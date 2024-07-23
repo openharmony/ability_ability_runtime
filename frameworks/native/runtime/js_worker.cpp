@@ -190,7 +190,7 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
         // 1.2 start with ../
         // 1.3 start with @namespace [not support]
         // 1.4 start with modulename
-        TAG_LOGD(AAFwkTag::JSRUNTIME, "The application is packaged using jsbundle mode.");
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "The application is packaged using jsbundle mode");
         if (uri.find_first_of("/") == 0) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "uri start with /modulename");
             realPath = uri.substr(1);
@@ -269,7 +269,7 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
 
 bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "Get secure mem");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     std::string resolvedPath;
     resolvedPath.reserve(PATH_MAX);
     resolvedPath.resize(PATH_MAX - 1);

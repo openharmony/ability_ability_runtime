@@ -53,8 +53,6 @@ void HdcRegister::StartHdcRegister(const std::string& bundleName, const std::str
         return;
     }
     startRegister(processName, bundleName, debugApp, callback);
-
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "end");
 }
 
 void HdcRegister::StopHdcRegister()
@@ -72,6 +70,5 @@ void HdcRegister::StopHdcRegister()
     }
     dlclose(registerHandler_);
     registerHandler_ = nullptr;
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "end");
 }
 } // namespace OHOS::AbilityRuntime
