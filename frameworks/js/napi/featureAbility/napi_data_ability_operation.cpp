@@ -142,7 +142,7 @@ napi_value BuildDataAbilityOperation(
     }
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
-    TAG_LOGI(AAFwkTag::FA, "end");
+    
     return result;
 }
 

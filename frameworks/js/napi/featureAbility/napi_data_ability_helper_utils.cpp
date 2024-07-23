@@ -82,13 +82,13 @@ napi_value InsertPromise(napi_env env, DAHelperInsertCB *insertCB)
             static_cast<void *>(insertCB),
             &insertCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, insertCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGD(AAFwkTag::FA, "end");
     return promise;
 }
 
 void InsertExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperInsertCB *insertCB = static_cast<DAHelperInsertCB *>(data);
     if (insertCB == nullptr) {
         TAG_LOGW(AAFwkTag::FA, "insertCB is nullptr");
@@ -105,12 +105,11 @@ void InsertExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
 }
 
 void InsertAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperInsertCB *insertCB = static_cast<DAHelperInsertCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -129,12 +128,12 @@ void InsertAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, insertCB->cbBase.asyncWork));
     delete insertCB;
     insertCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void InsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperInsertCB *insertCB = static_cast<DAHelperInsertCB *>(data);
     napi_value result = nullptr;
     napi_create_int32(env, insertCB->result, &result);
@@ -142,7 +141,7 @@ void InsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, insertCB->cbBase.asyncWork));
     delete insertCB;
     insertCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 napi_value NotifyChangeAsync(
@@ -221,7 +220,7 @@ void NotifyChangeExecuteCB(napi_env env, void *data)
 
 void NotifyChangeAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperNotifyChangeCB *notifyChangeCB = static_cast<DAHelperNotifyChangeCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -251,7 +250,7 @@ void NotifyChangeAsyncCompleteCB(napi_env env, napi_status status, void *data)
 
 void NotifyChangePromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperNotifyChangeCB *notifyChangeCB = static_cast<DAHelperNotifyChangeCB *>(data);
     napi_value result = nullptr;
     napi_create_int32(env, 0, &result);
@@ -321,7 +320,7 @@ napi_value GetTypePromise(napi_env env, DAHelperGetTypeCB *gettypeCB)
 
 void GetTypeExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperGetTypeCB *gettypeCB = static_cast<DAHelperGetTypeCB *>(data);
     auto dataAbilityHelper = gettypeCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -336,12 +335,11 @@ void GetTypeExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
 }
 
 void GetTypeAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperGetTypeCB *gettypeCB = static_cast<DAHelperGetTypeCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -361,12 +359,12 @@ void GetTypeAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, gettypeCB->cbBase.asyncWork));
     delete gettypeCB;
     gettypeCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void GetTypePromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperGetTypeCB *gettypeCB = static_cast<DAHelperGetTypeCB *>(data);
     napi_value result = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_create_string_utf8(env, gettypeCB->result.c_str(), NAPI_AUTO_LENGTH, &result));
@@ -374,7 +372,6 @@ void GetTypePromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, gettypeCB->cbBase.asyncWork));
     delete gettypeCB;
     gettypeCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
 }
 
 napi_value GetFileTypesAsync(
@@ -438,7 +435,7 @@ napi_value GetFileTypesPromise(napi_env env, DAHelperGetFileTypesCB *getfiletype
 
 void GetFileTypesExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperGetFileTypesCB *getfiletypesCB = static_cast<DAHelperGetFileTypesCB *>(data);
     auto dataAbilityHelper = getfiletypesCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -456,12 +453,12 @@ void GetFileTypesExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGI(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void GetFileTypesAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperGetFileTypesCB *getfiletypesCB = static_cast<DAHelperGetFileTypesCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -482,12 +479,11 @@ void GetFileTypesAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, getfiletypesCB->cbBase.asyncWork));
     delete getfiletypesCB;
     getfiletypesCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
 }
 
 void GetFileTypesPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperGetFileTypesCB *getfiletypesCB = static_cast<DAHelperGetFileTypesCB *>(data);
     napi_value result = nullptr;
 
@@ -496,7 +492,6 @@ void GetFileTypesPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, getfiletypesCB->cbBase.asyncWork));
     delete getfiletypesCB;
     getfiletypesCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
 }
 
 napi_value WrapGetFileTypesCB(napi_env env, const DAHelperGetFileTypesCB &getfiletypesCB)
@@ -580,7 +575,7 @@ napi_value NormalizeUriPromise(napi_env env, DAHelperNormalizeUriCB *normalizeur
 
 void NormalizeUriExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperNormalizeUriCB *normalizeuriCB = static_cast<DAHelperNormalizeUriCB *>(data);
     Uri uriValue(normalizeuriCB->uri);
     auto dataAbilityHelper = normalizeuriCB->dataAbilityHelper;
@@ -593,14 +588,13 @@ void NormalizeUriExecuteCB(napi_env env, void *data)
             normalizeuriCB->execResult = NO_ERROR;
         }
     } else {
-        TAG_LOGI(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
 }
 
 void NormalizeUriAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperNormalizeUriCB *normalizeuriCB = static_cast<DAHelperNormalizeUriCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -621,12 +615,11 @@ void NormalizeUriAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, normalizeuriCB->cbBase.asyncWork));
     delete normalizeuriCB;
     normalizeuriCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
 }
 
 void NormalizeUriPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperNormalizeUriCB *normalizeuriCB = static_cast<DAHelperNormalizeUriCB *>(data);
     napi_value result = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_create_string_utf8(env, normalizeuriCB->result.c_str(), NAPI_AUTO_LENGTH, &result));
@@ -634,7 +627,6 @@ void NormalizeUriPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, normalizeuriCB->cbBase.asyncWork));
     delete normalizeuriCB;
     normalizeuriCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
 }
 
 napi_value DenormalizeUriAsync(
@@ -698,7 +690,7 @@ napi_value DenormalizeUriPromise(napi_env env, DAHelperDenormalizeUriCB *denorma
 
 void DenormalizeUriExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperDenormalizeUriCB *denormalizeuriCB = static_cast<DAHelperDenormalizeUriCB *>(data);
     Uri uriValue(denormalizeuriCB->uri);
     auto dataAbilityHelper = denormalizeuriCB->dataAbilityHelper;
@@ -715,12 +707,12 @@ void DenormalizeUriExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void DenormalizeUriAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperDenormalizeUriCB *denormalizeuriCB = static_cast<DAHelperDenormalizeUriCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -741,12 +733,12 @@ void DenormalizeUriAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, denormalizeuriCB->cbBase.asyncWork));
     delete denormalizeuriCB;
     denormalizeuriCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void DenormalizeUriPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperDenormalizeUriCB *denormalizeuriCB = static_cast<DAHelperDenormalizeUriCB *>(data);
     napi_value result = nullptr;
     NAPI_CALL_RETURN_VOID(
@@ -755,7 +747,7 @@ void DenormalizeUriPromiseCompleteCB(napi_env env, napi_status status, void *dat
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, denormalizeuriCB->cbBase.asyncWork));
     delete denormalizeuriCB;
     denormalizeuriCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 napi_value DeleteAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperDeleteCB *deleteCB)
@@ -818,7 +810,7 @@ napi_value DeletePromise(napi_env env, DAHelperDeleteCB *deleteCB)
 
 void DeleteExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperDeleteCB *deleteCB = static_cast<DAHelperDeleteCB *>(data);
     auto dataAbilityHelper = deleteCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -833,12 +825,12 @@ void DeleteExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void DeleteAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperDeleteCB *DeleteCB = static_cast<DAHelperDeleteCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -857,12 +849,12 @@ void DeleteAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, DeleteCB->cbBase.asyncWork));
     delete DeleteCB;
     DeleteCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void DeletePromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperDeleteCB *DeleteCB = static_cast<DAHelperDeleteCB *>(data);
     napi_value result = nullptr;
     napi_create_int32(env, DeleteCB->result, &result);
@@ -870,7 +862,7 @@ void DeletePromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, DeleteCB->cbBase.asyncWork));
     delete DeleteCB;
     DeleteCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 napi_value UpdateAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperUpdateCB *updateCB)
@@ -933,7 +925,7 @@ napi_value UpdatePromise(napi_env env, DAHelperUpdateCB *updateCB)
 
 void UpdateExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperUpdateCB *updateCB = static_cast<DAHelperUpdateCB *>(data);
     auto dataAbilityHelper = updateCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -948,12 +940,12 @@ void UpdateExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void UpdateAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperUpdateCB *updateCB = static_cast<DAHelperUpdateCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -972,12 +964,12 @@ void UpdateAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, updateCB->cbBase.asyncWork));
     delete updateCB;
     updateCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void UpdatePromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperUpdateCB *updateCB = static_cast<DAHelperUpdateCB *>(data);
     napi_value result = nullptr;
     napi_create_int32(env, updateCB->result, &result);
@@ -985,12 +977,12 @@ void UpdatePromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, updateCB->cbBase.asyncWork));
     delete updateCB;
     updateCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void CallErrorAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperErrorCB *errorCB = static_cast<DAHelperErrorCB *>(data);
     if (errorCB != nullptr) {
         napi_value callback = nullptr;
@@ -1010,12 +1002,12 @@ void CallErrorAsyncCompleteCB(napi_env env, napi_status status, void *data)
     }
     delete errorCB;
     errorCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void CallErrorPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperErrorCB *errorCB = static_cast<DAHelperErrorCB *>(data);
     if (errorCB != nullptr) {
         napi_value result = nullptr;
@@ -1025,19 +1017,18 @@ void CallErrorPromiseCompleteCB(napi_env env, napi_status status, void *data)
     }
     delete errorCB;
     errorCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void CallErrorExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperErrorCB *errorCB = static_cast<DAHelperErrorCB *>(data);
     if (errorCB != nullptr) {
         errorCB->execResult = INVALID_PARAMETER;
     } else {
         TAG_LOGE(AAFwkTag::FA, "errorCB is null");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
 }
 
 napi_value CallErrorAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperErrorCB *errorCB)
@@ -1112,7 +1103,7 @@ napi_value CallErrorWrap(napi_env env, napi_value thisVar, napi_callback_info in
 
 void CallExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperCallCB *callCB = static_cast<DAHelperCallCB *>(data);
     auto dataAbilityHelper = callCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -1125,7 +1116,6 @@ void CallExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
 }
 
 static std::string ExcludeTag(const std::string& jsonString, const std::string& tagString)
@@ -1173,7 +1163,7 @@ napi_value CallPacMapValue(napi_env env, std::shared_ptr<AppExecFwk::PacMap> res
 
 void CallAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperCallCB *callCB = static_cast<DAHelperCallCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -1192,12 +1182,12 @@ void CallAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, callCB->cbBase.asyncWork));
     delete callCB;
     callCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void CallPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperCallCB *callCB = static_cast<DAHelperCallCB *>(data);
     napi_value result = nullptr;
     result = CallPacMapValue(env, callCB->result);
@@ -1205,7 +1195,6 @@ void CallPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, callCB->cbBase.asyncWork));
     delete callCB;
     callCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
 }
 
 napi_value CallAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperCallCB *callCB)
@@ -1326,7 +1315,7 @@ napi_value OpenFilePromise(napi_env env, DAHelperOpenFileCB *openFileCB)
 
 void OpenFileExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperOpenFileCB *OpenFileCB = static_cast<DAHelperOpenFileCB *>(data);
     auto dataAbilityHelper = OpenFileCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -1341,12 +1330,11 @@ void OpenFileExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
 }
 
 void OpenFileAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperOpenFileCB *OpenFileCB = static_cast<DAHelperOpenFileCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -1365,12 +1353,11 @@ void OpenFileAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, OpenFileCB->cbBase.asyncWork));
     delete OpenFileCB;
     OpenFileCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
 }
 
 void OpenFilePromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperOpenFileCB *OpenFileCB = static_cast<DAHelperOpenFileCB *>(data);
     napi_value result = nullptr;
     napi_create_int32(env, OpenFileCB->result, &result);
@@ -1378,7 +1365,6 @@ void OpenFilePromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, OpenFileCB->cbBase.asyncWork));
     delete OpenFileCB;
     OpenFileCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
 }
 
 napi_value BatchInsertAsync(
@@ -1442,7 +1428,7 @@ napi_value BatchInsertPromise(napi_env env, DAHelperBatchInsertCB *batchInsertCB
 
 void BatchInsertExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
+    TAG_LOGI(AAFwkTag::FA, "call");
     DAHelperBatchInsertCB *batchInsertCB = static_cast<DAHelperBatchInsertCB *>(data);
     auto dataAbilityHelper = batchInsertCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -1457,12 +1443,11 @@ void BatchInsertExecuteCB(napi_env env, void *data)
     } else {
         TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
 }
 
 void BatchInsertAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperBatchInsertCB *BatchInsertCB = static_cast<DAHelperBatchInsertCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -1481,12 +1466,12 @@ void BatchInsertAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, BatchInsertCB->cbBase.asyncWork));
     delete BatchInsertCB;
     BatchInsertCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void BatchInsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperBatchInsertCB *BatchInsertCB = static_cast<DAHelperBatchInsertCB *>(data);
     napi_value result = nullptr;
     napi_create_int32(env, BatchInsertCB->result, &result);
@@ -1494,7 +1479,7 @@ void BatchInsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, BatchInsertCB->cbBase.asyncWork));
     delete BatchInsertCB;
     BatchInsertCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 napi_value QuerySync(napi_env env, napi_value *args, const size_t argCallback, DAHelperQueryCB *queryCB)
@@ -1656,12 +1641,11 @@ void ExecuteBatchExecuteCB(napi_env env, void *data)
         TAG_LOGI(AAFwkTag::FA, "%{public}s, dataAbilityHelper is not nullptr. %{public}zu",
             __func__, executeBatchCB->result.size());
     }
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute end");
 }
 
 void ExecuteBatchAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete start");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperExecuteBatchCB *executeBatchCB = static_cast<DAHelperExecuteBatchCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -1681,12 +1665,12 @@ void ExecuteBatchAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, executeBatchCB->cbBase.asyncWork));
     delete executeBatchCB;
     executeBatchCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void ExecuteBatchPromiseCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete start");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperExecuteBatchCB *executeBatchCB = static_cast<DAHelperExecuteBatchCB *>(data);
     napi_value result = nullptr;
     napi_create_array(env, &result);
@@ -1695,7 +1679,7 @@ void ExecuteBatchPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, executeBatchCB->cbBase.asyncWork));
     delete executeBatchCB;
     executeBatchCB = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 
 void GetDataAbilityResultForResult(

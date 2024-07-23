@@ -38,7 +38,7 @@ void NAPIDataAbilityObserver::ReleaseJSCallback()
     }
 
     SafeReleaseJSCallback();
-    TAG_LOGI(AAFwkTag::FA, "end");
+    
 }
 
 void NAPIDataAbilityObserver::SafeReleaseJSCallback()
@@ -100,13 +100,13 @@ void NAPIDataAbilityObserver::SafeReleaseJSCallback()
 void NAPIDataAbilityObserver::SetEnv(const napi_env &env)
 {
     env_ = env;
-    TAG_LOGI(AAFwkTag::FA, "end");
+
 }
 
 void NAPIDataAbilityObserver::SetCallbackRef(const napi_ref &ref)
 {
     ref_ = ref;
-    TAG_LOGI(AAFwkTag::FA, "end");
+
 }
 
 static void OnChangeJSThreadWorker(uv_work_t *work, int status)
@@ -132,7 +132,7 @@ static void OnChangeJSThreadWorker(uv_work_t *work, int status)
     onCB = nullptr;
     delete work;
     work = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "end");
+
 }
 
 void NAPIDataAbilityObserver::CallJsMethod()
@@ -198,7 +198,7 @@ void NAPIDataAbilityObserver::OnChange()
             work = nullptr;
         }
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
 }
 
 }  // namespace AppExecFwk
