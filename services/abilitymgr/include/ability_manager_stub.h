@@ -22,7 +22,6 @@
 #include <iremote_stub.h>
 
 #include "dlp_connection_info.h"
-#include "hilog_wrapper.h"
 #include "iconnection_observer.h"
 
 namespace OHOS {
@@ -93,7 +92,8 @@ private:
     int StartAbilityAsCallerForOptionInner(MessageParcel &data, MessageParcel &reply);
     int StartExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
     int StartUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
-    int StartUIExtensionAbilityNonModalInner(MessageParcel &data, MessageParcel &reply);
+    int StartUIExtensionAbilityEmbeddedInner(MessageParcel &data, MessageParcel &reply);
+    int StartUIExtensionConstrainedEmbeddedInner(MessageParcel &data, MessageParcel &reply);
     int StartUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int StopExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
     int StartAbilityAddCallerInner(MessageParcel &data, MessageParcel &reply);
@@ -219,6 +219,7 @@ private:
     int BlockAppServiceInner(MessageParcel &data, MessageParcel &reply);
     #endif
     int EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int SubmitSaveRecoveryInfoInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleClearRecoveryPageStackInner(MessageParcel &data, MessageParcel &reply);
     int GetTopAbilityInner(MessageParcel &data, MessageParcel &reply);
@@ -287,6 +288,7 @@ private:
     int32_t GetForegroundUIAbilitiesInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t GetUIExtensionRootHostInfoInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetUIExtensionSessionInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t RestartAppInner(MessageParcel &data, MessageParcel &reply);
     int32_t RequestAssertFaultDialogInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyDebugAssertResultInner(MessageParcel &data, MessageParcel &reply);
@@ -294,6 +296,7 @@ private:
     int32_t GetAbilityStateByPersistentIdInner(MessageParcel &data, MessageParcel &reply);
     int32_t TransferAbilityResultForExtensionInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyFrozenProcessByRSSInner(MessageParcel &data, MessageParcel &reply);
+    int32_t PreStartMissionInner(MessageParcel &data, MessageParcel &reply);
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
@@ -338,6 +341,7 @@ private:
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
+    int32_t OpenLinkInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

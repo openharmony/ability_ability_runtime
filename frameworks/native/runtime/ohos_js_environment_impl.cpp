@@ -18,7 +18,6 @@
 #include "commonlibrary/ets_utils/js_sys_module/console/console.h"
 #include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_utils.h"
 #include "js_worker.h"
 #include "ohos_loop_handler.h"
@@ -170,7 +169,7 @@ void OHOSJsEnvironmentImpl::InitWorkerModule(NativeEngine* engine, std::shared_p
     engine->SetInitWorkerFunc(InitWorkerFunc);
     engine->SetOffWorkerFunc(OffWorkerFunc);
     engine->SetGetAssetFunc(AssetHelper(workerInfo));
-    engine->SetApiVersion(workerInfo->apiTargetVersion);
+    engine->SetApiVersion(static_cast<int32_t>(workerInfo->apiTargetVersion.GetOriginPointer()));
 
     engine->SetGetContainerScopeIdFunc(GetContainerId);
     engine->SetInitContainerScopeFunc(UpdateContainerScope);
