@@ -18,7 +18,6 @@
 #include "ability_manager_client.h"
 #include "accesstoken_kit.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_auto_fill_extension_util.h"
 #include "js_error_utils.h"
 #include "js_runtime_utils.h"
@@ -39,7 +38,7 @@ JsSaveRequestCallback::JsSaveRequestCallback(
 
 void JsSaveRequestCallback::Finalizer(napi_env env, void *data, void *hint)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "Finalizer is called.");
+    TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     std::unique_ptr<JsSaveRequestCallback>(static_cast<JsSaveRequestCallback*>(data));
 }
 

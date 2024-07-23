@@ -20,7 +20,6 @@
 #include "context/application_context.h"
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "js_ui_ability.h"
 #include "ohos_application.h"
@@ -708,7 +707,7 @@ void UIAbilityImpl::ExecuteInsightIntentRepeateForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
             TAG_LOGD(AAFwkTag::UIABILITY, "Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
@@ -730,7 +729,7 @@ void UIAbilityImpl::ExecuteInsightIntentMoveToForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
 
     {
         std::lock_guard<std::mutex> lock(notifyForegroundLock_);
@@ -823,7 +822,7 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundByColdBoot(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
             TAG_LOGD(AAFwkTag::UIABILITY, "Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
@@ -845,7 +844,7 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundAlreadyStart(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
 
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {

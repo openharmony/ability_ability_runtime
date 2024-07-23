@@ -457,7 +457,7 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     const sptr<AAFwk::SessionInfo> &sessionInfo, bool needForeground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     if (!HandleSessionCreate(want, sessionInfo)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "HandleSessionCreate failed.");
         return false;
@@ -538,7 +538,7 @@ void JsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &se
 void JsUIExtension::OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
@@ -732,7 +732,8 @@ void JsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::
         return;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ".", sessionInfo->uiExtensionComponentId);
+    TAG_LOGI(AAFwkTag::UI_EXT, "Before window show UIExtcomponent id: %{public}" PRId64,
+        sessionInfo->uiExtensionComponentId);
     auto componentId = sessionInfo->uiExtensionComponentId;
     auto& uiWindow = uiWindowMap_[componentId];
     if (uiWindow) {
@@ -750,13 +751,14 @@ void JsUIExtension::BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo
         return;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ".", sessionInfo->uiExtensionComponentId);
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Fail to find uiWindow");
         return;
     }
     auto& uiWindow = uiWindowMap_[componentId];
+    TAG_LOGI(AAFwkTag::UI_EXT, "Befor window hide UIExtcomponent id: %{public}" PRId64,
+        sessionInfo->uiExtensionComponentId);
     if (uiWindow) {
         uiWindow->Hide();
         foregroundWindows_.erase(componentId);
@@ -772,7 +774,6 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
         return;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ".", sessionInfo->uiExtensionComponentId);
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Wrong to find uiWindow");
@@ -788,6 +789,8 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
             CallObjectMethod("onSessionDestroy", argv, ARGC_ONE);
         }
     }
+    TAG_LOGI(AAFwkTag::UI_EXT, "Befor window destory, UIExtcomponent id: %{public}" PRId64,
+        sessionInfo->uiExtensionComponentId);
     auto uiWindow = uiWindowMap_[componentId];
     if (uiWindow) {
         uiWindow->Destroy();
@@ -918,7 +921,7 @@ void JsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& conf
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnConfigurationUpdated(configuration);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnConfigurationUpdated called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
 
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
@@ -947,7 +950,7 @@ void JsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& conf
 void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std::string> &info)
 {
     Extension::Dump(params, info);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension Dump called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     // create js array object of params
