@@ -191,7 +191,7 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
         case static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB):
             return HandleIsKilledForUpgradeWeb(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION):
-            return HandleIsKilledForUpgradeWeb(data, reply);
+            return HandleIsProcessContainsOnlyUIExtension(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
