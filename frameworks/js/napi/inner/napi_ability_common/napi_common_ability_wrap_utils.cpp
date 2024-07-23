@@ -153,7 +153,6 @@ bool CheckAbilityType(const AsyncCallbackInfo *asyncCallbackInfo)
         return false;
     }
 
-
     return CheckAbilityType((AbilityType)info->type, asyncCallbackInfo->abilityType);
 }
 
@@ -345,7 +344,6 @@ void IsUpdatingConfigurationsExecuteCallback(napi_env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_BOOL;
     asyncCallbackInfo->native_data.bool_value = asyncCallbackInfo->ability->IsUpdatingConfigurations();
-
 }
 
 /**
@@ -380,7 +378,6 @@ void PrintDrawnCompletedExecuteCallback(napi_env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     asyncCallbackInfo->native_data.bool_value = asyncCallbackInfo->ability->PrintDrawnCompleted();
-
 }
 
 
@@ -527,7 +524,6 @@ AppTypeCB *CreateAppTypeCBInfo(napi_env env)
     appTypeCB->cbBase.deferred = nullptr;
     appTypeCB->cbBase.ability = ability;
 
-
     return appTypeCB;
 }
 
@@ -559,7 +555,6 @@ AbilityInfoCB *CreateAbilityInfoCBInfo(napi_env env)
     abilityInfoCB->cbBase.asyncWork = nullptr;
     abilityInfoCB->cbBase.deferred = nullptr;
     abilityInfoCB->cbBase.ability = ability;
-
 
     return abilityInfoCB;
 }
@@ -744,7 +739,6 @@ HapModuleInfoCB *CreateHapModuleInfoCBInfo(napi_env env)
     hapModuleInfoCB->cbBase.deferred = nullptr;
     hapModuleInfoCB->cbBase.ability = ability;
 
-
     return hapModuleInfoCB;
 }
 
@@ -861,7 +855,6 @@ AppVersionInfoCB *CreateAppVersionInfoCBInfo(napi_env env)
     appVersionInfoCB->cbBase.deferred = nullptr;
     appVersionInfoCB->cbBase.ability = ability;
 
-
     return appVersionInfoCB;
 }
 
@@ -872,7 +865,6 @@ void SaveAppVersionInfo(AppVersionInfo &appVersionInfo, const std::string appNam
     appVersionInfo.appName = appName;
     appVersionInfo.versionName = versionName;
     appVersionInfo.versionCode = versionCode;
-
 }
 
 napi_value WrapAppVersionInfo(napi_env env, const AppVersionInfoCB &appVersionInfoCB)
@@ -891,7 +883,6 @@ napi_value WrapAppVersionInfo(napi_env env, const AppVersionInfoCB &appVersionIn
 
     NAPI_CALL(env, napi_create_int32(env, appVersionInfoCB.appVersionInfo.versionCode, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "versionCode", proValue));
-
 
     return result;
 }
@@ -924,7 +915,6 @@ AbilityNameCB *CreateAbilityNameCBInfo(napi_env env)
     abilityNameCB->cbBase.asyncWork = nullptr;
     abilityNameCB->cbBase.deferred = nullptr;
     abilityNameCB->cbBase.ability = ability;
-
 
     return abilityNameCB;
 }

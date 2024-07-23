@@ -1323,7 +1323,6 @@ napi_value StartBackgroundRunningAsync(
             &asyncCallbackInfo->asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, asyncCallbackInfo->asyncWork, napi_qos_utility));
 
-
     return WrapVoidToJS(env);
 }
 

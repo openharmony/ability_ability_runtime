@@ -2273,7 +2273,7 @@ napi_value GetOrCreateLocalDirPromise(napi_env env, GetOrCreateLocalDirCB *getOr
             static_cast<void *>(getOrCreateLocalDirCB),
             &getOrCreateLocalDirCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work(env, getOrCreateLocalDirCB->cbBase.asyncWork));
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, promise end");
+    TAG_LOGI(AAFwkTag::JSNAPI, "end");
     return promise;
 }
 

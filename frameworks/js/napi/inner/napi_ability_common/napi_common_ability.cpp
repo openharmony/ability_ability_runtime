@@ -549,7 +549,6 @@ void GetDisplayOrientationExecuteCallback(napi_env env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_INT32;
     asyncCallbackInfo->native_data.int32_value = asyncCallbackInfo->ability->GetDisplayOrientation();
-
 }
 
 bool UnwrapParamGetDisplayOrientationWrap(napi_env env, size_t argc, napi_value *argv,
@@ -740,7 +739,6 @@ AsyncCallbackInfo *CreateAsyncCallbackInfo(napi_env env)
     asyncCallbackInfo->native_result = false;
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->abilityType = AbilityType::UNKNOWN;
-
 
     return asyncCallbackInfo;
 }
