@@ -151,7 +151,7 @@ napi_value JsErrorObserver::CreateJsErrorObject(napi_env env, const AppExecFwk::
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGW(AAFwkTag::JSNAPI, "invalid object.");
+        TAG_LOGW(AAFwkTag::JSNAPI, "invalid object");
         return objValue;
     }
     napi_set_named_property(env, objValue, "name", CreateJsValue(env, errorObj.name));

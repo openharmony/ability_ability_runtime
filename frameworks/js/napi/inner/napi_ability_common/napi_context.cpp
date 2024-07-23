@@ -103,8 +103,6 @@ static void SetShowOnLockScreenAsyncCompleteCB(napi_env env, napi_status status,
     napi_delete_async_work(env, showOnLockScreenCB->cbBase.asyncWork);
     delete showOnLockScreenCB;
     showOnLockScreenCB = nullptr;
-
-    TAG_LOGD(AAFwkTag::JSNAPI, "called end");
 }
 
 static napi_value SetShowOnLockScreenAsync(napi_env env, napi_value *args, ShowOnLockScreenCB *showOnLockScreenCB)
@@ -138,7 +136,6 @@ static napi_value SetShowOnLockScreenAsync(napi_env env, napi_value *args, ShowO
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "called end");
     return result;
 }
 

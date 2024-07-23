@@ -130,7 +130,7 @@ bool CheckAbilityType(const AsyncJSCallbackInfo *asyncCallbackInfo)
         TAG_LOGE(AAFwkTag::JSNAPI, "info == null");
         return false;
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "exit");
+
     return CheckAbilityType((AbilityType)info->type, asyncCallbackInfo->abilityType);
 }
 
@@ -153,7 +153,7 @@ bool CheckAbilityType(const AsyncCallbackInfo *asyncCallbackInfo)
         return false;
     }
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return CheckAbilityType((AbilityType)info->type, asyncCallbackInfo->abilityType);
 }
 
@@ -174,7 +174,7 @@ napi_value GetContinueAbilityOptionsInfoCommon(
     }
 
     napi_get_null(env, &result);
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return result;
 }
 
@@ -198,7 +198,7 @@ napi_value GetContinueAbilityOptionsReversible(
         napi_get_value_bool(env, result, &reversible);
         info.reversible = reversible;
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return result;
 }
 
@@ -223,7 +223,7 @@ napi_value GetContinueAbilityOptionsDeviceID(
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
         info.deviceId = str;
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return result;
 }
 
@@ -264,7 +264,7 @@ napi_value WrapAppInfo(napi_env env, const ApplicationInfo &appInfo)
     (void)WrapModuleInfos(env, appInfo, result);
     NAPI_CALL(env, napi_create_string_utf8(env, appInfo.entryDir.c_str(), NAPI_AUTO_LENGTH, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "entryDir", proValue));
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return result;
 }
 
@@ -345,7 +345,7 @@ void IsUpdatingConfigurationsExecuteCallback(napi_env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_BOOL;
     asyncCallbackInfo->native_data.bool_value = asyncCallbackInfo->ability->IsUpdatingConfigurations();
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
 }
 
 /**
@@ -380,7 +380,7 @@ void PrintDrawnCompletedExecuteCallback(napi_env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     asyncCallbackInfo->native_data.bool_value = asyncCallbackInfo->ability->PrintDrawnCompleted();
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
 }
 
 
@@ -527,7 +527,7 @@ AppTypeCB *CreateAppTypeCBInfo(napi_env env)
     appTypeCB->cbBase.deferred = nullptr;
     appTypeCB->cbBase.ability = ability;
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return appTypeCB;
 }
 
@@ -560,7 +560,7 @@ AbilityInfoCB *CreateAbilityInfoCBInfo(napi_env env)
     abilityInfoCB->cbBase.deferred = nullptr;
     abilityInfoCB->cbBase.ability = ability;
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return abilityInfoCB;
 }
 
@@ -668,7 +668,7 @@ napi_value WrapAbilityInfo(napi_env env, const AbilityInfo &abilityInfo)
     napi_value applicationInfo = nullptr;
     applicationInfo = WrapAppInfo(env, abilityInfo.applicationInfo);
     NAPI_CALL(env, napi_set_named_property(env, result, "applicationInfo", applicationInfo));
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return result;
 }
 
@@ -744,7 +744,7 @@ HapModuleInfoCB *CreateHapModuleInfoCBInfo(napi_env env)
     hapModuleInfoCB->cbBase.deferred = nullptr;
     hapModuleInfoCB->cbBase.ability = ability;
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return hapModuleInfoCB;
 }
 
@@ -828,7 +828,7 @@ napi_value WrapHapModuleInfo(napi_env env, const HapModuleInfoCB &cb)
         NAPI_CALL(env, napi_set_element(env, abilityInfos, i, abilityInfo));
     }
     NAPI_CALL(env, napi_set_named_property(env, result, "abilityInfo", abilityInfos));
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return result;
 }
 
@@ -861,7 +861,7 @@ AppVersionInfoCB *CreateAppVersionInfoCBInfo(napi_env env)
     appVersionInfoCB->cbBase.deferred = nullptr;
     appVersionInfoCB->cbBase.ability = ability;
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return appVersionInfoCB;
 }
 
@@ -872,7 +872,7 @@ void SaveAppVersionInfo(AppVersionInfo &appVersionInfo, const std::string appNam
     appVersionInfo.appName = appName;
     appVersionInfo.versionName = versionName;
     appVersionInfo.versionCode = versionCode;
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
 }
 
 napi_value WrapAppVersionInfo(napi_env env, const AppVersionInfoCB &appVersionInfoCB)
@@ -892,7 +892,7 @@ napi_value WrapAppVersionInfo(napi_env env, const AppVersionInfoCB &appVersionIn
     NAPI_CALL(env, napi_create_int32(env, appVersionInfoCB.appVersionInfo.versionCode, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "versionCode", proValue));
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return result;
 }
 
@@ -925,7 +925,7 @@ AbilityNameCB *CreateAbilityNameCBInfo(napi_env env)
     abilityNameCB->cbBase.deferred = nullptr;
     abilityNameCB->cbBase.ability = ability;
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return abilityNameCB;
 }
 
@@ -938,7 +938,7 @@ napi_value WrapAbilityName(napi_env env, const AbilityNameCB *abilityNameCB)
     }
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_string_utf8(env, abilityNameCB->name.c_str(), NAPI_AUTO_LENGTH, &result));
-    TAG_LOGI(AAFwkTag::JSNAPI, "end");
+
     return result;
 }
 
