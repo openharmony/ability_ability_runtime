@@ -23,7 +23,6 @@
 #include "ability_process.h"
 #include "element_name.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "js_runtime_utils.h"
 #ifdef SUPPORT_SCREEN
@@ -805,7 +804,7 @@ napi_value UnwrapAbilityResult(CallAbilityParam &param, napi_env env, napi_value
  */
 napi_value GetWantSyncWrap(napi_env env, napi_callback_info info, AsyncCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s, called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (asyncCallbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "%{public}s, asyncCallbackInfo == nullptr.", __func__);
         return nullptr;
@@ -845,7 +844,7 @@ napi_value GetWantSyncWrap(napi_env env, napi_callback_info info, AsyncCallbackI
  */
 napi_value NAPI_GetWantSync(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     AsyncCallbackInfo *asyncCallbackInfo = CreateAsyncCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
         return WrapVoidToJS(env);
@@ -876,7 +875,7 @@ napi_value NAPI_GetWantSync(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_GetAppType(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetAppTypeCommon(env, info, AbilityType::PAGE);
 }
 
@@ -890,7 +889,7 @@ napi_value NAPI_GetAppType(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_GetAbilityName(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetAbilityNameCommon(env, info, AbilityType::PAGE);
 }
 
@@ -904,7 +903,7 @@ napi_value NAPI_GetAbilityName(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_GetAbilityInfo(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetAbilityInfoCommon(env, info, AbilityType::PAGE);
 }
 
@@ -918,7 +917,7 @@ napi_value NAPI_GetAbilityInfo(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_GetHapModuleInfo(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetHapModuleInfoCommon(env, info, AbilityType::PAGE);
 }
 
@@ -1174,7 +1173,7 @@ napi_value NAPI_FAContinueAbility(napi_env env, napi_callback_info info)
  */
 napi_value ContinueAbilityWrap(napi_env env, napi_callback_info info, AsyncCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s, called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     size_t argc = 2;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value ret = nullptr;

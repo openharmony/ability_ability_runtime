@@ -17,7 +17,6 @@
 #include <cstdarg>
 #include <string>
 
-#include "hilog_wrapper.h"
 #include "js_environment_impl.h"
 #define private public
 #define protected public
@@ -75,9 +74,9 @@ GetAssetFunc JsWorkerTest::TestGetGetAssetFunc() const
 HWTEST_F(JsWorkerTest, AssetHelper_0100, TestSize.Level1)
 {
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
-    workerInfo->codePath = "/data/test/codePath";
+    workerInfo->codePath = panda::panda_file::StringPacProtect("/data/test/codePath");
     workerInfo->packagePathStr = "/data/test/packagePath";
-    workerInfo->hapPath = "/data/test/hapPath";
+    workerInfo->hapPath = panda::panda_file::StringPacProtect("/data/test/hapPath");
     workerInfo->moduleName = "moduleName";
     TestSetGetAssetFunc(AssetHelper(workerInfo));
 
@@ -102,9 +101,9 @@ HWTEST_F(JsWorkerTest, AssetHelper_0100, TestSize.Level1)
 HWTEST_F(JsWorkerTest, AssetHelper_0200, TestSize.Level1)
 {
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
-    workerInfo->codePath = "/data/test/codePath";
+    workerInfo->codePath = panda::panda_file::StringPacProtect("/data/test/codePath");
     workerInfo->packagePathStr = "/data/test/packagePath";
-    workerInfo->hapPath = "/data/test/hapPath";
+    workerInfo->hapPath = panda::panda_file::StringPacProtect("/data/test/hapPath");
     workerInfo->moduleName = "moduleName";
     AssetHelper helper = AssetHelper(workerInfo);
 

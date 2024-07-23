@@ -19,7 +19,6 @@
 
 #include "bundle_mgr_interface.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "iservice_registry.h"
 #include "js_environment.h"
 #include "js_module_reader.h"
@@ -315,13 +314,13 @@ void NativeRuntimeImpl::InitWorkerModule(const Options& options, const std::shar
     }
 
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
-    workerInfo->codePath = options.codePath;
+    workerInfo->codePath = panda::panda_file::StringPacProtect(options.codePath);
     workerInfo->isDebugVersion = options.isDebugVersion;
     workerInfo->isBundle = options.isBundle;
     workerInfo->packagePathStr = options.packagePathStr;
     workerInfo->assetBasePathStr = options.assetBasePathStr;
-    workerInfo->hapPath = options.hapPath;
-    workerInfo->isStageModel = options.isStageModel;
+    workerInfo->hapPath = panda::panda_file::StringPacProtect(options.hapPath);
+    workerInfo->isStageModel = panda::panda_file::BoolPacProtect(options.isStageModel);
     workerInfo->moduleName = options.moduleName;
     if (options.isJsFramework) {
         SetJsFramework();
