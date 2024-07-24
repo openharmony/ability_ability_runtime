@@ -283,7 +283,7 @@ int DialogSessionManager::CreateImplicitSelectorModalDialog(AbilityRequest &abil
     sessionWant.SetParam("uri", abilityRequest.want.GetUriString());
     sessionWant.SetParam("entities", abilityRequest.want.GetEntities());
     sessionWant.SetParam("appselector.selectorType", static_cast<int>(SelectorType::IMPLICIT_START_SELECTOR));
-    bool showCaller = abilityRequest.want.GetBoolParam("showcaller", false);
+    bool showCaller = abilityRequest.want.GetBoolParam("showCaller", false);
     sessionWant.SetParam("showCaller", showCaller);
 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, sessionWant.GetParams(),
@@ -307,7 +307,7 @@ int DialogSessionManager::CreateCloneSelectorModalDialog(AbilityRequest &ability
     parameters.SetParam("appselector.selectorType",
         AAFwk::Integer::Box(static_cast<int>(SelectorType::APP_CLONR_SELECTOR)));
     if (replaceWant !=  "") {
-        parameters.SetParam("replaceWant", AAFwk::String::Box(replaceWant));
+        parameters.SetParam("ecological.replaceWant", AAFwk::String::Box(replaceWant));
     }
 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, parameters,
@@ -330,7 +330,7 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
         TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
         (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
         (const_cast<Want &>(replaceWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);
-        return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
+        return IN_PROCESS_CALL(connection->CreateModalUIExtension(replaceWant)) ? ERR_OK : INNER_ERR;
     }
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!callerRecord) {
@@ -349,7 +349,7 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
         TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
         (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
         (const_cast<Want &>(replaceWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);
-        return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
+        return IN_PROCESS_CALL(connection->CreateModalUIExtension(replaceWant)) ? ERR_OK : INNER_ERR;
     }
 
     if (callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE && token == callerToken) {
@@ -359,7 +359,7 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
     TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
     (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
     (const_cast<Want &>(replaceWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);
-    return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
+    return IN_PROCESS_CALL(connection->CreateModalUIExtension(replaceWant)) ? ERR_OK : INNER_ERR;
 }
 
 int DialogSessionManager::HandleErmsResult(AbilityRequest &abilityRequest, int32_t userId,
@@ -376,6 +376,7 @@ int DialogSessionManager::HandleErmsResult(AbilityRequest &abilityRequest, int32
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr is nullptr.");
         return INNER_ERR;
     }
+    (const_cast<Want &>(replaceWant)).RemoveParam("ecological_experience_original_target");
     return abilityMgr->CreateCloneSelectorDialog(abilityRequest, userId, replaceWant.ToString());
 }
 

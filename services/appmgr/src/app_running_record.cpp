@@ -1864,7 +1864,7 @@ int32_t AppRunningRecord::NotifyLoadRepairPatch(const std::string &bundleName, c
     const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
         return ERR_INVALID_VALUE;
@@ -1875,7 +1875,7 @@ int32_t AppRunningRecord::NotifyLoadRepairPatch(const std::string &bundleName, c
 int32_t AppRunningRecord::NotifyHotReloadPage(const sptr<IQuickFixCallback> &callback, const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
         return ERR_INVALID_VALUE;
@@ -1887,7 +1887,7 @@ int32_t AppRunningRecord::NotifyUnLoadRepairPatch(const std::string &bundleName,
     const sptr<IQuickFixCallback> &callback, const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
         return ERR_INVALID_VALUE;
@@ -1897,7 +1897,7 @@ int32_t AppRunningRecord::NotifyUnLoadRepairPatch(const std::string &bundleName,
 
 int32_t AppRunningRecord::NotifyAppFault(const FaultData &faultData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
         return ERR_INVALID_VALUE;
@@ -2056,7 +2056,7 @@ std::shared_ptr<AppRunningRecord> AppRunningRecord::GetParentAppRecord()
 
 int32_t AppRunningRecord::ChangeAppGcState(const int32_t state)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is nullptr.");
         return ERR_INVALID_VALUE;
@@ -2290,6 +2290,24 @@ SupportProcessCacheState AppRunningRecord::GetSupportProcessCacheState()
     return procCacheSupportState_;
 }
 
+void AppRunningRecord::ScheduleCacheProcess()
+{
+    if (appLifeCycleDeal_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        return;
+    }
+    appLifeCycleDeal_->ScheduleCacheProcess();
+}
+
+bool AppRunningRecord::CancelTask(std::string msg)
+{
+    if (!taskHandler_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ is nullptr");
+        return false;
+    }
+    return taskHandler_->CancelTask(msg);
+}
+
 void AppRunningRecord::SetBrowserHost(sptr<IRemoteObject> browser)
 {
     browserHost_ = browser;
@@ -2320,24 +2338,6 @@ void AppRunningRecord::SetGPUPid(pid_t gpuPid)
 pid_t AppRunningRecord::GetGPUPid()
 {
     return gpuPid_;
-}
-
-void AppRunningRecord::ScheduleCacheProcess()
-{
-    if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
-        return;
-    }
-    appLifeCycleDeal_->ScheduleCacheProcess();
-}
-
-bool AppRunningRecord::CancelTask(std::string msg)
-{
-    if (!taskHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ is nullptr");
-        return false;
-    }
-    return taskHandler_->CancelTask(msg);
 }
 
 void AppRunningRecord::SetAttachedToStatusBar(bool isAttached)

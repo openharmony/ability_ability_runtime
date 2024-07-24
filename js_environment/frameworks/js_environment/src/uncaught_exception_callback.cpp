@@ -40,7 +40,7 @@ std::string NapiUncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(napi_valu
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env_, valueStr, &valueType);
     if (valueType != napi_string) {
-        TAG_LOGE(AAFwkTag::JSENV, "Failed to convert value from key");
+        TAG_LOGD(AAFwkTag::JSENV, "Failed to convert value from key");
         return "";
     }
 

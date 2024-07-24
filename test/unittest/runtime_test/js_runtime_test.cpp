@@ -278,7 +278,6 @@ HWTEST_F(JsRuntimeTest, JsRuntimeRunSandboxScriptTest_0100, TestSize.Level0)
     std::string hapPath = "";
     jsRuntime->RunSandboxScript(path, hapPath);
     EXPECT_TRUE(jsRuntime != nullptr);
-
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "RunSandboxScript end");
@@ -1500,6 +1499,23 @@ HWTEST_F(JsRuntimeTest, RegisterQuickFixQueryFunc_0200, TestSize.Level1)
     std::map<std::string, std::string> moduleAndPath;
     jsRuntime->RegisterQuickFixQueryFunc(moduleAndPath);
     EXPECT_TRUE(jsRuntime != nullptr);
+}
+
+/**
+ * @tc.name: UpdatePkgContextInfoJson_0100
+ * @tc.desc: JsRuntime test for UpdatePkgContextInfoJson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
+{
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    EXPECT_NE(jsRuntime, nullptr);
+    std::string moduleName = "moduleName";
+    jsRuntime->pkgContextInfoJsonStringMap_.insert(std::make_pair(moduleName, "test2"));
+    std::string hapPath = TEST_HAP_PATH;
+    std::string packageName = "packageName";
+    jsRuntime->UpdatePkgContextInfoJson(moduleName, hapPath, packageName);
+    EXPECT_EQ(jsRuntime->pkgContextInfoJsonStringMap_[moduleName], "test2");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
