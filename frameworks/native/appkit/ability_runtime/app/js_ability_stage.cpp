@@ -404,7 +404,7 @@ int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback
 
 int32_t JsAbilityStage::RegisterStartupTaskFromProfile(std::vector<JsStartupTask> &jsStartupTasks)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "RegisterStartupTaskFromProfile called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     std::vector<std::string> profileInfo;
     if (!GetProfileInfoFromResourceManager(profileInfo)) {
         TAG_LOGE(AAFwkTag::APPKIT, "appStartup config not exist");
@@ -520,7 +520,7 @@ void JsAbilityStage::SetOptionalParameters(
     const nlohmann::json &module,
     JsStartupTask &jsStartupTask)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "SetOptionalParameters called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (module.contains(DEPENDENCIES) && module[DEPENDENCIES].is_array()) {
         std::vector<std::string> dependencies;
         for (const auto& dependency : module.at(DEPENDENCIES)) {
@@ -555,7 +555,7 @@ void JsAbilityStage::SetOptionalParameters(
 
 bool JsAbilityStage::AnalyzeProfileInfoAndRegisterStartupTask(const std::vector<std::string> &profileInfo)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "AnalyzeProfileInfoAndRegisterStartupTask called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     std::string startupInfo;
     for (const std::string& info: profileInfo) {
         startupInfo.append(info);
