@@ -762,6 +762,7 @@ void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &lis
             appData.accessTokenId = appInfo ? appInfo->accessTokenId : 0;
             appData.extensionType = appRecord->GetExtensionType();
             appData.isFocused = appRecord->GetFocusFlag();
+            appData.appIndex = appRecord->GetAppIndex();
             list.push_back(appData);
             TAG_LOGD(AAFwkTag::APPMGR, "bundleName:%{public}s", appData.bundleName.c_str());
         }
@@ -1151,7 +1152,8 @@ bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &for
         const auto &appRecord = item.second;
         if (appRecord == nullptr || appRecord->GetBundleName() != foregroundingRecord.GetBundleName()
             || AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
-            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
+            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
+            || appRecord->GetAppIndex() != foregroundingRecord.GetAppIndex()) {
             continue;
         }
         auto state = appRecord->GetState();
@@ -1163,7 +1165,7 @@ bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &for
     return true;
 }
 
-bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
+bool AppRunningManager::IsApplicationBackground(const AppRunningRecord &foregroundingRecord)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
@@ -1174,11 +1176,12 @@ bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
             return false;
         }
         if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
-            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
+            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
+            || appRecord->GetAppIndex() != backgroundingRecord.GetAppIndex()) {
             continue;
         }
         auto state = appRecord->GetState();
-        if (appRecord && appRecord->GetBundleName() == bundleName &&
+        if (appRecord && appRecord->GetBundleName() == backgroundingRecord.GetBundleName() &&
             state == ApplicationState::APP_STATE_FOREGROUND) {
             return false;
         }
