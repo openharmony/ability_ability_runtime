@@ -39,7 +39,7 @@ public:
 
     static void Finalizer(napi_env env, void *data, void *hint)
     {
-        TAG_LOGD(AAFwkTag::QUICKFIX, "function called");
+        TAG_LOGD(AAFwkTag::QUICKFIX, "called");
         std::unique_ptr<JsQuickFixManager>(static_cast<JsQuickFixManager*>(data));
     }
 
@@ -76,7 +76,7 @@ public:
 private:
     napi_value OnGetApplyedQuickFixInfo(napi_env env, NapiCallbackInfo &info)
     {
-        TAG_LOGD(AAFwkTag::QUICKFIX, "function called");
+        TAG_LOGD(AAFwkTag::QUICKFIX, "called");
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "The number of parameter is invalid");
             ThrowInvalidParamError(env, "Parameter error: The number of parameter is invalid.");
@@ -110,7 +110,7 @@ private:
 
     napi_value OnApplyQuickFix(napi_env env, NapiCallbackInfo &info)
     {
-        TAG_LOGD(AAFwkTag::QUICKFIX, "function called");
+        TAG_LOGD(AAFwkTag::QUICKFIX, "called");
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "The number of parameter is invalid");
             ThrowInvalidParamError(env, "Parameter error: The number of parameter is invalid.");

@@ -250,7 +250,7 @@ public:
 
     void OnUnloadPatchDone(int32_t resultCode, [[maybe_unused]] int32_t recordId) override
     {
-        TAG_LOGD(AAFwkTag::QUICKFIX, "function called.");
+        TAG_LOGD(AAFwkTag::QUICKFIX, "called");
         if (resultCode != 0) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "Notify app load patch failed with %{public}d", resultCode);
             applyTask_->NotifyApplyStatus(QUICK_FIX_NOTIFY_UNLOAD_PATCH_FAILED);
@@ -856,7 +856,7 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixAppRunning()
 
 void QuickFixManagerApplyTask::HandleRevokePatchSwitched()
 {
-    TAG_LOGD(AAFwkTag::QUICKFIX, "Function called");
+    TAG_LOGD(AAFwkTag::QUICKFIX, "called");
     // process is run, notify app unload patch
     if (GetRunningState()) {
         PostRevokeQuickFixNotifyUnloadPatchTask();

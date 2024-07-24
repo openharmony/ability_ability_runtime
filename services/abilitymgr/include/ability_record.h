@@ -1050,8 +1050,10 @@ private:
 
     bool IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken, uint32_t callingTokenId = 0);
 
+#ifdef WITH_DLP
     void HandleDlpAttached();
     void HandleDlpClosed();
+#endif // WITH_DLP
     void NotifyRemoveShellProcess(int32_t type);
     void NotifyAnimationAbilityDied();
     inline void SetCallerAccessTokenId(uint32_t callerAccessTokenId)
@@ -1169,9 +1171,6 @@ private:
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};
 
     bool isUninstall_ = false;
-    const static std::map<AbilityState, std::string> stateToStrMap;
-    const static std::map<AbilityLifeCycleState, AbilityState> convertStateMap;
-    const static std::map<AppState, std::string> appStateToStrMap_;
 
     bool isLauncherRoot_ = false;
 

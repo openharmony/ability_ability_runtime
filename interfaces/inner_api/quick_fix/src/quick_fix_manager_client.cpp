@@ -78,7 +78,7 @@ int32_t QuickFixManagerClient::GetApplyedQuickFixInfo(const std::string &bundleN
 sptr<IQuickFixManager> QuickFixManagerClient::GetQuickFixMgrProxy()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::QUICKFIX, "function called");
+    TAG_LOGD(AAFwkTag::QUICKFIX, "called");
     auto quickFixMgr = GetQuickFixMgr();
     if (quickFixMgr != nullptr) {
         TAG_LOGD(AAFwkTag::QUICKFIX, "Quick fix manager has been started");
