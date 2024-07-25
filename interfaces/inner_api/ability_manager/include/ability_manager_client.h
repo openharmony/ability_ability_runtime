@@ -1163,6 +1163,13 @@ public:
     void EnableRecoverAbility(sptr<IRemoteObject> token);
 
     /**
+     * @brief Submit save recovery info.
+     *
+     * @param token Ability identify.
+     */
+    void SubmitSaveRecoveryInfo(sptr<IRemoteObject> token);
+
+    /**
      * @brief Schedule recovery ability.
      *
      * @param token Ability identify.
@@ -1550,7 +1557,9 @@ private:
 
     sptr<IAbilityManager> GetAbilityManager();
     void ResetProxy(wptr<IRemoteObject> remote);
+#ifdef WITH_DLP
     void HandleDlpApp(Want &want);
+#endif // WITH_DLP
 
     static std::once_flag singletonFlag_;
     std::recursive_mutex mutex_;

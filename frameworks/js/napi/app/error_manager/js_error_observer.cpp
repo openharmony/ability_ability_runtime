@@ -65,7 +65,7 @@ void JsErrorObserver::HandleOnUnhandledException(const std::string &errMsg)
 
 void JsErrorObserver::CallJsFunction(napi_value obj, const char* methodName, napi_value const* argv, size_t argc)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "call method:%{public}s", methodName);
     if (obj == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "Failed to get object");
         return;
@@ -74,7 +74,7 @@ void JsErrorObserver::CallJsFunction(napi_value obj, const char* methodName, nap
     napi_value method = nullptr;
     napi_get_named_property(env_, obj, methodName, &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Failed to get method");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null method");
         return;
     }
     napi_value callResult = nullptr;
@@ -150,7 +150,7 @@ napi_value JsErrorObserver::CreateJsErrorObject(napi_env env, const AppExecFwk::
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGW(AAFwkTag::JSNAPI, "invalid object");
+        TAG_LOGW(AAFwkTag::JSNAPI, "null obj");
         return objValue;
     }
     napi_set_named_property(env, objValue, "name", CreateJsValue(env, errorObj.name));
