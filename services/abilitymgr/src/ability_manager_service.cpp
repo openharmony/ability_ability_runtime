@@ -10806,7 +10806,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
 {
     std::shared_ptr<AbilityRecord> abilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityRecord == nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "No matched token pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "No matched token pass");
         return false;
     }
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -10849,7 +10849,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
                 callerAbilityInfo.applicationName.c_str());
     
     if (abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD < API12) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "API version %{public}d pass",
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "API version %{public}d pass",
             abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
         return false;
     }
