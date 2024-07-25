@@ -10811,15 +10811,12 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     }
     auto abilityInfo = abilityRequest.abilityInfo;
     auto callerAbilityInfo = abilityRecord->GetAbilityInfo();
-
     PrintStartAbilityInfo(callerAbilityInfo, abilityInfo);
-    
     if (abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD < API12) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "API version %{public}d pass",
             abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
         return false;
     }
-    
     bool continuousFlag = false;
     continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     pid_t callerPid = abilityRecord->GetPid();
