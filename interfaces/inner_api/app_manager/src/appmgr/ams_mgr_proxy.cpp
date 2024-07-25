@@ -31,7 +31,6 @@ AmsMgrProxy::AmsMgrProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<IAmsMgr
 
 bool AmsMgrProxy::IsProcessContainsOnlyUIExtension(const pid_t pid)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: call IsProcessContainsOnlyUIExtension in ams_mgr_proxy.cpp");
     TAG_LOGD(AAFwkTag::APPMGR, "IsProcessContainsOnlyUIExtension start");
     MessageParcel data;
     MessageParcel reply;
