@@ -666,13 +666,19 @@ bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
     }
     return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
 }
-bool AmsMgrScheduler::IsProcessContainsOnlyUIExtension(const pid_t pid)
+bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
         return false;
     }
-    return amsMgrServiceInner_->IsProcessContainsOnlyUIExtension(pid);
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t pid = getprocpid();
+    if (callingPid != pid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessContainsOnlyUIAbility(pid);
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

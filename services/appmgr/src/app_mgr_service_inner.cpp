@@ -7193,7 +7193,7 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
     }
     return ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(bundleName);
 }
-bool AppMgrServiceInner::IsProcessContainsOnlyUIExtension(const pid_t pid)
+bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (appRecord == nullptr)

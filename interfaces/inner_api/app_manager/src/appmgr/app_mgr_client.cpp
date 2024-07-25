@@ -490,13 +490,13 @@ AppMgrResultCode AppMgrClient::ConnectAppMgrService()
     return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
 }
 
-bool AppMgrClient::IsProcessContainsOnlyUIExtension(const pid_t pid)
+bool AppMgrClient::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            return amsService->IsProcessContainsOnlyUIExtension(pid);
+            return amsService->IsProcessContainsOnlyUIAbility(pid);
         }
     }
     return false;

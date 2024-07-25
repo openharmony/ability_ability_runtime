@@ -29,9 +29,9 @@ constexpr int32_t MAX_APP_DEBUG_COUNT = 100;
 AmsMgrProxy::AmsMgrProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<IAmsMgr>(impl)
 {}
 
-bool AmsMgrProxy::IsProcessContainsOnlyUIExtension(const pid_t pid)
+bool AmsMgrProxy::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "IsProcessContainsOnlyUIExtension start");
+    TAG_LOGD(AAFwkTag::APPMGR, "IsProcessContainsOnlyUIAbility start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -46,7 +46,7 @@ bool AmsMgrProxy::IsProcessContainsOnlyUIExtension(const pid_t pid)
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "IsProcessContainsOnlyUIExtension end");
+    TAG_LOGD(AAFwkTag::APPMGR, "IsProcessContainsOnlyUIAbility end");
     return reply.ReadBool();
 }
 
