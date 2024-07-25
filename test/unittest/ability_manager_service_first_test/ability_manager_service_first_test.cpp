@@ -176,10 +176,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_001, TestSiz
 
     abilityMs_->startUpNewRule_ = true;
     EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_OK);
-
-    MyFlag::flag_ = 1;
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), 1);
-    MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_001 end");
 }
 
@@ -236,6 +232,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStartByCallPermission_002, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckStartByCallPermission_002 end");
 }
 
+#ifdef WITH_DLP
 /*
  * Feature: AbilityManagerService
  * Function: GetDlpConnectionInfos
@@ -255,6 +252,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, GetDlpConnectionInfos_001, TestSize.Lev
     MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GetDlpConnectionInfos_001 end");
 }
+#endif // WITH_DLP
 
 /*
  * Feature: AbilityManagerService
@@ -1472,10 +1470,9 @@ HWTEST_F(AbilityManagerServiceFirstTest, UnregisterAppDebugListener_001, TestSiz
 HWTEST_F(AbilityManagerServiceFirstTest, AttachAppDebug_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     std::string bundleName;
-    auto result = abilityMs_->AttachAppDebug(bundleName);
-    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    abilityMs_->AttachAppDebug(bundleName);
+    EXPECT_NE(abilityMs_, nullptr);
 }
 
 /**

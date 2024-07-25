@@ -49,9 +49,9 @@ static std::string GetSaveAppCachePath(int32_t savedStateId)
     }
 
     std::string fileDir = context->GetFilesDir();
-    TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery GetSaveAppCachePath fileDir %{public}s.", fileDir.c_str());
+    TAG_LOGD(AAFwkTag::RECOVERY, "fileDir %{public}s", fileDir.c_str());
     if (fileDir.empty() || !OHOS::FileExists(fileDir)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery GetSaveAppCachePath fileDir is empty or fileDir is not exists.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "empty fileDir or fileDir not exist");
         return "";
     }
 
@@ -247,6 +247,7 @@ bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams
 bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery ScheduleSaveAbilityState.");
     if (!isEnable_) {
         TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery not enable");
         return false;
@@ -276,6 +277,10 @@ bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
             return false;
         }
         abilityMgr->EnableRecoverAbility(token);
+        if (reason == StateReason::LIFECYCLE && DefaultRecovery()) {
+            TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery ScheduleSaveAbilityState SubmitSaveRecoveryInfo");
+            abilityMgr->SubmitSaveRecoveryInfo(token);
+        }
     }
     return ret;
 }

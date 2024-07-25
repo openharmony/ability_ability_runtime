@@ -74,7 +74,7 @@ void SetNamedProperty(napi_env env, napi_value dstObj, const char *objName, cons
 
 void SetNamedProperty(napi_env env, napi_value dstObj, const int32_t objValue, const char *propName)
 {
-    TAG_LOGD(AAFwkTag::FA, "called");
+    TAG_LOGD(AAFwkTag::FA, "end");
     napi_value prop = nullptr;
     napi_create_int32(env, objValue, &prop);
     napi_set_named_property(env, dstObj, propName, prop);

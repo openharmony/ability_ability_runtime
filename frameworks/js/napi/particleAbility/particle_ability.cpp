@@ -200,7 +200,7 @@ napi_value ParticleAbilityInit(napi_env env, napi_value exports)
 
 void JsParticleAbility::Finalizer(napi_env env, void *data, void *hint)
 {
-    TAG_LOGI(AAFwkTag::FA, "called");
+    TAG_LOGI(AAFwkTag::FA, "finalizer called");
     std::unique_ptr<JsParticleAbility>(static_cast<JsParticleAbility*>(data));
 }
 
@@ -275,7 +275,7 @@ napi_value JsParticleAbilityInit(napi_env env, napi_value exportObj)
     jsParticleAbility->ability_ = jsParticleAbility->GetAbility(env);
     napi_wrap(env, exportObj, jsParticleAbility.release(), JsParticleAbility::Finalizer, nullptr, nullptr);
 
-    TAG_LOGD(AAFwkTag::FA, "JsParticleAbility BindNativeFunction called");
+    TAG_LOGD(AAFwkTag::FA, "BindNativeFunction called");
     const char *moduleName = "JsParticleAbility";
     BindNativeFunction(env, exportObj, "connectAbility", moduleName, JsParticleAbility::PAConnectAbility);
     BindNativeFunction(env, exportObj, "disconnectAbility", moduleName, JsParticleAbility::PADisConnectAbility);

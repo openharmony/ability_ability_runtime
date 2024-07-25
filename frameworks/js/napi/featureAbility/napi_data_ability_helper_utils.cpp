@@ -30,9 +30,9 @@ namespace AppExecFwk {
 
 napi_value InsertAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperInsertCB *insertCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || insertCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -55,15 +55,15 @@ napi_value InsertAsync(napi_env env, napi_value *args, const size_t argCallback,
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, insertCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value InsertPromise(napi_env env, DAHelperInsertCB *insertCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (insertCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -82,13 +82,13 @@ napi_value InsertPromise(napi_env env, DAHelperInsertCB *insertCB)
             static_cast<void *>(insertCB),
             &insertCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, insertCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void InsertExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperInsertCB *insertCB = static_cast<DAHelperInsertCB *>(data);
     if (insertCB == nullptr) {
         TAG_LOGW(AAFwkTag::FA, "insertCB is nullptr");
@@ -103,8 +103,9 @@ void InsertExecuteCB(napi_env env, void *data)
             insertCB->execResult = NO_ERROR;
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void InsertAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -128,7 +129,7 @@ void InsertAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, insertCB->cbBase.asyncWork));
     delete insertCB;
     insertCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void InsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -141,15 +142,15 @@ void InsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, insertCB->cbBase.asyncWork));
     delete insertCB;
     insertCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value NotifyChangeAsync(
     napi_env env, napi_value *args, size_t argcAsync, const size_t argcPromise, DAHelperNotifyChangeCB *notifyChangeCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || notifyChangeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -177,9 +178,9 @@ napi_value NotifyChangeAsync(
 
 napi_value NotifyChangePromise(napi_env env, DAHelperNotifyChangeCB *notifyChangeCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (notifyChangeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -203,7 +204,7 @@ napi_value NotifyChangePromise(napi_env env, DAHelperNotifyChangeCB *notifyChang
 
 void NotifyChangeExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute.");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperNotifyChangeCB *notifyChangeCB = static_cast<DAHelperNotifyChangeCB *>(data);
     auto dataAbilityHelper = notifyChangeCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -213,7 +214,7 @@ void NotifyChangeExecuteCB(napi_env env, void *data)
             dataAbilityHelper->NotifyChange(uri);
             notifyChangeCB->execResult = NO_ERROR;
         } else {
-            TAG_LOGE(AAFwkTag::FA, "notifyChangeCB uri is empty");
+            TAG_LOGE(AAFwkTag::FA, "empty uri");
         }
     }
 }
@@ -232,7 +233,7 @@ void NotifyChangeAsyncCompleteCB(napi_env env, napi_status status, void *data)
     if (!IsTypeForNapiValue(env, callback, napi_function)) {
         delete notifyChangeCB;
         notifyChangeCB = nullptr;
-        TAG_LOGI(AAFwkTag::FA, "callback is invalid");
+        TAG_LOGI(AAFwkTag::FA, "invalid callback");
         return;
     }
 
@@ -262,9 +263,9 @@ void NotifyChangePromiseCompleteCB(napi_env env, napi_status status, void *data)
 
 napi_value GetTypeAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperGetTypeCB *gettypeCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || gettypeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -287,15 +288,15 @@ napi_value GetTypeAsync(napi_env env, napi_value *args, const size_t argCallback
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, gettypeCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value GetTypePromise(napi_env env, DAHelperGetTypeCB *gettypeCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (gettypeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -314,13 +315,13 @@ napi_value GetTypePromise(napi_env env, DAHelperGetTypeCB *gettypeCB)
             static_cast<void *>(gettypeCB),
             &gettypeCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, gettypeCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void GetTypeExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperGetTypeCB *gettypeCB = static_cast<DAHelperGetTypeCB *>(data);
     auto dataAbilityHelper = gettypeCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -330,11 +331,12 @@ void GetTypeExecuteCB(napi_env env, void *data)
             gettypeCB->result = dataAbilityHelper->GetType(uri);
             gettypeCB->execResult = NO_ERROR;
         } else {
-            TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper uri is empty");
+            TAG_LOGE(AAFwkTag::FA, "empty uri");
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void GetTypeAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -359,7 +361,7 @@ void GetTypeAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, gettypeCB->cbBase.asyncWork));
     delete gettypeCB;
     gettypeCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void GetTypePromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -372,14 +374,15 @@ void GetTypePromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, gettypeCB->cbBase.asyncWork));
     delete gettypeCB;
     gettypeCB = nullptr;
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value GetFileTypesAsync(
     napi_env env, napi_value *args, const size_t argCallback, DAHelperGetFileTypesCB *getfiletypesCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || getfiletypesCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -402,15 +405,15 @@ napi_value GetFileTypesAsync(
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, getfiletypesCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value GetFileTypesPromise(napi_env env, DAHelperGetFileTypesCB *getfiletypesCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (getfiletypesCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -429,13 +432,13 @@ napi_value GetFileTypesPromise(napi_env env, DAHelperGetFileTypesCB *getfiletype
             static_cast<void *>(getfiletypesCB),
             &getfiletypesCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, getfiletypesCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void GetFileTypesExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperGetFileTypesCB *getfiletypesCB = static_cast<DAHelperGetFileTypesCB *>(data);
     auto dataAbilityHelper = getfiletypesCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -448,12 +451,12 @@ void GetFileTypesExecuteCB(napi_env env, void *data)
             getfiletypesCB->result = dataAbilityHelper->GetFileTypes(uri, getfiletypesCB->mimeTypeFilter);
             getfiletypesCB->execResult = NO_ERROR;
         } else {
-            TAG_LOGI(AAFwkTag::FA, "dataAbilityHelper uri is empty");
+            TAG_LOGI(AAFwkTag::FA, "empty uri");
         }
     } else {
-        TAG_LOGI(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGI(AAFwkTag::FA, "null dataAbilityHelper");
     }
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void GetFileTypesAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -479,6 +482,7 @@ void GetFileTypesAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, getfiletypesCB->cbBase.asyncWork));
     delete getfiletypesCB;
     getfiletypesCB = nullptr;
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void GetFileTypesPromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -492,6 +496,7 @@ void GetFileTypesPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, getfiletypesCB->cbBase.asyncWork));
     delete getfiletypesCB;
     getfiletypesCB = nullptr;
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value WrapGetFileTypesCB(napi_env env, const DAHelperGetFileTypesCB &getfiletypesCB)
@@ -517,9 +522,9 @@ napi_value WrapGetFileTypesCB(napi_env env, const DAHelperGetFileTypesCB &getfil
 napi_value NormalizeUriAsync(
     napi_env env, napi_value *args, const size_t argCallback, DAHelperNormalizeUriCB *normalizeuriCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || normalizeuriCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -542,15 +547,15 @@ napi_value NormalizeUriAsync(
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, normalizeuriCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value NormalizeUriPromise(napi_env env, DAHelperNormalizeUriCB *normalizeuriCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (normalizeuriCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -569,13 +574,13 @@ napi_value NormalizeUriPromise(napi_env env, DAHelperNormalizeUriCB *normalizeur
             static_cast<void *>(normalizeuriCB),
             &normalizeuriCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, normalizeuriCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void NormalizeUriExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperNormalizeUriCB *normalizeuriCB = static_cast<DAHelperNormalizeUriCB *>(data);
     Uri uriValue(normalizeuriCB->uri);
     auto dataAbilityHelper = normalizeuriCB->dataAbilityHelper;
@@ -588,8 +593,9 @@ void NormalizeUriExecuteCB(napi_env env, void *data)
             normalizeuriCB->execResult = NO_ERROR;
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGI(AAFwkTag::FA, "null dataAbilityHelper");
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void NormalizeUriAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -615,6 +621,7 @@ void NormalizeUriAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, normalizeuriCB->cbBase.asyncWork));
     delete normalizeuriCB;
     normalizeuriCB = nullptr;
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void NormalizeUriPromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -627,14 +634,15 @@ void NormalizeUriPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, normalizeuriCB->cbBase.asyncWork));
     delete normalizeuriCB;
     normalizeuriCB = nullptr;
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value DenormalizeUriAsync(
     napi_env env, napi_value *args, const size_t argCallback, DAHelperDenormalizeUriCB *denormalizeuriCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || denormalizeuriCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -657,15 +665,15 @@ napi_value DenormalizeUriAsync(
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, denormalizeuriCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value DenormalizeUriPromise(napi_env env, DAHelperDenormalizeUriCB *denormalizeuriCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (denormalizeuriCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -684,13 +692,13 @@ napi_value DenormalizeUriPromise(napi_env env, DAHelperDenormalizeUriCB *denorma
             static_cast<void *>(denormalizeuriCB),
             &denormalizeuriCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, denormalizeuriCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void DenormalizeUriExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperDenormalizeUriCB *denormalizeuriCB = static_cast<DAHelperDenormalizeUriCB *>(data);
     Uri uriValue(denormalizeuriCB->uri);
     auto dataAbilityHelper = denormalizeuriCB->dataAbilityHelper;
@@ -702,12 +710,12 @@ void DenormalizeUriExecuteCB(napi_env env, void *data)
             denormalizeuriCB->result = uriValue.ToString();
             denormalizeuriCB->execResult = NO_ERROR;
         } else {
-            TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper uri is empty");
+            TAG_LOGE(AAFwkTag::FA, "empty uri");
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
     }
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void DenormalizeUriAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -733,7 +741,7 @@ void DenormalizeUriAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, denormalizeuriCB->cbBase.asyncWork));
     delete denormalizeuriCB;
     denormalizeuriCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void DenormalizeUriPromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -747,14 +755,14 @@ void DenormalizeUriPromiseCompleteCB(napi_env env, napi_status status, void *dat
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, denormalizeuriCB->cbBase.asyncWork));
     delete denormalizeuriCB;
     denormalizeuriCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value DeleteAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperDeleteCB *deleteCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || deleteCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -777,15 +785,15 @@ napi_value DeleteAsync(napi_env env, napi_value *args, const size_t argCallback,
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, deleteCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value DeletePromise(napi_env env, DAHelperDeleteCB *deleteCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (deleteCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -804,13 +812,13 @@ napi_value DeletePromise(napi_env env, DAHelperDeleteCB *deleteCB)
             static_cast<void *>(deleteCB),
             &deleteCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, deleteCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void DeleteExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperDeleteCB *deleteCB = static_cast<DAHelperDeleteCB *>(data);
     auto dataAbilityHelper = deleteCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -820,17 +828,17 @@ void DeleteExecuteCB(napi_env env, void *data)
             deleteCB->result = dataAbilityHelper->Delete(uri, deleteCB->predicates);
             deleteCB->execResult = NO_ERROR;
         } else {
-            TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper uri is empty");
+            TAG_LOGE(AAFwkTag::FA, "empty uri");
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
     }
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void DeleteAsyncCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "called");
+    TAG_LOGI(AAFwkTag::FA, "complete");
     DAHelperDeleteCB *DeleteCB = static_cast<DAHelperDeleteCB *>(data);
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -849,7 +857,7 @@ void DeleteAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, DeleteCB->cbBase.asyncWork));
     delete DeleteCB;
     DeleteCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void DeletePromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -862,14 +870,14 @@ void DeletePromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, DeleteCB->cbBase.asyncWork));
     delete DeleteCB;
     DeleteCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value UpdateAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperUpdateCB *updateCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || updateCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -892,15 +900,15 @@ napi_value UpdateAsync(napi_env env, napi_value *args, const size_t argCallback,
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, updateCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value UpdatePromise(napi_env env, DAHelperUpdateCB *updateCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (updateCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -919,13 +927,13 @@ napi_value UpdatePromise(napi_env env, DAHelperUpdateCB *updateCB)
             static_cast<void *>(updateCB),
             &updateCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, updateCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void UpdateExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperUpdateCB *updateCB = static_cast<DAHelperUpdateCB *>(data);
     auto dataAbilityHelper = updateCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -935,12 +943,12 @@ void UpdateExecuteCB(napi_env env, void *data)
             updateCB->result = dataAbilityHelper->Update(uri, updateCB->valueBucket, updateCB->predicates);
             updateCB->execResult = NO_ERROR;
         } else {
-            TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper uri is empty");
+            TAG_LOGE(AAFwkTag::FA, "empty uri");
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
     }
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void UpdateAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -964,7 +972,7 @@ void UpdateAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, updateCB->cbBase.asyncWork));
     delete updateCB;
     updateCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void UpdatePromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -977,7 +985,7 @@ void UpdatePromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, updateCB->cbBase.asyncWork));
     delete updateCB;
     updateCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void CallErrorAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -1002,7 +1010,7 @@ void CallErrorAsyncCompleteCB(napi_env env, napi_status status, void *data)
     }
     delete errorCB;
     errorCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void CallErrorPromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -1017,25 +1025,26 @@ void CallErrorPromiseCompleteCB(napi_env env, napi_status status, void *data)
     }
     delete errorCB;
     errorCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void CallErrorExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperErrorCB *errorCB = static_cast<DAHelperErrorCB *>(data);
     if (errorCB != nullptr) {
         errorCB->execResult = INVALID_PARAMETER;
     } else {
-        TAG_LOGE(AAFwkTag::FA, "errorCB is null");
+        TAG_LOGE(AAFwkTag::FA, "null errorCB");
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value CallErrorAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperErrorCB *errorCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || errorCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param or errorCB is null");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -1052,13 +1061,13 @@ napi_value CallErrorAsync(napi_env env, napi_value *args, const size_t argCallba
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, errorCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value CallErrorPromise(napi_env env, DAHelperErrorCB *errorCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (errorCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "param is null");
         return nullptr;
@@ -1073,7 +1082,7 @@ napi_value CallErrorPromise(napi_env env, DAHelperErrorCB *errorCB)
     NAPI_CALL(env, napi_create_async_work(env, nullptr, resourceName, CallErrorExecuteCB, CallErrorPromiseCompleteCB,
                        static_cast<void *>(errorCB), &errorCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, errorCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
@@ -1092,7 +1101,7 @@ napi_value CallErrorWrap(napi_env env, napi_value thisVar, napi_callback_info in
         ret = CallErrorPromise(env, errorCB);
     }
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete errorCB;
         errorCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -1103,7 +1112,7 @@ napi_value CallErrorWrap(napi_env env, napi_value thisVar, napi_callback_info in
 
 void CallExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperCallCB *callCB = static_cast<DAHelperCallCB *>(data);
     auto dataAbilityHelper = callCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -1114,13 +1123,14 @@ void CallExecuteCB(napi_env env, void *data)
             callCB->execResult = NO_ERROR;
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 static std::string ExcludeTag(const std::string& jsonString, const std::string& tagString)
 {
-    TAG_LOGD(AAFwkTag::FA, "enter");
+    TAG_LOGD(AAFwkTag::FA, "called");
     size_t pos = jsonString.find(tagString);
     if (pos == std::string::npos) {
         return jsonString;
@@ -1140,7 +1150,7 @@ static std::string ExcludeTag(const std::string& jsonString, const std::string& 
     if (valuePos >= valueString.size()) {
         return "";
     }
-    TAG_LOGD(AAFwkTag::FA, "exit");
+    TAG_LOGD(AAFwkTag::FA, "end");
     valueString = valueString.substr(valuePos);
     return valueString.substr(0, valueString.size() - 1);
 }
@@ -1156,7 +1166,7 @@ napi_value CallPacMapValue(napi_env env, std::shared_ptr<AppExecFwk::PacMap> res
         napi_create_string_utf8(env, resultWithoutTag.c_str(), NAPI_AUTO_LENGTH, &napiResult);
         NAPI_CALL(env, napi_set_named_property(env, value, "result", napiResult));
     } else {
-        TAG_LOGE(AAFwkTag::FA, "Return result is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
     }
     return value;
 }
@@ -1182,7 +1192,7 @@ void CallAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, callCB->cbBase.asyncWork));
     delete callCB;
     callCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void CallPromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -1195,13 +1205,14 @@ void CallPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, callCB->cbBase.asyncWork));
     delete callCB;
     callCB = nullptr;
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value CallAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperCallCB *callCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || callCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -1224,15 +1235,15 @@ napi_value CallAsync(napi_env env, napi_value *args, const size_t argCallback, D
     NAPI_CALL(env, napi_queue_async_work(env, callCB->cbBase.asyncWork));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value CallPromise(napi_env env, DAHelperCallCB *callCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (callCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -1251,15 +1262,15 @@ napi_value CallPromise(napi_env env, DAHelperCallCB *callCB)
             static_cast<void *>(callCB),
             &callCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work(env, callCB->cbBase.asyncWork));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 napi_value OpenFileAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperOpenFileCB *openFileCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || openFileCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = 0;
@@ -1282,15 +1293,15 @@ napi_value OpenFileAsync(napi_env env, napi_value *args, const size_t argCallbac
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, openFileCB->cbBase.asyncWork, napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value OpenFilePromise(napi_env env, DAHelperOpenFileCB *openFileCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (openFileCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -1309,13 +1320,13 @@ napi_value OpenFilePromise(napi_env env, DAHelperOpenFileCB *openFileCB)
             static_cast<void *>(openFileCB),
             &openFileCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work_with_qos(env, openFileCB->cbBase.asyncWork, napi_qos_user_initiated));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void OpenFileExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperOpenFileCB *OpenFileCB = static_cast<DAHelperOpenFileCB *>(data);
     auto dataAbilityHelper = OpenFileCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -1325,11 +1336,12 @@ void OpenFileExecuteCB(napi_env env, void *data)
             OpenFileCB->result = dataAbilityHelper->OpenFile(uri, OpenFileCB->mode);
             OpenFileCB->execResult = NO_ERROR;
         } else {
-            TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper uri is empty");
+            TAG_LOGE(AAFwkTag::FA, "empty uri");
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void OpenFileAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -1353,6 +1365,7 @@ void OpenFileAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, OpenFileCB->cbBase.asyncWork));
     delete OpenFileCB;
     OpenFileCB = nullptr;
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void OpenFilePromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -1365,14 +1378,15 @@ void OpenFilePromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, OpenFileCB->cbBase.asyncWork));
     delete OpenFileCB;
     OpenFileCB = nullptr;
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value BatchInsertAsync(
     napi_env env, napi_value *args, const size_t argCallback, DAHelperBatchInsertCB *batchInsertCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || batchInsertCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -1395,15 +1409,15 @@ napi_value BatchInsertAsync(
     NAPI_CALL(env, napi_queue_async_work(env, batchInsertCB->cbBase.asyncWork));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value BatchInsertPromise(napi_env env, DAHelperBatchInsertCB *batchInsertCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (batchInsertCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -1422,13 +1436,13 @@ napi_value BatchInsertPromise(napi_env env, DAHelperBatchInsertCB *batchInsertCB
             static_cast<void *>(batchInsertCB),
             &batchInsertCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work(env, batchInsertCB->cbBase.asyncWork));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void BatchInsertExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "call");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperBatchInsertCB *batchInsertCB = static_cast<DAHelperBatchInsertCB *>(data);
     auto dataAbilityHelper = batchInsertCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -1438,11 +1452,12 @@ void BatchInsertExecuteCB(napi_env env, void *data)
             batchInsertCB->result = dataAbilityHelper->BatchInsert(uri, batchInsertCB->values);
             batchInsertCB->execResult = NO_ERROR;
         } else {
-            TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper uri is empyt");
+            TAG_LOGE(AAFwkTag::FA, "empty uri");
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void BatchInsertAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -1466,7 +1481,7 @@ void BatchInsertAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, BatchInsertCB->cbBase.asyncWork));
     delete BatchInsertCB;
     BatchInsertCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void BatchInsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -1479,14 +1494,14 @@ void BatchInsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, BatchInsertCB->cbBase.asyncWork));
     delete BatchInsertCB;
     BatchInsertCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 napi_value QuerySync(napi_env env, napi_value *args, const size_t argCallback, DAHelperQueryCB *queryCB)
 {
-    TAG_LOGD(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGD(AAFwkTag::FA, "called");
     if (args == nullptr || queryCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
 
@@ -1532,9 +1547,9 @@ napi_value QuerySync(napi_env env, napi_value *args, const size_t argCallback, D
 
 napi_value QueryPromise(napi_env env, DAHelperQueryCB *queryCB)
 {
-    TAG_LOGD(AAFwkTag::FA, "promise");
+    TAG_LOGD(AAFwkTag::FA, "called");
     if (queryCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null queryCB");
         return nullptr;
     }
 
@@ -1564,7 +1579,7 @@ napi_value WrapResultSet(napi_env env, const std::shared_ptr<NativeRdb::AbsShare
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (resultSet == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "input parameter resultSet is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null resultSet");
         return WrapVoidToJS(env);
     }
 
@@ -1574,9 +1589,9 @@ napi_value WrapResultSet(napi_env env, const std::shared_ptr<NativeRdb::AbsShare
 napi_value ExecuteBatchAsync(
     napi_env env, napi_value *args, size_t argcAsync, const size_t argcPromise, DAHelperExecuteBatchCB *executeBatchCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback start");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || executeBatchCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -1599,15 +1614,15 @@ napi_value ExecuteBatchAsync(
     NAPI_CALL(env, napi_queue_async_work(env, executeBatchCB->cbBase.asyncWork));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "%{public}s, asyncCallback end.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 napi_value ExecuteBatchPromise(napi_env env, DAHelperExecuteBatchCB *executeBatchCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "promise start");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (executeBatchCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName;
@@ -1626,13 +1641,13 @@ napi_value ExecuteBatchPromise(napi_env env, DAHelperExecuteBatchCB *executeBatc
             static_cast<void *>(executeBatchCB),
             &executeBatchCB->cbBase.asyncWork));
     NAPI_CALL(env, napi_queue_async_work(env, executeBatchCB->cbBase.asyncWork));
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGI(AAFwkTag::FA, "end");
     return promise;
 }
 
 void ExecuteBatchExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute start");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperExecuteBatchCB *executeBatchCB = static_cast<DAHelperExecuteBatchCB *>(data);
     auto dataAbilityHelper = executeBatchCB->dataAbilityHelper;
     if (dataAbilityHelper != nullptr) {
@@ -1641,6 +1656,7 @@ void ExecuteBatchExecuteCB(napi_env env, void *data)
         TAG_LOGI(AAFwkTag::FA, "%{public}s, dataAbilityHelper is not nullptr. %{public}zu",
             __func__, executeBatchCB->result.size());
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void ExecuteBatchAsyncCompleteCB(napi_env env, napi_status status, void *data)
@@ -1665,7 +1681,7 @@ void ExecuteBatchAsyncCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, executeBatchCB->cbBase.asyncWork));
     delete executeBatchCB;
     executeBatchCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void ExecuteBatchPromiseCompleteCB(napi_env env, napi_status status, void *data)
@@ -1679,14 +1695,13 @@ void ExecuteBatchPromiseCompleteCB(napi_env env, napi_status status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, executeBatchCB->cbBase.asyncWork));
     delete executeBatchCB;
     executeBatchCB = nullptr;
-    TAG_LOGD(AAFwkTag::FA, "end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void GetDataAbilityResultForResult(
     napi_env env, const std::vector<std::shared_ptr<DataAbilityResult>> &dataAbilityResult, napi_value result)
 {
-    TAG_LOGI(AAFwkTag::FA, "getDataAbilityResultForResult start. %{public}zu",
-        dataAbilityResult.size());
+    TAG_LOGI(AAFwkTag::FA, "size:%{public}zu", dataAbilityResult.size());
     int32_t index = 0;
     std::vector<std::shared_ptr<DataAbilityResult>> entities = dataAbilityResult;
     for (const auto &item : entities) {
@@ -1696,12 +1711,12 @@ void GetDataAbilityResultForResult(
         napi_value uri;
         NAPI_CALL_RETURN_VOID(
             env, napi_create_string_utf8(env, item->GetUri().ToString().c_str(), NAPI_AUTO_LENGTH, &uri));
-        TAG_LOGI(AAFwkTag::FA, "uri = [%{public}s]", item->GetUri().ToString().c_str());
+        TAG_LOGI(AAFwkTag::FA, "uri= [%{public}s]", item->GetUri().ToString().c_str());
         NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, objDataAbilityResult, "uri", uri));
 
         napi_value count;
         NAPI_CALL_RETURN_VOID(env, napi_create_int32(env, item->GetCount(), &count));
-        TAG_LOGI(AAFwkTag::FA, "count = [%{public}d]", item->GetCount());
+        TAG_LOGI(AAFwkTag::FA, "count= [%{public}d]", item->GetCount());
         NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, objDataAbilityResult, "count", count));
 
         NAPI_CALL_RETURN_VOID(env, napi_set_element(env, result, index, objDataAbilityResult));
