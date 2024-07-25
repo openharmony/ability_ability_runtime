@@ -33,7 +33,6 @@
 namespace OHOS {
 namespace AppExecFwk {
 
-constexpr const char* APP_NO_RESPONSE_BUNDLENAME = "com.huawei.hmos.taskmanager";
 constexpr const char* APP_NO_RESPONSE_ABILITY = "AppAbnormalAbility";
 
 class ModalSystemAppFreezeUIExtension {
