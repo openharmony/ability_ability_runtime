@@ -508,6 +508,7 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
             obj, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref)));
         CallJsOnRequest(want, sessionInfo, uiWindow);
         uiWindowMap_[obj] = uiWindow;
+        context->SetSessionInfo(sessionInfo);
     }
     return true;
 }
@@ -534,7 +535,6 @@ void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<A
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Handle auto fill create failed.");
         return;
     }
-    context->SetSessionInfo(sessionInfo);
     auto obj = sessionInfo->sessionToken;
     auto& uiWindow = uiWindowMap_[obj];
     if (uiWindow) {
