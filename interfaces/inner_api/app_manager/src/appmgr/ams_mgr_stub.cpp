@@ -191,7 +191,7 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
         case static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB):
             return HandleIsKilledForUpgradeWeb(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION):
-            return HandleIsProcessContainsOnlyUIExtension(data, reply);
+            return HandleIsProcessContainsOnlyUIAbility(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION):
             return HandleForceKillApplication(data, reply);
     }
@@ -786,13 +786,13 @@ int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParc
     return NO_ERROR;
 }
 
-int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIExtension(MessageParcel &data, MessageParcel &reply)
+int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply)
 {
     auto pid = data.ReadUint32();
 
-    auto result = IsProcessContainsOnlyUIExtension(pid);
+    auto result = IsProcessContainsOnlyUIAbility(pid);
     if (!reply.WriteBool(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result in HandleIsProcessContainsOnlyUIExtension.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result in HandleIsProcessContainsOnlyUIAbility.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

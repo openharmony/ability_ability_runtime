@@ -10818,7 +10818,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         return false;
     }
     bool continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
-    if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIExtension(abilityRecord->GetPid()))
+    if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIAbility(abilityRecord->GetPid()))
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has other extension except UIAbility, pass");
         return false;
@@ -10857,39 +10857,39 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
 void AbilityManagerService::PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "calledAbilityInfo toString: "
-                "calledUid is: %{public}d, "
-                "name is: %{public}s, "
-                "bundleName is: %{public}s, "
-                "type is: %{public}d, "
-                "extensionAbilityType is: %{public}d, "
-                "moduleName is: %{public}s, "
-                "applicationName is: %{public}s",
-                calledInfo.applicationInfo.uid,
-                calledInfo.name.c_str(),
-                calledInfo.bundleName.c_str(),
-                static_cast<int32_t>(calledInfo.type),
-                static_cast<int32_t>(calledInfo.extensionAbilityType),
-                calledInfo.moduleName.c_str(),
-                calledInfo.applicationName.c_str());
+        "calledUid is: %{public}d, "
+        "name is: %{public}s, "
+        "bundleName is: %{public}s, "
+        "type is: %{public}d, "
+        "extensionAbilityType is: %{public}d, "
+        "moduleName is: %{public}s, "
+        "applicationName is: %{public}s",
+        calledInfo.applicationInfo.uid,
+        calledInfo.name.c_str(),
+        calledInfo.bundleName.c_str(),
+        static_cast<int32_t>(calledInfo.type),
+        static_cast<int32_t>(calledInfo.extensionAbilityType),
+        calledInfo.moduleName.c_str(),
+        calledInfo.applicationName.c_str());
     
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityInfo toString: "
-                "callerUid is: %{public}d, "
-                "callerPid is: %{public}d, "
-                "name is: %{public}s, "
-                "bundleName is: %{public}s, "
-                "type is: %{public}d, "
-                "extensionAbilityType is: %{public}d, "
-                "moduleName is: %{public}s, "
-                "applicationName is: %{public}s", 
-                IPCSkeleton::GetCallingUid(),
-                IPCSkeleton::GetCallingPid(),
-                callerInfo.name.c_str(),
-                callerInfo.bundleName.c_str(),
-                static_cast<int32_t>(callerInfo.type),
-                static_cast<int32_t>(callerInfo.extensionAbilityType),
-                callerInfo.moduleName.c_str(),
-                callerInfo.applicationName.c_str());
+        "callerUid is: %{public}d, "
+        "callerPid is: %{public}d, "
+        "name is: %{public}s, "
+        "bundleName is: %{public}s, "
+        "type is: %{public}d, "
+        "extensionAbilityType is: %{public}d, "
+        "moduleName is: %{public}s, "
+        "applicationName is: %{public}s", 
+        IPCSkeleton::GetCallingUid(),
+        IPCSkeleton::GetCallingPid(),
+        callerInfo.name.c_str(),
+        callerInfo.bundleName.c_str(),
+        static_cast<int32_t>(callerInfo.type),
+        static_cast<int32_t>(callerInfo.extensionAbilityType),
+        callerInfo.moduleName.c_str(),
+        callerInfo.applicationName.c_str());
 }
 
 void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,

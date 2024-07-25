@@ -313,7 +313,7 @@ public:
      * whether the abilities of process specified by pid type only UIAbility.
      * @return Returns true is only UIAbility, otherwise return false
      */
-    virtual bool IsProcessContainsOnlyUIExtension(const pid_t pid) override;
+    virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

@@ -799,7 +799,7 @@ public:
      * whether the abilities of process specified by pid type only UIAbility.
      * @return Returns true is only UIAbility, otherwise return false
      */
-    bool IsProcessContainsOnlyUIExtension(const pid_t pid);
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
