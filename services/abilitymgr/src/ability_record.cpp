@@ -3587,7 +3587,7 @@ void AbilityRecord::SetDebugAppByWaitingDebugFlag(Want &requestWant, const std::
             DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearNonPersistWaitingDebugFlag());
     }
 }
-void AbilityRecord::SetConnectWant(Want &want)
+void AbilityRecord::SaveConnectWant(Want &want)
 {
     std::lock_guard<ffrt::mutex> guard(connectWantLock_);
     if (connectWant_ == nullptr) {
