@@ -41,7 +41,8 @@ bool AmsMgrProxy::IsProcessContainsOnlyUIExtension(const pid_t pid)
     }
     data.WriteInt32(static_cast<int32_t>(pid));
     int32_t ret =
-        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION), data, reply, option);
+        SendTransactCmd(static_cast<uint32_t>(
+            IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         return false;
