@@ -1021,7 +1021,7 @@ public:
 
     void SetSpecifyTokenId(const uint32_t specifyTokenId);
 
-    void SaveConnectWant(Want &want);
+    void SaveConnectWant(const Want &want);
 
     void UpdateConnectWant();
 
