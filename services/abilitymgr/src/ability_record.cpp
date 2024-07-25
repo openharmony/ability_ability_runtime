@@ -3590,7 +3590,7 @@ void AbilityRecord::SetDebugAppByWaitingDebugFlag(Want &requestWant, const std::
 
 void AbilityRecord::SaveConnectWant(const Want &want)
 {
-    std::lock_guard<ffrt::mutex> guard(connectWantLock_);
+    std::lock_guard guard(connectWantLock_);
     if (connectWant_ == nullptr) {
         connectWant_ = std::make_shared<Want>(want);
     }
@@ -3598,7 +3598,7 @@ void AbilityRecord::SaveConnectWant(const Want &want)
 
 void AbilityRecord::UpdateConnectWant()
 {
-    std::lock_guard<ffrt::mutex> guard(connectWantLock_);
+    std::lock_guard guard(connectWantLock_);
     if (connectWant_ != nullptr) {
         SetWant(*connectWant_);
     }
@@ -3606,7 +3606,7 @@ void AbilityRecord::UpdateConnectWant()
 
 void AbilityRecord::RemoveConnectWant()
 {
-    std::lock_guard<ffrt::mutex> guard(connectWantLock_);
+    std::lock_guard guard(connectWantLock_);
     connectWant_.reset();
 }
 }  // namespace AAFwk
