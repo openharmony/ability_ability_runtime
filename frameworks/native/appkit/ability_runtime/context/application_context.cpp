@@ -49,6 +49,7 @@ void ApplicationContext::AttachContextImpl(const std::shared_ptr<ContextImpl> &c
 void ApplicationContext::RegisterAbilityLifecycleCallback(
     const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (abilityLifecycleCallback == nullptr) {
         return;
     }
@@ -59,6 +60,7 @@ void ApplicationContext::RegisterAbilityLifecycleCallback(
 void ApplicationContext::UnregisterAbilityLifecycleCallback(
     const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     auto it = std::find(callbacks_.begin(), callbacks_.end(), abilityLifecycleCallback);
     if (it != callbacks_.end()) {
@@ -75,6 +77,7 @@ bool ApplicationContext::IsAbilityLifecycleCallbackEmpty()
 void ApplicationContext::RegisterEnvironmentCallback(
     const std::shared_ptr<EnvironmentCallback> &environmentCallback)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (environmentCallback == nullptr) {
         return;
     }
@@ -85,6 +88,7 @@ void ApplicationContext::RegisterEnvironmentCallback(
 void ApplicationContext::UnregisterEnvironmentCallback(
     const std::shared_ptr<EnvironmentCallback> &environmentCallback)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     std::lock_guard<std::recursive_mutex> lock(envCallbacksLock_);
     auto it = std::find(envCallbacks_.begin(), envCallbacks_.end(), environmentCallback);
     if (it != envCallbacks_.end()) {
@@ -146,7 +150,7 @@ void ApplicationContext::DispatchOnWindowStageDestroy(const std::shared_ptr<Nati
 void ApplicationContext::DispatchWindowStageFocus(const std::shared_ptr<NativeReference> &ability,
     const std::shared_ptr<NativeReference> &windowStage)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability || !windowStage) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is null");
         return;
@@ -162,7 +166,7 @@ void ApplicationContext::DispatchWindowStageFocus(const std::shared_ptr<NativeRe
 void ApplicationContext::DispatchWindowStageUnfocus(const std::shared_ptr<NativeReference> &ability,
     const std::shared_ptr<NativeReference> &windowStage)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "begin");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability || !windowStage) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is nullptr");
         return;
@@ -299,7 +303,7 @@ void ApplicationContext::DispatchOnAbilityWillSaveState(const std::shared_ptr<Na
 
 void ApplicationContext::DispatchOnAbilitySaveState(const std::shared_ptr<NativeReference> &ability)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "onAbilitySaveState");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
         return;
@@ -385,7 +389,7 @@ void ApplicationContext::DispatchOnNewWant(const std::shared_ptr<NativeReference
 
 void ApplicationContext::DispatchOnAbilityWillCreate(const std::shared_ptr<NativeReference> &ability)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
@@ -401,7 +405,7 @@ void ApplicationContext::DispatchOnAbilityWillCreate(const std::shared_ptr<Nativ
 void ApplicationContext::DispatchOnWindowStageWillCreate(const std::shared_ptr<NativeReference> &ability,
     const std::shared_ptr<NativeReference> &windowStage)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability || !windowStage) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is null");
         return;
@@ -417,7 +421,7 @@ void ApplicationContext::DispatchOnWindowStageWillCreate(const std::shared_ptr<N
 void ApplicationContext::DispatchOnWindowStageWillDestroy(const std::shared_ptr<NativeReference> &ability,
     const std::shared_ptr<NativeReference> &windowStage)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability || !windowStage) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is null");
         return;
@@ -432,7 +436,7 @@ void ApplicationContext::DispatchOnWindowStageWillDestroy(const std::shared_ptr<
 
 void ApplicationContext::DispatchOnAbilityWillDestroy(const std::shared_ptr<NativeReference> &ability)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
@@ -447,7 +451,7 @@ void ApplicationContext::DispatchOnAbilityWillDestroy(const std::shared_ptr<Nati
 
 void ApplicationContext::DispatchOnAbilityWillForeground(const std::shared_ptr<NativeReference> &ability)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
@@ -462,7 +466,7 @@ void ApplicationContext::DispatchOnAbilityWillForeground(const std::shared_ptr<N
 
 void ApplicationContext::DispatchOnAbilityWillBackground(const std::shared_ptr<NativeReference> &ability)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;

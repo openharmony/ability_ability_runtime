@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,9 @@
  * limitations under the License.
  */
 
-#include "authorization_result.h"
-#include "hilog_tag_wrapper.h"
+#ifndef FUZZTEST_OHOS_ABILITY_RUNTIME_ABILITYAPPPRELOADER_FUZZER_H
+#define FUZZTEST_OHOS_ABILITY_RUNTIME_ABILITYAPPPRELOADER_FUZZER_H
 
-namespace OHOS {
-namespace AbilityRuntime {
-void AuthorizationResult::GrantResultsCallback(const std::vector<std::string>& permissions,
-    const std::vector<int>& grantResults)
-{
-    TAG_LOGI(AAFwkTag::DEFAULT, "called");
-    if (task_) {
-        TAG_LOGD(AAFwkTag::DEFAULT, "call client func");
-        task_(permissions, grantResults);
-    }
-}
-} // namespace AbilityRuntime
-} // namespace OHOS
+#define FUZZ_PROJECT_NAME "abilityapppreloader_fuzzer"
+
+#endif // FUZZTEST_OHOS_ABILITY_RUNTIME_ABILITYAPPPRELOADER_FUZZER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#include "authorization_result.h"
-#include "hilog_tag_wrapper.h"
+#ifndef MOCK_PARAMETERS_H
+#define MOCK_PARAMETERS_H
+
+#include <string>
 
 namespace OHOS {
-namespace AbilityRuntime {
-void AuthorizationResult::GrantResultsCallback(const std::vector<std::string>& permissions,
-    const std::vector<int>& grantResults)
-{
-    TAG_LOGI(AAFwkTag::DEFAULT, "called");
-    if (task_) {
-        TAG_LOGD(AAFwkTag::DEFAULT, "call client func");
-        task_(permissions, grantResults);
-    }
-}
-} // namespace AbilityRuntime
+namespace system {
+
+void SetBoolParameter(const std::string& key, bool def);
+
+bool GetBoolParameter(const std::string& key, bool def);
+
+} // namespace system
 } // namespace OHOS
+
+#endif // MOCK_PARAMETERS_H
