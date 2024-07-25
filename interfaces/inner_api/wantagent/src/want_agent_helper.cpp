@@ -24,6 +24,7 @@
 #include "want_agent_log_wrapper.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
+#include "xcollie/xcollie.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -300,14 +301,16 @@ std::shared_ptr<Want> WantAgentHelper::GetWant(const std::shared_ptr<WantAgent> 
         TAG_LOGE(AAFwkTag::WANTAGENT, "WantAgentHelper::GetWant WantAgent invalid input param.");
         return nullptr;
     }
-
+    int32_t timeId = HiviewDFX::Xcollie::GetInstance().SetTimer("wantAgent::GetWant", 10, nullptr, nullptr, 1);
     std::shared_ptr<PendingWant> pendingWant = agent->GetPendingWant();
     if (pendingWant == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "WantAgentHelper::GetWant PendingWant invalid input param.");
         return nullptr;
     }
 
-    return pendingWant->GetWant(pendingWant->GetTarget());
+    std::shared_ptr<Want> want = pendingWant->GetWant(pendingWant->GetTarget());
+    HiviewDFX::Xcollie::GetInstance().CancelTimer(timeId);
+    return want;
 }
 
 void WantAgentHelper::RegisterCancelListener(
