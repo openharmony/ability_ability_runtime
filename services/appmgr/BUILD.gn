@@ -168,6 +168,10 @@ ohos_shared_library("libappms") {
     defines += [ "APP_NO_RESPONSE_DIALOG" ]
   }
 
+  cflags += [
+    "-DAPP_NO_RESPONSE_BUNDLENAME=\"${ability_runtime_app_no_response_ability}\"",
+  ]
+
   version_script = "libappms.map"
   subsystem_name = "ability"
   part_name = "ability_runtime"
