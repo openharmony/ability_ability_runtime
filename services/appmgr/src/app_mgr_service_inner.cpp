@@ -7211,7 +7211,7 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
             return false;
         }
         
-        bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel);
+        bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE);
         if (!isUIAbility) {
             return false;
         }
