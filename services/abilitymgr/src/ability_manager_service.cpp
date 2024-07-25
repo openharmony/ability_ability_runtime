@@ -10812,41 +10812,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     auto abilityInfo = abilityRequest.abilityInfo;
     auto callerAbilityInfo = abilityRecord->GetAbilityInfo();
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "calledAbilityInfo toString: "
-                "calledUid is: %{public}d, "
-                "name is: %{public}s, "
-                "bundleName is: %{public}s, "
-                "type is: %{public}d, "
-                "extensionAbilityType is: %{public}d, "
-                "moduleName is: %{public}s, "
-                "applicationName is: %{public}s",
-                abilityInfo.applicationInfo.uid,
-                abilityInfo.name.c_str(),
-                abilityInfo.bundleName.c_str(),
-                static_cast<int32_t>(abilityInfo.type),
-                static_cast<int32_t>(abilityInfo.extensionAbilityType),
-                abilityInfo.moduleName.c_str(),
-                abilityInfo.applicationName.c_str());
-    
-    pid_t callerPid = abilityRecord->GetPid();
-
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityInfo toString: "
-                "callerUid is: %{public}d, "
-                "callerPid is: %{public}d, "
-                "name is: %{public}s, "
-                "bundleName is: %{public}s, "
-                "type is: %{public}d, "
-                "extensionAbilityType is: %{public}d, "
-                "moduleName is: %{public}s, "
-                "applicationName is: %{public}s", 
-                IPCSkeleton::GetCallingUid(),
-                callerPid,
-                callerAbilityInfo.name.c_str(),
-                callerAbilityInfo.bundleName.c_str(),
-                static_cast<int32_t>(callerAbilityInfo.type),
-                static_cast<int32_t>(callerAbilityInfo.extensionAbilityType),
-                callerAbilityInfo.moduleName.c_str(),
-                callerAbilityInfo.applicationName.c_str());
+    PrintStartAbilityInfo(callerAbilityInfo, abilityInfo);
     
     if (abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD < API12) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "API version %{public}d pass",
@@ -10856,7 +10822,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     
     bool continuousFlag = false;
     continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
-    
+    pid_t callerPid = abilityRecord->GetPid();
     if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIExtension(callerPid))
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has other extension except UIAbility, pass");
@@ -10891,6 +10857,44 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         abilityRecord->GetURI().c_str());
     ReportPreventStartAbilityResult(callerAbilityInfo, abilityInfo);
     return true;
+}
+
+void AbilityManagerService::PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "calledAbilityInfo toString: "
+                "calledUid is: %{public}d, "
+                "name is: %{public}s, "
+                "bundleName is: %{public}s, "
+                "type is: %{public}d, "
+                "extensionAbilityType is: %{public}d, "
+                "moduleName is: %{public}s, "
+                "applicationName is: %{public}s",
+                calledInfo.applicationInfo.uid,
+                calledInfo.name.c_str(),
+                calledInfo.bundleName.c_str(),
+                static_cast<int32_t>(calledInfo.type),
+                static_cast<int32_t>(calledInfo.extensionAbilityType),
+                calledInfo.moduleName.c_str(),
+                calledInfo.applicationName.c_str());
+    
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityInfo toString: "
+                "callerUid is: %{public}d, "
+                "callerPid is: %{public}d, "
+                "name is: %{public}s, "
+                "bundleName is: %{public}s, "
+                "type is: %{public}d, "
+                "extensionAbilityType is: %{public}d, "
+                "moduleName is: %{public}s, "
+                "applicationName is: %{public}s", 
+                IPCSkeleton::GetCallingUid(),
+                IPCSkeleton::GetCallingPid(),
+                callerInfo.name.c_str(),
+                callerInfo.bundleName.c_str(),
+                static_cast<int32_t>(callerInfo.type),
+                static_cast<int32_t>(callerInfo.extensionAbilityType),
+                callerInfo.moduleName.c_str(),
+                callerInfo.applicationName.c_str());
 }
 
 void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
