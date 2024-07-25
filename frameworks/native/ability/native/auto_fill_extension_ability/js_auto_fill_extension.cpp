@@ -525,7 +525,6 @@ void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<A
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to get context.");
         return;
     }
-    context->SetSessionInfo(sessionInfo);
 
     if (want.HasParameter(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY)) {
         isPopup_ = want.GetBoolParam(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY, false);
@@ -535,6 +534,7 @@ void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<A
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Handle auto fill create failed.");
         return;
     }
+    context->SetSessionInfo(sessionInfo);
     auto obj = sessionInfo->sessionToken;
     auto& uiWindow = uiWindowMap_[obj];
     if (uiWindow) {
