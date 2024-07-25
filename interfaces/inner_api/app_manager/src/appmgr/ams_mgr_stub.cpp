@@ -788,13 +788,11 @@ int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParc
 
 int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIExtension(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: call IsProcessContainsOnlyUIExtension in ams_mgr_stub.cpp");
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto pid = data.ReadUint32();
 
     auto result = IsProcessContainsOnlyUIExtension(pid);
     if (!reply.WriteBool(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result in HandleIsProcessContainsOnlyUIExtension.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
