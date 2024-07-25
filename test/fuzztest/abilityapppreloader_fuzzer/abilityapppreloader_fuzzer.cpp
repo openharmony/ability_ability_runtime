@@ -13,21 +13,24 @@
  * limitations under the License.
  */
 
-#include "abilitymemorylevelinfo_fuzzer.h"
+#include "abilityapppreloader_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
 
 #define private public
 #define protected public
-#include "memory_level_info.h"
+#include "app_preloader.h"
+#include "bundle_mgr_helper.h"
 #undef protected
 #undef private
 #include "parcel.h"
 #include <iostream>
 #include "securec.h"
 #include "configuration.h"
+
 using namespace OHOS::AppExecFwk;
+
 namespace OHOS {
 namespace {
 constexpr int INPUT_ZERO = 0;
@@ -50,15 +53,22 @@ uint32_t GetU32Data(const char* ptr)
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    std::shared_ptr<MemoryLevelInfo> memLevelInfo = std::make_shared<MemoryLevelInfo>();
-    if (memLevelInfo == nullptr) {
-        return false;
-    }
-    Parcel parcel;
-    memLevelInfo->GetProcLevelMap();
-    memLevelInfo->Marshalling(parcel);
-    memLevelInfo->ReadFromParcel(parcel);
-    MemoryLevelInfo::Unmarshalling(parcel);
+    std::shared_ptr<RemoteClientManager> remoteClientManager = std::make_shared<RemoteClientManager>();
+    auto bundleMgrHelper = std::make_shared<AppExecFwk::BundleMgrHelper>();
+    remoteClientManager->SetBundleManagerHelper(bundleMgrHelper);
+    auto appPreloader = std::make_shared<AppPreloader>(remoteClientManager);
+    std::string bundleName(data, size);
+    int32_t userId = static_cast<int32_t>(GetU32Data(data));
+    int32_t appIndex = static_cast<int32_t>(GetU32Data(data));
+    PreloadRequest request;
+    appPreloader->GeneratePreloadRequest(bundleName, userId, appIndex, request);
+    appPreloader->GetBundleManagerHelper();
+    AbilityInfo abilityInfo;
+    appPreloader->CheckPreloadConditions(abilityInfo);
+    AAFwk::Want launchWant;
+    appPreloader->GetLaunchWant(bundleName, userId, launchWant);
+    appPreloader->GetLaunchAbilityInfo(launchWant, userId, abilityInfo);
+    appPreloader->PreCheck(bundleName, PreloadMode::PRE_MAKE);
     return true;
 }
 }

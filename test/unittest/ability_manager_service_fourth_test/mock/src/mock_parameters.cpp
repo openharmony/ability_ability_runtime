@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
-#include "authorization_result.h"
-#include "hilog_tag_wrapper.h"
+#include "parameters.h"
 
 namespace OHOS {
-namespace AbilityRuntime {
-void AuthorizationResult::GrantResultsCallback(const std::vector<std::string>& permissions,
-    const std::vector<int>& grantResults)
+namespace system {
+
+bool g_returnFlag{false};
+
+void SetBoolParameter(const std::string& key, bool def)
 {
-    TAG_LOGI(AAFwkTag::DEFAULT, "called");
-    if (task_) {
-        TAG_LOGD(AAFwkTag::DEFAULT, "call client func");
-        task_(permissions, grantResults);
-    }
+    g_returnFlag = def;
 }
-} // namespace AbilityRuntime
+
+bool GetBoolParameter(const std::string& key, bool def)
+{
+    return g_returnFlag;
+}
+
+} // namespace system
 } // namespace OHOS
