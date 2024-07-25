@@ -40,6 +40,8 @@
 #include "ui_extension_utils.h"
 #include "ui_service_extension_connection_constants.h"
 #include "cache_extension_utils.h"
+#include "datetime_ex.h"
+#include "init_reboot.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -294,7 +296,7 @@ void AbilityConnectManager::SetLastExitReason(
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (targetRecord == nullptr || !UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to set UIExtensionAbility last exit reason.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Failed to set UIExtensionAbility last exit reason.");
         return;
     }
     auto appExitReasonDataMgr = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
@@ -308,7 +310,7 @@ void AbilityConnectManager::SetLastExitReason(
                               targetRecord->GetAbilityInfo().moduleName + SEPARATOR +
                               targetRecord->GetAbilityInfo().name;
     if (!appExitReasonDataMgr->GetUIExtensionAbilityExitReason(keyEx, exitReason)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "There is no record of UIExtensionAbility's last exit reason in the database.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "There is no record of UIExtensionAbility's last exit reason in the database.");
         return;
     }
     targetRecord->SetLastExitReason(exitReason);
@@ -319,8 +321,10 @@ void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecor
 {
     CHECK_POINTER(abilityRecord);
     CHECK_POINTER(abilityRequest.sessionInfo);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Foreground ability: %{public}s, persistentId: %{public}d",
-        abilityRecord->GetURI().c_str(), abilityRequest.sessionInfo->persistentId);
+    auto abilitystateStr = abilityRecord->ConvertAbilityState(abilityRecord->GetAbilityState());
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "Foreground ability: %{public}s, persistentId: %{public}d, abilityState: %{public}s",
+        abilityRecord->GetURI().c_str(), abilityRequest.sessionInfo->persistentId, abilitystateStr.c_str());
     if (abilityRecord->IsReady() && !abilityRecord->IsAbilityState(AbilityState::INACTIVATING) &&
         !abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING) &&
         !abilityRecord->IsAbilityState(AbilityState::BACKGROUNDING) &&
@@ -1636,7 +1640,7 @@ void AbilityConnectManager::HandleStopTimeoutTask(const std::shared_ptr<AbilityR
     CHECK_POINTER(abilityRecord);
     if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         if (uiExtensionAbilityRecordMgr_ != nullptr && IsCallerValid(abilityRecord)) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Start terminate timeout.");
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "Start terminate timeout");
             uiExtensionAbilityRecordMgr_->TerminateTimeout(abilityRecord->GetUIExtensionAbilityId());
         }
         PrintTimeOutLog(abilityRecord, AbilityManagerService::TERMINATE_TIMEOUT_MSG);
@@ -1842,9 +1846,10 @@ void AbilityConnectManager::DoBackgroundAbilityWindow(const std::shared_ptr<Abil
 {
     CHECK_POINTER(abilityRecord);
     CHECK_POINTER(sessionInfo);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Background ability: %{public}s, persistentId: %{public}d",
-        abilityRecord->GetURI().c_str(), sessionInfo->persistentId);
-
+    auto abilitystateStr = abilityRecord->ConvertAbilityState(abilityRecord->GetAbilityState());
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "Background ability: %{public}s, persistentId: %{public}d, abilityState: %{public}s",
+        abilityRecord->GetURI().c_str(), sessionInfo->persistentId, abilitystateStr.c_str());
     if (abilityRecord->IsAbilityState(AbilityState::FOREGROUND)) {
         MoveToBackground(abilityRecord);
     } else if (abilityRecord->IsAbilityState(AbilityState::INITIAL) ||
@@ -1862,8 +1867,10 @@ void AbilityConnectManager::TerminateAbilityWindowLocked(const std::shared_ptr<A
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(abilityRecord);
     CHECK_POINTER(sessionInfo);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Terminate ability: %{public}s, persistentId: %{public}d",
-        abilityRecord->GetURI().c_str(), sessionInfo->persistentId);
+    auto abilitystateStr = abilityRecord->ConvertAbilityState(abilityRecord->GetAbilityState());
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "Terminate ability: %{public}s, persistentId: %{public}d, abilityState: %{public}s",
+        abilityRecord->GetURI().c_str(), sessionInfo->persistentId, abilitystateStr.c_str());
     EventInfo eventInfo;
     eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
     eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
@@ -2140,6 +2147,25 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
             return;
         }
     }
+
+    if (abilityRecord->IsSceneBoard()) {
+        static int sceneBoardCrashCount = 0;
+        static int64_t tickCount = GetTickCount();
+        int64_t tickNow = GetTickCount();
+        const int64_t maxTime = 240000; // 240000 4min
+        const int maxCount = 4; // 4: crash happend 4 times during 4 mins
+        if (tickNow - tickCount > maxTime) {
+            sceneBoardCrashCount = 0;
+            tickCount = tickNow;
+        }
+        ++sceneBoardCrashCount;
+        if (sceneBoardCrashCount >= maxCount) {
+            std::string reason = "SceneBoard exits " + std::to_string(sceneBoardCrashCount) +
+                "times in " + std::to_string(maxTime) + "ms";
+            DoRebootExt("panic", reason.c_str());
+        }
+    }
+
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsKilledForUpgradeWeb(abilityInfo.bundleName)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "bundle is killed for upgrade web");
         return;
@@ -2694,7 +2720,7 @@ void AbilityConnectManager::HandleForegroundTimeoutTask(const std::shared_ptr<Ab
     }
     if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
         uiExtensionAbilityRecordMgr_ != nullptr && IsCallerValid(abilityRecord)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Start foreground timeout.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "Start foreground timeout.");
         uiExtensionAbilityRecordMgr_->ForegroundTimeout(abilityRecord->GetUIExtensionAbilityId());
     }
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
