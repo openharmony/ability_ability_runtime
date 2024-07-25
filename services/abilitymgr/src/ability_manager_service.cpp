@@ -9039,11 +9039,9 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
     verificationInfo.visible = abilityRequest.abilityInfo.visible;
     verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     verificationInfo.isBackgroundCall = false;
-    if (isParamStartAbilityEnable_)
-    {
+    if (isParamStartAbilityEnable_) {
         bool stopContinuousTaskFlag = ShouldPreventStartAbility(abilityRequest);
-        if (stopContinuousTaskFlag)
-        {
+        if (stopContinuousTaskFlag) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension");
             return CHECK_PERMISSION_FAILED;
         }
@@ -10818,8 +10816,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         return false;
     }
     bool continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
-    if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIAbility(abilityRecord->GetPid()))
-    {
+    if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIAbility(abilityRecord->GetPid())) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has other extension except UIAbility, pass");
         return false;
     }
