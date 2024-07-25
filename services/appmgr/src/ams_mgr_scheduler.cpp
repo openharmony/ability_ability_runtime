@@ -674,7 +674,7 @@ bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
     }
     pid_t callingPid = IPCSkeleton::GetCallingPid();
     pid_t procPid = getprocpid();
-    if (callingPid != pid) {
+    if (callingPid != procPid) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
         return false;
     }
