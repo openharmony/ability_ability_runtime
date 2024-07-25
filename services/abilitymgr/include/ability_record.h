@@ -1209,7 +1209,6 @@ private:
     mutable ffrt::mutex dumpLock_;
     mutable ffrt::mutex resultLock_;
     mutable ffrt::mutex wantLock_;
-    mutable ffrt::mutex connectWantLock_;
     mutable ffrt::condition_variable dumpCondition_;
     mutable bool isDumpTimeout_ = false;
     std::vector<std::string> dumpInfos_;
@@ -1248,6 +1247,7 @@ private:
     uint32_t specifyTokenId_ = 0;
 
     std::shared_ptr<Want> connectWant_ = nullptr;
+    ffrt::mutex connectWantLock_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
