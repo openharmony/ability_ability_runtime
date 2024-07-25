@@ -9047,7 +9047,6 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension");
             return CHECK_PERMISSION_FAILED;
         }
-        
     }
     
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
@@ -10810,73 +10809,82 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGI(AAFwkTag::ABILITYMGR, "No matched token pass");
         return false;
     }
+    auto abilityInfo = abilityRequest.abilityInfo;
+    auto callerAbilityInfo = abilityRecord->GetAbilityInfo();
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "calledAbilityInfo toString: "
+                "calledUid is: %{public}d, "
+                "name is: %{public}s, "
+                "bundleName is: %{public}s, "
+                "type is: %{public}d, "
+                "extensionAbilityType is: %{public}d, "
+                "moduleName is: %{public}s, "
+                "applicationName is: %{public}s",
+                abilityInfo.applicationInfo.uid,
+                abilityInfo.name.c_str(),
+                abilityInfo.bundleName.c_str(),
+                static_cast<int32_t>(abilityInfo.type),
+                static_cast<int32_t>(abilityInfo.extensionAbilityType),
+                abilityInfo.moduleName.c_str(),
+                abilityInfo.applicationName.c_str());
+    
+    pid_t callerPid = abilityRecord->GetPid();
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityInfo toString: "
+                "callerUid is: %{public}d, "
+                "callerPid is: %{public}d, "
+                "name is: %{public}s, "
+                "bundleName is: %{public}s, "
+                "type is: %{public}d, "
+                "extensionAbilityType is: %{public}d, "
+                "moduleName is: %{public}s, "
+                "applicationName is: %{public}s", 
+                IPCSkeleton::GetCallingUid(),
+                callerPid,
+                callerAbilityInfo.name.c_str(),
+                callerAbilityInfo.bundleName.c_str(),
+                static_cast<int32_t>(callerAbilityInfo.type),
+                static_cast<int32_t>(callerAbilityInfo.extensionAbilityType),
+                callerAbilityInfo.moduleName.c_str(),
+                callerAbilityInfo.applicationName.c_str());
+    
     if (abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD < API12) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "API version %{public}d pass",
             abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
         return false;
     }
-    auto abilityInfo = abilityRequest.abilityInfo;
-    auto callerAbilityInfo = abilityRecord->GetAbilityInfo();
+    
     bool continuousFlag = false;
     continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: abilityInfo toString: "
-                "name is: %{public}s, "
-                "bundleName is: %{public}s, "
-                "type is: %{public}d, "
-                "extensionAbilityType is: %{public}d, "
-                "moduleName is: %{public}s, "
-                "applicationName is: %{public}s", 
-            abilityInfo.name.c_str(),
-            abilityInfo.bundleName.c_str(),
-            static_cast<int32_t>(abilityInfo.type),
-            static_cast<int32_t>(abilityInfo.extensionAbilityType),
-            abilityInfo.moduleName.c_str(),
-            abilityInfo.applicationName.c_str());
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: callerAbilityInfo toString: "
-                "name is: %{public}s, "
-                "bundleName is: %{public}s, "
-                "type is: %{public}d, "
-                "extensionAbilityType is: %{public}d, "
-                "moduleName is: %{public}s, "
-                "applicationName is: %{public}s", 
-            callerAbilityInfo.name.c_str(),
-            callerAbilityInfo.bundleName.c_str(),
-            static_cast<int32_t>(callerAbilityInfo.type),
-            static_cast<int32_t>(callerAbilityInfo.extensionAbilityType),
-            callerAbilityInfo.moduleName.c_str(),
-            callerAbilityInfo.applicationName.c_str());
-    pid_t callerPid = abilityRecord->GetPid();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: callerPid is: %{public}d", callerPid);
     
     if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIExtension(callerPid))
     {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process has other extension except UIAbility, pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has other extension except UIAbility, pass");
         return false;
     }
     if (abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process did not call service or datashare extension Pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process did not call service or datashare extension Pass");
         return false;
     }
     if (abilityInfo.applicationInfo.uid == IPCSkeleton::GetCallingUid()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process is in same bundle Pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is in same bundle Pass");
         return false;
     }
     if (callerAbilityInfo.type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
         return false;
     }
     if (abilityRecord->GetAbilityState() != AAFwk::AbilityState::BACKGROUND) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
         return false;
     }
     if (continuousFlag) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process has continuous task Pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has continuous task Pass");
         return false;
     }
     if (IsInWhiteList(callerAbilityInfo.bundleName, abilityInfo.bundleName, abilityInfo.name)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process is in white list Pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is in white list Pass");
         return false;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.",

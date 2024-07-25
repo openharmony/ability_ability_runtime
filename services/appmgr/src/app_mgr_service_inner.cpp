@@ -7195,7 +7195,6 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
 }
 bool AppMgrServiceInner::IsProcessContainsOnlyUIExtension(const pid_t pid)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: call IsProcessContainsOnlyUIExtension in app_mgr_service_inner");
     auto appRecord = GetAppRunningRecordByPid(pid);
     auto abilityRecordList = appRecord->GetAbilities();
 
@@ -7203,15 +7202,6 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIExtension(const pid_t pid)
     {
         auto abilityInfo = it->second->GetAbilityInfo();
         bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: abilityInfo toString: "
-                "name is: %{public}s, "
-                "type is: %{public}d, "
-                "isStageBasedModel is: %{public}d, "
-                "isUIAbility is: %{public}d", 
-            abilityInfo->name.c_str(),
-            static_cast<int32_t>(abilityInfo->type),
-            abilityInfo->isStageBasedModel,
-            isUIAbility);
         if (!isUIAbility)
         {
             return false;
