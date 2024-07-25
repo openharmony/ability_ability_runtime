@@ -152,7 +152,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         uint32_t specifyTokenId,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE);
+        int requestCode = DEFAULT_INVAL_VALUE, bool isPendingWantCaller = false);
 
     /**
      * Starts a new ability with specific start options and specialId, send want to ability manager service.
@@ -171,7 +171,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        uint32_t specifyTokenId = 0);
+        uint32_t specifyTokenId = 0, bool isPendingWantCaller = false);
 
     /**
      * StartAbilityWithSpecifyTokenId with want and specialId, send want to ability manager service.
@@ -857,7 +857,9 @@ public:
 
     virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
 
+#ifdef WITH_DLP
     virtual int GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos) override;
+#endif // WITH_DLP
 
     virtual int GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &connectionData) override;
 
@@ -961,7 +963,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false);
+        bool isImplicit = false, bool isPendingWantCaller = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -971,7 +973,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false);
+        bool isImplicit = false, bool isPendingWantCaller = false);
 
     int StartExtensionAbilityInner(
         const Want &want,
@@ -996,7 +998,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t callerTokenId = 0,
         bool isImplicit = false,
-        bool isCallByShortcut = false);
+        bool isCallByShortcut = false, bool isPendingWantCaller = false);
 
     int StartAbilityForOptionInner(
         const Want &want,
@@ -1007,7 +1009,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isImplicit = false,
-        bool isCallByShortcut = false);
+        bool isCallByShortcut = false, bool isPendingWantCaller = false);
 
     int ImplicitStartAbility(
         const Want &want,
@@ -2093,9 +2095,11 @@ private:
 
     AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
 
+#ifdef WITH_DLP
     int CheckDlpForExtension(
         const Want &want, const sptr<IRemoteObject> &callerToken,
         int32_t userId, AAFwk::EventInfo &eventInfo, const EventName &eventName);
+#endif // WITH_DLP
 
     void InitStartupFlag();
 
@@ -2188,7 +2192,7 @@ private:
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
         int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
-        bool isCallByShortcut = false);
+        bool isCallByShortcut = false, bool isPendingWantCaller = false);
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
