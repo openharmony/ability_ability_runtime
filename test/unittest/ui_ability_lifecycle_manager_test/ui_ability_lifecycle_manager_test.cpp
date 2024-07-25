@@ -38,7 +38,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AAFwk {
 namespace {
+#ifdef WITH_DLP
 const std::string DLP_INDEX = "ohos.dlp.params.index";
+#endif // WITH_DLP
 constexpr int32_t TEST_UID = 20010001;
 };
 class UIAbilityLifecycleManagerTest : public testing::Test {
@@ -2295,6 +2297,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_001, TestSize.Level
     uiAbilityLifecycleManager.reset();
 }
 
+#ifdef WITH_DLP
 /**
  * @tc.name: UIAbilityLifecycleManager_OnAcceptWantResponse_0200
  * @tc.desc: OnAcceptWantResponse
@@ -2335,6 +2338,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_002, TestSize.Level
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
     uiAbilityLifecycleManager.reset();
 }
+#endif // WITH_DLP
 
 /**
  * @tc.name: UIAbilityLifecycleManager_StartSpecifiedAbilityBySCB_0100
@@ -2887,6 +2891,26 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetActiveAbilityList_002, TestSize.Level
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_IsAbilityStarted_0100
+ * @tc.desc: IsAbilityStarted
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, IsAbilityStarted_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->persistentId = 0;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, targetRecord);
+    EXPECT_EQ(uiAbilityLifecycleManager->IsAbilityStarted(abilityRequest, targetRecord), false);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_PrepareTerminateAbility_0100
  * @tc.desc: PrepareTerminateAbility
  * @tc.type: FUNC
@@ -3262,26 +3286,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MoveMissionToFront_004, TestSize.Level1)
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionId, abilityRecord);
     EXPECT_EQ(uiAbilityLifecycleManager->MoveMissionToFront(sessionId, startOptions), ERR_OK);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_IsAbilityStarted_0100
- * @tc.desc: IsAbilityStarted
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, IsAbilityStarted_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->sessionToken = new Rosen::Session(info);
-    sessionInfo->persistentId = 0;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, targetRecord);
-    EXPECT_EQ(uiAbilityLifecycleManager->IsAbilityStarted(abilityRequest, targetRecord), false);
 }
 
 /**
@@ -3875,6 +3879,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, DispatchBackground_002, TestSize.Level1)
     EXPECT_EQ(uiAbilityLifecycleManager->DispatchBackground(abilityRecord), ERR_INVALID_VALUE);
 }
 
+#ifdef WITH_DLP
 /**
  * @tc.name: UIAbilityLifecycleManager_CheckProperties_0100
  * @tc.desc: CheckProperties
@@ -3946,6 +3951,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CheckProperties_003, TestSize.Level1)
     auto ret = uiAbilityLifecycleManager->CheckProperties(abilityRecord, abilityRequest, launchMode);
     EXPECT_EQ(ret, true);
 }
+#endif // WITH_DLP
 
 /**
  * @tc.name: UIAbilityLifecycleManager_ResolveAbility_0100

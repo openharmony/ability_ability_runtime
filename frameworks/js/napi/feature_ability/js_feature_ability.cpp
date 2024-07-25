@@ -28,7 +28,7 @@ const std::string RESULT_DATA_TAG = "resultData";
 
 void JsFeatureAbility::Finalizer(napi_env env, void* data, void* hint)
 {
-    TAG_LOGI(AAFwkTag::FA, "called");
+    TAG_LOGI(AAFwkTag::FA, "finalizer called");
     std::unique_ptr<JsFeatureAbility>(static_cast<JsFeatureAbility*>(data));
 }
 
@@ -97,7 +97,7 @@ napi_value JsFeatureAbility::OnStartAbility(napi_env env, NapiCallbackInfo& info
 
     Ability* ability = GetAbility(env);
     if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability is null");
+        TAG_LOGE(AAFwkTag::FA, "ability null");
         return CreateJsUndefined(env);
     }
 
@@ -130,7 +130,7 @@ napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackI
     }
     Ability* ability = GetAbility(env);
     if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "ability null");
         return CreateJsUndefined(env);
     }
 
@@ -281,8 +281,7 @@ Ability* JsFeatureAbility::GetAbility(napi_env env)
     ret = napi_get_global(env, &global);
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGE(AAFwkTag::FA, "get_global=%{public}d err:%{public}s",
-            ret, errorInfo->error_message);
+        TAG_LOGE(AAFwkTag::FA, "get_global=%{public}d err:%{public}s", ret, errorInfo->error_message);
         return nullptr;
     }
 
@@ -392,7 +391,7 @@ bool JsFeatureAbility::UnWrapRequestParams(napi_env env, napi_value param, Distr
     TAG_LOGI(AAFwkTag::FA, "called");
 
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGI(AAFwkTag::FA, "Params is invalid");
+        TAG_LOGI(AAFwkTag::FA, "invalid params");
         return false;
     }
 
@@ -489,7 +488,7 @@ napi_value JsFeatureAbilityInit(napi_env env, napi_value exports)
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "env nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null env");
         return nullptr;
     }
 

@@ -186,7 +186,7 @@ napi_value NAPI_Insert(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperInsertCB *insertCB = new (std::nothrow) DAHelperInsertCB;
     if (insertCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "insertCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null insertCB");
         return WrapVoidToJS(env);
     }
     insertCB->cbBase.cbInfo.env = env;
@@ -201,6 +201,7 @@ napi_value NAPI_Insert(napi_env env, napi_callback_info info)
         insertCB = nullptr;
         ret = WrapVoidToJS(env);
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -224,7 +225,7 @@ napi_value InsertWrap(napi_env env, napi_callback_info info, DAHelperInsertCB *i
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong parameter count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -234,7 +235,7 @@ napi_value InsertWrap(napi_env env, napi_callback_info info, DAHelperInsertCB *i
         insertCB->uri = NapiValueToStringUtf8(env, args[PARAM0]);
         TAG_LOGI(AAFwkTag::FA, "uri=%{public}s", insertCB->uri.c_str());
     } else {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument type");
+        TAG_LOGE(AAFwkTag::FA, "wrong argument type");
     }
 
     insertCB->valueBucket.Clear();
@@ -246,6 +247,7 @@ napi_value InsertWrap(napi_env env, napi_callback_info info, DAHelperInsertCB *i
     } else {
         ret = InsertPromise(env, insertCB);
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -327,15 +329,16 @@ napi_value UnwrapValuesBucket(std::string &value, napi_env env, napi_value args)
 
     std::string strValue = "";
     if (UnwrapStringByPropertyName(env, args, "value", strValue)) {
-        TAG_LOGE(AAFwkTag::FA, "strValue=%{private}s", strValue.c_str());
+        TAG_LOGI(AAFwkTag::FA, "strValue=%{private}s", strValue.c_str());
         value = strValue;
     } else {
-        TAG_LOGE(AAFwkTag::FA, "value == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "invalid value");
         return nullptr;
     }
 
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
@@ -363,6 +366,7 @@ napi_value NAPI_NotifyChange(napi_env env, napi_callback_info info)
         notifyChangeCB = nullptr;
         ret = WrapVoidToJS(env);
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -386,7 +390,7 @@ napi_value NotifyChangeWrap(napi_env env, napi_callback_info info, DAHelperNotif
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong parameter count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -425,11 +429,12 @@ napi_value NAPI_Register(napi_env env, napi_callback_info info)
 
     napi_value ret = RegisterWrap(env, info, onCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete onCB;
         onCB = nullptr;
         ret = WrapVoidToJS(env);
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -443,7 +448,7 @@ napi_value NAPI_Register(napi_env env, napi_callback_info info)
  */
 napi_value RegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB *onCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "start");
+    TAG_LOGI(AAFwkTag::FA, "called");
     size_t argcAsync = ARGS_THREE;
     const size_t argcPromise = ARGS_TWO;
     const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
@@ -453,7 +458,7 @@ napi_value RegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB *
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong parameter count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -463,13 +468,13 @@ napi_value RegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB *
     if (valuetype == napi_string) {
         std::string type = NapiValueToStringUtf8(env, args[PARAM0]);
         if (type == "dataChange") {
-            TAG_LOGI(AAFwkTag::FA, "Right type=%{public}s", type.c_str());
+            TAG_LOGI(AAFwkTag::FA, "type:%{public}s", type.c_str());
         } else {
-            TAG_LOGE(AAFwkTag::FA, "Wrong argument type is %{public}s", type.c_str());
+            TAG_LOGE(AAFwkTag::FA, "error type: %{public}s", type.c_str());
             onCB->result = INVALID_PARAMETER;
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument type");
+        TAG_LOGE(AAFwkTag::FA, "wrong type");
         onCB->result = INVALID_PARAMETER;
     }
 
@@ -478,7 +483,7 @@ napi_value RegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB *
         onCB->uri = NapiValueToStringUtf8(env, args[PARAM1]);
         TAG_LOGI(AAFwkTag::FA, "uri=%{public}s", onCB->uri.c_str());
     } else {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument type");
+        TAG_LOGE(AAFwkTag::FA, "wrong type");
         onCB->result = INVALID_PARAMETER;
     }
     GetDataAbilityHelper(env, thisVar, onCB->dataAbilityHelper);
@@ -490,9 +495,9 @@ napi_value RegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB *
 napi_value RegisterAsync(
     napi_env env, napi_value *args, size_t argcAsync, const size_t argcPromise, DAHelperOnOffCB *onCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (args == nullptr || onCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -539,7 +544,7 @@ void RegisterExecuteCB(napi_env env, void *data)
     auto onCBIter = std::find(g_registerInstances.begin(), g_registerInstances.end(), onCB);
     if (onCBIter == g_registerInstances.end()) {
         // onCB is invalid or onCB has been delete
-        TAG_LOGE(AAFwkTag::FA, "input params onCB is invalid");
+        TAG_LOGE(AAFwkTag::FA, "invalid onCB");
         return;
     }
 
@@ -549,7 +554,7 @@ void RegisterExecuteCB(napi_env env, void *data)
             OHOS::Uri uri(onCB->uri);
             dataAbilityHelper->RegisterObserver(uri, onCB->observer);
         } else {
-            TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper uri is empty or callback is nullptr");
+            TAG_LOGE(AAFwkTag::FA, "empty uri or null callback");
         }
     }
 }
@@ -559,14 +564,14 @@ void RegisterCompleteCB(napi_env env, napi_status status, void *data)
     TAG_LOGI(AAFwkTag::FA, "main event thread complete");
     DAHelperOnOffCB *onCB = static_cast<DAHelperOnOffCB *>(data);
     if (onCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "input params onCB is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null onCB");
         return;
     }
 
     auto onCBIter = std::find(g_registerInstances.begin(), g_registerInstances.end(), onCB);
     if (onCBIter == g_registerInstances.end()) {
         // onCB is invalid or onCB has been delete
-        TAG_LOGE(AAFwkTag::FA, "input params onCB is invalid");
+        TAG_LOGE(AAFwkTag::FA, "invalid onCB");
         return;
     }
 
@@ -596,11 +601,12 @@ napi_value NAPI_UnRegister(napi_env env, napi_callback_info info)
 
     napi_value ret = UnRegisterWrap(env, info, offCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete offCB;
         offCB = nullptr;
         ret = WrapVoidToJS(env);
     }
+    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -623,7 +629,7 @@ napi_value UnRegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -639,7 +645,7 @@ napi_value UnRegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB
             offCB->result = INVALID_PARAMETER;
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument type");
+        TAG_LOGE(AAFwkTag::FA, "wrong argument type");
         offCB->result = INVALID_PARAMETER;
     }
 
