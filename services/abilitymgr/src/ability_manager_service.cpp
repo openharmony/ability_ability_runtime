@@ -10817,10 +10817,8 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
             abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
         return false;
     }
-    bool continuousFlag = false;
-    continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
-    pid_t callerPid = abilityRecord->GetPid();
-    if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIExtension(callerPid))
+    bool continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
+    if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIExtension(abilityRecord->GetPid()))
     {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has other extension except UIAbility, pass");
         return false;
