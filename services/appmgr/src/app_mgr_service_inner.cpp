@@ -7196,11 +7196,25 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
 bool AppMgrServiceInner::IsProcessContainsOnlyUIExtension(const pid_t pid)
 {
     auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr)
+    {
+        return false;
+    }
+    
     auto abilityRecordList = appRecord->GetAbilities();
 
     for (auto it = abilityRecordList.begin(); it != abilityRecordList.end(); ++it)
     {
+        if (it->second == nullptr)
+        {
+            return false;
+        }
         auto abilityInfo = it->second->GetAbilityInfo();
+        if (abilityInfo == nullptr)
+        {
+            return false;
+        }
+        
         bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel);
         if (!isUIAbility)
         {
