@@ -54,6 +54,15 @@ AppRunningManager::AppRunningManager()
 AppRunningManager::~AppRunningManager()
 {}
 
+void AppRunningManager::initConfig(const Configuration &config)
+{
+    std::vector<std::string> changeKeyV;
+    configuration_->CompareDifferent(changeKeyV, config);
+    if (!changeKeyV.empty()) {
+        configuration_->Merge(changeKeyV, config);
+    }
+}
+
 std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo)
 {
