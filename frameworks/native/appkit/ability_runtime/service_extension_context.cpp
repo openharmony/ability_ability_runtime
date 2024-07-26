@@ -243,6 +243,15 @@ AppExecFwk::AbilityType ServiceExtensionContext::GetAbilityInfoType() const
     return info->type;
 }
 
+ErrCode ServiceExtensionContext::AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
+{
+    ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(token_, observer);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "AddFreeInstallObserver error, ret: %{public}d", ret);
+    }
+    return ret;
+}
+
 ErrCode ServiceExtensionContext::PreStartMission(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, const std::string& startTime)
 {
@@ -252,15 +261,6 @@ ErrCode ServiceExtensionContext::PreStartMission(const std::string& bundleName, 
         TAG_LOGE(AAFwkTag::APPKIT, "PreStartMission is failed %{public}d", err);
     }
     return err;
-}
-
-ErrCode ServiceExtensionContext::AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
-{
-    ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(token_, observer);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ret: %{public}d", ret);
-    }
-    return ret;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
