@@ -268,6 +268,20 @@ std::string ContextImpl::GetTempDir()
     return dir;
 }
 
+std::string ContextImpl::GetResourceDir()
+{
+    std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfoPtr = GetHapModuleInfo();
+    if (hapModuleInfoPtr == nullptr || hapModuleInfoPtr->moduleName.empty()) {
+        return "";
+    }
+    std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR +
+                      hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
+    if (OHOS::FileExists(dir)) {
+        return dir;
+    }
+    return "";
+}
+
 void ContextImpl::GetAllTempDir(std::vector<std::string> &tempPaths)
 {
     // Application temp dir
@@ -291,26 +305,12 @@ void ContextImpl::GetAllTempDir(std::vector<std::string> &tempPaths)
     for (const auto &moudleItem: applicationInfo_->moduleInfos) {
         auto moudleTemp = baseDir + CONTEXT_HAPS + CONTEXT_FILE_SEPARATOR + moudleItem.moduleName + CONTEXT_TEMP;
         if (!OHOS::FileExists(moudleTemp)) {
-            TAG_LOGW(AAFwkTag::APPKIT, "moudle[%{public}s] temp path not exists,path is %{public}s",
+            TAG_LOGW(AAFwkTag::APPKIT, "moudle[%{public}s] temp path not exist,path: %{public}s",
                 moudleItem.moduleName.c_str(), moudleTemp.c_str());
             continue;
         }
         tempPaths.push_back(moudleTemp);
     }
-}
-
-std::string ContextImpl::GetResourceDir()
-{
-    std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfoPtr = GetHapModuleInfo();
-    if (hapModuleInfoPtr == nullptr || hapModuleInfoPtr->moduleName.empty()) {
-        return "";
-    }
-    std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR +
-        hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
-    if (OHOS::FileExists(dir)) {
-        return dir;
-    }
-    return "";
 }
 
 std::string ContextImpl::GetFilesDir()
@@ -805,10 +805,26 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitResourceMana
 
                 TAG_LOGD(AAFwkTag::APPKIT, "loadPath: %{public}s", loadPath.c_str());
                 GetOverlayPath(resourceManager, bundleInfo.name, hapModuleInfo.moduleName, loadPath, currentBundle);
+                AddPatchResource(resourceManager, loadPath, hapModuleInfo.hqfInfo.hqfFilePath,
+                    bundleInfo.applicationInfo.debug);
             }
         }
     }
     return resourceManager;
+}
+
+void ContextImpl::AddPatchResource(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
+    const std::string &loadPath, const std::string &hqfPath, bool isDebug)
+{
+    std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + GetBundleName());
+    if (!hqfPath.empty() && isDebug) {
+        std::string realHqfPath = std::regex_replace(hqfPath, pattern, LOCAL_CODE_PATH);
+        TAG_LOGI(AAFwkTag::APPKIT, "AddPatchResource hapPath:%{public}s, patchPath:%{public}s",
+            loadPath.c_str(), realHqfPath.c_str());
+        if (!resourceManager->AddPatchResource(loadPath.c_str(), realHqfPath.c_str())) {
+            TAG_LOGE(AAFwkTag::APPKIT, "AddPatchResource failed");
+        }
+    }
 }
 
 void ContextImpl::GetOverlayPath(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,

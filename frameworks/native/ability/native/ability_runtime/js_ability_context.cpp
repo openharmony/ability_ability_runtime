@@ -178,7 +178,7 @@ void StartAbilityByCallComplete(napi_env env, NapiAsyncTask& task, std::weak_ptr
     if (calldata->err != 0) {
         TAG_LOGE(AAFwkTag::CONTEXT, "OnStartAbilityByCall callComplete err is %{public}d", calldata->err);
         task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-        TAG_LOGD(AAFwkTag::CONTEXT, "clear failed call of startup is called.");
+        TAG_LOGD(AAFwkTag::CONTEXT, "clear failed call of startup is called");
         auto context = abilityContext.lock();
         if (context == nullptr || callerCallBack == nullptr) {
             TAG_LOGE(AAFwkTag::CONTEXT, "clear failed call of startup input param is nullptr.");
@@ -377,7 +377,7 @@ napi_value JsAbilityContext::DisconnectUIServiceExtension(napi_env env, napi_cal
 void JsAbilityContext::ClearFailedCallConnection(
     const std::weak_ptr<AbilityContext>& abilityContext, const std::shared_ptr<CallerCallBack> &callback)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "clear failed call of startup is called.");
+    TAG_LOGD(AAFwkTag::CONTEXT, "clear failed call of startup is called");
     auto context = abilityContext.lock();
     if (context == nullptr || callback == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "clear failed call of startup input param is nullptr.");
@@ -512,7 +512,7 @@ napi_value JsAbilityContext::OnStartUIServiceExtension(napi_env env, NapiCallbac
 bool JsAbilityContext::UnwrapConnectUIServiceExtensionParam(napi_env env, NapiCallbackInfo& info, AAFwk::Want& want)
 {
     if (info.argc < ARGC_TWO) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed, not enough params.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "invalid argc");
         ThrowTooFewParametersError(env);
         return false;
     }
@@ -576,7 +576,7 @@ napi_value JsAbilityContext::OnConnectUIServiceExtension(napi_env env, NapiCallb
     }
 
     sptr<JSUIServiceExtAbilityConnection> connection = sptr<JSUIServiceExtAbilityConnection>::MakeSptr(env);
-    sptr<UIAbilityServiceHostStubImpl>& stub = connection->GetServiceHostStub();
+    sptr<UIAbilityServiceHostStubImpl> stub = connection->GetServiceHostStub();
     want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
 
     result = nullptr;
@@ -628,7 +628,7 @@ void JsAbilityContext::DoConnectUIServiceExtension(napi_env env,
 napi_value JsAbilityContext::OnDisconnectUIServiceExtension(napi_env env, NapiCallbackInfo& info)
 {
     if (info.argc < ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed, not enough params.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "invalid argc");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -700,10 +700,9 @@ bool JsAbilityContext::CreateOpenLinkTask(const napi_env &env, const napi_value 
             TAG_LOGW(AAFwkTag::CONTEXT, "wrap abilityResult error");
             asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             return;
-        } else {
-            isInner ? asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode)) :
-                asyncTask->ResolveWithNoError(env, abilityResult);
         }
+        isInner ? asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode)) :
+            asyncTask->ResolveWithNoError(env, abilityResult);
     };
     curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
     requestCode = curRequestCode_;
@@ -1003,7 +1002,7 @@ bool JsAbilityContext::CheckStartAbilityByCallParams(napi_env env, NapiCallbackI
 
 napi_value JsAbilityContext::OnStartAbilityByCall(napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "JsAbilityContext::%{public}s, called", __func__);
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
     // 1. check params
     napi_value lastParam = nullptr;
     int32_t userId = DEFAULT_INVAL_VALUE;
@@ -1382,7 +1381,7 @@ napi_value JsAbilityContext::OnTerminateSelfWithResult(napi_env env, NapiCallbac
     int resultCode = 0;
     AAFwk::Want want;
     if (!AppExecFwk::UnWrapAbilityResult(env, info.argv[INDEX_ZERO], resultCode, want)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "%s Failed to parse ability result!", __func__);
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed to parse ability result");
         ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return CreateJsUndefined(env);
     }
@@ -1414,7 +1413,7 @@ napi_value JsAbilityContext::OnTerminateSelfWithResult(napi_env env, NapiCallbac
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnTerminateSelfWithResult",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    TAG_LOGD(AAFwkTag::CONTEXT, "OnTerminateSelfWithResult is called end");
+    TAG_LOGD(AAFwkTag::CONTEXT, "end");
     return result;
 }
 
@@ -1423,7 +1422,7 @@ napi_value JsAbilityContext::OnConnectAbility(napi_env env, NapiCallbackInfo& in
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // only support two params
     if (info.argc < ARGC_TWO) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Connect ability failed, not enough params.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid argc");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -1686,7 +1685,7 @@ napi_value JsAbilityContext::OnIsTerminating(napi_env env, NapiCallbackInfo& inf
 
 napi_value JsAbilityContext::OnReportDrawnCompleted(napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "called.");
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
     auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute = [weak = context_, innerErrorCode]() {
         auto context = weak.lock();
@@ -1790,7 +1789,6 @@ void JsAbilityContext::AddFreeInstallObserver(napi_env env, const AAFwk::Want &w
 
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "AddFreeInstallObserver error.");
-        return;
     }
     std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
     if (!isOpenLink) {
@@ -1903,11 +1901,13 @@ void JSAbilityConnection::ReleaseNativeReference(NativeReference* ref)
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ReleaseNativeReference: failed to get uv loop.");
+        delete ref;
         return;
     }
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ReleaseNativeReference: failed to create work.");
+        delete ref;
         return;
     }
     work->data = reinterpret_cast<void *>(ref);

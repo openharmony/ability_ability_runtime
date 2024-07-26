@@ -43,11 +43,9 @@ namespace {
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
-constexpr int32_t INDEX_THREE = 3;
 constexpr int32_t ERROR_CODE_ONE = 1;
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
-constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 
 class JSUIServiceExtensionContext final {
@@ -84,7 +82,7 @@ private:
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::UISERVC_EXT, "Call");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::UISERVC_EXT, "Start ability failed, not enough params.");
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }

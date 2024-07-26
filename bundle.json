@@ -26,7 +26,8 @@
         "ability_runtime_auto_fill_ability",
         "ability_runtime_graphics",
         "ability_runtime_power",
-        "ability_runtime_app_no_response_dialog"
+        "ability_runtime_app_no_response_dialog",
+        "ability_runtime_app_no_response_bundlename"
       ],
       "adapted_system_type": [
           "standard"
@@ -43,6 +44,7 @@
             "access_token",
             "ace_engine",
             "app_domain_verify",
+            "app_file_service",
             "appspawn",
             "background_task_mgr",
             "bundle_framework",
@@ -56,6 +58,7 @@
             "ets_runtime",
             "ets_utils",
             "faultloggerd",
+            "app_file_service",
             "ffrt",
             "form_fwk",
             "graphic_2d",
@@ -87,6 +90,7 @@
             "resource_schedule_service",
             "safwk",
             "samgr",
+            "sandbox_manager",
             "screenlock_mgr",
             "storage_service",
             "toolchain",
@@ -469,6 +473,7 @@
           "//foundation/ability/ability_runtime/tools/test:moduletest",
           "//foundation/ability/ability_runtime/tools/test:systemtest",
           "//foundation/ability/ability_runtime/tools/test:unittest",
+          "//foundation/ability/ability_runtime/cj_environment/test/unittest:unittest",
           "//foundation/ability/ability_runtime/js_environment/test/unittest:unittest",
           "//foundation/ability/ability_runtime/service_router_framework:test_target"
         ]

@@ -190,6 +190,10 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
             return HandleBlockProcessCacheByPids(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB):
             return HandleIsKilledForUpgradeWeb(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION):
+            return HandleIsProcessContainsOnlyUIAbility(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION):
+            return HandleForceKillApplication(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -362,6 +366,21 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
     return NO_ERROR;
 }
 
+ErrCode AmsMgrStub::HandleForceKillApplication(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::string bundleName = data.ReadString();
+    int userId = data.ReadInt32();
+    int appIndex = data.ReadInt32();
+
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s,userId=%{public}d,appIndex=%{public}d",
+        bundleName.c_str(), userId, appIndex);
+
+    int32_t result = ForceKillApplication(bundleName, userId, appIndex);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 ErrCode AmsMgrStub::HandleKillApplicationByUid(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
@@ -475,7 +494,7 @@ int32_t AmsMgrStub::HandleGetApplicationInfoByProcessID(MessageParcel &data, Mes
 
 int32_t AmsMgrStub::HandleNotifyAppMgrRecordExitReason(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "HandleNotifyAppMgrRecordExitReason called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     int32_t pid = data.ReadInt32();
     int32_t reason = data.ReadInt32();
     std::string exitMsg = Str16ToStr8(data.ReadString16());
@@ -762,6 +781,18 @@ int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParc
     auto result = IsKilledForUpgradeWeb(bundleName);
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply)
+{
+    auto pid = data.ReadUint32();
+
+    auto result = IsProcessContainsOnlyUIAbility(pid);
+    if (!reply.WriteBool(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result in HandleIsProcessContainsOnlyUIAbility.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

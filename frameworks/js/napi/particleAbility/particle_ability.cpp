@@ -40,7 +40,7 @@ namespace AppExecFwk {
  */
 napi_value NAPI_PAGetAppType(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetAppTypeCommon(env, info, AbilityType::UNKNOWN);
 }
 
@@ -54,7 +54,7 @@ napi_value NAPI_PAGetAppType(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_PAGetAbilityInfo(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetAbilityInfoCommon(env, info, AbilityType::UNKNOWN);
 }
 
@@ -68,7 +68,7 @@ napi_value NAPI_PAGetAbilityInfo(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_PAGetHapModuleInfo(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetHapModuleInfoCommon(env, info, AbilityType::UNKNOWN);
 }
 
@@ -82,7 +82,7 @@ napi_value NAPI_PAGetHapModuleInfo(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_PAGetContext(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetContextCommon(env, info, AbilityType::UNKNOWN);
 }
 
@@ -96,7 +96,7 @@ napi_value NAPI_PAGetContext(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_PAGetWant(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetWantCommon(env, info, AbilityType::UNKNOWN);
 }
 
@@ -110,7 +110,7 @@ napi_value NAPI_PAGetWant(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_PAGetAbilityName(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_GetAbilityNameCommon(env, info, AbilityType::UNKNOWN);
 }
 
@@ -124,7 +124,7 @@ napi_value NAPI_PAGetAbilityName(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_PAStopAbility(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_StopAbilityCommon(env, info, AbilityType::UNKNOWN);
 }
 
@@ -138,7 +138,7 @@ napi_value NAPI_PAStopAbility(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_PAAcquireDataAbilityHelper(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s,called", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_AcquireDataAbilityHelperCommon(env, info, AbilityType::UNKNOWN);
 }
 
@@ -152,7 +152,7 @@ napi_value NAPI_PAAcquireDataAbilityHelper(napi_env env, napi_callback_info info
  */
 napi_value NAPI_PAStartBackgroundRunning(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s,called", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_StartBackgroundRunningCommon(env, info);
 }
 
@@ -166,7 +166,7 @@ napi_value NAPI_PAStartBackgroundRunning(napi_env env, napi_callback_info info)
  */
 napi_value NAPI_PACancelBackgroundRunning(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s,called", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     return NAPI_CancelBackgroundRunningCommon(env, info);
 }
 
@@ -180,7 +180,7 @@ napi_value NAPI_PACancelBackgroundRunning(napi_env env, napi_callback_info info)
  */
 napi_value ParticleAbilityInit(napi_env env, napi_value exports)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("getAppType", NAPI_PAGetAppType),
         DECLARE_NAPI_FUNCTION("getAbilityInfo", NAPI_PAGetAbilityInfo),
@@ -200,7 +200,7 @@ napi_value ParticleAbilityInit(napi_env env, napi_value exports)
 
 void JsParticleAbility::Finalizer(napi_env env, void *data, void *hint)
 {
-    TAG_LOGI(AAFwkTag::FA, "JsParticleAbility::Finalizer is called");
+    TAG_LOGI(AAFwkTag::FA, "finalizer called");
     std::unique_ptr<JsParticleAbility>(static_cast<JsParticleAbility*>(data));
 }
 
@@ -235,7 +235,7 @@ Ability* JsParticleAbility::GetAbility(napi_env env)
     ret = napi_get_global(env, &global);
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGE(AAFwkTag::FA, "JsParticleAbility::GetAbility, get_global=%{public}d err:%{public}s",
+        TAG_LOGE(AAFwkTag::FA, "get_global=%{public}d err:%{public}s",
             ret, errorInfo->error_message);
         return nullptr;
     }
@@ -243,7 +243,7 @@ Ability* JsParticleAbility::GetAbility(napi_env env)
     ret = napi_get_named_property(env, global, "ability", &abilityObj);
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGE(AAFwkTag::FA, "JsParticleAbility::GetAbility, get_named_property=%{public}d err:%{public}s",
+        TAG_LOGE(AAFwkTag::FA, "get_named_property=%{public}d err:%{public}s",
             ret, errorInfo->error_message);
         return nullptr;
     }
@@ -251,7 +251,7 @@ Ability* JsParticleAbility::GetAbility(napi_env env)
     ret = napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability));
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGE(AAFwkTag::FA, "JsParticleAbility::GetAbility, get_value_external=%{public}d err:%{public}s",
+        TAG_LOGE(AAFwkTag::FA, "get_value_external=%{public}d err:%{public}s",
             ret, errorInfo->error_message);
         return nullptr;
     }
@@ -260,7 +260,7 @@ Ability* JsParticleAbility::GetAbility(napi_env env)
 
 napi_value JsParticleAbilityInit(napi_env env, napi_value exportObj)
 {
-    TAG_LOGD(AAFwkTag::FA, "JsParticleAbility is called");
+    TAG_LOGD(AAFwkTag::FA, "called");
 
     if (env == nullptr || exportObj == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "env or exportObj null");
@@ -275,14 +275,14 @@ napi_value JsParticleAbilityInit(napi_env env, napi_value exportObj)
     jsParticleAbility->ability_ = jsParticleAbility->GetAbility(env);
     napi_wrap(env, exportObj, jsParticleAbility.release(), JsParticleAbility::Finalizer, nullptr, nullptr);
 
-    TAG_LOGD(AAFwkTag::FA, "JsParticleAbility BindNativeFunction called");
+    TAG_LOGD(AAFwkTag::FA, "BindNativeFunction called");
     const char *moduleName = "JsParticleAbility";
     BindNativeFunction(env, exportObj, "connectAbility", moduleName, JsParticleAbility::PAConnectAbility);
     BindNativeFunction(env, exportObj, "disconnectAbility", moduleName, JsParticleAbility::PADisConnectAbility);
     BindNativeFunction(env, exportObj, "startAbility", moduleName, JsParticleAbility::PAStartAbility);
     BindNativeFunction(env, exportObj, "terminateSelf", moduleName, JsParticleAbility::PATerminateAbility);
 
-    TAG_LOGD(AAFwkTag::FA, "JsParticleAbility end");
+    TAG_LOGD(AAFwkTag::FA, "end");
     return exportObj;
 }
 }  // namespace AppExecFwk

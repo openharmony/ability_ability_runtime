@@ -24,7 +24,6 @@
 #include "errors.h"
 #include "exit_reason.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "iability_info_callback.h"
 #include "in_process_call_wrapper.h"
@@ -173,7 +172,6 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::CreateAbilityRecord(Ab
     TAG_LOGD(AAFwkTag::ABILITYMGR, "user id: %{public}d.", userId_);
     uiAbilityRecord->SetOwnerMissionUserId(userId_);
     SetRevicerInfo(abilityRequest, uiAbilityRecord);
-    SetLastExitReason(uiAbilityRecord);
     return uiAbilityRecord;
 }
 
@@ -235,6 +233,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Lifecycle: name is %{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
+    SetLastExitReason(abilityRecord);
 
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(handler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
@@ -689,8 +688,9 @@ void UIAbilityLifecycleManager::UpdateAbilityRecordLaunchReason(
         return;
     }
 
-    if (abilityRequest.IsContinuation()) {
-        abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
+    auto res = abilityRequest.IsContinuation();
+    if (res.first) {
+        abilityRecord->SetLaunchReason(res.second);
         return;
     }
 
@@ -832,7 +832,6 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
         uiAbilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
         uiAbilityRecord->SetOwnerMissionUserId(userId_);
         SetRevicerInfo(abilityRequest, uiAbilityRecord);
-        SetLastExitReason(uiAbilityRecord);
     } else {
         uiAbilityRecord = sessionAbilityMap_.at(persistentId);
     }
@@ -948,6 +947,8 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0));
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex: %{public}d.",
+        (sessionInfo->want).GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0));
     auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityRecord != nullptr && !abilityRecord->GetRestartAppFlag()) {
         auto callerSessionInfo = abilityRecord->GetSessionInfo();
@@ -1527,7 +1528,7 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
 
 void UIAbilityLifecycleManager::OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     specifiedRequestMap_.erase(requestId);
 }
@@ -1565,7 +1566,7 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const AAFwk::Wan
 
 void UIAbilityLifecycleManager::OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     specifiedRequestMap_.erase(requestId);
 }
@@ -1613,7 +1614,7 @@ void UIAbilityLifecycleManager::NotifyRestartSpecifiedAbility(AbilityRequest &re
     sptr<AppExecFwk::IAbilityInfoCallback> abilityInfoCallback
         = iface_cast<AppExecFwk::IAbilityInfoCallback> (request.abilityInfoCallback);
     if (abilityInfoCallback != nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s called.", __func__);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
         abilityInfoCallback->NotifyRestartSpecifiedAbility(token);
     }
 }
@@ -2475,7 +2476,7 @@ void UIAbilityLifecycleManager::SignRestartAppFlag(const std::string &bundleName
 
 void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) const
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "CompleteFirstFrameDrawing, called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto abilityRecord = GetAbilityRecordsById(sessionId);
     if (abilityRecord == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "CompleteFirstFrameDrawing, get AbilityRecord by sessionId failed.");
@@ -2505,7 +2506,7 @@ int UIAbilityLifecycleManager::StartWithPersistentIdByDistributed(const AbilityR
 
 int32_t UIAbilityLifecycleManager::GetAbilityStateByPersistentId(int32_t persistentId, bool &state)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "GetAbilityStateByPersistentId, called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     auto iter = sessionAbilityMap_.find(persistentId);
     if (iter != sessionAbilityMap_.end()) {

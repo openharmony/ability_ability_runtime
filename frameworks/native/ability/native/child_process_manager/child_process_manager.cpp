@@ -38,7 +38,6 @@
 #include "errors.h"
 #include "hap_module_info.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "parameters.h"
 #include "runtime.h"
 #include "sys_mgr_client.h"
@@ -70,7 +69,7 @@ ChildProcessManager::~ChildProcessManager()
 
 ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEntry, pid_t &pid)
 {
-    TAG_LOGI(AAFwkTag::PROCESSMGR, "called.");
+    TAG_LOGI(AAFwkTag::PROCESSMGR, "called");
     ChildProcessManagerErrorCode errorCode = PreCheck();
     if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
         return errorCode;
@@ -326,6 +325,11 @@ std::unique_ptr<AbilityRuntime::Runtime> ChildProcessManager::CreateRuntime(cons
     options.apiTargetVersion = applicationInfo.apiTargetVersion;
     options.loadAce = true;
     options.jitEnabled = jitEnabled;
+
+    for (auto moduleItem : bundleInfo.hapModuleInfos) {
+        options.pkgContextInfoJsonStringMap[moduleItem.moduleName] = moduleItem.hapPath;
+        options.packageNameList[moduleItem.moduleName] = moduleItem.packageName;
+    }
 
     std::shared_ptr<AppExecFwk::EventRunner> eventRunner =
         fromAppSpawn ? AppExecFwk::EventRunner::GetMainEventRunner() : AppExecFwk::EventRunner::Create();
