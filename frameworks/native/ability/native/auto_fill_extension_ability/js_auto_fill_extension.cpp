@@ -24,7 +24,6 @@
 #include "context.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "int_wrapper.h"
 #include "js_auto_fill_extension_util.h"
 #include "js_auto_fill_extension_context.h"
@@ -509,6 +508,7 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
             obj, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref)));
         CallJsOnRequest(want, sessionInfo, uiWindow);
         uiWindowMap_[obj] = uiWindow;
+        context->SetSessionInfo(sessionInfo);
     }
     return true;
 }
@@ -526,7 +526,6 @@ void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<A
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to get context.");
         return;
     }
-    context->SetSessionInfo(sessionInfo);
 
     if (want.HasParameter(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY)) {
         isPopup_ = want.GetBoolParam(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY, false);

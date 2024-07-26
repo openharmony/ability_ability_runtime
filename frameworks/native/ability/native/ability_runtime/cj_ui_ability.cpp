@@ -28,7 +28,6 @@
 #include "connection_manager.h"
 #include "context/context.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
 #include "insight_intent_executor_info.h"
@@ -279,7 +278,7 @@ void CJUIAbility::OnSceneCreated()
 void CJUIAbility::OnSceneRestored()
 {
     UIAbility::OnSceneRestored();
-    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
 
     if (!cjAbilityObj_) {
         TAG_LOGE(AAFwkTag::UIABILITY, "CJAbility is not loaded.");
@@ -595,7 +594,7 @@ void CJUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (executeParam == nullptr) {
         TAG_LOGW(AAFwkTag::UIABILITY, "Intention execute param invalid.");
         OnForeground(want);
@@ -630,7 +629,7 @@ bool CJUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     InsightIntentExecutorInfo& executeInfo)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto context = GetAbilityContext();
     if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr || cjWindowStage_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "Param invalid.");

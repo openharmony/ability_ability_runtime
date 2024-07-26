@@ -234,6 +234,17 @@ public:
     int KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
+     * ForceKillApplication, force kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    int ForceKillApplication(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0);
+
+    /**
      * kill the application by uid
      *
      * @param bundleName name of bundle.
@@ -437,6 +448,12 @@ public:
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
 
     bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
 protected:
     /**

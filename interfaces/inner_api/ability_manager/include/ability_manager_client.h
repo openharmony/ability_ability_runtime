@@ -41,7 +41,6 @@ class AbilityManagerClient {
 public:
     virtual ~AbilityManagerClient();
     static std::shared_ptr<AbilityManagerClient> GetInstance();
-
     void RemoveDeathRecipient();
 
     /**
@@ -1034,7 +1033,7 @@ public:
     void UpdateMissionSnapShot(sptr<IRemoteObject> token,
         std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
 
-    ErrCode GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &info);
+    ErrCode GetDialogSessionInfo(const std::string &dialogSessionId, sptr<DialogSessionInfo> &info);
     ErrCode SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllow);
 #endif
 
@@ -1161,6 +1160,13 @@ public:
      * @param token Ability identify.
      */
     void EnableRecoverAbility(sptr<IRemoteObject> token);
+
+    /**
+     * @brief Submit save recovery info.
+     *
+     * @param token Ability identify.
+     */
+    void SubmitSaveRecoveryInfo(sptr<IRemoteObject> token);
 
     /**
      * @brief Schedule recovery ability.
@@ -1401,6 +1407,13 @@ public:
         std::vector<int32_t> &sessionIds);
 
     /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RestartApp(const AAFwk::Want &want);
+
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1421,13 +1434,6 @@ public:
      */
     ErrCode GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo,
         int32_t userId = DEFAULT_INVAL_VALUE);
-
-    /**
-     * @brief Restart app self.
-     * @param want The ability type must be UIAbility.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t RestartApp(const AAFwk::Want &want);
 
     /**
      * Pop-up launch of full-screen atomic service.
@@ -1550,7 +1556,9 @@ private:
 
     sptr<IAbilityManager> GetAbilityManager();
     void ResetProxy(wptr<IRemoteObject> remote);
+#ifdef WITH_DLP
     void HandleDlpApp(Want &want);
+#endif // WITH_DLP
 
     static std::once_flag singletonFlag_;
     std::recursive_mutex mutex_;

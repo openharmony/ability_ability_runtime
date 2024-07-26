@@ -33,7 +33,7 @@ public:
 
     static void Finalizer(napi_env env, void* data, void* hint)
     {
-        TAG_LOGD(AAFwkTag::DIALOG, "JsDialogRequestCallback::Finalizer is called.");
+        TAG_LOGD(AAFwkTag::DIALOG, "called");
         std::unique_ptr<JsDialogRequestCallback>(static_cast<JsDialogRequestCallback*>(data));
     }
 
@@ -78,16 +78,16 @@ private:
         if (jWant != nullptr && CheckTypeForNapiValue(env, jWant, napi_object)) {
             AppExecFwk::UnwrapWant(env, jWant, wantValue);
         } else {
-            TAG_LOGW(AAFwkTag::DIALOG, "jWant is invalid data!");
+            TAG_LOGW(AAFwkTag::DIALOG, "invalid jWant");
         }
 
         if (callback_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DIALOG, "JsDialogRequestCallback::%{public}s, callback_ is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DIALOG, "null callback_");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
         callback_->SendResult(resultCodeValue, wantValue);
-        TAG_LOGI(AAFwkTag::DIALOG, "function called end.");
+        TAG_LOGI(AAFwkTag::DIALOG, "end");
         return CreateJsUndefined(env);
     }
 

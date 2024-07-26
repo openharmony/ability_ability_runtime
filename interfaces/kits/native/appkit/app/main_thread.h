@@ -269,8 +269,6 @@ public:
      */
     void ScheduleProcessSecurityExit() override;
 
-    void ScheduleClearPageStack() override;
-
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
@@ -341,6 +339,7 @@ public:
      */
     int32_t ScheduleDumpIpcStat(std::string& result) override;
 
+    void ScheduleClearPageStack() override;
     /**
      * ScheduleDumpFfrt, call ScheduleDumpFfrt(std::string& result) through proxy project,
      * Start querying the application's ffrt usage.
@@ -617,6 +616,14 @@ private:
 
     bool IsBgWorkingThread(const AbilityInfo &info);
 
+    /**
+     * @brief parse app configuration params
+     *
+     * @param configuration input configuration
+     * @config the config of application
+     */
+    void ParseAppConfigurationParams(const std::string configuration, Configuration &config);
+
     class MainHandler : public EventHandler {
     public:
         MainHandler(const std::shared_ptr<EventRunner> &runner, const sptr<MainThread> &thread);
@@ -695,10 +702,10 @@ private:
     bool CheckForHandleLaunchApplication(const AppLaunchData &appLaunchData);
     bool InitResourceManager(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
         const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const std::string &bundleName,
-        bool multiProjects, const Configuration &config);
+        const Configuration &config, const ApplicationInfo &appInfo);
     void OnStartAbility(const std::string& bundleName,
         std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
-        const AppExecFwk::HapModuleInfo &entryHapModuleInfo);
+        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const bool isDebugApp);
     std::vector<std::string> GetOverlayPaths(const std::string &bundleName,
         const std::vector<OverlayModuleInfo> &overlayModuleInfos);
     void SubscribeOverlayChange(const std::string &bundleName, const std::string &loadPath,

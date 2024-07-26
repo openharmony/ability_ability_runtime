@@ -18,7 +18,6 @@
 #include "auto_fill_manager.h"
 #include "auto_fill_manager_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "int_wrapper.h"
 #include "string_wrapper.h"
 #include "view_data.h"
@@ -29,7 +28,7 @@ namespace {
 #ifdef SUPPORT_GRAPHICS
 constexpr const char* WANT_PARAMS_VIEW_DATA_KEY = "ohos.ability.params.viewData";
 constexpr const char* WANT_PARAMS_AUTO_FILL_CMD_KEY = "ohos.ability.params.autoFillCmd";
-constexpr const char*  WANT_PARAMS_FILL_CONTENT = "ohos.ability.params.fillContent";
+constexpr const char* WANT_PARAMS_FILL_CONTENT = "ohos.ability.params.fillContent";
 constexpr const char* WANT_PARAMS_CUSTOM_DATA_KEY = "ohos.ability.params.customData";
 constexpr const char* WANT_PARAMS_AUTO_FILL_EVENT_KEY = "ability.want.params.AutoFillEvent";
 constexpr const char* WANT_PARAMS_UPDATE_POPUP_WIDTH = "ohos.ability.params.popupWidth";

@@ -377,7 +377,7 @@ enum class AbilityManagerInterfaceCode {
     // request modal UIExtension by want
     REQUESET_MODAL_UIEXTENSION = 1056,
 
-    // get root host info of uiextesnion
+    // get root host info of uiextension
     GET_UI_EXTENSION_ROOT_HOST_INFO = 1057,
 
     // change current ability visibility
@@ -484,6 +484,8 @@ enum class AbilityManagerInterfaceCode {
     VERIFY_PERMISSION = 3013,
 
     CLEAR_RECOVERY_PAGE_STACK = 3014,
+
+    ABILITY_RECOVERY_SUBMITINFO = 3015,
 
     ACQUIRE_SHARE_DATA = 4001,
     SHARE_DATA_DONE = 4002,

@@ -194,7 +194,7 @@ bool LocalCallContainer::IsCallBackCalled(const std::vector<std::shared_ptr<Call
 {
     for (auto& callBack : callers) {
         if (callBack != nullptr && !callBack->IsCallBack()) {
-            TAG_LOGI(AAFwkTag::LOCAL_CALL, "%{public}s call back is not called.", __func__);
+            TAG_LOGI(AAFwkTag::LOCAL_CALL, "callback is not called");
             return false;
         }
     }
@@ -204,7 +204,7 @@ bool LocalCallContainer::IsCallBackCalled(const std::vector<std::shared_ptr<Call
 
 void LocalCallContainer::DumpCalls(std::vector<std::string>& info)
 {
-    TAG_LOGD(AAFwkTag::LOCAL_CALL, "LocalCallContainer::DumpCalls called.");
+    TAG_LOGD(AAFwkTag::LOCAL_CALL, "called");
     info.emplace_back("          caller connections:");
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto &item : callProxyRecords_) {
@@ -215,10 +215,10 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info)
             tempstr += " uri[" + item.first + "]" + "\n";
             tempstr += "              callers #" + std::to_string(itemCall->GetCallers().size());
             if (IsCallBackCalled(itemCall->GetCallers())) {
-                TAG_LOGI(AAFwkTag::LOCAL_CALL, "%{public}s state is REQUESTEND.", __func__);
+                TAG_LOGI(AAFwkTag::LOCAL_CALL, "state: REQUESTEND");
                 tempstr += "  state #REQUESTEND";
             } else {
-                TAG_LOGI(AAFwkTag::LOCAL_CALL, "%{public}s state is REQUESTING.", __func__);
+                TAG_LOGI(AAFwkTag::LOCAL_CALL, "state: REQUESTING");
                 tempstr += "  state #REQUESTING";
             }
             info.emplace_back(tempstr);

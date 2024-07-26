@@ -34,7 +34,7 @@ AbilityMonitor::AbilityMonitor(const std::string &name, const std::string &modul
 
 void AbilityMonitor::OnAbilityStart(const std::weak_ptr<NativeReference> &abilityObj)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     if (jsMonitor_ == nullptr) {
         return;
@@ -42,12 +42,12 @@ void AbilityMonitor::OnAbilityStart(const std::weak_ptr<NativeReference> &abilit
 
     jsMonitor_->OnAbilityCreate(abilityObj);
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "end");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "end");
 }
 
 void AbilityMonitor::OnAbilityForeground(const std::weak_ptr<NativeReference> &abilityObj)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     if (jsMonitor_ == nullptr) {
         return;
@@ -55,12 +55,12 @@ void AbilityMonitor::OnAbilityForeground(const std::weak_ptr<NativeReference> &a
 
     jsMonitor_->OnAbilityForeground(abilityObj);
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "end");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "end");
 }
 
 void AbilityMonitor::OnAbilityBackground(const std::weak_ptr<NativeReference> &abilityObj)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     if (jsMonitor_ == nullptr) {
         return;
@@ -68,12 +68,12 @@ void AbilityMonitor::OnAbilityBackground(const std::weak_ptr<NativeReference> &a
 
     jsMonitor_->OnAbilityBackground(abilityObj);
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "end");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "end");
 }
 
 void AbilityMonitor::OnAbilityStop(const std::weak_ptr<NativeReference> &abilityObj)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     if (jsMonitor_ == nullptr) {
         return;
@@ -81,13 +81,13 @@ void AbilityMonitor::OnAbilityStop(const std::weak_ptr<NativeReference> &ability
 
     jsMonitor_->OnAbilityDestroy(abilityObj);
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "end");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "end");
 }
 
 void AbilityMonitor::OnWindowStageCreate(const std::weak_ptr<NativeReference> &abilityObj)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     if (jsMonitor_ == nullptr) {
         return;
@@ -95,12 +95,12 @@ void AbilityMonitor::OnWindowStageCreate(const std::weak_ptr<NativeReference> &a
 
     jsMonitor_->OnWindowStageCreate(abilityObj);
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "end");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "end");
 }
 
 void AbilityMonitor::OnWindowStageRestore(const std::weak_ptr<NativeReference> &abilityObj)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     if (jsMonitor_ == nullptr) {
         return;
@@ -108,12 +108,12 @@ void AbilityMonitor::OnWindowStageRestore(const std::weak_ptr<NativeReference> &
 
     jsMonitor_->OnWindowStageRestore(abilityObj);
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "end");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "end");
 }
 
 void AbilityMonitor::OnWindowStageDestroy(const std::weak_ptr<NativeReference> &abilityObj)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     if (jsMonitor_ == nullptr) {
         return;
@@ -121,7 +121,7 @@ void AbilityMonitor::OnWindowStageDestroy(const std::weak_ptr<NativeReference> &
 
     jsMonitor_->OnWindowStageDestroy(abilityObj);
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "end");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "end");
 }
 }  // namespace AbilityDelegatorJs
 }  // namespace OHOS

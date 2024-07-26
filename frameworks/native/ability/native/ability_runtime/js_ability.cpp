@@ -276,7 +276,7 @@ void JsAbility::AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, con
 
 int32_t JsAbility::OnShare(WantParams &wantParam)
 {
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s begin", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
@@ -295,14 +295,14 @@ int32_t JsAbility::OnShare(WantParams &wantParam)
     };
     CallObjectMethod("onShare", argv, ArraySize(argv));
     OHOS::AppExecFwk::UnwrapWantParams(env, jsWantParams, wantParam);
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s end", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "end");
     return ERR_OK;
 }
 
 void JsAbility::OnStop()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITY, "OnStop begin.");
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (abilityContext_) {
         TAG_LOGD(AAFwkTag::ABILITY, "OnStop, set terminating true.");
         abilityContext_->SetTerminating(true);
@@ -323,7 +323,7 @@ void JsAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInf
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITY, "OnStop begin.");
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (abilityContext_) {
         TAG_LOGD(AAFwkTag::ABILITY, "OnStop, set terminating true.");
         abilityContext_->SetTerminating(true);
@@ -354,21 +354,21 @@ void JsAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInf
         TAG_LOGE(AAFwkTag::ABILITY, "Failed to call promise.");
         OnStopCallback();
     }
-    TAG_LOGD(AAFwkTag::ABILITY, "OnStop end.");
+    TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
 void JsAbility::OnStopCallback()
 {
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
-        TAG_LOGD(AAFwkTag::ABILITY, "Call AbilityDelegator::PostPerformStop");
+        TAG_LOGD(AAFwkTag::ABILITY, "call PostPerformStop");
         delegator->PostPerformStop(CreateADelegatorAbilityProperty());
     }
 
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(AbilityContext::token_);
     if (ret) {
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
-        TAG_LOGD(AAFwkTag::ABILITY, "The service connection is not disconnected.");
+        TAG_LOGD(AAFwkTag::ABILITY, "service connection not disconnected");
     }
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -384,7 +384,7 @@ const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.
 void JsAbility::OnSceneCreated()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITY, "OnSceneCreated begin, ability is %{public}s.", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::ABILITY, "ability: %{public}s", GetAbilityName().c_str());
     Ability::OnSceneCreated();
     auto jsAppWindowStage = CreateAppWindowStage();
     if (jsAppWindowStage == nullptr) {
@@ -414,7 +414,7 @@ void JsAbility::OnSceneCreated()
         applicationContext->DispatchOnWindowStageCreate(jsAbilityObj_, jsWindowStageObj_);
     }
 
-    TAG_LOGD(AAFwkTag::ABILITY, "OnSceneCreated end, ability is %{public}s.", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::ABILITY, "end, ability: %{public}s", GetAbilityName().c_str());
 }
 
 void JsAbility::OnSceneRestored()
@@ -432,7 +432,7 @@ void JsAbility::OnSceneRestored()
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
-        TAG_LOGD(AAFwkTag::ABILITY, "Call AbilityDelegator::PostPerformScenceRestored");
+        TAG_LOGD(AAFwkTag::ABILITY, "Call PostPerformScenceRestored");
         delegator->PostPerformScenceRestored(CreateADelegatorAbilityProperty());
     }
 
@@ -664,7 +664,7 @@ void JsAbility::DoOnForeground(const Want &want)
     TAG_LOGI(AAFwkTag::ABILITY, "Move scene to foreground, sceneFlag_:%{public}d.", Ability::sceneFlag_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
     scene_->GoForeground(Ability::sceneFlag_);
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s end scene_->GoForeground.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
 bool JsAbility::InitWindowScene(const Want &want)
@@ -730,7 +730,7 @@ void JsAbility::RequestFocus(const Want &want)
 
 void JsAbility::ContinuationRestore(const Want &want)
 {
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (!IsRestoredInContinuation() || scene_ == nullptr) {
         return;
     }
@@ -741,7 +741,7 @@ void JsAbility::ContinuationRestore(const Want &want)
 
 std::shared_ptr<NativeReference> JsAbility::GetJsWindowStage()
 {
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (jsWindowStageObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "jsWindowSatge is nullptr");
     }
@@ -835,7 +835,7 @@ int32_t JsAbility::OnSaveState(int32_t reason, WantParams &wantParams)
 void JsAbility::OnConfigurationUpdated(const Configuration &configuration)
 {
     Ability::OnConfigurationUpdated(configuration);
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
 
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
@@ -854,7 +854,7 @@ void JsAbility::OnConfigurationUpdated(const Configuration &configuration)
 void JsAbility::OnMemoryLevel(int level)
 {
     Ability::OnMemoryLevel(level);
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
 
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
@@ -877,7 +877,7 @@ void JsAbility::OnMemoryLevel(int level)
 
 void JsAbility::UpdateContextConfiguration()
 {
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, GetAbilityContext()->GetConfiguration());
@@ -885,7 +885,7 @@ void JsAbility::UpdateContextConfiguration()
 
 void JsAbility::OnNewWant(const Want &want)
 {
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s begin.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     Ability::OnNewWant(want);
 
 #ifdef SUPPORT_SCREEN
@@ -923,12 +923,12 @@ void JsAbility::OnNewWant(const Want &want)
     CallObjectMethod("onNewWant", argv, ArraySize(argv));
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s end.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
 void JsAbility::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s begin.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     Ability::OnAbilityResult(requestCode, resultCode, resultData);
     std::shared_ptr<AbilityRuntime::AbilityContext> context = GetAbilityContext();
     if (context == nullptr) {
@@ -936,19 +936,19 @@ void JsAbility::OnAbilityResult(int requestCode, int resultCode, const Want &res
         return;
     }
     context->OnAbilityResult(requestCode, resultCode, resultData);
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s end.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
 sptr<IRemoteObject> JsAbility::CallRequest()
 {
-    TAG_LOGD(AAFwkTag::ABILITY, "JsAbility::CallRequest begin.");
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (jsAbilityObj_ == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITY, "JsAbility::CallRequest Obj is nullptr");
+        TAG_LOGW(AAFwkTag::ABILITY, "Obj is nullptr");
         return nullptr;
     }
 
     if (remoteCallee_ != nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITY, "JsAbility::CallRequest get Callee remoteObj.");
+        TAG_LOGD(AAFwkTag::ABILITY, "get Callee remoteObj");
         return remoteCallee_;
     }
 
@@ -1088,7 +1088,7 @@ std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> JsAbility::CreateADelegat
 void JsAbility::Dump(const std::vector<std::string> &params, std::vector<std::string> &info)
 {
     Ability::Dump(params, info);
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     HandleScope handleScope(jsRuntime_);
 
     if (!jsAbilityObj_) {
@@ -1146,7 +1146,7 @@ bool JsAbility::AddDumpInfo(napi_env env, napi_value obj, const std::vector<std:
 
 std::shared_ptr<NativeReference> JsAbility::GetJsAbility()
 {
-    TAG_LOGD(AAFwkTag::ABILITY, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (jsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "jsAbility object is nullptr");
     }

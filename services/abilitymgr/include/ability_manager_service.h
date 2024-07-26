@@ -152,7 +152,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         uint32_t specifyTokenId,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE);
+        int requestCode = DEFAULT_INVAL_VALUE, bool isPendingWantCaller = false);
 
     /**
      * Starts a new ability with specific start options and specialId, send want to ability manager service.
@@ -171,7 +171,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        uint32_t specifyTokenId = 0);
+        uint32_t specifyTokenId = 0, bool isPendingWantCaller = false);
 
     /**
      * StartAbilityWithSpecifyTokenId with want and specialId, send want to ability manager service.
@@ -857,7 +857,9 @@ public:
 
     virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
 
+#ifdef WITH_DLP
     virtual int GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos) override;
+#endif // WITH_DLP
 
     virtual int GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &connectionData) override;
 
@@ -961,7 +963,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false);
+        bool isImplicit = false, bool isPendingWantCaller = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -971,7 +973,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false);
+        bool isImplicit = false, bool isPendingWantCaller = false);
 
     int StartExtensionAbilityInner(
         const Want &want,
@@ -996,7 +998,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t callerTokenId = 0,
         bool isImplicit = false,
-        bool isCallByShortcut = false);
+        bool isCallByShortcut = false, bool isPendingWantCaller = false);
 
     int StartAbilityForOptionInner(
         const Want &want,
@@ -1007,7 +1009,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isImplicit = false,
-        bool isCallByShortcut = false);
+        bool isCallByShortcut = false, bool isPendingWantCaller = false);
 
     int ImplicitStartAbility(
         const Want &want,
@@ -1136,10 +1138,12 @@ public:
 
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
-    virtual int GetDialogSessionInfo(const std::string dialogSessionId,
+    virtual int GetDialogSessionInfo(const std::string &dialogSessionId,
         sptr<DialogSessionInfo> &dialogSessionInfo) override;
 
     virtual int SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed) override;
+
+    int CreateCloneSelectorDialog(AbilityRequest &request, int32_t userId, const std::string &replaceWantString = "");
 
     virtual int RegisterAbilityFirstFrameStateObserver(const sptr<IAbilityFirstFrameStateObserver> &observer,
         const std::string &bundleName) override;
@@ -1328,6 +1332,7 @@ public:
         const std::shared_ptr<Media::PixelMap> &pixelMap) override;
 #endif // SUPPORT_SCREEN
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
+    virtual void SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token) override;
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
 
@@ -1759,31 +1764,6 @@ public:
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
     static constexpr uint32_t MAX_WAIT_SETTINGS_DATA_NUM = 300;
 
-    enum DumpKey {
-        KEY_DUMP_ALL = 0,
-        KEY_DUMP_STACK_LIST,
-        KEY_DUMP_STACK,
-        KEY_DUMP_MISSION,
-        KEY_DUMP_TOP_ABILITY,
-        KEY_DUMP_WAIT_QUEUE,
-        KEY_DUMP_SERVICE,
-        KEY_DUMP_DATA,
-        KEY_DUMP_FOCUS_ABILITY,
-        KEY_DUMP_WINDOW_MODE,
-        KEY_DUMP_MISSION_LIST,
-        KEY_DUMP_MISSION_INFOS,
-    };
-
-    enum DumpsysKey {
-        KEY_DUMPSYS_ALL = 0,
-        KEY_DUMPSYS_MISSION_LIST,
-        KEY_DUMPSYS_ABILITY,
-        KEY_DUMPSYS_SERVICE,
-        KEY_DUMPSYS_PENDING,
-        KEY_DUMPSYS_PROCESS,
-        KEY_DUMPSYS_DATA,
-    };
-
     enum {
         ABILITY_MOVE_TO_FOREGROUND_CODE = 0,
         ABILITY_MOVE_TO_BACKGROUND_CODE,
@@ -2115,9 +2095,11 @@ private:
 
     AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
 
+#ifdef WITH_DLP
     int CheckDlpForExtension(
         const Want &want, const sptr<IRemoteObject> &callerToken,
         int32_t userId, AAFwk::EventInfo &eventInfo, const EventName &eventName);
+#endif // WITH_DLP
 
     void InitStartupFlag();
 
@@ -2210,7 +2192,7 @@ private:
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
         int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
-        bool isCallByShortcut = false);
+        bool isCallByShortcut = false, bool isPendingWantCaller = false);
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
@@ -2252,8 +2234,6 @@ private:
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
     std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper_;
     sptr<OHOS::AppExecFwk::IAppMgr> appMgr_ { nullptr };
-    const static std::map<std::string, AbilityManagerService::DumpKey> dumpMap;
-    const static std::map<std::string, AbilityManagerService::DumpsysKey> dumpsysMap;
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
 
@@ -2306,6 +2286,8 @@ private:
 
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
+    void PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo);
+
     bool IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
         const std::string &calleeAbilityName);
 
@@ -2328,6 +2310,8 @@ private:
 
     void ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
         const AppExecFwk::AbilityInfo &abilityInfo);
+
+    void SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType);
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif

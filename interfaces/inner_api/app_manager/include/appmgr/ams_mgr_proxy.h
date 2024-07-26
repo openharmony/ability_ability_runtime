@@ -141,6 +141,17 @@ public:
     virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = true) override;
 
     /**
+     * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int ForceKillApplication(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0) override;
+
+    /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
      *
      * @param  bundleName, bundle name in Application record.
@@ -297,6 +308,12 @@ public:
      * @return Returns true is killed for upgrade web, others return false.
      */
     virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
+
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
