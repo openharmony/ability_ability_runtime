@@ -15,7 +15,6 @@
 #include "local_call_record.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -187,8 +186,7 @@ bool LocalCallRecord::IsSameObject(const sptr<IRemoteObject>& remote) const
     }
 
     bool retVal = (remoteObject_ == remote);
-    TAG_LOGD(AAFwkTag::LOCAL_CALL, "LocalCallRecord::%{public}s the input object same as local object is %{public}s.",
-        __func__, retVal ? "true" : "false");
+    TAG_LOGD(AAFwkTag::LOCAL_CALL, "remoteObject_ matches remote: %{public}s", retVal ? "true" : "false");
     return retVal;
 }
 

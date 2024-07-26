@@ -16,7 +16,6 @@
 #include "request_info.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 
 namespace OHOS {
@@ -42,9 +41,9 @@ sptr<IRemoteObject> RequestInfo::GetToken()
 
 napi_value RequestInfo::WrapRequestInfo(napi_env env, RequestInfo *request)
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "WrapRequestInfo called.");
+    TAG_LOGD(AAFwkTag::DIALOG, "called");
     if (request == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "request is nullptr.");
+        TAG_LOGE(AAFwkTag::DIALOG, "null request");
         return nullptr;
     }
 
@@ -60,17 +59,17 @@ napi_value RequestInfo::WrapRequestInfo(napi_env env, RequestInfo *request)
     napi_value result = nullptr;
     napi_new_instance(env, requestInfoClass, 0, nullptr, &result);
     if (result == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create instance failed.");
+        TAG_LOGE(AAFwkTag::DIALOG, "create instance failed");
         return nullptr;
     }
 
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::DIALOG, "UnwrapRequestInfo result type error!");
+        TAG_LOGE(AAFwkTag::DIALOG, "UnwrapRequestInfo result type error");
         return nullptr;
     }
 
     auto nativeFinalize = [](napi_env env, void* data, void* hint) {
-        TAG_LOGI(AAFwkTag::DIALOG, "Js RequestInfo finalizer is called");
+        TAG_LOGI(AAFwkTag::DIALOG, "finalizer called");
         auto requestInfo = static_cast<RequestInfo*>(data);
         if (requestInfo) {
             delete requestInfo;
@@ -91,7 +90,7 @@ napi_value RequestInfo::CreateJsWindowRect(
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "Native object is nullptr.");
+        TAG_LOGE(AAFwkTag::DIALOG, "null obj");
         return objValue;
     }
     napi_set_named_property(env, objValue, "left", CreateJsValue(env, left));
@@ -103,14 +102,14 @@ napi_value RequestInfo::CreateJsWindowRect(
 
 std::shared_ptr<RequestInfo> RequestInfo::UnwrapRequestInfo(napi_env env, napi_value jsParam)
 {
-    TAG_LOGI(AAFwkTag::DIALOG, "UnwrapRequestInfo called.");
+    TAG_LOGI(AAFwkTag::DIALOG, "called");
     if (jsParam == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "jsParam is nullptr");
+        TAG_LOGE(AAFwkTag::DIALOG, "null jsParam");
         return nullptr;
     }
 
     if (!CheckTypeForNapiValue(env, jsParam, napi_object)) {
-        TAG_LOGE(AAFwkTag::DIALOG, "UnwrapRequestInfo jsParam type error!");
+        TAG_LOGE(AAFwkTag::DIALOG, "jsParam type error");
         return nullptr;
     }
     void* result = nullptr;

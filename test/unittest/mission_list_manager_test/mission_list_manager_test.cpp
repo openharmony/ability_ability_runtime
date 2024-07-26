@@ -20,7 +20,6 @@
 #include "ability_info.h"
 #include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "mission.h"
 #include "mission_info_mgr.h"
 #include "mission_list_manager.h"
@@ -34,7 +33,9 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace AAFwk {
 namespace {
+#ifdef WITH_DLP
 const std::string DLP_INDEX = "ohos.dlp.params.index";
+#endif // WITH_DLP
 }
 class MissionListManagerTest : public testing::Test {
 public:
@@ -959,6 +960,7 @@ HWTEST_F(MissionListManagerTest, CreateOrReusedMissionInfo_007, TestSize.Level1)
     missionListManager.reset();
 }
 
+#ifdef WITH_DLP
 /*
  * Feature: MissionListManager
  * Function: BuildInnerMissionInfo
@@ -1005,6 +1007,7 @@ HWTEST_F(MissionListManagerTest, BuildInnerMissionInfo_002, TestSize.Level1)
     missionListManager->BuildInnerMissionInfo(info, missionName, abilityRequest);
     missionListManager.reset();
 }
+#endif // WITH_DLP
 
 /*
  * Feature: MissionListManager

@@ -20,6 +20,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "constants.h"
 #include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
@@ -47,6 +48,7 @@
 #include "hilog_tag_wrapper.h"
 #include "os_account_manager_wrapper.h"
 #include "parameters.h"
+#include "ui_service_extension_connection_constants.h"
 #include "res_sched_util.h"
 #include "ui_extension_host_info.h"
 #include "scene_board_judgement.h"
@@ -57,6 +59,7 @@
 #include "uri_permission_manager_client.h"
 #include "permission_constants.h"
 #include "process_options.h"
+#include "utils/state_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
 #include "mission_info_mgr.h"
@@ -73,6 +76,7 @@ using namespace OHOS::AAFwk::PermissionConstants;
 const std::string DEBUG_APP = "debugApp";
 const std::string NATIVE_DEBUG = "nativeDebug";
 const std::string PERF_CMD = "perfCmd";
+const std::string ERROR_INFO_ENHANCE = "errorInfoEnhance";
 const std::string MULTI_THREAD = "multiThread";
 const std::string DMS_PROCESS_NAME = "distributedsched";
 const std::string DMS_MISSION_ID = "dmsMissionId";
@@ -80,7 +84,9 @@ const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 const std::string ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 const std::u16string SYSTEM_ABILITY_TOKEN_CALLBACK = u"ohos.aafwk.ISystemAbilityTokenCallback";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
+#ifdef WITH_DLP
 const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
+#endif // WITH_DLP
 const std::string COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 const std::string KEY_MISSION_ID = "ohos.anco.param.missionId";
 const std::string NEED_STARTINGWINDOW = "ohos.ability.NeedStartingWindow";
@@ -132,47 +138,6 @@ const int SHAREDATA_TIMEOUT_MULTIPLE = 5;
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 #endif
-const std::map<AbilityState, std::string> AbilityRecord::stateToStrMap = {
-    std::map<AbilityState, std::string>::value_type(INITIAL, "INITIAL"),
-    std::map<AbilityState, std::string>::value_type(INACTIVE, "INACTIVE"),
-    std::map<AbilityState, std::string>::value_type(ACTIVE, "ACTIVE"),
-    std::map<AbilityState, std::string>::value_type(INACTIVATING, "INACTIVATING"),
-    std::map<AbilityState, std::string>::value_type(ACTIVATING, "ACTIVATING"),
-    std::map<AbilityState, std::string>::value_type(TERMINATING, "TERMINATING"),
-    std::map<AbilityState, std::string>::value_type(FOREGROUND, "FOREGROUND"),
-    std::map<AbilityState, std::string>::value_type(BACKGROUND, "BACKGROUND"),
-    std::map<AbilityState, std::string>::value_type(FOREGROUNDING, "FOREGROUNDING"),
-    std::map<AbilityState, std::string>::value_type(BACKGROUNDING, "BACKGROUNDING"),
-    std::map<AbilityState, std::string>::value_type(FOREGROUND_FAILED, "FOREGROUND_FAILED"),
-    std::map<AbilityState, std::string>::value_type(FOREGROUND_INVALID_MODE, "FOREGROUND_INVALID_MODE"),
-    std::map<AbilityState, std::string>::value_type(FOREGROUND_WINDOW_FREEZED, "FOREGROUND_WINDOW_FREEZED"),
-    std::map<AbilityState, std::string>::value_type(FOREGROUND_DO_NOTHING, "FOREGROUND_DO_NOTHING"),
-    std::map<AbilityState, std::string>::value_type(BACKGROUND_FAILED, "BACKGROUND_FAILED"),
-};
-const std::map<AppState, std::string> AbilityRecord::appStateToStrMap_ = {
-    std::map<AppState, std::string>::value_type(AppState::BEGIN, "BEGIN"),
-    std::map<AppState, std::string>::value_type(AppState::READY, "READY"),
-    std::map<AppState, std::string>::value_type(AppState::FOREGROUND, "FOREGROUND"),
-    std::map<AppState, std::string>::value_type(AppState::BACKGROUND, "BACKGROUND"),
-    std::map<AppState, std::string>::value_type(AppState::SUSPENDED, "SUSPENDED"),
-    std::map<AppState, std::string>::value_type(AppState::TERMINATED, "TERMINATED"),
-    std::map<AppState, std::string>::value_type(AppState::END, "END"),
-    std::map<AppState, std::string>::value_type(AppState::FOCUS, "FOCUS"),
-};
-const std::map<AbilityLifeCycleState, AbilityState> AbilityRecord::convertStateMap = {
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_INITIAL, INITIAL),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_INACTIVE, INACTIVE),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_ACTIVE, ACTIVE),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_FOREGROUND_NEW, FOREGROUND),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_BACKGROUND_NEW, BACKGROUND),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_FOREGROUND_FAILED, FOREGROUND_FAILED),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_INVALID_WINDOW_MODE,
-        FOREGROUND_INVALID_MODE),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_WINDOW_FREEZED,
-        FOREGROUND_WINDOW_FREEZED),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_DO_NOTHING, FOREGROUND_DO_NOTHING),
-    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_BACKGROUND_FAILED, BACKGROUND_FAILED),
-};
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, FreezeUtil::TimeoutState state, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -430,10 +395,6 @@ bool AbilityRecord::CanRestartResident()
 void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (GetAbilityVisibilityState() == AbilityVisibilityState::FOREGROUND_HIDE) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability visibility state is FOREGROUND_HIDE, should not do foreground again.");
-        return;
-    }
     isWindowStarted_ = true;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundLifecycle: name:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
@@ -532,6 +493,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
             std::string bundleName = GetAbilityInfo().bundleName;
             int32_t uid = GetUid();
             ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
+            SetAbilityStateInner(AbilityState::FOREGROUNDING);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
         }
     } else {
@@ -698,7 +660,13 @@ void AbilityRecord::StartingWindowHot()
         return;
     }
 
-    auto pixelMap = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetSnapshot(missionId_);
+    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
+    if (missionListWrap == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionListWrap null.");
+        return;
+    }
+
+    auto pixelMap = missionListWrap->GetSnapshot(missionId_);
     if (!pixelMap) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Get snapshot failed.");
     }
@@ -764,9 +732,14 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
 
 std::shared_ptr<Want> AbilityRecord::GetWantFromMission() const
 {
+    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
+    if (missionListWrap == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionListWrap null.");
+        return nullptr;
+    }
+
     InnerMissionInfo innerMissionInfo;
-    int getMission = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-        missionId_, innerMissionInfo);
+    int getMission = missionListWrap->GetInnerMissionInfoById(missionId_, innerMissionInfo);
     if (getMission != ERR_OK) {
         TAG_LOGE(
             AAFwkTag::ABILITYMGR, "cannot find mission info from MissionInfoList by missionId: %{public}d", missionId_);
@@ -779,7 +752,7 @@ std::shared_ptr<Want> AbilityRecord::GetWantFromMission() const
 void AbilityRecord::AnimationTask(bool isRecent, const AbilityRequest &abilityRequest,
     const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (isRecent) {
         auto want = GetWantFromMission();
         NotifyAnimationFromRecentTask(startOptions, want);
@@ -861,7 +834,7 @@ void AbilityRecord::StartingWindowTask(bool isRecent, bool isCold, const Ability
     std::shared_ptr<StartOptions> &startOptions)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s was called.", __func__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (isRecent) {
         auto want = GetWantFromMission();
         if (isCold) {
@@ -882,10 +855,10 @@ void AbilityRecord::StartingWindowTask(bool isRecent, bool isCold, const Ability
 void AbilityRecord::PostCancelStartingWindowHotTask()
 {
     if (IsDebug()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "PostCancelStartingWindowHotTask was called, debug mode, just return.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "debug mode, just return.");
         return;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "PostCancelStartingWindowHotTask was called.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER_LOG(handler, "Fail to get TaskHandler.");
 
@@ -910,10 +883,10 @@ void AbilityRecord::PostCancelStartingWindowHotTask()
 void AbilityRecord::PostCancelStartingWindowColdTask()
 {
     if (IsDebug()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "PostCancelStartingWindowColdTask was called, debug mode, just return.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "debug mode, just return.");
         return;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "PostCancelStartingWindowColdTask was called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER_LOG(handler, "Fail to get TaskHandler.");
 
@@ -1106,7 +1079,13 @@ void AbilityRecord::StartingWindowHot(const std::shared_ptr<StartOptions> &start
         return;
     }
 
-    auto pixelMap = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetSnapshot(missionId_);
+    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
+    if (missionListWrap == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionListWrap null.");
+        return;
+    }
+
+    auto pixelMap = missionListWrap->GetSnapshot(missionId_);
     if (!pixelMap) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, Get snapshot failed.", __func__);
     }
@@ -1279,7 +1258,9 @@ int AbilityRecord::TerminateAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
+#ifdef WITH_DLP
     HandleDlpClosed();
+#endif // WITH_DLP
     AAFwk::EventInfo eventInfo;
     eventInfo.bundleName = GetAbilityInfo().bundleName;
     eventInfo.abilityName = GetAbilityInfo().name;
@@ -1404,7 +1385,9 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
         }
     }
 
-    DelayedSingleton<MissionInfoMgr>::GetInstance()->SetMissionAbilityState(missionId_, currentState_);
+    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
+    CHECK_POINTER(missionListWrap);
+    missionListWrap->SetMissionAbilityState(missionId_, currentState_);
 }
 #endif // SUPPORT_SCREEN
 bool AbilityRecord::GetAbilityForegroundingFlag() const
@@ -1461,7 +1444,9 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
         // add collaborator mission bind pid
         NotifyMissionBindPid();
+#ifdef WITH_DLP
         HandleDlpAttached();
+#endif // WITH_DLP
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduler is nullptr");
         isReady_ = false;
@@ -1619,7 +1604,9 @@ void AbilityRecord::Terminate(const Closure &task)
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Is debug mode, no need to handle time out.");
     }
+#ifdef WITH_DLP
     HandleDlpClosed();
+#endif // WITH_DLP
     // schedule background after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
 #ifdef SUPPORT_SCREEN
@@ -1648,10 +1635,20 @@ void AbilityRecord::ConnectAbility()
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
     }
-#ifdef SUPPORT_SCREEN
     GrantUriPermissionForServiceExtension();
-#endif // SUPPORT_SCREEN
     lifecycleDeal_->ConnectAbility(GetWant());
+    isConnected = true;
+}
+
+void AbilityRecord::ConnectUIServiceExtAbility(const Want &want)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Connect ability.");
+    CHECK_POINTER(lifecycleDeal_);
+    if (isConnected) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
+    }
+    GrantUriPermissionForServiceExtension();
+    lifecycleDeal_->ConnectAbility(want);
     isConnected = true;
 }
 
@@ -1661,9 +1658,26 @@ void AbilityRecord::DisconnectAbility()
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->DisconnectAbility(GetWant());
-    isConnected = false;
+    if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        if (GetInProgressRecordCount() == 0) {
+            isConnected = false;
+        }
+    } else {
+        isConnected = false;
+    }
 }
-#ifdef SUPPORT_SCREEN
+
+void AbilityRecord::DisconnectUIServiceExtAbility(const Want &want)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
+    CHECK_POINTER(lifecycleDeal_);
+    lifecycleDeal_->DisconnectAbility(want);
+    if (GetInProgressRecordCount() == 0) {
+        isConnected = false;
+    }
+}
+
 bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
     if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
@@ -1677,14 +1691,11 @@ bool AbilityRecord::GrantUriPermissionForServiceExtension()
     }
     return false;
 }
-#endif // SUPPORT_SCREEN
+
 void AbilityRecord::CommandAbility()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "startId_:%{public}d.", startId_);
     CHECK_POINTER(lifecycleDeal_);
-#ifdef SUPPORT_SCREEN
-    GrantUriPermissionForServiceExtension();
-#endif // SUPPORT_SCREEN
     lifecycleDeal_->CommandAbility(GetWant(), false, startId_);
 }
 
@@ -1892,8 +1903,7 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
         callerUid = IPCSkeleton::GetCallingUid();
         accessToken = IPCSkeleton::GetCallingTokenID();
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Try to SendResult, callerUid = %{public}d, AccessTokenId = %{public}u",
-        callerUid, accessToken);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Try to SendResult");
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CallerToken is nullptr");
         return;
@@ -1950,6 +1960,9 @@ void AbilityRecord::RemoveConnectRecordFromList(const std::shared_ptr<Connection
     CHECK_POINTER(connRecord);
     std::lock_guard guard(connRecordListMutex_);
     connRecordList_.remove(connRecord);
+    if (connRecordList_.empty()) {
+        isConnected = false;
+    }
 }
 
 void AbilityRecord::RemoveSpecifiedWantParam(const std::string &key)
@@ -2096,6 +2109,19 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectingRecordL
     return connectingList;
 }
 
+uint32_t AbilityRecord::GetInProgressRecordCount()
+{
+    std::lock_guard guard(connRecordListMutex_);
+    uint32_t count = 0;
+    for (auto record : connRecordList_) {
+        if (record && (record->GetConnectState() == ConnectionState::CONNECTING ||
+            record->GetConnectState() == ConnectionState::CONNECTED)) {
+            count ++;
+        }
+    }
+    return count;
+}
+
 std::shared_ptr<ConnectionRecord> AbilityRecord::GetDisconnectingRecord() const
 {
     std::lock_guard guard(connRecordListMutex_);
@@ -2135,29 +2161,17 @@ void AbilityRecord::GetAbilityTypeString(std::string &typeStr)
 
 std::string AbilityRecord::ConvertAbilityState(const AbilityState &state)
 {
-    auto it = stateToStrMap.find(state);
-    if (it != stateToStrMap.end()) {
-        return it->second;
-    }
-    return "INVALIDSTATE";
+    return  StateUtils::StateToStrMap(state);
 }
 
 std::string AbilityRecord::ConvertAppState(const AppState &state)
 {
-    auto it = appStateToStrMap_.find(state);
-    if (it != appStateToStrMap_.end()) {
-        return it->second;
-    }
-    return "INVALIDSTATE";
+    return StateUtils::AppStateToStrMap(state);
 }
 
 int AbilityRecord::ConvertLifeCycleToAbilityState(const AbilityLifeCycleState &state)
 {
-    auto it = convertStateMap.find(state);
-    if (it != convertStateMap.end()) {
-        return it->second;
-    }
-    return DEFAULT_INVAL_VALUE;
+    return StateUtils::ConvertStateMap(state);
 }
 
 void AbilityRecord::Dump(std::vector<std::string> &info)
@@ -2231,8 +2245,7 @@ void AbilityRecord::DumpUIExtensionRootHostInfo(std::vector<std::string> &info) 
     }
 
     UIExtensionHostInfo hostInfo;
-    auto ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->GetUIExtensionRootHostInfo(
-        token, hostInfo));
+    auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get ui extension host info failed with %{public}d.", ret);
         return;
@@ -2388,7 +2401,7 @@ void AbilityRecord::RemoveAbilityDeathRecipient() const
 
 void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
 
@@ -2427,7 +2440,9 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 #ifdef SUPPORT_GRAPHICS
     NotifyAnimationAbilityDied();
 #endif
+#ifdef WITH_DLP
     HandleDlpClosed();
+#endif // WITH_DLP
     NotifyRemoveShellProcess(CollaboratorType::RESERVE_TYPE);
     NotifyRemoveShellProcess(CollaboratorType::OTHERS_TYPE);
     FreezeUtil::GetInstance().DeleteLifecycleEvent(object);
@@ -2462,7 +2477,9 @@ void AbilityRecord::OnProcessDied()
 #ifdef SUPPORT_GRAPHICS
     NotifyAnimationAbilityDied();
 #endif
+#ifdef WITH_DLP
     HandleDlpClosed();
+#endif // WITH_DLP
     NotifyRemoveShellProcess(CollaboratorType::RESERVE_TYPE);
     NotifyRemoveShellProcess(CollaboratorType::OTHERS_TYPE);
 }
@@ -2555,6 +2572,7 @@ void AbilityRecord::SetWant(const Want &want)
     auto nativeDebug = want_.GetBoolParam(NATIVE_DEBUG, false);
     auto perfCmd = want_.GetStringParam(PERF_CMD);
     auto multiThread = want_.GetBoolParam(MULTI_THREAD, false);
+    auto errorInfoEnhance = want_.GetBoolParam(ERROR_INFO_ENHANCE, false);
     want_.CloseAllFd();
 
     want_ = want;
@@ -2569,6 +2587,12 @@ void AbilityRecord::SetWant(const Want &want)
     }
     if (multiThread) {
         want_.SetParam(MULTI_THREAD, true);
+    }
+    if (errorInfoEnhance) {
+        want_.SetParam(ERROR_INFO_ENHANCE, true);
+    }
+    if (want_.HasParameter(UISERVICEHOSTPROXY_KEY)) {
+        want_.RemoveParam(UISERVICEHOSTPROXY_KEY);
     }
 }
 
@@ -3085,12 +3109,17 @@ void AbilityRecord::PublishFileOpenEvent(const Want &want)
         EventFwk::CommonEventPublishInfo commonEventPublishInfo;
         std::vector<std::string> subscriberPermissions = {"ohos.permission.MANAGE_LOCAL_ACCOUNTS"};
         commonEventPublishInfo.SetSubscriberPermissions(subscriberPermissions);
-        EventFwk::CommonEventManager::PublishCommonEvent(commonData, commonEventPublishInfo);
+        IN_PROCESS_CALL(EventFwk::CommonEventManager::PublishCommonEvent(commonData, commonEventPublishInfo));
     }
 }
 
 void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId)
 {
+    if (specifyTokenId_ > 0) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "specifyTokenId is %{public}u, cleaned.", specifyTokenId_);
+        tokenId = specifyTokenId_;
+        specifyTokenId_ = 0;
+    }
     // reject sandbox to grant uri permission by start ability
     if (!callerList_.empty() && callerList_.back()) {
         auto caller = callerList_.back()->GetCaller();
@@ -3136,10 +3165,13 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
 void AbilityRecord::GrantUriPermissionInner(Want &want, std::vector<std::string> &uriVec,
     const std::string &targetBundleName, uint32_t tokenId)
 {
-    auto callerTokenId = specifyTokenId_ > 0 ? specifyTokenId_ :
-        static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId));
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "callerTokenId=%{public}u, tokenId=%{public}u, specifyTokenId=%{public}u",
-        callerTokenId, tokenId, specifyTokenId_);
+    auto callerTokenId = tokenId > 0 ? tokenId :
+        static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "callerTokenId=%{public}u, tokenId=%{public}u", callerTokenId, tokenId);
+    if (callerTokenId == 0) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerTokenId is invalid.");
+        return;
+    }
     uint32_t flag = want.GetFlags();
     std::vector<Uri> validUriList = {};
     for (auto &&uriStr : uriVec) {
@@ -3238,6 +3270,7 @@ void AbilityRecord::RevokeUriPermission()
     }
 }
 
+#ifdef WITH_DLP
 void AbilityRecord::HandleDlpAttached()
 {
     if (abilityInfo_.bundleName == DLP_BUNDLE_NAME) {
@@ -3259,6 +3292,7 @@ void AbilityRecord::HandleDlpClosed()
         DelayedSingleton<ConnectionStateManager>::GetInstance()->RemoveDlpAbility(shared_from_this());
     }
 }
+#endif // WITH_DLP
 
 void AbilityRecord::NotifyRemoveShellProcess(int32_t type)
 {
@@ -3544,6 +3578,28 @@ void AbilityRecord::SetDebugAppByWaitingDebugFlag(Want &requestWant, const std::
         IN_PROCESS_CALL_WITHOUT_RET(
             DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearNonPersistWaitingDebugFlag());
     }
+}
+
+void AbilityRecord::SaveConnectWant(const Want &want)
+{
+    std::lock_guard guard(connectWantLock_);
+    if (connectWant_ == nullptr) {
+        connectWant_ = std::make_shared<Want>(want);
+    }
+}
+
+void AbilityRecord::UpdateConnectWant()
+{
+    std::lock_guard guard(connectWantLock_);
+    if (connectWant_ != nullptr) {
+        SetWant(*connectWant_);
+    }
+}
+
+void AbilityRecord::RemoveConnectWant()
+{
+    std::lock_guard guard(connectWantLock_);
+    connectWant_.reset();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

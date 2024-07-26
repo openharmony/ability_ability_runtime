@@ -41,7 +41,6 @@ class AbilityManagerClient {
 public:
     virtual ~AbilityManagerClient();
     static std::shared_ptr<AbilityManagerClient> GetInstance();
-
     void RemoveDeathRecipient();
 
     /**
@@ -1009,7 +1008,8 @@ public:
      * @param handler Indidate handler of WindowManagerService.
      * @return ErrCode Returns ERR_OK on success, others on failure.
      */
-    ErrCode RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler);
+    ErrCode RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler,
+        bool animationEnabled = true);
 
     /**
      * WindowManager notification AbilityManager after the first frame is drawn.
@@ -1033,8 +1033,8 @@ public:
     void UpdateMissionSnapShot(sptr<IRemoteObject> token,
         std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
 
-    ErrCode GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &info);
-    ErrCode SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllow);
+    ErrCode GetDialogSessionInfo(const std::string &dialogSessionId, sptr<DialogSessionInfo> &info);
+    ErrCode SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllow);
 #endif
 
     /**
@@ -1162,6 +1162,13 @@ public:
     void EnableRecoverAbility(sptr<IRemoteObject> token);
 
     /**
+     * @brief Submit save recovery info.
+     *
+     * @param token Ability identify.
+     */
+    void SubmitSaveRecoveryInfo(sptr<IRemoteObject> token);
+
+    /**
      * @brief Schedule recovery ability.
      *
      * @param token Ability identify.
@@ -1180,10 +1187,12 @@ public:
     /**
      * @brief Add free install observer.
      *
+     * @param callerToken The caller ability token.
      * @param observer Free install observer.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode AddFreeInstallObserver(sptr<AbilityRuntime::IFreeInstallObserver> observer);
+    ErrCode AddFreeInstallObserver(const sptr<IRemoteObject> callToken,
+        const sptr<AbilityRuntime::IFreeInstallObserver> observer);
 
     /**
      * Called to verify that the MissionId is valid.
@@ -1398,6 +1407,13 @@ public:
         std::vector<int32_t> &sessionIds);
 
     /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RestartApp(const AAFwk::Want &want);
+
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1409,11 +1425,15 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
-     * @brief Restart app self.
-     * @param want The ability type must be UIAbility.
-     * @return Returns ERR_OK on success, others on failure.
+     * @brief Get ui extension session info
+     *
+     * @param token The ability token.
+     * @param uiExtensionSessionInfo The ui extension session info.
+     * @param userId The user id.
+     * @return int32_t Returns ERR_OK on success, others on failure.
      */
-    int32_t RestartApp(const AAFwk::Want &want);
+    ErrCode GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * Pop-up launch of full-screen atomic service.
@@ -1498,6 +1518,29 @@ public:
      */
     void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid);
 
+    /**
+     * Open atomic service window prior to finishing free install.
+     *
+     * @param bundleName, the bundle name of the atomic service.
+     * @param moduleName, the module name of the atomic service.
+     * @param abilityName, the ability name of the atomic service.
+     * @param startTime, the starting time of the free install task.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t PreStartMission(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, const std::string& startTime);
+
+    /**
+     * Open link of ability and atomic service.
+     *
+     * @param want Ability want.
+     * @param callerToken Caller ability token.
+     * @param userId User ID.
+     * @param requestCode Ability request code.
+     * @return Returns ERR_OK on success, others on failure.
+    */
+    int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode);
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);
@@ -1513,10 +1556,13 @@ private:
 
     sptr<IAbilityManager> GetAbilityManager();
     void ResetProxy(wptr<IRemoteObject> remote);
+#ifdef WITH_DLP
     void HandleDlpApp(Want &want);
+#endif // WITH_DLP
 
     static std::once_flag singletonFlag_;
     std::recursive_mutex mutex_;
+    std::mutex topAbilityMutex_;
     static std::shared_ptr<AbilityManagerClient> instance_;
     sptr<IAbilityManager> proxy_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;

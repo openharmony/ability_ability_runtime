@@ -163,6 +163,17 @@ public:
     virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
+     * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual AppMgrResultCode ForceKillApplication(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0);
+
+    /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
      *
      * @param  bundleName, bundle name in Application record.
@@ -292,8 +303,9 @@ public:
      * Prepare terminate.
      *
      * @param token Ability identify.
+     * @param clearMissionFlag Clear mission flag.
      */
-    virtual void PrepareTerminate(const sptr<IRemoteObject> &token);
+    virtual void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
     /**
      * Get running process information by ability token.
@@ -517,6 +529,14 @@ public:
     int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData);
 
     /**
+     * Set Appfreeze Detect Filter
+     *
+     * @param pid the process pid.
+     * @return Returns true on success, others on failure.
+     */
+    bool SetAppFreezeFilter(int32_t pid);
+
+    /**
      * Set AbilityForegroundingFlag of an app-record to true.
      *
      * @param pid, pid.
@@ -663,18 +683,18 @@ public:
     int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener);
 
     /**
-     * Whether the current application process is the last surviving process.
-     *
-     * @return Returns true is final application process, others return false.
-     */
-    bool IsFinalAppProcess();
-
-    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
      */
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
+
+    /**
+     * Whether the current application process is the last surviving process.
+     *
+     * @return Returns true is final application process, others return false.
+     */
+    bool IsFinalAppProcess();
 
     int32_t RegisterRenderStateObserver(const sptr<IRenderStateObserver> &observer);
 
@@ -755,6 +775,32 @@ public:
      * @return Returns RESULT_OK on success, others on failure.
      */
     virtual AppMgrResultCode AttachedToStatusBar(const sptr<IRemoteObject> &token);
+
+    int32_t NotifyProcessDependedOnWeb();
+
+    void KillProcessDependedOnWeb();
+    
+    /**
+     * Temporarily block the process cache feature.
+     *
+     * @param pids the pids of the processes that should be blocked.
+     */
+    virtual AppMgrResultCode BlockProcessCacheByPids(const std::vector<int32_t> &pids);
+
+    /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

@@ -22,7 +22,6 @@
 #include "appmgr/app_mgr_constants.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
 
 namespace OHOS {
@@ -183,14 +182,14 @@ void AppScheduler::KillProcessesByUserId(int32_t userId)
 
 void AppScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->KillProcessesByPids(pids);
 }
 
 void AppScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->AttachPidToParent(token, callerToken);
 }
@@ -259,6 +258,20 @@ int AppScheduler::KillApplication(const std::string &bundleName, const bool clea
     return ERR_OK;
 }
 
+int AppScheduler::ForceKillApplication(const std::string &bundleName,
+    const int userId, const int appIndex)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Called.");
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    int ret = (int)appMgrClient_->ForceKillApplication(bundleName, userId, appIndex);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to force kill application.");
+        return INNER_ERR;
+    }
+
+    return ERR_OK;
+}
+
 int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t uid)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
@@ -278,10 +291,10 @@ void AppScheduler::AttachTimeOut(const sptr<IRemoteObject> &token)
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->AbilityAttachTimeOut(token));
 }
 
-void AppScheduler::PrepareTerminate(const sptr<IRemoteObject> &token)
+void AppScheduler::PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag)
 {
     CHECK_POINTER(appMgrClient_);
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->PrepareTerminate(token));
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->PrepareTerminate(token, clearMissionFlag));
 }
 
 void AppScheduler::OnAppStateChanged(const AppExecFwk::AppProcessData &appData)
@@ -597,9 +610,33 @@ bool AppScheduler::IsMemorySizeSufficent() const
 
 void AppScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->AttachedToStatusBar(token);
 }
-}  // namespace AAFwk
+
+void AppScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    CHECK_POINTER(appMgrClient_);
+    appMgrClient_->BlockProcessCacheByPids(pids);
+}
+
+bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
+}
+bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsProcessContainsOnlyUIAbility(pid);
+}
+} // namespace AAFwk
 }  // namespace OHOS

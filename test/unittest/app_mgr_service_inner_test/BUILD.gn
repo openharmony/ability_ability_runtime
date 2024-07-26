@@ -63,6 +63,7 @@ ohos_unittest("AppMgrServiceInnerTest") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "image_framework:image_native",
     "init:libbeget_proxy",
     "init:libbegetutil",
@@ -82,6 +83,11 @@ ohos_unittest("AppMgrServiceInnerTest") {
 
   if (background_task_mgr_continuous_task_enable) {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
+
+  if (ability_runtime_feature_sandboxmanager) {
+    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines += [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
 }
 

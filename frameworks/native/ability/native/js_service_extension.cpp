@@ -22,7 +22,6 @@
 #include "configuration_utils.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "insight_intent_execute_param.h"
 #include "insight_intent_execute_result.h"
 #include "insight_intent_executor_info.h"
@@ -405,9 +404,9 @@ void JsServiceExtension::OnDisconnect(const AAFwk::Want &want)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HandleScope handleScope(jsRuntime_);
     Extension::OnDisconnect(want);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "%{public}s begin.", __func__);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     CallOnDisconnect(want, false);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "%{public}s end.", __func__);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "end");
 }
 
 void JsServiceExtension::OnDisconnect(const AAFwk::Want &want,
@@ -416,7 +415,7 @@ void JsServiceExtension::OnDisconnect(const AAFwk::Want &want,
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HandleScope handleScope(jsRuntime_);
     Extension::OnDisconnect(want);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "%{public}s start.", __func__);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     napi_value result = CallOnDisconnect(want, true);
     bool isPromise = CheckPromise(result);
     if (!isPromise) {
@@ -431,7 +430,7 @@ void JsServiceExtension::OnDisconnect(const AAFwk::Want &want,
         isAsyncCallback = true;
     }
 
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "%{public}s end.", __func__);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "end");
 }
 
 void JsServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
@@ -454,7 +453,7 @@ void JsServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int st
 
 bool JsServiceExtension::HandleInsightIntent(const AAFwk::Want &want)
 {
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called.");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     auto callback = std::make_unique<InsightIntentExecutorAsyncCallback>();
     callback.reset(InsightIntentExecutorAsyncCallback::Create());
     if (callback == nullptr) {
@@ -475,7 +474,7 @@ bool JsServiceExtension::HandleInsightIntent(const AAFwk::Want &want)
         executeParam->insightIntentName_.c_str(), executeParam->executeMode_, executeParam->insightIntentId_);
     auto asyncCallback = [weak = weak_from_this(), intentId = executeParam->insightIntentId_]
         (AppExecFwk::InsightIntentExecuteResult result) {
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "intentId %{public}" PRIu64"", intentId);
         auto extension = weak.lock();
         if (extension == nullptr) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "extension is nullptr.");
@@ -508,7 +507,7 @@ bool JsServiceExtension::GetInsightIntentExecutorInfo(const Want &want,
     const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &executeParam,
     InsightIntentExecutorInfo &executorInfo)
 {
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called.");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     auto context = GetContext();
     if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Param invalid.");
@@ -540,7 +539,7 @@ bool JsServiceExtension::OnInsightIntentExecuteDone(uint64_t intentId,
     }
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token, intentId, result);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Notify execute done faild.");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Notify execute done failed");
         return false;
     }
     return true;
@@ -736,7 +735,7 @@ void JsServiceExtension::OnConfigurationUpdated(const AppExecFwk::Configuration&
 
 void JsServiceExtension::ConfigurationUpdated()
 {
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called.");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
 
