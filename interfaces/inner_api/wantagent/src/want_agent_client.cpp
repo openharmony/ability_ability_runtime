@@ -24,7 +24,6 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-#include "xcollie/xcollie.h"
 
 using namespace OHOS::AbilityRuntime;
 namespace OHOS {
@@ -154,7 +153,6 @@ ErrCode WantAgentClient::GetPendingWantBundleName(const sptr<IWantSender> &targe
     CHECK_POINTER_AND_RETURN(target, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
-    int32_t timeId = HiviewDFX::Xcollie::GetInstance().SetTimer("wantAgent::getBundleName", 10, nullptr, nullptr, 1);
     ErrCode error;
     MessageParcel reply;
     if (!SendRequest(static_cast<int32_t>(AbilityManagerInterfaceCode::GET_PENDING_WANT_BUNDLENAME),
@@ -162,7 +160,6 @@ ErrCode WantAgentClient::GetPendingWantBundleName(const sptr<IWantSender> &targe
         return error;
     }
     bundleName = Str16ToStr8(reply.ReadString16());
-    HiviewDFX::Xcollie::GetInstance().CancelTimer(timeId);
     return ERR_OK;
 }
 
@@ -186,7 +183,6 @@ ErrCode WantAgentClient::GetPendingWantType(sptr<IWantSender> target, int32_t &t
     CHECK_POINTER_AND_RETURN(target, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
-    int32_t timeId = HiviewDFX::Xcollie::GetInstance().SetTimer("wantAgent::GetType", 10, nullptr, nullptr, 1);
     ErrCode error;
     MessageParcel reply;
     if (!SendRequest(static_cast<int32_t>(AbilityManagerInterfaceCode::GET_PENDING_WANT_TYPE),
@@ -195,7 +191,6 @@ ErrCode WantAgentClient::GetPendingWantType(sptr<IWantSender> target, int32_t &t
     }
     type = reply.ReadInt32();
     type < 0 ? type = 0 : type;
-    HiviewDFX::Xcollie::GetInstance().CancelTimer(timeId);
     return ERR_OK;
 }
 
