@@ -1635,9 +1635,7 @@ void AbilityRecord::ConnectAbility()
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
     }
-#ifdef SUPPORT_SCREEN
     GrantUriPermissionForServiceExtension();
-#endif // SUPPORT_SCREEN
     lifecycleDeal_->ConnectAbility(GetWant());
     isConnected = true;
 }
@@ -1649,9 +1647,7 @@ void AbilityRecord::ConnectUIServiceExtAbility(const Want &want)
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
     }
-#ifdef SUPPORT_SCREEN
     GrantUriPermissionForServiceExtension();
-#endif // SUPPORT_SCREEN
     lifecycleDeal_->ConnectAbility(want);
     isConnected = true;
 }
@@ -1682,7 +1678,6 @@ void AbilityRecord::DisconnectUIServiceExtAbility(const Want &want)
     }
 }
 
-#ifdef SUPPORT_SCREEN
 bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
     if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
@@ -1696,14 +1691,11 @@ bool AbilityRecord::GrantUriPermissionForServiceExtension()
     }
     return false;
 }
-#endif // SUPPORT_SCREEN
+
 void AbilityRecord::CommandAbility()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "startId_:%{public}d.", startId_);
     CHECK_POINTER(lifecycleDeal_);
-#ifdef SUPPORT_SCREEN
-    GrantUriPermissionForServiceExtension();
-#endif // SUPPORT_SCREEN
     lifecycleDeal_->CommandAbility(GetWant(), false, startId_);
 }
 
@@ -3586,6 +3578,28 @@ void AbilityRecord::SetDebugAppByWaitingDebugFlag(Want &requestWant, const std::
         IN_PROCESS_CALL_WITHOUT_RET(
             DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearNonPersistWaitingDebugFlag());
     }
+}
+
+void AbilityRecord::SaveConnectWant(const Want &want)
+{
+    std::lock_guard guard(connectWantLock_);
+    if (connectWant_ == nullptr) {
+        connectWant_ = std::make_shared<Want>(want);
+    }
+}
+
+void AbilityRecord::UpdateConnectWant()
+{
+    std::lock_guard guard(connectWantLock_);
+    if (connectWant_ != nullptr) {
+        SetWant(*connectWant_);
+    }
+}
+
+void AbilityRecord::RemoveConnectWant()
+{
+    std::lock_guard guard(connectWantLock_);
+    connectWant_.reset();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

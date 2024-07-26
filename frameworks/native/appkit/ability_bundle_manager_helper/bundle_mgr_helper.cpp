@@ -212,7 +212,7 @@ sptr<IBundleMgr> BundleMgrHelper::Connect()
         };
         deathRecipient_ = new (std::nothrow) BundleMgrServiceDeathRecipient(deathCallback);
         if (deathRecipient_ == nullptr) {
-            TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to create death recipient ptr deathRecipient_");
+            TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to create death recipient");
             return nullptr;
         }
         if (bundleMgr_->AsObject() != nullptr) {

@@ -26,7 +26,8 @@
         "ability_runtime_auto_fill_ability",
         "ability_runtime_graphics",
         "ability_runtime_power",
-        "ability_runtime_app_no_response_dialog"
+        "ability_runtime_app_no_response_dialog",
+        "ability_runtime_app_no_response_bundlename"
       ],
       "adapted_system_type": [
           "standard"
@@ -57,6 +58,7 @@
             "ets_runtime",
             "ets_utils",
             "faultloggerd",
+            "app_file_service",
             "ffrt",
             "form_fwk",
             "graphic_2d",
@@ -87,8 +89,8 @@
             "resource_management",
             "resource_schedule_service",
             "safwk",
-            "sandbox_manager",
             "samgr",
+            "sandbox_manager",
             "screenlock_mgr",
             "storage_service",
             "toolchain",

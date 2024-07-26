@@ -137,7 +137,6 @@ void JsEnvironment::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator
         if (sourceMapOperator_ != nullptr && sourceMapOperator_->GetInitStatus()) {
             return sourceMapOperator_->TranslateBySourceMap(rawStack);
         } else {
-            TAG_LOGE(AAFwkTag::JSENV, "SourceMap is not initialized yet");
             return NOT_INIT + rawStack;
         }
     };
@@ -147,7 +146,6 @@ void JsEnvironment::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator
         if (sourceMapOperator_ != nullptr && sourceMapOperator_->GetInitStatus()) {
             return sourceMapOperator_->TranslateUrlPositionBySourceMap(url, line, column);
         }
-        TAG_LOGE(AAFwkTag::JSENV, "SourceMap is not initialized yet");
         return false;
     };
     engine_->RegisterSourceMapTranslateCallback(translateUrlBySourceMapFunc);
@@ -305,12 +303,6 @@ void JsEnvironment::GetHeapPrepare()
     panda::DFXJSNApi::GetHeapPrepare(vm_);
 }
 
-void JsEnvironment::ReInitJsEnvImpl(std::unique_ptr<JsEnvironmentImpl> impl)
-{
-    TAG_LOGD(AAFwkTag::JSENV, "ReInit jsenv impl");
-    impl_ = std::move(impl);
-}
-
 void JsEnvironment::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate)
 {
     if (engine_ == nullptr) {
@@ -319,6 +311,12 @@ void JsEnvironment::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDele
     }
 
     engine_->SetModuleLoadChecker(moduleCheckerDelegate);
+}
+
+void JsEnvironment::ReInitJsEnvImpl(std::unique_ptr<JsEnvironmentImpl> impl)
+{
+    TAG_LOGD(AAFwkTag::JSENV, "ReInit jsenv impl.");
+    impl_ = std::move(impl);
 }
 
 void JsEnvironment::SetRequestAotCallback(const RequestAotCallback& cb)
