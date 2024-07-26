@@ -484,8 +484,7 @@ ErrCode WantAgentHelper::GetWant(const std::shared_ptr<WantAgent> &agent, std::s
         XCOLLIE_TIMEOUT,
         nullptr,
         nullptr,
-        HiviewDFX::XCOLLIE_FLAG_LOG|HiviewDFX::XCOLLIE_FLAG_RECOVERY
-    );
+        HiviewDFX::XCOLLIE_FLAG_LOG|HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     if ((agent == nullptr) || (agent->GetPendingWant() == nullptr)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "WantAgent or PendingWant invalid input param.");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
