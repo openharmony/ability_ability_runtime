@@ -1125,7 +1125,7 @@ public:
      * @return Returns ERR_OK is test ability, others is not test ability.
      */
     int32_t CheckCallingIsUserTestModeInner(const pid_t pid, bool &isUserTest);
-  
+
     bool GetSceneBoardAttachFlag() const;
 
     void SetSceneBoardAttachFlag(bool flag);
@@ -1150,6 +1150,8 @@ public:
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
 
     bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
+
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1511,6 +1513,7 @@ private:
 
     AAFwk::EventInfo BuildEventInfo(std::shared_ptr<AppRunningRecord> appRecord) const;
 
+    void NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord> appRecord);
 private:
     /**
      * Notify application status.
@@ -1521,8 +1524,8 @@ private:
      *
      * @return
      */
-    void NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t userId, const int32_t callerUid,
-        const std::string &eventData);
+    void NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId, const int32_t userId,
+        const int32_t callerUid, const std::string &eventData);
     void SendHiSysEvent(const int32_t innerEventId, const int64_t eventId);
     int FinishUserTestLocked(
         const std::string &msg, const int64_t &resultCode, const std::shared_ptr<AppRunningRecord> &appRecord);

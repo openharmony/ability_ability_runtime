@@ -70,6 +70,9 @@
 #include "render_state_observer_manager.h"
 #include "startup_util.h"
 #include "string_ex.h"
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+#include "sandbox_manager_kit.h"
+#endif
 #include "system_ability_definition.h"
 #include "time_util.h"
 #include "ui_extension_utils.h"
@@ -134,6 +137,8 @@ constexpr int REGISTER_VISIBILITY_DELAY = 5000;
 // Max render process number limitation for phone device.
 constexpr int PHONE_MAX_RENDER_PROCESS_NUM = 40;
 constexpr int PROCESS_RESTART_MARGIN_MICRO_SECONDS = 2000;
+constexpr const int32_t API10 = 10;
+constexpr const int32_t API_VERSION_MOD = 100;
 constexpr const char* CLASS_NAME = "ohos.app.MainThread";
 constexpr const char* FUNC_NAME = "main";
 constexpr const char* RENDER_PARAM = "invalidparam";
@@ -146,7 +151,11 @@ constexpr const char* ENTER_SANDBOX = "sandboxApp";
 constexpr const char* PERMISSION_INTERNET = "ohos.permission.INTERNET";
 constexpr const char* PERMISSION_MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 constexpr const char* PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
+
+#ifdef WITH_DLP
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
+#endif // WITH_DLP
+
 constexpr const char* SUPPORT_ISOLATION_MODE = "persist.bms.supportIsolationMode";
 constexpr const char* SUPPORT_SERVICE_EXT_MULTI_PROCESS = "component.startup.extension.multiprocess.enable";
 constexpr const char* SERVICE_EXT_MULTI_PROCESS_WHITE_LIST = "component.startup.extension.multiprocess.whitelist";
@@ -166,6 +175,7 @@ constexpr const char* GPU_PROCESS_NAME = ":gpu";
 constexpr const char* GPU_PROCESS_TYPE = "gpu";
 constexpr const char* FONT_WGHT_SCALE = "persist.sys.font_wght_scale_for_user0";
 constexpr const char* FONT_SCALE = "persist.sys.font_scale_for_user0";
+const std::string TOKEN_ID = "TOKEN_ID";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
@@ -856,7 +866,12 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
     std::string connector = "##";
     std::string traceName = __PRETTY_FUNCTION__ + connector + eventInfo.bundleName;
     HITRACE_METER_NAME(HITRACE_TAG_APP, traceName);
-    CHECK_POINTER_AND_RETURN_LOG(appScheduler, "app client is null");
+    if (appScheduler == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Attach null, pid:%{public}d. bundleName: %{public}s.", pid,
+            eventInfo.bundleName.c_str());
+        NotifyAppAttachFailed(appRecord);
+        return;
+    }
     TAG_LOGI(AAFwkTag::APPMGR, "attach, pid:%{public}d.", pid);
     sptr<AppDeathRecipient> appDeathRecipient = new (std::nothrow) AppDeathRecipient();
     CHECK_POINTER_AND_RETURN_LOG(appDeathRecipient, "Failed to create death recipient.");
@@ -882,6 +897,23 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_ATTACH, HiSysEventType::BEHAVIOR, eventInfo);
+}
+
+void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord> appRecord)
+{
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "AppRecord null.");
+    std::vector<sptr<IRemoteObject>> abilityTokens;
+    for (const auto &token : appRecord->GetAbilities()) {
+        abilityTokens.emplace_back(token.first);
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "Attach failed name: %{public}s %{public}zu", appRecord->GetProcessName().c_str(),
+        abilityTokens.size());
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &callback : appStateCallbacks_) {
+        if (callback != nullptr) {
+            callback->OnAppRemoteDied(abilityTokens);
+        }
+    }
 }
 
 void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecord> &appRecord)
@@ -1401,7 +1433,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
     if (userId == DEFAULT_INVAL_VALUE) {
         newUserId = GetUserIdByUid(callerUid);
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "userId:%{public}d", userId);
+    TAG_LOGI(AAFwkTag::APPMGR, "userId:%{public}d, appIndex:%{public}d", newUserId, appCloneIndex);
     return ClearUpApplicationDataByUserId(bundleName, callerUid, callerPid, appCloneIndex, newUserId);
 }
 
@@ -1443,7 +1475,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
     int32_t result = AccessToken::AccessTokenKit::ClearUserGrantedPermissionState(tokenId);
     if (result) {
         TAG_LOGE(AAFwkTag::APPMGR, "ClearUserGrantedPermissionState failed, ret:%{public}d", result);
-        return ERR_PERMISSION_DENIED;
+        return AAFwk::ERR_APP_CLONE_INDEX_INVALID;
     }
     // 2.delete bundle side user data
     if (!IN_PROCESS_CALL(bundleMgrHelper->CleanBundleDataFiles(bundleName, userId, appCloneIndex))) {
@@ -1468,7 +1500,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
         TAG_LOGW(
             AAFwkTag::APPMGR, "Distributeddata clear app storage failed, bundleName:%{public}s", bundleName.c_str());
     }
-    NotifyAppStatusByCallerUid(bundleName, userId, callerUid,
+    NotifyAppStatusByCallerUid(bundleName, tokenId, userId, callerUid,
         EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
     return ERR_OK;
 }
@@ -1972,7 +2004,9 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
         int32_t appIndex = 0;
         (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, appIndex);
         appRecord->SetAppIndex(appIndex);
+#ifdef WITH_DLP
         appRecord->SetSecurityFlag(want->GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
+#endif // WITH_DLP
         appRecord->SetRequestProcCode(want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0));
         appRecord->SetCallerPid(want->GetIntParam(Want::PARAM_RESV_CALLER_PID, -1));
         appRecord->SetCallerUid(want->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1));
@@ -2298,7 +2332,9 @@ void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObj
     }
 
     if (want) {
+#ifdef WITH_DLP
         want->SetParam(DLP_PARAMS_SECURITY_FLAG, appRecord->GetSecurityFlag());
+#endif // WITH_DLP
 
         auto isDebugApp = want->GetBoolParam(DEBUG_APP, false);
         if (isDebugApp && !appRecord->IsDebugApp()) {
@@ -2890,6 +2926,17 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
         return;
     }
+    
+    #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    bool checkApiVersion = (appInfo && (appInfo->apiTargetVersion % API_VERSION_MOD == API10));
+    TAG_LOGD(AAFwkTag::APPMGR, "version of api is %{public}d", appInfo->apiTargetVersion % API_VERSION_MOD);
+    if (checkApiVersion && AAFwk::AppUtils::GetInstance().IsGrantPersistUriPermission()) {
+        uint32_t tokenId = appInfo->accessTokenId;
+        auto sandboxRet = AccessControl::SandboxManager::SandboxManagerKit::StartAccessingByTokenId(tokenId);
+        TAG_LOGI(AAFwkTag::APPMGR, "tokenId = %{public}u, ret = %{public}d", tokenId, sandboxRet);
+    }
+    #endif
+    
     TAG_LOGI(AAFwkTag::APPMGR, "Start process success, pid: %{public}d, processName: %{public}s.",
         pid, processName.c_str());
     SetRunningSharedBundleList(bundleName, startMsg.hspList);
@@ -3583,17 +3630,18 @@ void AppMgrServiceInner::NotifyAppStatus(const std::string &bundleName, const st
     EventFwk::CommonEventManager::PublishCommonEvent(commonData);
 }
 
-void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t userId,
-    const int32_t callerUid, const std::string &eventData)
+void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId,
+    const int32_t userId, const int32_t callerUid, const std::string &eventData)
 {
     TAG_LOGI(AAFwkTag::APPMGR,
-        "%{public}s called, bundle name is %{public}s, , userId is %{public}d, event is %{public}s", __func__,
+        "%{public}s called, bundle name is %{public}s, userId is %{public}d, event is %{public}s", __func__,
         bundleName.c_str(), userId, eventData.c_str());
     Want want;
     want.SetAction(eventData);
     ElementName element;
     element.SetBundleName(bundleName);
     want.SetElement(element);
+    want.SetParam(TOKEN_ID, tokenId);
     want.SetParam(Constants::USER_ID, userId);
     want.SetParam(Constants::UID, callerUid);
     EventFwk::CommonEventData commonData {want};
@@ -7193,5 +7241,30 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
     }
     return ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(bundleName);
 }
-}  // namespace AppExecFwk
+bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr) {
+        return false;
+    }
+    
+    auto abilityRecordList = appRecord->GetAbilities();
+
+    for (auto it = abilityRecordList.begin(); it != abilityRecordList.end(); ++it) {
+        if (it->second == nullptr) {
+            return false;
+        }
+        auto abilityInfo = it->second->GetAbilityInfo();
+        if (abilityInfo == nullptr) {
+            return false;
+        }
+        
+        bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE);
+        if (!isUIAbility) {
+            return false;
+        }
+    }
+    return true;
+}
+} // namespace AppExecFwk
 }  // namespace OHOS
