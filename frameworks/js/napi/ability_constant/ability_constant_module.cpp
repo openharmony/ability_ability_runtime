@@ -15,7 +15,6 @@
 
 #include "ability_window_configuration.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "launch_param.h"
 #include "mission_info.h"
 #include "napi/native_api.h"
@@ -32,7 +31,7 @@ enum class MemoryLevel {
 
 static napi_status SetEnumItem(napi_env env, napi_value object, const char* name, int32_t value)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_status status;
     napi_value itemName;
     napi_value itemValue;
@@ -49,7 +48,7 @@ static napi_status SetEnumItem(napi_env env, napi_value object, const char* name
 
 static napi_value InitLaunchReasonObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -68,7 +67,7 @@ static napi_value InitLaunchReasonObject(napi_env env)
 
 static napi_value InitLastExitReasonObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -88,7 +87,7 @@ static napi_value InitLastExitReasonObject(napi_env env)
 
 static napi_value InitOnContinueResultObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -113,7 +112,7 @@ static napi_value InitContinueStateObject(napi_env env)
 
 static napi_value InitWindowModeObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -130,7 +129,7 @@ static napi_value InitWindowModeObject(napi_env env)
 // AbilityConstant.OnSaveResult
 static napi_value InitOnSaveResultEnum(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "ALL_AGREE", AppExecFwk::ALL_AGREE));
@@ -146,7 +145,7 @@ static napi_value InitOnSaveResultEnum(napi_env env)
 // AbilityConstant.StateType
 static napi_value InitStateTypeEnum(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "CONTINUATION", AppExecFwk::CONTINUATION));
@@ -157,7 +156,7 @@ static napi_value InitStateTypeEnum(napi_env env)
 
 static napi_value InitMemoryLevelObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -179,49 +178,49 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
 {
     napi_value launchReason = InitLaunchReasonObject(env);
     if (launchReason == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to create launch reason object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null launchReason");
         return nullptr;
     }
 
     napi_value lastExitReason = InitLastExitReasonObject(env);
     if (lastExitReason == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to create last exit reason object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null lastExitReason");
         return nullptr;
     }
 
     napi_value onContinueResult = InitOnContinueResultObject(env);
     if (onContinueResult == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to create onContinue result object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null onContinueResult");
         return nullptr;
     }
 
     napi_value continueState = InitContinueStateObject(env);
     if (continueState == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to create continue state object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null continueState");
         return nullptr;
     }
 
     napi_value windowMode = InitWindowModeObject(env);
     if (windowMode == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to create window mode object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null windowMode");
         return nullptr;
     }
 
     napi_value memoryLevel = InitMemoryLevelObject(env);
     if (memoryLevel == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to create memory level object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null memoryLevel");
         return nullptr;
     }
 
     napi_value stateType = InitStateTypeEnum(env);
     if (stateType == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to create state type object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null stateType");
         return nullptr;
     }
 
     napi_value saveResult = InitOnSaveResultEnum(env);
     if (saveResult == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to create save result object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null saveResult");
         return nullptr;
     }
 
@@ -237,7 +236,7 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
     };
     napi_status status = napi_define_properties(env, exports, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error to define properties for exports");
+        TAG_LOGE(AAFwkTag::JSNAPI, "define properties failed");
         return nullptr;
     }
 

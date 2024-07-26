@@ -110,6 +110,7 @@ private:
     int32_t HandleStartNativeProcessForDebugger(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyFault(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyFaultBySA(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetAppFreezeFilter(MessageParcel &data, MessageParcel &reply);
     int32_t HandleJudgeSandboxByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetRunningProcessInfoByPid(MessageParcel &data, MessageParcel &reply);
@@ -127,8 +128,8 @@ private:
     int32_t HandleGetChildProcessInfoForSelf(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachChildProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleExitChildProcessSafely(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleClearUpApplicationDataBySelf(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateRenderState(MessageParcel &data, MessageParcel &reply);
@@ -137,14 +138,29 @@ private:
     int32_t HandleGetAllUIExtensionRootHostPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllUIExtensionProviderPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyMemorySizeStateChanged(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSaveBrowserChannel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleCheckCallingIsUserTestMode(MessageParcel &data, MessageParcel &reply);
-    using AppMgrFunc = int32_t (AppMgrStub::*)(MessageParcel &data, MessageParcel &reply);
-    std::map<uint32_t, AppMgrFunc> memberFuncMap_;
-
+    int32_t HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleKillProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRestartResidentProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRemoteRequestInner(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerFifth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerSixth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
     DISALLOW_COPY_AND_MOVE(AppMgrStub);
 };
 }  // namespace AppExecFwk

@@ -22,7 +22,7 @@
 #include "napi_remote_object.h"
 #include "iremote_object.h"
 #include "session_info.h"
-#include "foundation/window/window_manager/interfaces/innerkits/wm/window.h"
+#include "wm/window.h"
 #include "launch_param.h"
 #include "ui_extension_window_command.h"
 #include "want.h"
@@ -256,7 +256,7 @@ public:
 
     virtual void OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result);
-        
+
     virtual bool HandleInsightIntent(const AAFwk::Want &want);
 
     virtual bool OnInsightIntentExecuteDone(uint64_t intentId, const AppExecFwk::InsightIntentExecuteResult &result);

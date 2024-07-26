@@ -16,7 +16,6 @@
 #include "ability_delegator.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ohos_application.h"
 #include "ability_manager_client.h"
 #include "ability_delegator_registry.h"
@@ -666,7 +665,7 @@ std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::FindPropertyByToken
         }
 
         if (token == it->token_) {
-            TAG_LOGI(AAFwkTag::DELEGATOR, "Property exists");
+            TAG_LOGI(AAFwkTag::DELEGATOR, "Property exist");
             return it;
         }
     }
@@ -690,7 +689,7 @@ std::shared_ptr<ADelegatorAbilityProperty> AbilityDelegator::FindPropertyByName(
         }
 
         if (name == it->fullName_) {
-            TAG_LOGI(AAFwkTag::DELEGATOR, "Property exists");
+            TAG_LOGI(AAFwkTag::DELEGATOR, "Property exist");
             return it;
         }
     }

@@ -19,7 +19,6 @@
 #include "event_handler.h"
 #include "event_runner.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_error_utils.h"
 #include "js_mission_info_utils.h"
 #include "js_mission_listener.h"
@@ -703,7 +702,6 @@ private:
     {
         TAG_LOGI(AAFwkTag::MISSION, "%{public}s is called", __FUNCTION__);
         std::vector<int32_t> missionIds;
-
         if (argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::MISSION, "OnMoveMissionsToBackground Not enough params");
             ThrowTooFewParametersError(env);
@@ -727,7 +725,6 @@ private:
             }
             missionIds.push_back(missionId);
         }
-
         NapiAsyncTask::CompleteCallback complete =
             [missionIds](napi_env env, NapiAsyncTask &task, int32_t status) {
                 std::vector<int32_t> resultMissionIds;
@@ -745,7 +742,6 @@ private:
                         CreateJsErrorByNativeErr(env, ret, PermissionConstants::PERMISSION_MANAGE_MISSION));
                 }
             };
-
         napi_value lastParam = (argc <= 1) ? nullptr : argv[1];
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("MissionManager::OnMoveMissionsToBackground",

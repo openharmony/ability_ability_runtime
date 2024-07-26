@@ -17,7 +17,6 @@
 
 #include "ffrt.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_environment_impl.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "uncaught_exception_callback.h"
@@ -182,7 +181,7 @@ bool JsEnvironment::LoadScript(const std::string& path, std::vector<uint8_t>* bu
 }
 
 bool JsEnvironment::StartDebugger(
-    std::string& option, uint32_t socketFd, bool isDebugApp, const DebuggerPostTask &debuggerPostTask)
+    std::string& option, uint32_t socketFd, bool isDebugApp)
 {
     TAG_LOGD(AAFwkTag::JSENV, "call.");
     if (vm_ == nullptr) {
@@ -194,18 +193,7 @@ bool JsEnvironment::StartDebugger(
         TAG_LOGE(AAFwkTag::JSENV, "Abnormal parsing of tid results.");
         return false;
     }
-    if (isDebugApp) {
-        debugMode_ = panda::JSNApi::StartDebuggerForSocketPair(identifierId, socketFd);
-    } else {
-        if (debuggerPostTask == nullptr) {
-            TAG_LOGE(AAFwkTag::JSENV, "debuggerPostTask is nullptr.");
-            return false;
-        }
-        auto startDebuggerForSocketPairTask = [identifierId, socketFd, this]() {
-            debugMode_ = panda::JSNApi::StartDebuggerForSocketPair(identifierId, socketFd);
-        };
-        debuggerPostTask(startDebuggerForSocketPairTask);
-    }
+    debugMode_ = panda::JSNApi::StartDebuggerForSocketPair(identifierId, socketFd);
     return debugMode_;
 }
 
@@ -319,12 +307,6 @@ void JsEnvironment::GetHeapPrepare()
     panda::DFXJSNApi::GetHeapPrepare(vm_);
 }
 
-void JsEnvironment::ReInitJsEnvImpl(std::unique_ptr<JsEnvironmentImpl> impl)
-{
-    TAG_LOGD(AAFwkTag::JSENV, "ReInit jsenv impl.");
-    impl_ = std::move(impl);
-}
-
 void JsEnvironment::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate)
 {
     if (engine_ == nullptr) {
@@ -333,6 +315,12 @@ void JsEnvironment::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDele
     }
 
     engine_->SetModuleLoadChecker(moduleCheckerDelegate);
+}
+
+void JsEnvironment::ReInitJsEnvImpl(std::unique_ptr<JsEnvironmentImpl> impl)
+{
+    TAG_LOGD(AAFwkTag::JSENV, "ReInit jsenv impl.");
+    impl_ = std::move(impl);
 }
 
 void JsEnvironment::SetRequestAotCallback(const RequestAotCallback& cb)

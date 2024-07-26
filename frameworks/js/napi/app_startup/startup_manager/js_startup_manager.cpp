@@ -17,7 +17,6 @@
 
 #include "ability_runtime_error_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_startup_config.h"
 #include "js_startup_task_result.h"
 #include "napi/native_api.h"
@@ -34,7 +33,7 @@ constexpr size_t ARGC_TWO = 2;
 } // namespace
 void JsStartupManager::Finalizer(napi_env env, void *data, void *hint)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     std::unique_ptr<JsStartupManager>(static_cast<JsStartupManager *>(data));
 }
 
@@ -65,9 +64,9 @@ napi_value JsStartupManager::RemoveResult(napi_env env, napi_callback_info info)
 
 napi_value JsStartupManager::OnRun(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (info.argc < ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::STARTUP, "the param is invalid.");
+        TAG_LOGE(AAFwkTag::STARTUP, "invalid argc");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -106,16 +105,16 @@ napi_value JsStartupManager::OnRun(napi_env env, NapiCallbackInfo &info)
 
 napi_value JsStartupManager::OnRemoveAllResult(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     DelayedSingleton<StartupManager>::GetInstance()->RemoveAllResult();
     return CreateJsUndefined(env);
 }
 
 napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (info.argc < ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::STARTUP, "the param is invalid.");
+        TAG_LOGE(AAFwkTag::STARTUP, "invalid argc");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
@@ -140,7 +139,7 @@ napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
     }
     std::shared_ptr<JsStartupTaskResult> jsResult = std::static_pointer_cast<JsStartupTaskResult>(result);
     if (jsResult == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s, failed to convert to js result.", startupTask.c_str());
+        TAG_LOGE(AAFwkTag::STARTUP, "null jsResult: %{public}s", startupTask.c_str());
         ThrowInvalidParamError(env, "%{public}s, failed to convert to js result.");
         return CreateJsUndefined(env);
     }
@@ -153,7 +152,7 @@ napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
 
 napi_value JsStartupManager::OnIsInitialized(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::STARTUP, "the param is invalid.");
         ThrowTooFewParametersError(env);
@@ -179,7 +178,7 @@ napi_value JsStartupManager::OnIsInitialized(napi_env env, NapiCallbackInfo &inf
 
 napi_value JsStartupManager::OnRemoveResult(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::STARTUP, "the param is invalid.");
         ThrowTooFewParametersError(env);
@@ -204,7 +203,7 @@ napi_value JsStartupManager::OnRemoveResult(napi_env env, NapiCallbackInfo &info
 
 napi_value JsStartupManagerInit(napi_env env, napi_value exportObj)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (env == nullptr || exportObj == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "Env or exportObj nullptr.");
         return nullptr;
