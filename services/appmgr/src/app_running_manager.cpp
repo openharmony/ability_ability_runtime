@@ -836,7 +836,7 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
         if (appRecord && !isCollaboratorReserveType(appRecord)) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
             std::lock_guard guard(updateConfigurationDelayedLock_);
-            if (appRecord->NeedUpdateConfigurationBackground() &&
+            if (appRecord->NeedUpdateConfigurationBackground() ||
                 appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = false;
                 result = appRecord->UpdateConfiguration(config);
