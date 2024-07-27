@@ -401,7 +401,7 @@ private:
             if (ret == 0) {
                 task.Resolve(env, CreateJsValue(env, ret));
             } else {
-                task->Reject(env, CreateJsError(env, AAFwk::CLEAR_APPLICATION_DATA_FAIL,
+                task.Reject(env, CreateJsError(env, AAFwk::CLEAR_APPLICATION_DATA_FAIL,
                     "clear up application failed."));
             }
         };
