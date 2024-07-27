@@ -13,17 +13,27 @@
  * limitations under the License.
  */
 
-class AsyncTaskCallback {
-  private __impl__: AsyncTaskCallback;
-  constructor(object) {
-    'use sendable';
-    this.__impl__ = object;
-  }
+#ifndef OHOS_ABILITY_RUNTIME_WINDOW_CONFIG_H
+#define OHOS_ABILITY_RUNTIME_WINDOW_CONFIG_H
 
-  onAsyncTaskCompleted(startupName, startupResult): void {
-    console.log('AsyncTaskCallback onAsyncTaskCompleted called, startupName: ' + startupName);
-    this.__impl__.onAsyncTaskCompleted(startupName, startupResult);
-  }
-}
+#include <string>
 
-export default AsyncTaskCallback;
+#include "parcel.h"
+
+namespace OHOS {
+namespace AAFwk {
+struct WindowConfig : public Parcelable {
+    WindowConfig() = default;
+
+    int32_t windowType = 0;
+    int32_t posx = 0;
+    int32_t posy = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static WindowConfig *Unmarshalling(Parcel &parcel);
+};
+}  // namespace AAFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_WINDOW_CONFIG_H
