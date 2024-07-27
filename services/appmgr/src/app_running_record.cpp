@@ -1856,11 +1856,11 @@ bool AppRunningRecord::NeedUpdateConfigurationBackground()
     auto abilitiesMap = GetAbilities();
     for (const auto &item : abilitiesMap) {
         const auto &abilityRecord = item.second;
-        if (!abilityRecord || !abilityRecord->GetAbilityInfo())
+        if (!abilityRecord || !abilityRecord->GetAbilityInfo()) {
             continue;
         }
         if (abilityRecord->GetAbilityInfo()->type != AppExecFwk::AbilityType::PAGE &&
-            !(AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->type))) {
+            !(AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType))) {
             needUpdate = true;
             break;
         }
