@@ -716,6 +716,15 @@ public:
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) override;
 
     /**
+     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
+     *
+     * @param token,.ability's token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int AbilityWindowConfigTransitionDone(
+        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig) override;
+
+    /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
      *
      * @param token,.service ability's token.
@@ -1741,6 +1750,8 @@ public:
     void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
         const std::string& reason);
 
+    int32_t TerminateMission(int32_t missionId) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2285,6 +2296,8 @@ private:
     std::list<std::string> exportWhiteList_;
 
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
+
+    void PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo);
 
     bool IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
         const std::string &calleeAbilityName);

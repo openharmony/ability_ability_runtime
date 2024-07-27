@@ -423,7 +423,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ForegroundAbility(const Closure &task, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag)
+void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability: %{public}s.", GetURI().c_str());
@@ -1294,6 +1294,11 @@ AbilityState AbilityRecord::GetAbilityState() const
     return currentState_;
 }
 
+WindowConfig AbilityRecord::GetAbilityWindowConfig() const
+{
+    return windowConfig_;
+}
+
 bool AbilityRecord::IsForeground() const
 {
     return currentState_ == AbilityState::FOREGROUND || currentState_ == AbilityState::FOREGROUNDING;
@@ -1635,9 +1640,7 @@ void AbilityRecord::ConnectAbility()
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
     }
-#ifdef SUPPORT_SCREEN
     GrantUriPermissionForServiceExtension();
-#endif // SUPPORT_SCREEN
     lifecycleDeal_->ConnectAbility(GetWant());
     isConnected = true;
 }
@@ -1649,9 +1652,7 @@ void AbilityRecord::ConnectUIServiceExtAbility(const Want &want)
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
     }
-#ifdef SUPPORT_SCREEN
     GrantUriPermissionForServiceExtension();
-#endif // SUPPORT_SCREEN
     lifecycleDeal_->ConnectAbility(want);
     isConnected = true;
 }
@@ -1682,7 +1683,6 @@ void AbilityRecord::DisconnectUIServiceExtAbility(const Want &want)
     }
 }
 
-#ifdef SUPPORT_SCREEN
 bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
     if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
@@ -1696,14 +1696,11 @@ bool AbilityRecord::GrantUriPermissionForServiceExtension()
     }
     return false;
 }
-#endif // SUPPORT_SCREEN
+
 void AbilityRecord::CommandAbility()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "startId_:%{public}d.", startId_);
     CHECK_POINTER(lifecycleDeal_);
-#ifdef SUPPORT_SCREEN
-    GrantUriPermissionForServiceExtension();
-#endif // SUPPORT_SCREEN
     lifecycleDeal_->CommandAbility(GetWant(), false, startId_);
 }
 
@@ -1724,6 +1721,12 @@ void AbilityRecord::SaveAbilityState(const PacMap &inState)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     stateDatas_ = inState;
+}
+
+void AbilityRecord::SaveAbilityWindowConfig(const WindowConfig &windowConfig)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    windowConfig_ = windowConfig;
 }
 
 void AbilityRecord::RestoreAbilityState()
@@ -2344,7 +2347,17 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
     if (isUIExtension) {
         info.emplace_back("      ability type [UIEXTENSION]");
     } else {
-        info.emplace_back("      ability type [SERVICE]");
+        if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+            info.emplace_back("      ability type [UI_SERVICE]");
+            info.emplace_back("      windowConfig windowType [" +
+                              std::to_string(GetAbilityWindowConfig().windowType) + "]");
+            info.emplace_back("      windowConfig rect [" + std::to_string(GetAbilityWindowConfig().posx) + ", " +
+                              std::to_string(GetAbilityWindowConfig().posy) + ", " +
+                              std::to_string(GetAbilityWindowConfig().width) + ", " +
+                              std::to_string(GetAbilityWindowConfig().height) + "]");
+        } else {
+            info.emplace_back("      ability type [SERVICE]");
+        }
     }
     info.emplace_back("      app state #" + AbilityRecord::ConvertAppState(appState_));
 
@@ -3586,6 +3599,28 @@ void AbilityRecord::SetDebugAppByWaitingDebugFlag(Want &requestWant, const std::
         IN_PROCESS_CALL_WITHOUT_RET(
             DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearNonPersistWaitingDebugFlag());
     }
+}
+
+void AbilityRecord::SaveConnectWant(const Want &want)
+{
+    std::lock_guard guard(connectWantLock_);
+    if (connectWant_ == nullptr) {
+        connectWant_ = std::make_shared<Want>(want);
+    }
+}
+
+void AbilityRecord::UpdateConnectWant()
+{
+    std::lock_guard guard(connectWantLock_);
+    if (connectWant_ != nullptr) {
+        SetWant(*connectWant_);
+    }
+}
+
+void AbilityRecord::RemoveConnectWant()
+{
+    std::lock_guard guard(connectWantLock_);
+    connectWant_.reset();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

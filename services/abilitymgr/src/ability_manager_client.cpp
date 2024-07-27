@@ -107,6 +107,14 @@ ErrCode AbilityManagerClient::AbilityTransitionDone(sptr<IRemoteObject> token, i
     return abms->AbilityTransitionDone(token, state, saveData);
 }
 
+ErrCode AbilityManagerClient::AbilityWindowConfigTransitionDone(
+    sptr<IRemoteObject> token, const WindowConfig &windowConfig)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->AbilityWindowConfigTransitionDone(token, windowConfig);
+}
+
 ErrCode AbilityManagerClient::ScheduleConnectAbilityDone(
     sptr<IRemoteObject> token, sptr<IRemoteObject> remoteObject)
 {
@@ -1241,11 +1249,13 @@ ErrCode AbilityManagerClient::DelegatorDoAbilityBackground(sptr<IRemoteObject> t
 ErrCode AbilityManagerClient::SetMissionContinueState(sptr<IRemoteObject> token,
     const AAFwk::ContinueState &state, sptr<IRemoteObject> sessionToken)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "SetMissionContinueState called. state: %{public}d", state);
 #ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
         uint32_t value = static_cast<uint32_t>(state);
         Rosen::ContinueState continueState = static_cast<Rosen::ContinueState>(value);
         auto err = sceneSessionManager->SetSessionContinueState(sessionToken, continueState);
@@ -1943,6 +1953,36 @@ ErrCode AbilityManagerClient::OpenLink(const Want& want, sptr<IRemoteObject> cal
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_INVALID_VALUE(abms);
     return abms->OpenLink(want, callerToken, userId, requestCode);
+}
+
+ErrCode AbilityManagerClient::TerminateMission(int32_t missionId)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "TerminateMission begin.");
+#ifdef SUPPORT_SCREEN
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+        CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        auto err = sceneSessionManager->TerminateSessionByPersistentId(missionId);
+        if (err != OHOS::Rosen::WMError::WM_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "TerminateMission failed, err: %{public}d.", static_cast<int32_t>(err));
+        }
+        if (err == Rosen::WMError::WM_ERROR_INVALID_PERMISSION) {
+            return CHECK_PERMISSION_FAILED;
+        }
+        if (err == Rosen::WMError::WM_ERROR_NOT_SYSTEM_APP) {
+            return ERR_NOT_SYSTEM_APP;
+        }
+        return static_cast<int32_t>(err);
+    }
+#endif //SUPPORT_SCREEN
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_INVALID_VALUE(abms);
+    int32_t ret = abms->TerminateMission(missionId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "TerminateMission failed, err: %{public}d.", ret);
+    }
+    return ret;
 }
 } // namespace AAFwk
 } // namespace OHOS
