@@ -236,6 +236,9 @@ constexpr const char* ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 constexpr const char* PROCESS_EXIT_EVENT_TASK = "Send Process Exit Event Task";
 constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
+constexpr int32_t FILE_GUARD_UID = 6266;
+constexpr const char* KEY_WATERMARK_BUSINESS_NAME = "com.ohos.param.watermarkBusinessName";
+constexpr const char* KEY_IS_WATERMARK_ENABLED = "com.ohos.param.isWatermarkEnabled";
 
 constexpr const char* PROC_SELF_TASK_PATH = "/proc/self/task/";
 
@@ -481,6 +484,61 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     }
 }
 
+void AppMgrServiceInner::MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia,
+    std::string &watermarkBusinessName, bool &isWatermarkEnabled,
+    bool &isFileUri, std::string &processName)
+{
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
+        return;
+    }
+#ifdef INCLUDE_ZURI
+    isFileUri = !want->GetUriString().empty() && want->GetUri().GetScheme() == "file";
+#endif
+    if (isFileUri && kiaInterceptor_ != nullptr) {
+        auto resultCode = kiaInterceptor_->OnIntercept(*want);
+        watermarkBusinessName = want->GetStringParam(KEY_WATERMARK_BUSINESS_NAME);
+        isWatermarkEnabled = want->GetBoolParam(KEY_IS_WATERMARK_ENABLED, false);
+        TAG_LOGI(AAFwkTag::APPMGR, "After calling kiaInterceptor_->OnIntercept,"
+            "resultCode=%{public}d,watermarkBusinessName=%{private}s,isWatermarkEnabled=%{private}d",
+            resultCode, watermarkBusinessName.c_str(),
+            static_cast<int>(isWatermarkEnabled));
+        isKia = (resultCode == ERR_OK && !watermarkBusinessName.empty() && isWatermarkEnabled);
+        if (isKia) {
+            processName += "_KIA";
+        }
+    }
+}
+
+void AppMgrServiceInner::ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
+    const std::string& watermarkBusinessName, bool isWatermarkEnabled)
+{
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr");
+        return;
+    }
+    if (!isKia) {
+        return;
+    }
+#ifdef SUPPORT_SCREEN
+    TAG_LOGI(AAFwkTag::APPMGR, "Openning KIA file, start setting watermark");
+    int32_t resultCode = static_cast<int32_t>(WindowManager::GetInstance().SetProcessWatermark(
+        appRecord->GetPriorityObject()->GetPid(), watermarkBusinessName, isWatermarkEnabled));
+    if (resultCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "setting watermark fails with result code:%{public}d", resultCode);
+        return;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "setting watermark succeeds, start setting snapshot skip");
+    resultCode = static_cast<int32_t>(WindowManager::GetInstance().SkipSnapshotForAppProcess(
+        appRecord->GetPriorityObject()->GetPid(), isWatermarkEnabled));
+    if (resultCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "setting snapshot skip fails with result code:%{public}d", resultCode);
+        return;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "setting snapshot skip succeeds");
+#endif // SUPPORT_SCREEN
+}
+
 void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
     std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
 {
@@ -527,6 +585,12 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     MakeProcessName(abilityInfo, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag, processName);
     TAG_LOGI(AAFwkTag::APPMGR, "%{public}s name:%{public}s-%{public}s processName = %{public}s",
         __func__, abilityInfo->bundleName.c_str(), abilityInfo->name.c_str(), processName.c_str());
+ 
+    bool isKia = false;
+    std::string watermarkBusinessName;
+    bool isWatermarkEnabled = false;
+    bool isFileUri = false;
+    MakeKiaProcess(want, isKia, watermarkBusinessName, isWatermarkEnabled, isFileUri, processName);
 
     std::shared_ptr<AppRunningRecord> appRecord;
     bool isProcCache = false;
@@ -545,9 +609,10 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
                 bundleInfo.name, appInfo->uid, AbilityRuntime::RunningStatus::APP_RUNNING_START);
         }
         appRecord = CreateAppRunningRecord(loadParam->token, loadParam->preToken, appInfo, abilityInfo,
-            processName, bundleInfo, hapModuleInfo, want, loadParam->abilityRecordId);
+            processName, bundleInfo, hapModuleInfo, want, loadParam->abilityRecordId, isKia);
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false, loadParam->token);
+        ProcessKia(isKia, appRecord, watermarkBusinessName, isWatermarkEnabled);
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "have apprecord");
         if (!isProcCache) {
@@ -2155,7 +2220,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetAppRunningRecordByPid(c
 std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(sptr<IRemoteObject> token,
     sptr<IRemoteObject> preToken, std::shared_ptr<ApplicationInfo> appInfo,
     std::shared_ptr<AbilityInfo> abilityInfo, const std::string &processName, const BundleInfo &bundleInfo,
-    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId)
+    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId, bool isKia)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (want != nullptr && (want->GetBoolParam(DEBUG_APP, false) || want->GetBoolParam(NATIVE_DEBUG, false))) {
@@ -2180,6 +2245,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId);
+    appRecord->SetIsKia(isKia);
     if (want) {
         appRecord->SetDebugApp(want->GetBoolParam(DEBUG_APP, false));
         appRecord->SetNativeDebug(want->GetBoolParam("nativeDebug", false));
@@ -7841,6 +7907,35 @@ int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bund
         }
     }
     return ERR_OK;
+}
+
+int AppMgrServiceInner::RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    if (IPCSkeleton::GetCallingUid() != FILE_GUARD_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "only open to file guard.");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (interceptor == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "interceptor is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    kiaInterceptor_ = interceptor;
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::CheckIsKiaProcess(pid_t pid, bool &isKia)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    if (IPCSkeleton::GetCallingUid() != FILE_GUARD_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "only open to file guard.");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return appRunningManager_->CheckIsKiaProcess(pid, isKia);
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

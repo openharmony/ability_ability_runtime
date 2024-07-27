@@ -353,6 +353,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleGetSupportedProcessCachePids(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_CHILDREN_PROCESSES):
             return HandleGetAllChildrenProcesses(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_KIA_INTERCEPTOR):
+            return HandleRegisterKiaInterceptor(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::CHECK_IS_KIA_PROCESS):
+            return HandleCheckIsKiaProcess(data, reply);
     }
     return INVALID_FD;
 }
@@ -1640,6 +1644,34 @@ int32_t AppMgrStub::HandleGetSupportedProcessCachePids(MessageParcel &data, Mess
 int32_t AppMgrStub::GetSupportedProcessCachePids(const std::string &bundleName,
     std::vector<int32_t> &pidList)
 {
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterKiaInterceptor(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    sptr<IKiaInterceptor> interceptor = iface_cast<IKiaInterceptor>(data.ReadRemoteObject());
+    if (interceptor == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "interceptor is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+
+    reply.WriteInt32(RegisterKiaInterceptor(interceptor));
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleCheckIsKiaProcess(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    int pid = data.ReadInt32();
+    bool isKia = false;
+    int result = CheckIsKiaProcess(pid, isKia);
+    reply.WriteInt32(result);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed,result=%{public}d.", result);
+        return result;
+    }
+    reply.WriteBool(isKia);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

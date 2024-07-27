@@ -1658,5 +1658,16 @@ void AppRunningManager::SetMultiUserConfigurationMgr(
 {
     multiUserConfigurationMgr_ = multiUserConfigurationMgr;
 }
+
+int32_t AppRunningManager::CheckIsKiaProcess(pid_t pid, bool &isKia)
+{
+    auto appRunningRecord = GetAppRunningRecordByPid(pid);
+    if (appRunningRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningRecord is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    isKia = appRunningRecord->GetIsKia();
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
