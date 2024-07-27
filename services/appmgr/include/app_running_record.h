@@ -850,6 +850,16 @@ public:
     void SetUIAbilityLaunched(bool hasLaunched);
     bool HasUIAbilityLaunched();
 
+    inline void SetIsKia(bool isKia)
+    {
+        isKia_ = isKia;
+    }
+
+    inline bool GetIsKia() const
+    {
+        return isKia_;
+    }
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1005,6 +1015,7 @@ private:
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
+    bool isKia_ = false;
 };
 
 }  // namespace AppExecFwk

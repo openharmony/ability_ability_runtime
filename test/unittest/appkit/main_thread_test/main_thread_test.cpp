@@ -257,6 +257,16 @@ class MockAppMgrStub : public AppMgrStub {
     {
         return true;
     }
+
+    int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor) override
+    {
+        return 0;
+    }
+
+    int32_t CheckIsKiaProcess(pid_t pid, bool &isKia) override
+    {
+        return 0;
+    }
 };
 
 /*

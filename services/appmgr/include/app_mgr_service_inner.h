@@ -58,6 +58,7 @@
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
+#include "kia_interceptor_interface.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "remote_client_manager.h"
@@ -472,7 +473,8 @@ public:
         const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want,
-        int32_t abilityRecordId);
+        int32_t abilityRecordId,
+        bool isKia = false);
 
     /**
      * OnStop, Application management service stopped.
@@ -1195,6 +1197,10 @@ public:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList);
 
+    int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor);
+
+    int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);
@@ -1556,6 +1562,10 @@ private:
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
     void DealMultiUserConfig(const Configuration &config, const int32_t userId);
     bool CheckIsDebugApp(const std::string &bundleName);
+    void MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,
+        bool &isWatermarkEnabled, bool &isFileUri, std::string &processName);
+    void ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
+        const std::string& watermarkBusinessName, bool isWatermarkEnabled);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
@@ -1602,7 +1612,7 @@ private:
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
-    
+    sptr<IKiaInterceptor> kiaInterceptor_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk
