@@ -1858,7 +1858,7 @@ bool AppRunningRecord::NeedUpdateConfigurationBackground()
         const auto &abilityRecord = item.second;
         if (abilityRecord && abilityRecord->GetAbilityInfo()) {
             if (!(abilityRecord->GetAbilityInfo()->type == AppExecFwk::AbilityType::PAGE) &&
-                !(AAFWK::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->type))) {
+                !(AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->type))) {
                     needUpdate = true;
                     break;
                 }
