@@ -1859,7 +1859,7 @@ bool AppRunningRecord::NeedUpdateConfigurationBackground()
         if (!abilityRecord || !abilityRecord->GetAbilityInfo())
             continue;
         }
-        if (!(abilityRecord->GetAbilityInfo()->type == AppExecFwk::AbilityType::PAGE) &&
+        if (abilityRecord->GetAbilityInfo()->type != AppExecFwk::AbilityType::PAGE &&
             !(AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->type))) {
             needUpdate = true;
             break;
