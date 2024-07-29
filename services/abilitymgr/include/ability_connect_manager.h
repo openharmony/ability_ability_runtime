@@ -300,8 +300,6 @@ public:
 
     void RemoveLauncherDeathRecipient();
 
-    std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
-
     /**
      * @brief Get ui extension session info
      *
@@ -315,6 +313,8 @@ public:
     void CloseAssertDialog(const std::string &assertSessionId);
 
     void SignRestartAppFlag(const std::string &bundleName);
+
+    std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
     void DeleteInvalidServiceRecord(const std::string &bundleName);
 
@@ -547,7 +547,6 @@ private:
     void MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord);
 
     void DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord, const AbilityRequest &abilityRequest);
-    void SaveUIExtRequestSessionInfo(std::shared_ptr<AbilityRecord> abilityRecord, sptr<SessionInfo> sessionInfo);
     void DoBackgroundAbilityWindow(const std::shared_ptr<AbilityRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);
 
@@ -616,6 +615,9 @@ private:
     void KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
     void ProcessEliminateAbilityRecord(std::shared_ptr<AbilityRecord> eliminateRecord);
     std::string GetServiceKey(const std::shared_ptr<AbilityRecord> &service);
+
+    int32_t ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo);
+    int32_t ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";

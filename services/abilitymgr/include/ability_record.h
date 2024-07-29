@@ -42,6 +42,7 @@
 #include "ui_extension_window_command.h"
 #include "uri.h"
 #include "want.h"
+#include "window_config.h"
 #ifdef SUPPORT_GRAPHICS
 #include "ability_window_configuration.h"
 #include "resource_manager.h"
@@ -368,7 +369,7 @@ public:
      *
      */
     void ForegroundAbility(uint32_t sceneFlag = 0);
-    void ForegroundAbility(const Closure &task, sptr<SessionInfo> sessionInfo = nullptr, uint32_t sceneFlag = 0);
+    void ForegroundAbility(const Closure &task, uint32_t sceneFlag = 0);
 
     /**
      * process request of foregrounding the ability.
@@ -435,6 +436,13 @@ public:
      */
     AbilityState GetAbilityState() const;
 
+    /**
+     * get ability's windowconfig.
+     *
+     * @return ability windowconfig.
+     */
+    WindowConfig GetAbilityWindowConfig() const;
+
     bool IsForeground() const;
 
     AbilityVisibilityState GetAbilityVisibilityState() const;
@@ -455,16 +463,6 @@ public:
     }
 
     sptr<SessionInfo> GetSessionInfo() const;
-
-    sptr<SessionInfo> GetUIExtRequestSessionInfo() const
-    {
-        return uiExtRequestSessionInfo_;
-    }
-
-    void SetUIExtRequestSessionInfo(sptr<SessionInfo> sessionInfo)
-    {
-        uiExtRequestSessionInfo_ = sessionInfo;
-    }
 
     /**
      * get ability's token.
@@ -657,6 +655,7 @@ public:
      */
     void SaveAbilityState();
     void SaveAbilityState(const PacMap &inState);
+    void SaveAbilityWindowConfig(const WindowConfig &windowConfig);
 
     /**
      * restore ability state.
@@ -1181,6 +1180,7 @@ private:
     bool isLauncherRoot_ = false;
 
     PacMap stateDatas_;             // ability saved ability state data
+    WindowConfig windowConfig_;
     bool isRestarting_ = false;     // is restarting ?
     AppState appState_ = AppState::BEGIN;
 
@@ -1219,7 +1219,6 @@ private:
     sptr<SessionInfo> sessionInfo_ = nullptr;
     mutable ffrt::mutex sessionLock_;
     std::map<uint64_t, AbilityWindowState> abilityWindowStateMap_;
-    sptr<SessionInfo> uiExtRequestSessionInfo_ = nullptr;
 
 #ifdef SUPPORT_SCREEN
     bool isStartingWindow_ = false;

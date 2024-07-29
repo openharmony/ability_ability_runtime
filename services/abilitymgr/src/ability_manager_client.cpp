@@ -107,6 +107,14 @@ ErrCode AbilityManagerClient::AbilityTransitionDone(sptr<IRemoteObject> token, i
     return abms->AbilityTransitionDone(token, state, saveData);
 }
 
+ErrCode AbilityManagerClient::AbilityWindowConfigTransitionDone(
+    sptr<IRemoteObject> token, const WindowConfig &windowConfig)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->AbilityWindowConfigTransitionDone(token, windowConfig);
+}
+
 ErrCode AbilityManagerClient::ScheduleConnectAbilityDone(
     sptr<IRemoteObject> token, sptr<IRemoteObject> remoteObject)
 {
@@ -1241,11 +1249,13 @@ ErrCode AbilityManagerClient::DelegatorDoAbilityBackground(sptr<IRemoteObject> t
 ErrCode AbilityManagerClient::SetMissionContinueState(sptr<IRemoteObject> token,
     const AAFwk::ContinueState &state, sptr<IRemoteObject> sessionToken)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "SetMissionContinueState called. state: %{public}d", state);
 #ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
         uint32_t value = static_cast<uint32_t>(state);
         Rosen::ContinueState continueState = static_cast<Rosen::ContinueState>(value);
         auto err = sceneSessionManager->SetSessionContinueState(sessionToken, continueState);
@@ -1926,6 +1936,19 @@ void AbilityManagerClient::NotifyFrozenProcessByRSS(const std::vector<int32_t> &
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->NotifyFrozenProcessByRSS(pidList, uid);
+}
+
+ErrCode AbilityManagerClient::CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo is invalid.");
+        return ERR_INVALID_VALUE;
+    }
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
+    return abms->CleanUIAbilityBySCB(sessionInfo);
 }
 
 ErrCode AbilityManagerClient::PreStartMission(const std::string& bundleName, const std::string& moduleName,

@@ -62,6 +62,14 @@ public:
     ErrCode AbilityTransitionDone(sptr<IRemoteObject> token, int state, const PacMap &saveData);
 
     /**
+     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
+     *
+     * @param token,.ability's token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AbilityWindowConfigTransitionDone(sptr<IRemoteObject> token, const WindowConfig &windowConfig);
+
+    /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
      *
      * @param token,.service ability's token.
@@ -1531,6 +1539,14 @@ public:
         const std::string& abilityName, const std::string& startTime);
 
     /**
+     *  Request to clean UIAbility from user.
+     *
+     * @param sessionInfo the session info of the ability to clean.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo);
+
+    /**
      * Open link of ability and atomic service.
      *
      * @param want Ability want.
@@ -1564,9 +1580,7 @@ private:
 
     sptr<IAbilityManager> GetAbilityManager();
     void ResetProxy(wptr<IRemoteObject> remote);
-#ifdef WITH_DLP
     void HandleDlpApp(Want &want);
-#endif // WITH_DLP
 
     static std::once_flag singletonFlag_;
     std::recursive_mutex mutex_;

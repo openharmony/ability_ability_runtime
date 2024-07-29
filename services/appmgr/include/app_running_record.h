@@ -676,6 +676,8 @@ public:
 
     void SetProcessChangeReason(ProcessChangeReason reason);
 
+    bool NeedUpdateConfigurationBackground();
+
     ProcessChangeReason GetProcessChangeReason() const;
 
     ExtensionAbilityType GetExtensionType() const;
@@ -803,7 +805,7 @@ public:
     bool GetIsGPU();
     void SetGPUPid(pid_t gpuPid);
     pid_t GetGPUPid();
-    
+
     inline void SetStrictMode(bool strictMode)
     {
         isStrictMode_ = strictMode;
@@ -840,6 +842,10 @@ public:
      * @return
      */
     void ScheduleBackgroundRunning();
+
+    void SetUserRequestCleaning();
+    bool IsUserRequestCleaning() const;
+    bool IsAllAbilityReadyToCleanedByUserRequest();
 
 private:
     /**
@@ -991,6 +997,7 @@ private:
     bool isStrictMode_ = false;
     bool isAttachedToStatusBar = false;
     bool isDependedOnArkWeb_ = false;
+    bool isUserRequestCleaning_ = false;
 };
 
 }  // namespace AppExecFwk
