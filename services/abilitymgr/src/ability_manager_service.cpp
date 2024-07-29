@@ -991,9 +991,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 #endif // SUPPORT_SCREEN
 
     // prevent the app from dominating the screen
-    if (system::GetBoolParameter(VERIFY_DOMINATE_SCREEN, false) &&
+    if (system::GetBoolParameter(VERIFY_DOMINATE_SCREEN, true) &&
         callerToken == nullptr && !IsCallerSceneBoard() && !isSendDialogResult && !isForegroundToRestartApp &&
-        AbilityPermissionUtil::GetInstance().IsDominateScreen(want)) {
+        AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is invalid.");
         return ERR_INVALID_CALLER;
     }
@@ -1569,9 +1569,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // prevent the app from dominating the screen
-    if (system::GetBoolParameter(VERIFY_DOMINATE_SCREEN, false) &&
+    if (system::GetBoolParameter(VERIFY_DOMINATE_SCREEN, true) &&
         callerToken == nullptr && !IsCallerSceneBoard() &&
-        AbilityPermissionUtil::GetInstance().IsDominateScreen(want)) {
+        AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is invalid.");
         return ERR_INVALID_CALLER;
     }
