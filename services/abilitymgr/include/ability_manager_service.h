@@ -152,7 +152,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         uint32_t specifyTokenId,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE, bool isPendingWantCaller = false);
+        int requestCode = DEFAULT_INVAL_VALUE);
 
     /**
      * Starts a new ability with specific start options and specialId, send want to ability manager service.
@@ -171,7 +171,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        uint32_t specifyTokenId = 0, bool isPendingWantCaller = false);
+        uint32_t specifyTokenId = 0);
 
     /**
      * StartAbilityWithSpecifyTokenId with want and specialId, send want to ability manager service.
@@ -716,6 +716,15 @@ public:
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) override;
 
     /**
+     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
+     *
+     * @param token,.ability's token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int AbilityWindowConfigTransitionDone(
+        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig) override;
+
+    /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
      *
      * @param token,.service ability's token.
@@ -746,6 +755,14 @@ public:
         const sptr<SessionInfo> &sessionInfo,
         WindowCommand winCmd,
         AbilityCommand abilityCmd) override;
+
+    /**
+     *  Request to clean UIAbility from user.
+     *
+     * @param sessionInfo the session info of the ability to clean.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo) override;
 
     std::shared_ptr<TaskHandlerWrap> GetTaskHandler() const
     {
@@ -963,7 +980,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false, bool isPendingWantCaller = false);
+        bool isImplicit = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -973,7 +990,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false, bool isPendingWantCaller = false);
+        bool isImplicit = false);
 
     int StartExtensionAbilityInner(
         const Want &want,
@@ -998,7 +1015,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t callerTokenId = 0,
         bool isImplicit = false,
-        bool isCallByShortcut = false, bool isPendingWantCaller = false);
+        bool isCallByShortcut = false);
 
     int StartAbilityForOptionInner(
         const Want &want,
@@ -1009,7 +1026,7 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isImplicit = false,
-        bool isCallByShortcut = false, bool isPendingWantCaller = false);
+        bool isCallByShortcut = false);
 
     int ImplicitStartAbility(
         const Want &want,
@@ -2194,7 +2211,7 @@ private:
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
         int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
-        bool isCallByShortcut = false, bool isPendingWantCaller = false);
+        bool isCallByShortcut = false);
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
@@ -2226,6 +2243,9 @@ private:
 
     int PreStartFreeInstall(const Want &want, sptr<IRemoteObject> callerToken,
         uint32_t specifyTokenId, bool isStartAsCaller, Want &localWant);
+
+    void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
+        const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;

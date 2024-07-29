@@ -77,6 +77,7 @@ private:
     int MinimizeUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int AttachAbilityThreadInner(MessageParcel &data, MessageParcel &reply);
     int AbilityTransitionDoneInner(MessageParcel &data, MessageParcel &reply);
+    int AbilityWindowConfigTransitionDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleConnectAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleDisconnectAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleCommandAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
@@ -301,6 +302,7 @@ private:
     int32_t GetAbilityStateByPersistentIdInner(MessageParcel &data, MessageParcel &reply);
     int32_t TransferAbilityResultForExtensionInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyFrozenProcessByRSSInner(MessageParcel &data, MessageParcel &reply);
+    int32_t CleanUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int32_t PreStartMissionInner(MessageParcel &data, MessageParcel &reply);
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
