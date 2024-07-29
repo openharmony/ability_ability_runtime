@@ -77,6 +77,7 @@ private:
     int MinimizeUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int AttachAbilityThreadInner(MessageParcel &data, MessageParcel &reply);
     int AbilityTransitionDoneInner(MessageParcel &data, MessageParcel &reply);
+    int AbilityWindowConfigTransitionDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleConnectAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleDisconnectAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleCommandAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
@@ -347,6 +348,7 @@ private:
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int32_t OpenLinkInner(MessageParcel &data, MessageParcel &reply);
+    int32_t TerminateMissionInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -34,6 +34,7 @@
 #include "in_process_call_wrapper.h"
 #include "int_wrapper.h"
 #include "parameter.h"
+#include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
 #include "extension_record.h"
@@ -64,13 +65,11 @@ const int LOAD_TIMEOUT_MULTIPLE = 150;
 const int CONNECT_TIMEOUT_MULTIPLE = 45;
 const int COMMAND_TIMEOUT_MULTIPLE = 75;
 const int COMMAND_WINDOW_TIMEOUT_MULTIPLE = 75;
-const int UI_EXTENSION_CONSUME_SESSION_TIMEOUT_MULTIPLE = 150;
 #else
 const int LOAD_TIMEOUT_MULTIPLE = 10;
 const int CONNECT_TIMEOUT_MULTIPLE = 10;
 const int COMMAND_TIMEOUT_MULTIPLE = 5;
 const int COMMAND_WINDOW_TIMEOUT_MULTIPLE = 5;
-const int UI_EXTENSION_CONSUME_SESSION_TIMEOUT_MULTIPLE = 10;
 #endif
 const int32_t AUTO_DISCONNECT_INFINITY = -1;
 const std::unordered_set<std::string> FROZEN_WHITE_LIST {
@@ -78,6 +77,8 @@ const std::unordered_set<std::string> FROZEN_WHITE_LIST {
 };
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
+
+const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
 
 bool IsSpecialAbility(const AppExecFwk::AbilityInfo &abilityInfo)
 {
@@ -258,9 +259,12 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
             uiExtensionMap_[remoteObj] = UIExtWindowMapValType(targetService, abilityRequest.sessionInfo);
         }
         AddUIExtWindowDeathRecipient(remoteObj);
-        if (!isLoadedAbility) {
-            SaveUIExtRequestSessionInfo(targetService, abilityRequest.sessionInfo);
-        }
+    }
+
+    auto &abilityInfo = abilityRequest.abilityInfo;
+    auto ret = ReportXiaoYiToRSSIfNeeded(abilityInfo);
+    if (ret != ERR_OK) {
+        return ret;
     }
 
     if (!isLoadedAbility) {
@@ -269,10 +273,12 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         if (IsUIExtensionAbility(targetService)) {
             targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
         }
+        targetService->GrantUriPermissionForServiceExtension();
         LoadAbility(targetService);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE) && !IsUIExtensionAbility(targetService)) {
         // It may have been started through connect
         targetService->SetWant(abilityRequest.want);
+        targetService->GrantUriPermissionForServiceExtension();
         CommandAbility(targetService);
     } else if (IsUIExtensionAbility(targetService)) {
         DoForegroundUIExtension(targetService, abilityRequest);
@@ -333,34 +339,9 @@ void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecor
             abilityRecord->SetWant(abilityRequest.want);
             CommandAbilityWindow(abilityRecord, abilityRequest.sessionInfo, WIN_CMD_FOREGROUND);
             return;
-        } else {
-            if (abilityRecord->GetUIExtRequestSessionInfo() == nullptr) {
-                abilityRecord->SetWant(abilityRequest.want);
-                SaveUIExtRequestSessionInfo(abilityRecord, abilityRequest.sessionInfo);
-                DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
-                return;
-            }
         }
     }
     EnqueueStartServiceReq(abilityRequest, abilityRecord->GetURI());
-}
-
-void AbilityConnectManager::SaveUIExtRequestSessionInfo(std::shared_ptr<AbilityRecord> abilityRecord,
-    sptr<SessionInfo> sessionInfo)
-{
-    CHECK_POINTER(abilityRecord);
-    CHECK_POINTER(taskHandler_);
-    abilityRecord->SetUIExtRequestSessionInfo(sessionInfo);
-    auto callback = [abilityRecord]() {
-        TAG_LOGE(
-            AAFwkTag::ABILITYMGR, "consume session timeout, abilityUri: %{public}s", abilityRecord->GetURI().c_str());
-        abilityRecord->SetUIExtRequestSessionInfo(nullptr);
-    };
-
-    int consumeSessionTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-        UI_EXTENSION_CONSUME_SESSION_TIMEOUT_MULTIPLE;
-    std::string taskName = std::string("ConsumeSessionTimeout_") +  std::to_string(abilityRecord->GetRecordId());
-    taskHandler_->SubmitTask(callback, taskName, consumeSessionTimeout);
 }
 
 void AbilityConnectManager::EnqueueStartServiceReq(const AbilityRequest &abilityRequest, const std::string &serviceUri)
@@ -678,13 +659,20 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
             WindowExtMapValType(targetService->GetApplicationInfo().accessTokenId, abilityRequest.sessionInfo));
     }
 
+    auto &abilityInfo = abilityRequest.abilityInfo;
+    ret = ReportXiaoYiToRSSIfNeeded(abilityInfo);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
     if (!isLoadedAbility) {
         LoadAbility(targetService);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE)) {
         targetService->SetWant(abilityRequest.want);
         HandleActiveAbility(targetService, connectRecord);
     } else {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Target service is activating, wait for callback");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Target service is activating, wait for callback");
+        targetService->SaveConnectWant(abilityRequest.want);
     }
 
     auto token = targetService->GetToken();
@@ -1027,6 +1015,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
             abilityRecord->GetAbilityState());
         return INVALID_CONNECTION_STATE;
     }
+    abilityRecord->RemoveConnectWant();
 
     if (abilityRecord->GetAbilityInfo().type == AbilityType::SERVICE) {
         DelayedSingleton<AppScheduler>::GetInstance()->UpdateAbilityState(
@@ -1536,6 +1525,8 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
     std::lock_guard guard(serialMutex_);
     CHECK_POINTER(abilityRecord);
     if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "consume session timeout, abilityUri: %{public}s",
+            abilityRecord->GetURI().c_str());
         if (uiExtensionAbilityRecordMgr_ != nullptr && IsCallerValid(abilityRecord)) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "Start load timeout.");
             uiExtensionAbilityRecordMgr_->LoadTimeout(abilityRecord->GetUIExtensionAbilityId());
@@ -1695,6 +1686,7 @@ int AbilityConnectManager::DispatchInactive(const std::shared_ptr<AbilityRecord>
         CommandAbility(abilityRecord);
         if (abilityRecord->GetConnectRecordList().size() > 0) {
             // It means someone called connectAbility when service was loading
+            abilityRecord->UpdateConnectWant();
             ConnectAbility(abilityRecord);
         }
     }
@@ -2644,18 +2636,7 @@ void AbilityConnectManager::MoveToForeground(const std::shared_ptr<AbilityRecord
         selfObj->PrintTimeOutLog(abilityRecord, AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
         selfObj->HandleForegroundTimeoutTask(abilityRecord);
     };
-    auto sessionInfo = abilityRecord->GetUIExtRequestSessionInfo();
-    if (sessionInfo != nullptr) {
-        abilityRecord->ForegroundAbility(task, sessionInfo);
-        abilityRecord->SetUIExtRequestSessionInfo(nullptr);
-    } else {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "SessionInfo is nullptr. Move to background");
-        abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
-        DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
-    }
-    if (taskHandler_) {
-        taskHandler_->CancelTask(std::string("ConsumeSessionTimeout_") +  std::to_string(abilityRecord->GetRecordId()));
-    }
+    abilityRecord->ForegroundAbility(task);
 }
 
 void AbilityConnectManager::MoveToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -3226,6 +3207,46 @@ std::string AbilityConnectManager::GenerateBundleName(const AbilityRequest &abil
         }
     }
     return bundleName;
+}
+
+int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION || 
+        abilityInfo.bundleName != XIAOYI_BUNDLE_NAME) {
+        return ERR_OK;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "bundleName is com.huawei.hmos.vassistant extension, abilityName:%{public}s, report to rss.",
+        abilityInfo.name.c_str());
+    auto ret = ReportAbilitStartInfoToRSS(abilityInfo);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReportAbilitStartInfoToRSS failed, ret:%{public}d", ret);
+        return ret;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityConnectManager::ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::vector<AppExecFwk::RunningProcessInfo> runningProcessInfos;
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetProcessRunningInfos(
+        runningProcessInfos));
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    bool isColdStart = true;
+    int32_t pid = 0;
+    for (auto const &info : runningProcessInfos) {
+        if (info.uid_ == abilityInfo.applicationInfo.uid) {
+            isColdStart = false;
+            pid = info.pid_;
+            break;
+        }
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR,"ReportAbilitStartInfoToRSS, abilityName:%{public}s.", abilityInfo.name.c_str());
+    ResSchedUtil::GetInstance().ReportAbilitStartInfoToRSS(abilityInfo, pid, isColdStart);
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
