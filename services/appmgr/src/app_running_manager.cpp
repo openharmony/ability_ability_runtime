@@ -54,6 +54,15 @@ AppRunningManager::AppRunningManager()
 AppRunningManager::~AppRunningManager()
 {}
 
+void AppRunningManager::initConfig(const Configuration &config)
+{
+    std::vector<std::string> changeKeyV;
+    configuration_->CompareDifferent(changeKeyV, config);
+    if (!changeKeyV.empty()) {
+        configuration_->Merge(changeKeyV, config);
+    }
+}
+
 std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo)
 {
@@ -383,17 +392,6 @@ bool AppRunningManager::GetPidsByBundleNameUserIdAndAppIndex(const std::string &
     }
 
     return (!pids.empty());
-}
-
-bool AppRunningManager::ProcessExitByPid(pid_t pid)
-{
-    auto appRecord = GetAppRunningRecordByPid(pid);
-    if (appRecord != nullptr) {
-        appRecord->SetKilling();
-        appRecord->ScheduleProcessSecurityExit();
-        return true;
-    }
-    return false;
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRemoteObject> &remote,
@@ -768,44 +766,6 @@ void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &lis
     }
 }
 
-void AppRunningManager::HandleAddAbilityStageTimeOut(const int64_t eventId)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "Handle add ability stage timeout.");
-    auto abilityRecord = GetAbilityRunningRecord(eventId);
-    if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr.");
-        return;
-    }
-
-    auto abilityToken = abilityRecord->GetToken();
-    auto appRecord = GetTerminatingAppRunningRecord(abilityToken);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr.");
-        return;
-    }
-
-    appRecord->ScheduleProcessSecurityExit();
-}
-
-void AppRunningManager::HandleStartSpecifiedAbilityTimeOut(const int64_t eventId)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "Handle receive multi instances timeout.");
-    auto abilityRecord = GetAbilityRunningRecord(eventId);
-    if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr");
-        return;
-    }
-
-    auto abilityToken = abilityRecord->GetToken();
-    auto appRecord = GetTerminatingAppRunningRecord(abilityToken);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr");
-        return;
-    }
-
-    appRecord->ScheduleProcessSecurityExit();
-}
-
 int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -827,7 +787,8 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
         if (appRecord && !isCollaboratorReserveType(appRecord)) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
             std::lock_guard guard(updateConfigurationDelayedLock_);
-            if (appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
+            if (appRecord->NeedUpdateConfigurationBackground() ||
+                appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = false;
                 result = appRecord->UpdateConfiguration(config);
             } else {
@@ -1610,7 +1571,7 @@ int32_t AppRunningManager::UpdateConfigurationDelayed(const std::shared_ptr<AppR
     std::lock_guard guard(updateConfigurationDelayedLock_);
     int32_t result = ERR_OK;
     auto it = updateConfigurationDelayedMap_.find(appRecord->GetRecordId());
-    if (it != updateConfigurationDelayedMap_.end()) {
+    if (it != updateConfigurationDelayedMap_.end() && it->second) {
         result = appRecord->UpdateConfiguration(*configuration_);
         it->second = false;
     }

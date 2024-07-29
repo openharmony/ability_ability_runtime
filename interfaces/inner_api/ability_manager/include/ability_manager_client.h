@@ -41,7 +41,6 @@ class AbilityManagerClient {
 public:
     virtual ~AbilityManagerClient();
     static std::shared_ptr<AbilityManagerClient> GetInstance();
-
     void RemoveDeathRecipient();
 
     /**
@@ -61,6 +60,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode AbilityTransitionDone(sptr<IRemoteObject> token, int state, const PacMap &saveData);
+
+    /**
+     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
+     *
+     * @param token,.ability's token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AbilityWindowConfigTransitionDone(sptr<IRemoteObject> token, const WindowConfig &windowConfig);
 
     /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
@@ -1408,6 +1415,13 @@ public:
         std::vector<int32_t> &sessionIds);
 
     /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RestartApp(const AAFwk::Want &want);
+
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1428,13 +1442,6 @@ public:
      */
     ErrCode GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo,
         int32_t userId = DEFAULT_INVAL_VALUE);
-
-    /**
-     * @brief Restart app self.
-     * @param want The ability type must be UIAbility.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t RestartApp(const AAFwk::Want &want);
 
     /**
      * Pop-up launch of full-screen atomic service.
@@ -1542,6 +1549,14 @@ public:
     */
     int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode);
 
+    /**
+     * Terminate process by bundleName.
+     *
+     * @param missionId, The mission id of the UIAbility need to be terminated.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode TerminateMission(int32_t missionId);
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);
@@ -1557,9 +1572,7 @@ private:
 
     sptr<IAbilityManager> GetAbilityManager();
     void ResetProxy(wptr<IRemoteObject> remote);
-#ifdef WITH_DLP
     void HandleDlpApp(Want &want);
-#endif // WITH_DLP
 
     static std::once_flag singletonFlag_;
     std::recursive_mutex mutex_;

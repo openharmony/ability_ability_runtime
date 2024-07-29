@@ -342,6 +342,15 @@ public:
         return true;
     }
 
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid)
+    {
+        return false;
+    }
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -384,11 +393,12 @@ public:
         KILL_PROCESSES_BY_PIDS,
         ATTACH_PID_TO_PARENT,
         IS_MEMORY_SIZE_SUFFICIENT,
-        SET_KEEP_ALIVE_ENABLE_STATE,
         NOTIFY_APP_MGR_RECORD_EXIT_REASON,
+        SET_KEEP_ALIVE_ENABLE_STATE,
         ATTACHED_TO_STATUS_BAR,
         BLOCK_PROCESS_CACHE_BY_PIDS,
         IS_KILLED_FOR_UPGRADE_WEB,
+        IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION,
         FORCE_KILL_APPLICATION,
     };
 };

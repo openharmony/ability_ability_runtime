@@ -683,18 +683,18 @@ public:
     int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener);
 
     /**
-     * Whether the current application process is the last surviving process.
-     *
-     * @return Returns true is final application process, others return false.
-     */
-    bool IsFinalAppProcess();
-
-    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
      */
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
+
+    /**
+     * Whether the current application process is the last surviving process.
+     *
+     * @return Returns true is final application process, others return false.
+     */
+    bool IsFinalAppProcess();
 
     int32_t RegisterRenderStateObserver(const sptr<IRenderStateObserver> &observer);
 
@@ -794,6 +794,12 @@ public:
      * @return Returns true is killed for upgrade web, others return false.
      */
     bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
