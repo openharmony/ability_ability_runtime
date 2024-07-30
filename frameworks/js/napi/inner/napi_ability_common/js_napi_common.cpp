@@ -1490,7 +1490,7 @@ void ConnectionCallback::Reset()
     }
     uv_work_t *work = new(std::nothrow) uv_work_t;
     if (work == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "work == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null work");
         return;
     }
     ConnectionCallback *data = new(std::nothrow) ConnectionCallback(std::move(*this));
@@ -1549,16 +1549,16 @@ size_t NAPIAbilityConnection::RemoveAllCallbacks(ConnectRemoveKeyType key)
 
 void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "UvWorkOnAbilityConnectDone, uv_queue_work");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     std::unique_ptr<uv_work_t> managedWork(work);
     if (work == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "UvWorkOnAbilityConnectDone, work is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null work");
         return;
     }
     // JS Thread
     std::unique_ptr<ConnectAbilityCB> connectAbilityCB(static_cast<ConnectAbilityCB *>(work->data));
     if (connectAbilityCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "UvWorkOnAbilityConnectDone, connectAbilityCB is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null connectAbilityCB");
         return;
     }
     CallbackInfo &cbInfo = connectAbilityCB->cbBase.cbInfo;
@@ -1599,7 +1599,6 @@ void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
         napi_delete_reference(cbInfo.env, cbInfo.callback);
     }
     napi_close_handle_scope(cbInfo.env, scope);
-    TAG_LOGI(AAFwkTag::JSNAPI, "UvWorkOnAbilityConnectDone, uv_queue_work end");
 }
 
 void NAPIAbilityConnection::HandleOnAbilityConnectDone(ConnectionCallback &callback, int resultCode)
@@ -1608,19 +1607,19 @@ void NAPIAbilityConnection::HandleOnAbilityConnectDone(ConnectionCallback &callb
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(callback.env, &loop);
     if (loop == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, loop == null.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null loop");
         return;
     }
 
     uv_work_t *work = new(std::nothrow) uv_work_t;
     if (work == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, work == null.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null work");
         return;
     }
 
     ConnectAbilityCB *connectAbilityCB = new (std::nothrow) ConnectAbilityCB;
     if (connectAbilityCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, connectAbilityCB == null.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null connectAbilityCB");
         if (work != nullptr) {
             delete work;
             work = nullptr;
@@ -1665,21 +1664,20 @@ void NAPIAbilityConnection::OnAbilityConnectDone(
         HandleOnAbilityConnectDone(*callback, resultCode);
     }
     connectionState_ = CONNECTION_STATE_CONNECTED;
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, end.", __func__);
 }
 
 void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "UvWorkOnAbilityDisconnectDone, uv_queue_work");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     std::unique_ptr<uv_work_t> managedWork(work);
     if (work == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "UvWorkOnAbilityDisconnectDone, work is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null work");
         return;
     }
     // JS Thread
     std::unique_ptr<ConnectAbilityCB> connectAbilityCB(static_cast<ConnectAbilityCB *>(work->data));
     if (connectAbilityCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "UvWorkOnAbilityDisconnectDone, connectAbilityCB is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null connectAbilityCB");
         return;
     }
     CallbackInfo &cbInfo = connectAbilityCB->cbBase.cbInfo;
@@ -1704,7 +1702,7 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
 
     // release connect
     std::lock_guard<std::mutex> lock(g_connectionsLock_);
-    TAG_LOGI(AAFwkTag::JSNAPI, "UvWorkOnAbilityDisconnectDone connects_.size:%{public}zu", connects_.size());
+    TAG_LOGI(AAFwkTag::JSNAPI, "connects_.size:%{public}zu", connects_.size());
     std::string deviceId = connectAbilityCB->abilityConnectionCB.elementName.GetDeviceID();
     std::string bundleName = connectAbilityCB->abilityConnectionCB.elementName.GetBundleName();
     std::string abilityName = connectAbilityCB->abilityConnectionCB.elementName.GetAbilityName();
@@ -1718,9 +1716,8 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
     if (item != connects_.end()) {
         // match deviceid & bundlename && abilityname
         connects_.erase(item);
-        TAG_LOGI(AAFwkTag::JSNAPI, "UvWorkOnAbilityDisconnectDone erase connects_.size:%{public}zu", connects_.size());
+        TAG_LOGI(AAFwkTag::JSNAPI, "erase connects_.size:%{public}zu", connects_.size());
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "UvWorkOnAbilityDisconnectDone, uv_queue_work end");
 }
 
 void NAPIAbilityConnection::HandleOnAbilityDisconnectDone(ConnectionCallback &callback, int resultCode)
@@ -1729,19 +1726,19 @@ void NAPIAbilityConnection::HandleOnAbilityDisconnectDone(ConnectionCallback &ca
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(callback.env, &loop);
     if (loop == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, loop == nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null loop", __func__);
         return;
     }
 
     uv_work_t *work = new(std::nothrow) uv_work_t;
     if (work == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "work == nullptr.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null work");
         return;
     }
 
     ConnectAbilityCB *connectAbilityCB = new (std::nothrow) ConnectAbilityCB;
     if (connectAbilityCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, connectAbilityCB == nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null connectAbilityCB");
         if (work != nullptr) {
             delete work;
             work = nullptr;
@@ -1780,7 +1777,6 @@ void NAPIAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementNam
         HandleOnAbilityDisconnectDone(*callback, resultCode);
     }
     connectionState_ = CONNECTION_STATE_DISCONNECTED;
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, end.", __func__);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
