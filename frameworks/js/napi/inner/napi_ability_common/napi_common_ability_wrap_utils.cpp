@@ -95,18 +95,18 @@ bool CheckAbilityType(AbilityType typeInAbility, AbilityType typeWant)
 bool CheckAbilityType(const CBBase *cbBase)
 {
     if (cbBase == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "cbBase == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null cbBase");
         return false;
     }
 
     if (cbBase->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "cbBase->ability == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null cbBase->ability");
         return false;
     }
 
     const std::shared_ptr<AbilityInfo> info = cbBase->ability->GetAbilityInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "info == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null info");
         return false;
     }
     return CheckAbilityType((AbilityType)info->type, cbBase->abilityType);
@@ -138,7 +138,7 @@ bool CheckAbilityType(const AsyncCallbackInfo *asyncCallbackInfo)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return false;
     }
 
@@ -149,7 +149,7 @@ bool CheckAbilityType(const AsyncCallbackInfo *asyncCallbackInfo)
 
     const std::shared_ptr<AbilityInfo> info = asyncCallbackInfo->ability->GetAbilityInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "info == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null info");
         return false;
     }
 
@@ -191,7 +191,7 @@ napi_value GetContinueAbilityOptionsReversible(
         napi_get_named_property(env, value, "reversible", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type. Bool expected");
+            TAG_LOGE(AAFwkTag::JSNAPI, "bool expected");
             return nullptr;
         }
         napi_get_value_bool(env, result, &reversible);
@@ -216,7 +216,7 @@ napi_value GetContinueAbilityOptionsDeviceID(
         napi_get_named_property(env, value, "deviceId", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type. String expected");
+            TAG_LOGE(AAFwkTag::JSNAPI, "string expected");
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -287,7 +287,7 @@ void GetFilesDirExecuteCallback(napi_env, void *data)
     TAG_LOGI(AAFwkTag::JSNAPI, "start");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
 
@@ -309,7 +309,7 @@ void GetFilesDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->native_data.data_type = NVT_STRING;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = asyncCallbackInfo->ability->GetAbilityContext();
     if (abilityContext == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetAbilityContext is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityContext");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
@@ -323,7 +323,7 @@ void IsUpdatingConfigurationsExecuteCallback(napi_env, void *data)
     TAG_LOGI(AAFwkTag::JSNAPI, "begin");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
 
@@ -357,7 +357,7 @@ void PrintDrawnCompletedExecuteCallback(napi_env, void *data)
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
 
@@ -386,7 +386,7 @@ void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
 
@@ -408,7 +408,7 @@ void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->native_data.data_type = NVT_STRING;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = asyncCallbackInfo->ability->GetAbilityContext();
     if (abilityContext == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetAbilityContext is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityContext");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
@@ -428,7 +428,7 @@ void GetCacheDirExecuteCallback(napi_env, void *data)
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
 
@@ -450,7 +450,7 @@ void GetCacheDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->native_data.data_type = NVT_STRING;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = asyncCallbackInfo->ability->GetAbilityContext();
     if (abilityContext == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetAbilityContext is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityContext");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
@@ -470,7 +470,7 @@ void GetExternalCacheDirExecuteCallback(napi_env, void *data)
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
 
@@ -1020,7 +1020,7 @@ bool UnwrapParamStopAbilityWrap(napi_env env, size_t argc, napi_value *argv, Asy
     TAG_LOGI(AAFwkTag::JSNAPI, "called argc=%{public}zu", argc);
     const size_t argcMax = 2;
     if (argc > argcMax || argc < argcMax - 1) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Params is invalid");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return false;
     }
 
