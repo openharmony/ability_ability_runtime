@@ -2317,7 +2317,7 @@ napi_value NAPI_GetBundleName(napi_env env, napi_callback_info info)
 
     napi_value ret = NAPI_GetBundleNameWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
@@ -2335,7 +2335,7 @@ napi_value NAPI_GetApplicationInfo(napi_env env, napi_callback_info info)
 
     napi_value ret = GetApplicationInfoWrap(env, info, appInfoCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (appInfoCB != nullptr) {
             delete appInfoCB;
             appInfoCB = nullptr;
@@ -2357,7 +2357,7 @@ napi_value NAPI_GetProcessInfo(napi_env env, napi_callback_info info)
     processInfoCB->cbBase.errCode = NAPI_ERR_NO_ERROR;
     napi_value ret = GetProcessInfoWrap(env, info, processInfoCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (processInfoCB != nullptr) {
             delete processInfoCB;
             processInfoCB = nullptr;
@@ -2379,7 +2379,7 @@ napi_value NAPI_GetElementName(napi_env env, napi_callback_info info)
     elementNameCB->cbBase.errCode = NAPI_ERR_NO_ERROR;
     napi_value ret = GetElementNameWrap(env, info, elementNameCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (elementNameCB != nullptr) {
             delete elementNameCB;
             elementNameCB = nullptr;
@@ -2401,7 +2401,7 @@ napi_value NAPI_GetProcessName(napi_env env, napi_callback_info info)
     processNameCB->cbBase.errCode = NAPI_ERR_NO_ERROR;
     napi_value ret = GetProcessNameWrap(env, info, processNameCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (processNameCB != nullptr) {
             delete processNameCB;
             processNameCB = nullptr;
@@ -2423,7 +2423,7 @@ napi_value NAPI_GetCallingBundle(napi_env env, napi_callback_info info)
     callingBundleCB->cbBase.errCode = NAPI_ERR_NO_ERROR;
     napi_value ret = GetCallingBundleWrap(env, info, callingBundleCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (callingBundleCB != nullptr) {
             delete callingBundleCB;
             callingBundleCB = nullptr;
@@ -2445,7 +2445,7 @@ napi_value NAPI_GetOrCreateLocalDir(napi_env env, napi_callback_info info)
     getOrCreateLocalDirCB->cbBase.errCode = NAPI_ERR_NO_ERROR;
     napi_value ret = GetOrCreateLocalDirWrap(env, info, getOrCreateLocalDirCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (getOrCreateLocalDirCB != nullptr) {
             delete getOrCreateLocalDirCB;
             getOrCreateLocalDirCB = nullptr;
@@ -2470,7 +2470,7 @@ DatabaseDirCB *CreateGetDatabaseDirCBInfo(napi_env env)
 
     DatabaseDirCB *getDatabaseDirCB = new (std::nothrow) DatabaseDirCB;
     if (getDatabaseDirCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "getDatabaseDirCB == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null getDatabaseDirCB");
         return nullptr;
     }
     getDatabaseDirCB->cbBase.cbInfo.env = env;
@@ -2486,7 +2486,7 @@ napi_value GetDatabaseDirWrap(napi_env env, napi_callback_info info, DatabaseDir
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (getDatabaseDirCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "getDatabaseDirCB == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null getDatabaseDirCB");
         return nullptr;
     }
 
@@ -2546,7 +2546,7 @@ napi_value NAPI_GetDatabaseDirSync(napi_env env, napi_callback_info info)
 
     if (ret == nullptr) {
         ret = WrapVoidToJS(env);
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
     } else {
         TAG_LOGI(AAFwkTag::JSNAPI, "end");
     }

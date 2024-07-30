@@ -60,7 +60,7 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
     napi_value napiIntentParam = nullptr;
     napi_get_named_property(env, param, "insightIntentParam", &napiIntentParam);
     if (napiIntentParam == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type insightIntentParam");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null napiIntentParam");
         return false;
     }
 
@@ -72,7 +72,7 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
     }
     auto wp = std::make_shared<WantParams>();
     if (!AppExecFwk::UnwrapWantParams(env, napiIntentParam, *wp)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type intentParam, Unwrap want fail");
+        TAG_LOGE(AAFwkTag::JSNAPI, "unwrap want fail");
         return false;
     }
     executeParam.insightIntentParam_ = wp;
@@ -88,10 +88,10 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
     if (executeMode == ExecuteMode::UI_ABILITY_FOREGROUND &&
         UnwrapInt32ByPropertyName(env, param, "displayId", displayId)) {
         if (displayId < 0) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument displayId");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid displayId");
             return false;
         }
-        TAG_LOGI(AAFwkTag::JSNAPI, "Get displayId %{public}d", displayId);
+        TAG_LOGI(AAFwkTag::JSNAPI, "displayId %{public}d", displayId);
         executeParam.displayId_ = displayId;
     }
 
