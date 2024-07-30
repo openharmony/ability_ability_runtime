@@ -85,7 +85,7 @@ void GetAppTypeAsyncCompleteCB(napi_env env, napi_status, void *data)
     NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, appTypeCB->cbBase.asyncWork));
     delete appTypeCB;
     appTypeCB = nullptr;
-    TAG_LOGI(AAFwkTag::JSNAPI, "main event thread complete end");
+    TAG_LOGI(AAFwkTag::JSNAPI, "end");
 }
 
 /**
@@ -110,7 +110,7 @@ void GetAppTypePromiseCompleteCB(napi_env env, napi_status, void *data)
     napi_delete_async_work(env, appTypeCB->cbBase.asyncWork);
     delete appTypeCB;
     appTypeCB = nullptr;
-    TAG_LOGI(AAFwkTag::JSNAPI, "main event thread complete end");
+    TAG_LOGI(AAFwkTag::JSNAPI, "end");
 }
 
 /**

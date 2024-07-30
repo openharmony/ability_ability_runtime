@@ -142,7 +142,7 @@ napi_value SetShowOnLockScreenPromise(napi_env env, ShowOnLockScreenCB *cbData)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "promise");
     if (cbData == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "param == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null cbData");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -202,7 +202,7 @@ napi_value NAPI_SetDisplayOrientationWrap(napi_env env, napi_callback_info info,
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (!UnwrapSetDisplayOrientation(env, argc, args, asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Invoke UnwrapSetDisplayOrientation fail");
+        TAG_LOGE(AAFwkTag::JSNAPI, "UnwrapSetDisplayOrientation fail");
         return nullptr;
     }
 
@@ -250,7 +250,7 @@ bool UnwrapSetDisplayOrientation(napi_env env, size_t argc, napi_value *argv, As
 
     const size_t argcMax = 2;
     if (argc > argcMax || argc < argcMax - 1) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Params is invalid.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return false;
     }
 
@@ -508,7 +508,7 @@ bool UnwrapParamVerifySelfPermission(
 
     const size_t argcMax = 2;
     if (argc > argcMax || argc < argcMax - 1) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Params is invalid.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return false;
     }
 
@@ -1831,7 +1831,7 @@ napi_value GetProcessNameAsync(napi_env env, napi_value *args, const size_t argC
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (args == nullptr || processNameCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "param == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -1861,7 +1861,7 @@ napi_value GetProcessNamePromise(napi_env env, ProcessNameCB *processNameCB)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "promise");
     if (processNameCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "param == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -2023,7 +2023,7 @@ napi_value GetCallingBundleAsync(
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (args == nullptr || callingBundleCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "param == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -2053,7 +2053,7 @@ napi_value GetCallingBundlePromise(napi_env env, CallingBundleCB *callingBundleC
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "promise");
     if (callingBundleCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "param == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -2223,7 +2223,7 @@ napi_value GetOrCreateLocalDirAsync(
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (args == nullptr || getOrCreateLocalDirCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "param == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -2254,7 +2254,7 @@ napi_value GetOrCreateLocalDirPromise(napi_env env, GetOrCreateLocalDirCB *getOr
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "promise");
     if (getOrCreateLocalDirCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "param == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
