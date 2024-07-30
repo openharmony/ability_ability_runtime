@@ -127,7 +127,7 @@ bool CheckAbilityType(const AsyncJSCallbackInfo *asyncCallbackInfo)
 
     const std::shared_ptr<AbilityInfo> info = asyncCallbackInfo->ability->GetAbilityInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "info == null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null info");
         return false;
     }
 
@@ -143,7 +143,7 @@ bool CheckAbilityType(const AsyncCallbackInfo *asyncCallbackInfo)
     }
 
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         return false;
     }
 
@@ -330,7 +330,7 @@ void IsUpdatingConfigurationsExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
@@ -364,7 +364,7 @@ void PrintDrawnCompletedExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
