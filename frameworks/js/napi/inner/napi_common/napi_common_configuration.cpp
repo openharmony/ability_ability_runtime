@@ -97,7 +97,7 @@ bool UnwrapConfiguration(napi_env env, napi_value param, Configuration &config)
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
 
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Params is invalid");
+        TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
         return false;
     }
 
