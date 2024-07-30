@@ -51,7 +51,7 @@ JsInsightIntentExecutor::JsInsightIntentExecutor(JsRuntime& runtime) : runtime_(
 JsInsightIntentExecutor::~JsInsightIntentExecutor()
 {
     state_ = State::DESTROYED;
-    TAG_LOGI(AAFwkTag::INTENT, "JsInsightIntentExecutor destructor");
+    TAG_LOGI(AAFwkTag::INTENT, "called");
 }
 
 bool JsInsightIntentExecutor::Init(const InsightIntentExecutorInfo& insightIntentInfo)
@@ -64,26 +64,26 @@ bool JsInsightIntentExecutor::Init(const InsightIntentExecutorInfo& insightInten
     HandleScope handleScope(runtime_);
     jsObj_ = JsInsightIntentExecutor::LoadJsCode(insightIntentInfo, runtime_);
     if (jsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "jsObj_ is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null jsObj_");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
     auto env = runtime_.GetNapiEnv();
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "env == nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null env");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Context is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null Context");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
     napi_value contextObj = CreateJsInsightIntentContext(env, context);
     contextObj_ = JsRuntime::LoadSystemModuleByEngine(env, "app.ability.InsightIntentContext", &contextObj, 1);
     if (contextObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "contextObj_ == nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null contextObj_");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
@@ -167,7 +167,7 @@ std::unique_ptr<NativeReference> JsInsightIntentExecutor::LoadJsCode(
     TAG_LOGD(AAFwkTag::INTENT, "called");
     auto executeParam = info.executeParam;
     if (executeParam == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "executeParam == nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null executeParam");
         return std::unique_ptr<NativeReference>();
     }
 

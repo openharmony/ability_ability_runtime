@@ -44,7 +44,7 @@ void InsightIntentExecuteCallbackProxy::OnExecuteDone(uint64_t key, int32_t resu
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "remote == nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null remote");
         return;
     }
 
