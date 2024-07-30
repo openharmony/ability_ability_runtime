@@ -403,7 +403,7 @@ napi_value JsFeatureAbility::OnGetWindow(napi_env env, napi_callback_info info)
 
     auto complete = [obj = this] (napi_env env, NapiAsyncTask& task, int32_t status) {
         if (obj->ability_ == nullptr) {
-            TAG_LOGE(AAFwkTag::FA, "task execute error, the ability is nullptr");
+            TAG_LOGE(AAFwkTag::FA, "null ability");
             task.Resolve(env, CreateJsNull(env));
             return;
         }
@@ -505,7 +505,7 @@ napi_value CreateAsyncWork(napi_env env, napi_value &resourceName, AsyncCallback
         TAG_LOGI(AAFwkTag::FA, "worker pool thread execute exit");
     },
     [](napi_env env, napi_status status, void *data) {
-        TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+        TAG_LOGI(AAFwkTag::FA, "complete");
         AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
         if (asyncCallbackInfo == nullptr) {
             TAG_LOGE(AAFwkTag::FA, "null asyncCallbackInfo");
@@ -745,7 +745,7 @@ napi_value UnwrapForResultParam(CallAbilityParam &param, napi_env env, napi_valu
     param.requestCode = dummyRequestCode_;
     param.forResultOption = true;
     dummyRequestCode_ = (dummyRequestCode_ < INT32_MAX) ? (dummyRequestCode_ + 1) : 0;
-    TAG_LOGI(AAFwkTag::FA, "reqCode=%{public}d forResultOption=%{public}d.",
+    TAG_LOGI(AAFwkTag::FA, "reqCode=%{public}d forResultOption=%{public}d",
         param.requestCode,
         param.forResultOption);
 

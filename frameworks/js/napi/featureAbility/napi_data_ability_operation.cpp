@@ -53,7 +53,7 @@ napi_value UnwrapDataAbilityOperation(
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGE(AAFwkTag::FA, "Params is invalid");
+        TAG_LOGE(AAFwkTag::FA, "invalid params");
         return nullptr;
     }
 
@@ -137,12 +137,12 @@ napi_value BuildDataAbilityOperation(
     builder->WithValueBackReferences(backReferences);
 
     if (builder != nullptr) {
-        TAG_LOGI(AAFwkTag::FA, "builder is not nullptr");
+        TAG_LOGI(AAFwkTag::FA, "builder not nullptr");
         dataAbilityOperation = builder->Build();
     }
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
-    
+
     return result;
 }
 
@@ -164,7 +164,7 @@ bool GetDataAbilityOperationBuilder(
             builder = DataAbilityOperation::NewAssertBuilder(uri);
             break;
         default:
-            TAG_LOGE(AAFwkTag::FA, "type:%{public}d is invalid", type);
+            TAG_LOGE(AAFwkTag::FA, "invalid type:%{public}d", type);
             return false;
     }
     return true;
@@ -177,7 +177,7 @@ napi_value UnwrapValuesBucket(const std::shared_ptr<NativeRdb::ValuesBucket> &pa
     napi_value result;
 
     if (param == nullptr) {
-        TAG_LOGI(AAFwkTag::FA, "input param is nullptr");
+        TAG_LOGI(AAFwkTag::FA, "null param");
         NAPI_CALL(env, napi_create_int32(env, 0, &result));
         return result;
     }
@@ -193,7 +193,7 @@ napi_value UnwrapDataAbilityPredicatesBackReferences(
     TAG_LOGI(AAFwkTag::FA, "called");
 
     if (!IsTypeForNapiValue(env, predicatesBackReferencesParam, napi_object)) {
-        TAG_LOGE(AAFwkTag::FA, "predicatesBackReferencesParam is invalid");
+        TAG_LOGE(AAFwkTag::FA, "invalid predicatesBackReferencesParam");
         return nullptr;
     }
 
