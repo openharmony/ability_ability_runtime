@@ -196,7 +196,7 @@ napi_value NAPI_Insert(napi_env env, napi_callback_info info)
 
     napi_value ret = InsertWrap(env, info, insertCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete insertCB;
         insertCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -361,7 +361,7 @@ napi_value NAPI_NotifyChange(napi_env env, napi_callback_info info)
 
     napi_value ret = NotifyChangeWrap(env, info, notifyChangeCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete notifyChangeCB;
         notifyChangeCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -690,7 +690,7 @@ napi_value UnRegisterSync(napi_env env, DAHelperOnOffCB *offCB)
 {
     TAG_LOGI(AAFwkTag::FA, "syncCallback");
     if (offCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "offCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null offCB");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -736,7 +736,7 @@ void FindRegisterObs(napi_env env, DAHelperOnOffCB *data)
 {
     TAG_LOGI(AAFwkTag::FA, "FindRegisterObs main event thread execute.");
     if (data == nullptr || data->dataAbilityHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param is null.");
+        TAG_LOGE(AAFwkTag::FA, "null param");
         return;
     }
 
@@ -776,7 +776,7 @@ napi_value NAPI_GetType(napi_env env, napi_callback_info info)
 
     napi_value ret = GetTypeWrap(env, info, gettypeCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete gettypeCB;
         gettypeCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -833,7 +833,7 @@ napi_value NAPI_GetFileTypes(napi_env env, napi_callback_info info)
 
     napi_value ret = GetFileTypesWrap(env, info, getfiletypesCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete getfiletypesCB;
         getfiletypesCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -896,7 +896,7 @@ napi_value NAPI_NormalizeUri(napi_env env, napi_callback_info info)
 
     napi_value ret = NormalizeUriWrap(env, info, normalizeuriCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete normalizeuriCB;
         normalizeuriCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -953,7 +953,7 @@ napi_value NAPI_DenormalizeUri(napi_env env, napi_callback_info info)
 
     napi_value ret = DenormalizeUriWrap(env, info, denormalizeuriCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete denormalizeuriCB;
         denormalizeuriCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -1024,7 +1024,7 @@ napi_value NAPI_Delete(napi_env env, napi_callback_info info)
 
     napi_value ret = DeleteWrap(env, info, deleteCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete deleteCB;
         deleteCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -1095,7 +1095,7 @@ napi_value NAPI_Update(napi_env env, napi_callback_info info)
 
     napi_value ret = UpdateWrap(env, info, updateCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete updateCB;
         updateCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -1272,7 +1272,7 @@ napi_value NAPI_Call(napi_env env, napi_callback_info info)
 
     napi_value ret = CallWrap(env, info, callCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete callCB;
         callCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -1304,7 +1304,7 @@ napi_value NAPI_OpenFile(napi_env env, napi_callback_info info)
 
     napi_value ret = OpenFileWrap(env, info, openFileCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete openFileCB;
         openFileCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -1383,7 +1383,7 @@ napi_value NAPI_BatchInsert(napi_env env, napi_callback_info info)
 
     napi_value ret = BatchInsertWrap(env, info, BatchInsertCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete BatchInsertCB;
         BatchInsertCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -1492,7 +1492,7 @@ napi_value NAPI_Query(napi_env env, napi_callback_info info)
 
     napi_value ret = QueryWrap(env, info, queryCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete queryCB;
         queryCB = nullptr;
         ret = WrapVoidToJS(env);
@@ -1564,7 +1564,7 @@ napi_value NAPI_ExecuteBatch(napi_env env, napi_callback_info info)
 
     napi_value ret = ExecuteBatchWrap(env, info, executeBatchCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         delete executeBatchCB;
         executeBatchCB = nullptr;
         ret = WrapVoidToJS(env);

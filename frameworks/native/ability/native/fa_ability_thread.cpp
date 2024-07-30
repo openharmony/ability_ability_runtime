@@ -110,7 +110,7 @@ std::string FAAbilityThread::CreateAbilityName(const std::shared_ptr<AppExecFwk:
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityRecord->GetAbilityInfo();
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityInfo is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityInfo");
         return abilityName;
     }
 
@@ -274,14 +274,14 @@ void FAAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     TAG_LOGD(AAFwkTag::FA, "begin ability: %{public}s", abilityRecord->GetAbilityInfo()->name.c_str());
     abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(mainRunner);
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
 
     // 2.new ability
     auto ability = AppExecFwk::AbilityLoader::GetInstance().GetAbilityByName(abilityName);
     if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ability");
         return;
     }
     currentAbility_.reset(ability);
@@ -308,7 +308,7 @@ void FAAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     abilityImpl_ = DelayedSingleton<AppExecFwk::AbilityImplFactory>::GetInstance()->MakeAbilityImplObject(
         abilityRecord->GetAbilityInfo());
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     abilityImpl_->Init(application, abilityRecord, currentAbility_, abilityHandler_, token_);
@@ -345,7 +345,7 @@ void FAAbilityThread::AttachExtension(const std::shared_ptr<AppExecFwk::OHOSAppl
     TAG_LOGD(AAFwkTag::FA, "extension: %{public}s", abilityRecord->GetAbilityInfo()->name.c_str());
     abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(mainRunner);
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
 
@@ -394,7 +394,7 @@ void FAAbilityThread::AttachExtension(const std::shared_ptr<AppExecFwk::OHOSAppl
     }
     abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(runner_);
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
 
@@ -445,19 +445,19 @@ void FAAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     std::string abilityName = CreateAbilityName(abilityRecord, application);
     runner_ = AppExecFwk::EventRunner::Create(abilityName);
     if (runner_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "runner_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null runner_");
         return;
     }
     abilityHandler_ = std::make_shared<AppExecFwk::AbilityHandler>(runner_);
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
 
     // 2.new ability
     auto ability = AppExecFwk::AbilityLoader::GetInstance().GetAbilityByName(abilityName);
     if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ability");
         return;
     }
     currentAbility_.reset(ability);
@@ -484,7 +484,7 @@ void FAAbilityThread::HandleAbilityTransaction(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, traceName);
     TAG_LOGD(AAFwkTag::FA, "Lifecycle: name is %{public}s.", want.GetElement().GetAbilityName().c_str());
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     std::string methodName = "HandleAbilityTransaction";
@@ -518,7 +518,7 @@ void FAAbilityThread::HandleShareData(const int32_t &uniqueId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     abilityImpl_->HandleShareData(uniqueId);
@@ -541,7 +541,7 @@ void FAAbilityThread::HandleConnectAbility(const Want &want)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
 
@@ -557,7 +557,7 @@ void FAAbilityThread::HandleDisconnectAbility(const Want &want)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
 
@@ -573,7 +573,7 @@ void FAAbilityThread::HandleCommandAbility(const Want &want, bool restart, int32
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     abilityImpl_->CommandAbility(want, restart, startId);
@@ -645,7 +645,7 @@ void FAAbilityThread::HandleRestoreAbilityState(const AppExecFwk::PacMap &state)
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
 
@@ -656,7 +656,7 @@ void FAAbilityThread::ScheduleSaveAbilityState()
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
 
@@ -667,7 +667,7 @@ void FAAbilityThread::ScheduleRestoreAbilityState(const AppExecFwk::PacMap &stat
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     abilityImpl_->DispatchRestoreAbilityState(state);
@@ -677,7 +677,7 @@ void FAAbilityThread::ScheduleUpdateConfiguration(const AppExecFwk::Configuratio
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -704,7 +704,7 @@ void FAAbilityThread::HandleUpdateConfiguration(const AppExecFwk::Configuration 
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
 
@@ -738,7 +738,7 @@ void FAAbilityThread::ScheduleAbilityTransaction(
         return;
     }
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -770,7 +770,7 @@ void FAAbilityThread::ScheduleShareData(const int32_t &uniqueId)
         return;
     }
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -792,7 +792,7 @@ void FAAbilityThread::ScheduleConnectAbility(const Want &want)
 {
     TAG_LOGD(AAFwkTag::FA, "begin, isExtension_: %{public}d", isExtension_);
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -819,7 +819,7 @@ void FAAbilityThread::ScheduleDisconnectAbility(const Want &want)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::FA, "begin, isExtension: %{public}d", isExtension_);
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -845,7 +845,7 @@ void FAAbilityThread::ScheduleCommandAbility(const Want &want, bool restart, int
 {
     TAG_LOGD(AAFwkTag::FA, "begin. startId: %{public}d", startId);
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -880,11 +880,11 @@ bool FAAbilityThread::SchedulePrepareTerminateAbility()
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return false;
     }
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return false;
     }
     if (getpid() == gettid()) {
@@ -928,7 +928,7 @@ void FAAbilityThread::ScheduleCommandAbilityWindow(
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -950,7 +950,7 @@ void FAAbilityThread::SendResult(int requestCode, int resultCode, const Want &wa
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -985,7 +985,7 @@ std::vector<std::string> FAAbilityThread::GetFileTypes(const Uri &uri, const std
     TAG_LOGD(AAFwkTag::FA, "begin");
     std::vector<std::string> types;
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return types;
     }
 
@@ -997,7 +997,7 @@ int FAAbilityThread::OpenFile(const Uri &uri, const std::string &mode)
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return -1;
     }
     return abilityImpl_->OpenFile(uri, mode);
@@ -1007,7 +1007,7 @@ int FAAbilityThread::OpenRawFile(const Uri &uri, const std::string &mode)
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return -1;
     }
 
@@ -1018,7 +1018,7 @@ int FAAbilityThread::Insert(const Uri &uri, const NativeRdb::ValuesBucket &value
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return -1;
     }
 
@@ -1030,7 +1030,7 @@ std::shared_ptr<AppExecFwk::PacMap> FAAbilityThread::Call(
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return nullptr;
     }
 
@@ -1042,7 +1042,7 @@ int FAAbilityThread::Update(
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return -1;
     }
 
@@ -1053,7 +1053,7 @@ int FAAbilityThread::Delete(const Uri &uri, const NativeRdb::DataAbilityPredicat
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return -1;
     }
     return abilityImpl_->Delete(uri, predicates);
@@ -1064,7 +1064,7 @@ std::shared_ptr<NativeRdb::AbsSharedResultSet> FAAbilityThread::Query(
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return nullptr;
     }
 
@@ -1076,7 +1076,7 @@ std::string FAAbilityThread::GetType(const Uri &uri)
     TAG_LOGD(AAFwkTag::FA, "called");
     std::string type;
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return "";
     }
 
@@ -1087,7 +1087,7 @@ bool FAAbilityThread::Reload(const Uri &uri, const AppExecFwk::PacMap &extras)
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return false;
     }
     return abilityImpl_->Reload(uri, extras);
@@ -1097,7 +1097,7 @@ int FAAbilityThread::BatchInsert(const Uri &uri, const std::vector<NativeRdb::Va
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return -1;
     }
 
@@ -1108,7 +1108,7 @@ void FAAbilityThread::ContinueAbility(const std::string &deviceId, uint32_t vers
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     abilityImpl_->ContinueAbility(deviceId, versionCode);
@@ -1118,7 +1118,7 @@ void FAAbilityThread::NotifyContinuationResult(int32_t result)
 {
     TAG_LOGD(AAFwkTag::FA, "begin, result: %{public}d", result);
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     abilityImpl_->NotifyContinuationResult(result);
@@ -1136,7 +1136,7 @@ void FAAbilityThread::NotifyMemoryLevel(int32_t level)
         return;
     }
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     abilityImpl_->NotifyMemoryLevel(level);
@@ -1151,7 +1151,7 @@ void FAAbilityThread::InitExtensionFlag(const std::shared_ptr<AppExecFwk::Abilit
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityRecord->GetAbilityInfo();
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityInfo is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ability");
         return;
     }
     if (abilityInfo->type == AppExecFwk::AbilityType::EXTENSION) {
@@ -1171,7 +1171,7 @@ Uri FAAbilityThread::NormalizeUri(const Uri &uri)
     TAG_LOGD(AAFwkTag::FA, "begin");
     Uri urivalue("");
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return urivalue;
     }
 
@@ -1244,7 +1244,7 @@ bool FAAbilityThread::ScheduleRegisterObserver(const Uri &uri, const sptr<AAFwk:
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return false;
     }
     wptr<FAAbilityThread> weak = this;
@@ -1267,7 +1267,7 @@ bool FAAbilityThread::ScheduleUnregisterObserver(const Uri &uri, const sptr<AAFw
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return false;
     }
     wptr<FAAbilityThread> weak = this;
@@ -1290,7 +1290,7 @@ bool FAAbilityThread::ScheduleNotifyChange(const Uri &uri)
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return false;
     }
     wptr<FAAbilityThread> weak = this;
@@ -1315,7 +1315,7 @@ std::vector<std::shared_ptr<AppExecFwk::DataAbilityResult>> FAAbilityThread::Exe
     TAG_LOGD(AAFwkTag::FA, "begin");
     std::vector<std::shared_ptr<AppExecFwk::DataAbilityResult>> results;
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         results.clear();
         return results;
     }
@@ -1348,7 +1348,7 @@ void FAAbilityThread::DumpAbilityInfo(const std::vector<std::string> &params, st
         return;
     }
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     wptr<FAAbilityThread> weak = this;
@@ -1420,12 +1420,12 @@ void FAAbilityThread::DumpOtherInfo(std::vector<std::string> &info)
     std::string dumpInfo = "        event:";
     info.push_back(dumpInfo);
     if (abilityHandler_ == nullptr) {
-        TAG_LOGD(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGD(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
     auto runner = abilityHandler_->GetEventRunner();
     if (runner == nullptr) {
-        TAG_LOGD(AAFwkTag::FA, "runner_ is nullptr");
+        TAG_LOGD(AAFwkTag::FA, "null runner_");
         return;
     }
     dumpInfo = "";
@@ -1450,11 +1450,11 @@ void FAAbilityThread::CallRequest()
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (currentAbility_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ability");
         return;
     }
     if (abilityHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
         return;
     }
 
@@ -1463,7 +1463,7 @@ void FAAbilityThread::CallRequest()
     auto syncTask = [ability = weakAbility, &retval]() {
         auto currentAbility = ability.lock();
         if (currentAbility == nullptr) {
-            TAG_LOGE(AAFwkTag::FA, "ability is nullptr");
+            TAG_LOGE(AAFwkTag::FA, "null ability");
             return;
         }
 
@@ -1477,7 +1477,7 @@ void FAAbilityThread::HandlePrepareTermianteAbility()
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (abilityImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "abilityImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null abilityImpl_");
         return;
     }
     isPrepareTerminate_ = abilityImpl_->PrepareTerminateAbility();
