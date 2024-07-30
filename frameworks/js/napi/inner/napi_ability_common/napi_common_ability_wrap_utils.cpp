@@ -116,12 +116,12 @@ bool CheckAbilityType(const AsyncJSCallbackInfo *asyncCallbackInfo)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "start");
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo == null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return false;
     }
 
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability == null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         return false;
     }
 
@@ -294,7 +294,7 @@ void GetFilesDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability == null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
@@ -477,7 +477,7 @@ void GetExternalCacheDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability == null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
