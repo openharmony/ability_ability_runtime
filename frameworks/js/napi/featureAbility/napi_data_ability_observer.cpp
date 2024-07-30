@@ -169,13 +169,13 @@ void NAPIDataAbilityObserver::CallJsMethod()
 void NAPIDataAbilityObserver::OnChange()
 {
     if (ref_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ref is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ret");
         return;
     }
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "loop is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null loop");
         return;
     }
 

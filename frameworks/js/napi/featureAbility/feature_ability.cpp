@@ -110,7 +110,7 @@ napi_value JsFeatureAbilityInit(napi_env env, napi_value exports)
     }
 
     if (!AppExecFwk::CheckTypeForNapiValue(env, exports, napi_object)) {
-        TAG_LOGE(AAFwkTag::FA, "object is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null object");
         return exports;
     }
 
@@ -221,7 +221,7 @@ napi_value JsFeatureAbility::OnHasWindowFocus(napi_env env, const NapiCallbackIn
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (info.argc > ARGS_ONE || info.argc < ARGS_ZERO) {
-        TAG_LOGE(AAFwkTag::FA, " wrong number of arguments");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return CreateJsUndefined(env);
     }
     NapiAsyncTask::CompleteCallback complete =
@@ -278,12 +278,12 @@ napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackI
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (info.argc < ARGS_ONE || info.argc > ARGS_TWO) {
-        TAG_LOGE(AAFwkTag::FA, "wrong number of arguments");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return CreateJsUndefined(env);
     }
 
     if (ability_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ability");
         return CreateJsUndefined(env);
     }
 
@@ -322,7 +322,7 @@ napi_value JsFeatureAbility::OnFinishWithResult(napi_env env, NapiCallbackInfo& 
 {
     TAG_LOGD(AAFwkTag::FA, "called");
     if (info.argc > ARGS_TWO || info.argc < ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::FA, "wrong number of arguments");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return CreateJsUndefined(env);
     }
 
@@ -692,7 +692,7 @@ void CallOnAbilityResult(int requestCode, int resultCode, const Want &resultData
         delete work;
         return;
     }
-    
+
     onAbilityCB->requestCode = requestCode;
     onAbilityCB->resultCode = resultCode;
     onAbilityCB->resultData = resultData;

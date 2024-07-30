@@ -91,7 +91,7 @@ napi_value JsFeatureAbility::OnStartAbility(napi_env env, NapiCallbackInfo& info
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (info.argc != 1) {
-        TAG_LOGE(AAFwkTag::FA, "arguments not match");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return CreateJsUndefined(env);
     }
 
@@ -176,18 +176,18 @@ napi_value JsFeatureAbility::OnFinishWithResult(napi_env env, NapiCallbackInfo& 
 
     Ability *ability = GetAbility(env);
     if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null ability");
         return CreateJsUndefined(env);
     }
 
     if (!IsTypeForNapiValue(env, info.argv[0], napi_object)) {
-        TAG_LOGE(AAFwkTag::FA, "Params is invalid");
+        TAG_LOGE(AAFwkTag::FA, "invalid args[PARAM0]");
         return CreateJsUndefined(env);
     }
 
     int32_t code = ERR_OK;
     if (!UnwrapInt32ByPropertyName(env, info.argv[0], "code", code)) {
-        TAG_LOGE(AAFwkTag::FA, "Failed to get code");
+        TAG_LOGE(AAFwkTag::FA, "invalid args[PARAM0]");
         return CreateJsUndefined(env);
     }
 
