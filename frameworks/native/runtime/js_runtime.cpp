@@ -120,7 +120,7 @@ static auto PermissionCheckFunc = []() {
 napi_value CanIUse(napi_env env, napi_callback_info info)
 {
     if (env == nullptr || info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "get syscap failed since env or callback info is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env or info");
         return nullptr;
     }
     napi_value undefined = CreateJsUndefined(env);
@@ -129,7 +129,7 @@ napi_value CanIUse(napi_env env, napi_callback_info info)
     napi_value argv[1] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get syscap failed with invalid parameter");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "invalid argc");
         return undefined;
     }
 
@@ -170,7 +170,7 @@ napi_status CreateNapiEnv(napi_env *env)
     }
     auto options = JsRuntime::GetChildOptions();
     if (options == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "options is null, it maybe application startup failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null options");
         return napi_status::napi_generic_failure;
     }
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
@@ -181,7 +181,7 @@ napi_status CreateNapiEnv(napi_env *env)
     }
     *env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "CreateJsEnv failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return napi_status::napi_generic_failure;
     }
     return NativeRuntimeImpl::GetNativeRuntimeImpl().Init(*options, *env);
@@ -208,7 +208,7 @@ std::shared_ptr<Runtime::Options> JsRuntime::childOptions_ = nullptr;
 std::mutex childOptionsMutex_;
 JsRuntime::JsRuntime()
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "JsRuntime costructor");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
 }
 
 JsRuntime::~JsRuntime()
@@ -254,7 +254,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     }
     CHECK_POINTER(jsEnv_);
     if (jsEnv_->GetDebugMode()) {
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "Already in debug mode");
+        TAG_LOGI(AAFwkTag::JSRUNTIME, "in debug mode");
         return;
     }
     // Set instance id to tid after the first instance.
@@ -275,7 +275,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s",
                 socketFd, option.c_str());
         if (weak == nullptr) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr in hdc register callback");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
@@ -381,7 +381,7 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
 
     interval = jsperfMatchResults[matchNumResultIndex].str();
     if (interval.empty()) {
-        TAG_LOGD(AAFwkTag::JSRUNTIME, "match order result error");
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "empty interval");
         return defaultValue;
     }
 
@@ -410,7 +410,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
         [bundleName, isStartWithDebug, instanceId, weak, isDebugApp](int socketFd, std::string option) {
         TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
         if (weak == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr in hdc register callback");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
@@ -1408,7 +1408,7 @@ bool JsRuntime::ReadSourceMapData(const std::string& hapPath, const std::string&
 {
     // Source map relative path, FA: "/assets/js", Stage: "/ets"
     if (hapPath.empty()) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "hapPath is empty");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "empty hapPath");
         return false;
     }
     bool newCreate = false;

@@ -80,7 +80,7 @@ void ConnectServerManager::LoadConnectServerDebuggerSo()
     if (handlerConnectServerSo_ == nullptr) {
         handlerConnectServerSo_ = dlopen("libconnectserver_debugger.z.so", RTLD_LAZY);
         if (handlerConnectServerSo_ == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to open register library");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null handlerConnectServerSo_");
             return;
         }
     }
@@ -95,7 +95,7 @@ void ConnectServerManager::StartConnectServer(const std::string& bundleName, int
     if (isLocalAbstract) {
         auto startServer = reinterpret_cast<StartServer>(dlsym(handlerConnectServerSo_, "StartServer"));
         if (startServer == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'StartServer'");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null startServer");
             return;
         }
         startServer(bundleName_);
@@ -105,7 +105,7 @@ void ConnectServerManager::StartConnectServer(const std::string& bundleName, int
         reinterpret_cast<StartServerForSocketPair>(dlsym(handlerConnectServerSo_, "StartServerForSocketPair"));
     if (startServerForSocketPair == nullptr) {
         TAG_LOGE(
-            AAFwkTag::JSRUNTIME, "failed to find symbol 'StartServer'");
+            AAFwkTag::JSRUNTIME, "null startServerForSocketPair");
         return;
     }
     startServerForSocketPair(socketFd);
@@ -115,7 +115,7 @@ void ConnectServerManager::StopConnectServer(bool isCloseSo)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     if (handlerConnectServerSo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "handlerConnectServerSo_ is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null handlerConnectServerSo_");
         return;
     }
     auto stopServer = reinterpret_cast<StopServer>(dlsym(handlerConnectServerSo_, "StopServer"));
@@ -205,7 +205,7 @@ void ConnectServerManager::SetSwitchCallback(int32_t instanceId)
     auto setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(
         dlsym(handlerConnectServerSo_, "SetSwitchCallBack"));
     if (setSwitchCallBack == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "ConnectServerManager::AddInstance failed to find symbol 'setSwitchCallBack'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null setSwitchCallBack");
         return;
     }
     setSwitchCallBack(
@@ -213,14 +213,14 @@ void ConnectServerManager::SetSwitchCallback(int32_t instanceId)
             if (setStatus_ != nullptr) {
                 setStatus_(status);
             } else {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "setStatus_ is nullptr");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "null setStatus_");
             }
         },
         [this](int32_t containerId) {
             if (createLayoutInfo_ != nullptr) {
                 createLayoutInfo_(containerId);
             } else {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "createLayoutInfo_ is nullptr");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "null createLayoutInfo_");
             }
         }, instanceId);
 }
@@ -239,21 +239,21 @@ void ConnectServerManager::SetProfilerCallBack()
         if (setArkUIStateProfilerStatus_ != nullptr) {
             setArkUIStateProfilerStatus_(status);
         } else {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "setArkUIStateProfilerStatus_ is nullptr");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null etArkUIStateProfilerStatus_");
         }
     });
 }
 
 bool ConnectServerManager::SendInstanceMessage(int32_t tid, int32_t instanceId, const std::string& instanceName)
 {
-    TAG_LOGI(AAFwkTag::JSRUNTIME, "ConnectServerManager::SendInstanceMessage Add instance to connect server");
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "called");
     ConnectServerManager::Get().SetSwitchCallback(instanceId);
     ConnectServerManager::Get().SetProfilerCallBack();
     std::string message = GetInstanceMapMessage("addInstance", instanceId, instanceName, tid);
     LoadConnectServerDebuggerSo();
     auto storeMessage = reinterpret_cast<StoreMessage>(dlsym(handlerConnectServerSo_, "StoreMessage"));
     if (storeMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "ConnectServerManager::SendInstanceMessage failed to find symbol 'StoreMessage'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null storeMessage");
         return false;
     }
     storeMessage(instanceId, message);
@@ -278,7 +278,7 @@ bool ConnectServerManager::AddInstance(int32_t tid, int32_t instanceId, const st
         return false;
     }
 
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "ConnectServerManager::AddInstance Add instance to connect server");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
 
     ConnectServerManager::Get().SetSwitchCallback(instanceId);
     ConnectServerManager::Get().SetProfilerCallBack();
@@ -288,7 +288,7 @@ bool ConnectServerManager::AddInstance(int32_t tid, int32_t instanceId, const st
 
     auto storeMessage = reinterpret_cast<StoreMessage>(dlsym(handlerConnectServerSo_, "StoreMessage"));
     if (storeMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'StoreMessage'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null StoreMessage");
         return false;
     }
     storeMessage(instanceId, message);
@@ -296,7 +296,7 @@ bool ConnectServerManager::AddInstance(int32_t tid, int32_t instanceId, const st
     // WaitForConnection() means the connection state of the connect server
     auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     if (sendMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'SendMessage'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null SendMessage");
         return false;
     }
     // if connected, message will be sent immediately.
@@ -332,7 +332,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
     LoadConnectServerDebuggerSo();
     auto waitForConnection = reinterpret_cast<WaitForConnection>(dlsym(handlerConnectServerSo_, "WaitForConnection"));
     if (waitForConnection == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'WaitForConnection'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null WaitForConnection");
         return;
     }
 
@@ -341,7 +341,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
 
     auto removeMessage = reinterpret_cast<RemoveMessage>(dlsym(handlerConnectServerSo_, "RemoveMessage"));
     if (removeMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'RemoveMessage'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null RemoveMessage");
         return;
     }
     removeMessage(instanceId);
@@ -363,7 +363,7 @@ void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const s
     TAG_LOGI(AAFwkTag::JSRUNTIME, "called");
     auto sendLayoutMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
     if (sendLayoutMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'sendLayoutMessage'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendLayoutMessage");
         return;
     }
 
@@ -372,7 +372,7 @@ void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const s
     auto storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(
         dlsym(handlerConnectServerSo_, "StoreInspectorInfo"));
     if (storeInspectorInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'StoreInspectorInfo'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null StoreInspectorInfo");
         return;
     }
     storeInspectorInfo(jsonTreeStr, jsonSnapshotStr);
