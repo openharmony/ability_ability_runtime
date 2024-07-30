@@ -22,11 +22,12 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 
+#include "app_mem_info.h"
 #include "app_mgr_interface.h"
 #include "app_service_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "app_mem_info.h"
+#include "param.h"
 
 namespace OHOS {
 namespace AppExecFwk {
