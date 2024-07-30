@@ -46,7 +46,7 @@ int32_t InsightIntentExecuteCallbackStub::OnExecuteDoneInner(MessageParcel &data
     std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> executeResult(
         data.ReadParcelable<AppExecFwk::InsightIntentExecuteResult>());
     if (executeResult == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "executeResult is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null executeResult");
         return ERR_INVALID_VALUE;
     }
     OnExecuteDone(key, resultCode, *executeResult);

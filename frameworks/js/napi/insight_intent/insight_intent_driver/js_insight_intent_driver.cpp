@@ -96,7 +96,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::INTENT, "called");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::INTENT, "Params not match");
+            TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }

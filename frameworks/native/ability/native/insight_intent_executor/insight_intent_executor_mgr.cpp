@@ -22,12 +22,12 @@ namespace OHOS {
 namespace AbilityRuntime {
 InsightIntentExecutorMgr::InsightIntentExecutorMgr()
 {
-    TAG_LOGD(AAFwkTag::INTENT, "constructor");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
 }
 
 InsightIntentExecutorMgr::~InsightIntentExecutorMgr()
 {
-    TAG_LOGI(AAFwkTag::INTENT, "deconstructor");
+    TAG_LOGI(AAFwkTag::INTENT, "called");
 }
 
 bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const InsightIntentExecutorInfo& executeInfo,
@@ -36,7 +36,7 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
     TAG_LOGD(AAFwkTag::INTENT, "called");
     auto executeParam = executeInfo.executeParam;
     if (executeParam == nullptr || executeParam->insightIntentParam_ == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "executeParam == nullptr or insightIntentParam_ == nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null executeParam or insightIntentParam_");
         TriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return false;
     }
@@ -47,7 +47,7 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
             TAG_LOGD(AAFwkTag::INTENT, "called");
             auto executorMgr = weak.lock();
             if (executorMgr == nullptr) {
-                TAG_LOGE(AAFwkTag::INTENT, "executorMgr == nullptr");
+                TAG_LOGE(AAFwkTag::INTENT, "null executorMgr");
                 return;
             }
             executorMgr->RemoveInsightIntentExecutor(intentId);
@@ -57,7 +57,7 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
     // Create insight intent executor
     auto intentExecutor = InsightIntentExecutor::Create(runtime);
     if (intentExecutor == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "intentExecutor == nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null intentExecutor");
         TriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return false;
     }

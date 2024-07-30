@@ -119,7 +119,7 @@ napi_value CreateJsInsightIntentContext(napi_env env, const std::shared_ptr<Insi
 bool CheckStartAbilityParam(napi_env env, NapiCallbackInfo& info, AAFwk::Want& want)
 {
     if (info.argc == 0) {
-        TAG_LOGE(AAFwkTag::INTENT, "not enough args");
+        TAG_LOGE(AAFwkTag::INTENT, "invalid argc");
         ThrowTooFewParametersError(env);
         return false;
     }
