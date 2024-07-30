@@ -113,7 +113,7 @@ napi_status NativeRuntimeImpl::Init(const Options& options, napi_env env)
 {
     auto jsEnv = GetJsEnv(env);
     if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
         return napi_status::napi_generic_failure;
     }
 
@@ -204,7 +204,7 @@ napi_status NativeRuntimeImpl::RemoveJsEnv(napi_env env)
 panda::ecmascript::EcmaVM* NativeRuntimeImpl::GetEcmaVm(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv) const
 {
     if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
         return nullptr;
     }
     return jsEnv->GetVM();
@@ -238,7 +238,7 @@ void NativeRuntimeImpl::LoadAotFile(const Options& options, const std::shared_pt
 void NativeRuntimeImpl::InitConsoleModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
         return;
     }
     jsEnv->InitConsoleModule();
@@ -247,7 +247,7 @@ void NativeRuntimeImpl::InitConsoleModule(const std::shared_ptr<JsEnv::JsEnviron
 void NativeRuntimeImpl::InitTimerModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
         return;
     }
     jsEnv->InitTimerModule();
@@ -257,7 +257,7 @@ void NativeRuntimeImpl::SetModuleLoadChecker(const std::shared_ptr<ModuleChecker
     const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
         return;
     }
     jsEnv->SetModuleLoadChecker(moduleCheckerDelegate);
@@ -266,7 +266,7 @@ void NativeRuntimeImpl::SetModuleLoadChecker(const std::shared_ptr<ModuleChecker
 void NativeRuntimeImpl::SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
         return;
     }
     auto callback = [](const std::string& bundleName, const std::string& moduleName, int32_t triggerMode) -> int32_t {
@@ -300,7 +300,7 @@ void NativeRuntimeImpl::SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnv
 bool NativeRuntimeImpl::InitLoop(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
         return false;
     }
     return jsEnv->InitLoop();
@@ -309,7 +309,7 @@ bool NativeRuntimeImpl::InitLoop(const std::shared_ptr<JsEnv::JsEnvironment>& js
 void NativeRuntimeImpl::InitWorkerModule(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "jsEnv is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
         return;
     }
 

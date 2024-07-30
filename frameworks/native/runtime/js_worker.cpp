@@ -76,7 +76,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     if (nativeEngine == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Input nativeEngine is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null nativeEngine");
         return;
     }
 
@@ -122,7 +122,7 @@ void OffWorkerFunc(NativeEngine* nativeEngine)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     if (nativeEngine == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Input nativeEngine is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null nativeEngine");
         return;
     }
 
