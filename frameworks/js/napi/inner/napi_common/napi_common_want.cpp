@@ -287,7 +287,7 @@ bool InnerWrapWantParamsDouble(
 bool InnerWrapWantParamsWantParams(
     napi_env env, napi_value jsObject, const std::string &key, const AAFwk::WantParams &wantParams)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called key=%{public}s", key.c_str());
+    TAG_LOGD(AAFwkTag::JSNAPI, "key=%{public}s", key.c_str());
     auto value = wantParams.GetParam(key);
     AAFwk::IWantParams *o = AAFwk::IWantParams::Query(value);
     if (o == nullptr) {
@@ -307,17 +307,17 @@ bool InnerWrapWantParamsWantParams(
 bool InnerWrapWantParamsRemoteObject(
     napi_env env, napi_value jsObject, const std::string &key, const AAFwk::WantParams &wantParams)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called key=%{public}s", key.c_str());
+    TAG_LOGD(AAFwkTag::JSNAPI, "key=%{public}s", key.c_str());
     auto value = wantParams.GetParam(key);
     AAFwk::IRemoteObjectWrap *remoteObjectIWrap = AAFwk::IRemoteObjectWrap::Query(value);
     if (remoteObjectIWrap == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "remoteObjectIWrap is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null remoteObjectIWrap");
         return false;
     }
     auto remoteObject = AAFwk::RemoteObjectWrap::UnBox(remoteObjectIWrap);
     auto jsValue = NAPI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
     if (jsValue == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "jsValue is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null jsValue");
         return false;
     }
 
@@ -608,7 +608,7 @@ bool InnerWrapWantParamsArrayWantParams(napi_env env, napi_value jsObject,
 
 bool InnerWrapWantParamsArray(napi_env env, napi_value jsObject, const std::string &key, sptr<AAFwk::IArray> &ao)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "called key=%{public}s", key.c_str());
+    TAG_LOGD(AAFwkTag::JSNAPI, "key=%{public}s", key.c_str());
     if (AAFwk::Array::IsStringArray(ao)) {
         return InnerWrapWantParamsArrayString(env, jsObject, key, ao);
     } else if (AAFwk::Array::IsBooleanArray(ao)) {
@@ -878,7 +878,7 @@ bool UnwrapWantParams(napi_env env, napi_value param, AAFwk::WantParams &wantPar
             TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s is filtered.", strProName.c_str());
             continue;
         }
-        TAG_LOGD(AAFwkTag::JSNAPI, "Property name=%{public}s.", strProName.c_str());
+        TAG_LOGD(AAFwkTag::JSNAPI, "property name=%{public}s", strProName.c_str());
         NAPI_CALL_BASE(env, napi_get_named_property(env, param, strProName.c_str(), &jsProValue), false);
         NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
 
@@ -920,7 +920,7 @@ void HandleNapiObject(napi_env env, napi_value param, napi_value jsProValue, std
         if (Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
             HandleRemoteObject(env, param, strProName, wantParams);
         } else {
-            TAG_LOGW(AAFwkTag::JSNAPI, "not system app, REMOTE_OBJECT is FORIBBED IN WANT.");
+            TAG_LOGW(AAFwkTag::JSNAPI, "not system app");
         }
     } else {
         bool isArray = false;
@@ -958,7 +958,7 @@ bool IsSpecialObject(napi_env env, napi_value param, std::string &strProName, st
     NAPI_CALL_BASE(env, napi_get_array_length(env, jsProNameList, &jsProCount), false);
 
     if (jsProCount != PROPERTIES_SIZE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "size is invalid, this object is not fd object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid size, not fd object");
         return false;
     }
 
@@ -968,7 +968,7 @@ bool IsSpecialObject(napi_env env, napi_value param, std::string &strProName, st
         false);
     NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
     if (jsValueType != jsValueProType) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "value property is invalid, this object is not fd object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid value property, not fd object");
         return false;
     }
 
@@ -1004,7 +1004,7 @@ bool HandleRemoteObject(napi_env env, napi_value param, std::string &strProName,
 
     sptr<IRemoteObject> remoteObject = NAPI_ohos_rpc_getNativeRemoteObject(env, jsProValue);
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "transfer to remoteObject fail");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null remoteObject");
         return false;
     }
 
@@ -1070,7 +1070,7 @@ napi_value WrapWant(napi_env env, const Want &want)
 
     napi_value jsElementName = WrapElementName(env, want.GetElement());
     if (jsElementName == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "Invoke WrapElementName failed");
+        TAG_LOGI(AAFwkTag::JSNAPI, "null jsElementName");
         return nullptr;
     }
 
@@ -1119,7 +1119,7 @@ napi_value WrapWant(napi_env env, const Want &want)
 bool UnwrapWant(napi_env env, napi_value param, Want &want)
 {
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "Params is invalid");
+        TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
         return false;
     }
 
@@ -1289,7 +1289,7 @@ bool InnerWrapJsWantParamsWantParams(
 
 bool WrapJsWantParamsArray(napi_env env, napi_value object, const std::string &key, sptr<AAFwk::IArray> &ao)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "called key=%{public}s", key.c_str());
+    TAG_LOGI(AAFwkTag::JSNAPI, "key=%{public}s", key.c_str());
     if (AAFwk::Array::IsStringArray(ao)) {
         return InnerWrapWantParamsArray<AAFwk::IString, AAFwk::String, std::string>(
             env, object, key, ao);

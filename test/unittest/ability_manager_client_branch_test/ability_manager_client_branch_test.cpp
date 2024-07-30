@@ -1749,6 +1749,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartAbilityByUIContentSession_0200, Te
     GTEST_LOG_(INFO) << "StartUIExtensionAbility_0200 end";
 }
 
+#ifdef WITH_DLP
 /**
  * @tc.number: NotifySaveAsResult_0100
  * @tc.name: NotifySaveAsResult
@@ -1760,6 +1761,7 @@ HWTEST_F(AbilityManagerClientBranchTest, NotifySaveAsResult_0100, TestSize.Level
     auto result = client_->NotifySaveAsResult(want, 0, 0);
     EXPECT_EQ(result, ERR_OK);
 }
+#endif // WITH_DLP
 
 /**
  * @tc.number: PrepareTerminateAbility_0100
@@ -1787,6 +1789,7 @@ HWTEST_F(AbilityManagerClientBranchTest, PrepareTerminateAbilityBySCB_0100, Test
     EXPECT_EQ(result, ERR_OK);
 }
 
+#ifdef WITH_DLP
 /**
  * @tc.number: UpdateMissionSnapShot_0100
  * @tc.name: UpdateMissionSnapShot
@@ -1799,6 +1802,7 @@ HWTEST_F(AbilityManagerClientBranchTest, UpdateMissionSnapShot_0100, TestSize.Le
     auto pixelMap = std::shared_ptr<Media::PixelMap>();
     client_->UpdateMissionSnapShot(token, pixelMap);
 }
+#endif // WITH_DLP
 
 /**
  * @tc.name: AbilityManagerClient_RegisterSessionHandler_0100
@@ -2579,36 +2583,6 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_GetAbilityStateByP
 }
 
 /**
- * @tc.name: AbilityManagerClient_RegisterStatusBarDelegate_0100
- * @tc.desc: RegisterStatusBarDelegate
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_RegisterStatusBarDelegate_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityManagerClient_RegisterStatusBarDelegate_0100 start";
-    ErrCode ret = client_->RegisterStatusBarDelegate(nullptr);
-    EXPECT_EQ(ret, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityManagerClient_RegisterStatusBarDelegate_0100 end";
-}
-
-#ifdef SUPPORT_GRAPHICS
-/**
- * @tc.name: AbilityManagerClient_SetMissionLabel_0100
- * @tc.desc: SetMissionLabel
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetMissionLabel_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityManagerClient_SetMissionLabel_0100 start";
-    sptr<IRemoteObject> token = nullptr;
-    std::string label = "label";
-    ErrCode ret = client_->SetMissionLabel(token, label);
-    EXPECT_EQ(ret, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityManagerClient_SetMissionLabel_0100 end";
-}
-#endif
-
-/**
  * @tc.name: AbilityManagerClient_TransferAbilityResultForExtension_0100
  * @tc.desc: TransferAbilityResult
  * @tc.type: FUNC
@@ -2637,5 +2611,35 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetResidentProcess
     EXPECT_TRUE(client_ != nullptr);
     GTEST_LOG_(INFO) << "AbilityManagerClient_SetResidentProcessEnabled_0100 end";
 }
+
+/**
+ * @tc.name: AbilityManagerClient_RegisterStatusBarDelegate_0100
+ * @tc.desc: RegisterStatusBarDelegate
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_RegisterStatusBarDelegate_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityManagerClient_RegisterStatusBarDelegate_0100 start";
+    ErrCode ret = client_->RegisterStatusBarDelegate(nullptr);
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityManagerClient_RegisterStatusBarDelegate_0100 end";
+}
+
+#ifdef SUPPORT_GRAPHICS
+/**
+ * @tc.name: AbilityManagerClient_SetMissionLabel_0100
+ * @tc.desc: SetMissionLabel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetMissionLabel_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityManagerClient_SetMissionLabel_0100 start";
+    sptr<IRemoteObject> token = nullptr;
+    std::string label = "label";
+    ErrCode ret = client_->SetMissionLabel(token, label);
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityManagerClient_SetMissionLabel_0100 end";
+}
+#endif
 }  // namespace AAFwk
 }  // namespace OHOS
