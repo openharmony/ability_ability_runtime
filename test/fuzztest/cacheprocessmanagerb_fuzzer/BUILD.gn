@@ -80,7 +80,6 @@ ohos_fuzztest("CacheProcessManagerbFuzzTest") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "samgr:samgr_proxy",
-    "hisysevent:libhisysevent",
   ]
 
   if (ability_runtime_graphics) {
