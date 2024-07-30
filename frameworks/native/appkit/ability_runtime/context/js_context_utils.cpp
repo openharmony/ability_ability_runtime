@@ -712,6 +712,31 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
     return contextObj;
 }
 
+void JsBaseContext::BindPropertiesAndFunctions(napi_env env, napi_value object, const char* moduleName, std::make_unique<JsBaseContext> jsContext){
+
+    BindNativeProperty(env, object, "cacheDir", JsBaseContext::GetCacheDir);
+    BindNativeProperty(env, object, "tempDir", JsBaseContext::GetTempDir);
+    BindNativeProperty(env, object, "resourceDir", JsBaseContext::GetResourceDir);
+    BindNativeProperty(env, object, "filesDir", JsBaseContext::GetFilesDir);
+    BindNativeProperty(env, object, "distributedFilesDir", JsBaseContext::GetDistributedFilesDir);
+    BindNativeProperty(env, object, "databaseDir", JsBaseContext::GetDatabaseDir);
+    BindNativeProperty(env, object, "preferencesDir", JsBaseContext::GetPreferencesDir);
+    BindNativeProperty(env, object, "bundleCodeDir", JsBaseContext::GetBundleCodeDir);
+    BindNativeProperty(env, object, "cloudFileDir", JsBaseContext::GetCloudFileDir);
+    BindNativeProperty(env, object, "area", JsBaseContext::GetArea);
+
+    BindNativeFunction(env, object, "createBundleContext", moduleName, JsBaseContext::CreateBundleContext);
+    BindNativeFunction(env, object, "getApplicationContext", moduleName, JsBaseContext::GetApplicationContext);
+    BindNativeFunction(env, object, "switchArea", moduleName, JsBaseContext::SwitchArea);
+    BindNativeFunction(env, object, "getArea", moduleName, JsBaseContext::GetArea);
+    BindNativeFunction(env, object, "createModuleContext", moduleName, JsBaseContext::CreateModuleContext);
+    BindNativeFunction(env, object, "createSystemHspModuleResourceManager", moduleName,
+        JsBaseContext::CreateSystemHspModuleResourceManager);
+    BindNativeFunction(env, object, "createModuleResourceManager", moduleName,
+        JsBaseContext::CreateModuleResourceManager);
+    BindNativeFunction(env, object, "getGroupDir", moduleName, JsBaseContext::GetGroupDir);
+}
+
 napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, bool keepContext)
 {
     napi_value object = nullptr;
@@ -745,25 +770,8 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
         }
     }
 
-    BindNativeProperty(env, object, "cacheDir", JsBaseContext::GetCacheDir);
-    BindNativeProperty(env, object, "tempDir", JsBaseContext::GetTempDir);
-    BindNativeProperty(env, object, "resourceDir", JsBaseContext::GetResourceDir);
-    BindNativeProperty(env, object, "filesDir", JsBaseContext::GetFilesDir);
-    BindNativeProperty(env, object, "distributedFilesDir", JsBaseContext::GetDistributedFilesDir);
-    BindNativeProperty(env, object, "databaseDir", JsBaseContext::GetDatabaseDir);
-    BindNativeProperty(env, object, "preferencesDir", JsBaseContext::GetPreferencesDir);
-    BindNativeProperty(env, object, "bundleCodeDir", JsBaseContext::GetBundleCodeDir);
-    BindNativeProperty(env, object, "cloudFileDir", JsBaseContext::GetCloudFileDir);
-    BindNativeProperty(env, object, "area", JsBaseContext::GetArea);
     const char *moduleName = "JsBaseContext";
-    BindNativeFunction(env, object, "createBundleContext", moduleName, JsBaseContext::CreateBundleContext);
-    BindNativeFunction(env, object, "getApplicationContext", moduleName, JsBaseContext::GetApplicationContext);
-    BindNativeFunction(env, object, "switchArea", moduleName, JsBaseContext::SwitchArea);
-    BindNativeFunction(env, object, "getArea", moduleName, JsBaseContext::GetArea);
-    BindNativeFunction(env, object, "createModuleContext", moduleName, JsBaseContext::CreateModuleContext);
-    BindNativeFunction(env, object, "createSystemHspModuleResourceManager", moduleName,JsBaseContext::CreateSystemHspModuleResourceManager);
-    BindNativeFunction(env, object, "createModuleResourceManager", moduleName,JsBaseContext::CreateModuleResourceManager);
-    BindNativeFunction(env, object, "getGroupDir", moduleName, JsBaseContext::GetGroupDir);
+    BindPropertiesAndFunctions(env,object,moduleName,jsContext);
     return object;
 }
 }  // namespace AbilityRuntime
