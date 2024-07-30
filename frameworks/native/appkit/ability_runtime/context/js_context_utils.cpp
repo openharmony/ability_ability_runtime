@@ -770,7 +770,7 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
     }
 
     const char *moduleName = "JsBaseContext";
-    BindPropertiesAndFunctions(env,object,moduleName,jsContext);
+    BindPropertiesAndFunctions(env, object, moduleName, jsContext);
     return object;
 }
 }  // namespace AbilityRuntime
