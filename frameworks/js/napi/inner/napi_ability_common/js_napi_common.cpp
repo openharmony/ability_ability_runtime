@@ -81,7 +81,7 @@ napi_value JsNapiCommon::OnFindAbilityConnection(napi_env env, sptr<NAPIAbilityC
     abilityConnection->AddConnectionCallback(connectionCallback);
     // Judge connection-state
     auto connectionState = abilityConnection->GetConnectionState();
-    TAG_LOGI(AAFwkTag::JSNAPI, "connectionState = %{public}d", connectionState);
+    TAG_LOGI(AAFwkTag::JSNAPI, "connectionState=%{public}d", connectionState);
     if (connectionState == CONNECTION_STATE_CONNECTED) {
         abilityConnection->HandleOnAbilityConnectDone(*connectionCallback, ERR_OK);
         return CreateJsValue(env, id);
@@ -224,7 +224,7 @@ bool JsNapiCommon::CreateConnectionAndConnectAbilityLocked(
 
     // connectAbility
     if (ability_ == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ConnectAbility, the ability is nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         return false;
     }
     connection->SetConnectionState(CONNECTION_STATE_CONNECTING);
@@ -615,7 +615,7 @@ napi_value JsNapiCommon::JsGetAppVersionInfo(
     auto execute = [obj = this, appInfo = infoData, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is null");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
@@ -777,7 +777,7 @@ napi_value JsNapiCommon::JsGetDisplayOrientation(napi_env env, napi_callback_inf
         *value = obj->ability_->GetDisplayOrientation();
     };
     auto complete = [value = errorVal] (napi_env env, NapiAsyncTask &task, int32_t status) {
-        TAG_LOGD(AAFwkTag::JSNAPI, "innerCall value = %{public}d", *value);
+        TAG_LOGD(AAFwkTag::JSNAPI, "innerCall value=%{public}d", *value);
         if (*value == NAPI_ERR_ACE_ABILITY) {
             task.Reject(env, CreateJsError(env, NAPI_ERR_ACE_ABILITY, "ability is nullptr"));
         } else if (*value == NAPI_ERR_ABILITY_TYPE_INVALID) {

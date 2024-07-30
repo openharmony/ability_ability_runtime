@@ -418,7 +418,7 @@ napi_value GetAbilityInfoWrap(napi_env env, napi_callback_info info, AbilityInfo
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong parameter count");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
@@ -822,7 +822,7 @@ napi_value GetWantAsync(napi_env env, napi_value *args, const size_t argCallback
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
     if (args == nullptr || asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null parameter");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null params");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -874,7 +874,7 @@ napi_value GetWantPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "promise");
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null parameter");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null params");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -1154,7 +1154,7 @@ void StopAbilityExecuteCallback(napi_env, void *data)
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "asyncCallbackInfo is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
 
@@ -1162,7 +1162,7 @@ void StopAbilityExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
 
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability is null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
@@ -1364,7 +1364,7 @@ napi_value StartBackgroundRunningWrap(napi_env &env, napi_callback_info &info, A
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramNums, args, NULL, NULL));
 
     if (paramNums < minParamNums || paramNums > maxParamNums) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument count");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
@@ -1463,7 +1463,7 @@ napi_value CancelBackgroundRunningWrap(napi_env &env, napi_callback_info &info, 
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, NULL, NULL));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument count");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
