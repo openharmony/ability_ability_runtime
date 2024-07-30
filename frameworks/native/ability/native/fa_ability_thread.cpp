@@ -33,7 +33,6 @@
 #endif // WITH_DLP
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "ohos_application.h"
 #ifdef SUPPORT_GRAPHICS
@@ -313,7 +312,7 @@ void FAAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     }
     abilityImpl_->Init(application, abilityRecord, currentAbility_, abilityHandler_, token_);
     // 4. ability attach : ipc
-    TAG_LOGD(AAFwkTag::FA, "LoadLifecycle: Attach ability");
+    TAG_LOGD(AAFwkTag::FA, "attach ability");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::LOAD };
     std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
         "; AbilityThread::Attach; the load lifecycle.";
@@ -339,7 +338,7 @@ void FAAbilityThread::AttachExtension(const std::shared_ptr<AppExecFwk::OHOSAppl
     // 1.new AbilityHandler
     std::string abilityName = CreateAbilityName(abilityRecord, application);
     if (abilityName.empty()) {
-        TAG_LOGE(AAFwkTag::FA, "abilityName is empty");
+        TAG_LOGE(AAFwkTag::FA, "empty abilityName");
         return;
     }
     TAG_LOGD(AAFwkTag::FA, "extension: %{public}s", abilityRecord->GetAbilityInfo()->name.c_str());
@@ -715,7 +714,7 @@ void FAAbilityThread::HandleExtensionUpdateConfiguration(const AppExecFwk::Confi
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (extensionImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "extensionImpl_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null extensionImpl_");
         return;
     }
 
@@ -734,7 +733,7 @@ void FAAbilityThread::ScheduleAbilityTransaction(
     AddLifecycleEvent(lifeCycleStateInfo.state, methodName);
 
     if (token_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "token_ is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null token_");
         return;
     }
     if (abilityHandler_ == nullptr) {
@@ -852,7 +851,7 @@ void FAAbilityThread::ScheduleCommandAbility(const Want &want, bool restart, int
     auto task = [weak, want, restart, startId]() {
         auto abilityThread = weak.promote();
         if (abilityThread == nullptr) {
-            TAG_LOGE(AAFwkTag::FA, "abilityThread is nullptr");
+            TAG_LOGE(AAFwkTag::FA, "null abilityThread");
             return;
         }
         if (abilityThread->isExtension_) {

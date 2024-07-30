@@ -102,11 +102,11 @@ napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
     if (status != napi_ok) {
         auto ability = OHOS::AbilityRuntime::GetCurrentAbility(env);
         if (ability == nullptr) {
-            TAG_LOGE(AAFwkTag::FA, "Failed to get native context instance");
+            TAG_LOGE(AAFwkTag::FA, "null ability");
             return nullptr;
         }
         std::string strUri = NapiValueToStringUtf8(env, argv[0]);
-        TAG_LOGI(AAFwkTag::FA, "FA Model: strUri = %{public}s", strUri.c_str());
+        TAG_LOGI(AAFwkTag::FA, "strUri=%{public}s", strUri.c_str());
         dataAbilityHelper = DataAbilityHelper::Creator(ability->GetContext(), std::make_shared<Uri>(strUri));
     } else {
         if (stageMode) {
@@ -146,7 +146,7 @@ napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
         [](napi_env env, void *data, void *hint) {
             auto objectInfo = static_cast<NAPIDataAbilityHelperWrapper *>(data);
             if (objectInfo == nullptr) {
-                TAG_LOGW(AAFwkTag::FA, "DAHelper finalize_cb objectInfo is nullptr");
+                TAG_LOGW(AAFwkTag::FA, "null objectInfo");
                 return;
             }
             TAG_LOGD(AAFwkTag::FA, "DAHelper finalize_cb dataAbilityHelperList.size = %{public}zu, "
@@ -539,7 +539,7 @@ napi_value RegisterAsync(
 
 void RegisterExecuteCB(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "worker pool thread execute.");
+    TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperOnOffCB *onCB = static_cast<DAHelperOnOffCB *>(data);
     auto onCBIter = std::find(g_registerInstances.begin(), g_registerInstances.end(), onCB);
     if (onCBIter == g_registerInstances.end()) {
@@ -561,7 +561,7 @@ void RegisterExecuteCB(napi_env env, void *data)
 
 void RegisterCompleteCB(napi_env env, napi_status status, void *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete");
+    TAG_LOGI(AAFwkTag::FA, "complete");
     DAHelperOnOffCB *onCB = static_cast<DAHelperOnOffCB *>(data);
     if (onCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null onCB");
@@ -700,7 +700,7 @@ napi_value UnRegisterSync(napi_env env, DAHelperOnOffCB *offCB)
         FindRegisterObs(env, offCB);
     }
 
-    TAG_LOGI(AAFwkTag::FA, "offCB->NotifyList size is %{public}zu", offCB->NotifyList.size());
+    TAG_LOGI(AAFwkTag::FA, "notifyList size: %{public}zu", offCB->NotifyList.size());
     for (auto &iter : offCB->NotifyList) {
         if (iter != nullptr && iter->observer != nullptr) {
             OHOS::Uri uri(iter->uri);
@@ -796,7 +796,7 @@ napi_value GetTypeWrap(napi_env env, napi_callback_info info, DAHelperGetTypeCB 
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "error argument count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -823,7 +823,7 @@ napi_value NAPI_GetFileTypes(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperGetFileTypesCB *getfiletypesCB = new (std::nothrow) DAHelperGetFileTypesCB;
     if (getfiletypesCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "getfiletypesCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null getfiletypesCB");
         return WrapVoidToJS(env);
     }
     getfiletypesCB->cbBase.cbInfo.env = env;
@@ -853,7 +853,7 @@ napi_value GetFileTypesWrap(napi_env env, napi_callback_info info, DAHelperGetFi
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong arguments count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -886,7 +886,7 @@ napi_value NAPI_NormalizeUri(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperNormalizeUriCB *normalizeuriCB = new (std::nothrow) DAHelperNormalizeUriCB;
     if (normalizeuriCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "normalizeuriCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null normalizeuriCB");
         return WrapVoidToJS(env);
     }
     normalizeuriCB->cbBase.cbInfo.env = env;
@@ -917,7 +917,7 @@ napi_value NormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperNorma
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Error argument count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -942,8 +942,8 @@ napi_value NAPI_DenormalizeUri(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperDenormalizeUriCB *denormalizeuriCB = new (std::nothrow) DAHelperDenormalizeUriCB;
-    if (denormalizeuriCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "denormalizeuriCB == nullptr");
+    if (null denormalizeuriCB) {
+        TAG_LOGE(AAFwkTag::FA, "null denormalizeuriCB");
         return WrapVoidToJS(env);
     }
     denormalizeuriCB->cbBase.cbInfo.env = env;
@@ -974,7 +974,7 @@ napi_value DenormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperDen
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Parameter count error");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -999,7 +999,7 @@ void UnwrapDataAbilityPredicates(NativeRdb::DataAbilityPredicates &predicates, n
 {
     auto tempPredicates = DataAbilityJsKit::DataAbilityPredicatesProxy::GetNativePredicates(env, value);
     if (tempPredicates == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "GetNativePredicates retval Marshalling failed");
+        TAG_LOGE(AAFwkTag::FA, "null tempPredicates");
         return;
     }
     predicates = *tempPredicates;
@@ -1053,7 +1053,7 @@ napi_value DeleteWrap(napi_env env, napi_callback_info info, DAHelperDeleteCB *d
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync) {
-        TAG_LOGE(AAFwkTag::FA, "Error argument count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -1124,7 +1124,7 @@ napi_value UpdateWrap(napi_env env, napi_callback_info info, DAHelperUpdateCB *u
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Parameter count error");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -1211,11 +1211,11 @@ napi_value CallWrap(napi_env env, napi_callback_info info, DAHelperCallCB *callC
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync != ARGS_FOUR && argcAsync != ARGS_FIVE) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument count not 4 or 5");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
     bool isPromise = (argcAsync <= argcPromise) ? true : false;
@@ -1262,7 +1262,7 @@ napi_value NAPI_Call(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperCallCB *callCB = new (std::nothrow) DAHelperCallCB;
     if (callCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "callCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null callCB");
         return WrapVoidToJS(env);
     }
     callCB->cbBase.cbInfo.env = env;
@@ -1294,7 +1294,7 @@ napi_value NAPI_OpenFile(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperOpenFileCB *openFileCB = new (std::nothrow) DAHelperOpenFileCB;
     if (openFileCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "openFileCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null openFileCB");
         return WrapVoidToJS(env);
     }
     openFileCB->cbBase.cbInfo.env = env;
@@ -1333,7 +1333,7 @@ napi_value OpenFileWrap(napi_env env, napi_callback_info info, DAHelperOpenFileC
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "argument count error");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -1373,7 +1373,7 @@ napi_value NAPI_BatchInsert(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperBatchInsertCB *BatchInsertCB = new (std::nothrow) DAHelperBatchInsertCB;
     if (BatchInsertCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "BatchInsertCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null BatchInsertCB");
         return WrapVoidToJS(env);
     }
     BatchInsertCB->cbBase.cbInfo.env = env;
@@ -1450,7 +1450,7 @@ napi_value BatchInsertWrap(napi_env env, napi_callback_info info, DAHelperBatchI
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -1520,7 +1520,7 @@ napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *que
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -1554,7 +1554,7 @@ napi_value NAPI_ExecuteBatch(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "start");
     DAHelperExecuteBatchCB *executeBatchCB = new (std::nothrow) DAHelperExecuteBatchCB;
     if (executeBatchCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "executeBatchCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "invalid executeBatchCB");
         return WrapVoidToJS(env);
     }
     executeBatchCB->cbBase.cbInfo.env = env;
@@ -1613,7 +1613,7 @@ napi_value ExecuteBatchWrap(napi_env env, napi_callback_info info, DAHelperExecu
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument count");
+        TAG_LOGE(AAFwkTag::FA, "invalid argc");
         return nullptr;
     }
 
@@ -1675,7 +1675,7 @@ bool NeedErase(std::vector<DAHelperOnOffCB*>::iterator& iter,
 void DeleteDAHelperOnOffCB(DAHelperOnOffCB *onCB)
 {
     if (!onCB) {
-        TAG_LOGI(AAFwkTag::FA, "onCB is nullptr, no need delete");
+        TAG_LOGI(AAFwkTag::FA, "null onCB");
         return;
     }
     EraseMemberProperties(onCB);

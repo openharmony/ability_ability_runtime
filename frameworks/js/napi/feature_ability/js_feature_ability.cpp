@@ -146,7 +146,7 @@ napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackI
 
     std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
     FeatureAbilityTask task = [env, asyncTask](int resultCode, const AAFwk::Want& want) {
-        TAG_LOGI(AAFwkTag::FA, "async callback is called");
+        TAG_LOGI(AAFwkTag::FA, "asyncCallback");
         std::string data = want.GetStringParam(RESULT_DATA_TAG);
         napi_value abilityResult = JsFeatureAbility::CreateJsResult(env, resultCode, data);
         if (abilityResult == nullptr) {
@@ -155,7 +155,7 @@ napi_value JsFeatureAbility::OnStartAbilityForResult(napi_env env, NapiCallbackI
         } else {
             asyncTask->Resolve(env, abilityResult);
         }
-        TAG_LOGI(AAFwkTag::FA, "async callback is called end");
+        TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
     };
 
     want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
