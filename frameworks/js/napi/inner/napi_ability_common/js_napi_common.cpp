@@ -1726,7 +1726,7 @@ void NAPIAbilityConnection::HandleOnAbilityDisconnectDone(ConnectionCallback &ca
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(callback.env, &loop);
     if (loop == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null loop", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null loop");
         return;
     }
 
