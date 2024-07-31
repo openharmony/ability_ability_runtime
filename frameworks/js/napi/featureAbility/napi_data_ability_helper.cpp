@@ -942,7 +942,7 @@ napi_value NAPI_DenormalizeUri(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperDenormalizeUriCB *denormalizeuriCB = new (std::nothrow) DAHelperDenormalizeUriCB;
-    if (null denormalizeuriCB) {
+    if (denormalizeuriCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null denormalizeuriCB");
         return WrapVoidToJS(env);
     }
