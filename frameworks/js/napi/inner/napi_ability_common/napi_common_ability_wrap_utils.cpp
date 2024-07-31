@@ -984,7 +984,7 @@ bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilitySta
         NAPI_CALL_BASE(env, napi_get_element(env, jsProNameList, index, &jsProName), false);
 
         std::string strProName = UnwrapStringFromJS(env, jsProName);
-        TAG_LOGI(AAFwkTag::JSNAPI, "Property name=%{public}s.", strProName.c_str());
+        TAG_LOGI(AAFwkTag::JSNAPI, "Property name=%{public}s", strProName.c_str());
         NAPI_CALL_BASE(env, napi_get_named_property(env, param, strProName.c_str(), &jsProValue), false);
         NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
 
