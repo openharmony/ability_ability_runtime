@@ -600,7 +600,7 @@ napi_value GetHapModuleInfoWrap(napi_env env, napi_callback_info info, HapModule
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong parameters count");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
@@ -937,7 +937,7 @@ napi_value GetWantWrap(napi_env env, napi_callback_info info, AsyncCallbackInfo 
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error argument count");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
@@ -1136,7 +1136,7 @@ napi_value GetAbilityNameWrap(napi_env env, napi_callback_info info, AbilityName
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "argument count wrong");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 

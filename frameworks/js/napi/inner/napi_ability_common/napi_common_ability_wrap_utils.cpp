@@ -393,7 +393,7 @@ void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability: nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
@@ -435,7 +435,7 @@ void GetCacheDirExecuteCallback(napi_env, void *data)
     asyncCallbackInfo->error_code = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability: null");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
@@ -516,7 +516,7 @@ AppTypeCB *CreateAppTypeCBInfo(napi_env env)
 
     AppTypeCB *appTypeCB = new (std::nothrow) AppTypeCB;
     if (appTypeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "appTypeCB == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null appTypeCB");
         return nullptr;
     }
     appTypeCB->cbBase.cbInfo.env = env;
@@ -548,7 +548,7 @@ AbilityInfoCB *CreateAbilityInfoCBInfo(napi_env env)
 
     AbilityInfoCB *abilityInfoCB = new (std::nothrow) AbilityInfoCB;
     if (abilityInfoCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "abilityInfoCB == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityInfoCB");
         return nullptr;
     }
     abilityInfoCB->cbBase.cbInfo.env = env;
@@ -731,7 +731,7 @@ HapModuleInfoCB *CreateHapModuleInfoCBInfo(napi_env env)
 
     HapModuleInfoCB *hapModuleInfoCB = new (std::nothrow) HapModuleInfoCB;
     if (hapModuleInfoCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "hapModuleInfoCB == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null hapModuleInfoCB");
         return nullptr;
     }
     hapModuleInfoCB->cbBase.cbInfo.env = env;
@@ -847,7 +847,7 @@ AppVersionInfoCB *CreateAppVersionInfoCBInfo(napi_env env)
 
     AppVersionInfoCB *appVersionInfoCB = new (std::nothrow) AppVersionInfoCB;
     if (appVersionInfoCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "appVersionInfoCB == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null appVersionInfoCB");
         return nullptr;
     }
     appVersionInfoCB->cbBase.cbInfo.env = env;
@@ -908,7 +908,7 @@ AbilityNameCB *CreateAbilityNameCBInfo(napi_env env)
 
     AbilityNameCB *abilityNameCB = new (std::nothrow) AbilityNameCB;
     if (abilityNameCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "abilityNameCB == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityNameCB");
         return nullptr;
     }
     abilityNameCB->cbBase.cbInfo.env = env;
@@ -923,7 +923,7 @@ napi_value WrapAbilityName(napi_env env, const AbilityNameCB *abilityNameCB)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (abilityNameCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Invalid param(abilityNameCB == nullptr)");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityNameCB");
         return nullptr;
     }
     napi_value result = nullptr;
@@ -976,7 +976,7 @@ bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilitySta
 
     NAPI_CALL_BASE(env, napi_get_property_names(env, param, &jsProNameList), false);
     NAPI_CALL_BASE(env, napi_get_array_length(env, jsProNameList, &jsProCount), false);
-    TAG_LOGI(AAFwkTag::JSNAPI, "Property size: %{public}d.", jsProCount);
+    TAG_LOGI(AAFwkTag::JSNAPI, "Property size: %{public}d", jsProCount);
 
     napi_value jsProName = nullptr;
     napi_value jsProValue = nullptr;
@@ -999,7 +999,7 @@ bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilitySta
             case napi_boolean: {
                 bool natValue = false;
                 NAPI_CALL_BASE(env, napi_get_value_bool(env, jsProValue, &natValue), false);
-                TAG_LOGI(AAFwkTag::JSNAPI, "Property value=%{public}s.",
+                TAG_LOGI(AAFwkTag::JSNAPI, "Property value=%{public}s",
                          natValue ? "true" : "false");
                 setting.AddProperty(strProName, std::to_string(natValue));
                 break;
@@ -1026,7 +1026,7 @@ bool UnwrapParamStopAbilityWrap(napi_env env, size_t argc, napi_value *argv, Asy
 
     if (argc == argcMax) {
         if (!CreateAsyncCallback(env, argv[PARAM1], asyncCallbackInfo)) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "the second parameter is invalid");
+            TAG_LOGI(AAFwkTag::JSNAPI, "argv[PARAM1] invalid");
             return false;
         }
     }
