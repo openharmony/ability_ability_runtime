@@ -226,7 +226,7 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
         // 2.2 start with /modulename
         // 2.3 start with @namespace
         // 2.4 start with modulename
-        TAG_LOGD(AAFwkTag::JSRUNTIME, "The application is packaged using esmodule mode");
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "esmodule mode");
         if (uri.find(BUNDLE_NAME_FLAG) == 0) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "uri start with @bundle:");
             size_t fileNamePos = uri.find_last_of("/");

@@ -138,7 +138,7 @@ bool ConnectServerManager::StoreInstanceMessage(int32_t tid, int32_t instanceId,
         auto result = instanceMap_.try_emplace(instanceId, std::make_pair(instanceName, tid));
         if (!result.second) {
             TAG_LOGW(AAFwkTag::JSRUNTIME,
-                "Instance %{public}d already added", instanceId);
+                "Instance %{public}d added", instanceId);
             return false;
         }
     }
@@ -314,7 +314,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         std::lock_guard<std::mutex> lock(mutex_);
         auto it = instanceMap_.find(instanceId);
         if (it == instanceMap_.end()) {
-            TAG_LOGW(AAFwkTag::JSRUNTIME, "Instance %{public}d is not found",
+            TAG_LOGW(AAFwkTag::JSRUNTIME, "Instance %{public}d not found",
                 instanceId);
             return;
         }
