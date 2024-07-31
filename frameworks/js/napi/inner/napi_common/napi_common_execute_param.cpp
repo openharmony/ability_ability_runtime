@@ -25,7 +25,7 @@ using namespace OHOS::AppExecFwk;
 bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecuteParam &executeParam)
 {
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Params is invalid");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid params");
         return false;
     }
 

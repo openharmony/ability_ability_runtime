@@ -916,8 +916,6 @@ napi_value NAPI_GetContextCommon(napi_env env, napi_callback_info info, AbilityT
     if (ret == nullptr) {
         ret = WrapVoidToJS(env);
         TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
-    } else {
-
     }
     return ret;
 }
