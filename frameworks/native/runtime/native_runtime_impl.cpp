@@ -119,7 +119,7 @@ napi_status NativeRuntimeImpl::Init(const Options& options, napi_env env)
 
     auto vm = GetEcmaVm(jsEnv);
     if (!vm) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "vm is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null vm");
         return napi_status::napi_generic_failure;
     }
 
@@ -154,7 +154,7 @@ napi_status NativeRuntimeImpl::Init(const Options& options, napi_env env)
         SetRequestAotCallback(jsEnv);
 
         if (!InitLoop(jsEnv)) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Initialize loop failed");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "Init loop failed");
             return napi_status::napi_generic_failure;
         }
     }
@@ -172,7 +172,7 @@ napi_status NativeRuntimeImpl::AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnv
         return napi_status::napi_create_ark_runtime_only_one_env_per_thread;
     }
     if (envMap_.size() >= MAX_ENV_COUNT) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "the maximum number of runtime environments that can be created is 16");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "envMap size exceed upperLimits");
         return napi_status::napi_create_ark_runtime_too_many_envs;
     }
     threadIds_.insert(threadId);
@@ -272,19 +272,19 @@ void NativeRuntimeImpl::SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnv
     auto callback = [](const std::string& bundleName, const std::string& moduleName, int32_t triggerMode) -> int32_t {
         auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (systemAbilityMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to get system ability manager");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "get Samgr failed");
             return ERR_INVALID_VALUE;
         }
 
         auto remoteObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
         if (remoteObj == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Remote object is nullptr");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null remoteObj");
             return ERR_INVALID_VALUE;
         }
 
         auto bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
         if (bundleMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to get bundle manager");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "get bms failed");
             return ERR_INVALID_VALUE;
         }
 

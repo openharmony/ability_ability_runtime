@@ -122,7 +122,7 @@ void ConnectServerManager::StopConnectServer(bool isCloseSo)
     if (stopServer != nullptr) {
         stopServer(bundleName_);
     } else {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'StopServer'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null StopServer");
     }
     if (isCloseSo) {
         dlclose(handlerConnectServerSo_);
@@ -190,7 +190,7 @@ void ConnectServerManager::SetConnectedCallback()
         dlsym(handlerConnectServerSo_, "SetConnectCallback"));
     if (setConnectCallBack == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME,
-            "failed to find symbol 'SetConnectCallBack'");
+            "null setConnectCallBack");
         return;
     }
 
@@ -268,7 +268,7 @@ bool ConnectServerManager::AddInstance(int32_t tid, int32_t instanceId, const st
         auto result = instanceMap_.try_emplace(instanceId, std::make_pair(instanceName, tid));
         if (!result.second) {
             TAG_LOGW(
-                AAFwkTag::JSRUNTIME, "Instance %{public}d already added", instanceId);
+                AAFwkTag::JSRUNTIME, "Instance %{public}d added", instanceId);
             return false;
         }
     }
@@ -352,7 +352,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
 
     auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     if (sendMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to find symbol 'SendMessage'");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendMessage");
         return;
     }
     sendMessage(message);
@@ -401,7 +401,7 @@ void ConnectServerManager::SendArkUIStateProfilerMessage(const std::string &mess
     auto sendProfilerMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendProfilerMessage"));
     if (sendProfilerMessage == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME,
-                 "failed to find symbol 'sendProfilerMessage'");
+                 "null sendProfilerMessage");
         return;
     }
 
@@ -412,7 +412,7 @@ DebuggerPostTask ConnectServerManager::GetDebuggerPostTask(int32_t tid)
 {
     auto it = g_debuggerInfo.find(tid);
     if (it == g_debuggerInfo.end()) {
-        TAG_LOGW(AAFwkTag::JSRUNTIME, "tid %{public}d is not found: ", tid);
+        TAG_LOGW(AAFwkTag::JSRUNTIME, "tid %{public}d not found: ", tid);
         return nullptr;
     }
     return it->second.second;
