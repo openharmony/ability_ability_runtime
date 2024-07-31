@@ -189,7 +189,7 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
         // 1.2 start with ../
         // 1.3 start with @namespace [not support]
         // 1.4 start with modulename
-        TAG_LOGD(AAFwkTag::JSRUNTIME, "The application is packaged using jsbundle mode");
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "esmodule mode");
         if (uri.find_first_of("/") == 0) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "uri start with /modulename");
             realPath = uri.substr(1);
