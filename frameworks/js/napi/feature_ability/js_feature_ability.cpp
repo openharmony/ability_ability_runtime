@@ -193,7 +193,7 @@ napi_value JsFeatureAbility::OnFinishWithResult(napi_env env, NapiCallbackInfo& 
 
     napi_value jsResultObj = GetPropertyValueByPropertyName(env, info.argv[0], "result", napi_object);
     if (jsResultObj == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "Failed to get result");
+        TAG_LOGE(AAFwkTag::FA, "get result failed");
         return CreateJsUndefined(env);
     }
 
