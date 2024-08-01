@@ -552,7 +552,7 @@ bool JsRuntime::LoadRepairPatch(const std::string& hqfFile, const std::string& h
     auto ret = panda::JSNApi::LoadPatch(vm, patchFile, hqfSafeData->GetDataPtr(), hqfSafeData->GetDataLen(),
         resolvedHapPath, hapSafeData->GetDataPtr(), hapSafeData->GetDataLen());
     if (ret != panda::JSNApi::PatchErrorCode::SUCCESS) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "LoadPatch failed with %{public}d", static_cast<int32_t>(ret));
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "LoadPatch failed:%{public}d", static_cast<int32_t>(ret));
         return false;
     }
 
@@ -844,7 +844,7 @@ bool JsRuntime::CreateJsEnv(const Options& options)
     pandaOption.SetMemConfigProperty(memConfigProperty);
     pandaOption.SetGcThreadNum(gcThreadNum);
     pandaOption.SetLongPauseTime(longPauseTime);
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "ark properties = %{public}d bundlename = %{public}s",
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "ark properties=%{public}d bundlename=%{public}s",
         arkProperties, bundleName.c_str());
     pandaOption.SetGcType(panda::RuntimeOption::GC_TYPE::GEN_GC);
     pandaOption.SetGcPoolSize(DEFAULT_GC_POOL_SIZE);
@@ -942,7 +942,7 @@ void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSy
 
     auto moduleManager = NativeModuleManager::GetInstance();
     if (moduleManager == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get module manager failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null moduleManager");
         return;
     }
 
@@ -1556,7 +1556,7 @@ void JsRuntime::SetRequestAotCallback()
 
         auto bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
         if (bundleMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to get bundle manager");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "get bms failed");
             return ERR_INVALID_VALUE;
         }
 

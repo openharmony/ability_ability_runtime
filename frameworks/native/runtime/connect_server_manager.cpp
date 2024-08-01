@@ -137,8 +137,7 @@ bool ConnectServerManager::StoreInstanceMessage(int32_t tid, int32_t instanceId,
         std::lock_guard<std::mutex> lock(mutex_);
         auto result = instanceMap_.try_emplace(instanceId, std::make_pair(instanceName, tid));
         if (!result.second) {
-            TAG_LOGW(AAFwkTag::JSRUNTIME,
-                "Instance %{public}d added", instanceId);
+            TAG_LOGW(AAFwkTag::JSRUNTIME, "Instance %{public}d added", instanceId);
             return false;
         }
     }
@@ -189,8 +188,7 @@ void ConnectServerManager::SetConnectedCallback()
     auto setConnectCallBack = reinterpret_cast<SetConnectCallback>(
         dlsym(handlerConnectServerSo_, "SetConnectCallback"));
     if (setConnectCallBack == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME,
-            "null setConnectCallBack");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null setConnectCallBack");
         return;
     }
 
@@ -314,8 +312,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         std::lock_guard<std::mutex> lock(mutex_);
         auto it = instanceMap_.find(instanceId);
         if (it == instanceMap_.end()) {
-            TAG_LOGW(AAFwkTag::JSRUNTIME, "Instance %{public}d not found",
-                instanceId);
+            TAG_LOGW(AAFwkTag::JSRUNTIME, "Instance %{public}d not found", instanceId);
             return;
         }
 
@@ -400,8 +397,7 @@ void ConnectServerManager::SendArkUIStateProfilerMessage(const std::string &mess
     TAG_LOGI(AAFwkTag::JSRUNTIME, "called");
     auto sendProfilerMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendProfilerMessage"));
     if (sendProfilerMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME,
-                 "null sendProfilerMessage");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendProfilerMessage");
         return;
     }
 
@@ -412,7 +408,7 @@ DebuggerPostTask ConnectServerManager::GetDebuggerPostTask(int32_t tid)
 {
     auto it = g_debuggerInfo.find(tid);
     if (it == g_debuggerInfo.end()) {
-        TAG_LOGW(AAFwkTag::JSRUNTIME, "tid %{public}d not found: ", tid);
+        TAG_LOGW(AAFwkTag::JSRUNTIME, "tid %{public}d not found", tid);
         return nullptr;
     }
     return it->second.second;
