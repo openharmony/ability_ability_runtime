@@ -715,12 +715,11 @@ napi_value UnRegisterSync(napi_env env, DAHelperOnOffCB *offCB)
 
     TAG_LOGI(AAFwkTag::FA, "offCB->DestroyList size is %{public}zu", offCB->DestroyList.size());
     for (auto &iter : offCB->DestroyList) {
-        TAG_LOGI(AAFwkTag::FA, "ReleaseJSCallback. 1 ---");
         if (iter->observer != nullptr) {
             iter->observer->ReleaseJSCallback();
             delete iter;
             iter = nullptr;
-            TAG_LOGI(AAFwkTag::FA, "ReleaseJSCallback. 2 ---");
+            TAG_LOGI(AAFwkTag::FA, "ReleaseJSCallback");
         }
     }
 
@@ -734,7 +733,7 @@ napi_value UnRegisterSync(napi_env env, DAHelperOnOffCB *offCB)
 
 void FindRegisterObs(napi_env env, DAHelperOnOffCB *data)
 {
-    TAG_LOGI(AAFwkTag::FA, "FindRegisterObs main event thread execute.");
+    TAG_LOGI(AAFwkTag::FA, "execute");
     if (data == nullptr || data->dataAbilityHelper == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null param");
         return;
@@ -756,9 +755,9 @@ void FindRegisterObs(napi_env env, DAHelperOnOffCB *data)
             TAG_LOGI(AAFwkTag::FA, "Instances erase size = %{public}zu", g_registerInstances.size());
         }
     } else {
-        TAG_LOGE(AAFwkTag::FA, "error: uri is null");
+        TAG_LOGE(AAFwkTag::FA, "null uri");
     }
-    TAG_LOGI(AAFwkTag::FA, "FindRegisterObs main event thread execute.end %{public}zu",
+    TAG_LOGI(AAFwkTag::FA, "execute end %{public}zu",
         data->NotifyList.size());
 }
 napi_value NAPI_GetType(napi_env env, napi_callback_info info)
@@ -766,7 +765,7 @@ napi_value NAPI_GetType(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "called");
     DAHelperGetTypeCB *gettypeCB = new (std::nothrow) DAHelperGetTypeCB;
     if (gettypeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "gettypeCB == nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null gettypeCB");
         return WrapVoidToJS(env);
     }
     gettypeCB->cbBase.cbInfo.env = env;
@@ -806,7 +805,7 @@ napi_value GetTypeWrap(napi_env env, napi_callback_info info, DAHelperGetTypeCB 
         gettypeCB->uri = NapiValueToStringUtf8(env, args[PARAM0]);
         TAG_LOGI(AAFwkTag::FA, "uri=%{public}s", gettypeCB->uri.c_str());
     } else {
-        TAG_LOGE(AAFwkTag::FA, "Wrong argument type");
+        TAG_LOGE(AAFwkTag::FA, "not string");
     }
     GetDataAbilityHelper(env, thisVar, gettypeCB->dataAbilityHelper);
 
@@ -1408,7 +1407,7 @@ bool UnwrapArrayObjectFromJS(napi_env env, napi_value param, std::vector<NativeR
     std::string strValue = "";
 
     if (!IsArrayForNapiValue(env, param, arraySize)) {
-        TAG_LOGI(AAFwkTag::FA, "IsArrayForNapiValue is false");
+        TAG_LOGI(AAFwkTag::FA, "IsArrayForNapiValue:false");
         return false;
     }
 
@@ -1416,7 +1415,7 @@ bool UnwrapArrayObjectFromJS(napi_env env, napi_value param, std::vector<NativeR
     for (uint32_t i = 0; i < arraySize; i++) {
         jsValue = nullptr;
         if (napi_get_element(env, param, i, &jsValue) != napi_ok) {
-            TAG_LOGI(AAFwkTag::FA, "napi_get_element is false");
+            TAG_LOGI(AAFwkTag::FA, "get jsValue failed");
             return false;
         }
 
@@ -1585,17 +1584,17 @@ bool UnwrapArrayOperationFromJS(
         TAG_LOGE(AAFwkTag::FA, "Wrong argument type");
         return false;
     }
-    TAG_LOGI(AAFwkTag::FA, "param size:%{public}d ", arraySize);
+    TAG_LOGI(AAFwkTag::FA, "param size:%{public}d", arraySize);
     result.clear();
     for (uint32_t i = 0; i < arraySize; i++) {
         jsValue = nullptr;
         if (napi_get_element(env, param, i, &jsValue) != napi_ok) {
-            TAG_LOGE(AAFwkTag::FA, "get element failed, index:%{public}d ", i);
+            TAG_LOGE(AAFwkTag::FA, "get index:%{public}d failed", i);
             return false;
         }
         std::shared_ptr<DataAbilityOperation> operation = nullptr;
         UnwrapDataAbilityOperation(operation, env, jsValue);
-        TAG_LOGI(AAFwkTag::FA, "UnwrapDataAbilityOperation, index:%{public}d ", i);
+        TAG_LOGI(AAFwkTag::FA, "UnwrapDataAbilityOperation index:%{public}d", i);
         result.push_back(operation);
     }
     return true;
