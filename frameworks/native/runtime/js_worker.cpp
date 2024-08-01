@@ -95,7 +95,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
     // load jsfwk
     if (g_jsFramework && !arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to load js framework");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "load jsframework failed");
     }
 
     if (g_debugMode) {
@@ -343,7 +343,7 @@ bool AssetHelper::ReadAmiData(const std::string& ami, uint8_t** buff, size_t* bu
 
     auto fileLen = stream.tellg();
     if (!workerInfo_->isDebugVersion && fileLen > ASSET_FILE_MAX_SIZE) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "File is too large");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "File too large");
         return false;
     }
 
@@ -363,7 +363,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
 {
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "The bundleMgrHelper is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null bundleMgrHelper");
         return false;
     }
 
