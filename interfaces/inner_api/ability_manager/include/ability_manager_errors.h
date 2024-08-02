@@ -560,6 +560,11 @@ enum {
      */
     ERR_FREE_INSTALL_TASK_NOT_EXIST = 2097260,
 
+    /*
+     * Result (2097261) for killing process uid is foundation.
+     */
+    ERR_KILL_FOUNDATION_UID = 2097261,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
