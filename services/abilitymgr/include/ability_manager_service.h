@@ -455,6 +455,18 @@ public:
      */
     virtual int TerminateAbility(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr) override;
+    
+    /**
+     * BackToCallerAbilityWithResult, return to the caller ability.
+     *
+     * @param token, the token of the ability to terminate.
+     * @param resultCode, the resultCode of the ability to terminate.
+     * @param resultWant, the Want of the ability to return.
+     * @param callerRequestCode, the requestCode of caller ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
+        const Want *resultWant, int64_t callerRequestCode) override;
 
     /**
      * TerminateAbility, terminate the special ui extension ability.
@@ -1168,6 +1180,8 @@ public:
 
     int CreateCloneSelectorDialog(AbilityRequest &request, int32_t userId, const std::string &replaceWantString = "");
 
+    void SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken);
+
     virtual int RegisterAbilityFirstFrameStateObserver(const sptr<IAbilityFirstFrameStateObserver> &observer,
         const std::string &bundleName) override;
 
@@ -1874,6 +1888,7 @@ private:
     void UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObject> asCallerSourceToken, sptr<IRemoteObject> callerToken);
     void UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteObject> asCallerSourceToken);
     void UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken);
+    void UpdateAsCallerInfoFromDialog(Want& want);
     void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
     void UpdateCallerInfoFromToken(Want& want, const sptr<IRemoteObject> &token);
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);

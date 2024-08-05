@@ -2079,6 +2079,14 @@ void AbilityConnectManager::HandleInactiveTimeout(const std::shared_ptr<AbilityR
     }
     if (ability->GetAbilityInfo().name == AbilityConfig::CALLUI_ABILITY_NAME && ability->GetStartId() == 0) {
         HandleConnectTimeoutTask(ability);
+        EventInfo eventInfo;
+        eventInfo.userId = userId_;
+        eventInfo.bundleName = ability->GetAbilityInfo().bundleName;
+        eventInfo.moduleName = ability->GetAbilityInfo().moduleName;
+        eventInfo.abilityName = ability->GetAbilityInfo().name;
+        eventInfo.abilityName = ability->GetAbilityInfo().name;
+        eventInfo.errCode = CONNECTION_TIMEOUT;
+        EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleInactiveTimeout end");
@@ -3237,7 +3245,7 @@ int32_t AbilityConnectManager::ReportAbilitStartInfoToRSS(const AppExecFwk::Abil
             break;
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR,"ReportAbilitStartInfoToRSS, abilityName:%{public}s.", abilityInfo.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilitStartInfoToRSS, abilityName:%{public}s.", abilityInfo.name.c_str());
     ResSchedUtil::GetInstance().ReportAbilitStartInfoToRSS(abilityInfo, pid, isColdStart);
     return ERR_OK;
 }

@@ -338,6 +338,14 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
 #endif
 }
 
+ErrCode AbilityContextImpl::BackToCallerAbilityWithResult(const AAFwk::Want& want, int resultCode, int64_t requestCode)
+{
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->BackToCallerAbilityWithResult(
+        token_, resultCode, &want, requestCode);
+    TAG_LOGI(AAFwkTag::CONTEXT, "ret is %{public}d", err);
+    return static_cast<int32_t>(err);
+}
+
 void AbilityContextImpl::SetWeakSessionToken(const wptr<IRemoteObject>& sessionToken)
 {
     std::lock_guard lock(sessionTokenMutex_);
@@ -979,6 +987,7 @@ ErrCode AbilityContextImpl::CreateModalUIExtensionWithApp(const AAFwk::Want &wan
         disposedCallback->OnDestroy();
     };
     Ace::ModalUIExtensionConfig config;
+    config.prohibitedRemoveByRouter = true;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
         TAG_LOGE(AAFwkTag::CONTEXT, "CreateModalUIExtension is failed");
@@ -1048,6 +1057,16 @@ ErrCode AbilityContextImpl::OpenLink(const AAFwk::Want& want, int requestCode)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
+}
+
+std::shared_ptr<AAFwk::Want> AbilityContextImpl::GetWant()
+{
+    auto abilityCallback = abilityCallback_.lock();
+    if (abilityCallback == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "abilityCallback is nullptr.");
+        return nullptr;
+    }
+    return abilityCallback->GetWant();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
