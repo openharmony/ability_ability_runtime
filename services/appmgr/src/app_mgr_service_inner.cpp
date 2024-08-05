@@ -21,6 +21,7 @@
 #include <mutex>
 #include <queue>
 #include <securec.h>
+#include <sstream>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -220,6 +221,8 @@ constexpr const char* ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 constexpr const char* PROCESS_EXIT_EVENT_TASK = "Send Process Exit Event Task";
 constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
+
+constexpr const char* PROC_SELF_TASK_PATH = "/proc/self/task/";
 
 constexpr int32_t ROOT_UID = 0;
 constexpr int32_t FOUNDATION_UID = 5523;
@@ -489,8 +492,9 @@ void AppMgrServiceInner::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObje
     TAG_LOGD(AAFwkTag::APPMGR, "processName = %{public}s", processName.c_str());
 
     std::shared_ptr<AppRunningRecord> appRecord;
+    bool isProcCache = false;
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
-        processName, appInfo->uid, bundleInfo, specifiedProcessFlag);
+        processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache);
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         NotifyMemMgrPriorityChanged(appRecord);
     }
@@ -509,7 +513,11 @@ void AppMgrServiceInner::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObje
             bundleInfo, hapModuleInfo, want, appExistFlag, false, token);
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "have apprecord");
-        SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::MULTI_INSTANCE);
+        if (!isProcCache) {
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::MULTI_INSTANCE);
+        } else {
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::PROCESS_CACHE_LAUNCH);
+        }
         int32_t requestProcCode = (want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
         if (requestProcCode != 0 && appRecord->GetRequestProcCode() == 0) {
             appRecord->SetRequestProcCode(requestProcCode);
@@ -1231,6 +1239,42 @@ int32_t AppMgrServiceInner::ForceKillApplicationInner(const std::string &bundleN
     return result;
 }
 
+int32_t AppMgrServiceInner::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called.");
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
+    if (!isCallingPerm) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no permission to kill processes.");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    std::vector<pid_t> pids;
+    GetPidsByAccessTokenId(accessTokenId, pids);
+    if (pids.empty()) {
+        TAG_LOGI(AAFwkTag::APPMGR, "no pids matching the given accessTokenId.");
+        return ERR_OK;
+    }
+
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+
+    int32_t result = ERR_OK;
+    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
+        result = KillProcessByPid(*iter, "KillProcessesByAccessTokenId");
+        if (result < 0) {
+            TAG_LOGE(AAFwkTag::APPMGR,
+                "KillProcessesByAccessTokenId failed for accessTokenId:%{public}d,pid:%{public}d",
+                accessTokenId, *iter);
+            return result;
+        }
+    }
+    return result;
+}
+
 int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, const int uid)
 {
     if (!appRunningManager_) {
@@ -1845,9 +1889,9 @@ void AppMgrServiceInner::GetRenderProcesses(const std::shared_ptr<AppRunningReco
     }
 }
 
-int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string& reason, int32_t uid)
+int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string& reason)
 {
-    if (!ProcessExist(pid, uid)) {
+    if (!ProcessExist(pid)) {
         TAG_LOGI(AAFwkTag::APPMGR, "KillProcessByPid, process not exists, pid: %{public}d", pid);
         return AAFwk::ERR_KILL_PROCESS_NOT_EXIST;
     }
@@ -1858,6 +1902,10 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
     }
     int32_t ret = -1;
     if (pid > 0) {
+        if (CheckIsThreadInFoundation(pid)) {
+            TAG_LOGI(AAFwkTag::APPMGR, "pid %{public}d is thread tid in foundation, don't kill.", pid);
+            return AAFwk::ERR_KILL_FOUNDATION_UID;
+        }
         TAG_LOGI(AAFwkTag::APPMGR, "kill pid %{public}d", pid);
         ret = kill(pid, SIGNAL_KILL);
     }
@@ -1893,6 +1941,14 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
     return ret;
 }
 
+bool AppMgrServiceInner::CheckIsThreadInFoundation(pid_t pid) {
+    std::ostringstream pathBuilder;
+    pathBuilder << PROC_SELF_TASK_PATH << pid;
+    std::string path = pathBuilder.str();
+    TAG_LOGD(AAFwkTag::APPMGR, "CheckIsThreadInFoundation path:%{public}s", path.c_str());
+    return access(path.c_str(), F_OK) == 0;
+}
+
 bool AppMgrServiceInner::WaitForRemoteProcessExit(std::list<pid_t> &pids, const int64_t startTime)
 {
     int64_t delayTime = SystemTimeMillisecond() - startTime;
@@ -1906,7 +1962,7 @@ bool AppMgrServiceInner::WaitForRemoteProcessExit(std::list<pid_t> &pids, const 
     return false;
 }
 
-bool AppMgrServiceInner::ProcessExist(pid_t pid, int32_t uid)
+bool AppMgrServiceInner::ProcessExist(pid_t pid)
 {
     char pid_path[128] = {0};
     struct stat stat_buf;
@@ -1916,14 +1972,7 @@ bool AppMgrServiceInner::ProcessExist(pid_t pid, int32_t uid)
     if (snprintf_s(pid_path, sizeof(pid_path), sizeof(pid_path) - 1, "/proc/%d/status", pid) < 0) {
         return false;
     }
-    if (stat(pid_path, &stat_buf) != 0) {
-        return false;
-    }
-    TAG_LOGI(AAFwkTag::APPMGR, "uid: %{public}d, input uid: %{public}d", stat_buf.st_uid, uid);
-    if (uid == -1 || stat_buf.st_uid == 0) {
-        return true;
-    }
-    if (stat_buf.st_uid == static_cast<uint32_t>(uid)) {
+    if (stat(pid_path, &stat_buf) == 0) {
         return true;
     }
     return false;
@@ -3269,7 +3318,7 @@ void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRe
     if (pid > 0) {
         auto timeoutTask = [appRecord, pid, uid, innerService = shared_from_this()]() {
             TAG_LOGI(AAFwkTag::APPMGR, "KillProcessByPid %{public}d, uid: %{public}d", pid, uid);
-            int32_t result = innerService->KillProcessByPid(pid, "TerminateApplication", uid);
+            int32_t result = innerService->KillProcessByPid(pid, "TerminateApplication");
             innerService->SendProcessExitEvent(appRecord);
             if (result < 0) {
                 TAG_LOGE(AAFwkTag::APPMGR, "KillProcessByPid kill process is fail");
@@ -5224,7 +5273,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
     // A dialog box is displayed when the PC appfreeze
     bool isDialogExist = appRunningManager_ ?
         appRunningManager_->CheckAppRunningRecordIsExist(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY) : false;
-    auto killFaultApp = std::bind(&AppMgrServiceInner::KillFaultApp, this, pid, bundleName, faultData);
+    auto killFaultApp = std::bind(&AppMgrServiceInner::KillFaultApp, this, pid, bundleName, faultData, false);
     ModalSystemAppFreezeUIExtension::GetInstance().ProcessAppFreeze(appRecord->GetFocusFlag(), faultData,
         std::to_string(pid), bundleName, killFaultApp, isDialogExist);
 #else
@@ -5236,7 +5285,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
 
 bool AppMgrServiceInner::CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData)
 {
-    if (faultData.timeoutMarkers != "" && !taskHandler_->CancelTask(faultData.timeoutMarkers)) {
+    if (faultData.timeoutMarkers != "" && !dfxTaskHandler_->CancelTask(faultData.timeoutMarkers)) {
         return true;
     }
 
@@ -5246,10 +5295,11 @@ bool AppMgrServiceInner::CheckAppFault(const std::shared_ptr<AppRunningRecord> &
     return false;
 }
 
-int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData)
+int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
+    bool isNeedExit)
 {
-    auto killAppTask = [pid, bundleName, faultData, innerService = shared_from_this()]() {
-        if (faultData.forceExit && !faultData.waitSaveState) {
+    auto killAppTask = [pid, bundleName, faultData, isNeedExit, innerService = shared_from_this()]() {
+        if (isNeedExit || (faultData.forceExit && !faultData.waitSaveState)) {
             TAG_LOGI(AAFwkTag::APPMGR, "FaultData %{public}s,pid == %{public}d is going to exit due to %{public}s.",
                 bundleName.c_str(), pid, innerService->FaultTypeToString(faultData.faultType).c_str());
             innerService->KillProcessByPid(pid, "KillFaultApp");
@@ -5265,6 +5315,18 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
 void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
     const std::string& bundleName, const FaultData &faultData)
 {
+    bool isNeedExit = (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) ||
+        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT);
+#ifdef APP_NO_RESPONSE_DIALOG
+    bool isDialogExist = appRunningManager_ ?
+        appRunningManager_->CheckAppRunningRecordIsExist(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY) :
+        false;
+    auto killFaultApp = std::bind(&AppMgrServiceInner::KillFaultApp, this, pid, bundleName, faultData, isNeedExit);
+    ModalSystemAppFreezeUIExtension::GetInstance().ProcessAppFreeze(true, faultData, std::to_string(pid),
+        bundleName, killFaultApp, isDialogExist);
+#else
+    KillFaultApp(pid, bundleName, faultData, isNeedExit);
+#endif
     if (faultData.faultType == FaultDataType::APP_FREEZE) {
         AppfreezeManager::AppInfo info = {
             .pid = pid,
@@ -5273,14 +5335,6 @@ void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
             .processName = bundleName,
         };
         AppExecFwk::AppfreezeManager::GetInstance()->AppfreezeHandleWithStack(faultData, info);
-#ifdef APP_NO_RESPONSE_DIALOG
-        bool isDialogExist = appRunningManager_ ?
-            appRunningManager_->CheckAppRunningRecordIsExist(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY) :
-            false;
-        auto killFaultApp = std::bind(&AppMgrServiceInner::KillFaultApp, this, pid, bundleName, faultData);
-        ModalSystemAppFreezeUIExtension::GetInstance().ProcessAppFreeze(true, faultData, std::to_string(pid),
-            bundleName, killFaultApp, isDialogExist);
-#endif
     }
 }
 
@@ -5329,7 +5383,7 @@ int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData
             auto timeoutNotifyApp = [this, pid, uid, bundleName, transformedFaultData]() {
                 this->TimeoutNotifyApp(pid, uid, bundleName, transformedFaultData);
             };
-            taskHandler_->SubmitTask(timeoutNotifyApp, transformedFaultData.timeoutMarkers, timeout);
+            dfxTaskHandler_->SubmitTask(timeoutNotifyApp, transformedFaultData.timeoutMarkers, timeout);
         }
         record->NotifyAppFault(transformedFaultData);
         TAG_LOGW(AAFwkTag::APPMGR, "FaultDataBySA is: name: %{public}s, faultType: %{public}s, uid: %{public}d,"
@@ -5636,11 +5690,14 @@ void AppMgrServiceInner::KillRenderProcess(const std::shared_ptr<AppRunningRecor
         for (auto iter : renderRecordMap) {
             auto renderRecord = iter.second;
             if (renderRecord && renderRecord->GetPid() > 0) {
-                TAG_LOGD(AAFwkTag::APPMGR, "Kill render process when host died.");
-                KillProcessByPid(renderRecord->GetPid(), "KillRenderProcess");
+                auto pid = renderRecord->GetPid();
+                auto uid = renderRecord->GetUid();
+                TAG_LOGI(AAFwkTag::APPMGR, "Kill render process when host died, pid:%{public}d, uid:%{public}d.",
+                    pid, uid);
+                KillProcessByPid(pid, "KillRenderProcess");
                 {
                     std::lock_guard lock(renderUidSetLock_);
-                    renderUidSet_.erase(renderRecord->GetUid());
+                    renderUidSet_.erase(uid);
                 }
                 DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
             }
@@ -6390,7 +6447,8 @@ void AppMgrServiceInner::KillChildProcess(const std::shared_ptr<AppRunningRecord
         }
         auto childPid = childRecord->GetPid();
         if (childPid > 0) {
-            TAG_LOGI(AAFwkTag::APPMGR, "Kill child process when host died, childPid:%{public}d.", childPid);
+            TAG_LOGI(AAFwkTag::APPMGR, "Kill child process when host died, childPid:%{public}d, childUid:%{public}d.",
+                childPid, childRecord->GetUid());
             KillProcessByPid(childPid, "KillChildProcess");
         }
     }
@@ -6423,6 +6481,8 @@ void AppMgrServiceInner::ExitChildProcessSafelyByChildPid(const pid_t pid)
         return;
     }
     childRecord->RegisterDeathRecipient();
+    TAG_LOGI(AAFwkTag::APPMGR, "Kill child ExitChildProcessSafely, childPid:%{public}d, childUid:%{public}d.",
+        pid, childRecord->GetUid());
     int32_t result = KillProcessByPid(pid, "ExitChildProcessSafelyByChildPid");
     if (result < 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "KillChildProcessByPid kill process is fail.");
@@ -7174,7 +7234,7 @@ bool AppMgrServiceInner::CleanAbilityByUserRequest(const sptr<IRemoteObject> &to
         return false;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "all user request clean ability scheduled to bg, force kill pid:%{public}d", targetPid);
-    KillProcessByPid(targetPid, KILL_REASON_USER_REQUEST, targetUid);
+    KillProcessByPid(targetPid, KILL_REASON_USER_REQUEST);
     return true;
 }
 
@@ -7209,7 +7269,7 @@ void AppMgrServiceInner::CheckCleanAbilityByUserRequest(const std::shared_ptr<Ap
         pid = appRecord->GetPriorityObject()->GetPid();
     }
     TAG_LOGI(AAFwkTag::APPMGR, "all user request clean ability scheduled to bg, force kill, pid:%{public}d", pid);
-    KillProcessByPid(pid, KILL_REASON_USER_REQUEST, appRecord->GetUid());
+    KillProcessByPid(pid, KILL_REASON_USER_REQUEST);
 }
 
 bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) const
@@ -7221,6 +7281,34 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
     }
     return ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(bundleName);
 }
+
+void AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids)
+{
+    int32_t result = ERR_OK;
+    pid_t foregroundPid = -1;
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        if (!appRecord->GetSpawned()) {
+            continue;
+        }
+        auto applicationInfo = appRecord->GetApplicationInfo();
+        if (!applicationInfo) {
+            continue;
+        }
+        if (accessTokenId == applicationInfo->accessTokenId) {
+            pid_t curPid = appRecord->GetPriorityObject()->GetPid();
+            if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
+                foregroundPid = curPid;
+                continue;
+            }
+            pids.push_back(curPid);
+        }
+    }
+    if (foregroundPid >= 0) {
+        pids.push_back(foregroundPid);
+    }
+}
+
 bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     auto appRecord = GetAppRunningRecordByPid(pid);

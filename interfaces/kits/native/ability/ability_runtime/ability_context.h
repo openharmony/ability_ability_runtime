@@ -165,6 +165,8 @@ public:
 
     virtual ErrCode TerminateAbilityWithResult(const AAFwk::Want &want, int resultCode) = 0;
 
+    virtual ErrCode BackToCallerAbilityWithResult(const AAFwk::Want &want, int resultCode, int64_t requestCode) = 0;
+
     virtual ErrCode RestoreWindowStage(napi_env env, napi_value contentStorage) = 0;
 
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) = 0;
@@ -348,6 +350,8 @@ public:
 
     virtual void SetRestoreEnabled(bool enabled) = 0;
     virtual bool GetRestoreEnabled() = 0;
+
+    virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
 #ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN

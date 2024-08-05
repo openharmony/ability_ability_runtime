@@ -17,6 +17,7 @@
 
 #include "ability_record.h"
 #include "ability_util.h"
+#include "app_utils.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "startup_util.h"
@@ -27,8 +28,11 @@ namespace {
 constexpr const char* SCREENSHOT_BUNDLE_NAME = "com.huawei.ohos.screenshot";
 constexpr const char* SCREENSHOT_ABILITY_NAME = "com.huawei.ohos.screenshot.ServiceExtAbility";
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
-constexpr const char* SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
-constexpr int32_t BROKER_UID = 5557;
+constexpr const char* PARAM_RESV_ANCO_CALLER_UID = "ohos.anco.param.callerUid";
+constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.callerBundleName";
+constexpr int32_t REQUEST_CODE_LENGTH = 32;
+constexpr int32_t PID_LENGTH = 16;
+constexpr int32_t REQUEST_CODE_PID_LENGTH = 48;
 }
 thread_local std::shared_ptr<StartAbilityInfo> StartAbilityUtils::startAbilityInfo;
 thread_local std::shared_ptr<StartAbilityInfo> StartAbilityUtils::callerAbilityInfo;
@@ -140,6 +144,9 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
     }
     Want localWant = want;
     if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
+        localWant.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
+        localWant.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
         localWant.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
         localWant.RemoveParam(Want::PARAM_RESV_CALLER_UID);
         localWant.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
@@ -319,14 +326,44 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateCallerAbilityInfo(cons
 bool StartAbilityUtils::IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &callerToken)
 {
     auto callingUid = IPCSkeleton::GetCallingUid();
-    if (callingUid == BROKER_UID) {
+    if (callingUid == AppUtils::GetInstance().GetCollaboratorBrokerUID()) {
         return true;
     }
     AppExecFwk::AbilityInfo callerAbilityInfo;
     if (GetCallerAbilityInfo(callerToken, callerAbilityInfo)) {
-        return callerAbilityInfo.bundleName == SHELL_ASSISTANT_BUNDLENAME;
+        return callerAbilityInfo.bundleName == AppUtils::GetInstance().GetShellAssistantBundleName();
     }
     return false;
+}
+
+int64_t StartAbilityUtils::GenerateFullRequestCode(int32_t pid, bool backFlag, int32_t requestCode)
+{
+    if (requestCode <= 0 || pid <= 0) {
+        return 0;
+    }
+    int64_t fullRequestCode = requestCode;
+    uint64_t tempNum = pid;
+    fullRequestCode |= (tempNum << REQUEST_CODE_LENGTH);
+    if (backFlag) {
+        tempNum = 1;
+        fullRequestCode |= (tempNum << REQUEST_CODE_PID_LENGTH);
+    }
+    return fullRequestCode;
+}
+
+CallerRequestInfo StartAbilityUtils::ParseFullRequestCode(int64_t fullRequestCode)
+{
+    CallerRequestInfo requestInfo;
+    if (fullRequestCode <= 0) {
+        return requestInfo;
+    }
+    uint64_t tempNum = 1;
+    requestInfo.requestCode = (fullRequestCode & ((tempNum << REQUEST_CODE_LENGTH) - 1));
+    fullRequestCode >>= REQUEST_CODE_LENGTH;
+    requestInfo.pid = (fullRequestCode & ((tempNum << PID_LENGTH) - 1));
+    fullRequestCode >>= PID_LENGTH;
+    requestInfo.backFlag = (fullRequestCode == 1);
+    return requestInfo;
 }
 }
 }

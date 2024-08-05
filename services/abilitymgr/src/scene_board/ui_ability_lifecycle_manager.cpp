@@ -20,6 +20,7 @@
 #include "app_exit_reason_data_manager.h"
 #include "app_utils.h"
 #include "hitrace_meter.h"
+#include "permission_constants.h"
 #include "process_options.h"
 #include "scene_board/status_bar_delegate_manager.h"
 #include "session_manager_lite.h"
@@ -941,7 +942,7 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
 }
 
 int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
-    const AbilityRequest &abilityRequest) const
+    const AbilityRequest &abilityRequest)
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "windowLeft=%{public}d,windowTop=%{public}d,"
@@ -959,9 +960,7 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         CHECK_POINTER_AND_RETURN(callerSessionInfo, ERR_INVALID_VALUE);
         CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
         auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
-        bool hasContinuousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->
-            IsBackgroundTaskUid(abilityRecord->GetUid());
-        sessionInfo->hasContinuousTask = hasContinuousTask;
+        CheckCallerFromBackground(abilityRecord, sessionInfo);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by callerSession.");
         return static_cast<int>(callerSession->PendingSessionActivation(sessionInfo));
     }
@@ -977,6 +976,7 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
             TAG_LOGI(AAFwkTag::ABILITYMGR, "session id: %{public}d.", sessionInfo->persistentId);
         }
     }
+    sessionInfo->canStartAbilityFromBackground = true;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by rootSceneSession.");
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
 }
@@ -1129,6 +1129,33 @@ void UIAbilityLifecycleManager::CompleteBackground(const std::shared_ptr<Ability
             terminateAbility->Terminate(timeoutTask);
         }
     }
+}
+
+int UIAbilityLifecycleManager::BackToCallerAbilityWithResult(sptr<SessionInfo> currentSessionInfo,
+    std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called.");
+    if (currentSessionInfo == nullptr || currentSessionInfo->sessionToken == nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "currentSessionInfo is invalid.");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (abilityRecord == nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "callerAbility is invalid.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto callerSessionInfo = abilityRecord->GetSessionInfo();
+    if (callerSessionInfo == nullptr || callerSessionInfo->sessionToken == nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "callerSessionInfo is invalid.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto currentSession = iface_cast<Rosen::ISession>(currentSessionInfo->sessionToken);
+    callerSessionInfo->isBackTransition = true;
+    auto ret = static_cast<int>(currentSession->PendingSessionActivation(callerSessionInfo));
+    callerSessionInfo->isBackTransition = false;
+    return ret;
 }
 
 int UIAbilityLifecycleManager::CloseUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
@@ -1686,16 +1713,16 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
         auto callerSessionInfo = callerAbility->GetSessionInfo();
         if (callerSessionInfo != nullptr && callerSessionInfo->sessionToken != nullptr) {
             auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
-            bool hasContinuousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->
-                IsBackgroundTaskUid(callerAbility->GetUid());
-            sessionInfo->hasContinuousTask = hasContinuousTask;
+            CheckCallerFromBackground(callerAbility, sessionInfo);
             callerSession->PendingSessionActivation(sessionInfo);
         } else {
             CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
+            sessionInfo->canStartAbilityFromBackground = true;
             tmpSceneSession->PendingSessionActivation(sessionInfo);
         }
     } else {
         CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
+        sessionInfo->canStartAbilityFromBackground = true;
         tmpSceneSession->PendingSessionActivation(sessionInfo);
     }
     return ERR_OK;
@@ -2281,6 +2308,7 @@ int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId, std::shared
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0));
+    sessionInfo->canStartAbilityFromBackground = true;
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
 }
 
@@ -2543,6 +2571,24 @@ int32_t UIAbilityLifecycleManager::CleanUIAbility(const std::shared_ptr<AbilityR
     }
 
     return CloseUIAbilityInner(abilityRecord, -1, nullptr, true);
+}
+
+void UIAbilityLifecycleManager::CheckCallerFromBackground(
+    std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo)
+{
+    CHECK_POINTER(callerAbility);
+    CHECK_POINTER(sessionInfo);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    bool hasContinousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->
+        IsBackgroundTaskUid(callerAbility->GetUid());
+
+    auto permission = AAFwk::PermissionVerification::GetInstance();
+    bool hasPermission =
+        permission->VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND) ||
+        permission->VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILIIES_FROM_BACKGROUND);
+
+    sessionInfo->canStartAbilityFromBackground = hasContinousTask || hasPermission;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckCallerFromBackground: %{public}d", sessionInfo->canStartAbilityFromBackground);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
