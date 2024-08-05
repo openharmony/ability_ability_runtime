@@ -624,10 +624,10 @@ public:
     void ConnectAbility();
 
     /**
-     * connect the ability.
+     * connect the ability with want.
      *
      */
-    void ConnectUIServiceExtAbility(const Want &want);
+    void ConnectAbilityWithWant(const Want &want);
 
     /**
      * disconnect the ability.
@@ -639,7 +639,7 @@ public:
      * disconnect the ability with want
      *
      */
-    void DisconnectUIServiceExtAbility(const Want &want);
+    void DisconnectAbilityWithWant(const Want &want);
 
     /**
      * Command the ability.
