@@ -233,6 +233,11 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t GetFileEncryptStatus(uint32_t userId, bool &isEncrypted) override
+    {
+        return E_OK;
+    }
     
     virtual int32_t UpdateKeyContext(uint32_t userId) override
     {
