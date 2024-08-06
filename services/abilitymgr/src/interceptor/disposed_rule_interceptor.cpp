@@ -16,6 +16,7 @@
 #include "interceptor/disposed_rule_interceptor.h"
 
 #include "ability_record.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "modal_system_ui_extension.h"
