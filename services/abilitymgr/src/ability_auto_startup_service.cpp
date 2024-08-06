@@ -15,24 +15,13 @@
 
 #include "ability_auto_startup_service.h"
 
-#include <algorithm>
-#include <mutex>
-#include <string>
-
 #include "ability_auto_startup_data_manager.h"
-#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
-#include "auto_startup_callback_proxy.h"
-#include "auto_startup_info.h"
 #include "auto_startup_interface.h"
-#include "ability_util.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
-#include "ipc_skeleton.h"
-#include "parameters.h"
 #include "permission_constants.h"
-#include "permission_verification.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -130,8 +119,8 @@ int32_t AbilityAutoStartupService::SetApplicationAutoStartup(const AutoStartupIn
 
     AutoStartupInfo fullInfo(info);
     fullInfo.abilityTypeName = abilityTypeName;
-    fullInfo.accessTokenId = accessTokenId;
     fullInfo.userId = userId;
+    fullInfo.accessTokenId = accessTokenId;
 
     return InnerSetApplicationAutoStartup(fullInfo);
 }
@@ -614,7 +603,7 @@ int32_t AbilityAutoStartupService::SetApplicationAutoStartupByEDM(const AutoStar
     int32_t userId;
     std::string typeName;
     std::string accessTokenId;
-    
+
     errorCode = GetAbilityInfo(info, typeName, accessTokenId, userId);
     if (errorCode != ERR_OK) {
         return errorCode;

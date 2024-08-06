@@ -15,28 +15,18 @@
 
 #include "ability_connect_manager.h"
 
-#include <algorithm>
-#include <mutex>
 #include <regex>
 
-#include "ability_connect_callback_stub.h"
-#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
-#include "ability_util.h"
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
-#include "app_utils.h"
 #include "assert_fault_callback_death_mgr.h"
-#include "extension_config.h"
 #include "hitrace_meter.h"
-#include "hilog_tag_wrapper.h"
-#include "in_process_call_wrapper.h"
 #include "int_wrapper.h"
-#include "parameter.h"
+#include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
-#include "extension_record.h"
 #include "ui_extension_utils.h"
 #include "ui_service_extension_connection_constants.h"
 #include "cache_extension_utils.h"
@@ -76,6 +66,8 @@ const std::unordered_set<std::string> FROZEN_WHITE_LIST {
 };
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
+
+const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
 
 bool IsSpecialAbility(const AppExecFwk::AbilityInfo &abilityInfo)
 {
@@ -258,6 +250,12 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         AddUIExtWindowDeathRecipient(remoteObj);
     }
 
+    auto &abilityInfo = abilityRequest.abilityInfo;
+    auto ret = ReportXiaoYiToRSSIfNeeded(abilityInfo);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
     if (!isLoadedAbility) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Target service has not been loaded.");
         SetLastExitReason(abilityRequest, targetService);
@@ -329,6 +327,10 @@ void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecor
         if (abilityRecord->IsAbilityState(AbilityState::FOREGROUND)) {
             abilityRecord->SetWant(abilityRequest.want);
             CommandAbilityWindow(abilityRecord, abilityRequest.sessionInfo, WIN_CMD_FOREGROUND);
+            return;
+        } else {
+            abilityRecord->SetWant(abilityRequest.want);
+            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
             return;
         }
     }
@@ -648,6 +650,12 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
         std::lock_guard guard(windowExtensionMapMutex_);
         windowExtensionMap_.emplace(connectObject,
             WindowExtMapValType(targetService->GetApplicationInfo().accessTokenId, abilityRequest.sessionInfo));
+    }
+
+    auto &abilityInfo = abilityRequest.abilityInfo;
+    ret = ReportXiaoYiToRSSIfNeeded(abilityInfo);
+    if (ret != ERR_OK) {
+        return ret;
     }
 
     if (!isLoadedAbility) {
@@ -2071,6 +2079,14 @@ void AbilityConnectManager::HandleInactiveTimeout(const std::shared_ptr<AbilityR
     }
     if (ability->GetAbilityInfo().name == AbilityConfig::CALLUI_ABILITY_NAME && ability->GetStartId() == 0) {
         HandleConnectTimeoutTask(ability);
+        EventInfo eventInfo;
+        eventInfo.userId = userId_;
+        eventInfo.bundleName = ability->GetAbilityInfo().bundleName;
+        eventInfo.moduleName = ability->GetAbilityInfo().moduleName;
+        eventInfo.abilityName = ability->GetAbilityInfo().name;
+        eventInfo.abilityName = ability->GetAbilityInfo().name;
+        eventInfo.errCode = CONNECTION_TIMEOUT;
+        EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleInactiveTimeout end");
@@ -3192,6 +3208,46 @@ std::string AbilityConnectManager::GenerateBundleName(const AbilityRequest &abil
         }
     }
     return bundleName;
+}
+
+int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
+        abilityInfo.bundleName != XIAOYI_BUNDLE_NAME) {
+        return ERR_OK;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "bundleName is com.huawei.hmos.vassistant extension, abilityName:%{public}s, report to rss.",
+        abilityInfo.name.c_str());
+    auto ret = ReportAbilitStartInfoToRSS(abilityInfo);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReportAbilitStartInfoToRSS failed, ret:%{public}d", ret);
+        return ret;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityConnectManager::ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::vector<AppExecFwk::RunningProcessInfo> runningProcessInfos;
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetProcessRunningInfos(
+        runningProcessInfos));
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    bool isColdStart = true;
+    int32_t pid = 0;
+    for (auto const &info : runningProcessInfos) {
+        if (info.uid_ == abilityInfo.applicationInfo.uid) {
+            isColdStart = false;
+            pid = info.pid_;
+            break;
+        }
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilitStartInfoToRSS, abilityName:%{public}s.", abilityInfo.name.c_str());
+    ResSchedUtil::GetInstance().ReportAbilitStartInfoToRSS(abilityInfo, pid, isColdStart);
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

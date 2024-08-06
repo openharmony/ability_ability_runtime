@@ -245,6 +245,14 @@ public:
         const int appIndex = 0);
 
     /**
+     * KillProcessesByAccessTokenId.
+     *
+     * @param  accessTokenId, accessTokenId.
+     * @return ERR_OK, return back success, others fail.
+     */
+    int KillProcessesByAccessTokenId(const uint32_t accessTokenId);
+
+    /**
      * kill the application by uid
      *
      * @param bundleName name of bundle.
@@ -446,6 +454,14 @@ public:
     void AttachedToStatusBar(const sptr<IRemoteObject> &token);
 
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
     bool IsKilledForUpgradeWeb(const std::string &bundleName);
 

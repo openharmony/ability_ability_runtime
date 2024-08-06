@@ -160,6 +160,8 @@ const std::string OVERLAY_STATE_CHANGED = "usual.event.OVERLAY_STATE_CHANGED";
 const std::string JSON_KEY_APP_FONT_SIZE_SCALE = "fontSizeScale";
 const std::string JSON_KEY_APP_FONT_MAX_SCALE = "fontSizeMaxScale";
 const std::string JSON_KEY_APP_CONFIGURATION = "configuration";
+const std::string DEFAULT_APP_FONT_SIZE_SCALE = "nonFollowSystem";
+const std::string SYSTEM_DEFAULT_FONTSIZE_SCALE = "1.0";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 
@@ -1531,7 +1533,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.lang = isCJApp ? AbilityRuntime::Runtime::Language::CJ : AbilityRuntime::Runtime::Language::JS;
 #endif
         if (applicationInfo_->appProvisionType == Constants::APP_PROVISION_TYPE_DEBUG) {
-            TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Multi-Thread Mode: %{public}d.", appLaunchData.GetMultiThread());
+            TAG_LOGD(AAFwkTag::APPKIT, "multi-thread mode: %{public}d", appLaunchData.GetMultiThread());
             options.isMultiThread = appLaunchData.GetMultiThread();
             TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Error-Info-Enhance Mode: %{public}d.",
                 appLaunchData.GetErrorInfoEnhance());
@@ -1644,7 +1646,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 TAG_LOGI(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
                     " pid=%{public}d, processName=%{public}s, msg=%{public}s", result, pid, processName.c_str(),
                     KILL_REASON);
-    
+
                 if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
                     ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
                     return;
@@ -1664,6 +1666,16 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             (static_cast<AbilityRuntime::CJRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(expectionInfo);
         }
 #endif
+        wptr<MainThread> weak = this;
+        auto callback = [weak](const AAFwk::ExitReason &exitReason) {
+            auto appThread = weak.promote();
+            if (appThread == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "Main thread is nullptr");
+            }
+            AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+            appThread->ScheduleProcessSecurityExit();
+        };
+        applicationContext->RegisterProcessSecurityExit(callback);
 
         application_->SetRuntime(std::move(runtime));
 
@@ -1752,6 +1764,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     Configuration appConfig = config;
     ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
+    std::string systemSizeScale = appConfig.GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    if (!systemSizeScale.empty() && systemSizeScale.compare(DEFAULT_APP_FONT_SIZE_SCALE) == 0) {
+        appConfig.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, SYSTEM_DEFAULT_FONTSIZE_SCALE);
+    }
 
     if (!InitResourceManager(resourceManager, entryHapModuleInfo, bundleInfo.name,
         appConfig, bundleInfo.applicationInfo)) {
@@ -3413,6 +3429,7 @@ void MainThread::ScheduleCacheProcess()
 void MainThread::ParseAppConfigurationParams(const std::string configuration, Configuration &appConfig)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "start");
+    appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE, DEFAULT_APP_FONT_SIZE_SCALE);
     if (configuration.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "the configuration is empty");
         return;
@@ -3433,6 +3450,7 @@ void MainThread::ParseAppConfigurationParams(const std::string configuration, Co
     }
     if (jsonObject.contains(JSON_KEY_APP_FONT_SIZE_SCALE)
         && jsonObject[JSON_KEY_APP_FONT_SIZE_SCALE].is_string()) {
+        std::string configFontSizeScal = jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>();
         appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE,
             jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>());
     }

@@ -15,14 +15,9 @@
 
 #include "app_scheduler.h"
 
-#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
-#include "ability_record.h"
 #include "ability_util.h"
-#include "appmgr/app_mgr_constants.h"
 #include "hitrace_meter.h"
-#include "hilog_tag_wrapper.h"
-#include "in_process_call_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -266,6 +261,19 @@ int AppScheduler::ForceKillApplication(const std::string &bundleName,
     int ret = (int)appMgrClient_->ForceKillApplication(bundleName, userId, appIndex);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to force kill application.");
+        return INNER_ERR;
+    }
+
+    return ERR_OK;
+}
+
+int AppScheduler::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Called.");
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    int ret = (int)appMgrClient_->KillProcessesByAccessTokenId(accessTokenId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to force kill application by accessTokenId.");
         return INNER_ERR;
     }
 
@@ -620,6 +628,17 @@ void AppScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->BlockProcessCacheByPids(pids);
+}
+
+bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
 }
 
 bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)

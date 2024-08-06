@@ -151,8 +151,9 @@ public:
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         uint32_t specifyTokenId,
+        bool isPendingWantCaller,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE, bool isPendingWantCaller = false);
+        int requestCode = DEFAULT_INVAL_VALUE);
 
     /**
      * Starts a new ability with specific start options and specialId, send want to ability manager service.
@@ -169,9 +170,10 @@ public:
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,
+        bool isPendingWantCaller,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        uint32_t specifyTokenId = 0, bool isPendingWantCaller = false);
+        uint32_t specifyTokenId = 0);
 
     /**
      * StartAbilityWithSpecifyTokenId with want and specialId, send want to ability manager service.
@@ -453,6 +455,18 @@ public:
      */
     virtual int TerminateAbility(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr) override;
+    
+    /**
+     * BackToCallerAbilityWithResult, return to the caller ability.
+     *
+     * @param token, the token of the ability to terminate.
+     * @param resultCode, the resultCode of the ability to terminate.
+     * @param resultWant, the Want of the ability to return.
+     * @param callerRequestCode, the requestCode of caller ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
+        const Want *resultWant, int64_t callerRequestCode) override;
 
     /**
      * TerminateAbility, terminate the special ui extension ability.
@@ -756,6 +770,14 @@ public:
         WindowCommand winCmd,
         AbilityCommand abilityCmd) override;
 
+    /**
+     *  Request to clean UIAbility from user.
+     *
+     * @param sessionInfo the session info of the ability to clean.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo) override;
+
     std::shared_ptr<TaskHandlerWrap> GetTaskHandler() const
     {
         return taskHandler_;
@@ -968,21 +990,23 @@ public:
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int requestCode,
+        bool isPendingWantCaller,
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false, bool isPendingWantCaller = false);
+        bool isImplicit = false);
 
     int StartAbilityInner(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int requestCode,
+        bool isPendingWantCaller,
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false, bool isPendingWantCaller = false);
+        bool isImplicit = false);
 
     int StartExtensionAbilityInner(
         const Want &want,
@@ -1002,23 +1026,25 @@ public:
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,
+        bool isPendingWantCaller,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
         uint32_t callerTokenId = 0,
         bool isImplicit = false,
-        bool isCallByShortcut = false, bool isPendingWantCaller = false);
+        bool isCallByShortcut = false);
 
     int StartAbilityForOptionInner(
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,
+        bool isPendingWantCaller,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isImplicit = false,
-        bool isCallByShortcut = false, bool isPendingWantCaller = false);
+        bool isCallByShortcut = false);
 
     int ImplicitStartAbility(
         const Want &want,
@@ -1153,6 +1179,8 @@ public:
     virtual int SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed) override;
 
     int CreateCloneSelectorDialog(AbilityRequest &request, int32_t userId, const std::string &replaceWantString = "");
+
+    void SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken);
 
     virtual int RegisterAbilityFirstFrameStateObserver(const sptr<IAbilityFirstFrameStateObserver> &observer,
         const std::string &bundleName) override;
@@ -1860,6 +1888,7 @@ private:
     void UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObject> asCallerSourceToken, sptr<IRemoteObject> callerToken);
     void UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteObject> asCallerSourceToken);
     void UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken);
+    void UpdateAsCallerInfoFromDialog(Want& want);
     void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
     void UpdateCallerInfoFromToken(Want& want, const sptr<IRemoteObject> &token);
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
@@ -2202,8 +2231,8 @@ private:
     std::shared_ptr<AbilityDebugDeal> ConnectInitAbilityDebugDeal();
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
-        int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
-        bool isCallByShortcut = false, bool isPendingWantCaller = false);
+        bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
+        bool isCallByShortcut = false);
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
@@ -2213,6 +2242,8 @@ private:
 
     int CheckUIExtensionUsage(AppExecFwk::UIExtensionUsage uiExtensionUsage,
         AppExecFwk::ExtensionAbilityType extensionType);
+
+    bool CheckUIExtensionCallerIsForeground(const AbilityRequest &abilityRequest);
 
     int CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest);
 
@@ -2235,6 +2266,9 @@ private:
 
     int PreStartFreeInstall(const Want &want, sptr<IRemoteObject> callerToken,
         uint32_t specifyTokenId, bool isStartAsCaller, Want &localWant);
+
+    void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
+        const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;

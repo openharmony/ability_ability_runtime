@@ -14,26 +14,15 @@
  */
 #include "implicit_start_processor.h"
 
-#include <string>
-
 #include "ability_manager_service.h"
 #include "ability_util.h"
-#include "app_gallery_enable_util.h"
 #include "app_utils.h"
-#include "default_app_interface.h"
 #include "dialog_session_manager.h"
-#include "errors.h"
 #include "ecological_rule/ability_ecological_rule_mgr_service.h"
-#include "event_report.h"
 #include "global_constant.h"
-#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "in_process_call_wrapper.h"
-#include "parameters.h"
-#include "scene_board_judgement.h"
 #include "start_ability_utils.h"
 #include "startup_util.h"
-#include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -281,16 +270,19 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
 static void ProcessLinkType(std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
 {
     bool appLinkingExist = false;
+    bool defaultAppExist = false;
     if (!abilityInfos.size()) {
         return;
     }
     for (const auto &info : abilityInfos) {
         if (info.linkType == AppExecFwk::LinkType::APP_LINK) {
             appLinkingExist = true;
-            break;
+        }
+        if (info.linkType == AppExecFwk::LinkType::DEFAULT_APP) {
+            defaultAppExist = true;
         }
     }
-    if (!appLinkingExist) {
+    if (!appLinkingExist && !defaultAppExist) {
         return;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Open applink first!");
@@ -299,10 +291,17 @@ static void ProcessLinkType(std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
             it++;
             continue;
         }
-        if (it->linkType == AppExecFwk::LinkType::DEEP_LINK) {
+        if (it->linkType == AppExecFwk::LinkType::DEFAULT_APP && appLinkingExist) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s default deleted.", it->name.c_str());
             it = abilityInfos.erase(it);
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s deleted.", it->name.c_str());
+            continue;
         }
+        if (it->linkType == AppExecFwk::LinkType::DEEP_LINK) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s deleted.", it->name.c_str());
+            it = abilityInfos.erase(it);
+            continue;
+        }
+        it++;
     }
 }
 
@@ -643,7 +642,7 @@ int32_t ImplicitStartProcessor::ImplicitStartAbilityInner(const Want &targetWant
             break;
         default:
             result = abilityMgr->StartAbilityWrap(
-                targetWant, request.callerToken, request.requestCode, userId, false, 0, false, true);
+                targetWant, request.callerToken, request.requestCode, false, userId, false, 0, false, true);
             break;
     }
 

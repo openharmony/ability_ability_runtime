@@ -24,6 +24,7 @@
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
 #include "cache_process_manager.h"
+#include "hisysevent.h"
 #ifdef SUPPORT_SCREEN
 #include "window_visibility_info.h"
 #endif //SUPPORT_SCREEN
@@ -35,6 +36,10 @@ constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias s
 constexpr int32_t MAX_RESTART_COUNT = 3;
 constexpr int32_t RESTART_INTERVAL_TIME = 120000;
 constexpr const char* LAUNCHER_NAME = "com.ohos.sceneboard";
+constexpr const char *EVENT_KEY_VERSION_NAME = "VERSION_NAME";
+constexpr const char *EVENT_KEY_VERSION_CODE = "VERSION_CODE";
+constexpr const char *EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
+constexpr const char *EVENT_KEY_SUPPORT_STATE = "SUPPORT_STATE";
 }
 
 int64_t AppRunningRecord::appEventId_ = 0;
@@ -1111,13 +1116,14 @@ void AppRunningRecord::PopForegroundingAbilityTokens()
     for (auto iter = foregroundingAbilityTokens_.begin(); iter != foregroundingAbilityTokens_.end();) {
         auto ability = GetAbilityRunningRecordByToken(*iter);
         auto moduleRecord = GetModuleRunningRecordByToken(*iter);
-        if (!moduleRecord) {
-            TAG_LOGE(AAFwkTag::APPMGR, "can not find module record");
-            ++iter;
-            continue;
+        if (moduleRecord != nullptr) {
+            moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
+            StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND),
+                true, false);
+        } else {
+            TAG_LOGW(AAFwkTag::APPMGR, "can not find module record");
         }
-        moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
-        StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
+        // The token should be removed even though the module record didn't exist.
         iter = foregroundingAbilityTokens_.erase(iter);
     }
 }
@@ -1166,6 +1172,11 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
             appRecord->GetBundleName().c_str());
         needCache = true;
     }
+    auto state = static_cast<int>(GetSupportProcessCacheState());
+    auto appInfo = appRecord->GetApplicationInfo();
+    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_SUPPORT_STATE", HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
+        EVENT_KEY_BUNDLE_NAME, appInfo->bundleName, EVENT_KEY_SUPPORT_STATE, state);
     if (moduleRecord->GetAbilities().empty() && (!IsKeepAliveApp()
         || AAFwk::UIExtensionUtils::IsUIExtension(GetExtensionType())
         || !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !needCache) {
@@ -1860,7 +1871,7 @@ bool AppRunningRecord::NeedUpdateConfigurationBackground()
             continue;
         }
         if (abilityRecord->GetAbilityInfo()->type != AppExecFwk::AbilityType::PAGE &&
-            !(AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->type))) {
+            !(AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType))) {
             needUpdate = true;
             break;
         }
@@ -2376,6 +2387,33 @@ void AppRunningRecord::SetProcessCacheBlocked(bool isBlocked)
 bool AppRunningRecord::GetProcessCacheBlocked()
 {
     return processCacheBlocked;
+}
+
+bool AppRunningRecord::IsAllAbilityReadyToCleanedByUserRequest()
+{
+    std::lock_guard<ffrt::mutex> lock(hapModulesLock_);
+    for (const auto &iter : hapModules_) {
+        for (const auto &moduleRecord : iter.second) {
+            if (moduleRecord == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "Module record is nullptr.");
+                continue;
+            }
+            if (!moduleRecord->IsAllAbilityReadyToCleanedByUserRequest()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void AppRunningRecord::SetUserRequestCleaning()
+{
+    isUserRequestCleaning_ = true;
+}
+
+bool AppRunningRecord::IsUserRequestCleaning() const
+{
+    return isUserRequestCleaning_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

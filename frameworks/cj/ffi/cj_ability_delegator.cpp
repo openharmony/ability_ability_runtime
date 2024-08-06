@@ -63,6 +63,11 @@ std::string CJShellCmdResult::Dump()
 {
     return shellCmdResultr_->Dump();
 }
+
+void CJAbilityDelegator::FinishTest(const char* msg, int64_t code)
+{
+    delegator_->FinishUserTest(msg, code);
+}
  
 extern "C" {
 int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator()
@@ -73,6 +78,10 @@ int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator()
         return INVALID_CODE;
     }
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj delegator is null.");
+        return INVALID_CODE;
+    }
     return cjDelegator->GetID();
 }
  
@@ -95,6 +104,10 @@ int32_t FFIAbilityDelegatorExecuteShellCommand(int64_t id, const char* cmd, int6
         return INVALID_CODE;
     }
     auto cJShellCmdResult = FFI::FFIData::Create<CJShellCmdResult>(cjDelegator->ExecuteShellCommand(cmd, timeoutSec));
+    if (cJShellCmdResult == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj shell command result is null.");
+        return INVALID_CODE;
+    }
     return cJShellCmdResult->GetID();
 }
 
@@ -143,6 +156,15 @@ int32_t FFIAbilityDelegatorApplicationContext(int64_t id)
         return INVALID_CODE;
     }
     return appContext->GetID();
+}
+
+void FFIAbilityDelegatorFinishTest(int64_t id, const char* msg, int64_t code)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj delegator is null.");
+    }
+    cjDelegator->FinishTest(msg, code);
 }
 }
 }

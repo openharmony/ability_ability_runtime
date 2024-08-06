@@ -439,6 +439,21 @@ public:
      */
     virtual int TerminateAbility(
         const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant = nullptr) = 0;
+    
+    /**
+     * BackToCallerAbilityWithResult, return to the caller ability.
+     *
+     * @param token, the token of the ability to terminate.
+     * @param resultCode, the resultCode of the ability to terminate.
+     * @param resultWant, the Want of the ability to return.
+     * @param callerRequestCode, the requestCode of caller ability.·
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
+        const Want *resultWant, int64_t callerRequestCode)
+    {
+        return 0;
+    };
 
     /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
@@ -1677,6 +1692,17 @@ public:
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid)
     {
         return;
+    }
+
+    /**
+     *  Request to clean UIAbility from user.
+     *
+     * @param sessionInfo the session info of the ability to clean.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+    {
+        return 0;
     }
 
     /**

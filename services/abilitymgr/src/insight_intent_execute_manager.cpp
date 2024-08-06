@@ -15,9 +15,6 @@
 
 #include "insight_intent_execute_manager.h"
 
-#include <chrono>
-#include <cinttypes>
-
 #include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_execute_callback_interface.h"
@@ -38,7 +35,7 @@ void InsightIntentExecuteRecipient::OnRemoteDied(const wptr<OHOS::IRemoteObject>
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentExecuteRecipient OnRemoteDied, %{public}" PRIu64, intentId_);
     auto object = remote.promote();
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "remote object is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null remote object");
         return;
     }
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->RemoteDied(intentId_);
@@ -56,11 +53,11 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateParam(uint64_t key, const spt
         return result;
     }
     if (callerToken == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "callerToken is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null callerToken");
         return ERR_INVALID_VALUE;
     }
     if (param == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "param is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null param");
         return ERR_INVALID_VALUE;
     }
     if (param->bundleName_.empty() || param->moduleName_.empty() || param->abilityName_.empty() ||
@@ -93,7 +90,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     auto srcEntry = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName.GetBundleName(),
         elementName.GetModuleName(), want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME));
     if (srcEntry.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "Insight intent srcEntry invalid.");
+        TAG_LOGE(AAFwkTag::INTENT, "empty srcEntry");
         return ERR_INVALID_VALUE;
     }
     want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
@@ -208,7 +205,7 @@ int32_t InsightIntentExecuteManager::GenerateWant(
     const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want)
 {
     if (param == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "param is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null param");
         return ERR_INVALID_VALUE;
     }
     want.SetElementName("", param->bundleName_, param->abilityName_, param->moduleName_);
@@ -251,7 +248,7 @@ int32_t InsightIntentExecuteManager::IsValidCall(const Want &want)
 {
     std::string insightIntentName = want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME);
     if (insightIntentName.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "insightIntentName is empty");
+        TAG_LOGE(AAFwkTag::INTENT, "empty insightIntentName");
         return ERR_INVALID_VALUE;
     }
     TAG_LOGD(AAFwkTag::INTENT, "insightIntentName: %{public}s", insightIntentName.c_str());
