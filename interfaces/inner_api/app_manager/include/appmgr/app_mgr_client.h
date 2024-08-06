@@ -174,6 +174,15 @@ public:
         const int appIndex = 0);
 
     /**
+     * KillProcessesByAccessTokenId, call KillProcessesByAccessTokenId() through proxy object,
+     * force kill the application.
+     *
+     * @param  accessTokenId, accessTokenId.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual AppMgrResultCode KillProcessesByAccessTokenId(const uint32_t accessTokenId);
+
+    /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
      *
      * @param  bundleName, bundle name in Application record.
@@ -779,13 +788,21 @@ public:
     int32_t NotifyProcessDependedOnWeb();
 
     void KillProcessDependedOnWeb();
-    
+
     /**
      * Temporarily block the process cache feature.
      *
      * @param pids the pids of the processes that should be blocked.
      */
     virtual AppMgrResultCode BlockProcessCacheByPids(const std::vector<int32_t> &pids);
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
     /**
      * whether killed for upgrade web.

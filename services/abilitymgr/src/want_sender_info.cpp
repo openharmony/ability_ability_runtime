@@ -16,8 +16,6 @@
 #include "want_sender_info.h"
 
 #include "hilog_tag_wrapper.h"
-#include "nlohmann/json.hpp"
-#include "string_ex.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -38,7 +36,7 @@ bool WantSenderInfo::ReadFromParcel(Parcel &parcel)
     for (int32_t i = 0; i < wantsInfoSize; i++) {
         std::unique_ptr<WantsInfo> wantsInfo(parcel.ReadParcelable<WantsInfo>());
         if (!wantsInfo) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "ReadParcelable<WantsInfo> failed");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "wantsInfo is nullptr");
             return false;
         }
         allWants.emplace_back(*wantsInfo);

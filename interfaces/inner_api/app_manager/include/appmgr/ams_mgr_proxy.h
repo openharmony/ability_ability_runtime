@@ -152,6 +152,15 @@ public:
         const int appIndex = 0) override;
 
     /**
+     * KillProcessesByAccessTokenId, call KillProcessesByAccessTokenId() through proxy object,
+     * force kill the application.
+     *
+     * @param  accessTokenId, accessTokenId.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int KillProcessesByAccessTokenId(const uint32_t accessTokenId) override;
+
+    /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
      *
      * @param  bundleName, bundle name in Application record.
@@ -300,6 +309,14 @@ public:
      * @param pids the pids of the processes that should be blocked.
      */
     virtual void BlockProcessCacheByPids(const std::vector<int32_t> &pids) override;
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
 
     /**
      * whether killed for upgrade web.

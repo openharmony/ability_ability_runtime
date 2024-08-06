@@ -24,10 +24,14 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
 
 using namespace OHOS::AbilityRuntime;
 namespace OHOS {
 namespace AAFwk {
+const unsigned int XCOLLIE_TIMEOUT = 10;
+
 WantAgentClient &WantAgentClient::GetInstance()
 {
     static WantAgentClient client;
@@ -50,17 +54,17 @@ ErrCode WantAgentClient::GetWantSender(
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
     if (!data.WriteParcelable(&wantSenderInfo)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "wantSenderInfo write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write failed");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
     if (callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "flag and callerToken write failed.");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "flag and callerToken write failed");
             return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         }
     } else {
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "flag write failed.");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "flag write failed");
             return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         }
     }
@@ -68,7 +72,6 @@ ErrCode WantAgentClient::GetWantSender(
     auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER),
         data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Send request error: %{public}d", error);
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
     wantSender = iface_cast<IWantSender>(reply.ReadRemoteObject());
@@ -87,18 +90,17 @@ ErrCode WantAgentClient::SendWantSender(sptr<IWantSender> target, const SenderIn
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
     if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "SendWantSender, target write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write failed");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
     if (!data.WriteParcelable(&senderInfo)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "SendWantSender, senderInfo write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "senderInfo write failed");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
 
     auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_PENDING_WANT_SENDER),
         data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "SendWantSender, Send request error: %{public}d", error);
         return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_TIMEOUT;
     }
     return reply.ReadInt32();
@@ -153,13 +155,21 @@ ErrCode WantAgentClient::GetPendingWantBundleName(const sptr<IWantSender> &targe
     CHECK_POINTER_AND_RETURN(target, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer(
+        "OHOS::AAFwk::WantAgentClient::GetPendingWantBundleName",
+        XCOLLIE_TIMEOUT,
+        nullptr,
+        nullptr,
+        HiviewDFX::XCOLLIE_FLAG_LOG | HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     ErrCode error;
     MessageParcel reply;
     if (!SendRequest(static_cast<int32_t>(AbilityManagerInterfaceCode::GET_PENDING_WANT_BUNDLENAME),
         abms, target->AsObject(), reply, error)) {
+        HiviewDFX::XCollie::GetInstance().CancelTimer(id);
         return error;
     }
     bundleName = Str16ToStr8(reply.ReadString16());
+    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     return ERR_OK;
 }
 
@@ -183,14 +193,22 @@ ErrCode WantAgentClient::GetPendingWantType(sptr<IWantSender> target, int32_t &t
     CHECK_POINTER_AND_RETURN(target, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
+    int id = HiviewDFX::XCollie::GetInstance().SetTimer(
+        "OHOS::AAFwk::WantAgentClient::GetPendingWantType",
+        XCOLLIE_TIMEOUT,
+        nullptr,
+        nullptr,
+        HiviewDFX::XCOLLIE_FLAG_LOG|HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     ErrCode error;
     MessageParcel reply;
     if (!SendRequest(static_cast<int32_t>(AbilityManagerInterfaceCode::GET_PENDING_WANT_TYPE),
         abms, target->AsObject(), reply, error)) {
+        HiviewDFX::XCollie::GetInstance().CancelTimer(id);
         return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_TIMEOUT;
     }
     type = reply.ReadInt32();
     type < 0 ? type = 0 : type;
+    HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     return ERR_OK;
 }
 
@@ -201,7 +219,7 @@ void WantAgentClient::RegisterCancelListener(const sptr<IWantSender> &sender, co
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "RegisterCancelListener, ability proxy is nullptr.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "ability proxy is nullptr");
         return;
     }
     MessageParcel data;
@@ -211,17 +229,16 @@ void WantAgentClient::RegisterCancelListener(const sptr<IWantSender> &sender, co
         return;
     }
     if (!data.WriteRemoteObject(sender->AsObject())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "RegisterCancelListener, sender write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "sender write failed");
         return;
     }
     if (!data.WriteRemoteObject(receiver->AsObject())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "RegisterCancelListener, receiver write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "receiver write failed");
         return;
     }
     auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::REGISTER_CANCEL_LISTENER),
         data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "RegisterCancelListener, Send request error: %{public}d", error);
         return;
     }
 }
@@ -234,7 +251,7 @@ void WantAgentClient::UnregisterCancelListener(
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "UnregisterCancelListener, ability proxy is nullptr.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "ability proxy is nullptr");
         return;
     }
     MessageParcel data;
@@ -244,17 +261,16 @@ void WantAgentClient::UnregisterCancelListener(
         return;
     }
     if (!data.WriteRemoteObject(sender->AsObject())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "UnregisterCancelListener, sender write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "sender write failed");
         return;
     }
     if (!data.WriteRemoteObject(receiver->AsObject())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "UnregisterCancelListener, receiver write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "receiver write failed");
         return;
     }
     auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::UNREGISTER_CANCEL_LISTENER),
         data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "UnregisterCancelListener, Send request error: %{public}d", error);
         return;
     }
 }
@@ -280,22 +296,22 @@ ErrCode WantAgentClient::GetPendingRequestWant(const sptr<IWantSender> &target, 
     }
 
     if (!data.WriteRemoteObject(obj)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPendingRequestWant, target write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write failed");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
     if (!data.WriteParcelable(want.get())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPendingRequestWant, want write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "want write failed");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
     auto error = abms->SendRequest(static_cast<int32_t>(AbilityManagerInterfaceCode::GET_PENDING_REQUEST_WANT),
         data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPendingRequestWant, Send request error: %{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Send request error: %{public}d", error);
         return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_TIMEOUT;
     }
     std::unique_ptr<Want> wantInfo(reply.ReadParcelable<Want>());
     if (!wantInfo) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPendingRequestWant, readParcelableInfo failed");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "ReadParcelable failed");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
     want = std::move(wantInfo);
@@ -316,22 +332,22 @@ ErrCode WantAgentClient::GetWantSenderInfo(const sptr<IWantSender> &target, std:
         return INNER_ERR;
     }
     if (!data.WriteRemoteObject(target->AsObject())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetWantSenderInfo, target write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "target write failed");
         return INNER_ERR;
     }
     if (!data.WriteParcelable(info.get())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetWantSenderInfo, info write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "info write failed");
         return INNER_ERR;
     }
     auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER_INFO),
         data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetWantSenderInfo, Send request error: %{public}d", error);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Send request error: %{public}d", error);
         return error;
     }
     std::unique_ptr<WantSenderInfo> wantSenderInfo(reply.ReadParcelable<WantSenderInfo>());
     if (!wantSenderInfo) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetWantSenderInfo, readParcelable Info failed");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "readParcelable Info failed");
         return INNER_ERR;
     }
     info = std::move(wantSenderInfo);
@@ -346,22 +362,22 @@ sptr<IRemoteObject> WantAgentClient::GetAbilityManager()
     if (proxy_ == nullptr) {
         auto systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (systemManager == nullptr) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "Fail to get registry.");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Fail to get registry");
             return nullptr;
         }
         auto remoteObj = systemManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
         if (remoteObj == nullptr) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "Fail to connect ability manager service.");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Fail to connect ability manager service");
             return nullptr;
         }
 
         deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) WantAgentDeathRecipient());
         if (deathRecipient_ == nullptr) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "%{public}s :Failed to create WantAgentDeathRecipient!", __func__);
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to create DeathRecipient");
             return nullptr;
         }
         if (!remoteObj->AddDeathRecipient(deathRecipient_)) {
-            TAG_LOGI(AAFwkTag::WANTAGENT, "%{public}s :Add death recipient to failed, maybe already add.", __func__);
+            TAG_LOGI(AAFwkTag::WANTAGENT, "Add death recipient to failed");
         }
         proxy_ = remoteObj;
     }
@@ -371,7 +387,7 @@ sptr<IRemoteObject> WantAgentClient::GetAbilityManager()
 
 void WantAgentClient::WantAgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "WantAgentDeathRecipient handle remote died.");
+    TAG_LOGI(AAFwkTag::WANTAGENT, "call");
     WantAgentClient::GetInstance().ResetProxy(remote);
 }
 
@@ -390,7 +406,7 @@ void WantAgentClient::ResetProxy(const wptr<IRemoteObject>& remote)
 bool WantAgentClient::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(IAbilityManager::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "write interface token failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write interface token failed");
         return false;
     }
     return true;
@@ -399,11 +415,11 @@ bool WantAgentClient::WriteInterfaceToken(MessageParcel &data)
 bool WantAgentClient::CheckSenderAndRecevier(const sptr<IWantSender> &sender, const sptr<IWantReceiver> &receiver)
 {
     if (sender == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "sender is nullptr.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "sender is nullptr");
         return false;
     }
     if (receiver == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "receiver is nullptr.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "receiver is nullptr");
         return false;
     }
 
@@ -420,13 +436,12 @@ bool WantAgentClient::SendRequest(int32_t operation, const sptr<IRemoteObject> &
         return false;
     }
     if (!data.WriteRemoteObject(remoteObject)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "write failed.");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "write failed");
         error = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return false;
     }
     error = abms->SendRequest(operation, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Send request error: %{public}d", error);
         error = ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY;
         return false;
     }

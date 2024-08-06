@@ -16,7 +16,6 @@
 #include "pending_want_record.h"
 
 #include "hilog_tag_wrapper.h"
-#include "iremote_object.h"
 #include "pending_want_manager.h"
 #include "int_wrapper.h"
 
@@ -74,7 +73,7 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
 
     auto pendingWantManager = pendingWantManager_.lock();
     if (pendingWantManager == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "%{public}s:pendingWantManager is nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "pendingWantManager is nullptr");
         return ERR_INVALID_VALUE;
     }
 

@@ -17,7 +17,6 @@
 
 #include "hilog_tag_wrapper.h"
 #include "json_util.h"
-#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -232,7 +231,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentProfileInfoVec &in
 bool TransformToInsightIntentInfo(const InsightIntentProfileInfo &insightIntent, InsightIntentInfo &info)
 {
     if (insightIntent.intentName.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "Intent name invalid.");
+        TAG_LOGE(AAFwkTag::INTENT, "Intent name is empty");
         return false;
     }
 
@@ -279,7 +278,7 @@ bool InsightIntentProfile::TransformTo(const std::string &profileStr, std::vecto
     TAG_LOGD(AAFwkTag::INTENT, "called");
     auto jsonObject = nlohmann::json::parse(profileStr, nullptr, false);
     if (jsonObject.is_discarded()) {
-        TAG_LOGE(AAFwkTag::INTENT, "Profile invalid.");
+        TAG_LOGE(AAFwkTag::INTENT, "jsonObject is discarded");
         return false;
     }
 
