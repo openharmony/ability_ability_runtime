@@ -161,34 +161,14 @@ bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
     return true;
 }
 
-void CJRuntime::SetAsanVersion()
+void CJRuntime::SetSanitizerVersion(SanitizerKind kind)
 {
     auto cjEnv = OHOS::CJEnv::LoadInstance();
     if (cjEnv == nullptr) {
         TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
         return;
     }
-    cjEnv->setSanitizerKindRuntimeVersion(SanitizerKind::ASAN);
-}
-
-void CJRuntime::SetTsanVersion()
-{
-    auto cjEnv = OHOS::CJEnv::LoadInstance();
-    if (cjEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
-        return;
-    }
-    cjEnv->setSanitizerKindRuntimeVersion(SanitizerKind::TSAN);
-}
-
-void CJRuntime::SetHWAsanVersion()
-{
-    auto cjEnv = OHOS::CJEnv::LoadInstance();
-    if (cjEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
-        return;
-    }
-    cjEnv->setSanitizerKindRuntimeVersion(SanitizerKind::HWASAN);
+    cjEnv->setSanitizerKindRuntimeVersion(kind);
 }
 
 void CJRuntime::StartDebugMode(const DebugOption dOption)
