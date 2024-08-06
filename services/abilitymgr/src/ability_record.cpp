@@ -15,44 +15,26 @@
 
 #include "ability_record.h"
 
-#include <filesystem>
 #include <singleton.h>
-#include <vector>
-#include <unordered_map>
 
-#include "constants.h"
-#include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
 #include "ability_scheduler_stub.h"
-#include "ability_util.h"
 #include "app_exit_reason_data_manager.h"
 #include "app_utils.h"
-#include "appfreeze_manager.h"
 #include "array_wrapper.h"
 #include "accesstoken_kit.h"
-#include "bundle_mgr_client.h"
 #include "configuration_convertor.h"
 #include "connection_state_manager.h"
-#include "common_event_data.h"
 #include "common_event_manager.h"
-#include "common_event_support.h"
 #include "freeze_util.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
-#include "in_process_call_wrapper.h"
-#include "int_wrapper.h"
-#include "errors.h"
-#include "event_report.h"
-#include "hilog_tag_wrapper.h"
 #include "os_account_manager_wrapper.h"
-#include "parameters.h"
 #include "ui_service_extension_connection_constants.h"
 #include "res_sched_util.h"
-#include "ui_extension_host_info.h"
 #include "scene_board_judgement.h"
-#include "start_ability_utils.h"
 #include "startup_util.h"
 #include "system_ability_token_callback.h"
 #include "ui_extension_utils.h"
@@ -62,7 +44,6 @@
 #include "utils/state_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
-#include "mission_info_mgr.h"
 #endif
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
@@ -216,6 +197,7 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
     if (want_.HasParameter(Want::PARAM_APP_AUTO_STARTUP_LAUNCH_REASON)) {
         want_.RemoveParam(Want::PARAM_APP_AUTO_STARTUP_LAUNCH_REASON);
     }
+    SetDebugAppByWaitingDebugFlag();
 }
 
 AbilityRecord::~AbilityRecord()
@@ -234,11 +216,6 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(
         abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
     CHECK_POINTER_AND_RETURN(abilityRecord, nullptr);
-
-    Want newWant = abilityRecord->GetWant();
-    SetDebugAppByWaitingDebugFlag(newWant, abilityRequest.appInfo.bundleName, abilityRequest.appInfo.debug);
-    abilityRecord->SetWant(newWant);
-
     abilityRecord->SetUid(abilityRequest.uid);
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
@@ -3647,15 +3624,16 @@ void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
     specifyTokenId_ = specifyTokenId;
 }
 
-void AbilityRecord::SetDebugAppByWaitingDebugFlag(Want &requestWant, const std::string &bundleName, bool isDebugApp)
+void AbilityRecord::SetDebugAppByWaitingDebugFlag()
 {
-    if (!isDebugApp || !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+    if (!applicationInfo_.debug || !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Not meeting the set debugging conditions.");
         return;
     }
 
-    if (IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsWaitingDebugApp(bundleName))) {
-        requestWant.SetParam(DEBUG_APP, true);
+    if (IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsWaitingDebugApp(
+        applicationInfo_.bundleName))) {
+        want_.SetParam(DEBUG_APP, true);
         IN_PROCESS_CALL_WITHOUT_RET(
             DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearNonPersistWaitingDebugFlag());
     }

@@ -15,29 +15,10 @@
 
 #include "ability_manager_service.h"
 
-#include <atomic>
-#include <chrono>
-#include <csignal>
-#include <cstdlib>
-#include <fstream>
-#include <functional>
-#include <getopt.h>
-#include <memory>
-#include <mutex>
-#include <nlohmann/json.hpp>
-#include <string>
-#include <thread>
-#include <unistd.h>
-#include <unordered_set>
-
 #include "ability_background_connection.h"
 #include "ability_connect_manager.h"
-#include "ability_debug_deal.h"
-#include "ability_manager_constants.h"
-#include "ability_manager_errors.h"
 #include "ability_manager_radar.h"
 #include "ability_resident_process_rdb.h"
-#include "ability_util.h"
 #include "accesstoken_kit.h"
 #ifdef APP_DOMAIN_VERIFY_ENABLED
 #include "ag_convert_callback_impl.h"
@@ -49,28 +30,16 @@
 #include "application_util.h"
 #include "recovery_info_timer.h"
 #include "assert_fault_callback_death_mgr.h"
-#include "assert_fault_proxy.h"
-#include "bundle_mgr_client.h"
-#include "common_event_manager.h"
-#include "common_event_support.h"
 #include "connection_state_manager.h"
 #include "display_manager.h"
 #include "distributed_client.h"
 #ifdef WITH_DLP
 #include "dlp_utils.h"
 #endif // WITH_DLP
-#include "errors.h"
-#include "extension_config.h"
 #include "freeze_util.h"
 #include "global_constant.h"
-#include "hilog_tag_wrapper.h"
-#include "hisysevent.h"
 #include "hitrace_meter.h"
-#include "if_system_ability_manager.h"
-#include "in_process_call_wrapper.h"
-#include "insight_intent_execute_callback_proxy.h"
 #include "insight_intent_execute_manager.h"
-#include "int_wrapper.h"
 #include "interceptor/ability_jump_interceptor.h"
 #include "interceptor/control_interceptor.h"
 #include "interceptor/crowd_test_interceptor.h"
@@ -80,35 +49,23 @@
 #include "interceptor/screen_unlock_interceptor.h"
 #include "interceptor/start_other_app_interceptor.h"
 #include "ipc_skeleton.h"
-#include "ipc_types.h"
 #include "iservice_registry.h"
-#include "itest_observer.h"
-#include "mission_info.h"
-#include "mission_info_mgr.h"
 #include "mock_session_manager_service.h"
 #include "modal_system_ui_extension.h"
 #include "os_account_manager_wrapper.h"
-#include "parameters.h"
 #include "permission_constants.h"
 #include "process_options.h"
 #include "recovery_param.h"
 #include "res_sched_util.h"
 #include "restart_app_manager.h"
-#include "sa_mgr_client.h"
 #include "scene_board_judgement.h"
 #include "server_constant.h"
-#include "session_info.h"
 #include "softbus_bus_center.h"
 #include "start_ability_handler/start_ability_sandbox_savefile.h"
-#include "start_options.h"
 #include "start_ability_utils.h"
 #include "startup_util.h"
 #include "status_bar_delegate_interface.h"
-#include "string_ex.h"
 #include "string_wrapper.h"
-#include "system_ability_definition.h"
-#include "system_ability_token_callback.h"
-#include "extension_record_manager.h"
 #include "ui_extension_utils.h"
 #include "ui_service_extension_connection_constants.h"
 #include "unlock_screen_manager.h"
@@ -117,7 +74,6 @@
 #include "view_data.h"
 #include "xcollie/watchdog.h"
 #include "config_policy_utils.h"
-#include "running_multi_info.h"
 #include "utils/ability_permission_util.h"
 #include "utils/dump_utils.h"
 #include "utils/extension_permissions_util.h"
@@ -7029,6 +6985,9 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
         return StartRemoteAbilityByCall(want, callerToken, connect->AsObject());
     }
 
+    if (accountId == U0_USER_ID) {
+        accountId = DEFAULT_INVAL_VALUE;
+    }
     int32_t oriValidUserId = GetValidUserId(accountId);
     if (!JudgeMultiUserConcurrency(oriValidUserId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Multi-user non-concurrent mode is not satisfied.");
@@ -9319,7 +9278,51 @@ int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abil
             return CHECK_PERMISSION_FAILED;
         }
     }
+
+    if (!CheckUIExtensionCallerIsForeground(abilityRequest)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
     return ERR_OK;
+}
+
+bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequest &abilityRequest)
+{
+    // Check caller ability firstly.
+    auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility != nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Caller ability is %{public}s, state: %{public}d",
+            callerAbility->GetURI().c_str(), callerAbility->GetAbilityState());
+        if (callerAbility->IsForeground() || callerAbility->GetAbilityForegroundingFlag()) {
+            return true;
+        }
+
+        if (UIExtensionUtils::IsUIExtension(callerAbility->GetAbilityInfo().extensionAbilityType)) {
+            auto tokenId = callerAbility->GetApplicationInfo().accessTokenId;
+            bool isFocused = false;
+            if (CheckUIExtensionIsFocused(tokenId, isFocused) == ERR_OK && isFocused) {
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "Root caller is foreground");
+                return true;
+            }
+        }
+
+        if (callerAbility->IsSceneBoard()) {
+            return true;
+        }
+    }
+
+    // Check caller app.
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
+    if (processInfo.isFocused || processInfo.isAbilityForegrounding) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Caller app %{public}s is foreground", processInfo.processName_.c_str());
+        return true;
+    }
+
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller app %{public}s is not foreground, can't start %{public}s",
+        processInfo.processName_.c_str(), abilityRequest.want.GetElement().GetURI().c_str());
+    return false;
 }
 
 int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityRequest &abilityRequest)
