@@ -33,7 +33,7 @@ void BundleContainer::LoadBundleInfos(const std::vector<uint8_t> &buffer)
 {
     bundleInfo_ = std::make_shared<InnerBundleInfo>();
     if (!bundleInfo_) {
-        TAG_LOGD(AAFwkTag::ABILITY_SIM, "bundleInfo_ is nullptr");
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "null bundleInfo_");
         return;
     }
 
@@ -57,7 +57,7 @@ std::shared_ptr<HapModuleInfo> BundleContainer::GetHapModuleInfo(const std::stri
     if (bundleInfo_ != nullptr) {
         auto uid = Constants::UNSPECIFIED_USERID;
         TAG_LOGI(AAFwkTag::ABILITY_SIM,
-            "BundleContainer GetHapModuleInfo by modulePackage %{public}s", modulePackage.c_str());
+            "modulePackage %{public}s", modulePackage.c_str());
         std::optional<HapModuleInfo> hapMouduleInfo = bundleInfo_->FindHapModuleInfo(modulePackage, uid);
         if (hapMouduleInfo) {
             auto hapInfo = std::make_shared<HapModuleInfo>();
