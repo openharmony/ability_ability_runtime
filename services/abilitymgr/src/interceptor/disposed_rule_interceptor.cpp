@@ -107,7 +107,7 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
         } else {
             ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
                 userId, disposedRuleList, 0));
-        } 
+        }
         if (ret != ERR_OK || disposedRuleList.empty()) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Get No DisposedRule");
             return false;
