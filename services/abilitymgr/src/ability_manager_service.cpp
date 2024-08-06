@@ -5654,11 +5654,19 @@ int AbilityManagerService::AbilityWindowConfigTransitionDone(
         return CHECK_PERMISSION_FAILED;
     }
 
+    auto abilityInfo = abilityRecord->GetAbilityInfo();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Lifecycle: ability: %{public}s.", abilityRecord->GetURI().c_str());
-    int32_t ownerMissionUserId = abilityRecord->GetOwnerMissionUserId();
-    auto uiAbilityManager = GetUIAbilityManagerByUserId(ownerMissionUserId);
-    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-    return uiAbilityManager->AbilityWindowConfigTransactionDone(token, windowConfig);
+    auto type = abilityInfo.extensionAbilityType;
+    auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
+    if (type == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        auto connectManager = GetConnectManagerByUserId(userId);
+        if (!connectManager) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager is nullptr. userId=%{public}d", userId);
+            return ERR_INVALID_VALUE;
+        }
+        return connectManager->AbilityWindowConfigTransactionDone(token, windowConfig);
+    }
+    return ERR_OK;
 }
 
 int AbilityManagerService::ScheduleConnectAbilityDone(
