@@ -55,6 +55,12 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
         }
     }
 
+    if (wantSenderInfo.type == static_cast<int32_t>(OperationType::START_SERVICE_EXTENSION) && !isSystemApp &&
+        !AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "non-system app called");
+        return nullptr;
+    }
+
     WantSenderInfo info = wantSenderInfo;
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
 }
@@ -293,6 +299,19 @@ int32_t PendingWantManager::PendingWantStartAbility(const Want &want, const sptr
     }
     int32_t result = DeviceIdDetermine(want, startOptions, callerToken, requestCode, callerUid, callerTokenId);
     return result;
+}
+
+int32_t PendingWantManager::PendingWantStartServiceExtension(Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGI(AAFwkTag::WANTAGENT, "called");
+    if (!PermissionVerification::GetInstance()->IsSystemAppCall()
+        && !PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "non-system app called");
+        return ERR_INVALID_VALUE;
+    }
+    //reset flags
+    want.SetFlags(0);
+    return DelayedSingleton<AbilityManagerService>::GetInstance()->StartExtensionAbility(want, callerToken);
 }
 
 int32_t PendingWantManager::PendingWantStartAbilitys(const std::vector<WantsInfo> &wantsInfo,
