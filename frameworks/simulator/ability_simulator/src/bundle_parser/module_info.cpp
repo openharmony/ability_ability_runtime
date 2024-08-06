@@ -65,7 +65,7 @@ void from_json(const nlohmann::json &jsonObject, ModuleInfo &moduleInfo)
         ArrayType::STRING);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM,
-            "read module moduleInfo from jsonObject error, error code : %{public}d", parseResult);
+            "read module moduleInfo from jsonObject error:%{public}d", parseResult);
     }
 }
 } // namespace AppExecFwk
