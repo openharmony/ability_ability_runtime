@@ -78,7 +78,6 @@ ohos_fuzztest("AbilityManagerServiceFirstFuzzTest") {
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
-    external_deps += [ "dlp_permission_service:libdlpparse" ]
   }
 }
 
