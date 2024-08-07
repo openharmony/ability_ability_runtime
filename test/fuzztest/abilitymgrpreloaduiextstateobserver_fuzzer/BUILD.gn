@@ -78,6 +78,11 @@ ohos_fuzztest("AbilitymgrPreloadUiextStateObserverFuzzTest") {
   if (ability_runtime_graphics) {
     external_deps += [ "input:libmmi-client" ]
   }
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+    external_deps += [ "dlp_permission_service:libdlp_permission_sdk" ]
+  }
 }
 
 ###############################################################################
