@@ -64,6 +64,9 @@ void ContextImplTest::TearDownTestCase(void)
 void ContextImplTest::SetUp(void)
 {
     contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    auto config = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(config, nullptr);
+    contextImpl_->SetConfiguration(config);
     sptr<IRemoteObject> bundleObject = new (std::nothrow) BundleMgrService();
     DelayedSingleton<SysMrgClient>::GetInstance()->RegisterSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID,
         bundleObject);
@@ -755,6 +758,11 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_001, Functio
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_InitResourceManager_001 start";
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ContextImpl> appContext = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    auto config = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(config, nullptr);
+    contextImpl_->SetConfiguration(config);
+
     AppExecFwk::BundleInfo bundleInfo;
     bundleInfo.name = "com.test.module";
     bundleInfo.isKeepAlive = true;
@@ -789,6 +797,9 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_002, Functio
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_InitResourceManager_002 start";
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ContextImpl> appContext = std::make_shared<AbilityRuntime::ContextImpl>();
+    auto config = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(config, nullptr);
+    contextImpl_->SetConfiguration(config);
     AppExecFwk::BundleInfo bundleInfo;
     bundleInfo.name = "com.ohos.contactsdataability";
     bundleInfo.isKeepAlive = true;
@@ -838,6 +849,9 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_003, Functio
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_InitResourceManager_003 start";
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ContextImpl> appContext = std::make_shared<AbilityRuntime::ContextImpl>();
+    auto config = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(config, nullptr);
+    contextImpl_->SetConfiguration(config);
     AppExecFwk::BundleInfo bundleInfo;
     bundleInfo.name = "com.ohos.contactsdataability";
     bundleInfo.isKeepAlive = true;
@@ -884,6 +898,9 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_004, Functio
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_InitResourceManager_004 start";
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ContextImpl> appContext = std::make_shared<AbilityRuntime::ContextImpl>();
+    auto config = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(config, nullptr);
+    contextImpl_->SetConfiguration(config);
     AppExecFwk::BundleInfo bundleInfo;
     bundleInfo.name = "com.ohos.contactsdataability";
     bundleInfo.isKeepAlive = true;
@@ -926,6 +943,10 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_005, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
     EXPECT_NE(contextImpl, nullptr);
+
+    auto config = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(config, nullptr);
+    contextImpl_->SetConfiguration(config);
 
     // branch when appContext is nullptr
     AppExecFwk::BundleInfo bundleInfo;
@@ -983,6 +1004,9 @@ HWTEST_F(ContextImplTest, InitHapModuleInfo_0100, TestSize.Level1)
     auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
     EXPECT_NE(contextImpl, nullptr);
 
+    auto config = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(config, nullptr);
+    contextImpl->SetConfiguration(config);
     AppExecFwk::HapModuleInfo hapModuleInfo;
     contextImpl->InitHapModuleInfo(hapModuleInfo);
     EXPECT_NE(contextImpl->GetHapModuleInfo(), nullptr);
