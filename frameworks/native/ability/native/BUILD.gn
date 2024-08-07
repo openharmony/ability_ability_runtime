@@ -1879,6 +1879,7 @@ ohos_shared_library("photo_editor_extension") {
     "image_framework:image_native",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "app_file_service:fileuri_native"
   ]
 
   if (ability_runtime_graphics) {
