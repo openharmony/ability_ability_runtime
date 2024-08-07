@@ -49,6 +49,12 @@ ohos_shared_library("wantagent") {
     "node:node_header_notice",
   ]
 
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+    external_deps += [ "dlp_permission_service:libdlp_permission_sdk" ]
+  }
+
   relative_install_dir = "module"
   subsystem_name = "ability"
   part_name = "ability_runtime"

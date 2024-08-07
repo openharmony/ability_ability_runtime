@@ -58,6 +58,10 @@ ohos_unittest("start_other_app_interceptor_test") {
     "init:libbegetutil",
     "ipc:ipc_core",
   ]
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+    external_deps += [ "dlp_permission_service:libdlp_permission_sdk" ]
+  }
 }
 
 group("unittest") {
