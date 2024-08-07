@@ -39,8 +39,6 @@ constexpr int32_t DEFAULT_DMS_SESSION_ID = 0;
 constexpr char LAUNCHER_BUNDLE_NAME[] = "com.ohos.launcher";
 constexpr char LAUNCHER_ABILITY_NAME[] = "com.ohos.launcher.MainAbility";
 constexpr char SHOW_ON_LOCK_SCREEN[] = "ShowOnLockScreen";
-#endif
-
 #ifdef WITH_DLP
 constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
 #endif // WITH_DLP
