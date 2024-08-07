@@ -5658,15 +5658,16 @@ int AbilityManagerService::AbilityWindowConfigTransitionDone(
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Lifecycle: ability: %{public}s.", abilityRecord->GetURI().c_str());
     auto type = abilityInfo.extensionAbilityType;
     auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
-    if (type == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        auto connectManager = GetConnectManagerByUserId(userId);
-        if (!connectManager) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager is nullptr. userId=%{public}d", userId);
-            return ERR_INVALID_VALUE;
-        }
-        return connectManager->AbilityWindowConfigTransactionDone(token, windowConfig);
+    if (type != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid type");
+        return ERR_INVALID_VALUE;
     }
-    return ERR_OK;
+    auto connectManager = GetConnectManagerByUserId(userId);
+    if(!connectManager) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager is nullptr. userId=%{public}d", userId);
+        return ERR_INVALID_VALUE;
+    }
+    return connectManager->AbilityWindowConfigTransactionDone(token, windowConfig);
 }
 
 int AbilityManagerService::ScheduleConnectAbilityDone(
