@@ -67,7 +67,6 @@ ohos_unittest("connection_observer_controller_test") {
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
-    external_deps += [ "dlp_permission_service:libdlpparse" ]
   }
 }
 
