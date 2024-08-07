@@ -86,7 +86,7 @@ bool UriPermissionManagerStubImpl::VerifySubDirUriPermission(const std::string &
 {
     auto iPos = uriStr.find(CLOUND_DOCS_URI_MARK);
     if (iPos == std::string::npos) {
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "Local uri not support to verify sub directory uri permission");
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "Local uri not support to verify sub directory uri permission");
         return false;
     }
 
@@ -271,7 +271,7 @@ int UriPermissionManagerStubImpl::AddTempUriPermission(const std::string &uri, u
     GrantInfo info = { flag, fromTokenId, targetTokenId, autoRemove, {} };
     info.AddAbilityId(abilityId);
     if (search == uriMap_.end()) {
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "Insert an uri r/w permission");
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "Insert an uri r/w permission");
         std::list<GrantInfo> infoList = { info };
         uriMap_.emplace(uri, infoList);
         return ERR_OK;
