@@ -5654,14 +5654,14 @@ int AbilityManagerService::AbilityWindowConfigTransitionDone(
         return CHECK_PERMISSION_FAILED;
     }
 
-    auto abilityInfo = abilityRecord->GetAbilityInfo();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Lifecycle: ability: %{public}s.", abilityRecord->GetURI().c_str());
+    auto abilityInfo = abilityRecord->GetAbilityInfo();
     auto type = abilityInfo.extensionAbilityType;
-    auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
     if (type != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid type");
         return ERR_INVALID_VALUE;
     }
+    auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
     auto connectManager = GetConnectManagerByUserId(userId);
     if(!connectManager) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager is nullptr. userId=%{public}d", userId);
