@@ -53,7 +53,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::SaveEditedContent(const std::s
     const std::string panelUri = want_->GetStringParam(PANEL_TRANSFER_FILE_PATH);
     AppFileService::ModuleFileUri::FileUri fileUri(panelUri);
     std::string panelPhysicalPath = fileUri.GetRealPath();
-    TAG_LOGD(AAFwkTag::UI_EXT, "PanelPhysicalPath: %{public}s", panelUri.c_str());
+    TAG_LOGD(AAFwkTag::UI_EXT, "PanelPhysicalPath: %{public}s", panelPhysicalPath.c_str());
 
     std::ofstream panelFile;
     panelFile.open(panelPhysicalPath, std::ios::binary);
@@ -109,8 +109,6 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
 {
     AppFileService::ModuleFileUri::FileUri fileUri(panelUri);
     std::string panelPhysicalPath = fileUri.GetRealPath();
-    TAG_LOGD(AAFwkTag::UI_EXT, "PanelPhysicalPath: %{public}s", panelUri.c_str());
-
     TAG_LOGD(AAFwkTag::UI_EXT, "ImageUri: %{public}s, panelPhysicalPath: %{public}s", imageUri.c_str(),
              panelPhysicalPath.c_str());
 
