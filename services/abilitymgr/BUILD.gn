@@ -388,6 +388,12 @@ ohos_shared_library("mission_list") {
     ]
   }
 
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+    external_deps += [ "dlp_permission_service:libdlp_permission_sdk" ]
+  }
+
   subsystem_name = "ability"
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "ability_runtime"
