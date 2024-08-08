@@ -7629,7 +7629,7 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
 
         ReportAppRecoverResult(record->GetUid(), appInfo, abilityInfo.name, "SUCCESS");
     }
-    RestartApp(curWant);
+    RestartApp(curWant, true);
 }
 
 int32_t AbilityManagerService::GetRemoteMissionSnapshotInfo(const std::string& deviceId, int32_t missionId,
@@ -10876,7 +10876,7 @@ int32_t AbilityManagerService::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
     return ERR_OK;
 }
 
-int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want)
+int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
     int result = CheckRestartAppWant(want);
@@ -10899,7 +10899,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want)
         return AAFwk::NOT_TOP_ABILITY;
     }
 
-    result = SignRestartAppFlag(userId, bundleName);
+    result = SignRestartAppFlag(userId, bundleName, isAppRecovery);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "SignRestartAppFlag error.");
         return result;
@@ -10943,7 +10943,8 @@ int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want)
     return ERR_OK;
 }
 
-int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::string &bundleName)
+int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::string &bundleName,
+    bool isAppRecovery)
 {
     auto appMgr = GetAppMgr();
     if (appMgr == nullptr) {
@@ -10961,7 +10962,7 @@ int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::str
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        uiAbilityManager->SignRestartAppFlag(bundleName);
+        uiAbilityManager->SignRestartAppFlag(bundleName, isAppRecovery);
         return ERR_OK;
     }
     auto missionListManager = GetMissionListManagerByUserId(userId);
