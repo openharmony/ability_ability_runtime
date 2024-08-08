@@ -57,6 +57,8 @@ public:
     std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
     sptr<Token> MockToken(AbilityType);
     sptr<SessionInfo> MockSessionInfo(int32_t persistentId);
+
+    std::shared_ptr<AbilityRecord> abilityRecord;
 };
 
 void AbilityManagerServiceFourthTest::SetUpTestCase() {}
@@ -89,7 +91,7 @@ std::shared_ptr<AbilityRecord> AbilityManagerServiceFourthTest::MockAbilityRecor
 
 sptr<Token> AbilityManagerServiceFourthTest::MockToken(AbilityType abilityType)
 {
-    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(abilityType);
+    abilityRecord = MockAbilityRecord(abilityType);
     if (!abilityRecord) {
         return nullptr;
     }
@@ -1375,5 +1377,47 @@ HWTEST_F(AbilityManagerServiceFourthTest, SetAbilityRequestSessionInfo_001, Test
     abilityMs_->SetAbilityRequestSessionInfo(abilityRequest, extensionType);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest SetAbilityRequestSessionInfo_001 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetAbilityRequestSessionInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetAbilityRequestSessionInfo
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, SetAbilityRequestSessionInfo_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest SetAbilityRequestSessionInfo_002 start");
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+    abilityRequest.callerToken = MockToken(AbilityType::PAGE);
+    AppExecFwk::ExtensionAbilityType extensionType{AppExecFwk::ExtensionAbilityType::UI_SERVICE};
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->SetAbilityRequestSessionInfo(abilityRequest, extensionType);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest SetAbilityRequestSessionInfo_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetAbilityRequestSessionInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetAbilityRequestSessionInfo
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, SetAbilityRequestSessionInfo_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest SetAbilityRequestSessionInfo_003 start");
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::VPN;
+    abilityRequest.callerToken = MockToken(AbilityType::PAGE);
+    abilityRecord = nullptr;
+    AppExecFwk::ExtensionAbilityType extensionType{AppExecFwk::ExtensionAbilityType::UI_SERVICE};
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->SetAbilityRequestSessionInfo(abilityRequest, extensionType);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest SetAbilityRequestSessionInfo_003 end");
+}
+
 } // namespace AAFwk
 } // namespace OHOS
