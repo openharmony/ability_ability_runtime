@@ -9315,7 +9315,8 @@ bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequ
     auto callerPid = IPCSkeleton::GetCallingPid();
     AppExecFwk::RunningProcessInfo processInfo;
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
-    if (processInfo.isFocused || processInfo.isAbilityForegrounding) {
+    if (processInfo.isFocused || processInfo.isAbilityForegrounding ||
+        processInfo.state_ == AppExecFwk::AppProcessState::APP_STATE_FOREGROUND) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Caller app %{public}s is foreground", processInfo.processName_.c_str());
         return true;
     }
