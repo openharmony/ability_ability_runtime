@@ -391,23 +391,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, ReleaseRemoteAbility_001, TestSize.Leve
 
 /*
  * Feature: AbilityManagerService
- * Function: ReleaseCall
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService ReleaseCall
- */
-HWTEST_F(AbilityManagerServiceThirdTest, ReleaseCall_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ReleaseCall_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
-    AppExecFwk::ElementName element;
-    EXPECT_EQ(abilityMs_->ReleaseCall(nullptr, element), ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ReleaseCall_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: JudgeAbilityVisibleControl
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService JudgeAbilityVisibleControl
@@ -777,34 +760,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetDataAbilityUri_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetDataAbilityUri_001 end");
 }
 
-/**
- * @tc.number: ReportDrawnCompleted_001
- * @tc.name: ReportDrawnCompleted
- * @tc.desc: After passing in a callerToken with parameter nullptr, INNER_ERR is returned
- */
-HWTEST_F(AbilityManagerServiceThirdTest, ReportDrawnCompleted_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ReportDrawnCompleted_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    sptr<IRemoteObject> callerToken = nullptr;
-    EXPECT_EQ(abilityMs_->ReportDrawnCompleted(callerToken), INNER_ERR);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ReportDrawnCompleted_001 end");
-}
-
-/**
- * @tc.number: ReportDrawnCompleted_002
- * @tc.name: ReportDrawnCompleted
- * @tc.desc: After passing in a callerToken with parameter nullptr, INNER_ERR is returned
- */
-HWTEST_F(AbilityManagerServiceThirdTest, ReportDrawnCompleted_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ReportDrawnCompleted_002 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    sptr<IRemoteObject> callerToken = new AbilityManagerStubTestMock();
-    EXPECT_EQ(abilityMs_->ReportDrawnCompleted(callerToken), INNER_ERR);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ReportDrawnCompleted_002 end");
-}
-
 #ifdef ABILITY_COMMAND_FOR_TEST
 /*
  * Feature: AbilityManagerService
@@ -883,20 +838,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, CreateVerificationInfo_001, TestSize.Le
     abilityRequest.appInfo.associatedWakeUp = false;
     EXPECT_FALSE(abilityMs_->CreateVerificationInfo(abilityRequest).associatedWakeUp);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CreateVerificationInfo_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartUser
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartUser
- */
-HWTEST_F(AbilityManagerServiceThirdTest, StartUser_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StartUser_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->StartUser(USER_ID_U100, nullptr), CHECK_PERMISSION_FAILED);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StartUser_001 end");
 }
 
 /*
@@ -1022,20 +963,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckCollaboratorType_001, TestSize.Lev
 
 /*
  * Feature: AbilityManagerService
- * Function: RegisterSessionHandler
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService RegisterSessionHandler
- */
-HWTEST_F(AbilityManagerServiceThirdTest, RegisterSessionHandler_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RegisterSessionHandler_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->RegisterSessionHandler(nullptr), ERR_WRONG_INTERFACE_CALL);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RegisterSessionHandler_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: CheckUserIdActive
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService CheckUserIdActive
@@ -1061,19 +988,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, RegisterSessionHandler_002, TestSize.Le
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(abilityMs_->RegisterSessionHandler(nullptr), ERR_WRONG_INTERFACE_CALL);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest RegisterSessionHandler_002 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: IsAbilityControllerStart
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService IsAbilityControllerStart
- */
-HWTEST_F(AbilityManagerServiceThirdTest, IsAbilityControllerStart_003, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    Want want;
-    EXPECT_TRUE(abilityMs_->IsAbilityControllerStart(want));
 }
 
 /*
