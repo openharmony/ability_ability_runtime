@@ -135,7 +135,7 @@ bool CallContainer::CallRequestDone(const sptr<IRemoteObject> &callStub)
             }
         });
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call Request Done end.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "end");
     return true;
 }
 
