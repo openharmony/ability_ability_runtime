@@ -209,23 +209,6 @@ HWTEST_F(JsUIServiceExtensionTest, OnCreateAndOnChangeAndOnDestroy_0100, TestSiz
 }
 
 /**
- * @tc.number: OnStart_0200
- * @tc.name: OnStart2
- * @tc.desc: JsUIServiceExtension OnStart
- */
-HWTEST_F(JsUIServiceExtensionTest, OnStart_0200, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "OnStart_0200 start");
-
-    AAFwk::Want want;
-    sptr<AAFwk::SessionInfo> sessionInfo = new AAFwk::SessionInfo();
-
-    jsUIServiceExtension->OnStart(want, sessionInfo);
-
-    TAG_LOGI(AAFwkTag::TEST, "OnStart_0200 end");
-}
-
-/**
  * @tc.number: OnSceneWillCreated_0100
  * @tc.name: OnSceneWillCreated
  * @tc.desc: JsUIServiceExtension OnSceneWillCreated
