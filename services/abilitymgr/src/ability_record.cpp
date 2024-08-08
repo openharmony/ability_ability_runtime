@@ -370,7 +370,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     isWindowStarted_ = true;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "name:%{public}s", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundLifecycle: name:%{public}s", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
@@ -1183,7 +1183,7 @@ void AbilityRecord::SetColdStartFlag(bool isColdStart)
 void AbilityRecord::BackgroundAbility(const Closure &task)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "BackgroundLifecycle: ability:%{public}s", GetURI().c_str());
     if (lifecycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Move the ability to background fail, lifecycleDeal_ is null.");
         return;
