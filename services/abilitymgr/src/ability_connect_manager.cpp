@@ -187,11 +187,11 @@ int AbilityConnectManager::TerminateAbilityInner(const sptr<IRemoteObject> &toke
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Terminate ability, ability is %{public}s.", element.c_str());
     if (IsUIExtensionAbility(abilityRecord)) {
         if (!abilityRecord->IsConnectListEmpty()) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "There exist connection, don't terminate.");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "exist connection, don't terminate");
             return ERR_OK;
         } else if (abilityRecord->IsAbilityState(AbilityState::FOREGROUND) ||
             abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING)) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "current ability is active");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "current ability is active");
             DoBackgroundAbilityWindow(abilityRecord, abilityRecord->GetSessionInfo());
             MoveToTerminatingMap(abilityRecord);
             return ERR_OK;
@@ -203,7 +203,7 @@ int AbilityConnectManager::TerminateAbilityInner(const sptr<IRemoteObject> &toke
 
 int AbilityConnectManager::StopServiceAbility(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     std::lock_guard guard(serialMutex_);
     return StopServiceAbilityLocked(abilityRequest);
 }
@@ -627,7 +627,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     bool isCallbackConnected = !connectRecordList.empty();
     // 3. If this service ability and callback has been connected, There is no need to connect repeatedly
     if (isLoadedAbility && (isCallbackConnected) && IsAbilityConnected(targetService, connectRecordList)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Service and callback was connected.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Service/callback connected");
         return ERR_OK;
     }
 
@@ -664,7 +664,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
         targetService->SetWant(abilityRequest.want);
         HandleActiveAbility(targetService, connectRecord);
     } else {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Target service is activating, wait for callback");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "TargetService active");
         targetService->SaveConnectWant(abilityRequest.want);
     }
 
@@ -2909,7 +2909,7 @@ bool AbilityConnectManager::IsUIExtensionFocused(uint32_t uiExtensionTokenId, co
         auto sessionInfo = item.second.second;
         if (uiExtension && uiExtension->GetApplicationInfo().accessTokenId == uiExtensionTokenId) {
             if (uiExtensionAbilityRecordMgr_->IsFocused(uiExtension->GetUIExtensionAbilityId(), focusToken)) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "isFocused.");
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "Focused");
                 return true;
             }
             if (sessionInfo && sessionInfo->callerToken == focusToken) {
