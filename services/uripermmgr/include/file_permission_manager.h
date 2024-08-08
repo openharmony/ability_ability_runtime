@@ -20,11 +20,18 @@
 #include <string>
 #include <vector>
 #include "uri.h"
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 #include "sandbox_manager_kit.h"
+#include "policy_info.h"
+#else
+#include "upms_policy_info.h"
+#endif
 
 namespace OHOS {
 namespace AAFwk {
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 using namespace AccessControl::SandboxManager;
+#endif
 typedef enum OperationMode {
     READ_MODE = 1 << 0,
     WRITE_MODE = 1 << 1,
