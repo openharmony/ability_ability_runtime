@@ -4173,5 +4173,64 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetContentAndTypeId_005, TestSize.Level1
     int typeId;
     EXPECT_EQ(uiAbilityLifecycleManager->GetContentAndTypeId(msgId, msgContent, typeId), false);
 }
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckCallerFromBackground_0100
+ * @tc.desc: CheckCallerFromBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CheckCallerFromBackground_0100, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    sptr<SessionInfo> info = nullptr;
+    uiAbilityLifecycleManager->CheckCallerFromBackground(nullptr, info);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckCallerFromBackground_0200
+ * @tc.desc: CheckCallerFromBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CheckCallerFromBackground_0200, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    sptr<SessionInfo> info = nullptr;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    AbilityRequest abilityRequest;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->CheckCallerFromBackground(abilityRecord, info);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckCallerFromBackground_0300
+ * @tc.desc: CheckCallerFromBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CheckCallerFromBackground_0300, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    uiAbilityLifecycleManager->CheckCallerFromBackground(nullptr, sessionInfo);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CheckCallerFromBackground_0400
+ * @tc.desc: CheckCallerFromBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CheckCallerFromBackground_0400, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    AbilityRequest abilityRequest;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->CheckCallerFromBackground(abilityRecord, sessionInfo);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
