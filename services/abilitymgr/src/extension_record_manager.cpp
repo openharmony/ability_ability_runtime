@@ -606,7 +606,11 @@ int32_t ExtensionRecordManager::CreateExtensionRecord(const AAFwk::AbilityReques
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid extensionAbilityType");
         return ERR_INVALID_VALUE;
     }
-    int32_t result = factory->CreateRecord(abilityRequest, extensionRecord);
+    int32_t result = factory->PreCheck(abilityRequest, hostBundleName);
+    if (result != ERR_OK) {
+        return result;
+    }
+    result = factory->CreateRecord(abilityRequest, extensionRecord);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "createRecord error");
         return result;
