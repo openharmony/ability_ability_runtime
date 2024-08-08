@@ -89,7 +89,7 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
         resultIndex.emplace_back(i);
         persistPolicys.emplace_back(policyInfo);
     }
-    
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     std::vector<bool> persistResultCodes;
     int32_t ret = SandboxManagerKit::CheckPersistPolicy(callerTokenId, persistPolicys, persistResultCodes);
     if (ret == SANDBOX_MANAGER_OK && persistResultCodes.size() == resultIndex.size()) {
@@ -98,6 +98,7 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
             resultCodes[index] = persistResultCodes[i];
         }
     }
+#endif
     return resultCodes;
 }
 }
