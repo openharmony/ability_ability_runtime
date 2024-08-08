@@ -332,7 +332,7 @@ bool StartAbilityUtils::IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &c
     }
     AppExecFwk::AbilityInfo callerAbilityInfo;
     if (GetCallerAbilityInfo(callerToken, callerAbilityInfo)) {
-        return callerAbilityInfo.bundleName == AppUtils::GetInstance().GetShellAssistantBundleName();
+        return callerAbilityInfo.bundleName == AppUtils::GetInstance().GetBrokerDelegateBundleName();
     }
     return false;
 }
