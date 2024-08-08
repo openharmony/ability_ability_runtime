@@ -169,8 +169,8 @@ protected:
 private:
     static int ILLEGAL_REQUEST_CODE;
     std::map<int, RuntimeTask> resultCallbacks_;
-
-    int curRequestCode_ = 0;
+    static int32_t curRequestCode_;
+    static std::mutex requestCodeMutex_;
 #ifdef SUPPORT_SCREEN
     sptr<Rosen::Window> window_ = nullptr;
 #endif // SUPPORT_SCREEN

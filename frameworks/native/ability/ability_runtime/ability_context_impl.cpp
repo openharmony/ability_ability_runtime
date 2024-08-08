@@ -342,7 +342,7 @@ ErrCode AbilityContextImpl::BackToCallerAbilityWithResult(const AAFwk::Want& wan
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->BackToCallerAbilityWithResult(
         token_, resultCode, &want, requestCode);
-    TAG_LOGI(AAFwkTag::CONTEXT, "ret is %{public}d", err);
+    TAG_LOGI(AAFwkTag::CONTEXT, "ret:%{public}d", err);
     return static_cast<int32_t>(err);
 }
 
