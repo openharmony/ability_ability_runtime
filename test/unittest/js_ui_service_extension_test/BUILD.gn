@@ -44,7 +44,6 @@ ohos_unittest("js_ui_service_extension_test") {
     "${ability_runtime_native_path}/ability/native:ui_service_extension_connection",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${ability_runtime_native_path}/appkit:appkit_native",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -54,15 +53,12 @@ ohos_unittest("js_ui_service_extension_test") {
     "ability_base:want",
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
-    "napi:ace_napi",
     "samgr:samgr_proxy",
     "window_manager:libwsutils",
-    "window_manager:window_native_kit",
   ]
 }
 
