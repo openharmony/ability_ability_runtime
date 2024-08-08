@@ -1814,29 +1814,20 @@ std::shared_ptr<AbilityRecord> AbilityRecord::GetCallerByRequestCode(int32_t req
 {
     for (auto caller : GetCallerRecordList()) {
         if (caller == nullptr) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "caller is nullptr.");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "null caller");
             continue;
         }
         std::shared_ptr<AbilityRecord> callerAbilityRecord = caller->GetCaller();
-        if (callerAbilityRecord == nullptr) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "caller abilityRecord is nullptr.");
+        if (callerAbilityRecord == nullptr || callerAbilityRecord->GetPid() != pid) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbility not match");
             continue;
-        }
-        if (callerAbilityRecord->GetPid() != pid) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "pid not match: %{public}d, %{public}d",
-                callerAbilityRecord->GetPid(), pid);
-            continue;
-        }
-        auto recordList = caller->GetRequestCodeList();
-        for (auto code: recordList) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "callerRequestCode is %{public}d", code);
         }
         if (caller->IsHistoryRequestCode(requestCode)) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "requestcode is invalid");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "found callerAbility");
             return callerAbilityRecord;
         }
     }
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "Not found caller by requestCode and pid.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Can't found caller");
     return nullptr;
 }
 
@@ -2001,7 +1992,7 @@ void AbilityRecord::RemoveCallerRequestCode(std::shared_ptr<AbilityRecord> calle
     for (auto it = callerList_.begin(); it != callerList_.end(); it++) {
         if ((*it)->GetCaller() == callerAbilityRecord) {
             (*it)->RemoveHistoryRequestCode(requestCode);
-            if ((*it)->GetRequestCodeList().empty()) {
+            if ((*it)->GetRequestCodeSet().empty()) {
                 callerList_.erase(it);
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "remove a callerRecord.");
             }
@@ -2029,7 +2020,7 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
     auto record = std::find_if(callerList_.begin(), callerList_.end(), isExist);
     auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, abilityRecord);
     if (record != callerList_.end()) {
-        newCallerRecord->SetRequestCodeList((*record)->GetRequestCodeList());
+        newCallerRecord->SetRequestCodeSet((*record)->GetRequestCodeSet());
         callerList_.erase(record);
     }
     newCallerRecord->AddHistoryRequestCode(requestCode);

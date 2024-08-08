@@ -140,8 +140,8 @@ public:
      */
     std::shared_ptr<AbilityRecord> GetUIAbilityRecordBySessionInfo(const sptr<SessionInfo> &sessionInfo);
 
-    int BackToCallerAbilityWithResult(sptr<SessionInfo> currentSessionInfo,
-        std::shared_ptr<AbilityRecord> abilityRecord);
+    int32_t BackToCallerAbilityWithResult(std::shared_ptr<AbilityRecord> abilityRecord,
+        int resultCode, const Want *resultWant, int64_t callerRequestCode);
 
     /**
      * CloseUIAbility, close the special ability by scb.
@@ -446,6 +446,8 @@ private:
     void TerminateSession(std::shared_ptr<AbilityRecord> abilityRecord);
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
+    int32_t BackToCallerAbilityWithResultLocked(sptr<SessionInfo> currentSessionInfo,
+        std::shared_ptr<AbilityRecord> callerAbilityRecord);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
