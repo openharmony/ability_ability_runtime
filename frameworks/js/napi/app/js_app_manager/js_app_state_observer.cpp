@@ -18,6 +18,9 @@
 #include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 #include "js_app_manager_utils.h"
+#include "napi/native_api.h"
+#include "napi/native_node_api.h"
+#include "napi_common_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -36,19 +39,19 @@ void JSAppStateObserver::OnForegroundApplicationChanged(const AppStateData &appS
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([jsObserver, appStateData](napi_env env, NapiAsyncTask &task, int32_t status) {
-            sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
-            if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr");
-                return;
-            }
-            jsObserverSptr->HandleOnForegroundApplicationChanged(appStateData);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JSAppStateObserver::OnForegroundApplicationChanged",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto asyncTask = [jsObserver, appStateData, env = env_]() {
+        HandleScope handleScope(env);
+        sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
+        if (!jsObserverSptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr");
+            return;
+        }
+        jsObserverSptr->HandleOnForegroundApplicationChanged(appStateData);
+    };
+    napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to send event");
+    }
 }
 
 void JSAppStateObserver::HandleOnForegroundApplicationChanged(const AppStateData &appStateData)
@@ -71,19 +74,19 @@ void JSAppStateObserver::OnAbilityStateChanged(const AbilityStateData &abilitySt
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([jsObserver, abilityStateData](napi_env env, NapiAsyncTask &task, int32_t status) {
-            sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
-            if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
-                return;
-            }
-            jsObserverSptr->HandleOnAbilityStateChanged(abilityStateData);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JSAppStateObserver::OnAbilityStateChanged",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto asyncTask = [jsObserver, abilityStateData, env = env_]() {
+        HandleScope handleScope(env);
+        sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
+        if (!jsObserverSptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
+            return;
+        }
+        jsObserverSptr->HandleOnAbilityStateChanged(abilityStateData);
+    };
+    napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to send event");
+    }
 }
 
 void JSAppStateObserver::HandleOnAbilityStateChanged(const AbilityStateData &abilityStateData)
@@ -105,19 +108,19 @@ void JSAppStateObserver::OnExtensionStateChanged(const AbilityStateData &ability
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([jsObserver, abilityStateData](napi_env env, NapiAsyncTask &task, int32_t status) {
-            sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
-            if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr");
-                return;
-            }
-            jsObserverSptr->HandleOnExtensionStateChanged(abilityStateData);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JSAppStateObserver::OnExtensionStateChanged",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto asyncTask = [jsObserver, abilityStateData, env = env_]() {
+        HandleScope handleScope(env);
+        sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
+        if (!jsObserverSptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr");
+            return;
+        }
+        jsObserverSptr->HandleOnExtensionStateChanged(abilityStateData);
+    };
+    napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to send event");
+    }
 }
 
 void JSAppStateObserver::HandleOnExtensionStateChanged(const AbilityStateData &abilityStateData)
@@ -139,19 +142,19 @@ void JSAppStateObserver::OnProcessCreated(const ProcessData &processData)
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([jsObserver, processData](napi_env env, NapiAsyncTask &task, int32_t status) {
-            sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
-            if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
-                return;
-            }
-            jsObserverSptr->HandleOnProcessCreated(processData);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JSAppStateObserver::OnProcessCreated",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto asyncTask = [jsObserver, processData, env = env_]() {
+        HandleScope handleScope(env);
+        sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
+        if (!jsObserverSptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
+            return;
+        }
+        jsObserverSptr->HandleOnProcessCreated(processData);
+    };
+    napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to send event");
+    }
 }
 
 void JSAppStateObserver::HandleOnProcessCreated(const ProcessData &processData)
@@ -173,19 +176,19 @@ void JSAppStateObserver::OnProcessStateChanged(const ProcessData &processData)
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([jsObserver, processData](napi_env env, NapiAsyncTask &task, int32_t status) {
-            sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
-            if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr");
-                return;
-            }
-            jsObserverSptr->HandleOnProcessStateChanged(processData);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JSAppStateObserver::OnProcessStateChanged",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto asyncTask = [jsObserver, processData, env = env_]() {
+        HandleScope handleScope(env);
+        sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
+        if (!jsObserverSptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr");
+            return;
+        }
+        jsObserverSptr->HandleOnProcessStateChanged(processData);
+    };
+    napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to send event");
+    }
 }
 
 void JSAppStateObserver::HandleOnProcessStateChanged(const ProcessData &processData)
@@ -207,19 +210,19 @@ void JSAppStateObserver::OnProcessDied(const ProcessData &processData)
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([jsObserver, processData](napi_env env, NapiAsyncTask &task, int32_t status) {
-            sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
-            if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
-                return;
-            }
-            jsObserverSptr->HandleOnProcessDied(processData);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JSAppStateObserver::OnProcessCreated",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto asyncTask = [jsObserver, processData, env = env_]() {
+        HandleScope handleScope(env);
+        sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
+        if (!jsObserverSptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
+            return;
+        }
+        jsObserverSptr->HandleOnProcessDied(processData);
+    };
+    napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to send event");
+    }
 }
 
 void JSAppStateObserver::HandleOnProcessDied(const ProcessData &processData)
@@ -242,19 +245,19 @@ void JSAppStateObserver::OnAppStarted(const AppStateData &appStateData)
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([jsObserver, appStateData](napi_env env, NapiAsyncTask &task, int32_t status) {
-            sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
-            if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
-                return;
-            }
-            jsObserverSptr->HandleOnAppStarted(appStateData);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JSAppStateObserver::OnAppStarted",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto asyncTask = [jsObserver, appStateData, env = env_]() {
+        HandleScope handleScope(env);
+        sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
+        if (!jsObserverSptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
+            return;
+        }
+        jsObserverSptr->HandleOnAppStarted(appStateData);
+    };
+    napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to send event");
+    }
 }
 
 void JSAppStateObserver::HandleOnAppStarted(const AppStateData &appStateData)
@@ -282,19 +285,19 @@ void JSAppStateObserver::OnAppStopped(const AppStateData &appStateData)
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([jsObserver, appStateData](napi_env env, NapiAsyncTask &task, int32_t status) {
-            sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
-            if (!jsObserverSptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
-                return;
-            }
-            jsObserverSptr->HandleOnAppStopped(appStateData);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JSAppStateObserver::OnAppStopped",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    auto asyncTask = [jsObserver, appStateData, env = env_]() {
+        HandleScope handleScope(env);
+        sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
+        if (!jsObserverSptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
+            return;
+        }
+        jsObserverSptr->HandleOnAppStopped(appStateData);
+    };
+    napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    if (ret != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to send event");
+    }
 }
 
 void JSAppStateObserver::HandleOnAppStopped(const AppStateData &appStateData)
