@@ -58,7 +58,7 @@ constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN = "/system/etc/start_abi
 constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_PATH =
     "/etc/ability_runtime/start_ability_without_caller_token.json";
 constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_TITLE = "startAbilityWithoutCallerToken";
-constexpr const char* SHELL_ASSISTANT_BUNDLE_NAME = "const.sys.abilityms.shell_assistant_bundle_name";
+constexpr const char* BROKER_DELEGATE_BUNDLE_NAME = "const.sys.abilityms.broker_delegate_bundle_name";
 constexpr const char* COLLABORATOR_BROKER_UID = "const.sys.abilityms.collaborator_broker_uid";
 constexpr const char* COLLABORATOR_BROKER_RESERVE_UID = "const.sys.abilityms.collaborator_broker_reserve_uid";
 }
@@ -360,14 +360,14 @@ void AppUtils::LoadStartAbilityWithoutCallerToken()
     }
 }
 
-std::string AppUtils::GetShellAssistantBundleName()
+std::string AppUtils::GetBrokerDelegateBundleName()
 {
-    if (!shellAssistantBundleName_.isLoaded) {
-        shellAssistantBundleName_.value = system::GetParameter(SHELL_ASSISTANT_BUNDLE_NAME, "");
-        shellAssistantBundleName_.isLoaded = true;
+    if (!brokerDelegateBundleName_.isLoaded) {
+        brokerDelegateBundleName_.value = system::GetParameter(BROKER_DELEGATE_BUNDLE_NAME, "");
+        brokerDelegateBundleName_.isLoaded = true;
     }
-    TAG_LOGD(AAFwkTag::DEFAULT, "shellAssistantBundleName_ is %{public}s", shellAssistantBundleName_.value.c_str());
-    return shellAssistantBundleName_.value;
+    TAG_LOGD(AAFwkTag::DEFAULT, "shellAssistantBundleName_ is %{public}s", brokerDelegateBundleName_.value.c_str());
+    return brokerDelegateBundleName_.value;
 }
 
 int32_t AppUtils::GetCollaboratorBrokerUID()
