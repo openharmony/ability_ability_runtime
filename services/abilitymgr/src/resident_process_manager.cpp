@@ -249,7 +249,7 @@ void ResidentProcessManager::OnAppStateChanged(const AppInfo &info)
     bool localEnable = false;
     auto rdbResult = AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleName, localEnable);
     if (rdbResult != Rdb_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to obtain resident process properties. result: %{public}d", rdbResult);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetResidentProcessEnable failed: %{public}d", rdbResult);
         return;
     }
 
