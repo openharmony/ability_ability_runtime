@@ -3446,8 +3446,12 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAppFault_001, TestSize.Level1)
 HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::shared_ptr<AppMgrServiceInner> appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
+    std::shared_ptr<TaskHandlerWrap> taskHandler =
+        AAFwk::TaskHandlerWrap::CreateQueueHandler("app_mgr_task_queue");
+    appMgrServiceInner->SetTaskHandler(taskHandler);
+
     int32_t pid = 0;
     int32_t uid = 0;
     std::string bundleName = "test_processName";
@@ -3455,6 +3459,7 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     faultData.errorObject.name = "1234";
     faultData.faultType = FaultDataType::APP_FREEZE;
     appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, faultData);
+    taskHandler.reset();
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 end");
 }
 
