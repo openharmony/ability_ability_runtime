@@ -6218,9 +6218,6 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, const bool
         return KILL_PROCESS_FAILED;
     }
 
-    auto connectMgr = GetConnectManagerByUserId(userId);
-    CHECK_POINTER_AND_RETURN(connectMgr, ERR_NO_INIT);
-    connectMgr->DeleteInvalidServiceRecord(bundleName);
     return ERR_OK;
 }
 
