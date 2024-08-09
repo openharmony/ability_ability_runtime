@@ -497,7 +497,7 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
             TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
             return false;
         }
-        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+        sptr<Rosen::WindowOption> option = new (std::nothrow) Rosen::WindowOption();
         if (option == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
             return false;

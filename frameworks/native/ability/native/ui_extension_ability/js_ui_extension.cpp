@@ -360,7 +360,6 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(data);
     if (callbackInfo == nullptr) {
         TAG_LOGD(AAFwkTag::UI_EXT, "Invalid input info");
-        data = nullptr;
         return nullptr;
     }
     callbackInfo->Call();
