@@ -47,6 +47,7 @@ ohos_fuzztest("ScreenUnlockInterceptorFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/screen_unlock_interceptor.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "screenunlockinterceptor_fuzzer.cpp",
   ]
 
