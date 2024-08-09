@@ -42,7 +42,7 @@ void ExtensionImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
     TAG_LOGD(AAFwkTag::EXT, "call");
     if ((token == nullptr) || (application == nullptr) || (handler == nullptr) || (record == nullptr) ||
         extension == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::init failed, some object is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "init failed, some obj null");
         return;
     }
 
@@ -66,17 +66,17 @@ void ExtensionImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
 void ExtensionImpl::PrintTokenInfo() const
 {
     if (token_ == nullptr) {
-        TAG_LOGI(AAFwkTag::EXT, "com.ohos.callui.ServiceAbility token is null");
+        TAG_LOGI(AAFwkTag::EXT, "null token");
         return;
     }
     if (!token_->IsProxyObject()) {
-        TAG_LOGI(AAFwkTag::EXT, "com.ohos.callui.ServiceAbility token is not proxy");
+        TAG_LOGI(AAFwkTag::EXT, "token not proxy");
         return;
     }
     IPCObjectProxy *tokenProxyObject = reinterpret_cast<IPCObjectProxy *>(token_.GetRefPtr());
     if (tokenProxyObject != nullptr) {
         std::string remoteDescriptor = Str16ToStr8(tokenProxyObject->GetInterfaceDescriptor());
-        TAG_LOGI(AAFwkTag::EXT, "com.ohos.callui.ServiceAbility handle: %{public}d, descriptor: %{public}s",
+        TAG_LOGI(AAFwkTag::EXT, "handle: %{public}d, descriptor: %{public}s",
             tokenProxyObject->GetHandle(), remoteDescriptor.c_str());
     }
 }
@@ -96,7 +96,7 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
     TAG_LOGI(AAFwkTag::EXT, "sourceState:%{public}d;targetState:%{public}d;isNewWant:%{public}d",
         lifecycleState_, targetState.state, targetState.isNewWant);
     if (lifecycleState_ == targetState.state) {
-        TAG_LOGE(AAFwkTag::EXT, "Org lifeCycleState equals to Dst lifeCycleState.");
+        TAG_LOGE(AAFwkTag::EXT, "lifecycle state equal");
         return;
     }
     SetLaunchParam(targetState.launchParam);
@@ -131,7 +131,7 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
         }
         default: {
             ret = false;
-            TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::HandleExtensionTransaction state is error");
+            TAG_LOGE(AAFwkTag::EXT, "error state");
             break;
         }
     }
@@ -152,7 +152,7 @@ void ExtensionImpl::ScheduleUpdateConfiguration(const AppExecFwk::Configuration 
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::ScheduleUpdateConfiguration extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
 
@@ -163,7 +163,7 @@ void ExtensionImpl::NotifyMemoryLevel(int level)
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::NotifyMemoryLevel extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
 
@@ -184,7 +184,7 @@ void ExtensionImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::Start extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
 
@@ -207,7 +207,7 @@ void ExtensionImpl::Stop()
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::Stop extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
 
@@ -221,7 +221,7 @@ void ExtensionImpl::Stop(bool &isAsyncCallback, const Want &want, sptr<AAFwk::Se
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::Stop extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         isAsyncCallback = false;
         return;
     }
@@ -241,7 +241,7 @@ void ExtensionImpl::Stop(bool &isAsyncCallback, const Want &want, sptr<AAFwk::Se
     auto asyncCallback = [ExtensionImplWeakPtr = weakPtr, state = AAFwk::ABILITY_STATE_INITIAL]() {
         auto extensionImpl = ExtensionImplWeakPtr.lock();
         if (extensionImpl == nullptr) {
-            TAG_LOGE(AAFwkTag::EXT, "extensionImpl is nullptr.");
+            TAG_LOGE(AAFwkTag::EXT, "null extensionImpl");
             return;
         }
         extensionImpl->lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
@@ -275,7 +275,7 @@ sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want)
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::ConnectAbility extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return nullptr;
     }
 
@@ -291,7 +291,7 @@ sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want, bool &isAs
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::ConnectAbility extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         isAsyncCallback = false;
         return nullptr;
     }
@@ -310,7 +310,7 @@ sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want, bool &isAs
     auto asyncCallback = [extensionImplWeakPtr = weakPtr](sptr<IRemoteObject> &service) {
         auto extensionImpl = extensionImplWeakPtr.lock();
         if (extensionImpl == nullptr) {
-            TAG_LOGE(AAFwkTag::EXT, "extensionImpl is nullptr.");
+            TAG_LOGE(AAFwkTag::EXT, "null extensionImpl");
             return;
         }
         extensionImpl->lifecycleState_ = AAFwk::ABILITY_STATE_ACTIVE;
@@ -332,7 +332,7 @@ void ExtensionImpl::ConnectExtensionCallback(sptr<IRemoteObject> &service)
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->ScheduleConnectAbilityDone(token_, service);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::EXT, "failed err = %{public}d", err);
+        TAG_LOGE(AAFwkTag::EXT, "err: %{public}d", err);
     }
 }
 
@@ -345,7 +345,7 @@ void ExtensionImpl::DisconnectExtension(const Want &want)
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
 
@@ -357,7 +357,7 @@ void ExtensionImpl::DisconnectExtension(const Want &want, bool &isAsyncCallback)
 {
     TAG_LOGD(AAFwkTag::EXT, "called");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "Failed to disconnect, extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         isAsyncCallback = false;
         return;
     }
@@ -372,7 +372,7 @@ void ExtensionImpl::DisconnectExtension(const Want &want, bool &isAsyncCallback)
     auto asyncCallback = [extensionImplWeakPtr = weakPtr]() {
         auto extensionImpl = extensionImplWeakPtr.lock();
         if (extensionImpl == nullptr) {
-            TAG_LOGE(AAFwkTag::EXT, "extensionImpl is nullptr.");
+            TAG_LOGE(AAFwkTag::EXT, "null extensionImpl");
             return;
         }
         extensionImpl->DisconnectExtensionCallback();
@@ -391,7 +391,7 @@ void ExtensionImpl::DisconnectExtensionCallback()
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->ScheduleDisconnectAbilityDone(token_);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::EXT, "failed err = %{public}d", err);
+        TAG_LOGE(AAFwkTag::EXT, "err: %{public}d", err);
     }
 }
 
@@ -411,7 +411,7 @@ void ExtensionImpl::CommandExtension(const Want &want, bool restart, int startId
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::CommandAbility extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
     if (!AppExecFwk::InsightIntentExecuteParam::IsInsightIntentExecute(want) || !skipCommandExtensionWithIntent_) {
@@ -426,12 +426,12 @@ bool ExtensionImpl::HandleInsightIntent(const Want &want)
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::HandleInsightIntent extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return false;
     }
     auto ret = extension_->HandleInsightIntent(want);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::extension HandleInsightIntent failed");
+        TAG_LOGE(AAFwkTag::EXT, "handle failed");
         return false;
     }
     TAG_LOGD(AAFwkTag::EXT, "ok");
@@ -443,7 +443,7 @@ void ExtensionImpl::CommandExtensionWindow(const Want &want, const sptr<AAFwk::S
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (extension_ == nullptr || sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "extension_ or sessionInfo is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_ or sessionInfo");
         return;
     }
 
@@ -455,21 +455,21 @@ void ExtensionImpl::CommandExtensionWindow(const Want &want, const sptr<AAFwk::S
 
 void ExtensionImpl::SendResult(int requestCode, int resultCode, const Want &resultData)
 {
-    TAG_LOGD(AAFwkTag::EXT, "begin.");
+    TAG_LOGD(AAFwkTag::EXT, "begin");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
 
     extension_->OnAbilityResult(requestCode, resultCode, resultData);
-    TAG_LOGD(AAFwkTag::EXT, "end.");
+    TAG_LOGD(AAFwkTag::EXT, "end");
 }
 
 void ExtensionImpl::SetLaunchParam(const AAFwk::LaunchParam &launchParam)
 {
     TAG_LOGD(AAFwkTag::EXT, "called");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "Extension is nullptr.");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
 
@@ -479,9 +479,9 @@ void ExtensionImpl::SetLaunchParam(const AAFwk::LaunchParam &launchParam)
 void ExtensionImpl::Foreground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::EXT, "ExtensionImpl::Foreground begin");
+    TAG_LOGD(AAFwkTag::EXT, "begin");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::Foreground ability is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension");
         return;
     }
 
@@ -492,9 +492,9 @@ void ExtensionImpl::Foreground(const Want &want, sptr<AAFwk::SessionInfo> sessio
 void ExtensionImpl::Background(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::EXT, "ExtensionImpl::Background begin");
+    TAG_LOGD(AAFwkTag::EXT, "begin");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::Background ability is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
 
