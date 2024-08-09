@@ -136,7 +136,7 @@ ErrCode UIServiceExtensionContext::DisConnectServiceExtensionAbility(const AAFwk
         ErrCode ret =
             ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::UISERVC_EXT, "%{public}s end DisconnectAbility error, ret=%{public}d", __func__, ret);
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "DisconnectAbility error, ret=%{public}d", ret);
         }
         TAG_LOGI(AAFwkTag::UISERVC_EXT, "end");
         return ret;
