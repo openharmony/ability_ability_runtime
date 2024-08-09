@@ -27,12 +27,21 @@
 #include "ability_handler.h"
 #include "ohos_application.h"
 #include "runtime.h"
+#include "ui_service_extension_connection_constants.h"
+#include "ui_service_host_stub.h"
 
 using namespace testing::ext;
 
-
 namespace OHOS {
 namespace AbilityRuntime {
+
+class ServiceHostStubImpl : public AAFwk::UIServiceHostStub {
+public:
+    virtual int32_t SendData(OHOS::AAFwk::WantParams &data)
+    {
+        return 0;
+    }
+};
 
 class JsUIServiceExtensionTest : public testing::Test {
 public:
@@ -42,7 +51,7 @@ public:
     void TearDown() override;
 
     std::unique_ptr<Runtime> runtime;
-    JsUIServiceExtension* jsUIServiceExtension;
+    std::shared_ptr<JsUIServiceExtension> jsUIServiceExtension;
 };
 
 void JsUIServiceExtensionTest::SetUpTestCase()
@@ -55,7 +64,7 @@ void JsUIServiceExtensionTest::SetUp()
 {
     Runtime::Options options;
     runtime = Runtime::Create(options);
-    jsUIServiceExtension = JsUIServiceExtension::Create(runtime);
+    jsUIServiceExtension.reset(JsUIServiceExtension::Create(runtime));
 
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     info->name = "JsUIServiceExtensionTest";
@@ -256,6 +265,103 @@ HWTEST_F(JsUIServiceExtensionTest, OnSceneDidCreated_0100, TestSize.Level1)
     jsUIServiceExtension->OnSceneDidCreated(window);
 
     TAG_LOGI(AAFwkTag::TEST, "OnSceneDidCreated_0100 end");
+}
+
+/**
+ * @tc.number: OnConnect_0100
+ * @tc.name: OnConnect
+ * @tc.desc: JsUIServiceExtension OnConnect
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnConnect_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnConnect_0100 start");
+    sptr<ServiceHostStubImpl> stub = sptr<ServiceHostStubImpl>::MakeSptr();
+    AAFwk::Want want;
+    want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
+    bool isAsyncCallback = false;
+    auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
+    EXPECT_NE(result, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "OnConnect_0100 end");
+}
+
+/**
+ * @tc.number: OnConnect_0200
+ * @tc.name: OnConnect
+ * @tc.desc: JsUIServiceExtension OnConnect
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnConnect_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnConnect_0200 start");
+    sptr<ServiceHostStubImpl> stub = sptr<ServiceHostStubImpl>::MakeSptr();
+    AAFwk::Want want;
+    bool isAsyncCallback = false;
+    auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
+    EXPECT_EQ(result, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "OnConnect_0200 end");
+}
+
+/**
+ * @tc.number: OnConnect_0300
+ * @tc.name: OnConnect
+ * @tc.desc: JsUIServiceExtension OnConnect
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnConnect_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnConnect_0300 start");
+    sptr<ServiceHostStubImpl> stub = sptr<ServiceHostStubImpl>::MakeSptr();
+    AAFwk::Want want;
+    want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
+    bool isAsyncCallback = false;
+    auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
+    EXPECT_NE(result, nullptr);
+    result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
+    EXPECT_NE(result, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "OnConnect_0300 end");
+}
+
+/**
+ * @tc.number: OnDisconnect_0100
+ * @tc.name: OnDisconnect
+ * @tc.desc: JsUIServiceExtension OnDisconnect
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnDisconnect_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnDisconnect_0100 start");
+    sptr<ServiceHostStubImpl> stub = sptr<ServiceHostStubImpl>::MakeSptr();
+    AAFwk::Want want;
+    want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
+    bool isAsyncCallback = false;
+
+    jsUIServiceExtension->OnDisconnect(want, nullptr, isAsyncCallback);
+
+    auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
+    EXPECT_NE(result, nullptr);
+
+    jsUIServiceExtension->OnDisconnect(want, nullptr, isAsyncCallback);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnDisconnect_0100 end");
+}
+
+/**
+ * @tc.number: HandleSendData_0100
+ * @tc.name: HandleSendData
+ * @tc.desc: JsUIServiceExtension HandleSendData
+ */
+HWTEST_F(JsUIServiceExtensionTest, HandleSendData_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleSendData_0100 start");
+    sptr<ServiceHostStubImpl> stub = sptr<ServiceHostStubImpl>::MakeSptr();
+    AAFwk::Want want;
+    want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
+    bool isAsyncCallback = false;
+
+    auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
+    EXPECT_NE(result, nullptr);
+
+    AAFwk::WantParams params;
+    jsUIServiceExtension->HandleSendData(stub->AsObject(), params);
+
+    TAG_LOGI(AAFwkTag::TEST, "HandleSendData_0100 end");
 }
 
 /**
