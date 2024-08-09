@@ -2314,7 +2314,8 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
     }
 
     if (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::DATASHARE ||
-        abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
+        abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         result = CheckCallServiceExtensionPermission(abilityRequest);
         if (result != ERR_OK) {
             return result;
@@ -2509,7 +2510,8 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
-    if (extensionType == AppExecFwk::ExtensionAbilityType::VPN) {
+    if (extensionType == AppExecFwk::ExtensionAbilityType::VPN ||
+        extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         return StartExtensionAbilityInner(want, callerToken, userId, extensionType, false);
     }
     return StartExtensionAbilityInner(want, callerToken, userId, extensionType, true);
@@ -9101,7 +9103,8 @@ int AbilityManagerService::CheckCallServicePermission(const AbilityRequest &abil
         auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionType is %{public}d.", static_cast<int>(extensionType));
         if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE ||
-            extensionType == AppExecFwk::ExtensionAbilityType::DATASHARE) {
+            extensionType == AppExecFwk::ExtensionAbilityType::DATASHARE ||
+            extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
             return CheckCallServiceExtensionPermission(abilityRequest);
         } else {
             return CheckCallOtherExtensionPermission(abilityRequest);
@@ -9191,6 +9194,19 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
         }
     }
 
+    if (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "background startup UI_SERVICE");
+        verificationInfo.isBackgroundCall = true;
+        std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+        if (callerAbility) {
+            verificationInfo.apiTargetVersion = callerAbility->GetApplicationInfo().apiTargetVersion;
+        }
+        if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "not background startup UI_SERVICE");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension or DataShareExtension");
@@ -9237,8 +9253,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
         return CheckUIExtensionPermission(abilityRequest);
     }
-    if (extensionType == AppExecFwk::ExtensionAbilityType::VPN ||
-        extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+    if (extensionType == AppExecFwk::ExtensionAbilityType::VPN) {
         return ERR_OK;
     }
 
@@ -11797,24 +11812,21 @@ void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &ability
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         return;
     }
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
-    sessionInfo->callerToken = abilityRequest.callerToken;
+
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if(callerAbilityRecord != nullptr) {
         sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();
         if (callerSessionInfo != nullptr) {
-            sessionInfo->hostWindowId = callerSessionInfo->persistentId;
+            if (callerAbilityRecord->GetAbilityInfo().type == AbilityType::PAGE) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "UIAbility Caller");
+                abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, callerSessionInfo->persistentId);
+            } else {
+                abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
+            }
         }
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbilityRecord is nullptr");
     }
-    if (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, static_cast<int32_t>(sessionInfo->hostWindowId));
-    }
-    sessionInfo->want = abilityRequest.want;
-    sessionInfo->callingTokenId = static_cast<uint32_t>(abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
-    IPCSkeleton::GetCallingTokenID()));
-    abilityRequest.sessionInfo = sessionInfo;
 }
 
 int32_t AbilityManagerService::TerminateMission(int32_t missionId)
