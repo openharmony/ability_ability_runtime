@@ -236,11 +236,16 @@ private:
         return result;
     }
 
-        bool CheckConnectionParam(napi_env env, napi_value value,
+    bool CheckConnectionParam(napi_env env, napi_value value,
         sptr<JSUIServiceExtensionConnection>& connection, AAFwk::Want& want, int32_t accountId = -1) const
     {
         if (!CheckTypeForNapiValue(env, value, napi_object)) {
             TAG_LOGE(AAFwkTag::UISERVC_EXT, "Failed to get connection object");
+            return false;
+        }
+
+        if (connection == nullptr) {
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "connection is null");
             return false;
         }
         connection->SetJsConnectionObject(value);
