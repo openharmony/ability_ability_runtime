@@ -65,13 +65,13 @@ void RemoveConnection(int64_t connectId)
         return connectId == obj.first.id;
     });
     if (item != g_connects.end()) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "conn ability to be removed exists");
+        TAG_LOGD(AAFwkTag::UI_EXT, "conn ability exists");
         if (item->second) {
             item->second->RemoveConnectionObject();
         }
         g_connects.erase(item);
     } else {
-        TAG_LOGD(AAFwkTag::UI_EXT, "conn ability to be removed not exists");
+        TAG_LOGD(AAFwkTag::UI_EXT, "conn ability not exists");
     }
 }
 
@@ -543,12 +543,13 @@ napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo
         return CreateJsUndefined(env);
     }
     // Unwrap want and connection
-    AAFwk::Want want;
-    sptr<JSUIExtensionConnection> connection = new JSUIExtensionConnection(env);
+    sptr<JSUIExtensionConnection> connection = new (std::nothrow) JSUIExtensionConnection(env);
     if (connection == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "make conn failed");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
+    AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, info.argv[0], want) ||
         !CheckConnectionParam(env, info.argv[1], connection, want)) {
         ThrowInvalidParamError(env,
