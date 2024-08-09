@@ -188,9 +188,8 @@ void ExtensionImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
         return;
     }
 
-    TAG_LOGD(AAFwkTag::EXT, "called");
-    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW ||
-        extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+    TAG_LOGD(AAFwkTag::EXT, "ExtensionImpl::Start");
+    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW) {
         extension_->OnStart(want, sessionInfo);
     } else {
         extension_->OnStart(want);
