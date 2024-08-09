@@ -15,69 +15,50 @@
 #include "reverse_continuation_scheduler_replica_stub.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-ReverseContinuationSchedulerReplicaStub::ReverseContinuationSchedulerReplicaStub()
-{
-    continuationFuncMap_[static_cast<uint32_t>(IReverseContinuationSchedulerReplica::Message::PASS_PRIMARY)] =
-        &ReverseContinuationSchedulerReplicaStub::PassPrimaryInner;
-    continuationFuncMap_[static_cast<uint32_t>(IReverseContinuationSchedulerReplica::Message::REVERSE_CONTINUATION)] =
-        &ReverseContinuationSchedulerReplicaStub::ReverseContinuationInner;
-    continuationFuncMap_[static_cast<uint32_t>(IReverseContinuationSchedulerReplica::Message::NOTIFY_REVERSE_RESULT)] =
-        &ReverseContinuationSchedulerReplicaStub::NotifyReverseResultInner;
-}
-ReverseContinuationSchedulerReplicaStub::~ReverseContinuationSchedulerReplicaStub()
-{
-    continuationFuncMap_.clear();
-}
+ReverseContinuationSchedulerReplicaStub::ReverseContinuationSchedulerReplicaStub() {}
+
+ReverseContinuationSchedulerReplicaStub::~ReverseContinuationSchedulerReplicaStub() {}
+
 int32_t ReverseContinuationSchedulerReplicaStub::PassPrimaryInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
     sptr<IRemoteObject> primary = nullptr;
     if (data.ReadBool()) {
         primary = data.ReadRemoteObject();
     }
     PassPrimary(primary);
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     return NO_ERROR;
 }
 int32_t ReverseContinuationSchedulerReplicaStub::ReverseContinuationInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
     ReverseContinuation();
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     return NO_ERROR;
 }
 int32_t ReverseContinuationSchedulerReplicaStub::NotifyReverseResultInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
     int reverseResult = data.ReadInt32();
     NotifyReverseResult(reverseResult);
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     return NO_ERROR;
 }
 
 int ReverseContinuationSchedulerReplicaStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION,
-        "%{public}s called begin, code = %{public}u, flags= %{public}d.", __func__, code, option.GetFlags());
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (remoteDescriptor != ReverseContinuationSchedulerReplicaStub::GetDescriptor()) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ReverseContinuationSchedulerReplicaStub::OnRemoteRequest token is invalid");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "token is invalid");
         return ERR_INVALID_STATE;
     }
-
-    auto itFunc = continuationFuncMap_.find(code);
-    if (itFunc != continuationFuncMap_.end()) {
-        auto continuationFunc = itFunc->second;
-        if (continuationFunc != nullptr) {
-            return (this->*continuationFunc)(data, reply);
-        }
+    switch (code) {
+        case static_cast<uint32_t>(IReverseContinuationSchedulerReplica::Message::PASS_PRIMARY):
+            return PassPrimaryInner(data, reply);
+        case static_cast<uint32_t>(IReverseContinuationSchedulerReplica::Message::REVERSE_CONTINUATION):
+            return ReverseContinuationInner(data, reply);
+        case static_cast<uint32_t>(IReverseContinuationSchedulerReplica::Message::NOTIFY_REVERSE_RESULT):
+            return NotifyReverseResultInner(data, reply);
     }
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 }  // namespace AppExecFwk

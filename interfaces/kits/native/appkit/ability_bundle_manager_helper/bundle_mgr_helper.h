@@ -28,6 +28,7 @@ class BundleMgrHelper : public std::enable_shared_from_this<BundleMgrHelper> {
 public:
     DISALLOW_COPY_AND_MOVE(BundleMgrHelper);
     ErrCode GetNameForUid(const int32_t uid, std::string &name);
+    ErrCode GetNameAndIndexForUid(const int32_t uid, std::string &bundleName, int32_t &appIndex);
     bool GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId);
     ErrCode InstallSandboxApp(const std::string &bundleName, int32_t dlpType, int32_t userId, int32_t &appIndex);
     ErrCode UninstallSandboxApp(const std::string &bundleName, int32_t appIndex, int32_t userId);
@@ -99,6 +100,7 @@ public:
         BundleInfo &bundleInfo, int32_t userId);
     ErrCode QueryCloneExtensionAbilityInfoWithAppIndex(const ElementName &element, int32_t flags, int32_t appCloneIndex,
         ExtensionAbilityInfo &extensionInfo, int32_t userId);
+    ErrCode GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes, int32_t userId);
 
 private:
     sptr<IBundleMgr> Connect();

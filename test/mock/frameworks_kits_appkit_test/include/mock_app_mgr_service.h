@@ -22,7 +22,6 @@
 #include "app_scheduler_interface.h"
 #include "app_mgr_stub.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "app_malloc_info.h"
 #include "app_jsheap_mem_info.h"
 
@@ -84,9 +83,9 @@ public:
     MOCK_METHOD1(RegisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
     MOCK_METHOD1(UnregisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
     MOCK_METHOD2(UpdateRenderState, int32_t(pid_t renderPid, int32_t state));
-    MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupported));
     MOCK_METHOD2(GetRunningMultiAppInfoByBundleName, int32_t(const std::string &bundleName,
         RunningMultiAppInfo &info));
+    MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupported));
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
 
@@ -129,6 +128,8 @@ public:
     MOCK_METHOD2(UpdateApplicationInfoInstalled, int(const std::string&, const int uid));
 
     MOCK_METHOD2(KillApplication, int(const std::string& appName, const bool clearPageStack));
+    MOCK_METHOD3(ForceKillApplication, int(const std::string& appName, const int userId, const int appIndex));
+    MOCK_METHOD1(KillProcessesByAccessTokenId, int32_t(const uint32_t accessTokenId));
     MOCK_METHOD2(KillApplicationByUid, int(const std::string&, const int uid));
     MOCK_METHOD0(IsFinalAppProcess, bool());
 

@@ -320,7 +320,7 @@ napi_value JsApplication::CreateJsContext(napi_env env, const std::shared_ptr<Co
 
 napi_value ApplicationInit(napi_env env, napi_value exportObj)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "Called");
     if (env == nullptr || exportObj == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Env or exportObj is nullptr.");
         return nullptr;

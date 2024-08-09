@@ -16,7 +16,6 @@
 #include "extension_context.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -25,7 +24,7 @@ const size_t ExtensionContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("Exten
 void ExtensionContext::SetAbilityInfo(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> &abilityInfo)
 {
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ExtensionContext::SetAbilityInfo Info == nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityInfo == nullptr");
         return;
     }
     abilityInfo_ = abilityInfo;

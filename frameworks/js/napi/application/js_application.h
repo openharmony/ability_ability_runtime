@@ -46,7 +46,7 @@ private:
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo &info);
 };
 
-    napi_value ApplicationInit(napi_env env, napi_value exportObj);
+napi_value ApplicationInit(napi_env env, napi_value exportObj);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif //OHOS_ABILITY_RUNTIME_JS_APPLICATION_H

@@ -14,14 +14,8 @@
  */
 #include "free_install_observer_manager.h"
 
-#include <chrono>
-
-#include "ability_event_handler.h"
 #include "ability_manager_service.h"
-#include "ability_manager_errors.h"
 #include "ability_util.h"
-#include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -31,20 +25,15 @@ FreeInstallObserverManager::FreeInstallObserverManager()
 FreeInstallObserverManager::~FreeInstallObserverManager()
 {}
 
-int32_t FreeInstallObserverManager::AddObserver(const sptr<IFreeInstallObserver> &observer)
+int32_t FreeInstallObserverManager::AddObserver(int32_t recordId, const sptr<IFreeInstallObserver> &observer)
 {
-    TAG_LOGD(AAFwkTag::FREE_INSTALL, "AddObserver begin.");
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "begin");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "the observer is nullptr.");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "observer is nullptr");
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<ffrt::mutex> lock(observerLock_);
-    if (ObserverExistLocked(observer)) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "Observer exist.");
-        return ERR_INVALID_VALUE;
-    }
-    observerList_.emplace_back(observer);
-    TAG_LOGD(AAFwkTag::FREE_INSTALL, "observerList_ size:%{public}zu", observerList_.size());
+    observerMap_[recordId] = observer;
 
     if (!deathRecipient_) {
         std::weak_ptr<FreeInstallObserverManager> thisWeakPtr(shared_from_this());
@@ -60,7 +49,7 @@ int32_t FreeInstallObserverManager::AddObserver(const sptr<IFreeInstallObserver>
     
     auto observerObj = observer->AsObject();
     if (!observerObj || !observerObj->AddDeathRecipient(deathRecipient_)) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "AddDeathRecipient failed.");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "AddDeathRecipient failed");
     }
 
     return ERR_OK;
@@ -68,36 +57,32 @@ int32_t FreeInstallObserverManager::AddObserver(const sptr<IFreeInstallObserver>
 
 int32_t FreeInstallObserverManager::RemoveObserver(const sptr<IFreeInstallObserver> &observer)
 {
-    TAG_LOGD(AAFwkTag::FREE_INSTALL, "RemoveObserver begin.");
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "begin");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "the observer is nullptr.");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "observer is nullptr.");
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<ffrt::mutex> lock(observerLock_);
-    auto it = std::find_if(observerList_.begin(), observerList_.end(),
-        [&observer](const sptr<IFreeInstallObserver> &item) {
-        return (item && item->AsObject() == observer->AsObject());
-    });
-    if (it != observerList_.end()) {
-        observerList_.erase(it);
-        TAG_LOGI(AAFwkTag::FREE_INSTALL, "observerList_ size:%{public}zu", observerList_.size());
-        return ERR_OK;
+    for (auto &item : observerMap_) {
+        if (item.second && item.second->AsObject() == observer->AsObject()) {
+            observerMap_.erase(item.first);
+            return ERR_OK;
+        }
     }
-    TAG_LOGE(AAFwkTag::FREE_INSTALL, "Observer not exist or has been removed.");
+    TAG_LOGE(AAFwkTag::FREE_INSTALL, "Observer not exist or has been removed");
     return ERR_INVALID_VALUE;
 }
 
-void FreeInstallObserverManager::OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-    const std::string &startTime, const int &resultCode)
+void FreeInstallObserverManager::OnInstallFinished(int32_t recordId, const std::string &bundleName,
+    const std::string &abilityName, const std::string &startTime, const int &resultCode)
 {
-    auto task = [weak = weak_from_this(), bundleName, abilityName, startTime, resultCode]() {
+    auto task = [weak = weak_from_this(), recordId, bundleName, abilityName, startTime, resultCode]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::FREE_INSTALL, "self is nullptr, OnInstallFinished failed.");
+            TAG_LOGE(AAFwkTag::FREE_INSTALL, "self is nullptr");
             return;
         }
-        TAG_LOGI(AAFwkTag::FREE_INSTALL, "OnInstallFinished come.");
-        self->HandleOnInstallFinished(bundleName, abilityName, startTime, resultCode);
+        self->HandleOnInstallFinished(recordId, bundleName, abilityName, startTime, resultCode);
     };
 
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
@@ -105,49 +90,58 @@ void FreeInstallObserverManager::OnInstallFinished(const std::string &bundleName
     handler->SubmitTask(task);
 }
 
-void FreeInstallObserverManager::HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-    const std::string &startTime, const int &resultCode)
+void FreeInstallObserverManager::OnInstallFinishedByUrl(int32_t recordId, const std::string &startTime,
+    const std::string &url, const int &resultCode)
 {
-    TAG_LOGD(AAFwkTag::FREE_INSTALL, "HandleOnInstallFinished begin.");
-    for (auto it = observerList_.begin(); it != observerList_.end(); ++it) {
-        if ((*it) == nullptr) {
-            continue;
+    auto task = [weak = weak_from_this(), recordId, startTime, url, resultCode]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::FREE_INSTALL, "self is nullptr");
+            return;
         }
-        (*it)->OnInstallFinished(bundleName, abilityName, startTime, resultCode);
+        self->HandleOnInstallFinishedByUrl(recordId, startTime, url, resultCode);
+    };
+
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    CHECK_POINTER_LOG(handler, "Fail to get Ability task handler.");
+    handler->SubmitTask(task);
+}
+
+void FreeInstallObserverManager::HandleOnInstallFinished(int32_t recordId, const std::string &bundleName,
+    const std::string &abilityName, const std::string &startTime, const int &resultCode)
+{
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "begin");
+    auto iter = observerMap_.find(recordId);
+    if (iter != observerMap_.end() && iter->second != nullptr) {
+        (iter->second)->OnInstallFinished(bundleName, abilityName, startTime, resultCode);
     }
 }
 
-bool FreeInstallObserverManager::ObserverExistLocked(const sptr<IFreeInstallObserver> &observer)
+void FreeInstallObserverManager::HandleOnInstallFinishedByUrl(int32_t recordId, const std::string &startTime,
+    const std::string &url, const int &resultCode)
 {
-    TAG_LOGD(AAFwkTag::FREE_INSTALL, "ObserExist begin.");
-    if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "The param observer is nullptr.");
-        return false;
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "begin");
+    auto iter = observerMap_.find(recordId);
+    if (iter != observerMap_.end() && iter->second != nullptr) {
+        (iter->second)->OnInstallFinishedByUrl(startTime, url, resultCode);
     }
-    auto it = std::find_if(observerList_.begin(), observerList_.end(),
-        [&observer](const sptr<IFreeInstallObserver> &item) {
-        return (item && item->AsObject() == observer->AsObject());
-    });
-    return it != observerList_.end();
 }
 
 void FreeInstallObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGI(AAFwkTag::FREE_INSTALL, "OnObserverDied begin.");
     auto remoteObj = remote.promote();
     if (remoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "observer is nullptr.");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "observer is nullptr");
         return;
     }
     remoteObj->RemoveDeathRecipient(deathRecipient_);
 
     std::lock_guard<ffrt::mutex> lock(observerLock_);
-    auto it = std::find_if(observerList_.begin(), observerList_.end(), [&remoteObj]
-        (const sptr<IFreeInstallObserver> item) {
-        return (item && item->AsObject() == remoteObj);
-    });
-    if (it != observerList_.end()) {
-        observerList_.erase(it);
+    for (auto &item : observerMap_) {
+        if (item.second && item.second->AsObject() == remoteObj) {
+            observerMap_.erase(item.first);
+            return;
+        }
     }
 }
 
@@ -159,7 +153,6 @@ FreeInstallObserverRecipient::~FreeInstallObserverRecipient()
 
 void FreeInstallObserverRecipient::OnRemoteDied(const wptr<IRemoteObject> &__attribute__((unused)) remote)
 {
-    TAG_LOGE(AAFwkTag::FREE_INSTALL, "FreeInstallObserverRecipient On remote died.");
     if (handler_) {
         handler_(remote);
     }

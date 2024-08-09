@@ -16,7 +16,6 @@
 #include "quick_fix_info.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -27,7 +26,7 @@ bool ApplicationQuickFixInfo::ReadFromParcel(Parcel &parcel)
     bundleVersionName = parcel.ReadString();
     std::unique_ptr<AppExecFwk::AppqfInfo> qfInfo(parcel.ReadParcelable<AppExecFwk::AppqfInfo>());
     if (qfInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "ReadParcelable<AppqfInfo> failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "ReadParcelable<AppqfInfo> failed");
         return false;
     }
     appqfInfo = *qfInfo;
@@ -37,19 +36,19 @@ bool ApplicationQuickFixInfo::ReadFromParcel(Parcel &parcel)
 bool ApplicationQuickFixInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Write bundleName failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Write bundleName failed");
         return false;
     }
     if (!parcel.WriteUint32(bundleVersionCode)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Write bundleVersionCode failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Write bundleVersionCode failed");
         return false;
     }
     if (!parcel.WriteString(bundleVersionName)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Write bundleVersionName failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Write bundleVersionName failed");
         return false;
     }
     if (!parcel.WriteParcelable(&appqfInfo)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Write appQfInfo failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Write appQfInfo failed");
         return false;
     }
     return true;
@@ -59,12 +58,12 @@ ApplicationQuickFixInfo *ApplicationQuickFixInfo::Unmarshalling(Parcel &parcel)
 {
     ApplicationQuickFixInfo *info = new (std::nothrow) ApplicationQuickFixInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Create failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Create failed");
         return nullptr;
     }
 
     if (!info->ReadFromParcel(parcel)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Read from parcel failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Read from parcel failed");
         delete info;
         return nullptr;
     }

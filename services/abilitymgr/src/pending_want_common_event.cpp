@@ -15,7 +15,6 @@
 
 #include "pending_want_common_event.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -34,11 +33,9 @@ void PendingWantCommonEvent::SetFinishedReceiver(const sptr<IWantReceiver> &fini
 
 void PendingWantCommonEvent::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "Receive common event callback.");
     if (finishedReceiver_ != nullptr) {
-        TAG_LOGI(AAFwkTag::WANTAGENT, "PendingWantCommonEvent::OnReceiveEvent begin.");
+        TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
         finishedReceiver_->PerformReceive(data.GetWant(), data.GetCode(), "", wantParams_, false, false, 0);
-        TAG_LOGI(AAFwkTag::WANTAGENT, "PendingWantCommonEvent::OnReceiveEvent end.");
     }
 }
 }  // namespace AAFwk

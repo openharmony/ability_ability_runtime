@@ -23,7 +23,6 @@
 #include "bundle_mgr_helper.h"
 #include "constants.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "parameters.h"
 
 namespace OHOS {
@@ -36,7 +35,7 @@ const int32_t TYPE_OTHERS = 2;
 void ContextContainer::AttachBaseContext(const std::shared_ptr<ContextDeal> &base)
 {
     if (base == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextDeal::AttachBaseContext failed, base is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "base is nullptr");
         return;
     }
     baseContext_ = base;
@@ -58,7 +57,7 @@ std::shared_ptr<ProcessInfo> ContextContainer::GetProcessInfo() const
 void ContextContainer::SetProcessInfo(const std::shared_ptr<ProcessInfo> &info)
 {
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetProcessInfo failed, info is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "info is empty");
         return;
     }
     processInfo_ = info;
@@ -69,7 +68,7 @@ std::shared_ptr<ApplicationInfo> ContextContainer::GetApplicationInfo() const
     if (baseContext_ != nullptr) {
         return baseContext_->GetApplicationInfo();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetApplicationInfo baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return nullptr;
     }
 }
@@ -79,7 +78,7 @@ std::shared_ptr<Context> ContextContainer::GetApplicationContext() const
     if (baseContext_ != nullptr) {
         return baseContext_->GetApplicationContext();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetApplicationContext baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return nullptr;
     }
 }
@@ -89,7 +88,7 @@ std::string ContextContainer::GetBundleCodePath()
     if (baseContext_ != nullptr) {
         return baseContext_->GetBundleCodePath();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetBundleCodePath baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -99,7 +98,7 @@ const std::shared_ptr<AbilityInfo> ContextContainer::GetAbilityInfo()
     if (baseContext_ != nullptr) {
         return baseContext_->GetAbilityInfo();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetAbilityInfo baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return nullptr;
     }
 }
@@ -109,7 +108,7 @@ std::shared_ptr<Context> ContextContainer::GetContext()
     if (baseContext_ != nullptr) {
         return baseContext_->GetContext();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetContext baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return nullptr;
     }
 }
@@ -119,7 +118,7 @@ std::shared_ptr<BundleMgrHelper> ContextContainer::GetBundleManager() const
     if (baseContext_ != nullptr) {
         return baseContext_->GetBundleManager();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "The baseContext_ is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return nullptr;
     }
 }
@@ -129,7 +128,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextContainer::GetResource
     if (baseContext_ != nullptr) {
         return baseContext_->GetResourceManager();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetResourceManager baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return nullptr;
     }
 }
@@ -139,7 +138,7 @@ std::string ContextContainer::GetDatabaseDir()
     if (baseContext_ != nullptr) {
         return baseContext_->GetDatabaseDir();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetDatabaseDir baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -149,7 +148,7 @@ std::string ContextContainer::GetDataDir()
     if (baseContext_ != nullptr) {
         return baseContext_->GetDataDir();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetDataDir baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -159,7 +158,7 @@ std::string ContextContainer::GetDir(const std::string &name, int mode)
     if (baseContext_ != nullptr) {
         return baseContext_->GetDir(name, mode);
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetDir baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -169,7 +168,7 @@ std::string ContextContainer::GetFilesDir()
     if (baseContext_ != nullptr) {
         return baseContext_->GetFilesDir();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetFilesDir baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -179,7 +178,7 @@ std::string ContextContainer::GetBundleName() const
     if (baseContext_ != nullptr) {
         return baseContext_->GetBundleName();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetBundleName baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -189,7 +188,7 @@ std::string ContextContainer::GetBundleResourcePath()
     if (baseContext_ != nullptr) {
         return baseContext_->GetBundleResourcePath();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetBundleResourcePath baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -199,7 +198,7 @@ sptr<AAFwk::IAbilityManager> ContextContainer::GetAbilityManager()
     if (baseContext_ != nullptr) {
         return baseContext_->GetAbilityManager();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetAbilityManager baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return nullptr;
     }
 }
@@ -209,7 +208,7 @@ std::string ContextContainer::GetAppType()
     if (baseContext_ != nullptr) {
         return baseContext_->GetAppType();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetAppType baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -219,7 +218,7 @@ void ContextContainer::SetPattern(int patternId)
     if (baseContext_ != nullptr) {
         baseContext_->SetPattern(patternId);
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::SetPattern baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
     }
 }
 
@@ -228,7 +227,7 @@ std::shared_ptr<HapModuleInfo> ContextContainer::GetHapModuleInfo()
     if (baseContext_ != nullptr) {
         return baseContext_->GetHapModuleInfo();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetHapModuleInfo baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return nullptr;
     }
 }
@@ -241,7 +240,7 @@ std::string ContextContainer::GetProcessName()
 std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundleName, int flag, int accountId)
 {
     if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "The bundleName is empty.");
+        TAG_LOGE(AAFwkTag::APPKIT, "The bundleName is empty");
         return nullptr;
     }
 
@@ -251,12 +250,12 @@ std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundl
 
     std::shared_ptr<BundleMgrHelper> bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgr is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgr is nullptr");
         return nullptr;
     }
 
     BundleInfo bundleInfo;
-    TAG_LOGI(AAFwkTag::APPKIT, "Length: %{public}zu, bundleName: %{public}s, accountId is %{public}d.",
+    TAG_LOGI(AAFwkTag::APPKIT, "Length: %{public}zu, bundleName: %{public}s, accountId is %{public}d",
         bundleName.length(),
         bundleName.c_str(),
         accountId);
@@ -267,7 +266,7 @@ std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundl
     bundleMgr->GetBundleInfo(bundleName, BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, realAccountId);
 
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get Bundle Info.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get Bundle Info");
         return nullptr;
     }
 
@@ -307,7 +306,7 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
             bundleInfo.name, moduleName, hapPath, overlayPaths, *resConfig, appType));
         if (resourceManager == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "ContextImpl::InitResourceManager failed to create resourceManager");
+            TAG_LOGE(AAFwkTag::APPKIT, "failed to create resourceManager");
             return;
         }
         deal->initResourceManager(resourceManager);
@@ -317,11 +316,17 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
         bundleInfo.name, moduleName, hapPath, overlayPaths, *resConfig, appType));
     if (resourceManager == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::InitResourceManager create resourceManager failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "create resourceManager failed");
         return;
     }
+    LoadResources(bundleInfo, resourceManager, resConfig, deal);
+}
 
-    TAG_LOGD(AAFwkTag::APPKIT, "ContextContainer::InitResourceManager hapModuleInfos count: %{public}zu",
+void ContextContainer::LoadResources(BundleInfo &bundleInfo,
+    std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
+    std::unique_ptr<Global::Resource::ResConfig> &resConfig, std::shared_ptr<ContextDeal> &deal)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "hapModuleInfos count: %{public}zu",
         bundleInfo.hapModuleInfos.size());
     std::regex pattern(AbilityBase::Constants::ABS_CODE_PATH);
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
@@ -335,7 +340,7 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
             continue;
         }
         loadPath = std::regex_replace(loadPath, pattern, AbilityBase::Constants::LOCAL_BUNDLES);
-        TAG_LOGD(AAFwkTag::APPKIT, "ContextContainer::InitResourceManager loadPath: %{public}s", loadPath.c_str());
+        TAG_LOGD(AAFwkTag::APPKIT, "loadPath: %{private}s", loadPath.c_str());
         if (!resourceManager->AddResource(loadPath.c_str())) {
             TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::InitResourceManager AddResource failed");
         }
@@ -345,12 +350,12 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
 #ifdef SUPPORT_GRAPHICS
     if (resConfig->GetLocaleInfo() != nullptr) {
         TAG_LOGI(AAFwkTag::APPKIT,
-            "ContextContainer::InitResourceManager language: %{public}s, script: %{public}s, region: %{public}s,",
+            "language: %{public}s, script: %{public}s, region: %{public}s,",
             resConfig->GetLocaleInfo()->getLanguage(),
             resConfig->GetLocaleInfo()->getScript(),
             resConfig->GetLocaleInfo()->getCountry());
     } else {
-        TAG_LOGI(AAFwkTag::APPKIT, "ContextContainer::InitResourceManager language: GetLocaleInfo is null.");
+        TAG_LOGI(AAFwkTag::APPKIT, "language: GetLocaleInfo is null.");
     }
 #endif
     resourceManager->UpdateResConfig(*resConfig);
@@ -374,7 +379,7 @@ std::string ContextContainer::GetString(int resId)
         std::string ret = baseContext_->GetString(resId);
         return ret;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetString baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetString baseContext_ is nullptr");
         return "";
     }
 }
@@ -384,7 +389,7 @@ std::vector<std::string> ContextContainer::GetStringArray(int resId)
     if (baseContext_ != nullptr) {
         return baseContext_->GetStringArray(resId);
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetStringArray baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return std::vector<std::string>();
     }
 }
@@ -394,7 +399,7 @@ std::vector<int> ContextContainer::GetIntArray(int resId)
     if (baseContext_ != nullptr) {
         return baseContext_->GetIntArray(resId);
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetIntArray baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return std::vector<int>();
     }
 }
@@ -404,7 +409,7 @@ std::map<std::string, std::string> ContextContainer::GetTheme()
     if (baseContext_ != nullptr) {
         return baseContext_->GetTheme();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetTheme baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return std::map<std::string, std::string>();
     }
 }
@@ -414,7 +419,7 @@ void ContextContainer::SetTheme(int themeId)
     if (baseContext_ != nullptr) {
         baseContext_->SetTheme(themeId);
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::SetTheme baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
     }
 }
 
@@ -423,7 +428,7 @@ std::map<std::string, std::string> ContextContainer::GetPattern()
     if (baseContext_ != nullptr) {
         return baseContext_->GetPattern();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetPattern baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return std::map<std::string, std::string>();
     }
 }
@@ -433,7 +438,7 @@ int ContextContainer::GetColor(int resId)
     if (baseContext_ != nullptr) {
         return baseContext_->GetColor(resId);
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetColor baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return INVALID_RESOURCE_VALUE;
     }
 }
@@ -443,7 +448,7 @@ int ContextContainer::GetThemeId()
     if (baseContext_ != nullptr) {
         return baseContext_->GetThemeId();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetThemeId baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return -1;
     }
 }
@@ -453,7 +458,7 @@ int ContextContainer::GetDisplayOrientation()
     if (baseContext_ != nullptr) {
         return baseContext_->GetDisplayOrientation();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetDisplayOrientation baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return static_cast<int>(DisplayOrientation::UNSPECIFIED);
     }
 }
@@ -463,7 +468,7 @@ std::string ContextContainer::GetPreferencesDir()
     if (baseContext_ != nullptr) {
         return baseContext_->GetPreferencesDir();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetPreferencesDir baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return "";
     }
 }
@@ -471,7 +476,7 @@ std::string ContextContainer::GetPreferencesDir()
 void ContextContainer::SetColorMode(int mode)
 {
     if (baseContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::SetColorMode baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return;
     }
 
@@ -481,7 +486,7 @@ void ContextContainer::SetColorMode(int mode)
 int ContextContainer::GetColorMode()
 {
     if (baseContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::GetColorMode baseContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "baseContext_ is nullptr");
         return -1;
     }
 

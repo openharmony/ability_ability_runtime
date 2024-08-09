@@ -16,7 +16,6 @@
 #include "napi_common_open_link_options.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "int_wrapper.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
@@ -29,7 +28,7 @@ bool UnwrapOpenLinkOptions(napi_env env, napi_value param, AAFwk::OpenLinkOption
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
 
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "Params is invalid.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid params");
         return false;
     }
 

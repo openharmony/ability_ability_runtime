@@ -16,7 +16,6 @@
 #include "dialog_request_callback_proxy.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
 
@@ -28,7 +27,7 @@ void DialogRequestCallbackProxy::SendResult(int32_t resultCode, const AAFwk::Wan
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
 
-    TAG_LOGI(AAFwkTag::DIALOG, "DialogRequestCallbackProxy, send result");
+    TAG_LOGI(AAFwkTag::DIALOG, "send result");
     if (!data.WriteInterfaceToken(IDialogRequestCallback::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::DIALOG, "Write interface token failed.");
         return;
@@ -47,7 +46,7 @@ void DialogRequestCallbackProxy::SendResult(int32_t resultCode, const AAFwk::Wan
     auto remote = Remote();
     if (remote) {
         auto errCode = remote->SendRequest(IDialogRequestCallback::CODE_SEND_RESULT, data, reply, option);
-        TAG_LOGI(AAFwkTag::DIALOG, "SendRequest result, error code: %{public}d", errCode);
+        TAG_LOGI(AAFwkTag::DIALOG, "SendRequest result, error code:%{public}d", errCode);
     }
 }
 }  // namespace AbilityRuntime

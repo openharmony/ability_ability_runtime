@@ -38,7 +38,6 @@
 #include "errors.h"
 #include "hap_module_info.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "parameters.h"
 #include "runtime.h"
 #include "sys_mgr_client.h"
@@ -70,7 +69,7 @@ ChildProcessManager::~ChildProcessManager()
 
 ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEntry, pid_t &pid)
 {
-    TAG_LOGI(AAFwkTag::PROCESSMGR, "called.");
+    TAG_LOGI(AAFwkTag::PROCESSMGR, "called");
     ChildProcessManagerErrorCode errorCode = PreCheck();
     if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
         return errorCode;
@@ -127,10 +126,11 @@ ChildProcessManagerErrorCode ChildProcessManager::StartArkChildProcess(
     AppExecFwk::ChildProcessRequest request;
     request.srcEntry = srcEntry;
     request.childProcessType = childProcessType;
-    request.childProcessCount = childProcessCount_;
     request.isStartWithDebug = g_debugOption.isStartWithDebug;
     request.args = args;
     request.options = options;
+    std::lock_guard<std::mutex> lock(childProcessCountLock_);
+    request.childProcessCount = childProcessCount_;
     auto ret = appMgr->StartChildProcess(pid, request);
     childProcessCount_++;
     TAG_LOGD(AAFwkTag::PROCESSMGR, "AppMgr StartChildProcess ret:%{public}d", ret);
@@ -156,6 +156,7 @@ ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSp
         return ChildProcessManagerErrorCode::ERR_GET_APP_MGR_FAILED;
     }
 
+    std::lock_guard<std::mutex> lock(childProcessCountLock_);
     auto ret = appMgr->StartNativeChildProcess(libName, childProcessCount_, callbackStub);
     TAG_LOGD(AAFwkTag::PROCESSMGR, "AppMgr StartNativeChildProcess ret:%{public}d", ret);
 
@@ -327,6 +328,11 @@ std::unique_ptr<AbilityRuntime::Runtime> ChildProcessManager::CreateRuntime(cons
     options.loadAce = true;
     options.jitEnabled = jitEnabled;
 
+    for (auto moduleItem : bundleInfo.hapModuleInfos) {
+        options.pkgContextInfoJsonStringMap[moduleItem.moduleName] = moduleItem.hapPath;
+        options.packageNameList[moduleItem.moduleName] = moduleItem.packageName;
+    }
+
     std::shared_ptr<AppExecFwk::EventRunner> eventRunner =
         fromAppSpawn ? AppExecFwk::EventRunner::GetMainEventRunner() : AppExecFwk::EventRunner::Create();
     options.eventRunner = eventRunner;
@@ -461,6 +467,7 @@ void ChildProcessManager::MakeProcessName(const std::string &srcEntry)
             processName.append(filename);
         }
     }
+    std::lock_guard<std::mutex> lock(childProcessCountLock_);
     processName.append(std::to_string(childProcessCount_));
     childProcessCount_++;
     TAG_LOGD(AAFwkTag::PROCESSMGR, "SetForkProcessDebugOption processName is %{public}s", processName.c_str());

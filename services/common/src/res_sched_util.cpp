@@ -19,7 +19,6 @@
 
 #include "ability_info.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -45,7 +44,7 @@ int64_t ResSchedUtil::convertType(int64_t resSchedType)
         return static_cast<int64_t>(AssociatedStartType::MISSION_LIST_START_ABILITY);
     }
 #endif
-    TAG_LOGE(AAFwkTag::DEFAULT, "res sched type invalid");
+    TAG_LOGE(AAFwkTag::DEFAULT, "sched invalid");
     return -1;
 }
 

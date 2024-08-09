@@ -17,7 +17,6 @@
 
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_runtime.h"
 #include "singleton.h"
 #include "dfx_jsnapi.h"
@@ -31,18 +30,18 @@ DumpRuntimeHelper::DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &app
 void DumpRuntimeHelper::SetAppFreezeFilterCallback()
 {
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetAppFreezeFilterCallback OHOSApplication is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "OHOSApplication is nullptr");
         return;
     }
     auto& runtime = application_->GetRuntime();
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetAppFreezeFilterCallback GetRuntime is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "Runtime is nullptr");
         return;
     }
     auto appfreezeFilterCallback = [] (const int32_t pid) -> bool {
         auto client = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
         if (client == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "SetAppFreezeFilterCallback client is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "client is nullptr");
             return false;
         }
         return client->SetAppFreezeFilter(pid);

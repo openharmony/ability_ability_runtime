@@ -28,38 +28,9 @@
 #ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
 #endif // SUPPORT_GRAPHICS
-#include "view_data.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-namespace AutoFill {
-enum class AutoFillCommand {
-    NONE,
-    FILL,
-    SAVE,
-    UPDATE,
-    RESIZE,
-    INPUT,
-    RELOAD_IN_MODAL
-};
-
-/**
- * @struct AutoFillRequest
- * AutoFillRequest is used to define the auto fill request parameter structure.
- */
-struct AutoFillRequest {
-    AbilityBase::AutoFillType autoFillType = AbilityBase::AutoFillType::UNSPECIFIED;
-    AutoFillCommand autoFillCommand = AutoFillCommand::NONE;
-    AbilityBase::ViewData viewData;
-    AutoFillCustomConfig config;
-    std::function<void()> doAfterAsyncModalBinding;
-};
-
-struct AutoFillResult {
-    bool isPopup = false;
-    uint32_t autoFillSessionId = 0;
-};
-}
 #ifdef SUPPORT_GRAPHICS
 class AutoFillManager {
 public:
@@ -68,10 +39,14 @@ public:
     int32_t RequestAutoFill(Ace::UIContent *uiContent, const AutoFill::AutoFillRequest &request,
         const std::shared_ptr<IFillRequestCallback> &fillCallback, AutoFill::AutoFillResult &result);
 
+    bool IsNeedToCreatePopupWindow(const AbilityBase::AutoFillType &autoFillType);
+
     int32_t RequestAutoSave(Ace::UIContent *uiContent, const AutoFill::AutoFillRequest &request,
         const std::shared_ptr<ISaveRequestCallback> &saveCallback, AutoFill::AutoFillResult &result);
 
     void UpdateCustomPopupUIExtension(uint32_t autoFillSessionId, const AbilityBase::ViewData &viewData);
+
+    void CloseUIExtension(uint32_t autoFillSessionId);
 
     void HandleTimeOut(uint32_t eventId);
     void SetTimeOutEvent(uint32_t eventId);

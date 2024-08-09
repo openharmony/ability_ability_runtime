@@ -15,10 +15,6 @@
 
 #include "wants_info.h"
 
-#include "hilog_wrapper.h"
-#include "nlohmann/json.hpp"
-#include "string_ex.h"
-
 namespace OHOS {
 namespace AAFwk {
 bool WantsInfo::ReadFromParcel(Parcel &parcel)

@@ -16,7 +16,6 @@
 
 #include <vector>
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
@@ -59,7 +58,7 @@ bool CommonFunc::ParsePropertyArray(napi_env env, napi_value args, const std::st
     bool hasKey = false;
     napi_has_named_property(env, args, propertyName.c_str(), &hasKey);
     if (!hasKey) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "%{public}s is not existed", propertyName.c_str());
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "%{public}s is not exist", propertyName.c_str());
         return true;
     }
     napi_value property = nullptr;

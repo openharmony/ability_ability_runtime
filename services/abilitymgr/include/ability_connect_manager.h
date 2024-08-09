@@ -166,6 +166,16 @@ public:
     int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state);
 
     /**
+     * @brief execute after the ability schedule the lifecycle
+     *
+     * @param token the ability token
+     * @param windowConfig the windowconfig
+     * @return execute error code
+     */
+    int AbilityWindowConfigTransactionDone(
+        const sptr<IRemoteObject> &token, const AppExecFwk::WindowConfig &windowConfig);
+
+    /**
      * ScheduleConnectAbilityDoneLocked, service ability call this interface while session was connected.
      *
      * @param token, service ability's token.
@@ -300,8 +310,6 @@ public:
 
     void RemoveLauncherDeathRecipient();
 
-    std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
-
     /**
      * @brief Get ui extension session info
      *
@@ -315,6 +323,8 @@ public:
     void CloseAssertDialog(const std::string &assertSessionId);
 
     void SignRestartAppFlag(const std::string &bundleName);
+
+    std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
     void DeleteInvalidServiceRecord(const std::string &bundleName);
 
@@ -353,11 +363,10 @@ private:
      * DisconnectAbilityLocked, disconnect session with callback.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
-     * @param force, Indicates forcing to disconnect and clear. For example, it is called when the source
-     * dies and the connection has not completed yet.
+     * @param callerDied, bool Indicates if it is caused by the caller's death.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect, bool force);
+    int DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect, bool callerDied);
 
     /**
      * LoadAbility.
@@ -372,6 +381,21 @@ private:
      * @param abilityRecord, the ptr of the ability to connect.
      */
     void ConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * ConnectAbility.Schedule connect ability
+     *
+     * @param abilityRecord, the ptr of the ability to connect.
+     */
+    void ConnectUIServiceExtAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        int connectRecordId, const Want &want);
+
+    /**
+     * ConnectAbility.Schedule Resume Connect ability
+     *
+     * @param abilityRecord, the ptr of the ability to connect.
+     */
+    void ResumeConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
      * CommandAbility. Schedule command ability
@@ -518,6 +542,7 @@ private:
      * @param messageId, message id.
      */
     void PostTimeOutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t messageId);
+    void PostTimeOutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, int connectRecordId, uint32_t messageId);
 
     void CompleteForeground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -534,7 +559,6 @@ private:
     void MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord);
 
     void DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord, const AbilityRequest &abilityRequest);
-    void SaveUIExtRequestSessionInfo(std::shared_ptr<AbilityRecord> abilityRecord, sptr<SessionInfo> sessionInfo);
     void DoBackgroundAbilityWindow(const std::shared_ptr<AbilityRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);
 
@@ -569,7 +593,8 @@ private:
 
 private:
     void TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord);
-    int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord) const;
+    int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord,
+        bool callerDied) const;
     void DisconnectRecordForce(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord);
     std::shared_ptr<AbilityRecord> GetExtensionByIdFromServiceMap(int32_t abilityRecordId);
     int TerminateAbilityInner(const sptr<IRemoteObject> &token);
@@ -603,6 +628,9 @@ private:
     void ProcessEliminateAbilityRecord(std::shared_ptr<AbilityRecord> eliminateRecord);
     std::string GetServiceKey(const std::shared_ptr<AbilityRecord> &service);
 
+    int32_t ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo);
+    int32_t ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
+
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     const std::string TASK_ON_ABILITY_DIED = "OnAbilityDiedTask";
@@ -614,7 +642,7 @@ private:
 
     ffrt::mutex serviceMapMutex_;
     ServiceMapType serviceMap_;
-    ServiceMapType terminatingExtensionMap_;
+    std::list<std::shared_ptr<AbilityRecord>> terminatingExtensionList_;
 
     std::mutex recipientMapMutex_;
     RecipientMapType recipientMap_;

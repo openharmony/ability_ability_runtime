@@ -276,7 +276,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallDataAbilityPermission_002, Te
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallDataAbilityPermission_002 start");
     abilityRequest_.abilityInfo.type = AbilityType::DATA;
-    abilityMs_->Init();
     EXPECT_EQ(abilityMs_->CheckCallDataAbilityPermission(abilityRequest_, false), ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallDataAbilityPermission_002 end");
 }
@@ -826,21 +825,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, NotifyContinuationResult_001, TestSize
 
 /*
  * Feature: AbilityManagerService
- * Function: StartSyncRemoteMissions
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartSyncRemoteMissions
- */
-HWTEST_F(AbilityManagerServiceSecondTest, StartSyncRemoteMissions_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartSyncRemoteMissions_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    std::string devId = "test";
-    EXPECT_EQ(abilityMs_->StartSyncRemoteMissions(devId, true, 1), CHECK_PERMISSION_FAILED);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartSyncRemoteMissions_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: StopSyncRemoteMissions
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StopSyncRemoteMissions
@@ -1135,20 +1119,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, GetPendingRequestWant_001, TestSize.Le
     std::shared_ptr<Want> want;
     EXPECT_EQ(abilityMs_->GetPendingRequestWant(nullptr, want), ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetPendingRequestWant_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: LockMissionForCleanup
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService LockMissionForCleanup
- */
-HWTEST_F(AbilityManagerServiceSecondTest, LockMissionForCleanup_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest LockMissionForCleanup_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_->LockMissionForCleanup(1), CHECK_PERMISSION_FAILED);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest LockMissionForCleanup_001 end");
 }
 
 /*

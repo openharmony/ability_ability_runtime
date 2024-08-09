@@ -21,7 +21,6 @@
 #include "assert_fault_task_thread.h"
 #include "assert_fault_callback.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "main_thread.h"
 #include "string_wrapper.h"
 
@@ -42,21 +41,21 @@ constexpr char ASSERT_FAULT_PROMPT[] = "\n\n(Press Retry to debug the applicatio
 AAFwk::UserStatus AssertFaultTaskThread::RequestAssertResult(const std::string &exprStr)
 {
     if (assertHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Assert handler is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Assert handler is nullptr");
         return ASSERT_FAULT_DEFAULT_VALUE;
     }
 
     auto assertResult = ASSERT_FAULT_DEFAULT_VALUE;
     std::weak_ptr<AssertFaultTaskThread> weak = shared_from_this();
     assertHandler_->PostSyncTask([weak, exprStr, &assertResult]() {
-        TAG_LOGD(AAFwkTag::APPKIT, "Post sync task called.");
+        TAG_LOGD(AAFwkTag::APPKIT, "called");
         auto assertFaultTask = weak.lock();
         if (assertFaultTask == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Assert fault task instance is nullptr.");
+            TAG_LOGE(AAFwkTag::APPKIT, "Assert fault task instance is nullptr");
             return;
         }
         assertResult = assertFaultTask->HandleAssertCallback(exprStr);
-    });
+        }, "AssertFaultTaskThread::RequestAssertResult");
     return assertResult;
 }
 
@@ -64,7 +63,7 @@ Assert_Status ConvertAssertResult(AAFwk::UserStatus status)
 {
     auto result = assertResultMap.find(status);
     if (result == assertResultMap.end()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Find %{public}d failed, convert assert reuslt error.", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "Find %{public}d failed, convert assert reuslt error", status);
         return Assert_Status::ASSERT_ABORT;
     }
     return result->second;
@@ -72,10 +71,10 @@ Assert_Status ConvertAssertResult(AAFwk::UserStatus status)
 
 static Assert_Status AssertCallback(AssertFailureInfo assertFail)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto instance = DelayedSingleton<AbilityRuntime::AssertFaultTaskThread>::GetInstance();
     if (instance == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid Instance.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Invalid Instance");
         return Assert_Status::ASSERT_ABORT;
     }
 
@@ -89,7 +88,7 @@ static Assert_Status AssertCallback(AssertFailureInfo assertFail)
     std::string textDetail = textFile + textFunc + textLine + textExpression + ASSERT_FAULT_PROMPT;
 
     auto ret = ConvertAssertResult(instance->RequestAssertResult(textDetail));
-    TAG_LOGD(AAFwkTag::APPKIT, "Return sync task result is %{public}d.", static_cast<int32_t>(ret));
+    TAG_LOGD(AAFwkTag::APPKIT, "Return sync task result is %{public}d", static_cast<int32_t>(ret));
     return ret;
 }
 
@@ -97,13 +96,13 @@ void AssertFaultTaskThread::InitAssertFaultTask(const wptr<AppExecFwk::MainThrea
 {
     auto runner = AppExecFwk::EventRunner::Create(ASSERT_FAULT_THREAD);
     if (runner == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Runner is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Runner is nullptr");
         return;
     }
 
     auto assertHandler = std::make_shared<AppExecFwk::EventHandler>(runner);
     if (assertHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Handler is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Handler is nullptr");
         runner->Stop();
         return;
     }
@@ -118,7 +117,7 @@ void AssertFaultTaskThread::InitAssertFaultTask(const wptr<AppExecFwk::MainThrea
 void AssertFaultTaskThread::Stop()
 {
     if (assertRunner_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Assert runner is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Assert runner is nullptr");
         return;
     }
     assertRunner_->Stop();
@@ -129,7 +128,7 @@ AAFwk::UserStatus AssertFaultTaskThread::HandleAssertCallback(const std::string 
 {
     auto mainThread = mainThread_.promote();
     if (mainThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid thread object.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Invalid thread object");
         return ASSERT_FAULT_DEFAULT_VALUE;
     }
 
@@ -141,13 +140,13 @@ AAFwk::UserStatus AssertFaultTaskThread::HandleAssertCallback(const std::string 
         sptr<AssertFaultCallback> assertFaultCallback =
             new (std::nothrow) AssertFaultCallback(shared_from_this());
         if (assertFaultCallback == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Invalid assert fault callback object.");
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid assert fault callback object");
             break;
         }
 
         auto amsClient = AAFwk::AbilityManagerClient::GetInstance();
         if (amsClient == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Invalid client object.");
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid client object");
             break;
         }
 
@@ -156,12 +155,11 @@ AAFwk::UserStatus AssertFaultTaskThread::HandleAssertCallback(const std::string 
         wantParams.SetParam(ASSERT_FAULT_DETAIL, AAFwk::String::Box(exprStr));
         auto err = amsClient->RequestAssertFaultDialog(assertFaultCallback->AsObject(), wantParams);
         if (err != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Request assert fault dialog failed.");
+            TAG_LOGE(AAFwkTag::APPKIT, "Request assert fault dialog failed");
             break;
         }
 
         assertResultCV_.wait(lockAssertResult);
-        TAG_LOGD(AAFwkTag::APPKIT, "Wait assert result over.");
         assertResult = assertFaultCallback->GetAssertResult();
     } while (false);
 
@@ -175,7 +173,6 @@ void AssertFaultTaskThread::NotifyReleaseLongWaiting()
 {
     std::unique_lock<std::mutex> lockAssertResult(assertResultMutex_);
     assertResultCV_.notify_one();
-    TAG_LOGD(AAFwkTag::APPKIT, "Notify assert result done.");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

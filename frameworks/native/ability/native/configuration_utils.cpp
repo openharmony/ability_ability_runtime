@@ -17,7 +17,6 @@
 
 #include "configuration_convertor.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window.h"
@@ -52,6 +51,7 @@ void ConfigurationUtils::GetGlobalConfig(const Configuration &configuration,
     resourceConfig.SetMnc(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
     resourceConfig.SetColorModeIsSetByApp(
         configuration.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP));
+    resourceConfig.SetThemeId(configuration.GetItem(AAFwk::GlobalConfigurationKey::THEME_ID));
 }
 
 #ifdef SUPPORT_GRAPHICS

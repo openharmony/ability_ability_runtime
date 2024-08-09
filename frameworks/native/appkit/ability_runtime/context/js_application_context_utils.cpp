@@ -25,7 +25,6 @@
 #include "application_info.h"
 #include "application_context_manager.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
 #include "js_ability_auto_startup_callback.h"
 #include "js_ability_auto_startup_manager_utils.h"
@@ -208,7 +207,11 @@ napi_value JsApplicationContextUtils::OnCreateModuleContext(napi_env env, NapiCa
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
+    return CreateJsModuleContext(env, moduleContext);
+}
 
+napi_value JsApplicationContextUtils::CreateJsModuleContext(napi_env env, const std::shared_ptr<Context>& moduleContext)
+{
     napi_value value = CreateJsBaseContext(env, moduleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
@@ -730,12 +733,12 @@ napi_value JsApplicationContextUtils::OnPreloadUIExtensionAbility(napi_env env, 
     NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, want, innerErrCode]() {
         auto context = applicationContext.lock();
         if (!context) {
-            TAG_LOGE(AAFwkTag::APPKIT, "context is released");
+            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
         auto hostBundleName = context->GetBundleName();
-        TAG_LOGD(AAFwkTag::APPKIT, "HostBundleName is %{public}s.", hostBundleName.c_str());
+        TAG_LOGD(AAFwkTag::APPKIT, "HostBundleName is %{public}s", hostBundleName.c_str());
         *innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->PreloadUIExtensionAbility(want, hostBundleName);
     };
     NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -891,23 +894,22 @@ napi_value JsApplicationContextUtils::OnRegisterAbilityLifecycleCallback(
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     // only support one params
     if (info.argc != ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
         return CreateJsUndefined(env);
     }
 
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         return CreateJsUndefined(env);
     }
     if (callback_ != nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "callback_ is not nullptr.");
+        TAG_LOGD(AAFwkTag::APPKIT, "callback_ is not nullptr");
         return CreateJsValue(env, callback_->Register(info.argv[0]));
     }
     callback_ = std::make_shared<JsAbilityLifecycleCallback>(env);
     int32_t callbackId = callback_->Register(info.argv[INDEX_ZERO]);
     applicationContext->RegisterAbilityLifecycleCallback(callback_);
-    TAG_LOGI(AAFwkTag::APPKIT, "end");
     return CreateJsValue(env, callbackId);
 }
 
@@ -918,7 +920,7 @@ napi_value JsApplicationContextUtils::OnUnregisterAbilityLifecycleCallback(
     int32_t errCode = 0;
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         errCode = ERROR_CODE_ONE;
     }
     int32_t callbackId = -1;
@@ -978,34 +980,32 @@ napi_value JsApplicationContextUtils::OnRegisterEnvironmentCallback(
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     // only support one params
     if (info.argc != ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
         return CreateJsUndefined(env);
     }
 
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         return CreateJsUndefined(env);
     }
     if (envCallback_ != nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "envCallback_ is not nullptr.");
+        TAG_LOGD(AAFwkTag::APPKIT, "envCallback_ is not nullptr");
         return CreateJsValue(env, envCallback_->Register(info.argv[0]));
     }
     envCallback_ = std::make_shared<JsEnvironmentCallback>(env);
     int32_t callbackId = envCallback_->Register(info.argv[INDEX_ZERO]);
     applicationContext->RegisterEnvironmentCallback(envCallback_);
-    TAG_LOGD(AAFwkTag::APPKIT, "end");
     return CreateJsValue(env, callbackId);
 }
 
 napi_value JsApplicationContextUtils::OnUnregisterEnvironmentCallback(
     napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     int32_t errCode = 0;
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         errCode = ERROR_CODE_ONE;
     }
     int32_t callbackId = -1;
@@ -1014,7 +1014,7 @@ napi_value JsApplicationContextUtils::OnUnregisterEnvironmentCallback(
         errCode = ERROR_CODE_ONE;
     } else {
         napi_get_value_int32(env, info.argv[INDEX_ZERO], &callbackId);
-        TAG_LOGD(AAFwkTag::APPKIT, "callbackId is %{public}d.", callbackId);
+        TAG_LOGD(AAFwkTag::APPKIT, "callbackId is %{public}d", callbackId);
     }
     std::weak_ptr<JsEnvironmentCallback> envCallbackWeak(envCallback_);
     NapiAsyncTask::CompleteCallback complete = [envCallbackWeak, callbackId, errCode](
@@ -1030,9 +1030,8 @@ napi_value JsApplicationContextUtils::OnUnregisterEnvironmentCallback(
                 return;
             }
 
-            TAG_LOGD(AAFwkTag::APPKIT, "begin");
             if (!env_callback->UnRegister(callbackId)) {
-                TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed!");
+                TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
                 task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "call UnRegister failed!"));
                 return;
             }
@@ -1061,7 +1060,7 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
     TAG_LOGD(AAFwkTag::APPKIT, "called");
 
     if (info.argc != ARGC_TWO) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
         ThrowInvalidParamError(env, "Not enough params.");
         return CreateJsUndefined(env);
     }
@@ -1073,7 +1072,7 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
     }
     std::string type;
     if (!ConvertFromJsValue(env, info.argv[0], type)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "convert type failed!");
+        TAG_LOGE(AAFwkTag::APPKIT, "convert type failed");
         ThrowInvalidParamError(env,
             "Parse param type failed, type must be string.");
         return CreateJsUndefined(env);
@@ -1094,7 +1093,7 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
     if (type == "applicationStateChange") {
         return OnOnApplicationStateChange(env, info);
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "on function type not match.");
+    TAG_LOGE(AAFwkTag::APPKIT, "on function type not match");
     ThrowInvalidParamError(env, "Parse param callback failed, callback must be function.");
     return CreateJsUndefined(env);
 }
@@ -1115,7 +1114,7 @@ napi_value JsApplicationContextUtils::OnOff(napi_env env, NapiCallbackInfo& info
     }
     std::string type;
     if (!ConvertFromJsValue(env, info.argv[0], type)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "convert type failed!");
+        TAG_LOGE(AAFwkTag::APPKIT, "convert type failed");
         ThrowInvalidParamError(env,
             "Parse param type failed, type must be string.");
         return CreateJsUndefined(env);
@@ -1157,34 +1156,29 @@ napi_value JsApplicationContextUtils::OnOff(napi_env env, NapiCallbackInfo& info
 napi_value JsApplicationContextUtils::OnOnAbilityLifecycle(
     napi_env env, NapiCallbackInfo& info, bool isSync)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
 
     if (callback_ != nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "callback_ is not nullptr.");
+        TAG_LOGD(AAFwkTag::APPKIT, "callback_ is not nullptr");
         return CreateJsValue(env, callback_->Register(info.argv[1], isSync));
     }
     callback_ = std::make_shared<JsAbilityLifecycleCallback>(env);
     int32_t callbackId = callback_->Register(info.argv[1], isSync);
     applicationContext->RegisterAbilityLifecycleCallback(callback_);
-    TAG_LOGI(AAFwkTag::APPKIT, "end");
     return CreateJsValue(env, callbackId);
 }
 
 napi_value JsApplicationContextUtils::OnOffAbilityLifecycle(
     napi_env env, NapiCallbackInfo& info, int32_t callbackId)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -1200,9 +1194,8 @@ napi_value JsApplicationContextUtils::OnOffAbilityLifecycle(
                 return;
             }
 
-            TAG_LOGD(AAFwkTag::APPKIT, "OnOffAbilityLifecycle begin");
             if (!callback->UnRegister(callbackId, false)) {
-                TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed!");
+                TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
                 task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER,
                     "call UnRegister failed!"));
                 return;
@@ -1224,7 +1217,7 @@ napi_value JsApplicationContextUtils::OnOffAbilityLifecycleEventSync(
 
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }
@@ -1271,7 +1264,7 @@ napi_value JsApplicationContextUtils::OnOffEnvironment(
 
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -1290,7 +1283,7 @@ napi_value JsApplicationContextUtils::OnOffEnvironment(
 
             TAG_LOGD(AAFwkTag::APPKIT, "OnOffEnvironment begin");
             if (!env_callback->UnRegister(callbackId, false)) {
-                TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed!");
+                TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
                 task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER,
                     "call UnRegister failed!"));
                 return;
@@ -1312,7 +1305,7 @@ napi_value JsApplicationContextUtils::OnOffEnvironmentEventSync(
 
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }
@@ -1322,7 +1315,7 @@ napi_value JsApplicationContextUtils::OnOffEnvironmentEventSync(
         return CreateJsUndefined(env);
     }
     if (!envCallback_->UnRegister(callbackId, true)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed!");
+        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }
@@ -1332,10 +1325,10 @@ napi_value JsApplicationContextUtils::OnOffEnvironmentEventSync(
 napi_value JsApplicationContextUtils::OnOnApplicationStateChange(
     napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -1355,17 +1348,17 @@ napi_value JsApplicationContextUtils::OnOnApplicationStateChange(
 napi_value JsApplicationContextUtils::OnOffApplicationStateChange(
     napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationContext is nullptr");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
 
     std::lock_guard<std::mutex> lock(applicationStateCallbackLock_);
     if (applicationStateCallback_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationStateCallback_ is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "ApplicationStateCallback_ is nullptr");
         ThrowInvalidParamError(env,
             "Parse applicationStateCallback failed, applicationStateCallback must be function.");
         return CreateJsUndefined(env);
@@ -1374,7 +1367,7 @@ napi_value JsApplicationContextUtils::OnOffApplicationStateChange(
     if (info.argc == ARGC_ONE || !CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
         applicationStateCallback_->UnRegister();
     } else if (!applicationStateCallback_->UnRegister(info.argv[INDEX_ONE])) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed!");
+        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
         ThrowInvalidParamError(env, "Parse param call UnRegister failed, call UnRegister must be function.");
         return CreateJsUndefined(env);
     }
@@ -1480,11 +1473,6 @@ napi_value JsApplicationContextUtils::OnSetSupportedProcessCacheSelf(napi_env en
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
 
-    if (!CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "This application is not system-app, can not use system-api.");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
-        return CreateJsUndefined(env);
-    }
     // only support one params
     if (info.argc == ARGC_ZERO) {
         TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
@@ -1507,12 +1495,9 @@ napi_value JsApplicationContextUtils::OnSetSupportedProcessCacheSelf(napi_env en
     }
 
     int32_t errCode = applicationContext->SetSupportedProcessCacheSelf(isSupport);
-    if (errCode == AAFwk::CHECK_PERMISSION_FAILED) {
-        TAG_LOGE(AAFwkTag::APPKIT, "check permission failed");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_NO_ACCESS_PERMISSION);
-    } else if (errCode == AAFwk::ERR_SET_SUPPORTED_PROCESS_CACHE_AGAIN) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cannot set more than once");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_SET_SUPPORTED_PROCESS_CACHE_AGAIN);
+    if (errCode == AAFwk::ERR_CAPABILITY_NOT_SUPPORT) {
+        TAG_LOGE(AAFwkTag::APPKIT, "process cache feature is disabled.");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_NO_SUCH_SYSCAP);
     } else if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "set failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
