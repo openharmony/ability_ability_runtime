@@ -1501,9 +1501,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     if (isCJApp) {
         AbilityRuntime::CJRuntime::SetAppLibPath(appLibPaths);
         if (appInfo.asanEnabled) {
-            AbilityRuntime::CJRuntime::SetAsanVersion();
+            AbilityRuntime::CJRuntime::SetSanitizerVersion(SanitizerKind::ASAN);
         } else if (appInfo.tsanEnabled) {
-            AbilityRuntime::CJRuntime::SetTsanVersion();
+            AbilityRuntime::CJRuntime::SetSanitizerVersion(SanitizerKind::TSAN);
+        } else if (appInfo.hwasanEnabled) {
+            AbilityRuntime::CJRuntime::SetSanitizerVersion(SanitizerKind::HWASAN);
         }
     } else {
 #endif
