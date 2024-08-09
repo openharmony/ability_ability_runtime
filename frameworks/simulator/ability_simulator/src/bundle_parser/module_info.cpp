@@ -16,7 +16,6 @@
 #include "module_info.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "json_util.h"
 #include "nlohmann/json.hpp"
 #include "string_ex.h"
@@ -66,7 +65,7 @@ void from_json(const nlohmann::json &jsonObject, ModuleInfo &moduleInfo)
         ArrayType::STRING);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM,
-            "read module moduleInfo from jsonObject error, error code : %{public}d", parseResult);
+            "read module moduleInfo from jsonObject error:%{public}d", parseResult);
     }
 }
 } // namespace AppExecFwk

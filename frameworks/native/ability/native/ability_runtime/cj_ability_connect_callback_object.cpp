@@ -17,7 +17,6 @@
 
 #include "cj_remote_object_ffi.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 using namespace OHOS::AbilityRuntime;
 
@@ -27,9 +26,9 @@ CJAbilityConnectCallbackFuncs* g_cjAbilityConnectCallbackFuncs = nullptr;
 
 void RegisterCJAbilityConnectCallbackFuncs(void (*registerFunc)(CJAbilityConnectCallbackFuncs* result))
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "RegisterCJAbilityConnectCallbackFuncs start.");
+    TAG_LOGD(AAFwkTag::CONTEXT, "start");
     if (g_cjAbilityConnectCallbackFuncs != nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Repeated registration for cangjie functions of CJAbilityConnectCallback.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "not null cangjie callback");
         return;
     }
 
@@ -40,7 +39,7 @@ void RegisterCJAbilityConnectCallbackFuncs(void (*registerFunc)(CJAbilityConnect
 CJAbilityConnectCallback::~CJAbilityConnectCallback()
 {
     if (g_cjAbilityConnectCallbackFuncs == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Cangjie functions for CJAbilityConnectCallbacks are not registered");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cangjie callback");
         return;
     }
     g_cjAbilityConnectCallbackFuncs->release(callbackId_);
@@ -49,23 +48,27 @@ CJAbilityConnectCallback::~CJAbilityConnectCallback()
 void CJAbilityConnectCallback::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "OnAbilityConnectDone begin, resultCode:%{public}d", resultCode);
+    TAG_LOGD(AAFwkTag::CONTEXT, "called, resultCode:%{public}d", resultCode);
     if (g_cjAbilityConnectCallbackFuncs == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Cangjie functions for CJAbilityConnectCallbacks are not registered");
+        TAG_LOGE(AAFwkTag::CONTEXT, "cangjie functions for CJAbilityConnectCallbacks are not registered");
         return;
     }
 
     ElementNameHandle elementNameHandle = const_cast<AppExecFwk::ElementName*>(&element);
     // The cj side is responsible for the release.
     auto cjRemoteObj = FFI::FFIData::Create<AppExecFwk::CJRemoteObject>(remoteObject);
+    if (cjRemoteObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "remote object is empty.");
+        return;
+    }
     g_cjAbilityConnectCallbackFuncs->onConnect(callbackId_, elementNameHandle, cjRemoteObj->GetID(), resultCode);
 }
 
 void CJAbilityConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "OnAbilityDisconnectDone begin, resultCode:%{public}d", resultCode);
+    TAG_LOGD(AAFwkTag::CONTEXT, "called, resultCode:%{public}d", resultCode);
     if (g_cjAbilityConnectCallbackFuncs == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Cangjie functions for CJAbilityConnectCallbacks are not registered");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cangjie callback");
         return;
     }
 

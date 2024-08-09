@@ -18,7 +18,6 @@
 #include <mutex>
 #include "cpp/mutex.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ffrt_task_utils_wrap.h"
 #include "queue_task_handler_wrap.h"
 #include "ffrt_task_handler_wrap.h"
@@ -47,7 +46,7 @@ void TaskHandle::Sync() const
 {
     auto handler = handler_.lock();
     if (!status_ || !handler || !innerTaskHandle_) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Invalid state");
+        TAG_LOGE(AAFwkTag::DEFAULT, "Invalid status");
         return;
     }
     auto &status = *status_;

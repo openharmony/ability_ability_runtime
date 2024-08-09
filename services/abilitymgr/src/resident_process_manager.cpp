@@ -19,8 +19,6 @@
 #include "ability_resident_process_rdb.h"
 #include "ability_util.h"
 #include "ffrt.h"
-#include "hilog_tag_wrapper.h"
-#include "user_controller.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -189,7 +187,7 @@ int32_t ResidentProcessManager::SetResidentProcessEnabled(
 void ResidentProcessManager::UpdateResidentProcessesStatus(
     const std::string &bundleName, bool localEnable, bool updateEnable)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Bundle name is empty!");
         return;

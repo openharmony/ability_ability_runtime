@@ -15,7 +15,6 @@
 
 #include "js_app_state_observer.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 #include "js_app_manager_utils.h"
 #include "napi/native_api.h"
@@ -35,7 +34,7 @@ void JSAppStateObserver::OnForegroundApplicationChanged(const AppStateData &appS
     TAG_LOGD(AAFwkTag::APPMGR, "bundleName:%{public}s, uid:%{public}d, state:%{public}d",
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has destroyed");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid appmgr");
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
@@ -238,7 +237,7 @@ void JSAppStateObserver::HandleOnProcessDied(const ProcessData &processData)
 
 void JSAppStateObserver::OnAppStarted(const AppStateData &appStateData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "onAppStarted bundleName:%{public}s, uid:%{public}d, state:%{public}d",
+    TAG_LOGD(AAFwkTag::APPMGR, "bundleName:%{public}s, uid:%{public}d, state:%{public}d",
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     if (!valid_) {
         TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has destroyed");
@@ -263,7 +262,7 @@ void JSAppStateObserver::OnAppStarted(const AppStateData &appStateData)
 void JSAppStateObserver::HandleOnAppStarted(const AppStateData &appStateData)
 {
     TAG_LOGD(AAFwkTag::APPMGR,
-        "HandleOnAppStarted bundleName:%{public}s, uid:%{public}d, state:%{public}d",
+        "bundleName:%{public}s, uid:%{public}d, state:%{public}d",
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     auto tmpMap = jsObserverObjectMap_;
     for (auto &item : tmpMap) {
@@ -278,7 +277,7 @@ void JSAppStateObserver::HandleOnAppStarted(const AppStateData &appStateData)
 
 void JSAppStateObserver::OnAppStopped(const AppStateData &appStateData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "OnAppStopped bundleName:%{public}s, uid:%{public}d, state:%{public}d",
+    TAG_LOGD(AAFwkTag::APPMGR, "bundleName:%{public}s, uid:%{public}d, state:%{public}d",
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     if (!valid_) {
         TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has destroyed");
@@ -303,7 +302,7 @@ void JSAppStateObserver::OnAppStopped(const AppStateData &appStateData)
 void JSAppStateObserver::HandleOnAppStopped(const AppStateData &appStateData)
 {
     TAG_LOGD(AAFwkTag::APPMGR,
-        "HandleOnAppStopped bundleName:%{public}s, uid:%{public}d, state:%{public}d",
+        "bundleName:%{public}s, uid:%{public}d, state:%{public}d",
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     auto tmpMap = jsObserverObjectMap_;
     for (auto &item : tmpMap) {
@@ -319,7 +318,7 @@ void JSAppStateObserver::HandleOnAppStopped(const AppStateData &appStateData)
 void JSAppStateObserver::CallJsFunction(
     napi_value value, const char *methodName, napi_value* argv, size_t argc)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called, method:%{public}s", methodName);
+    TAG_LOGD(AAFwkTag::APPMGR, "call method:%{public}s", methodName);
     if (value == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to get object");
         return;

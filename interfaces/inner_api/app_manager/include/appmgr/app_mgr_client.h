@@ -160,7 +160,27 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearPageStack = true);
+    virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearpagestack = false);
+
+    /**
+     * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual AppMgrResultCode ForceKillApplication(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0);
+
+    /**
+     * KillProcessesByAccessTokenId, call KillProcessesByAccessTokenId() through proxy object,
+     * force kill the application.
+     *
+     * @param  accessTokenId, accessTokenId.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual AppMgrResultCode KillProcessesByAccessTokenId(const uint32_t accessTokenId);
 
     /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
@@ -176,7 +196,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillApplicationSelf(const bool clearPageStack = true);
+    virtual AppMgrResultCode KillApplicationSelf(const bool clearpagestack = false);
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
@@ -672,18 +692,18 @@ public:
     int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener);
 
     /**
-     * Whether the current application process is the last surviving process.
-     *
-     * @return Returns true is final application process, others return false.
-     */
-    bool IsFinalAppProcess();
-
-    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
      */
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
+
+    /**
+     * Whether the current application process is the last surviving process.
+     *
+     * @return Returns true is final application process, others return false.
+     */
+    bool IsFinalAppProcess();
 
     int32_t RegisterRenderStateObserver(const sptr<IRenderStateObserver> &observer);
 
@@ -768,6 +788,36 @@ public:
     int32_t NotifyProcessDependedOnWeb();
 
     void KillProcessDependedOnWeb();
+
+    /**
+     * Temporarily block the process cache feature.
+     *
+     * @param pids the pids of the processes that should be blocked.
+     */
+    virtual AppMgrResultCode BlockProcessCacheByPids(const std::vector<int32_t> &pids);
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
+
+    /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

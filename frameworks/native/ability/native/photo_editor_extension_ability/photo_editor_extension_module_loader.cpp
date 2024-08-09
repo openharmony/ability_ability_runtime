@@ -24,7 +24,7 @@ PhotoEditorExtensionModuleLoader::~PhotoEditorExtensionModuleLoader() = default;
 
 Extension *PhotoEditorExtensionModuleLoader::Create(const std::unique_ptr<Runtime> &runtime) const
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "Called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     return PhotoEditorExtension::Create(runtime);
 }
 
@@ -34,7 +34,7 @@ std::map<std::string, std::string> PhotoEditorExtensionModuleLoader::GetParams()
     std::map<std::string, std::string> params;
     // type means extension type in ExtensionAbilityType of
     // extension_ability_info.h, 266 means photoEditorExtension.
-    params.insert(std::pair<std::string, std::string>("type", "266"));
+    params.insert(std::pair<std::string, std::string>("type", "23"));
     params.insert(std::pair<std::string, std::string>("name", "PhotoEditorExtensionAbility"));
     return params;
 }

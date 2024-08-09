@@ -41,6 +41,10 @@ public:
 
     void SetRootCallerToken(sptr<IRemoteObject> &rootCallerToken);
 
+    sptr<IRemoteObject> GetFocusedCallerToken() const;
+
+    void SetFocusedCallerToken(sptr<IRemoteObject> &rootCallerToken);
+
     virtual bool ContinueToGetCallerToken();
 
     virtual void Update(const AAFwk::AbilityRequest &abilityRequest);
@@ -54,8 +58,10 @@ public:
     int32_t extensionRecordId_ = INVALID_EXTENSION_RECORD_ID;
     uint32_t processMode_ = 0;
     bool isHostSpecified_ = false;
+    pid_t hostPid_ = 0;
 private:
     sptr<IRemoteObject> rootCallerToken_ = nullptr;
+    sptr<IRemoteObject> focusedCallerToken_ = nullptr;
     sptr<AAFwk::PreLoadUIExtStateObserver> preLoadUIExtStateObserver_;
 };
 } // namespace AbilityRuntime

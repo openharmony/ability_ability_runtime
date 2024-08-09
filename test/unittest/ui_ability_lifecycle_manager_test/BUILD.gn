@@ -48,6 +48,7 @@ ohos_unittest("ui_ability_lifecycle_manager_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
@@ -95,6 +96,10 @@ ohos_unittest("ui_ability_lifecycle_manager_test") {
       "window_manager:libwsutils",
       "window_manager:scene_session",
     ]
+  }
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
 }
 

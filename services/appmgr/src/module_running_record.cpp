@@ -319,7 +319,7 @@ bool ModuleRunningRecord::RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteOb
 
 bool ModuleRunningRecord::IsAbilitiesBackgrounded()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard<ffrt::mutex> lock(abilitiesMutex_);
     for (const auto &iter : abilities_) {
         const auto &ability = iter.second;
@@ -372,6 +372,35 @@ void ModuleRunningRecord::SetApplicationClient(std::shared_ptr<AppLifeCycleDeal>
 ModuleRecordState ModuleRunningRecord::GetState() const
 {
     return owenState_;
+}
+
+bool ModuleRunningRecord::IsAllAbilityReadyToCleanedByUserRequest()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::lock_guard<ffrt::mutex> lock(abilitiesMutex_);
+    for (const auto &iter : abilities_) {
+        const auto &ability = iter.second;
+        if (ability == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "ability is nullptr.");
+            continue;
+        }
+        const auto &abilityInfo = ability->GetAbilityInfo();
+        if (abilityInfo != nullptr && abilityInfo->type != AbilityType::PAGE) {
+            continue;
+        }
+
+        if (!ability->IsUserRequestCleaning()) {
+            return false;
+        }
+
+        const auto &state = ability->GetState();
+        if (state != AbilityState::ABILITY_STATE_BACKGROUND &&
+            state != AbilityState::ABILITY_STATE_TERMINATED &&
+            state != AbilityState::ABILITY_STATE_END) {
+            return false;
+        }
+    }
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -64,7 +64,12 @@ enum class OperationType {
     /**
      * Starts a foreground ability without a UI.
      */
-    START_FOREGROUND_SERVICE
+    START_FOREGROUND_SERVICE,
+
+    /**
+     * Starts a service extension.
+     */
+    START_SERVICE_EXTENSION
 };
 
 enum class Flags {
@@ -149,6 +154,7 @@ public:
     void CancelWantSenderLocked(PendingWantRecord &record, bool cleanAbility);
     int32_t PendingWantStartAbility(const Want &want, const sptr<StartOptions> &startOptions,
         const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid, int32_t callerTokenId);
+    int32_t PendingWantStartServiceExtension(Want &want, const sptr<IRemoteObject> &callerToken);
     int32_t PendingWantStartAbilitys(const std::vector<WantsInfo> &wantsInfo, const sptr<StartOptions> &startOptions,
         const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid, int32_t callerTokenId);
     int32_t DeviceIdDetermine(const Want &want, const sptr<StartOptions> &startOptions,
@@ -172,6 +178,8 @@ private:
     sptr<PendingWantRecord> GetPendingWantRecordByCode(int32_t code);
     static int32_t PendingRecordIdCreate();
     void ClearPendingWantRecordTask(const std::string &bundleName, int32_t uid);
+
+    bool CheckCallerPermission();
 
 private:
     std::map<std::shared_ptr<PendingWantKey>, sptr<PendingWantRecord>> wantRecords_;

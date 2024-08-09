@@ -15,14 +15,8 @@
 
 #include "data_ability_record.h"
 
-#include <algorithm>
-#include <mutex>
-
 #include "ability_util.h"
-#include "app_scheduler.h"
 #include "connection_state_manager.h"
-#include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {

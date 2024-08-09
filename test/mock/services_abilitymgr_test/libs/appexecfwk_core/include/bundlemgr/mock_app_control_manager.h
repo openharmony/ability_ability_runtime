@@ -18,7 +18,7 @@
 
 #include "want.h"
 #include <gmock/gmock.h>
-#include "foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_core/include/app_control/app_control_interface.h"
+#include "app_control_interface.h"
 #include "iremote_proxy.h"
 
 namespace OHOS {
@@ -52,8 +52,8 @@ public:
     virtual ErrCode GetAppRunningControlRule(
         const std::string& bundleName, int32_t userId, AppRunningControlRuleResult& controlRuleResult) override;
 
-    virtual ErrCode GetAbilityRunningControlRule(
-        const std::string &bundleName, int32_t userId, std::vector<DisposedRule> &disposedRuleList) override;
+    virtual ErrCode GetAbilityRunningControlRule(const std::string &bundleName, int32_t userId,
+        std::vector<DisposedRule> &disposedRuleList, int32_t appIndex = 0) override;
 
     virtual ErrCode ConfirmAppJumpControlRule(const std::string &callerBundleName, const std::string &targetBundleName,
         int32_t userId) override;

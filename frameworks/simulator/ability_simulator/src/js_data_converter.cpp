@@ -17,7 +17,6 @@
 
 #include "common_func.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 
@@ -53,7 +52,7 @@ int32_t ConvertDisplayId(const std::string &displayId)
 
 Global::Resource::ScreenDensity ConvertDensity(const std::string &density)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "ConvertDensity is called");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     auto resolution = Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET;
 
     static const std::vector<std::pair<std::string, Global::Resource::ScreenDensity>> resolutions = {
@@ -99,7 +98,7 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration &
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Native object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null Native object");
         return object;
     }
 
@@ -130,7 +129,7 @@ napi_value CreateJsApplicationInfo(napi_env env, const AppExecFwk::ApplicationIn
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Create object failed.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Create object failed");
         return nullptr;
     }
 
@@ -143,7 +142,7 @@ napi_value CreateJsHapModuleInfo(napi_env env, const AppExecFwk::HapModuleInfo &
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Create object failed.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Create object failed");
         return nullptr;
     }
 
@@ -156,7 +155,7 @@ napi_value CreateJsAbilityInfo(napi_env env, const AppExecFwk::AbilityInfo &abil
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Create object failed.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Create object failed");
         return nullptr;
     }
 

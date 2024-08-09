@@ -18,7 +18,6 @@
 #include <string>
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 
 namespace OHOS {
@@ -44,7 +43,7 @@ std::string MakeLogContent(napi_env env, napi_callback_info info)
         }
 
         if (value == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITY_SIM, "Failed to convert to string object");
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "convert to string failed");
             continue;
         }
 
@@ -57,7 +56,7 @@ std::string MakeLogContent(napi_env env, napi_callback_info info)
 
         auto buff = new (std::nothrow) char[bufferLen + 1];
         if (buff == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITY_SIM, "Failed to allocate buffer, size = %zu", bufferLen + 1);
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "allocate buffer failed, size = %zu", bufferLen + 1);
             break;
         }
 
@@ -77,7 +76,7 @@ template<LogLevel LEVEL>
 napi_value ConsoleLog(napi_env env, napi_callback_info info)
 {
     if (env == nullptr || info == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "env or callback info is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null env/callback info");
         return nullptr;
     }
 
@@ -93,7 +92,7 @@ void InitConsoleLogModule(napi_env env, napi_value globalObject)
     napi_value consoleObj = nullptr;
     napi_create_object(env, &consoleObj);
     if (consoleObj == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Failed to create console object");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create console object failed");
         return;
     }
     const char *moduleName = "console";

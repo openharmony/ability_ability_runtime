@@ -56,7 +56,7 @@ public:
         }
     };
 
-    void SignRestartAppFlag(const std::string &bundleName);
+    void SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery = false);
 
     /**
      * StartUIAbility with request.
@@ -66,7 +66,8 @@ public:
      * @param isColdStart the session info of the ability is or not cold start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, bool &isColdStart);
+    int StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag,
+        bool &isColdStart);
 
     /**
      * @brief execute after the ability schedule the lifecycle
@@ -77,6 +78,16 @@ public:
      * @return execute error code
      */
     int AbilityTransactionDone(const sptr<IRemoteObject> &token, int state, const AppExecFwk::PacMap &saveData);
+
+    /**
+     * @brief execute after the ability schedule the lifecycle
+     *
+     * @param token the ability token
+     * @param windowConfig the windowconfig
+     * @return execute error code
+     */
+    int AbilityWindowConfigTransactionDone(
+        const sptr<IRemoteObject> &token, const AppExecFwk::WindowConfig &windowConfig);
 
     /**
      * attach ability thread ipc object.
@@ -119,7 +130,7 @@ public:
      * @param fromUser, Whether form user.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool fromUser = false);
+    int MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool fromUser, uint32_t sceneFlag);
 
     /**
      * GetUIAbilityRecordBySessionInfo.
@@ -128,6 +139,9 @@ public:
      * @return Returns AbilityRecord shared_ptr.
      */
     std::shared_ptr<AbilityRecord> GetUIAbilityRecordBySessionInfo(const sptr<SessionInfo> &sessionInfo);
+
+    int BackToCallerAbilityWithResult(sptr<SessionInfo> currentSessionInfo,
+        std::shared_ptr<AbilityRecord> abilityRecord);
 
     /**
      * CloseUIAbility, close the special ability by scb.
@@ -356,8 +370,10 @@ public:
 
     int32_t GetAbilityStateByPersistentId(int32_t persistentId, bool &state);
 
-    void NotifySCBToHandleException(const std::shared_ptr<AbilityRecord> &ability, int32_t errorCode,
+    void NotifySCBToHandleAtomicServiceException(sptr<SessionInfo> sessionInfo, int32_t errorCode,
         const std::string& errorReason);
+
+    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -380,6 +396,8 @@ private:
     void HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &ability,
         AbilityState state = AbilityState::INITIAL);
     void HandleForegroundTimeout(const std::shared_ptr<AbilityRecord> &ability);
+    void NotifySCBToHandleException(const std::shared_ptr<AbilityRecord> &ability, int32_t errorCode,
+        const std::string& errorReason);
     void MoveToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void PrintTimeOutLog(std::shared_ptr<AbilityRecord> ability, uint32_t msgId, bool isHalf = false);
@@ -395,7 +413,7 @@ private:
     // byCall
     int CallAbilityLocked(const AbilityRequest &abilityRequest);
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
-    int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest) const;
+    int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
 
@@ -427,6 +445,7 @@ private:
     void BatchCloseUIAbility(const std::unordered_set<std::shared_ptr<AbilityRecord>>& abilitySet);
     void TerminateSession(std::shared_ptr<AbilityRecord> abilityRecord);
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
+    void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;

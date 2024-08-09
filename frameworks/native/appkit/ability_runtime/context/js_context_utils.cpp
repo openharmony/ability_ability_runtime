@@ -19,7 +19,6 @@
 #include "application_context.h"
 #include "application_context_manager.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
 #include "js_application_context_utils.h"
 #include "js_data_struct_converter.h"
@@ -78,10 +77,13 @@ protected:
 
 private:
     napi_value OnCreateBundleContext(napi_env env, NapiCallbackInfo& info);
+    napi_value CreateJsBundleContext(napi_env env, const std::shared_ptr<Context>& bundleContext);
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo& info);
+    napi_value CreateJSApplicationContext(napi_env env, const std::shared_ptr<ApplicationContext> applicationContext);
     napi_value OnSwitchArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo& info);
+    napi_value CreateJsModuleContext(napi_env env, const std::shared_ptr<Context>& moduleContext);
     napi_value OnCreateSystemHspModuleResourceManager(napi_env env, NapiCallbackInfo& info);
     napi_value OnCreateModuleResourceManager(napi_env env, NapiCallbackInfo& info);
     bool CheckCallerIsSystemApp();
@@ -105,7 +107,6 @@ napi_value JsBaseContext::GetApplicationContext(napi_env env, napi_callback_info
 
 napi_value JsBaseContext::SwitchArea(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnSwitchArea, BASE_CONTEXT_NAME);
 }
 
@@ -149,7 +150,6 @@ napi_value JsBaseContext::OnSwitchArea(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsBaseContext::CreateModuleContext(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnCreateModuleContext, BASE_CONTEXT_NAME);
 }
 
@@ -166,7 +166,7 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
     std::string moduleName;
 
     if (!ConvertFromJsValue(env, info.argv[1], moduleName)) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Parse inner module name.");
+        TAG_LOGD(AAFwkTag::APPKIT, "Parse inner module name");
         if (!ConvertFromJsValue(env, info.argv[0], moduleName)) {
             TAG_LOGE(AAFwkTag::APPKIT, "Parse moduleName failed");
             ThrowInvalidParamError(env, "Parse param moduleName failed, moduleName must be string.");
@@ -185,20 +185,24 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
             AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
             return CreateJsUndefined(env);
         }
-        TAG_LOGD(AAFwkTag::APPKIT, "Parse outer module name.");
+        TAG_LOGD(AAFwkTag::APPKIT, "Parse outer module name");
         moduleContext = context->CreateModuleContext(bundleName, moduleName);
     }
 
     if (!moduleContext) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to create module context.");
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to create module context");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
+    return CreateJsModuleContext(env, moduleContext);
+}
 
+napi_value JsBaseContext::CreateJsModuleContext(napi_env env, const std::shared_ptr<Context>& moduleContext)
+{
     napi_value value = CreateJsBaseContext(env, moduleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid systemModule.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid systemModule");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -221,7 +225,6 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
 
 napi_value JsBaseContext::CreateSystemHspModuleResourceManager(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext,
         OnCreateSystemHspModuleResourceManager, BASE_CONTEXT_NAME);
 }
@@ -266,7 +269,6 @@ napi_value JsBaseContext::OnCreateSystemHspModuleResourceManager(napi_env env, N
 
 napi_value JsBaseContext::CreateModuleResourceManager(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnCreateModuleResourceManager, BASE_CONTEXT_NAME);
 }
 
@@ -308,7 +310,6 @@ napi_value JsBaseContext::OnCreateModuleResourceManager(napi_env env, NapiCallba
 
 napi_value JsBaseContext::GetArea(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetArea, BASE_CONTEXT_NAME);
 }
 
@@ -325,7 +326,6 @@ napi_value JsBaseContext::OnGetArea(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsBaseContext::GetCacheDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetCacheDir, BASE_CONTEXT_NAME);
 }
 
@@ -342,7 +342,6 @@ napi_value JsBaseContext::OnGetCacheDir(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsBaseContext::GetTempDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetTempDir, BASE_CONTEXT_NAME);
 }
 
@@ -359,7 +358,6 @@ napi_value JsBaseContext::OnGetTempDir(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsBaseContext::GetResourceDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetResourceDir, BASE_CONTEXT_NAME);
 }
 
@@ -376,7 +374,6 @@ napi_value JsBaseContext::OnGetResourceDir(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsBaseContext::GetFilesDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetFilesDir, BASE_CONTEXT_NAME);
 }
 
@@ -393,7 +390,6 @@ napi_value JsBaseContext::OnGetFilesDir(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsBaseContext::GetDistributedFilesDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetDistributedFilesDir, BASE_CONTEXT_NAME);
 }
 
@@ -410,7 +406,6 @@ napi_value JsBaseContext::OnGetDistributedFilesDir(napi_env env, NapiCallbackInf
 
 napi_value JsBaseContext::GetDatabaseDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetDatabaseDir, BASE_CONTEXT_NAME);
 }
 
@@ -427,7 +422,6 @@ napi_value JsBaseContext::OnGetDatabaseDir(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsBaseContext::GetPreferencesDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetPreferencesDir, BASE_CONTEXT_NAME);
 }
 
@@ -444,7 +438,6 @@ napi_value JsBaseContext::OnGetPreferencesDir(napi_env env, NapiCallbackInfo& in
 
 napi_value JsBaseContext::GetGroupDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetGroupDir, BASE_CONTEXT_NAME);
 }
 
@@ -463,7 +456,6 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
         return CreateJsUndefined(env);
     }
 
-    TAG_LOGD(AAFwkTag::APPKIT, "Get Group Dir");
     auto complete = [context = context_, groupId]
         (napi_env env, NapiAsyncTask& task, int32_t status) {
         auto completeContext = context.lock();
@@ -485,7 +477,6 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
 
 napi_value JsBaseContext::GetBundleCodeDir(napi_env env, napi_callback_info info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetBundleCodeDir, BASE_CONTEXT_NAME);
 }
 
@@ -509,7 +500,7 @@ napi_value JsBaseContext::OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info
 {
     auto context = context_.lock();
     if (!context) {
-        HILOG_WARN("context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetCloudFileDir();
@@ -550,11 +541,15 @@ napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& 
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
+    return CreateJsBundleContext(env, bundleContext);
+}
 
+napi_value JsBaseContext::CreateJsBundleContext(napi_env env, const std::shared_ptr<Context>& bundleContext)
+{
     napi_value value = CreateJsBaseContext(env, bundleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "OnCreateBundleContext, invalid systemModule.");
+        TAG_LOGW(AAFwkTag::APPKIT, "OnCreateBundleContext, invalid systemModule");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -577,7 +572,6 @@ napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& 
 
 napi_value JsBaseContext::OnGetApplicationContext(napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "start");
     auto context = context_.lock();
     if (!context) {
         TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
@@ -600,11 +594,16 @@ napi_value JsBaseContext::OnGetApplicationContext(napi_env env, NapiCallbackInfo
             return objValue;
         }
     }
+    return CreateJSApplicationContext(env, applicationContext);
+}
 
+napi_value JsBaseContext::CreateJSApplicationContext(napi_env env,
+    const std::shared_ptr<ApplicationContext> applicationContext)
+{
     napi_value value = JsApplicationContextUtils::CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "OnGetApplicationContext, invalid systemModule.");
+        TAG_LOGW(AAFwkTag::APPKIT, "OnGetApplicationContext, invalid systemModule");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -646,18 +645,18 @@ napi_value AttachBaseContext(napi_env env, void* value, void* hint)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (value == nullptr || env == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid parameter.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid parameter");
         return nullptr;
     }
     auto ptr = reinterpret_cast<std::weak_ptr<Context>*>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid context.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid context");
         return nullptr;
     }
     napi_value object = CreateJsBaseContext(env, ptr, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &object, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "AttachBaseContext, invalid systemModule.");
+        TAG_LOGW(AAFwkTag::APPKIT, "AttachBaseContext, invalid systemModule");
         return nullptr;
     }
 
@@ -681,18 +680,18 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (value == nullptr || env == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid parameter.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid parameter");
         return nullptr;
     }
     auto ptr = reinterpret_cast<std::weak_ptr<ApplicationContext>*>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid context.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid context");
         return nullptr;
     }
     napi_value object = JsApplicationContextUtils::CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &object, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid systemModule.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid systemModule");
         return nullptr;
     }
     auto contextObj = systemModule->GetNapiValue();
@@ -713,12 +712,40 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
     return contextObj;
 }
 
+void BindPropertyAndFunction(napi_env env, napi_value object, const char* moduleName)
+{
+    BindNativeProperty(env, object, "cacheDir", JsBaseContext::GetCacheDir);
+    BindNativeProperty(env, object, "tempDir", JsBaseContext::GetTempDir);
+    BindNativeProperty(env, object, "resourceDir", JsBaseContext::GetResourceDir);
+    BindNativeProperty(env, object, "filesDir", JsBaseContext::GetFilesDir);
+    BindNativeProperty(env, object, "distributedFilesDir", JsBaseContext::GetDistributedFilesDir);
+    BindNativeProperty(env, object, "databaseDir", JsBaseContext::GetDatabaseDir);
+    BindNativeProperty(env, object, "preferencesDir", JsBaseContext::GetPreferencesDir);
+    BindNativeProperty(env, object, "bundleCodeDir", JsBaseContext::GetBundleCodeDir);
+    BindNativeProperty(env, object, "cloudFileDir", JsBaseContext::GetCloudFileDir);
+    BindNativeProperty(env, object, "area", JsBaseContext::GetArea);
+
+    BindNativeFunction(env, object, "createBundleContext", moduleName, JsBaseContext::CreateBundleContext);
+    BindNativeFunction(env, object, "getApplicationContext", moduleName, JsBaseContext::GetApplicationContext);
+    BindNativeFunction(env, object, "switchArea", moduleName, JsBaseContext::SwitchArea);
+    BindNativeFunction(env, object, "getArea", moduleName, JsBaseContext::GetArea);
+    BindNativeFunction(env, object, "createModuleContext", moduleName, JsBaseContext::CreateModuleContext);
+    BindNativeFunction(env, object, "createSystemHspModuleResourceManager", moduleName,
+        JsBaseContext::CreateSystemHspModuleResourceManager);
+    BindNativeFunction(env, object, "createModuleResourceManager", moduleName,
+        JsBaseContext::CreateModuleResourceManager);
+    BindNativeFunction(env, object, "getGroupDir", moduleName, JsBaseContext::GetGroupDir);
+}
 napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, bool keepContext)
 {
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid object.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid object");
+        return nullptr;
+    }
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context object");
         return nullptr;
     }
     auto jsContext = std::make_unique<JsBaseContext>(context);
@@ -742,27 +769,8 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
         }
     }
 
-    BindNativeProperty(env, object, "cacheDir", JsBaseContext::GetCacheDir);
-    BindNativeProperty(env, object, "tempDir", JsBaseContext::GetTempDir);
-    BindNativeProperty(env, object, "resourceDir", JsBaseContext::GetResourceDir);
-    BindNativeProperty(env, object, "filesDir", JsBaseContext::GetFilesDir);
-    BindNativeProperty(env, object, "distributedFilesDir", JsBaseContext::GetDistributedFilesDir);
-    BindNativeProperty(env, object, "databaseDir", JsBaseContext::GetDatabaseDir);
-    BindNativeProperty(env, object, "preferencesDir", JsBaseContext::GetPreferencesDir);
-    BindNativeProperty(env, object, "bundleCodeDir", JsBaseContext::GetBundleCodeDir);
-    BindNativeProperty(env, object, "cloudFileDir", JsBaseContext::GetCloudFileDir);
-    BindNativeProperty(env, object, "area", JsBaseContext::GetArea);
     const char *moduleName = "JsBaseContext";
-    BindNativeFunction(env, object, "createBundleContext", moduleName, JsBaseContext::CreateBundleContext);
-    BindNativeFunction(env, object, "getApplicationContext", moduleName, JsBaseContext::GetApplicationContext);
-    BindNativeFunction(env, object, "switchArea", moduleName, JsBaseContext::SwitchArea);
-    BindNativeFunction(env, object, "getArea", moduleName, JsBaseContext::GetArea);
-    BindNativeFunction(env, object, "createModuleContext", moduleName, JsBaseContext::CreateModuleContext);
-    BindNativeFunction(env, object, "createSystemHspModuleResourceManager", moduleName,
-        JsBaseContext::CreateSystemHspModuleResourceManager);
-    BindNativeFunction(env, object, "createModuleResourceManager", moduleName,
-        JsBaseContext::CreateModuleResourceManager);
-    BindNativeFunction(env, object, "getGroupDir", moduleName, JsBaseContext::GetGroupDir);
+    BindPropertyAndFunction(env, object, moduleName);
     return object;
 }
 }  // namespace AbilityRuntime

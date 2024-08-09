@@ -23,7 +23,6 @@
 
 #include "bundle_constants.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "json_serializer.h"
 #include "json_util.h"
 #include "nlohmann/json.hpp"
@@ -149,7 +148,7 @@ void from_json(const nlohmann::json &jsonObject, Resource &resource)
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGD(AAFwkTag::ABILITY_SIM, "read Resource from database error, error code : %{public}d", parseResult);
+        TAG_LOGD(AAFwkTag::ABILITY_SIM, "read Resource from database error,:%{public}d", parseResult);
     }
 }
 
@@ -866,7 +865,7 @@ void from_json(const nlohmann::json &jsonObject, ApplicationInfo &applicationInf
         parseResult,
         ArrayType::NUMBER);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "from_json error, error code : %{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "from_json error:%{public}d", parseResult);
     }
 }
 }  // namespace AppExecFwk

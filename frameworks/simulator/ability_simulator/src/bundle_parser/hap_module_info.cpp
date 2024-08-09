@@ -17,7 +17,6 @@
 
 #include "bundle_constants.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "json_util.h"
 #include "nlohmann/json.hpp"
 #include "string_ex.h"
@@ -100,7 +99,7 @@ void from_json(const nlohmann::json &jsonObject, PreloadItem &preloadItem)
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "read PreloadItem from database error, error code : %{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "read PreloadItem from database error:%{public}d", parseResult);
     }
 }
 
@@ -151,7 +150,7 @@ void from_json(const nlohmann::json &jsonObject, ProxyData &proxyData)
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "read ProxyData from database error, error code : %{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "read ProxyData from database error:%{public}d", parseResult);
     }
 }
 
@@ -607,7 +606,7 @@ void from_json(const nlohmann::json &jsonObject, HapModuleInfo &hapModuleInfo)
         parseResult,
         ArrayType::STRING);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "HapModuleInfo from_json error, error code : %{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "HapModuleInfo from_json error:%{public}d", parseResult);
     }
 }
 }  // namespace AppExecFwk

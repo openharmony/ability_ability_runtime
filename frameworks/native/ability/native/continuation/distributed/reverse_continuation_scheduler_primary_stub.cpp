@@ -16,7 +16,6 @@
 #include "reverse_continuation_scheduler_primary_stub.h"
 #include "ability_scheduler_interface.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -24,16 +23,9 @@ namespace AppExecFwk {
 const std::string ReverseContinuationSchedulerPrimaryStub::DESCRIPTOR(
     "ohos.abilityshell.ReverseContinuationSchedulerMaster");
 
-ReverseContinuationSchedulerPrimaryStub::ReverseContinuationSchedulerPrimaryStub()
-{
-    requestFuncMap_[NOTIFY_REPLICA_TERMINATED] = &ReverseContinuationSchedulerPrimaryStub::NotifyReplicaTerminatedInner;
-    requestFuncMap_[CONTINUATION_BACK] = &ReverseContinuationSchedulerPrimaryStub::ContinuationBackInner;
-}
+ReverseContinuationSchedulerPrimaryStub::ReverseContinuationSchedulerPrimaryStub() {}
 
-ReverseContinuationSchedulerPrimaryStub::~ReverseContinuationSchedulerPrimaryStub()
-{
-    requestFuncMap_.clear();
-}
+ReverseContinuationSchedulerPrimaryStub::~ReverseContinuationSchedulerPrimaryStub() {}
 
 /**
  * @brief Sets an entry for receiving requests.
@@ -48,56 +40,41 @@ ReverseContinuationSchedulerPrimaryStub::~ReverseContinuationSchedulerPrimaryStu
 int ReverseContinuationSchedulerPrimaryStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
     std::u16string token = data.ReadInterfaceToken();
     std::u16string descriptor = Str8ToStr16(DESCRIPTOR);
     if (descriptor != token) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "ReverseContinuationSchedulerPrimaryStub::OnRemoteRequest failed, DESCRIPTOR != touken");
+            "DESCRIPTOR != token");
         return -1;
     }
-
-    auto iter = requestFuncMap_.find(code);
-    if (iter != requestFuncMap_.end()) {
-        auto func = iter->second;
-        if (func != nullptr) {
-            return (this->*func)(data, reply);
-        } else {
-            TAG_LOGW(AAFwkTag::CONTINUATION,
-                "ReverseContinuationSchedulerPrimaryStub::OnRemoteRequest failed, func is nullptr");
-        }
-    } else {
-        TAG_LOGW(AAFwkTag::CONTINUATION,
-            "ReverseContinuationSchedulerPrimaryStub::OnRemoteRequest failed, iter not find");
+    switch (code) {
+        case NOTIFY_REPLICA_TERMINATED:
+            return NotifyReplicaTerminatedInner(data, reply);
+        case CONTINUATION_BACK:
+            return ContinuationBackInner(data, reply);
     }
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int ReverseContinuationSchedulerPrimaryStub::NotifyReplicaTerminatedInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
     NotifyReplicaTerminated();
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     return 0;
 }
 int ReverseContinuationSchedulerPrimaryStub::ContinuationBackInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "ReverseContinuationSchedulerPrimaryStub::ContinuationBackInner want is nullptr");
+            "want is nullptr");
         return -1;
     }
 
     if (!ContinuationBack(*want)) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "ReverseContinuationSchedulerPrimaryStub::NotifyReverseaTerminatedInner failed, ContinuationBack() "
-                 "return false");
+            "ContinuationBack failed");
         return -1;
     }
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     return 0;
 }
 }  // namespace AppExecFwk

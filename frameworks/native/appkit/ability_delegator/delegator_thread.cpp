@@ -15,7 +15,6 @@
 
 #include "delegator_thread.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -33,12 +32,12 @@ DelegatorThread::DelegatorThread(bool isMain)
 bool DelegatorThread::Run(const DTask &task)
 {
     if (!task) {
-        TAG_LOGW(AAFwkTag::DELEGATOR, "Invalid input parameter");
+        TAG_LOGW(AAFwkTag::DELEGATOR, "invalid input params");
         return false;
     }
 
     if (!handler_) {
-        TAG_LOGW(AAFwkTag::DELEGATOR, "Invalid EventHandler");
+        TAG_LOGW(AAFwkTag::DELEGATOR, "invalid EventHandler");
         return false;
     }
 

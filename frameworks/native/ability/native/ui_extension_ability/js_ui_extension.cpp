@@ -24,7 +24,6 @@
 #include "context.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
@@ -56,20 +55,20 @@ constexpr size_t ARGC_TWO = 2;
 
 napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "AttachUIExtensionContext");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     if (value == nullptr || extValue == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "invalid parameter.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid parameter");
         return nullptr;
     }
 
     auto ptr = reinterpret_cast<std::weak_ptr<UIExtensionContext> *>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "invalid context.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid context");
         return nullptr;
     }
     auto screenModePtr = reinterpret_cast<std::weak_ptr<int32_t> *>(extValue)->lock();
     if (screenModePtr == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid screenModePtr.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid screenModePtr");
         return nullptr;
     }
     napi_value contextObj = nullptr;
@@ -90,7 +89,7 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
         contextObj = contextRef->GetNapiValue();
     }
     if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "load context error.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "load context error");
         return nullptr;
     }
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc,
@@ -117,7 +116,7 @@ JsUIExtension::JsUIExtension(JsRuntime& jsRuntime) : jsRuntime_(jsRuntime)
 
 JsUIExtension::~JsUIExtension()
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "Js ui extension destructor.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "Js ui extension destructor");
     auto context = GetContext();
     if (context) {
         context->Unbind();
@@ -136,7 +135,7 @@ void JsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension begin init");
+    TAG_LOGD(AAFwkTag::UI_EXT, "init");
     CHECK_POINTER(record);
     UIExtension::Init(record, application, handler, token);
     if (Extension::abilityInfo_ == nullptr || Extension::abilityInfo_->srcEntrance.empty()) {
@@ -200,7 +199,7 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
         return;
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "BindContext CreateJsUIExtensionContext.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "BindContext CreateJsUIExtensionContext");
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Want info is null.");
         return;
@@ -209,7 +208,7 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
     napi_value contextObj = nullptr;
     CreateJSContext(env, contextObj, context, screenMode);
     if (shellContextRef_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get LoadSystemModuleByEngine.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get LoadSystemModuleByEngine");
         return;
     }
     contextObj = shellContextRef_->GetNapiValue();
@@ -232,13 +231,13 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
         },
         nullptr, nullptr);
-    TAG_LOGD(AAFwkTag::UI_EXT, "Init end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::OnStart(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnStart begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     Extension::OnStart(want);
     auto context = GetContext();
 #ifdef SUPPORT_GRAPHICS
@@ -270,18 +269,18 @@ void JsUIExtension::OnStart(const AAFwk::Want &want)
         napi_value argv[] = {CreateJsLaunchParam(env, launchParam) };
         CallObjectMethod("onCreate", argv, ARGC_ONE);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnStart end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::OnStop()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     UIExtension::OnStop();
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnStop begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
     OnStopCallBack();
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnStop end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 void JsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback)
 {
@@ -291,7 +290,7 @@ void JsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbac
         return;
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "OnStop begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     UIExtension::OnStop();
     HandleScope handleScope(jsRuntime_);
     napi_value result = CallObjectMethod("onDestroy", nullptr, 0, true);
@@ -305,7 +304,7 @@ void JsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbac
     auto asyncCallback = [extensionWeakPtr = weakPtr]() {
         auto jsUIExtension = extensionWeakPtr.lock();
         if (jsUIExtension == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "extension is nullptr.");
+            TAG_LOGE(AAFwkTag::UI_EXT, "extension is nullptr");
             return;
         }
         jsUIExtension->OnStopCallBack();
@@ -313,10 +312,10 @@ void JsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbac
     callbackInfo->Push(asyncCallback);
     isAsyncCallback = CallPromise(result, callbackInfo);
     if (!isAsyncCallback) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call promise.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call promise");
         OnStopCallBack();
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "OnStop end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::OnStopCallBack()
@@ -329,7 +328,7 @@ void JsUIExtension::OnStopCallBack()
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(context->GetToken());
     if (ret) {
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
-        TAG_LOGD(AAFwkTag::UI_EXT, "The service connection is not disconnected.");
+        TAG_LOGD(AAFwkTag::UI_EXT, "The service connection is not disconnected");
     }
 
     auto applicationContext = Context::GetApplicationContext();
@@ -341,14 +340,14 @@ void JsUIExtension::OnStopCallBack()
 bool JsUIExtension::CheckPromise(napi_value result)
 {
     if (result == nullptr) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "result is null, no need to call promise.");
+        TAG_LOGD(AAFwkTag::UI_EXT, "result is null, no need to call promise");
         return false;
     }
     napi_env env = jsRuntime_.GetNapiEnv();
     bool isPromise = false;
     napi_is_promise(env, result, &isPromise);
     if (!isPromise) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "result is not promise, no need to call promise.");
+        TAG_LOGD(AAFwkTag::UI_EXT, "result is not promise, no need to call promise");
         return false;
     }
     return true;
@@ -360,7 +359,7 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     NAPI_CALL_NO_THROW(napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &data), nullptr);
     auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(data);
     if (callbackInfo == nullptr) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "Invalid input info.");
+        TAG_LOGD(AAFwkTag::UI_EXT, "Invalid input info");
         return nullptr;
     }
     callbackInfo->Call();
@@ -373,19 +372,19 @@ bool JsUIExtension::CallPromise(napi_value result, AppExecFwk::AbilityTransactio
 {
     auto env = jsRuntime_.GetNapiEnv();
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to convert native value to NativeObject.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to convert native value to NativeObject");
         return false;
     }
     napi_value then = nullptr;
     napi_get_named_property(env, result, "then", &then);
     if (then == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get property: then.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get property: then");
         return false;
     }
     bool isCallable = false;
     napi_is_callable(env, then, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "property then is not callable.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "property then is not callable");
         return false;
     }
     HandleScope handleScope(jsRuntime_);
@@ -405,7 +404,7 @@ sptr<IRemoteObject> JsUIExtension::OnConnect(const AAFwk::Want &want)
     napi_env env = jsRuntime_.GetNapiEnv();
     auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(env, result);
     if (remoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "remoteObj is nullptr.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "remoteObj is nullptr");
     }
     return remoteObj;
 }
@@ -414,10 +413,10 @@ void JsUIExtension::OnDisconnect(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnDisconnect(want);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnDisconnect begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnDisconnect begin");
     HandleScope handleScope(jsRuntime_);
     CallOnDisconnect(want, false);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnDisconnect end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnDisconnect end");
 }
 
 void JsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
@@ -425,7 +424,7 @@ void JsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::S
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo is nullptr.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo is nullptr");
         return;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "begin. persistentId: %{private}d, winCmd: %{public}d",
@@ -448,7 +447,7 @@ void JsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::S
             DestroyWindow(sessionInfo);
             break;
         default:
-            TAG_LOGD(AAFwkTag::UI_EXT, "unsupported cmd.");
+            TAG_LOGD(AAFwkTag::UI_EXT, "unsupported cmd");
             break;
     }
     OnCommandWindowDone(sessionInfo, winCmd);
@@ -458,24 +457,24 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     const sptr<AAFwk::SessionInfo> &sessionInfo, bool needForeground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     if (!HandleSessionCreate(want, sessionInfo)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "HandleSessionCreate failed.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "HandleSessionCreate failed");
         return false;
     }
 
     std::unique_ptr<InsightIntentExecutorAsyncCallback> executorCallback = nullptr;
     executorCallback.reset(InsightIntentExecutorAsyncCallback::Create());
     if (executorCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Create async callback failed.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Create async callback failed");
         return false;
     }
 
     auto uiExtension = std::static_pointer_cast<JsUIExtension>(shared_from_this());
     executorCallback->Push([uiExtension, sessionInfo, needForeground](AppExecFwk::InsightIntentExecuteResult result) {
-        TAG_LOGI(AAFwkTag::UI_EXT, "Execute post insightintent.");
+        TAG_LOGI(AAFwkTag::UI_EXT, "Execute post insightintent");
         if (uiExtension == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "UI extension is nullptr.");
+            TAG_LOGE(AAFwkTag::UI_EXT, "UI extension is nullptr");
             return;
         }
 
@@ -504,10 +503,10 @@ bool JsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         jsRuntime_, executorInfo, std::move(executorCallback));
     if (!ret) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
         // callback has removed, release in insight intent executor.
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return true;
 }
 
@@ -515,7 +514,7 @@ void JsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &se
     const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "Post insightintent executed.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "Post insightintent executed");
     if (needForeground) {
         // If uiextensionability is started for the first time or need move background to foreground.
         HandleScope handleScope(jsRuntime_);
@@ -539,7 +538,7 @@ void JsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &se
 void JsUIExtension::OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     auto context = GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
@@ -556,7 +555,7 @@ void JsUIExtension::OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionI
     }
     AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo, winCmd, abilityCmd);
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
@@ -564,11 +563,11 @@ void JsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &s
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ".", sessionInfo->uiExtensionComponentId);
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64, sessionInfo->uiExtensionComponentId);
     auto componentId = sessionInfo->uiExtensionComponentId;
     auto res = uiWindowMap_.find(componentId);
     if (res != uiWindowMap_.end() && res->second != nullptr) {
@@ -597,13 +596,13 @@ void JsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &s
         res->second->Show();
         foregroundWindows_.emplace(componentId);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
 {
     Extension::OnCommand(want, restart, startId);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnCommand begin restart=%{public}s,startId=%{public}d.",
+    TAG_LOGD(AAFwkTag::UI_EXT, "restart=%{public}s, startId=%{public}d",
         restart ? "true" : "false", startId);
     // wrap want
     HandleScope handleScope(jsRuntime_);
@@ -614,13 +613,13 @@ void JsUIExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId
     napi_create_int32(env, startId, &napiStartId);
     napi_value argv[] = {napiWant, napiStartId};
     CallObjectMethod("onRequest", argv, ARGC_TWO);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnCommand end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnForeground begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     Extension::OnForeground(want, sessionInfo);
 
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
@@ -633,35 +632,35 @@ void JsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sess
     ForegroundWindow(want, sessionInfo);
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onForeground");
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnForeground end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnBackground begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onBackground");
     Extension::OnBackground();
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnBackground end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr || sessionInfo->uiExtensionComponentId == 0) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return false;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", element: %{public}s.",
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", element: %{public}s",
         sessionInfo->uiExtensionComponentId, want.GetElement().GetURI().c_str());
     auto compId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(compId) == uiWindowMap_.end()) {
         auto context = GetContext();
         auto uiWindow = CreateUIWindow(context, sessionInfo);
         if (uiWindow == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "create ui window error.");
+            TAG_LOGE(AAFwkTag::UI_EXT, "create ui window error");
             return false;
         }
         HandleScope handleScope(jsRuntime_);
@@ -677,7 +676,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             screenMode_ = AAFwk::EMBEDDED_FULL_SCREEN_MODE;
             auto jsAppWindowStage = CreateAppWindowStage(uiWindow, sessionInfo);
             if (jsAppWindowStage == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "JsAppWindowStage is nullptr.");
+                TAG_LOGE(AAFwkTag::UI_EXT, "JsAppWindowStage is nullptr");
                 return false;
             }
             napi_value argv[] = {jsAppWindowStage->GetNapiValue()};
@@ -729,51 +728,52 @@ void JsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!HandleSessionCreate(want, sessionInfo)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "HandleSessionCreate failed.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "HandleSessionCreate failed");
         return;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ".", sessionInfo->uiExtensionComponentId);
+    TAG_LOGI(AAFwkTag::UI_EXT, "Before window show UIExtcomponent id: %{public}" PRId64,
+        sessionInfo->uiExtensionComponentId);
     auto componentId = sessionInfo->uiExtensionComponentId;
     auto& uiWindow = uiWindowMap_[componentId];
     if (uiWindow) {
         uiWindow->Show();
         foregroundWindows_.emplace(componentId);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ".", sessionInfo->uiExtensionComponentId);
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Fail to find uiWindow");
         return;
     }
     auto& uiWindow = uiWindowMap_[componentId];
+    TAG_LOGI(AAFwkTag::UI_EXT, "Befor window hide UIExtcomponent id: %{public}" PRId64,
+        sessionInfo->uiExtensionComponentId);
     if (uiWindow) {
         uiWindow->Hide();
         foregroundWindows_.erase(componentId);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ".", sessionInfo->uiExtensionComponentId);
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Wrong to find uiWindow");
@@ -789,6 +789,8 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
             CallObjectMethod("onSessionDestroy", argv, ARGC_ONE);
         }
     }
+    TAG_LOGI(AAFwkTag::UI_EXT, "Befor window destory, UIExtcomponent id: %{public}" PRId64,
+        sessionInfo->uiExtensionComponentId);
     auto uiWindow = uiWindowMap_[componentId];
     if (uiWindow) {
         uiWindow->Destroy();
@@ -809,12 +811,12 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     if (abilityResultListeners_) {
         abilityResultListeners_->RemoveListener(componentId);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 napi_value JsUIExtension::CallObjectMethod(const char *name, napi_value const *argv, size_t argc, bool withResult)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension CallObjectMethod(%{public}s), begin", name);
+    TAG_LOGD(AAFwkTag::UI_EXT, "%{public}s, begin", name);
 
     if (!jsObj_) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Not found UIExtension.js");
@@ -850,7 +852,7 @@ napi_value JsUIExtension::CallOnConnect(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnConnect(want);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension CallOnConnect begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension CallOnConnect begin");
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
@@ -875,9 +877,9 @@ napi_value JsUIExtension::CallOnConnect(const AAFwk::Want &want)
     napi_value remoteNative = nullptr;
     napi_call_function(env, obj, method, ARGC_ONE, argv, &remoteNative);
     if (remoteNative == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "remoteNative is nullptr.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "remoteNative is nullptr");
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension CallOnConnect end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return remoteNative;
 }
 
@@ -919,7 +921,7 @@ void JsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& conf
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnConfigurationUpdated(configuration);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnConfigurationUpdated called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
 
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
@@ -936,7 +938,7 @@ void JsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& conf
 
     auto fullConfig = context->GetConfiguration();
     if (!fullConfig) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "configuration is nullptr.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "configuration is nullptr");
         return;
     }
     JsExtensionContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
@@ -948,7 +950,7 @@ void JsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& conf
 void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std::string> &info)
 {
     Extension::Dump(params, info);
-    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension Dump called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     // create js array object of params
@@ -978,7 +980,7 @@ void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std
     napi_value dumpInfo = nullptr;
     napi_call_function(env, obj, method, ARGC_ONE, argv, &dumpInfo);
     if (dumpInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "dumpInfo is nullptr.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "dumpInfo is nullptr");
         return;
     }
     uint32_t len = 0;
@@ -988,7 +990,7 @@ void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std
         napi_value element = nullptr;
         napi_get_element(env, dumpInfo, i, &element);
         if (!ConvertFromJsValue(env, element, dumpInfoStr)) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "Parse dumpInfoStr fail.");
+            TAG_LOGE(AAFwkTag::UI_EXT, "Parse dumpInfoStr fail");
             return;
         }
         info.push_back(dumpInfoStr);
@@ -998,11 +1000,11 @@ void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std
 
 void JsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     Extension::OnAbilityResult(requestCode, resultCode, resultData);
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGW(AAFwkTag::UI_EXT, "not attached to any runtime context!");
+        TAG_LOGW(AAFwkTag::UI_EXT, "not attached to any runtime context");
         return;
     }
     context->OnAbilityResult(requestCode, resultCode, resultData);
@@ -1011,7 +1013,7 @@ void JsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want 
         return;
     }
     abilityResultListeners_->OnAbilityResult(requestCode, resultCode, resultData);
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 }
 }

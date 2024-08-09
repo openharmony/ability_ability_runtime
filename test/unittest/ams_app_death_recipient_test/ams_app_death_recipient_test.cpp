@@ -20,7 +20,6 @@
 #undef private
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "iremote_object.h"
 #include "mock_ability_token.h"
 #include "mock_app_scheduler.h"
@@ -177,8 +176,6 @@ sptr<IRemoteObject> AppDeathRecipientTest::GetApp(int32_t pid, int size)
     appMgrServiceInner_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
 
     auto appRecord = GetAppRunningRecordByIndex(pid);
-
-    EXPECT_EQ(size, static_cast<int>(appMgrServiceInner_->GetRecentAppList().size()));
 
     sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
     sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockAppScheduler.GetRefPtr());

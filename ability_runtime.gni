@@ -93,6 +93,7 @@ declare_args() {
   background_task_mgr_continuous_task_enable = true
   resource_schedule_service_enable = true
   ability_runtime_power = true
+  ability_runtime_feature_sandboxmanager = false
   ability_runtime_relational = true
   ability_runtime_ces = true
   ability_runtime_resource = true
@@ -106,6 +107,8 @@ declare_args() {
       "com.ohos.textautofill/entry/TextAutoFillAbility"
   cj_frontend = true
   ability_runtime_app_no_response_dialog = false
+  ability_runtime_app_no_response_bundlename = "com.ohos.taskmanager"
+  include_app_domain_verify = true
 
   if (!defined(global_parts_info) ||
       defined(global_parts_info.account_os_account)) {
@@ -170,10 +173,20 @@ declare_args() {
     hichecker_enabled = false
   }
 
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.bundlemanager_app_domain_verify)) {
+    include_app_domain_verify = false
+  }
+
   if (!defined(global_parts_info) ||
       defined(global_parts_info.ability_form_fwk)) {
     form_fwk_enable = true
   } else {
     form_fwk_enable = false
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.accesscontrol_sandbox_manager)) {
+    ability_runtime_feature_sandboxmanager = true
   }
 }
