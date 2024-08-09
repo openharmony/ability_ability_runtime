@@ -487,6 +487,7 @@ group("unittest") {
       "js_auto_fill_extension_test:unittest",
       "js_service_extension_test:unittest",
       "js_ui_extension_context_test:unittest",
+      "js_ui_service_extension_connection_test:unittest",
       "js_ui_service_extension_test:unittest",
       "lifecycle_deal_test:unittest",
       "lifecycle_test:unittest",
