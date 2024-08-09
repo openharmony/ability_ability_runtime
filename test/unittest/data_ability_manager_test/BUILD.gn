@@ -39,6 +39,7 @@ ohos_unittest("data_ability_manager_test") {
     "${ability_runtime_services_path}/abilitymgr/src/rdb/ability_resident_process_rdb.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/rdb/parser_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/rdb/rdb_data_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "data_ability_manager_test.cpp",  # add mock file
   ]
 

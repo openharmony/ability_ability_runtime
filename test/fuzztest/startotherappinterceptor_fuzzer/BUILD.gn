@@ -46,6 +46,7 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/start_other_app_interceptor.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "startotherappinterceptor_fuzzer.cpp",
   ]
 
