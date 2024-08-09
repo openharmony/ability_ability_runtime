@@ -15,30 +15,28 @@
 
 #include "dialog_session_info.h"
 
-#include <string>
-
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "parcel_macro.h"
-#include "string_ex.h"
 
 namespace OHOS {
 namespace AAFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
-constexpr size_t MEMBER_NUM = 8;
+constexpr size_t MEMBER_NUM = 11;
 
 std::string DialogAbilityInfo::GetURI() const
 {
     return bundleName + "/" + moduleName + "/" + abilityName + "/" +
         std::to_string(bundleIconId) + "/" + std::to_string(bundleLabelId) + "/" +
         std::to_string(abilityIconId) + "/" + std::to_string(abilityLabelId) + "/" +
-        std::to_string(visible);
+        std::to_string(visible) + "/" + std::to_string(appIndex) + "/" +
+        std::to_string(static_cast<int32_t>(multiAppMode.multiAppModeType)) + "/" +
+        std::to_string(multiAppMode.maxCount);
 }
 
 bool DialogAbilityInfo::ParseURI(const std::string &uri)
 {
     if (std::count(uri.begin(), uri.end(), '/') != MEMBER_NUM - 1) {
-        TAG_LOGE(AAFwkTag::DIALOG, "Invalid uri: %{public}s.", uri.c_str());
+        TAG_LOGE(AAFwkTag::DIALOG, "Invalid uri: %{public}s", uri.c_str());
         return false;
     }
 
@@ -55,6 +53,9 @@ bool DialogAbilityInfo::ParseURI(const std::string &uri)
     abilityIconId = static_cast<int32_t>(std::stoi(uriVec[index++]));
     abilityLabelId = static_cast<int32_t>(std::stoi(uriVec[index++]));
     visible = std::stoi(uriVec[index++]);
+    appIndex = static_cast<int32_t>(std::stoi(uriVec[index++]));
+    multiAppMode.multiAppModeType = static_cast<AppExecFwk::MultiAppModeType>(std::stoi(uriVec[index++]));
+    multiAppMode.maxCount = static_cast<int32_t>(std::stoi(uriVec[index++]));
     return true;
 }
 
@@ -83,7 +84,7 @@ bool DialogSessionInfo::ReadFromParcel(Parcel &parcel)
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, targetAbilityInfoSize);
     CONTAINER_SECURITY_VERIFY(parcel, targetAbilityInfoSize, &targetAbilityInfos);
     if (targetAbilityInfoSize > CYCLE_LIMIT) {
-        TAG_LOGE(AAFwkTag::DIALOG, "size is too large.");
+        TAG_LOGE(AAFwkTag::DIALOG, "size too large");
         return false;
     }
     for (auto i = 0; i < targetAbilityInfoSize; i++) {

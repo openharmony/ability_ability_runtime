@@ -17,14 +17,13 @@
 #include "js_insight_intent_executor.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_runtime.h"
 #include "runtime.h"
 
 namespace OHOS::AbilityRuntime {
 std::shared_ptr<InsightIntentExecutor> InsightIntentExecutor::Create(Runtime& runtime)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "InsightIntentExecutor Create runtime");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     switch (runtime.GetLanguage()) {
         case Runtime::Language::JS:
             return static_cast<std::shared_ptr<InsightIntentExecutor>>(JsInsightIntentExecutor::Create(
@@ -38,7 +37,7 @@ bool InsightIntentExecutor::Init(const InsightIntentExecutorInfo& intentInfo)
 {
     auto executeParam = intentInfo.executeParam;
     if (executeParam == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Execute param invalid.");
+        TAG_LOGE(AAFwkTag::INTENT, "null executeParam");
         return false;
     }
 

@@ -14,14 +14,13 @@
  */
 
 #include "deeplink_reserve/deeplink_reserve_config.h"
+
 #include <fstream>
-#include <sstream>
 #include <unistd.h>
 #include <regex>
 
 #include "config_policy_utils.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {

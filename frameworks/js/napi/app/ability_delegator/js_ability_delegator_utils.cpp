@@ -17,7 +17,6 @@
 
 #include <map>
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_ability_monitor.h"
 #include "napi/native_common.h"
 
@@ -26,12 +25,12 @@ namespace AbilityDelegatorJs {
 using namespace OHOS::AbilityRuntime;
 napi_value CreateJsAbilityDelegator(napi_env env)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get object");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null objValue");
         return nullptr;
     }
 
@@ -71,11 +70,11 @@ napi_value CreateJsAbilityDelegator(napi_env env)
 
 napi_value SetAbilityDelegatorArgumentsPara(napi_env env, const std::map<std::string, std::string> &paras)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get object");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null objValue");
         return nullptr;
     }
 
@@ -90,12 +89,12 @@ napi_value SetAbilityDelegatorArgumentsPara(napi_env env, const std::map<std::st
 napi_value CreateJsAbilityDelegatorArguments(
     napi_env env, const std::shared_ptr<AbilityDelegatorArgs> &abilityDelegatorArgs)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get object");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null objValue");
         return CreateJsNull(env);
     }
 
@@ -113,17 +112,17 @@ napi_value CreateJsAbilityDelegatorArguments(
 
 napi_value CreateJsShellCmdResult(napi_env env, std::unique_ptr<ShellCmdResult> &shellResult)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "called");
 
     if (!shellResult) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "shellResult is null");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null shellResult");
         return nullptr;
     }
 
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get object");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null objValue");
         return nullptr;
     }
 

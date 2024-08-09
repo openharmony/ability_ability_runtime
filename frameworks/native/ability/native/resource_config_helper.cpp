@@ -14,7 +14,6 @@
  */
 #include "resource_config_helper.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "configuration_convertor.h"
 #include "hitrace_meter.h"
 
@@ -62,6 +61,10 @@ std::string ResourceConfigHelper::GetMnc()
 void ResourceConfigHelper::SetMnc(std::string mnc)
 {
     mnc_ = mnc;
+}
+void ResourceConfigHelper::SetThemeId(std::string themeId)
+{
+    themeId_ = themeId;
 }
 
 std::string ResourceConfigHelper::GetColorModeIsSetByApp()
@@ -140,6 +143,13 @@ void ResourceConfigHelper::UpdateResConfig(std::unique_ptr<Global::Resource::Res
         if (ConvertStringToUint32(mnc_, mncNum)) {
             resConfig->SetMnc(mncNum);
             TAG_LOGD(AAFwkTag::ABILITY, "set mnc: %{public}u", resConfig->GetMnc());
+        }
+    }
+    if (!themeId_.empty()) {
+        uint32_t themeId = 0;
+        if (ConvertStringToUint32(themeId_, themeId)) {
+            resConfig->SetThemeId(themeId);
+            TAG_LOGD(AAFwkTag::ABILITY, "set themeId: %{public}u", resConfig->GetThemeId());
         }
     }
 }

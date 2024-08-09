@@ -18,7 +18,6 @@
 #include <sstream>
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "native_engine/native_engine.h"
 #ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
@@ -32,7 +31,7 @@ constexpr char BACKTRACE[] = "=====================Backtrace====================
 std::string NapiUncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(napi_value obj, const char* key)
 {
     if (obj == nullptr) {
-        TAG_LOGE(AAFwkTag::JSENV, "Failed to get value from key.");
+        TAG_LOGE(AAFwkTag::JSENV, "Failed to get value from key");
         return "";
     }
 
@@ -41,7 +40,7 @@ std::string NapiUncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(napi_valu
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env_, valueStr, &valueType);
     if (valueType != napi_string) {
-        TAG_LOGE(AAFwkTag::JSENV, "Failed to convert value from key.");
+        TAG_LOGD(AAFwkTag::JSENV, "Failed to convert value from key");
         return "";
     }
 
@@ -51,7 +50,7 @@ std::string NapiUncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(napi_valu
     size_t valueStrLength = 0;
     napi_get_value_string_utf8(env_, valueStr, valueCStr.get(), valueStrBufLength + 1, &valueStrLength);
     std::string ret(valueCStr.get(), valueStrLength);
-    TAG_LOGD(AAFwkTag::JSENV, "GetNativeStrFromJsTaggedObj Success.");
+    TAG_LOGD(AAFwkTag::JSENV, "GetNativeStrFromJsTaggedObj Success");
     return ret;
 }
 

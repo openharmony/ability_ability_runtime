@@ -24,7 +24,6 @@
 #include "ffrt.h"
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "hisysevent.h"
 #include "parameter.h"
@@ -115,7 +114,7 @@ int AppfreezeInner::AppfreezeHandle(const FaultData& faultData, bool onlyMainThr
 bool AppfreezeInner::IsExitApp(const std::string& name)
 {
     if (name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::APP_INPUT_BLOCK ||
-        name == AppFreezeType::LIFECYCLE_TIMEOUT) {
+        name == AppFreezeType::LIFECYCLE_TIMEOUT || name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S) {
         return true;
     }
     return false;
@@ -129,7 +128,7 @@ void AppfreezeInner::SendProcessKillEvent(const std::string& killReason)
         std::string processName = applicationInfo->process;
         int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
             HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_PID, pid,
-            EVENT_PROCESS_NAME, applicationInfo->process, EVENT_MESSAGE, killReason);
+            EVENT_PROCESS_NAME, processName, EVENT_MESSAGE, killReason);
         TAG_LOGI(AAFwkTag::APPDFR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
             " pid=%{public}d, processName=%{public}s, msg=%{public}s", result, pid, processName.c_str(),
             killReason.c_str());

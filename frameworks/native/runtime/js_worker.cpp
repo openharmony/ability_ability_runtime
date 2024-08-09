@@ -35,7 +35,6 @@
 #include "extractor.h"
 #include "file_mapper.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "js_runtime_utils.h"
@@ -77,7 +76,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     if (nativeEngine == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Input nativeEngine is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null nativeEngine");
         return;
     }
 
@@ -96,11 +95,11 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
     // load jsfwk
     if (g_jsFramework && !arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to load js framework!");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "load jsframework failed");
     }
 
     if (g_debugMode) {
-        auto instanceId = arkNativeEngine->GetThreadIdOrTaskId();
+        auto instanceId = DFXJSNApi::GetCurrentThreadId();
         std::string instanceName = "workerThread_" + std::to_string(instanceId);
         bool needBreakPoint = ConnectServerManager::Get().AddInstance(instanceId, instanceId, instanceName);
         if (g_nativeStart) {
@@ -121,16 +120,16 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
 
 void OffWorkerFunc(NativeEngine* nativeEngine)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "OffWorkerFunc called");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     if (nativeEngine == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Input nativeEngine is nullptr");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null nativeEngine");
         return;
     }
 
     if (g_debugMode) {
-        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
-        auto instanceId = arkNativeEngine->GetThreadIdOrTaskId();
+        auto instanceId = DFXJSNApi::GetCurrentThreadId();
         ConnectServerManager::Get().RemoveInstance(instanceId);
+        auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         panda::JSNApi::StopDebugger(vm);
     }
@@ -162,7 +161,7 @@ std::string AssetHelper::NormalizedFileName(const std::string& fileName) const
 
 AssetHelper::~AssetHelper()
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "destroyed.");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "destroyed");
     if (fd_ != -1) {
         close(fd_);
         fd_ = -1;
@@ -173,7 +172,7 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
     std::string& ami, bool& useSecureMem, bool isRestricted)
 {
     if (uri.empty() || buff == nullptr || buffSize == nullptr || workerInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Input params invalid.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Input params invalid");
         return;
     }
 
@@ -190,7 +189,7 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
         // 1.2 start with ../
         // 1.3 start with @namespace [not support]
         // 1.4 start with modulename
-        TAG_LOGD(AAFwkTag::JSRUNTIME, "The application is packaged using jsbundle mode.");
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "esmodule mode");
         if (uri.find_first_of("/") == 0) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "uri start with /modulename");
             realPath = uri.substr(1);
@@ -217,17 +216,17 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Get asset, ami: %{private}s", ami.c_str());
         if (ami.find(CACHE_DIRECTORY) != std::string::npos) {
             if (!ReadAmiData(ami, buff, buffSize, content, useSecureMem, isRestricted)) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by ami failed.");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by ami failed");
             }
         } else if (!ReadFilePathData(filePath, buff, buffSize, content, useSecureMem, isRestricted)) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by filepath failed.");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by filepath failed");
         }
     } else {
         // 2.1 start with @bundle:bundlename/modulename
         // 2.2 start with /modulename
         // 2.3 start with @namespace
         // 2.4 start with modulename
-        TAG_LOGD(AAFwkTag::JSRUNTIME, "The application is packaged using esmodule mode.");
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "esmodule mode");
         if (uri.find(BUNDLE_NAME_FLAG) == 0) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "uri start with @bundle:");
             size_t fileNamePos = uri.find_last_of("/");
@@ -259,34 +258,34 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Get asset, ami: %{private}s", ami.c_str());
         if (ami.find(CACHE_DIRECTORY) != std::string::npos) {
             if (!ReadAmiData(ami, buff, buffSize, content, useSecureMem, isRestricted)) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by ami failed.");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by ami failed");
             }
         } else if (!ReadFilePathData(filePath, buff, buffSize, content, useSecureMem, isRestricted)) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by filepath failed.");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by filepath failed");
         }
     }
 }
 
 bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "Get secure mem.");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     std::string resolvedPath;
     resolvedPath.reserve(PATH_MAX);
     resolvedPath.resize(PATH_MAX - 1);
     if (realpath(ami.c_str(), &(resolvedPath[0])) == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Realpath file %{private}s caught error: %{public}d.", ami.c_str(), errno);
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Realpath file %{private}s caught error: %{public}d", ami.c_str(), errno);
         return false;
     }
 
     int fd = open(resolvedPath.c_str(), O_RDONLY);
     if (fd < 0) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Open file %{private}s caught error: %{public}d.", resolvedPath.c_str(), errno);
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Open file %{private}s caught error: %{public}d", resolvedPath.c_str(), errno);
         return false;
     }
 
     struct stat statbuf;
     if (fstat(fd, &statbuf) < 0) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get fstat of file %{private}s caught error: %{public}d.", resolvedPath.c_str(),
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get fstat of file %{private}s caught error: %{public}d", resolvedPath.c_str(),
             errno);
         close(fd);
         return false;
@@ -294,14 +293,14 @@ bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* bu
 
     std::unique_ptr<FileMapper> fileMapper = std::make_unique<FileMapper>();
     if (fileMapper == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create file mapper failed.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create file mapper failed");
         close(fd);
         return false;
     }
 
     auto result = fileMapper->CreateFileMapper(resolvedPath, false, fd, 0, statbuf.st_size, FileMapperType::SAFE_ABC);
     if (!result) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create file %{private}s mapper failed.", resolvedPath.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create file %{private}s mapper failed", resolvedPath.c_str());
         close(fd);
         return false;
     }
@@ -326,30 +325,30 @@ bool AssetHelper::ReadAmiData(const std::string& ami, uint8_t** buff, size_t* bu
             return true;
         } else {
             // If api version less than 12 and get secure mem failed, try get normal mem.
-            TAG_LOGW(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s.", ami.c_str());
+            TAG_LOGW(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s", ami.c_str());
         }
     }
 
     char path[PATH_MAX];
     if (realpath(ami.c_str(), path) == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Realpath file %{private}s caught error: %{public}d.", ami.c_str(), errno);
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Realpath file %{private}s caught error: %{public}d", ami.c_str(), errno);
         return false;
     }
 
     std::ifstream stream(path, std::ios::binary | std::ios::ate);
     if (!stream.is_open()) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to open file %{private}s.", ami.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to open file %{private}s", ami.c_str());
         return false;
     }
 
     auto fileLen = stream.tellg();
     if (!workerInfo_->isDebugVersion && fileLen > ASSET_FILE_MAX_SIZE) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "File is too large.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "File too large");
         return false;
     }
 
     if (fileLen <= 0) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid file length.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid file length");
         return false;
     }
 
@@ -364,7 +363,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
 {
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null bundleMgrHelper");
         return false;
     }
 
@@ -372,11 +371,11 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
     auto getInfoResult = bundleMgrHelper->GetBundleInfoForSelf(
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
     if (getInfoResult != 0) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "GetBundleInfoForSelf failed.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "GetBundleInfoForSelf failed");
         return false;
     }
     if (bundleInfo.hapModuleInfos.size() == 0) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get hapModuleInfo of bundleInfo failed.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get hapModuleInfo of bundleInfo failed");
         return false;
     }
 
@@ -427,7 +426,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
             if (workerInfo_->apiTargetVersion >= API12) {
                 useSecureMem = true;
                 if (safeData == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s.", filePath.c_str());
+                    TAG_LOGE(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s", filePath.c_str());
                     return false;
                 }
                 *buff = safeData->GetDataPtr();
@@ -440,7 +439,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
                 return true;
             } else {
                 // If api version less than 12 and get secure mem failed, try get normal mem.
-                TAG_LOGW(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s.", filePath.c_str());
+                TAG_LOGW(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s", filePath.c_str());
             }
         }
         if (!extractor->ExtractToBufByName(realfilePath, dataPtr, fileLen)) {
@@ -501,7 +500,7 @@ void AssetHelper::GetAmi(std::string& ami, const std::string& filePath)
     TAG_LOGI(AAFwkTag::JSRUNTIME, "targetFilePath %{public}s", targetFilePath.c_str());
 
     if (!flag) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "get targetFilePath failed!");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "get targetFilePath failed");
         return;
     }
 

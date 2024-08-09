@@ -16,7 +16,6 @@
 #include "quick_fix_manager_service_ability.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
@@ -25,45 +24,40 @@ REGISTER_SYSTEM_ABILITY_BY_ID(QuickFixManagerServiceAbility, QUICK_FIX_MGR_SERVI
 
 QuickFixManagerServiceAbility::QuickFixManagerServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate), service_(nullptr)
-{
-    TAG_LOGD(AAFwkTag::QUICKFIX, "function called.");
-}
+{}
 
 QuickFixManagerServiceAbility::~QuickFixManagerServiceAbility()
 {
-    TAG_LOGD(AAFwkTag::QUICKFIX, "function called.");
+    TAG_LOGD(AAFwkTag::QUICKFIX, "called");
 }
 
 void QuickFixManagerServiceAbility::OnStart()
 {
-    TAG_LOGI(AAFwkTag::QUICKFIX, "function called.");
+    TAG_LOGI(AAFwkTag::QUICKFIX, "called");
     if (service_ != nullptr) {
-        TAG_LOGD(AAFwkTag::QUICKFIX, "Quick fix manager service has started.");
+        TAG_LOGD(AAFwkTag::QUICKFIX, "Quick fix manager service has started");
         return;
     }
 
     service_ = QuickFixManagerService::GetInstance();
     if (service_ == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "instance is nullptr.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "instance is nullptr");
         return;
     }
 
     if (!service_->Init()) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "init failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "init failed");
         return;
     }
 
     if (!Publish(service_)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Publish failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Publish failed");
         return;
     }
-
-    TAG_LOGI(AAFwkTag::QUICKFIX, "Quick fix manager service start succeed.");
 }
 
 void QuickFixManagerServiceAbility::OnStop()
 {
-    TAG_LOGI(AAFwkTag::QUICKFIX, "function called.");
     service_ = nullptr;
 }
 }  // namespace AAFwk

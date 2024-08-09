@@ -17,14 +17,13 @@
 
 #include "interceptor/disposed_rule_interceptor.h"
 #include "ability_record.h"
-#include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "modal_system_ui_extension.h"
-#include "want.h"
+
 namespace OHOS {
 namespace AAFwk {
 namespace {
-const std::string UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
+constexpr const char* UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
+constexpr const char* INTERCEPT_MISSION_ID = "intercept_missionId";
 }
 
 DisposedObserver::DisposedObserver(const AppExecFwk::DisposedRule &disposedRule,
@@ -36,19 +35,26 @@ void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData 
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
     std::lock_guard<ffrt::mutex> guard(observerLock_);
-    if (abilityStateData.abilityState == static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND)) {
-        token_ = abilityStateData.token;
-        auto abilityRecord = Token::GetAbilityRecordByToken(token_);
-        if (abilityRecord && !abilityRecord->GetAbilityInfo().isStageBasedModel) {
-            auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
-            Want want = *disposedRule_.want;
-            want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
-            bool ret = systemUIExtension->CreateModalUIExtension(want);
-            if (!ret) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start system UIExtension");
-            }
-            interceptor_->UnregisterObserver(abilityStateData.bundleName);
+    if (abilityStateData.abilityState != static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND)) {
+        return;
+    }
+    token_ = abilityStateData.token;
+    auto abilityRecord = Token::GetAbilityRecordByToken(token_);
+    if (abilityRecord && !abilityRecord->GetAbilityInfo().isStageBasedModel) {
+        auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
+        Want want = *disposedRule_.want;
+        want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
+        auto sessionInfo = abilityRecord->GetSessionInfo();
+        if (sessionInfo != nullptr) {
+            want.SetParam(INTERCEPT_MISSION_ID, sessionInfo->persistentId);
+        } else {
+            want.SetParam(INTERCEPT_MISSION_ID, abilityRecord->GetMissionId());
         }
+        bool ret = IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want));
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start system UIExtension");
+        }
+        interceptor_->UnregisterObserver(abilityStateData.bundleName);
     }
 }
 
@@ -68,7 +74,7 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
             auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
             Want want = *disposedRule_.want;
             want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
-            bool ret = systemUIExtension->CreateModalUIExtension(want);
+            bool ret = IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want));
             if (!ret) {
                 interceptor_->UnregisterObserver(pageStateData.bundleName);
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start system UIExtension");

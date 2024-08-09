@@ -21,7 +21,6 @@
 #include "ability_manager_client.h"
 #include "ability_runtime/js_caller_complex.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_extension_context.h"
 #include "js_error_utils.h"
 #include "js_data_struct_converter.h"
@@ -152,6 +151,11 @@ public:
         GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnStartExtensionAbility);
     }
 
+    static napi_value StartUIServiceExtensionAbility(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnStartUIServiceExtension);
+    }
+
     static napi_value StartServiceExtensionAbilityWithAccount(napi_env env, napi_callback_info info)
     {
         GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnStartExtensionAbilityWithAccount);
@@ -183,7 +187,7 @@ private:
     static void ClearFailedCallConnection(
         const std::weak_ptr<ServiceExtensionContext>& serviceContext, const std::shared_ptr<CallerCallBack> &callback)
     {
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "clear failed call of startup is called.");
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
         auto context = serviceContext.lock();
         if (context == nullptr || callback == nullptr) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "clear failed call of startup input param is nullptr.");
@@ -199,7 +203,12 @@ private:
         int ret = 0;
         if (freeInstallObserver_ == nullptr) {
             freeInstallObserver_ = new JsFreeInstallObserver(env);
-            ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(freeInstallObserver_);
+            auto context = context_.lock();
+            if (!context) {
+                TAG_LOGW(AAFwkTag::SERVICE_EXT, "context is released");
+                return;
+            }
+            ret = context->AddFreeInstallObserver(freeInstallObserver_);
         }
 
         if (ret != ERR_OK) {
@@ -219,7 +228,7 @@ private:
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "StartAbility");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Start ability failed, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -362,7 +371,7 @@ private:
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StartAbilityAsCaller");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Start ability as caller failed, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -427,7 +436,7 @@ private:
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StartAbilityByCall");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Start ability by call failed, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -578,7 +587,7 @@ private:
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StartAbilityWithAccount");
         if (info.argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Start ability with account failed, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -672,10 +681,10 @@ private:
 
     napi_value OnConnectAbility(napi_env env, NapiCallbackInfo& info)
     {
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "ConnectAbility called.");
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
         // Check params count
         if (info.argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Connect ability error, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -696,12 +705,12 @@ private:
         NapiAsyncTask::CompleteCallback complete = [connection, connectId, innerErrorCode](napi_env env,
             NapiAsyncTask& task, int32_t status) {
             if (*innerErrorCode == 0) {
-                HILOG_INFO("Connect ability success.");
+                TAG_LOGI(AAFwkTag::SERVICE_EXT, "Connect ability success.");
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
                 return;
             }
 
-            HILOG_ERROR("Connect ability failed.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Connect ability failed.");
             int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrorCode));
             if (errcode) {
                 connection->CallJsFailed(errcode);
@@ -719,7 +728,7 @@ private:
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "ConnectAbilityWithAccount");
         // Check params count
         if (info.argc < ARGC_THREE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Connect ability failed, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -792,7 +801,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "DisconnectAbility start");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Disconnect ability error, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -862,7 +871,7 @@ private:
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StartExtensionAbility");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Start extension failed, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -895,11 +904,50 @@ private:
         return result;
     }
 
+    napi_value OnStartUIServiceExtension(napi_env env, NapiCallbackInfo& info)
+    {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "OnStartUIServiceExtension is enter");
+        if (info.argc <ARGC_TWO) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        AAFwk::Want want;
+        if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to parse want!");
+            ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
+            return CreateJsUndefined(env);
+        }
+
+        NapiAsyncTask::CompleteCallback complete =
+            [weak = context_, want](napi_env env, NapiAsyncTask& task, int32_t status) {
+                auto context = weak.lock();
+                if (!context) {
+                    TAG_LOGW(AAFwkTag::SERVICE_EXT, "context is released");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+                    return;
+                }
+                auto errcode = context->StartUIServiceExtensionAbility(want);
+                if (errcode == 0) {
+                    task.ResolveWithNoError(env, CreateJsUndefined(env));
+                } else {
+                    task.Reject(env, CreateJsErrorByNativeErr(env, errcode));
+                }
+            };
+
+        napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartUIServiceExtension",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        return result;
+    }
+
     napi_value OnStartExtensionAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StartExtensionAbilityWithAccount");
         if (info.argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Stop extension error, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -937,7 +985,7 @@ private:
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StopExtensionAbility");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Start extension failed, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -974,7 +1022,7 @@ private:
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StopExtensionAbilityWithAccount");
         if (info.argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Stop extension failed, not enough params.");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -1038,7 +1086,7 @@ private:
             if (*innerErrCode == ERR_OK) {
                 task.Resolve(env, CreateJsUndefined(env));
             } else {
-                TAG_LOGE(AAFwkTag::APPKIT, "OnRequestModalUIExtension is failed %{public}d", *innerErrCode);
+                TAG_LOGE(AAFwkTag::APPKIT, "OnRequestModalUIExtension failed %{public}d", *innerErrCode);
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }
         };
@@ -1103,7 +1151,7 @@ private:
                 auto context = weak.lock();
                 if (!context) {
                     TAG_LOGW(AAFwkTag::SERVICE_EXT, "context is released");
-                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                     return;
                 }
                 auto errcode = context->PreStartMission(bundleName, moduleName, abilityName, startTime);
@@ -1221,6 +1269,8 @@ napi_value CreateJsServiceExtensionContext(napi_env env, std::shared_ptr<Service
         "connectServiceExtensionAbilityWithAccount", moduleName, JsServiceExtensionContext::ConnectAbilityWithAccount);
     BindNativeFunction(env, object, "startServiceExtensionAbility", moduleName,
         JsServiceExtensionContext::StartServiceExtensionAbility);
+    BindNativeFunction(env, object, "startUIServiceExtensionAbility", moduleName,
+        JsServiceExtensionContext::StartUIServiceExtensionAbility);
     BindNativeFunction(env, object, "startServiceExtensionAbilityWithAccount", moduleName,
         JsServiceExtensionContext::StartServiceExtensionAbilityWithAccount);
     BindNativeFunction(env, object, "stopServiceExtensionAbility", moduleName,

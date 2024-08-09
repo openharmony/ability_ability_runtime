@@ -35,7 +35,6 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
     "${ability_runtime_services_path}/appmgr/src/app_mgr_event.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_mgr_service_inner.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_preloader.cpp",
-    "${ability_runtime_services_path}/appmgr/src/app_process_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_manager.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_record.cpp",
     "${ability_runtime_services_path}/appmgr/src/app_running_status_module.cpp",
@@ -106,6 +105,15 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
       "window_manager:libwm",
       "window_manager:libwsutils",
     ]
+  }
+
+  if (ability_runtime_feature_sandboxmanager) {
+    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
+  }
+
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
 }
 

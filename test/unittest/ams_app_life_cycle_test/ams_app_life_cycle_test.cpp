@@ -333,8 +333,6 @@ HWTEST_F(AmsAppLifeCycleTest, RemoveAppFromRecentList_001, TestSize.Level1)
     appRecord->SetApplicationClient(client);
 
     EXPECT_TRUE(appRecord);
-    int size = serviceInner_->GetRecentAppList().size();
-    EXPECT_EQ(size, 1);
     EXPECT_FALSE(result.appExists);
 
     auto abilityInfo2 = std::make_shared<AbilityInfo>();
@@ -351,24 +349,7 @@ HWTEST_F(AmsAppLifeCycleTest, RemoveAppFromRecentList_001, TestSize.Level1)
     auto appRecord2 = StartProcessAndLoadAbility(token2, nullptr, abilityInfo2, appInfo2, 101);
     appRecord2->SetApplicationClient(client);
     EXPECT_TRUE(appRecord2);
-    size = serviceInner_->GetRecentAppList().size();
-    EXPECT_EQ(size, 2);
     EXPECT_FALSE(result.appExists);
-
-    // remove the first
-    EXPECT_CALL(*mockAppScheduler, ScheduleProcessSecurityExit()).Times(1);
-    serviceInner_->RemoveAppFromRecentList(appRecord->GetName(), appRecord->GetName());
-    sleep(1);
-    size = serviceInner_->GetRecentAppList().size();
-    EXPECT_EQ(size, 1);
-
-    EXPECT_CALL(*mockAppScheduler, ScheduleProcessSecurityExit()).Times(1);
-    serviceInner_->RemoveAppFromRecentList(appRecord2->GetName(), appRecord2->GetName());
-    sleep(3);
-
-    auto list = serviceInner_->GetRecentAppList();
-    size = list.size();
-    EXPECT_EQ(size, 0);
 }
 
 /*
@@ -594,7 +575,6 @@ HWTEST_F(AmsAppLifeCycleTest, Schedule_013, TestSize.Level1)
 
     EXPECT_CALL(*(testAppPreRecord.mockAppScheduler_), ScheduleForegroundApplication()).Times(1);
     serviceInner_->UpdateAbilityState(GetMockToken(), AbilityState::ABILITY_STATE_FOREGROUND);
-    testAppPreRecord.appRecord_->SetUpdateStateFromService(true);
     serviceInner_->ApplicationForegrounded(testAppPreRecord.appRecord_->GetRecordId());
     EXPECT_EQ(AbilityState::ABILITY_STATE_FOREGROUND, testAppPreRecord.firstAbilityRecord_->GetState());
     EXPECT_EQ(ApplicationState::APP_STATE_FOREGROUND, testAppPreRecord.appRecord_->GetState());
@@ -631,7 +611,6 @@ HWTEST_F(AmsAppLifeCycleTest, Schedule_015, TestSize.Level1)
 
     EXPECT_CALL(*(testAppPreRecord.mockAppScheduler_), ScheduleForegroundApplication()).Times(1);
     serviceInner_->UpdateAbilityState(GetMockToken(), AbilityState::ABILITY_STATE_FOREGROUND);
-    testAppPreRecord.appRecord_->SetUpdateStateFromService(true);
     serviceInner_->ApplicationForegrounded(testAppPreRecord.appRecord_->GetRecordId());
     EXPECT_EQ(AbilityState::ABILITY_STATE_FOREGROUND, testAppPreRecord.firstAbilityRecord_->GetState());
     EXPECT_EQ(ApplicationState::APP_STATE_FOREGROUND, testAppPreRecord.appRecord_->GetState());
@@ -685,7 +664,6 @@ HWTEST_F(AmsAppLifeCycleTest, Schedule_018, TestSize.Level1)
 
     EXPECT_CALL(*(testAppPreRecord.mockAppScheduler_), ScheduleForegroundApplication()).Times(1);
     serviceInner_->UpdateAbilityState(GetMockToken(), AbilityState::ABILITY_STATE_FOREGROUND);
-    testAppPreRecord.appRecord_->SetUpdateStateFromService(true);
     serviceInner_->ApplicationForegrounded(testAppPreRecord.appRecord_->GetRecordId());
     EXPECT_EQ(AbilityState::ABILITY_STATE_FOREGROUND, testAppPreRecord.firstAbilityRecord_->GetState());
     EXPECT_EQ(ApplicationState::APP_STATE_FOREGROUND, testAppPreRecord.appRecord_->GetState());
@@ -805,7 +783,6 @@ HWTEST_F(AmsAppLifeCycleTest, Schedule_028, TestSize.Level1)
 
     EXPECT_CALL(*(testAppPreRecord.mockAppScheduler_), ScheduleBackgroundApplication()).Times(1);
     serviceInner_->UpdateAbilityState(GetMockToken(), AbilityState::ABILITY_STATE_BACKGROUND);
-    testAppPreRecord.appRecord_->SetUpdateStateFromService(true);
     serviceInner_->ApplicationBackgrounded(testAppPreRecord.appRecord_->GetRecordId());
     EXPECT_EQ(AbilityState::ABILITY_STATE_BACKGROUND, testAppPreRecord.firstAbilityRecord_->GetState());
     EXPECT_EQ(ApplicationState::APP_STATE_BACKGROUND, testAppPreRecord.appRecord_->GetState());
@@ -1072,7 +1049,6 @@ HWTEST_F(AmsAppLifeCycleTest, Process_001, TestSize.Level1)
     int32_t appRecordId = appRecord->GetRecordId();
     EXPECT_TRUE(appRecordId > 0);
 
-    appRecord->SetUpdateStateFromService(true);
     serviceInner_->ApplicationForegrounded(appRecordId);
     auto testAppRecord = serviceInner_->GetAppRunningRecordByAppRecordId(appRecordId);
     EXPECT_NE(nullptr, testAppRecord);
@@ -1092,7 +1068,6 @@ HWTEST_F(AmsAppLifeCycleTest, Process_002, TestSize.Level1)
     int32_t appRecordId = appRecord->GetRecordId();
     EXPECT_TRUE(appRecordId > 0);
 
-    appRecord->SetUpdateStateFromService(true);
     serviceInner_->ApplicationForegrounded(appRecordId);
     auto testAppRecord = serviceInner_->GetAppRunningRecordByAppRecordId(appRecordId);
     EXPECT_NE(nullptr, testAppRecord);
@@ -1112,7 +1087,6 @@ HWTEST_F(AmsAppLifeCycleTest, Process_003, TestSize.Level1)
     int32_t appRecordId = appRecord->GetRecordId();
     EXPECT_TRUE(appRecordId > 0);
 
-    appRecord->SetUpdateStateFromService(true);
     serviceInner_->ApplicationForegrounded(appRecordId);
     auto testAppRecord = serviceInner_->GetAppRunningRecordByAppRecordId(appRecordId);
     EXPECT_NE(nullptr, testAppRecord);
@@ -1132,7 +1106,6 @@ HWTEST_F(AmsAppLifeCycleTest, Process_004, TestSize.Level1)
     int32_t appRecordId = appRecord->GetRecordId();
     EXPECT_TRUE(appRecordId > 0);
 
-    appRecord->SetUpdateStateFromService(true);
     serviceInner_->ApplicationForegrounded(appRecordId);
     auto testAppRecord = serviceInner_->GetAppRunningRecordByAppRecordId(appRecordId);
     EXPECT_NE(nullptr, testAppRecord);
@@ -1168,7 +1141,6 @@ HWTEST_F(AmsAppLifeCycleTest, Process_006, TestSize.Level1)
     int32_t appRecordId = appRecord->GetRecordId();
     EXPECT_TRUE(appRecordId > 0);
 
-    appRecord->SetUpdateStateFromService(true);
     serviceInner_->ApplicationBackgrounded(appRecordId);
     auto testAppRecord = serviceInner_->GetAppRunningRecordByAppRecordId(appRecordId);
     EXPECT_NE(nullptr, testAppRecord);
@@ -1188,7 +1160,6 @@ HWTEST_F(AmsAppLifeCycleTest, Process_007, TestSize.Level1)
     int32_t appRecordId = appRecord->GetRecordId();
     EXPECT_TRUE(appRecordId > 0);
 
-    appRecord->SetUpdateStateFromService(true);
     serviceInner_->ApplicationBackgrounded(appRecordId);
     auto testAppRecord = serviceInner_->GetAppRunningRecordByAppRecordId(appRecordId);
     EXPECT_NE(nullptr, testAppRecord);
@@ -1208,7 +1179,6 @@ HWTEST_F(AmsAppLifeCycleTest, Process_008, TestSize.Level1)
     int32_t appRecordId = appRecord->GetRecordId();
     EXPECT_TRUE(appRecordId > 0);
 
-    appRecord->SetUpdateStateFromService(true);
     serviceInner_->ApplicationBackgrounded(appRecord->GetRecordId());
     auto testAppRecord = serviceInner_->GetAppRunningRecordByAppRecordId(appRecord->GetRecordId());
     EXPECT_NE(nullptr, testAppRecord);

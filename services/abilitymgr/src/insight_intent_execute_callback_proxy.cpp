@@ -13,39 +13,36 @@
  * limitations under the License.
  */
 
-#include "ability_manager_errors.h"
 #include "insight_intent_execute_callback_proxy.h"
+
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
-#include "iremote_object.h"
-#include "message_parcel.h"
 
 namespace OHOS {
 namespace AAFwk {
 void InsightIntentExecuteCallbackProxy::OnExecuteDone(uint64_t key, int32_t resultCode,
     const AppExecFwk::InsightIntentExecuteResult &executeResult)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "call");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     MessageParcel data;
     if (!data.WriteInterfaceToken(IInsightIntentExecuteCallback::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::INTENT, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::INTENT, "interface token write failed");
         return;
     }
     if (!data.WriteUint64(key)) {
-        TAG_LOGE(AAFwkTag::INTENT, "key write failed.");
+        TAG_LOGE(AAFwkTag::INTENT, "key write failed");
         return;
     }
     if (!data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::INTENT, "resultCode write failed.");
+        TAG_LOGE(AAFwkTag::INTENT, "resultCode Int32 write failed");
         return;
     }
     if (!data.WriteParcelable(&executeResult)) {
-        TAG_LOGE(AAFwkTag::INTENT, "executeResult write failed.");
+        TAG_LOGE(AAFwkTag::INTENT, "executeResult Parcelable write failed");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Remote() is NULL");
+        TAG_LOGE(AAFwkTag::INTENT, "null remote");
         return;
     }
 

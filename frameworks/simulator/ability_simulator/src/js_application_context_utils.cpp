@@ -17,7 +17,6 @@
 
 #include <map>
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_context_utils.h"
 #include "js_data_converter.h"
 #include "js_runtime_utils.h"
@@ -44,7 +43,7 @@ napi_value JsApplicationContextUtils::OnSwitchArea(napi_env env, NapiCallbackInf
 {
     napi_value object = info.thisVar;
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "object is null");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null object");
         return CreateJsUndefined(env);
     }
     BindNativeProperty(env, object, "cacheDir", GetCacheDir);
@@ -79,7 +78,7 @@ napi_value JsApplicationContextUtils::OnGetTempDir(napi_env env, NapiCallbackInf
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetTempDir();
@@ -95,7 +94,7 @@ napi_value JsApplicationContextUtils::OnGetResourceDir(napi_env env, NapiCallbac
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetResourceDir();
@@ -111,7 +110,7 @@ napi_value JsApplicationContextUtils::OnGetArea(napi_env env, NapiCallbackInfo &
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     int area = context->GetArea();
@@ -127,7 +126,7 @@ napi_value JsApplicationContextUtils::OnGetCacheDir(napi_env env, NapiCallbackIn
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetCacheDir();
@@ -143,7 +142,7 @@ napi_value JsApplicationContextUtils::OnGetFilesDir(napi_env env, NapiCallbackIn
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetFilesDir();
@@ -160,7 +159,7 @@ napi_value JsApplicationContextUtils::OnGetDistributedFilesDir(napi_env env, Nap
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetDistributedFilesDir();
@@ -176,7 +175,7 @@ napi_value JsApplicationContextUtils::OnGetDatabaseDir(napi_env env, NapiCallbac
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetDatabaseDir();
@@ -193,7 +192,7 @@ napi_value JsApplicationContextUtils::OnGetPreferencesDir(napi_env env, NapiCall
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetPreferencesDir();
@@ -210,7 +209,7 @@ napi_value JsApplicationContextUtils::OnGetBundleCodeDir(napi_env env, NapiCallb
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetBundleCodeDir();
@@ -227,7 +226,7 @@ napi_value JsApplicationContextUtils::OnGetCloudFileDir(napi_env env, NapiCallba
 {
     auto context = context_.lock();
     if (!context) {
-        HILOG_WARN("context is already released");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetCloudFileDir();
@@ -292,7 +291,7 @@ napi_value JsApplicationContextUtils::OnGetApplicationContext(napi_env env, Napi
     napi_value value = CreateJsApplicationContext(env, context_.lock());
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "OnGetApplicationContext, invalid systemModule.");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "invalid systemModule");
         return CreateJsUndefined(env);
     }
     return systemModule->GetNapiValue();

@@ -22,7 +22,6 @@
 
 #include "bundle_constants.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "json_util.h"
 #include "nlohmann/json.hpp"
 #include "string_ex.h"
@@ -131,7 +130,7 @@ void to_json(nlohmann::json &jsonObject, const Metadata &metadata)
 
 void to_json(nlohmann::json &jsonObject, const AbilityInfo &abilityInfo)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "AbilityInfo to_json begin");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     jsonObject = nlohmann::json {
         {JSON_KEY_NAME, abilityInfo.name},
         {JSON_KEY_LABEL, abilityInfo.label},
@@ -289,13 +288,13 @@ void from_json(const nlohmann::json &jsonObject, Metadata &metadata)
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGD(
-            AAFwkTag::ABILITY_SIM, "read Ability Metadata from database error, error code : %{public}d", parseResult);
+            AAFwkTag::ABILITY_SIM, "read Ability Metadata error:%{public}d", parseResult);
     }
 }
 
 void from_json(const nlohmann::json &jsonObject, AbilityInfo &abilityInfo)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "AbilityInfo from_json begin");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
     GetValueIfFindKey<std::string>(jsonObject,
@@ -851,7 +850,7 @@ void from_json(const nlohmann::json &jsonObject, AbilityInfo &abilityInfo)
         parseResult,
         ArrayType::STRING);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "AbilityInfo from_json error, error code : %{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "AbilityInfo from_json error:%{public}d", parseResult);
     }
 }
 }  // namespace AppExecFwk

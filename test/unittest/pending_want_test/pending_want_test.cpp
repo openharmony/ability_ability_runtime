@@ -54,7 +54,6 @@
 #include "string_wrapper.h"
 #include "array_wrapper.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 using namespace testing::ext;
 using namespace OHOS::AAFwk;
@@ -1398,5 +1397,39 @@ HWTEST_F(PendingWantTest, PendingWant_7300, Function | MediumTest | Level1)
 
     EXPECT_EQ(callBackCancelListenerConnt, 0);
     callBackCancelListenerConnt = 0;
+}
+
+/*
+ * @tc.number    : PendingWant_7400
+ * @tc.name      : PendingWant GetServiceExtension
+ * @tc.desc      : 1.Get pendingWant (want is nullptr)
+ */
+HWTEST_F(PendingWantTest, PendingWant_7400, Function | MediumTest | Level1)
+{
+    int requestCode = 10;
+    std::shared_ptr<Want> want;
+    unsigned int flags = 1;
+    flags |= FLAG_ONE_SHOT;
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    PendingWant::GetServiceExtension(GetAppContext(), requestCode, want, flags, pendingWant);
+    EXPECT_NE(pendingWant, nullptr);
+}
+
+/*
+ * @tc.number    : PendingWant_7500
+ * @tc.name      : PendingWant GetServiceExtension
+ * @tc.desc      : 1.Get pendingWant (context is nullptr)
+ */
+HWTEST_F(PendingWantTest, PendingWant_7500, Function | MediumTest | Level1)
+{
+    int requestCode = 10;
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    unsigned int flags = 1;
+    flags |= FLAG_NO_CREATE;
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    PendingWant::GetServiceExtension(nullptr, requestCode, want, flags, pendingWant);
+    EXPECT_EQ(pendingWant, nullptr);
 }
 }  // namespace OHOS::AbilityRuntime::WantAgent

@@ -16,7 +16,6 @@
 #include "napi_common_start_options.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include "int_wrapper.h"
@@ -35,22 +34,22 @@ bool UnwrapProcessOptions(napi_env env, napi_value param, std::shared_ptr<AAFwk:
     auto option = std::make_shared<AAFwk::ProcessOptions>();
     int32_t processMode = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "processMode", processMode)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processMode failed.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processMode failed");
         return false;
     }
     option->processMode = AAFwk::ProcessOptions::ConvertInt32ToProcessMode(processMode);
     if (option->processMode == AAFwk::ProcessMode::UNSPECIFIED) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Convert processMode failed.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Convert processMode failed");
         return false;
     }
     int32_t startupVisibility = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "startupVisibility", startupVisibility)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startupVisibility failed.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startupVisibility failed");
         return false;
     }
     option->startupVisibility = AAFwk::ProcessOptions::ConvertInt32ToStartupVisibility(startupVisibility);
     if (option->startupVisibility == AAFwk::StartupVisibility::UNSPECIFIED) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Convert startupVisibility failed.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Convert startupVisibility failed");
         return false;
     }
     processOptions = option;
@@ -64,7 +63,7 @@ bool UnwrapStartOptionsWithProcessOption(napi_env env, napi_value param, AAFwk::
 {
     UnwrapStartOptions(env, param, startOptions);
     if (!UnwrapProcessOptions(env, param, startOptions.processOptions)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processOptions failed.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processOptions failed");
         return false;
     }
     return true;
@@ -72,10 +71,10 @@ bool UnwrapStartOptionsWithProcessOption(napi_env env, napi_value param, AAFwk::
 
 bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &startOptions)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
 
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. Params is invalid.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
         return false;
     }
 
@@ -130,7 +129,7 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
 bool UnwrapStartOptionsAndWant(napi_env env, napi_value param, AAFwk::StartOptions &startOptions, AAFwk::Want &want)
 {
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. Params is invalid.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
         return false;
     }
     napi_value jsValue = GetPropertyValueByPropertyName(env, param, "parameters", napi_object);
