@@ -15,9 +15,12 @@
 #ifndef OHOS_ABILITY_RUNTIME_JS_APPLICATION_H
 #define OHOS_ABILITY_RUNTIME_JS_APPLICATION_H
 
+#include "context.h"
 #include "napi/native_api.h"
+#include "ipc_skeleton.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -28,9 +31,18 @@ public:
     virtual ~JsApplication() = default;
 
     static void Finalizer(napi_env env, void *data, void *hint);
+    static napi_value CreateModuleContext(napi_env env, napi_callback_info info);
+    static napi_value CreateBundleContext(napi_env env, napi_callback_info info);
     static napi_value GetApplicationContext(napi_env env, napi_callback_info info);
 
 private:
+    napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo &info);
+    napi_value OnCreateBundleContext(napi_env env, NapiCallbackInfo &info);
+    napi_value CreateJsContext(napi_env env, const std::shared_ptr<Context> &context);
+    void SetCreateCompleteCallback(std::shared_ptr<std::shared_ptr<Context>> contextPtr,
+        NapiAsyncTask::CompleteCallback &complete);
+    bool CheckCallerIsSystemApp();
+    bool CheckCallerPermission(const std::string &permission);
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo &info);
 };
 
