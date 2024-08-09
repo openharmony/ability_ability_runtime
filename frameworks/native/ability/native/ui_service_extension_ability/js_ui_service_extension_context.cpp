@@ -271,8 +271,10 @@ private:
         sptr<JSUIServiceExtensionConnection> connection, int64_t connectId, std::shared_ptr<int> innerErrorCode)
     {
         return [weak = context_, want, connection, connectId, innerErrorCode]() {
-            TAG_LOGI(AAFwkTag::UISERVC_EXT, "Connect ability execute begin, connectId: %{public}" PRId64,
-                connectId);
+            if (innerErrorCode == nullptr) {
+                TAG_LOGE(AAFwkTag::UISERVC_EXT, "innerErrorCode is null");
+                return;
+            }
 
             auto context = weak.lock();
             if (!context) {
@@ -405,7 +407,7 @@ private:
                 TAG_LOGD(AAFwkTag::UISERVC_EXT, "context->DisconnectServiceExtensionAbility");
                 auto innerErrorCode = context->DisConnectServiceExtensionAbility(want, connection, accountId);
                 if (innerErrorCode == 0) {
-                    task.Resolve(env, CreateJsUndefined(env));
+                    task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, innerErrorCode));
                 }
