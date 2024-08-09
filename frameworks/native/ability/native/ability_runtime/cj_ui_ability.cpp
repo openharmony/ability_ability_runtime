@@ -174,7 +174,7 @@ void CJUIAbility::AddLifecycleEventAfterCall(FreezeUtil::TimeoutState state, con
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
     auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; CJUIAbility::" + methodName +
-        "; the " + methodName + " end";
+        "; the " + methodName + " end.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
