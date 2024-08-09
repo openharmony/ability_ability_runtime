@@ -1843,7 +1843,7 @@ void AbilityRecord::SaveResultToCallers(const int resultCode, const Want *result
 {
     auto callerRecordList = GetCallerRecordList();
     if (callerRecordList.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerList empty");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerRecordList is empty");
         return;
     }
     auto latestCaller = callerRecordList.back();
