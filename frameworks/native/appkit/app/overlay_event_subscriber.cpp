@@ -17,7 +17,6 @@
 
 #include "bundle_mgr_proxy.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "overlay_module_info.h"
 
 namespace OHOS {
@@ -29,7 +28,7 @@ OverlayEventSubscriber::OverlayEventSubscriber(const EventFwk::CommonEventSubscr
 
 void OverlayEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "OnReceiveEvent begin.");
+    TAG_LOGD(AAFwkTag::APPKIT, "OnReceiveEvent begin");
     if (callback_ != nullptr) {
         callback_(data);
     }

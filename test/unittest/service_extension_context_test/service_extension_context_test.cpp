@@ -58,7 +58,7 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_startAbility_001
     ServiceExtensionContext serviceExtensionContextTest;
     Want want;
     ErrCode result = serviceExtensionContextTest.StartAbility(want);
-    EXPECT_EQ(ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK, result);
+    EXPECT_EQ(ERR_IMPLICIT_START_ABILITY_FAIL, result);
 }
 
 /*
@@ -75,7 +75,7 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_startAbility_002
     Want want;
     StartOptions startOptions;
     ErrCode result = serviceExtensionContextTest.StartAbility(want, startOptions);
-    EXPECT_EQ(ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK, result);
+    EXPECT_EQ(ERR_IMPLICIT_START_ABILITY_FAIL, result);
 }
 
 /*
@@ -91,8 +91,8 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartAbilityAsCa
     ServiceExtensionContext serviceExtensionContextTest;
     Want want;
     ErrCode result = serviceExtensionContextTest.StartAbilityAsCaller(want);
-    GTEST_LOG_(INFO) <<result;
-    EXPECT_EQ(ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK, result);
+    GTEST_LOG_(INFO) << result;
+    EXPECT_EQ(ERR_IMPLICIT_START_ABILITY_FAIL, result);
 }
 
 /*
@@ -109,8 +109,8 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartAbilityAsCa
     Want want;
     StartOptions startOptions;
     ErrCode result = serviceExtensionContextTest.StartAbilityAsCaller(want, startOptions);
-    GTEST_LOG_(INFO) <<result;
-    EXPECT_EQ(ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK, result);
+    GTEST_LOG_(INFO) << result;
+    EXPECT_EQ(ERR_IMPLICIT_START_ABILITY_FAIL, result);
 }
 
 /*
@@ -440,6 +440,44 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_ClearFailedCallC
     serviceExtensionContextTest.ClearFailedCallConnection(nullptr);
     EXPECT_NE(serviceExtensionContextTest.localCallContainer_, nullptr);
     GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallConnection_001 end";
+}
+
+/**
+ * @tc.number: service_extension_context_StartUIServiceExtensionAbility_001
+ * @tc.name: StartUIServiceExtensionAbility
+ * @tc.desc: Start ui service extension ability success
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartUIServiceExtensionAbility_001, TestSize.Level1)
+{
+    ServiceExtensionContext serviceExtensionContextTest;
+    Want want;
+    int32_t accountId = 1;
+    StartOptions startOptions;
+    ErrCode result = serviceExtensionContextTest.StartUIServiceExtensionAbility(want, accountId);
+    EXPECT_EQ(CHECK_PERMISSION_FAILED, result);
+}
+
+/**
+ * @tc.number: service_extension_context_StartUIServiceExtensionAbility_002
+ * @tc.name: StartUIServiceExtensionAbility
+ * @tc.desc: Start ui service extension ability success
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartUIServiceExtensionAbility_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_StartUIServiceExtensionAbility_002 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    sptr<AAFwk::AbilityManagerStubTestMock> mock = new AAFwk::AbilityManagerStubTestMock();
+    AAFwk::AbilityManagerClient::GetInstance()->proxy_ = mock;
+
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("device", "com.ix.hiMusic", "MusicAbility");
+    want.SetElement(element);
+    int32_t accountId = 1;
+
+    auto ret = serviceExtensionContextTest.StartUIServiceExtensionAbility(want, accountId);
+    EXPECT_EQ(ret, ERR_OK);
+    AAFwk::AbilityManagerClient::GetInstance()->proxy_ = nullptr;
+    GTEST_LOG_(INFO) << "service_extension_context_StartUIServiceExtensionAbility_002 end";
 }
 }
 }

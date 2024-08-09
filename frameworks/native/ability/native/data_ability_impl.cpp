@@ -20,7 +20,6 @@
 #include "data_ability_operation.h"
 #include "data_ability_predicates.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
 #include "values_bucket.h"
 
@@ -455,7 +454,7 @@ bool DataAbilityImpl::CheckReadAndWritePermission(const std::string &permissionT
 {
     std::string permission = GetPermissionInfo(permissionType);
     if (permission.empty()) {
-        TAG_LOGD(AAFwkTag::DATA_ABILITY, "%{public}s, permission is empty", __func__);
+        TAG_LOGD(AAFwkTag::DATA_ABILITY, "empty permission");
         return true;
     }
 
@@ -463,8 +462,7 @@ bool DataAbilityImpl::CheckReadAndWritePermission(const std::string &permissionT
     int checkReadPermission = AccessTokenKit::VerifyAccessToken(tokenId, permission);
     if (checkReadPermission != ERR_OK) {
         std::shared_ptr<AbilityInfo> abilityInfo = ability_->GetAbilityInfo();
-        TAG_LOGD(AAFwkTag::DATA_ABILITY, "%{public}s do not have permission, bundleName: %{public}s",
-            __func__, abilityInfo->bundleName.c_str());
+        TAG_LOGD(AAFwkTag::DATA_ABILITY, "no permission, bundleName: %{public}s", abilityInfo->bundleName.c_str());
         return false;
     }
 
@@ -473,10 +471,10 @@ bool DataAbilityImpl::CheckReadAndWritePermission(const std::string &permissionT
 
 std::string DataAbilityImpl::GetPermissionInfo(const std::string &permissionType) const
 {
-    TAG_LOGD(AAFwkTag::DATA_ABILITY, "%{public}s begin, permissionType:%{public}s", __func__, permissionType.c_str());
+    TAG_LOGD(AAFwkTag::DATA_ABILITY, "permissionType:%{public}s", permissionType.c_str());
     std::shared_ptr<AbilityInfo> abilityInfo = ability_->GetAbilityInfo();
     if (abilityInfo == nullptr) {
-        TAG_LOGW(AAFwkTag::DATA_ABILITY, "%{public}s abilityInfo is nullptr", __func__);
+        TAG_LOGW(AAFwkTag::DATA_ABILITY, "null abilityInfo");
         return "";
     }
     if (permissionType == READ) {
@@ -484,8 +482,7 @@ std::string DataAbilityImpl::GetPermissionInfo(const std::string &permissionType
     } else if (permissionType == WRITE) {
         return abilityInfo->writePermission;
     } else {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "%{public}s permissionType is not read or write, permissionType:%{public}s",
-            __func__, permissionType.c_str());
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "invalid permissionType:%{public}s", permissionType.c_str());
         return "";
     }
 }

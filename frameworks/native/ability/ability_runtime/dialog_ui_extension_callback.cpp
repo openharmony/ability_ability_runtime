@@ -14,7 +14,6 @@
  */
 #include "dialog_ui_extension_callback.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -23,17 +22,17 @@ DialogUIExtensionCallback::DialogUIExtensionCallback(const std::weak_ptr<AppExec
 {}
 void DialogUIExtensionCallback::OnRelease()
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "Called");
+    TAG_LOGD(AAFwkTag::DIALOG, "Call");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
+        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback null");
         return;
     }
 #ifdef SUPPORT_SCREEN
     abilityCallback->EraseUIExtension(sessionId_);
 
     if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ is nullptr.");
+        TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ null");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
@@ -42,16 +41,16 @@ void DialogUIExtensionCallback::OnRelease()
 
 void DialogUIExtensionCallback::OnError()
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "Called");
+    TAG_LOGD(AAFwkTag::DIALOG, "Call");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
+        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback null");
         return;
     }
 #ifdef SUPPORT_SCREEN
     abilityCallback->EraseUIExtension(sessionId_);
     if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ is nullptr.");
+        TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ null");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
@@ -60,10 +59,10 @@ void DialogUIExtensionCallback::OnError()
 
 void DialogUIExtensionCallback::OnDestroy()
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "Called");
+    TAG_LOGD(AAFwkTag::DIALOG, "Call");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
+        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback null");
         return;
     }
 #ifdef SUPPORT_SCREEN

@@ -14,7 +14,6 @@
  */
 #include "continuation_device_callback_proxy.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 namespace OHOS {
 namespace AppExecFwk {
 /**
@@ -31,28 +30,24 @@ ContinuationDeviceCallbackProxy::~ContinuationDeviceCallbackProxy()
 {}
 void ContinuationDeviceCallbackProxy::Connect(const std::string &deviceId, const std::string &deviceType)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
     std::shared_ptr<IContinuationDeviceCallback> callback = nullptr;
     callback = callback_.lock();
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s callback is null", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "callback is null");
         return;
     }
     callback->OnDeviceConnectDone(deviceId, deviceType);
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
 }
 
 void ContinuationDeviceCallbackProxy::Disconnect(const std::string &deviceId)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
     std::shared_ptr<IContinuationDeviceCallback> callback = nullptr;
     callback = callback_.lock();
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s callback is null", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "callback is null");
         return;
     }
     callback->OnDeviceDisconnectDone(deviceId);
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

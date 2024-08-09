@@ -15,15 +15,10 @@
 
 #include "ability_auto_startup_data_manager.h"
 
-#include <algorithm>
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
-#include "errors.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
-#include "nlohmann/json.hpp"
-#include "types.h"
 #include "os_account_manager_wrapper.h"
 
 namespace OHOS {
@@ -299,7 +294,7 @@ AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const Auto
 int32_t AbilityAutoStartupDataManager::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList,
     int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
@@ -332,7 +327,7 @@ int32_t AbilityAutoStartupDataManager::QueryAllAutoStartupApplications(std::vect
 int32_t AbilityAutoStartupDataManager::GetCurrentAppAutoStartupData(
     const std::string &bundleName, std::vector<AutoStartupInfo> &infoList, const std::string &accessTokenId)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
@@ -482,9 +477,9 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const
     if (!IsEqual(jsonObject, JSON_KEY_BUNDLE_NAME, info.bundleName)
         || !IsEqual(jsonObject, JSON_KEY_ABILITY_NAME, info.abilityName)
         || !IsEqual(jsonObject, JSON_KEY_MODULE_NAME, info.moduleName, true)
+        || !IsEqual(jsonObject, JSON_KEY_APP_CLONE_INDEX, info.appCloneIndex)
         || !IsEqual(jsonObject, JSON_KEY_ACCESS_TOKENID, info.accessTokenId)
-        || !IsEqual(jsonObject, JSON_KEY_USERID, info.userId)
-        || !IsEqual(jsonObject, JSON_KEY_APP_CLONE_INDEX, info.appCloneIndex)) {
+        || !IsEqual(jsonObject, JSON_KEY_USERID, info.userId)) {
         return false;
     }
     return true;

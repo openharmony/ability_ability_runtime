@@ -24,7 +24,6 @@
 #include <unistd.h>
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace JsEnv {
@@ -267,7 +266,6 @@ void SourceMap::ExtractSourceMapData(const std::string& allmappings, std::shared
         std::vector<int32_t> ans;
 
         if (!VlqRevCode(mapping, ans)) {
-            TAG_LOGE(AAFwkTag::JSENV, "decode code fail");
             return;
         }
         if (ans.empty()) {
@@ -490,7 +488,7 @@ ErrorPos SourceMap::GetErrorPos(const std::string& rawStack)
     if (findLineEnd == std::string::npos) {
         return std::make_pair(0, 0);
     }
-    int32_t lineEnd = findLineEnd - 1;
+    int32_t lineEnd = (int32_t)findLineEnd - 1;
     if (lineEnd < 1 || rawStack[lineEnd - 1] == '?') {
         return std::make_pair(0, 0);
     }
@@ -526,7 +524,7 @@ bool SourceMap::TranslateUrlPositionBySourceMap(std::string& url, int& line, int
         if (iter != sourceMaps_.end()) {
             return GetLineAndColumnNumbers(line, column, *(iter->second), url);
         }
-        TAG_LOGE(AAFwkTag::JSENV, "TranslateUrlPositionBySourceMap: stageMode sourceMaps find fail");
+        TAG_LOGE(AAFwkTag::JSENV, "stageMode sourceMaps find fail");
         return false;
     }
     return false;

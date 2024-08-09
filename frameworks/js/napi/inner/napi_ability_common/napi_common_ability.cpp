@@ -22,7 +22,6 @@
 
 #include "ability_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_napi_common_ability.h"
 #include "js_runtime_utils.h"
 #include "napi_common_ability_execute_utils.h"
@@ -74,7 +73,7 @@ bool& GetDataAbilityHelperStatus()
 
 napi_value NAPI_GetFilesDirWrap(napi_env env, napi_callback_info info, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s start", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "start");
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value jsthis = nullptr;
@@ -83,27 +82,27 @@ napi_value NAPI_GetFilesDirWrap(napi_env env, napi_callback_info info, AsyncJSCa
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called, params is invalid.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s begin, the first parameter is invalid.", __func__);
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid args[PARAM0]");
             return nullptr;
         }
     }
 
     AsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s begin. asyncCallback.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
         asyncParamEx.resource = "NAPI_GetFilesDirCallback";
         asyncParamEx.execute = GetFilesDirExecuteCallback;
         asyncParamEx.complete = CompleteAsyncCallbackWork;
 
         return ExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. promise.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "promise");
         asyncParamEx.resource = "NAPI_GetFilesDirPromise";
         asyncParamEx.execute = GetFilesDirExecuteCallback;
         asyncParamEx.complete = CompletePromiseCallbackWork;
@@ -114,21 +113,21 @@ napi_value NAPI_GetFilesDirWrap(napi_env env, napi_callback_info info, AsyncJSCa
 
 napi_value NAPI_GetFilesDirCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. Invoke CreateAsyncJSCallbackInfo failed.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = NAPI_GetFilesDirWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end", __func__);
+
     return ret;
 }
 
@@ -143,7 +142,7 @@ napi_value NAPI_GetFilesDirCommon(napi_env env, napi_callback_info info, Ability
 napi_value NAPI_GetOrCreateDistributedDirWrap(
     napi_env env, napi_callback_info info, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s start", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "start");
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value jsthis = nullptr;
@@ -152,27 +151,27 @@ napi_value NAPI_GetOrCreateDistributedDirWrap(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s called, parameters is invalid.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s called, the first parameter is invalid.", __func__);
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid args[PARAM0]");
             return nullptr;
         }
     }
 
     AsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. asyncCallback.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
         asyncParamEx.resource = "NAPI_GetFilesDirCallback";
         asyncParamEx.execute = GetOrCreateDistributedDirExecuteCallback;
         asyncParamEx.complete = CompleteAsyncCallbackWork;
 
         return ExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. promise.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "promise");
         asyncParamEx.resource = "NAPI_GetFilesDirPromise";
         asyncParamEx.execute = GetOrCreateDistributedDirExecuteCallback;
         asyncParamEx.complete = CompletePromiseCallbackWork;
@@ -183,21 +182,21 @@ napi_value NAPI_GetOrCreateDistributedDirWrap(
 
 napi_value NAPI_GetOrCreateDistributedDirCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s called. Invoke CreateAsyncJSCallbackInfo failed.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallback");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = NAPI_GetOrCreateDistributedDirWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end", __func__);
+
     return ret;
 }
 
@@ -211,7 +210,7 @@ napi_value NAPI_GetOrCreateDistributedDirCommon(napi_env env, napi_callback_info
  */
 napi_value NAPI_GetCacheDirWrap(napi_env env, napi_callback_info info, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s begin", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "begin");
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value jsthis = nullptr;
@@ -220,27 +219,27 @@ napi_value NAPI_GetCacheDirWrap(napi_env env, napi_callback_info info, AsyncJSCa
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s called, arguments is invalid.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s called, the first argument is invalid.", __func__);
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid args[PARAM0]");
             return nullptr;
         }
     }
 
     AsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. asyncCallback.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
         asyncParamEx.resource = "NAPI_GetCacheDirCallback";
         asyncParamEx.execute = GetCacheDirExecuteCallback;
         asyncParamEx.complete = CompleteAsyncCallbackWork;
 
         return ExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. promise.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "promise");
         asyncParamEx.resource = "NAPI_GetCacheDirPromise";
         asyncParamEx.execute = GetCacheDirExecuteCallback;
         asyncParamEx.complete = CompletePromiseCallbackWork;
@@ -251,21 +250,21 @@ napi_value NAPI_GetCacheDirWrap(napi_env env, napi_callback_info info, AsyncJSCa
 
 napi_value NAPI_GetCacheDirCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s called. Invoke CreateAsyncJSCallbackInfo failed.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = NAPI_GetCacheDirWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end", __func__);
+
     return ret;
 }
 
@@ -279,7 +278,7 @@ napi_value NAPI_GetCacheDirCommon(napi_env env, napi_callback_info info, Ability
  */
 napi_value NAPI_GetExternalCacheDirWrap(napi_env env, napi_callback_info info, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s begin", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "begin");
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value jsthis = nullptr;
@@ -288,27 +287,27 @@ napi_value NAPI_GetExternalCacheDirWrap(napi_env env, napi_callback_info info, A
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s start, parameters is invalid.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s start, the first parameter is invalid.", __func__);
+            TAG_LOGE(AAFwkTag::JSNAPI, "args[PARAM0] invalid");
             return nullptr;
         }
     }
 
     AsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s start. asyncCallback.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
         asyncParamEx.resource = "NAPI_GetExternalCacheDirCallback";
         asyncParamEx.execute = GetExternalCacheDirExecuteCallback;
         asyncParamEx.complete = CompleteAsyncCallbackWork;
 
         return ExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. promise.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "promise");
         asyncParamEx.resource = "NAPI_GetExternalCacheDirPromise";
         asyncParamEx.execute = GetExternalCacheDirExecuteCallback;
         asyncParamEx.complete = CompletePromiseCallbackWork;
@@ -319,28 +318,28 @@ napi_value NAPI_GetExternalCacheDirWrap(napi_env env, napi_callback_info info, A
 
 napi_value NAPI_GetExternalCacheDirCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. Invoke CreateAsyncJSCallbackInfo failed.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "create callbackInfo failed");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = NAPI_GetExternalCacheDirWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end", __func__);
+
     return ret;
 }
 
 napi_value NAPI_IsUpdatingConfigurationsWrap(
     napi_env env, napi_callback_info info, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s enter", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value jsthis = nullptr;
@@ -349,27 +348,27 @@ napi_value NAPI_IsUpdatingConfigurationsWrap(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s enter, parameters is invalid.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s enter, the first parameter is invalid.", __func__);
+            TAG_LOGI(AAFwkTag::JSNAPI, "args[PARAM0] invalid");
             return nullptr;
         }
     }
 
     AsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s enter. asyncCallback.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
         asyncParamEx.resource = "NAPI_IsUpdatingConfigurationsCallback";
         asyncParamEx.execute = IsUpdatingConfigurationsExecuteCallback;
         asyncParamEx.complete = CompleteAsyncCallbackWork;
 
         return ExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. promise.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "promise");
         asyncParamEx.resource = "NAPI_IsUpdatingConfigurationsPromise";
         asyncParamEx.execute = IsUpdatingConfigurationsExecuteCallback;
         asyncParamEx.complete = CompletePromiseCallbackWork;
@@ -380,7 +379,7 @@ napi_value NAPI_IsUpdatingConfigurationsWrap(
 
 napi_value NAPI_PrintDrawnCompletedWrap(napi_env env, napi_callback_info info, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s begin", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "begin");
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value jsthis = nullptr;
@@ -389,27 +388,27 @@ napi_value NAPI_PrintDrawnCompletedWrap(napi_env env, napi_callback_info info, A
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called, arguments is invalid.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called, the first argument is invalid.", __func__);
+            TAG_LOGI(AAFwkTag::JSNAPI, "args[PARAM0] invalid");
             return nullptr;
         }
     }
 
     AsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. asyncCallback.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
         asyncParamEx.resource = "NAPI_PrintDrawnCompletedCallback";
         asyncParamEx.execute = PrintDrawnCompletedExecuteCallback;
         asyncParamEx.complete = CompleteAsyncVoidCallbackWork;
 
         return ExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. promise.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "promise");
         asyncParamEx.resource = "NAPI_PrintDrawnCompletedPromise";
         asyncParamEx.execute = PrintDrawnCompletedExecuteCallback;
         asyncParamEx.complete = CompletePromiseVoidCallbackWork;
@@ -420,41 +419,41 @@ napi_value NAPI_PrintDrawnCompletedWrap(napi_env env, napi_callback_info info, A
 
 napi_value NAPI_IsUpdatingConfigurationsCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. Invoke CreateAsyncJSCallbackInfo failed.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "create callbackInfo failed");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = NAPI_IsUpdatingConfigurationsWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end", __func__);
+
     return ret;
 }
 
 napi_value NAPI_PrintDrawnCompletedCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. Invoke CreateAsyncJSCallbackInfo failed.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "create callbackInfo failed");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = NAPI_PrintDrawnCompletedWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end", __func__);
+
     return ret;
 }
 
@@ -468,7 +467,7 @@ napi_value NAPI_PrintDrawnCompletedCommon(napi_env env, napi_callback_info info,
  */
 napi_value NAPI_GetAppTypeCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AppTypeCB *appTypeCB = CreateAppTypeCBInfo(env);
     if (appTypeCB == nullptr) {
         return WrapVoidToJS(env);
@@ -478,21 +477,21 @@ napi_value NAPI_GetAppTypeCommon(napi_env env, napi_callback_info info, AbilityT
     appTypeCB->cbBase.abilityType = abilityType;
     napi_value ret = GetAppTypeWrap(env, info, appTypeCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, ret == nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (appTypeCB != nullptr) {
             delete appTypeCB;
             appTypeCB = nullptr;
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, end.", __func__);
+
     return ret;
 }
 
 #ifdef SUPPORT_GRAPHICS
 napi_value GetDisplayOrientationWrap(napi_env env, napi_callback_info info, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value jsthis = nullptr;
@@ -501,20 +500,20 @@ napi_value GetDisplayOrientationWrap(napi_env env, napi_callback_info info, Asyn
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (!UnwrapParamGetDisplayOrientationWrap(env, argc, args, asyncCallbackInfo)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. Invoke UnwrapParamGetDisplayOrientationWrap fail", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "unwrapParamGetDisplayOrientationWrap fail");
         return nullptr;
     }
 
     AsyncParamEx asyncParamEx;
     if (asyncCallbackInfo->cbInfo.callback != nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. asyncCallback.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
         asyncParamEx.resource = "NAPI_GetDisplayOrientationWrapCallback";
         asyncParamEx.execute = GetDisplayOrientationExecuteCallback;
         asyncParamEx.complete = CompleteAsyncCallbackWork;
 
         return ExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. promise.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "promise");
         asyncParamEx.resource = "NAPI_GetDisplayOrientationWrapPromise";
         asyncParamEx.execute = GetDisplayOrientationExecuteCallback;
         asyncParamEx.complete = CompletePromiseCallbackWork;
@@ -525,10 +524,10 @@ napi_value GetDisplayOrientationWrap(napi_env env, napi_callback_info info, Asyn
 
 void GetDisplayOrientationExecuteCallback(napi_env env, void *data)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s asyncCallbackInfo is nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
 
@@ -536,13 +535,13 @@ void GetDisplayOrientationExecuteCallback(napi_env env, void *data)
     asyncCallbackInfo->native_data.data_type = NVT_NONE;
 
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ability is nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s fail type of ability", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid type");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -550,22 +549,21 @@ void GetDisplayOrientationExecuteCallback(napi_env env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_INT32;
     asyncCallbackInfo->native_data.int32_value = asyncCallbackInfo->ability->GetDisplayOrientation();
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
 }
 
 bool UnwrapParamGetDisplayOrientationWrap(napi_env env, size_t argc, napi_value *argv,
     AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called, argc=%{public}zu", __func__, argc);
+    TAG_LOGI(AAFwkTag::JSNAPI, "argc=%{public}zu", argc);
     const size_t argcMax = 1;
     if (argc > argcMax || argc < argcMax - 1) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, Params is invalid.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return false;
     }
 
     if (argc == argcMax) {
         if (!CreateAsyncCallback(env, argv[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, the first parameter is invalid.", __func__);
+            TAG_LOGI(AAFwkTag::JSNAPI, "args[PARAM0] invalid");
             return false;
         }
     }
@@ -575,10 +573,10 @@ bool UnwrapParamGetDisplayOrientationWrap(napi_env env, size_t argc, napi_value 
 
 napi_value NAPI_GetDisplayOrientationCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s. Invoke CreateAsyncJSCallbackInfo failed.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "create callbackInfo failed");
         return WrapVoidToJS(env);
     }
 
@@ -586,11 +584,11 @@ napi_value NAPI_GetDisplayOrientationCommon(napi_env env, napi_callback_info inf
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = GetDisplayOrientationWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, ret == nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s, end.", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "end");
     return ret;
 }
 #endif
@@ -605,7 +603,7 @@ napi_value NAPI_GetDisplayOrientationCommon(napi_env env, napi_callback_info inf
  */
 napi_value NAPI_GetAbilityInfoCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AbilityInfoCB *abilityInfoCB = CreateAbilityInfoCBInfo(env);
     if (abilityInfoCB == nullptr) {
         return WrapVoidToJS(env);
@@ -615,14 +613,14 @@ napi_value NAPI_GetAbilityInfoCommon(napi_env env, napi_callback_info info, Abil
     abilityInfoCB->cbBase.abilityType = abilityType;
     napi_value ret = GetAbilityInfoWrap(env, info, abilityInfoCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (abilityInfoCB != nullptr) {
             delete abilityInfoCB;
             abilityInfoCB = nullptr;
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
+
     return ret;
 }
 
@@ -636,7 +634,7 @@ napi_value NAPI_GetAbilityInfoCommon(napi_env env, napi_callback_info info, Abil
  */
 napi_value NAPI_GetHapModuleInfoCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     HapModuleInfoCB *hapModuleInfoCB = CreateHapModuleInfoCBInfo(env);
     if (hapModuleInfoCB == nullptr) {
         return WrapVoidToJS(env);
@@ -646,14 +644,14 @@ napi_value NAPI_GetHapModuleInfoCommon(napi_env env, napi_callback_info info, Ab
     hapModuleInfoCB->cbBase.abilityType = abilityType;
     napi_value ret = GetHapModuleInfoWrap(env, info, hapModuleInfoCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (hapModuleInfoCB != nullptr) {
             delete hapModuleInfoCB;
             hapModuleInfoCB = nullptr;
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
+
     return ret;
 }
 
@@ -667,7 +665,7 @@ napi_value NAPI_GetHapModuleInfoCommon(napi_env env, napi_callback_info info, Ab
  */
 napi_value NAPI_GetAppVersionInfoCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AppVersionInfoCB *appVersionInfoCB = CreateAppVersionInfoCBInfo(env);
     if (appVersionInfoCB == nullptr) {
         return WrapVoidToJS(env);
@@ -677,14 +675,14 @@ napi_value NAPI_GetAppVersionInfoCommon(napi_env env, napi_callback_info info, A
     appVersionInfoCB->cbBase.abilityType = abilityType;
     napi_value ret = GetAppVersionInfoWrap(env, info, appVersionInfoCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (appVersionInfoCB != nullptr) {
             delete appVersionInfoCB;
             appVersionInfoCB = nullptr;
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
+
     return ret;
 }
 
@@ -697,9 +695,9 @@ napi_value NAPI_GetAppVersionInfoCommon(napi_env env, napi_callback_info info, A
  */
 AsyncCallbackInfo *CreateAsyncCallbackInfo(napi_env env)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (env == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s env == nullptr.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "null env");
         return nullptr;
     }
 
@@ -709,7 +707,7 @@ AsyncCallbackInfo *CreateAsyncCallbackInfo(napi_env env)
     ret = napi_get_global(env, &global);
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s get_global=%{public}d err:%{public}s", __func__, ret,
+        TAG_LOGE(AAFwkTag::JSNAPI, "get_global=%{public}d err:%{public}s", ret,
                  errorInfo->error_message);
     }
 
@@ -717,7 +715,7 @@ AsyncCallbackInfo *CreateAsyncCallbackInfo(napi_env env)
     ret = napi_get_named_property(env, global, "ability", &abilityObj);
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s get_named_property=%{public}d err:%{public}s", __func__, ret,
+        TAG_LOGE(AAFwkTag::JSNAPI, "get_named_property=%{public}d err:%{public}s", ret,
                  errorInfo->error_message);
     }
 
@@ -725,13 +723,13 @@ AsyncCallbackInfo *CreateAsyncCallbackInfo(napi_env env)
     ret = napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability));
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s get_value_external=%{public}d err:%{public}s", __func__, ret,
+        TAG_LOGE(AAFwkTag::JSNAPI, "get_value_external=%{public}d err:%{public}s", ret,
                  errorInfo->error_message);
     }
 
     AsyncCallbackInfo *asyncCallbackInfo = new (std::nothrow) AsyncCallbackInfo;
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s asyncCallbackInfo == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return nullptr;
     }
     asyncCallbackInfo->cbInfo.env = env;
@@ -742,39 +740,38 @@ AsyncCallbackInfo *CreateAsyncCallbackInfo(napi_env env)
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->abilityType = AbilityType::UNKNOWN;
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
     return asyncCallbackInfo;
 }
 
 void GetContextAsyncExecuteCB(napi_env, void *data)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "GetContextAsync, worker pool thread execute.");
+    TAG_LOGI(AAFwkTag::JSNAPI, "execute");
     AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetContextAsync, asyncCallbackInfo == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return;
     }
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     if (asyncCallbackInfo->ability == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetContextAsync, ability == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
         asyncCallbackInfo->errCode = NAPI_ERR_ACE_ABILITY;
         return;
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetContextAsync,wrong ability type");
+        TAG_LOGE(AAFwkTag::JSNAPI, "wrong ability type");
         asyncCallbackInfo->errCode = NAPI_ERR_ABILITY_TYPE_INVALID;
         return;
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "GetContextAsync, worker pool thread execute end.");
+    TAG_LOGI(AAFwkTag::JSNAPI, "execute end");
 }
 
 napi_value GetContextAsync(
     napi_env env, napi_value *args, const size_t argCallback, AsyncCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, asyncCallback.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback");
     if (args == nullptr || asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, parameter == nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null params");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -788,7 +785,7 @@ napi_value GetContextAsync(
     }
     napi_create_async_work(env, nullptr, resourceName, GetContextAsyncExecuteCB,
         [](napi_env env, napi_status, void *data) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "GetContextAsync, main event thread complete.");
+            TAG_LOGI(AAFwkTag::JSNAPI, "complete");
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
             napi_value callback = nullptr;
             napi_value undefined = nullptr;
@@ -805,26 +802,26 @@ napi_value GetContextAsync(
             napi_call_function(env, undefined, callback, ARGS_TWO, &result[PARAM0], &callResult);
 
             if (asyncCallbackInfo->cbInfo.callback != nullptr) {
-                TAG_LOGD(AAFwkTag::JSNAPI, "Delete GetContextAsync callback reference.");
+                TAG_LOGD(AAFwkTag::JSNAPI, "Delete GetContextAsync callback reference");
                 napi_delete_reference(env, asyncCallbackInfo->cbInfo.callback);
             }
             napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
             delete asyncCallbackInfo;
             asyncCallbackInfo = nullptr;
-            TAG_LOGI(AAFwkTag::JSNAPI, "GetContextAsync, main event thread complete end.");
+            TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
         }, static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
     napi_queue_async_work_with_qos(env, asyncCallbackInfo->asyncWork, napi_qos_user_initiated);
     napi_value result = nullptr;
     napi_get_null(env, &result);
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, asyncCallback end.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "asyncCallback end");
     return result;
 }
 
 napi_value GetContextPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, promise.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "promise");
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, param == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null param");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -840,7 +837,7 @@ napi_value GetContextPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
         resourceName,
         GetContextAsyncExecuteCB,
         [](napi_env env, napi_status, void *data) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "GetContextPromise, main event thread complete.");
+            TAG_LOGI(AAFwkTag::JSNAPI, "complete");
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
             napi_value result = nullptr;
             if (asyncCallbackInfo->errCode == NAPI_ERR_NO_ERROR) {
@@ -854,12 +851,12 @@ napi_value GetContextPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
             napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
             delete asyncCallbackInfo;
             asyncCallbackInfo = nullptr;
-            TAG_LOGI(AAFwkTag::JSNAPI, "GetContextPromise, main event thread complete end.");
+            TAG_LOGI(AAFwkTag::JSNAPI, "complete end");
         },
         static_cast<void *>(asyncCallbackInfo),
         &asyncCallbackInfo->asyncWork);
     napi_queue_async_work_with_qos(env, asyncCallbackInfo->asyncWork, napi_qos_user_initiated);
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, promise end.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "promise end");
     return promise;
 }
 
@@ -873,22 +870,22 @@ napi_value GetContextPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
  */
 napi_value GetContextWrap(napi_env env, napi_callback_info, AsyncCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, asyncCallbackInfo == nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return nullptr;
     }
 
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s,wrong ability type", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "wrong ability type");
         asyncCallbackInfo->errCode = NAPI_ERR_ABILITY_TYPE_INVALID;
         return nullptr;
     }
 
     napi_value result = nullptr;
     napi_new_instance(env, GetGlobalClassContext(env), 0, nullptr, &result);
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, end.", __func__);
+
     return result;
 }
 
@@ -902,10 +899,10 @@ napi_value GetContextWrap(napi_env env, napi_callback_info, AsyncCallbackInfo *a
  */
 napi_value NAPI_GetContextCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncCallbackInfo *asyncCallbackInfo = CreateAsyncCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s asyncCallbackInfo == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
@@ -918,9 +915,7 @@ napi_value NAPI_GetContextCommon(napi_env env, napi_callback_info info, AbilityT
 
     if (ret == nullptr) {
         ret = WrapVoidToJS(env);
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr.", __func__);
-    } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s, end.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
     }
     return ret;
 }
@@ -937,7 +932,7 @@ napi_value NAPI_GetWantCommon(napi_env env, napi_callback_info info, AbilityType
 {
     AsyncCallbackInfo *asyncCallbackInfo = CreateAsyncCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, asyncCallbackInfo == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
@@ -945,7 +940,7 @@ napi_value NAPI_GetWantCommon(napi_env env, napi_callback_info info, AbilityType
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = GetWantWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (asyncCallbackInfo != nullptr) {
             delete asyncCallbackInfo;
             asyncCallbackInfo = nullptr;
@@ -965,10 +960,10 @@ napi_value NAPI_GetWantCommon(napi_env env, napi_callback_info info, AbilityType
  */
 napi_value NAPI_GetAbilityNameCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AbilityNameCB *abilityNameCB = CreateAbilityNameCBInfo(env);
     if (abilityNameCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s abilityNameCB == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null abilityNameCB");
         return WrapVoidToJS(env);
     }
 
@@ -976,14 +971,14 @@ napi_value NAPI_GetAbilityNameCommon(napi_env env, napi_callback_info info, Abil
     abilityNameCB->cbBase.abilityType = abilityType;
     napi_value ret = GetAbilityNameWrap(env, info, abilityNameCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (abilityNameCB != nullptr) {
             delete abilityNameCB;
             abilityNameCB = nullptr;
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
+
     return ret;
 }
 
@@ -997,10 +992,10 @@ napi_value NAPI_GetAbilityNameCommon(napi_env env, napi_callback_info info, Abil
  */
 napi_value NAPI_StopAbilityCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s. Invoke CreateAsyncJSCallbackInfo failed.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "create callbackInfo failed");
         return WrapVoidToJS(env);
     }
 
@@ -1008,11 +1003,11 @@ napi_value NAPI_StopAbilityCommon(napi_env env, napi_callback_info info, Ability
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = StopAbilityWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s. ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
+
     return ret;
 }
 
@@ -1026,7 +1021,7 @@ napi_value NAPI_StopAbilityCommon(napi_env env, napi_callback_info info, Ability
  */
 napi_value NAPI_AcquireDataAbilityHelperCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "AcquireDataAbilityHelper called");
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     DataAbilityHelperCB *dataAbilityHelperCB = new DataAbilityHelperCB;
     dataAbilityHelperCB->cbBase.cbInfo.env = env;
     dataAbilityHelperCB->cbBase.ability = nullptr; // temporary value assignment
@@ -1034,14 +1029,14 @@ napi_value NAPI_AcquireDataAbilityHelperCommon(napi_env env, napi_callback_info 
     dataAbilityHelperCB->cbBase.abilityType = abilityType;
     napi_value ret = AcquireDataAbilityHelperWrap(env, info, dataAbilityHelperCB);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (dataAbilityHelperCB != nullptr) {
             delete dataAbilityHelperCB;
             dataAbilityHelperCB = nullptr;
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "AcquireDataAbilityHelper end");
+
     return ret;
 }
 
@@ -1056,7 +1051,7 @@ napi_value NAPI_AcquireDataAbilityHelperCommon(napi_env env, napi_callback_info 
 napi_value AcquireDataAbilityHelperWrap(napi_env env, napi_callback_info info, DataAbilityHelperCB *dataAbilityHelperCB)
 {
     if (dataAbilityHelperCB == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s,dataAbilityHelperCB == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null dataAbilityHelperCB");
         return nullptr;
     }
 
@@ -1065,7 +1060,7 @@ napi_value AcquireDataAbilityHelperWrap(napi_env env, napi_callback_info info, D
     napi_value args[ARGS_TWO] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
     if (argc > requireArgc) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, Wrong argument count.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
@@ -1087,36 +1082,36 @@ napi_value AcquireDataAbilityHelperWrap(napi_env env, napi_callback_info info, D
 
         if (!CheckAbilityType(&dataAbilityHelperCB->cbBase)) {
             dataAbilityHelperCB->cbBase.errCode = NAPI_ERR_ABILITY_TYPE_INVALID;
-            TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ability type invalid.", __func__);
+            TAG_LOGE(AAFwkTag::JSNAPI, "ability type invalid");
             return nullptr;
         }
     }
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, args[uriIndex], &valuetype));
     if (valuetype != napi_string) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, Wrong argument type.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type");
         return nullptr;
     }
     napi_value result = nullptr;
     NAPI_CALL(env, napi_new_instance(env, GetGlobalDataAbilityHelper(env), uriIndex + 1, &args[PARAM0], &result));
 
     if (!IsTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, IsTypeForNapiValue isn`t object", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "result not object");
         return nullptr;
     }
 
     if (IsTypeForNapiValue(env, result, napi_null)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, IsTypeForNapiValue is null", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "result null");
         return nullptr;
     }
 
     if (IsTypeForNapiValue(env, result, napi_undefined)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, IsTypeForNapiValue is undefined", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "result undefined");
         return nullptr;
     }
 
     if (!GetDataAbilityHelperStatus()) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, GetDataAbilityHelperStatus is false", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetDataAbilityHelperStatus false");
         return nullptr;
     }
 
@@ -1127,47 +1122,47 @@ napi_value AcquireDataAbilityHelperWrap(napi_env env, napi_callback_info info, D
 
 napi_value NAPI_StartBackgroundRunningCommon(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncCallbackInfo *asyncCallbackInfo = CreateAsyncCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s asyncCallbackInfo == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     napi_value ret = StartBackgroundRunningWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == null", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (asyncCallbackInfo != nullptr) {
             delete asyncCallbackInfo;
             asyncCallbackInfo = nullptr;
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s finish.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "finish");
     return ret;
 }
 
 napi_value NAPI_CancelBackgroundRunningCommon(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncCallbackInfo *asyncCallbackInfo = CreateAsyncCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s asyncCallbackInfo == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     napi_value ret = CancelBackgroundRunningWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s ret == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         if (asyncCallbackInfo != nullptr) {
             delete asyncCallbackInfo;
             asyncCallbackInfo = nullptr;
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
+
     return ret;
 }
 }  // namespace AppExecFwk

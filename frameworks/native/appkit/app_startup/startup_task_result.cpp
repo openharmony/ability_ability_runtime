@@ -16,7 +16,6 @@
 #include "startup_task_result.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -63,11 +62,11 @@ OnCompletedCallback::~OnCompletedCallback() = default;
 void OnCompletedCallback::Call(const std::shared_ptr<StartupTaskResult> &result)
 {
     if (isCalled_) {
-        TAG_LOGD(AAFwkTag::STARTUP, "the callback already is called");
+        TAG_LOGD(AAFwkTag::STARTUP, "callback already called");
         return;
     }
     if (callbackFunc_ == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "the callback is null");
+        TAG_LOGE(AAFwkTag::STARTUP, "callbackFunc null");
         return;
     }
     callbackFunc_(result);

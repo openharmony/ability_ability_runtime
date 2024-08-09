@@ -17,12 +17,9 @@
 
 #include "ability_delegator_registry.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 #include "runner_runtime/js_test_runner.h"
 
-extern const char _binary_delegator_mgmt_abc_start[];
-extern const char _binary_delegator_mgmt_abc_end[];
 namespace OHOS {
 namespace RunnerRuntime {
 namespace {
@@ -34,19 +31,19 @@ std::unique_ptr<TestRunner> JsTestRunner::Create(const std::unique_ptr<Runtime> 
     const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo, bool isFaJsModel)
 {
     if (!runtime) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Invalid runtime");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid runtime");
         return nullptr;
     }
 
     if (!args) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Invalid ability delegator args");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "invalid args");
         return nullptr;
     }
 
     auto pTestRunner = new (std::nothrow) JsTestRunner(static_cast<JsRuntime &>(*runtime), args, bundleInfo,
         isFaJsModel);
     if (!pTestRunner) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to create test runner");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "create testrunner failed");
         return nullptr;
     }
 
@@ -76,7 +73,7 @@ JsTestRunner::JsTestRunner(
         srcPath.append(".abc");
         srcPath_ = srcPath;
     }
-    TAG_LOGD(AAFwkTag::DELEGATOR, "JsTestRunner srcPath is %{public}s", srcPath_.c_str());
+    TAG_LOGD(AAFwkTag::DELEGATOR, "srcPath: %{public}s", srcPath_.c_str());
 
     if (!moduleName.empty()) {
         for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
@@ -89,7 +86,7 @@ JsTestRunner::JsTestRunner(
     } else {
         hapPath_ = bundleInfo.hapModuleInfos.back().hapPath;
     }
-    TAG_LOGD(AAFwkTag::DELEGATOR, "JsTestRunner hapPath is %{public}s", hapPath_.c_str());
+    TAG_LOGD(AAFwkTag::DELEGATOR, "hapPath: %{public}s", hapPath_.c_str());
 
     if (isFaJsModel) {
         return;
@@ -99,10 +96,10 @@ JsTestRunner::JsTestRunner(
     jsTestRunnerObj_ = jsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
         bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE);
     if (!jsTestRunnerObj_ && srcPath_.find(LOWERCASETESTRUNNER) != std::string::npos) {
-        TAG_LOGD(AAFwkTag::DELEGATOR, "Not found %{public}s , retry load capital address", srcPath_.c_str());
+        TAG_LOGI(AAFwkTag::DELEGATOR, "not found %{public}s , retry load capital address", srcPath_.c_str());
         std::regex src_pattern(LOWERCASETESTRUNNER);
         srcPath_ = std::regex_replace(srcPath_, src_pattern, CAPITALTESTRUNNER);
-        TAG_LOGD(AAFwkTag::DELEGATOR, "Capital address is %{public}s", srcPath_.c_str());
+        TAG_LOGD(AAFwkTag::DELEGATOR, "capital address is %{public}s", srcPath_.c_str());
         jsTestRunnerObj_ = jsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
             bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE);
     }
@@ -114,17 +111,17 @@ bool JsTestRunner::Initialize()
 {
     if (isFaJsModel_) {
         if (!jsRuntime_.RunScript("/system/etc/strip.native.min.abc", "")) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "RunScript err");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "runscript err");
             return false;
         }
 
         if (!jsRuntime_.RunScript("/system/etc/abc/ability/delegator_mgmt.abc", "")) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "Run delegator failed.");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "run delegator failed");
             return false;
         }
 
         if (!jsRuntime_.RunSandboxScript(srcPath_, hapPath_)) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "RunScript srcPath_ err");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "runScript srcPath_ err");
             return false;
         }
 
@@ -132,19 +129,19 @@ bool JsTestRunner::Initialize()
         napi_value object = nullptr;
         napi_get_global(env, &object);
         if (object == nullptr) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get global object");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "get globalobject get");
             return false;
         }
         napi_value mainEntryFunc = nullptr;
         napi_get_named_property(env, object, "___mainEntry___", &mainEntryFunc);
         if (mainEntryFunc == nullptr) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get mainEntryFunc");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "get mainEntryFunc failed");
             return false;
         }
         napi_value value = nullptr;
         napi_get_global(env, &value);
         if (value == nullptr) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get global");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "get global failed");
             return false;
         }
         napi_call_function(env, value, mainEntryFunc, 1, &value, nullptr);
@@ -157,7 +154,6 @@ void JsTestRunner::Prepare()
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
     TestRunner::Prepare();
     CallObjectMethod("onPrepare");
-    TAG_LOGI(AAFwkTag::DELEGATOR, "End");
 }
 
 void JsTestRunner::Run()
@@ -165,12 +161,11 @@ void JsTestRunner::Run()
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
     TestRunner::Run();
     CallObjectMethod("onRun");
-    TAG_LOGI(AAFwkTag::DELEGATOR, "End");
 }
 
 void JsTestRunner::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "JsTestRunner::CallObjectMethod(%{public}s)", name);
+    TAG_LOGI(AAFwkTag::DELEGATOR, "callJsMethod(%{public}s)", name);
     auto env = jsRuntime_.GetNapiEnv();
     if (isFaJsModel_) {
         napi_value global = nullptr;
@@ -178,21 +173,21 @@ void JsTestRunner::CallObjectMethod(const char *name, napi_value const *argv, si
         napi_value exportObject = nullptr;
         napi_get_named_property(env, global, "exports", &exportObject);
         if (!CheckTypeForNapiValue(env, exportObject, napi_object)) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get exportObject");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "get exportObject failed");
             return;
         }
 
         napi_value defaultObject = nullptr;
         napi_get_named_property(env, exportObject, "default", &defaultObject);
         if (!CheckTypeForNapiValue(env, defaultObject, napi_object)) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get defaultObject");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "get defaultObject failed");
             return;
         }
 
         napi_value func = nullptr;
         napi_get_named_property(env, defaultObject, name, &func);
         if (!CheckTypeForNapiValue(env, func, napi_function)) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "CallRequest func is %{public}s", func == nullptr ? "nullptr" : "not func");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "callRequest func:%{public}s", func == nullptr ? "nullptr" : "not func");
             return;
         }
         napi_call_function(env, CreateJsUndefined(env), func, argc, argv, nullptr);
@@ -200,7 +195,7 @@ void JsTestRunner::CallObjectMethod(const char *name, napi_value const *argv, si
     }
 
     if (!jsTestRunnerObj_) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Not found %{public}s", srcPath_.c_str());
+        TAG_LOGE(AAFwkTag::DELEGATOR, "not found %{public}s", srcPath_.c_str());
         ReportFinished("Not found " + srcPath_);
         return;
     }
@@ -208,7 +203,7 @@ void JsTestRunner::CallObjectMethod(const char *name, napi_value const *argv, si
     HandleScope handleScope(jsRuntime_);
     napi_value obj = jsTestRunnerObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get Test Runner object");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "get TestRunner object failed");
         ReportFinished("Failed to get Test Runner object");
         return;
     }
@@ -216,7 +211,7 @@ void JsTestRunner::CallObjectMethod(const char *name, napi_value const *argv, si
     napi_value methodOnCreate = nullptr;
     napi_get_named_property(env, obj, name, &methodOnCreate);
     if (methodOnCreate == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Failed to get '%{public}s' from Test Runner object", name);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "get '%{public}s' from TestRunner object failed", name);
         ReportStatus("Failed to get " + std::string(name) + " from Test Runner object");
         return;
     }
@@ -225,10 +220,10 @@ void JsTestRunner::CallObjectMethod(const char *name, napi_value const *argv, si
 
 void JsTestRunner::ReportFinished(const std::string &msg)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (!delegator) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "delegator is null");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return;
     }
 
@@ -237,10 +232,10 @@ void JsTestRunner::ReportFinished(const std::string &msg)
 
 void JsTestRunner::ReportStatus(const std::string &msg)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
+    TAG_LOGI(AAFwkTag::DELEGATOR, "enter");
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (!delegator) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "delegator is null");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return;
     }
 

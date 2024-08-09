@@ -22,7 +22,6 @@
 #include "ipc_object_proxy.h"
 #include "extension_context.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ui_extension_utils.h"
 
 
@@ -94,7 +93,7 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::EXT, "sourceState:%{public}d;targetState:%{public}d;isNewWant:%{public}d",
+    TAG_LOGI(AAFwkTag::EXT, "sourceState:%{public}d;targetState:%{public}d;isNewWant:%{public}d",
         lifecycleState_, targetState.state, targetState.isNewWant);
     if (lifecycleState_ == targetState.state) {
         TAG_LOGE(AAFwkTag::EXT, "Org lifeCycleState equals to Dst lifeCycleState.");
@@ -102,7 +101,6 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
     }
     SetLaunchParam(targetState.launchParam);
     bool ret = true;
-
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_INITIAL: {
             bool isAsyncCallback = false;
@@ -137,7 +135,6 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
             break;
         }
     }
-
     if (ret && !UIExtensionAbilityExecuteInsightIntent(want)) {
         TAG_LOGD(AAFwkTag::EXT, "call abilityms");
         AAFwk::PacMap restoreData;
@@ -192,7 +189,8 @@ void ExtensionImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     }
 
     TAG_LOGD(AAFwkTag::EXT, "ExtensionImpl::Start");
-    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW) {
+    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW ||
+        extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         extension_->OnStart(want, sessionInfo);
     } else {
         extension_->OnStart(want);
@@ -258,7 +256,7 @@ void ExtensionImpl::Stop(bool &isAsyncCallback, const Want &want, sptr<AAFwk::Se
         AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
     }
     // else: callbackInfo will be destroyed after the async callback
-    TAG_LOGD(AAFwkTag::EXT, "%{public}s end.", __func__);
+    TAG_LOGD(AAFwkTag::EXT, "end");
 }
 
 void ExtensionImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleState &state)
@@ -305,7 +303,7 @@ sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want, bool &isAs
         sptr<IRemoteObject> object = extension_->OnConnect(want);
         lifecycleState_ = AAFwk::ABILITY_STATE_ACTIVE;
         isAsyncCallback = false;
-        TAG_LOGI(AAFwkTag::EXT, "%{public}s end.", __func__);
+        TAG_LOGI(AAFwkTag::EXT, "end");
         return object;
     }
 
@@ -335,7 +333,7 @@ void ExtensionImpl::ConnectExtensionCallback(sptr<IRemoteObject> &service)
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->ScheduleConnectAbilityDone(token_, service);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::EXT, "AbilityThread::HandleConnectExtension failed err = %{public}d", err);
+        TAG_LOGE(AAFwkTag::EXT, "failed err = %{public}d", err);
     }
 }
 
@@ -348,7 +346,7 @@ void ExtensionImpl::DisconnectExtension(const Want &want)
 {
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::DisconnectAbility extension_ is nullptr");
+        TAG_LOGE(AAFwkTag::EXT, "extension_ is nullptr");
         return;
     }
 
@@ -358,7 +356,7 @@ void ExtensionImpl::DisconnectExtension(const Want &want)
 
 void ExtensionImpl::DisconnectExtension(const Want &want, bool &isAsyncCallback)
 {
-    TAG_LOGD(AAFwkTag::EXT, "%{public}s begin.", __func__);
+    TAG_LOGD(AAFwkTag::EXT, "called");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "Failed to disconnect, extension_ is nullptr");
         isAsyncCallback = false;
@@ -387,14 +385,14 @@ void ExtensionImpl::DisconnectExtension(const Want &want, bool &isAsyncCallback)
         AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
     }
     // else: callbackInfo will be destroyed after the async callback
-    TAG_LOGD(AAFwkTag::EXT, "%{public}s end.", __func__);
+    TAG_LOGD(AAFwkTag::EXT, "end");
 }
 
 void ExtensionImpl::DisconnectExtensionCallback()
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->ScheduleDisconnectAbilityDone(token_);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::EXT, "ExtensionImpl::DisconnectExtensionCallback failed err = %{public}d", err);
+        TAG_LOGE(AAFwkTag::EXT, "failed err = %{public}d", err);
     }
 }
 
@@ -470,7 +468,7 @@ void ExtensionImpl::SendResult(int requestCode, int resultCode, const Want &resu
 
 void ExtensionImpl::SetLaunchParam(const AAFwk::LaunchParam &launchParam)
 {
-    TAG_LOGD(AAFwkTag::EXT, "Called.");
+    TAG_LOGD(AAFwkTag::EXT, "called");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "Extension is nullptr.");
         return;
@@ -511,22 +509,22 @@ void ExtensionImpl::Background(const Want &want, sptr<AAFwk::SessionInfo> sessio
 
 void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterForeground()
 {
-    TAG_LOGD(AAFwkTag::EXT, "called.");
+    TAG_LOGD(AAFwkTag::EXT, "called");
 }
 
 void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterBackground()
 {
-    TAG_LOGD(AAFwkTag::EXT, "called.");
+    TAG_LOGD(AAFwkTag::EXT, "called");
 }
 
 void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterActive()
 {
-    TAG_LOGD(AAFwkTag::EXT, "called.");
+    TAG_LOGD(AAFwkTag::EXT, "called");
 }
 
 void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterInactive()
 {
-    TAG_LOGD(AAFwkTag::EXT, "called.");
+    TAG_LOGD(AAFwkTag::EXT, "called");
 }
 }
 }

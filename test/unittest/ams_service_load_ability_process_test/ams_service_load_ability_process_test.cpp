@@ -27,7 +27,6 @@
 #include "bundle_mgr_interface.h"
 #include "gtest/gtest.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "mock_app_scheduler.h"
 #include "mock_ability_token.h"
 #include "mock_app_spawn_client.h"
@@ -209,7 +208,6 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_002, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest LoadAbility_002 start");
 
     EXPECT_TRUE(service_ != nullptr);
-    service_->ClearRecentAppList();
 
     sptr<IRemoteObject> token = GetMockToken();
     auto abilityInfo = std::make_shared<AbilityInfo>();

@@ -14,7 +14,6 @@
  */
 #include "remote_register_service_proxy.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -28,10 +27,8 @@ namespace AppExecFwk {
 int RemoteRegisterServiceProxy::Register(const std::string &bundleName, const sptr<IRemoteObject> &token,
     const ExtraParams &extras, const sptr<IConnectCallback> &callback)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called", __func__);
-
     if (bundleName.empty() || token == nullptr || callback == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s param invalid", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "param invalid");
         return ERR_INVALID_DATA;
     }
 
@@ -39,7 +36,7 @@ int RemoteRegisterServiceProxy::Register(const std::string &bundleName, const sp
     if (!data.WriteInterfaceToken(IRemoteRegisterService::GetDescriptor()) || !data.WriteString(bundleName) ||
         !data.WriteRemoteObject(token) || !data.WriteInt32(1) || !extras.Marshalling(data) ||
         !data.WriteRemoteObject(callback->AsObject())) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s Failed to write transfer data.", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write transfer data");
         return IPC_INVOKER_WRITE_TRANS_ERR;
     }
 
@@ -47,10 +44,9 @@ int RemoteRegisterServiceProxy::Register(const std::string &bundleName, const sp
     MessageOption option;
     int result = SendTransactCmd(COMMAND_REGISTER, data, reply, option);
     if (result == ERR_NONE) {
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s SendRequest ok", __func__);
         return reply.ReadInt32();
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s SendRequest error, result=%{public}d", __func__, result);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "result=%{public}d", result);
         return IPC_INVOKER_TRANSLATE_ERR;
     }
 }
@@ -62,11 +58,9 @@ int RemoteRegisterServiceProxy::Register(const std::string &bundleName, const sp
  */
 bool RemoteRegisterServiceProxy::Unregister(int registerToken)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called", __func__);
-
     MessageParcel data;
     if (!data.WriteInterfaceToken(IRemoteRegisterService::GetDescriptor()) || !data.WriteInt32(registerToken)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s Failed to write transfer data.", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write transfer data");
         return false;
     }
 
@@ -74,10 +68,9 @@ bool RemoteRegisterServiceProxy::Unregister(int registerToken)
     MessageOption option;
     int32_t result = SendTransactCmd(COMMAND_UNREGISTER, data, reply, option);
     if (result == ERR_NONE) {
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s SendRequest ok", __func__);
         return reply.ReadInt32() == ERR_NONE;
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s SendRequest error, result=%{public}d", __func__, result);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "result=%{public}d", result);
         return false;
     }
 }
@@ -91,12 +84,10 @@ bool RemoteRegisterServiceProxy::Unregister(int registerToken)
  */
 bool RemoteRegisterServiceProxy::UpdateConnectStatus(int registerToken, const std::string &deviceId, int status)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called", __func__);
-
     MessageParcel data;
     if (!data.WriteInterfaceToken(IRemoteRegisterService::GetDescriptor()) || !data.WriteInt32(registerToken) ||
         !data.WriteString(deviceId) || !data.WriteInt32(status)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s Failed to write transfer data.", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write transfer data");
         return false;
     }
 
@@ -104,10 +95,9 @@ bool RemoteRegisterServiceProxy::UpdateConnectStatus(int registerToken, const st
     MessageOption option;
     int32_t result = SendTransactCmd(COMMAND_UPDATE_CONNECT_STATUS, data, reply, option);
     if (result == ERR_NONE) {
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s SendRequest ok", __func__);
         return reply.ReadInt32() == ERR_NONE;
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s SendRequest error, result=%{public}d", __func__, result);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "result=%{public}d", result);
         return false;
     }
 }
@@ -120,12 +110,10 @@ bool RemoteRegisterServiceProxy::UpdateConnectStatus(int registerToken, const st
  */
 bool RemoteRegisterServiceProxy::ShowDeviceList(int registerToken, const ExtraParams &extras)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called", __func__);
-
     MessageParcel data;
     if (!data.WriteInterfaceToken(IRemoteRegisterService::GetDescriptor()) || !data.WriteInt32(registerToken) ||
         !data.WriteInt32(1) || !extras.Marshalling(data)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s Failed to write transfer data.", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write transfer data");
         return false;
     }
 
@@ -133,10 +121,9 @@ bool RemoteRegisterServiceProxy::ShowDeviceList(int registerToken, const ExtraPa
     MessageOption option;
     int32_t result = SendTransactCmd(COMMAND_SHOW_DEVICE_LIST, data, reply, option);
     if (result == ERR_NONE) {
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s SendRequest ok", __func__);
         return reply.ReadInt32() == ERR_NONE;
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s SendRequest error, result=%{public}d", __func__, result);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "result=%{public}d", result);
         return false;
     }
 }

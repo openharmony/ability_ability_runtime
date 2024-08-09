@@ -16,7 +16,6 @@
 #include "ui_extension.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_ui_extension.h"
 #include "runtime.h"
 #include "ui_extension_context.h"
@@ -44,7 +43,7 @@ void UIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension begin init");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     ExtensionBase<UIExtensionContext>::Init(record, application, handler, token);
 }
 

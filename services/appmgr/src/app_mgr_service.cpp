@@ -186,8 +186,12 @@ void AppMgrService::AttachApplication(const sptr<IRemoteObject> &app)
     }
 
     pid_t pid = IPCSkeleton::GetCallingPid();
-    std::function<void()> attachApplicationFunc = [appMgrServiceInner = appMgrServiceInner_, pid, app]() {
-        appMgrServiceInner->AttachApplication(pid, iface_cast<IAppScheduler>(app));
+    auto appScheduler = iface_cast<IAppScheduler>(app);
+    if (appScheduler == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appScheduler null");
+    }
+    std::function<void()> attachApplicationFunc = [appMgrServiceInner = appMgrServiceInner_, pid, appScheduler]() {
+        appMgrServiceInner->AttachApplication(pid, appScheduler);
     };
     taskHandler_->SubmitTask(attachApplicationFunc, AAFwk::TaskAttribute{
         .taskName_ = TASK_ATTACH_APPLICATION,
@@ -350,9 +354,12 @@ int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int
             return AAFwk::CHECK_PERMISSION_FAILED;
         }
     }
+    if (appCloneIndex < 0 || appCloneIndex > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appCloneIndex is invalid.");
+        return AAFwk::ERR_APP_CLONE_INDEX_INVALID;
+    }
     pid_t pid = IPCSkeleton::GetCallingPid();
-    appMgrServiceInner_->ClearUpApplicationData(bundleName, callingUid, pid, appCloneIndex, userId);
-    return ERR_OK;
+    return appMgrServiceInner_->ClearUpApplicationData(bundleName, callingUid, pid, appCloneIndex, userId);
 }
 
 int32_t AppMgrService::ClearUpApplicationDataBySelf(int32_t userId)
@@ -415,6 +422,12 @@ int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService is not ready.");
         return ERR_INVALID_OPERATION;
+    }
+    bool isCallingPermission =
+        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
+    if (!isCallingPermission) {
+        TAG_LOGE(AAFwkTag::APPMGR, "VerificationAllToken failed.");
+        return ERR_PERMISSION_DENIED;
     }
     auto appRunningRecord = appMgrServiceInner_->GetAppRunningRecordByPid(pid);
     if (appRunningRecord && appRunningRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
@@ -527,7 +540,7 @@ int32_t AppMgrService::UnregisterApplicationStateObserver(const sptr<IApplicatio
 int32_t AppMgrService::RegisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
@@ -537,7 +550,7 @@ int32_t AppMgrService::RegisterAbilityForegroundStateObserver(const sptr<IAbilit
 
 int32_t AppMgrService::UnregisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
@@ -614,7 +627,7 @@ int AppMgrService::FinishUserTest(const std::string &msg, const int64_t &resultC
 
 int AppMgrService::Dump(int fd, const std::vector<std::u16string>& args)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready.");
         return ERR_APPEXECFWK_HIDUMP_ERROR;
@@ -632,7 +645,7 @@ int AppMgrService::Dump(int fd, const std::vector<std::u16string>& args)
 
 int AppMgrService::Dump(const std::vector<std::u16string>& args, std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto size = args.size();
     if (size == 0) {
         return ShowHelp(args, result);
@@ -666,7 +679,7 @@ int AppMgrService::ShowHelp(const std::vector<std::u16string>& args, std::string
 
 int AppMgrService::DumpIpcAllInner(const AppMgrService::DumpIpcKey key, std::string& result)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     switch (key) {
         case KEY_DUMP_IPC_START:
             return DumpIpcAllStart(result);
@@ -686,7 +699,7 @@ int AppMgrService::DumpIpcAllInner(const AppMgrService::DumpIpcKey key, std::str
 int AppMgrService::DumpIpcWithPidInner(const AppMgrService::DumpIpcKey key,
     const std::string& optionPid, std::string& result)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     int32_t pid = -1;
     char* end = nullptr;
     pid = static_cast<int32_t>(std::strtol(optionPid.c_str(), &end, BASE_TEN));
@@ -702,7 +715,7 @@ int AppMgrService::DumpIpcWithPidInner(const AppMgrService::DumpIpcKey key,
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid: %{public}s", optionPid.c_str());
         return DumpErrorCode::ERR_INVALID_PID_ERROR;
     }
-    
+
     switch (key) {
         case KEY_DUMP_IPC_START:
             return DumpIpcStart(pid, result);
@@ -794,7 +807,7 @@ int AppMgrService::DumpIpc(const std::vector<std::u16string>& args, std::string&
     std::string optionPid = Str16ToStr8(args[INDEX_PID]);
     TAG_LOGD(AAFwkTag::APPMGR, "option pid:%{public}s, option cmd:%{public}s",
         optionPid.c_str(), optionCmd.c_str());
-    
+
     DumpIpcKey key;
     if (!GetDumpIpcKeyByOption(optionCmd, key)) {
         result.append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
@@ -834,37 +847,37 @@ int AppMgrService::DumpFfrt(const std::vector<std::u16string>& args, std::string
 
 int AppMgrService::DumpIpcAllStart(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     return appMgrServiceInner_->DumpIpcAllStart(result);
 }
 
 int AppMgrService::DumpIpcAllStop(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     return appMgrServiceInner_->DumpIpcAllStop(result);
 }
 
 int AppMgrService::DumpIpcAllStat(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     return appMgrServiceInner_->DumpIpcAllStat(result);
 }
 
 int AppMgrService::DumpIpcStart(const int32_t pid, std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     return appMgrServiceInner_->DumpIpcStart(pid, result);
 }
 
 int AppMgrService::DumpIpcStop(const int32_t pid, std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     return appMgrServiceInner_->DumpIpcStop(pid, result);
 }
 
 int AppMgrService::DumpIpcStat(const int32_t pid, std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     return appMgrServiceInner_->DumpIpcStat(pid, result);
 }
 
@@ -938,7 +951,7 @@ int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_
 
 void AppMgrService::AttachRenderProcess(const sptr<IRemoteObject> &scheduler)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "AttachRenderProcess called.");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AttachRenderProcess failed, not ready.");
         return;
@@ -1070,6 +1083,10 @@ int32_t AppMgrService::NotifyHotReloadPage(const std::string &bundleName, const 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 int32_t AppMgrService::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
 {
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not foundation.");
+        return ERR_INVALID_OPERATION;
+    }
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService is not ready.");
         return ERR_INVALID_OPERATION;
@@ -1249,7 +1266,7 @@ void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::st
 
 int32_t AppMgrService::ChangeAppGcState(pid_t pid, int32_t state)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appMgrServiceInner_) {
         return ERR_INVALID_VALUE;
     }
@@ -1284,7 +1301,7 @@ int32_t AppMgrService::NotifyPageHide(const sptr<IRemoteObject> &token, const Pa
 
 int32_t AppMgrService::RegisterAppRunningStatusListener(const sptr<IRemoteObject> &listener)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready");
         return ERR_INVALID_OPERATION;
@@ -1294,7 +1311,7 @@ int32_t AppMgrService::RegisterAppRunningStatusListener(const sptr<IRemoteObject
 
 int32_t AppMgrService::UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
@@ -1304,7 +1321,7 @@ int32_t AppMgrService::UnregisterAppRunningStatusListener(const sptr<IRemoteObje
 
 int32_t AppMgrService::RegisterAppForegroundStateObserver(const sptr<IAppForegroundStateObserver> &observer)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
@@ -1314,7 +1331,7 @@ int32_t AppMgrService::RegisterAppForegroundStateObserver(const sptr<IAppForegro
 
 int32_t AppMgrService::UnregisterAppForegroundStateObserver(const sptr<IAppForegroundStateObserver> &observer)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
@@ -1340,7 +1357,7 @@ int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCl
 
 int32_t AppMgrService::StartChildProcess(pid_t &childPid, const ChildProcessRequest &request)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "StartChildProcess failed, AppMgrService not ready.");
         return ERR_INVALID_OPERATION;
@@ -1539,7 +1556,7 @@ int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32
 
 int32_t AppMgrService::CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appMgrServiceInner_) {
         return ERR_INVALID_VALUE;
     }
@@ -1548,7 +1565,7 @@ int32_t AppMgrService::CheckCallingIsUserTestMode(const pid_t pid, bool &isUserT
 
 int32_t AppMgrService::NotifyProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appMgrServiceInner_) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_VALUE;
@@ -1558,9 +1575,9 @@ int32_t AppMgrService::NotifyProcessDependedOnWeb()
 
 void AppMgrService::KillProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
-    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not SA.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyKillProcessDependedOnWebPermission()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller have not permission.");
         return;
     }
     if (!appMgrServiceInner_) {
@@ -1571,7 +1588,7 @@ void AppMgrService::KillProcessDependedOnWeb()
 
 void AppMgrService::RestartResidentProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not foundation.");
         return;

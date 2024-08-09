@@ -16,13 +16,9 @@
 #include "extension_config.h"
 
 #include <fstream>
-#include <sstream>
-#include <unistd.h>
 
 #include "config_policy_utils.h"
-#include "element_name.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {

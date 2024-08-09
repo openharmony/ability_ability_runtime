@@ -16,15 +16,10 @@
 #include "interceptor/disposed_rule_interceptor.h"
 
 #include "ability_record.h"
-#include "ability_util.h"
-#include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
-#include "in_process_call_wrapper.h"
 #include "iservice_registry.h"
 #include "modal_system_ui_extension.h"
-#include "task_utils_wrap.h"
-#include "ui_extension_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -44,7 +39,7 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
     AppExecFwk::DisposedRule disposedRule;
-    if (CheckControl(param.want, param.userId, disposedRule)) {
+    if (CheckControl(param.want, param.userId, disposedRule, param.appIndex)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "The target ability is intercpted, disposedType is %{public}d, controlType is %{public}d, "
             "componentType is %{public}d.", disposedRule.disposedType, disposedRule.controlType,
@@ -85,7 +80,7 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 }
 
 bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
-    AppExecFwk::DisposedRule &disposedRule)
+    AppExecFwk::DisposedRule &disposedRule, int32_t appIndex)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // get bms
@@ -105,8 +100,14 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
     std::vector<AppExecFwk::DisposedRule> disposedRuleList;
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "GetAbilityRunningControlRule");
-        auto ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
-            userId, disposedRuleList));
+        int32_t ret = ERR_OK;
+        if (appIndex > 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+            ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
+                userId, disposedRuleList, appIndex));
+        } else {
+            ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
+                userId, disposedRuleList, 0));
+        }
         if (ret != ERR_OK || disposedRuleList.empty()) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Get No DisposedRule");
             return false;
@@ -252,7 +253,7 @@ ErrCode DisposedRuleInterceptor::CreateModalUIExtension(const Want &want, const 
     if (abilityRecord == nullptr) {
         auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
         (const_cast<Want &>(want)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
-        return systemUIExtension->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
+        return IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want)) ? ERR_OK : INNER_ERR;
     } else {
         return abilityRecord->CreateModalUIExtension(want);
     }

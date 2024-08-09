@@ -16,15 +16,10 @@
 #include "user_controller.h"
 
 #include "ability_manager_service.h"
-#include "app_scheduler.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
-#include "ipc_skeleton.h"
 #include "mock_session_manager_service.h"
 #include "os_account_manager_wrapper.h"
 #include "scene_board_judgement.h"
-#include "user_callback.h"
-#include "task_data_persistence_mgr.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -175,20 +170,21 @@ int32_t UserController::StopUser(int32_t userId)
     }
     appScheduler->KillProcessesByUserId(userId);
 
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto taskDataPersistenceMgr = DelayedSingleton<TaskDataPersistenceMgr>::GetInstance();
-        if (!taskDataPersistenceMgr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr is null");
-            return -1;
-        }
-        taskDataPersistenceMgr->RemoveUserDir(userId);
-    }
-
     auto abilityManagerService = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!abilityManagerService) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManagerService is null");
         return -1;
     }
+
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto missionListWrap = abilityManagerService->GetMissionListWrap();
+        if (!missionListWrap) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListWrap is null");
+            return -1;
+        }
+        missionListWrap->RemoveUserDir(userId);
+    }
+
     abilityManagerService->ClearUserData(userId);
 
     BroadcastUserStopped(userId);
@@ -220,8 +216,8 @@ int32_t UserController::LogoutUser(int32_t userId)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appScheduler is null");
         return INVALID_USERID_VALUE;
     }
-    appScheduler->KillProcessesByUserId(userId);
     abilityManagerService->ClearUserData(userId);
+    appScheduler->KillProcessesByUserId(userId);
     if (IsCurrentUser(userId)) {
         SetCurrentUserId(0);
     }

@@ -16,7 +16,6 @@
 #include "ability_lifecycle_callback.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 
 namespace OHOS {
@@ -46,20 +45,20 @@ void JsAbilityLifecycleCallback::CallJsMethodInnerCommon(const std::string &meth
 
     for (auto &callback : callbacks) {
         if (!callback.second) {
-            TAG_LOGE(AAFwkTag::APPKIT, "CallJsMethodInnerCommon, Invalid jsCallback");
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid jsCallback");
             return;
         }
 
         auto obj = callback.second->GetNapiValue();
         if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "CallJsMethodInnerCommon, Failed to get object");
+            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
             return;
         }
 
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName.data(), &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "CallJsMethodInnerCommon, Failed to get %{public}s from object",
+            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get %{public}s from object",
                 methodName.data());
             return;
         }
@@ -77,7 +76,7 @@ void JsAbilityLifecycleCallback::CallJsMethodInnerCommon(const std::string &meth
 void JsAbilityLifecycleCallback::CallJsMethod(
     const std::string &methodName, const std::shared_ptr<NativeReference> &ability)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "CallJsMethod methodName = %{public}s", methodName.c_str());
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = %{public}s", methodName.c_str());
     if (!ability) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
         return;
@@ -90,7 +89,7 @@ void JsAbilityLifecycleCallback::CallJsMethod(
 void JsAbilityLifecycleCallback::CallWindowStageJsMethod(const std::string &methodName,
     const std::shared_ptr<NativeReference> &ability, const std::shared_ptr<NativeReference> &windowStage)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "CallWindowStageJsMethod methodName = %{public}s", methodName.c_str());
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = %{public}s", methodName.c_str());
     if (!ability || !windowStage) {
         TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is nullptr");
         return;
@@ -200,18 +199,18 @@ int32_t JsAbilityLifecycleCallback::Register(napi_value jsCallback, bool isSync)
 
 bool JsAbilityLifecycleCallback::UnRegister(int32_t callbackId, bool isSync)
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "UnRegister called, callbackId : %{public}d", callbackId);
+    TAG_LOGI(AAFwkTag::APPKIT, "callbackId : %{public}d", callbackId);
     if (isSync) {
         auto it = callbacksSync_.find(callbackId);
         if (it == callbacksSync_.end()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "UnRegister callbackId: %{public}d is not in callbacksSync_", callbackId);
+            TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacksSync_", callbackId);
             return false;
         }
         return callbacksSync_.erase(callbackId) == 1;
     }
     auto it = callbacks_.find(callbackId);
     if (it == callbacks_.end()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "UnRegister callbackId: %{public}d is not in callbacks_", callbackId);
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacks_", callbackId);
         return false;
     }
     return callbacks_.erase(callbackId) == 1;

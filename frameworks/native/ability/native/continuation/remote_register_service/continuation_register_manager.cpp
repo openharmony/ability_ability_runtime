@@ -18,7 +18,6 @@
 #include "continuation_register_manager_proxy.h"
 #include "extra_params.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "request_callback.h"
 
 namespace OHOS {
@@ -41,12 +40,11 @@ void ContinuationRegisterManager::Register(const std::string &bundleName, const 
     const std::shared_ptr<IContinuationDeviceCallback> &deviceCallback,
     const std::shared_ptr<RequestCallback> &requestCallback)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
+    TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->Register(bundleName, parameter, deviceCallback, requestCallback);
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s, ContinuationRegisterManagerProxy is null", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
     }
 }
 
@@ -58,12 +56,11 @@ void ContinuationRegisterManager::Register(const std::string &bundleName, const 
  */
 void ContinuationRegisterManager::Unregister(int token, const std::shared_ptr<RequestCallback> &requestCallback)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
+    TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->Unregister(token, requestCallback);
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s, ContinuationRegisterManagerProxy is null", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
     }
 }
 
@@ -78,12 +75,11 @@ void ContinuationRegisterManager::Unregister(int token, const std::shared_ptr<Re
 void ContinuationRegisterManager::UpdateConnectStatus(
     int token, const std::string &deviceId, int status, const std::shared_ptr<RequestCallback> &requestCallback)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
+    TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->UpdateConnectStatus(token, deviceId, status, requestCallback);
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s, ContinuationRegisterManagerProxy is null", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
     }
 }
 
@@ -97,12 +93,11 @@ void ContinuationRegisterManager::UpdateConnectStatus(
 void ContinuationRegisterManager::ShowDeviceList(
     int token, const ExtraParams &parameter, const std::shared_ptr<RequestCallback> &requestCallback)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
+    TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->ShowDeviceList(token, parameter, requestCallback);
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s, ContinuationRegisterManagerProxy is null", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
     }
 }
 
@@ -111,12 +106,11 @@ void ContinuationRegisterManager::ShowDeviceList(
  */
 void ContinuationRegisterManager::Disconnect(void)
 {
-    TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called begin", __func__);
+    TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->Disconnect();
-        TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "%{public}s, ContinuationRegisterManagerProxy is null", __func__);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
     }
 }
 }  // namespace AppExecFwk

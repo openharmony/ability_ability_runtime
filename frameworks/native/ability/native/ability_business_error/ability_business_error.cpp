@@ -75,13 +75,16 @@ constexpr const char* ERROR_MSG_NOT_SUPPORT_CROSS_APP_START =
     "The application is not allow jumping to other applications when api version is above 11.";
 constexpr const char* ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT = "Can not match any component.";
 constexpr const char* ERROR_MSG_TARGET_BUNDLE_NOT_EXIST = "The target bundle does not exist.";
-constexpr const char* ERROR_MSG_SET_SUPPORTED_PROCESS_CACHE_AGAIN = "Can not set process cache state more than once.";
 constexpr const char* ERROR_MSG_NO_RESIDENT_PERMISSION =
     "The caller application can only set the resident status of the configured process.";
 constexpr const char* ERROR_MSG_MULTI_APP_NOT_SUPPORTED = "App clone or multi-instance is not supported.";
+constexpr const char* ERROR_MSG_NOT_APP_CLONE = "The target app is not Clone.";
 constexpr const char* ERROR_MSG_APP_CLONE_INDEX_INVALID =
     "The target app clone with the specified index does not exist.";
-constexpr const char* ERROR_MSG_NOT_APP_CLONE = "The target app is not Clone.";
+constexpr const char* ERROR_MSG_CALLER_NOT_EXIST =
+    "The caller application does not exist.";
+constexpr const char* ERROR_MSG_NOT_SUPPROT_BACK_TO_CALLER =
+    "Current application does not support back to caller application.";
 constexpr const char* ERROR_MSG_EXTENSION_START_THIRD_PARTY_APP_CONTROLLED =
     "The extension can not start the specified third party application.";
 constexpr const char* ERROR_MSG_EXTENSION_START_SERVICE_CONTROLLED = "The extension can not start the service.";
@@ -137,11 +140,12 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_CROSS_APP_START, ERROR_MSG_NOT_SUPPORT_CROSS_APP_START },
     { AbilityErrorCode::ERROR_CODE_CANNOT_MATCH_ANY_COMPONENT, ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT },
     { AbilityErrorCode::ERROR_CODE_TARGET_BUNDLE_NOT_EXIST, ERROR_MSG_TARGET_BUNDLE_NOT_EXIST },
-    { AbilityErrorCode::ERROR_CODE_SET_SUPPORTED_PROCESS_CACHE_AGAIN, ERROR_MSG_SET_SUPPORTED_PROCESS_CACHE_AGAIN },
     { AbilityErrorCode::ERROR_CODE_NO_RESIDENT_PERMISSION, ERROR_MSG_NO_RESIDENT_PERMISSION },
     { AbilityErrorCode::ERROR_CODE_MULTI_APP_NOT_SUPPORTED, ERROR_MSG_MULTI_APP_NOT_SUPPORTED },
-    { AbilityErrorCode::ERROR_APP_CLONE_INDEX_INVALID, ERROR_MSG_APP_CLONE_INDEX_INVALID },
     { AbilityErrorCode::ERROR_NOT_APP_CLONE, ERROR_MSG_NOT_APP_CLONE },
+    { AbilityErrorCode::ERROR_APP_CLONE_INDEX_INVALID, ERROR_MSG_APP_CLONE_INDEX_INVALID },
+    { AbilityErrorCode::ERROR_CODE_CALLER_NOT_EXIST, ERROR_MSG_CALLER_NOT_EXIST },
+    { AbilityErrorCode::ERROR_CODE_NOT_SUPPROT_BACK_TO_CALLER, ERROR_MSG_NOT_SUPPROT_BACK_TO_CALLER },
     { AbilityErrorCode::ERROR_CODE_EXTENSION_START_THIRD_PARTY_APP_CONTROLLED,
         ERROR_MSG_EXTENSION_START_THIRD_PARTY_APP_CONTROLLED },
     { AbilityErrorCode::ERROR_CODE_EXTENSION_START_SERVICE_CONTROLLED, ERROR_MSG_EXTENSION_START_SERVICE_CONTROLLED},
@@ -194,17 +198,18 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_NOT_ALLOW_IMPLICIT_START, AbilityErrorCode::ERROR_CODE_RESOLVE_ABILITY},
     {ERR_START_OPTIONS_CHECK_FAILED, AbilityErrorCode::ERROR_START_OPTIONS_CHECK_FAILED},
     {ERR_ABILITY_ALREADY_RUNNING, AbilityErrorCode::ERROR_ABILITY_ALREADY_RUNNING},
-    {ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_INVALID_ID},
     {ERR_ABILITY_NOT_FOREGROUND, AbilityErrorCode::ERROR_CODE_ABILITY_NOT_FOREGROUND},
     {ERR_WUKONG_MODE_CANT_MOVE_STATE, AbilityErrorCode::ERROR_CODE_WUKONG_MODE_CANT_MOVE_STATE},
     {ERR_OPERATION_NOT_SUPPORTED_ON_CURRENT_DEVICE, AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED},
     {ERR_IMPLICIT_START_ABILITY_FAIL, AbilityErrorCode::ERROR_CODE_CANNOT_MATCH_ANY_COMPONENT},
+    {ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_INVALID_ID},
     {ERR_START_OTHER_APP_FAILED, AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_CROSS_APP_START},
     {ERR_TARGET_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_TARGET_BUNDLE_NOT_EXIST},
-    {ERR_SET_SUPPORTED_PROCESS_CACHE_AGAIN, AbilityErrorCode::ERROR_CODE_SET_SUPPORTED_PROCESS_CACHE_AGAIN},
     {ERR_NO_RESIDENT_PERMISSION, AbilityErrorCode::ERROR_CODE_NO_RESIDENT_PERMISSION},
     {ERR_MULTI_APP_NOT_SUPPORTED, AbilityErrorCode::ERROR_CODE_MULTI_APP_NOT_SUPPORTED},
     {ERR_APP_CLONE_INDEX_INVALID, AbilityErrorCode::ERROR_APP_CLONE_INDEX_INVALID},
+    {ERR_CALLER_NOT_EXISTS, AbilityErrorCode::ERROR_CODE_CALLER_NOT_EXIST},
+    {ERR_NOT_SUPPORT_BACK_TO_CALLER, AbilityErrorCode::ERROR_CODE_NOT_SUPPROT_BACK_TO_CALLER},
     {EXTENSION_BLOCKED_BY_THIRD_PARTY_APP_FLAG,
         AbilityErrorCode::ERROR_CODE_EXTENSION_START_THIRD_PARTY_APP_CONTROLLED},
     {EXTENSION_BLOCKED_BY_SERVICE_LIST, AbilityErrorCode::ERROR_CODE_EXTENSION_START_SERVICE_CONTROLLED},

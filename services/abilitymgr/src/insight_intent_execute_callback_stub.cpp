@@ -16,50 +16,37 @@
 #include "insight_intent_execute_callback_stub.h"
 #include "insight_intent_host_client.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
 
-InsightIntentExecuteCallbackStub::InsightIntentExecuteCallbackStub()
-{
-    requestFuncMap_[ON_INSIGHT_INTENT_EXECUTE_DONE] = &InsightIntentExecuteCallbackStub::OnExecuteDoneInner;
-}
+InsightIntentExecuteCallbackStub::InsightIntentExecuteCallbackStub() {}
 
-InsightIntentExecuteCallbackStub::~InsightIntentExecuteCallbackStub()
-{
-    TAG_LOGD(AAFwkTag::INTENT, "call");
-    requestFuncMap_.clear();
-}
+InsightIntentExecuteCallbackStub::~InsightIntentExecuteCallbackStub() {}
 
 int32_t InsightIntentExecuteCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != IInsightIntentExecuteCallback::GetDescriptor()) {
-        TAG_LOGE(AAFwkTag::INTENT, "InterfaceToken not equal IInsightIntentExecuteCallback's descriptor.");
+        TAG_LOGE(AAFwkTag::INTENT, "InterfaceToken not equal");
         return ERR_INVALID_STATE;
     }
 
-    auto itFunc = requestFuncMap_.find(code);
-    if (itFunc != requestFuncMap_.end()) {
-        auto requestFunc = itFunc->second;
-        if (requestFunc != nullptr) {
-            return (this->*requestFunc)(data, reply);
-        }
+    if (code == ON_INSIGHT_INTENT_EXECUTE_DONE) {
+        return OnExecuteDoneInner(data, reply);
     }
-    TAG_LOGW(AAFwkTag::INTENT, "default case, need check.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t InsightIntentExecuteCallbackStub::OnExecuteDoneInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "call");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     uint64_t key = data.ReadUint64();
     int32_t resultCode = data.ReadInt32();
     std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> executeResult(
         data.ReadParcelable<AppExecFwk::InsightIntentExecuteResult>());
     if (executeResult == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "executeResult is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null executeResult");
         return ERR_INVALID_VALUE;
     }
     OnExecuteDone(key, resultCode, *executeResult);

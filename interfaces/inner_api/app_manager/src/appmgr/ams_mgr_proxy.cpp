@@ -20,7 +20,6 @@
 
 #include "appexecfwk_errors.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -29,6 +28,27 @@ constexpr int32_t MAX_APP_DEBUG_COUNT = 100;
 }
 AmsMgrProxy::AmsMgrProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<IAmsMgr>(impl)
 {}
+
+bool AmsMgrProxy::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "IsProcessContainsOnlyUIAbility start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return false;
+    }
+    data.WriteInt32(static_cast<int32_t>(pid));
+    int32_t ret =
+        SendTransactCmd(static_cast<uint32_t>(
+            IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "IsProcessContainsOnlyUIAbility end");
+    return reply.ReadBool();
+}
 
 bool AmsMgrProxy::WriteInterfaceToken(MessageParcel &data)
 {
@@ -404,6 +424,66 @@ int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool c
     return reply.ReadInt32();
 }
 
+int32_t AmsMgrProxy::ForceKillApplication(const std::string &bundleName,
+    const int userId, const int appIndex)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel bundleName failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel userId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel appIndex failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret =
+        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d.", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AmsMgrProxy::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteInt32(accessTokenId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel accessTokenId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret =
+        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID),
+            data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d.", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start.");
@@ -692,7 +772,7 @@ int AmsMgrProxy::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Applic
 
 int32_t AmsMgrProxy::NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "NotifyAppMgrRecordExitReason called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -768,7 +848,7 @@ int32_t AmsMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName, 
 
 int32_t AmsMgrProxy::RegisterAppDebugListener(const sptr<IAppDebugListener> &listener)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -793,7 +873,7 @@ int32_t AmsMgrProxy::RegisterAppDebugListener(const sptr<IAppDebugListener> &lis
 
 int32_t AmsMgrProxy::UnregisterAppDebugListener(const sptr<IAppDebugListener> &listener)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -818,7 +898,7 @@ int32_t AmsMgrProxy::UnregisterAppDebugListener(const sptr<IAppDebugListener> &l
 
 int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -843,7 +923,7 @@ int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName)
 
 int32_t AmsMgrProxy::DetachAppDebug(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -868,7 +948,7 @@ int32_t AmsMgrProxy::DetachAppDebug(const std::string &bundleName)
 
 void AmsMgrProxy::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -893,7 +973,7 @@ void AmsMgrProxy::SetKeepAliveEnableState(const std::string &bundleName, bool en
 
 int32_t AmsMgrProxy::SetAppWaitingDebug(const std::string &bundleName, bool isPersist)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -922,7 +1002,7 @@ int32_t AmsMgrProxy::SetAppWaitingDebug(const std::string &bundleName, bool isPe
 
 int32_t AmsMgrProxy::CancelAppWaitingDebug()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -941,7 +1021,7 @@ int32_t AmsMgrProxy::CancelAppWaitingDebug()
 
 int32_t AmsMgrProxy::GetWaitingDebugApp(std::vector<std::string> &debugInfoList)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -978,7 +1058,7 @@ int32_t AmsMgrProxy::GetWaitingDebugApp(std::vector<std::string> &debugInfoList)
 
 bool AmsMgrProxy::IsWaitingDebugApp(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -1002,7 +1082,7 @@ bool AmsMgrProxy::IsWaitingDebugApp(const std::string &bundleName)
 
 void AmsMgrProxy::ClearNonPersistWaitingDebugFlag()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -1020,7 +1100,7 @@ void AmsMgrProxy::ClearNonPersistWaitingDebugFlag()
 
 int32_t AmsMgrProxy::RegisterAbilityDebugResponse(const sptr<IAbilityDebugResponse> &response)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -1045,7 +1125,7 @@ int32_t AmsMgrProxy::RegisterAbilityDebugResponse(const sptr<IAbilityDebugRespon
 
 bool AmsMgrProxy::IsAttachDebug(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
@@ -1091,7 +1171,7 @@ bool AmsMgrProxy::IsMemorySizeSufficent()
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        HILOG_ERROR("Write interface token failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
         return true;
     }
 
@@ -1099,7 +1179,7 @@ bool AmsMgrProxy::IsMemorySizeSufficent()
     MessageOption option(MessageOption::TF_SYNC);
     auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_MEMORY_SIZE_SUFFICIENT), data, reply, option);
     if (ret != NO_ERROR) {
-        HILOG_ERROR("Send request failed, error code is %{public}d.", ret);
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, error code is %{public}d.", ret);
         return true;
     }
     return reply.ReadBool();
@@ -1141,6 +1221,79 @@ void AmsMgrProxy::AttachedToStatusBar(const sptr<IRemoteObject> &token)
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
     }
     TAG_LOGD(AAFwkTag::APPMGR, "end");
+}
+
+void AmsMgrProxy::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return;
+    }
+    if (!data.WriteUint32(pids.size())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write size failed.");
+        return;
+    }
+    for (const auto &pid: pids) {
+        if (!data.WriteInt32(pid)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write pid failed.");
+            return;
+        }
+    }
+    int32_t ret =
+        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::BLOCK_PROCESS_CACHE_BY_PIDS), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "end");
+}
+
+bool AmsMgrProxy::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write interface token");
+        return false;
+    }
+    if (!data.WriteRemoteObject(token.GetRefPtr())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
+        return false;
+    }
+
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IAmsMgr::Message::CLEAN_UIABILITY_BY_USER_REQUEST), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+    }
+    return reply.ReadBool();
+}
+
+bool AmsMgrProxy::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return false;
+    }
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel WriteString failed");
+        return false;
+    }
+
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, error code is %{public}d.", ret);
+        return false;
+    }
+    return reply.ReadBool();
 }
 } // namespace AppExecFwk
 } // namespace OHOS
