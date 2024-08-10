@@ -877,7 +877,7 @@ int AbilityManagerProxy::BackToCallerAbilityWithResult(const sptr<IRemoteObject>
     MessageParcel reply;
     MessageOption option;
 
-    CHECK_POINTER_AND_RETURN_LOG(token, ERR_INVALID_VALUE, "token is nullptr");
+    CHECK_POINTER_AND_RETURN_LOG(token, ERR_INVALID_VALUE, "null token");
 
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
@@ -885,21 +885,21 @@ int AbilityManagerProxy::BackToCallerAbilityWithResult(const sptr<IRemoteObject>
 
     if (token) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag and token write failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "token write failed");
             return INNER_ERR;
         }
     } else {
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write failed");
             return INNER_ERR;
         }
     }
     if (!data.WriteInt32(resultCode) || !data.WriteParcelable(resultWant)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "data write ability result failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write ability result failed");
         return INNER_ERR;
     }
     if (!data.WriteInt64(callerRequestCode)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "data write requestCode failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write requestCode failed");
         return INNER_ERR;
     }
     error = SendRequest(AbilityManagerInterfaceCode::BACK_TO_CALLER_UIABILITY, data, reply, option);
