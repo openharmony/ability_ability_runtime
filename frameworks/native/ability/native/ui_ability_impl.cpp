@@ -453,7 +453,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
     if (needNotifyAMS) {
         TAG_LOGI(AAFwkTag::UIABILITY, "notify ability manager service");
         entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-            "; AbilityManagerClient::AbilityTransitionDone; the transaction start";
+            "; AbilityManagerClient::AbilityTransitionDone; the transaction start.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         owner->lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
         AppExecFwk::PacMap restoreData;

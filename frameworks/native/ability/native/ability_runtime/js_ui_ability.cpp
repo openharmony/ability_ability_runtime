@@ -341,7 +341,7 @@ void JsUIAbility::AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, 
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
     auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; JsUIAbility::" + methodName +
-        "; the " + methodName + " begin";
+        "; the " + methodName + " begin.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
@@ -349,7 +349,7 @@ void JsUIAbility::AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, c
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
     auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; JsUIAbility::" + methodName +
-        "; the " + methodName + " end";
+        "; the " + methodName + " end.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
