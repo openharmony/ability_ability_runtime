@@ -256,6 +256,15 @@ void JsUIServiceExtension::OnStop()
 {
     Extension::OnStop();
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "call");
+    auto context = GetContext();
+    if (context != nullptr) {
+        sptr<Rosen::Window> win = context->GetWindow();
+        if (win != nullptr) {
+            TAG_LOGI(AAFwkTag::UISERVC_EXT, "Destroy Window");
+            win->Destroy();
+            context->SetWindow(nullptr);
+        }
+    }
     CallObjectMethod("onDestroy");
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(GetContext()->GetToken());
     if (ret) {
