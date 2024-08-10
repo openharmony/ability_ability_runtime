@@ -524,6 +524,7 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         CallJsOnRequest(want, sessionInfo, uiWindow);
         uiWindowMap_[obj] = uiWindow;
         context->SetSessionInfo(sessionInfo);
+        context->SetWindow(uiWindow);
     }
     return true;
 }
