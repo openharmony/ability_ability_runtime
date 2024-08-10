@@ -17,7 +17,9 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <mutex>
+#include <regex>
 
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
@@ -72,6 +74,31 @@ std::recursive_mutex gConnectsLock_;
 int64_t g_serialNumber = 0;
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 std::atomic<bool> g_hasSetContinueState = false;
+// max request code is (1 << 49) - 1
+constexpr int64_t MAX_REQUEST_CODE = 562949953421311;
+constexpr size_t MAX_REQUEST_CODE_LENGTH = 15;
+constexpr int32_t BASE_REQUEST_CODE_NUM = 10;
+
+int64_t RequestCodeFromStringToInt64(const std::string &requestCode)
+{
+    if (requestCode.size() > MAX_REQUEST_CODE_LENGTH) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "requestCode too long: %{public}s", requestCode.c_str());
+        return 0;
+    }
+    std::regex formatRegex("^[1-9]\\d*|0$");
+    std::smatch sm;
+    if (!std::regex_match(requestCode, sm, formatRegex)) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "requestCode match failed: %{public}s", requestCode.c_str());
+        return 0;
+    }
+    int64_t parsedRequestCode = 0;
+    parsedRequestCode = strtoll(requestCode.c_str(), nullptr, BASE_REQUEST_CODE_NUM);
+    if (parsedRequestCode > MAX_REQUEST_CODE) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "requestCode too large: %{public}s", requestCode.c_str());
+        return 0;
+    }
+    return parsedRequestCode;
+}
 
 // This function has to be called from engine thread
 void RemoveConnection(int64_t connectId)
@@ -1424,54 +1451,54 @@ napi_value JsAbilityContext::OnTerminateSelfWithResult(napi_env env, NapiCallbac
 
 napi_value JsAbilityContext::OnBackToCallerAbilityWithResult(napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGI(AAFwkTag::CONTEXT, "OnBackToCallerAbilityWithResult start");
+    TAG_LOGD(AAFwkTag::CONTEXT, "start");
     if (info.argc < ARGC_TWO) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Not enough params");
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid argc");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
 
-    int resultCode = 0;
+    int32_t resultCode = 0;
     AAFwk::Want want;
     if (!AppExecFwk::UnWrapAbilityResult(env, info.argv[INDEX_ZERO], resultCode, want)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "%s Failed to parse ability result!", __func__);
+        TAG_LOGE(AAFwkTag::CONTEXT, "parse ability result failed");
         ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return CreateJsUndefined(env);
     }
 
-    int64_t requestCode = -1;
-    if (!OHOS::AppExecFwk::UnwrapInt64FromJS2(env, info.argv[INDEX_ONE], requestCode)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "the second parameter is invalid.");
-        ThrowInvalidParamError(env, "Parse param requestCode failed, requestCode must be number.");
+    std::string requestCodeStr;
+    if (!OHOS::AppExecFwk::UnwrapStringFromJS2(env, info.argv[INDEX_ONE], requestCodeStr)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid requestCode.");
+        ThrowInvalidParamError(env, "Parse param requestCode failed, requestCode must be string.");
         return CreateJsUndefined(env);
     }
+    auto requestCode = RequestCodeFromStringToInt64(requestCodeStr);
+    TAG_LOGD(AAFwkTag::CONTEXT, "requestCode: %{public}s", requestCodeStr.c_str());
 
-    NapiAsyncTask::CompleteCallback complete =
-        [weak = context_, want, resultCode, requestCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            TAG_LOGI(AAFwkTag::CONTEXT, "TerminateSelfWithResult async");
-            auto context = weak.lock();
-            if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
-                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
-                return;
-            }
+    auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, resultCode, requestCode, innerErrorCode]() {
+        TAG_LOGI(AAFwkTag::CONTEXT, "aync execute");
+        auto context = weak.lock();
+        if (!context) {
+            TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+            *innerErrorCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            return;
+        }
 
-            auto errorCode = context->BackToCallerAbilityWithResult(want, resultCode, requestCode);
-            if (errorCode == 0) {
-                task.Resolve(env, CreateJsUndefined(env));
-            } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, errorCode));
-            }
-        };
+        *innerErrorCode = context->BackToCallerAbilityWithResult(want, resultCode, requestCode);
+    };
 
-    napi_value lastParam = (info.argc > ARGC_TWO) ? info.argv[ARGC_TWO] : nullptr;
+    NapiAsyncTask::CompleteCallback complete = [innerErrorCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        (*innerErrorCode == ERR_OK) ? task.ResolveWithNoError(env, CreateJsUndefined(env)) :
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
+    };
+    // only support promise method
+    napi_value lastParam = nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnBackToCallerAbilityWithResult",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    TAG_LOGD(AAFwkTag::CONTEXT, "OnBackToCallerAbilityWithResult end");
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
-
 
 napi_value JsAbilityContext::OnConnectAbility(napi_env env, NapiCallbackInfo& info)
 {

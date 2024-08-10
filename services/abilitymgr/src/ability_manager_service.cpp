@@ -1024,9 +1024,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (requestCode > 0 && callerAbilityRecord != nullptr) {
         bool backFlag = AmsConfigurationParameter::GetInstance().IsSupportBackToCaller();
-        long long fullRequestCode = StartAbilityUtils::GenerateFullRequestCode(
+        auto fullRequestCode = StartupUtil::GenerateFullRequestCode(
             callerAbilityRecord->GetPid(), backFlag, requestCode);
-        const_cast<Want &>(want).SetParam(CALLER_REQUEST_CODE, fullRequestCode);
+        const_cast<Want &>(want).SetParam(CALLER_REQUEST_CODE, std::to_string(fullRequestCode));
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pid: %{public}d, requestCode: %{public}d, fullRequestCode: %{public}lld.",
             callerAbilityRecord->GetPid(), requestCode, fullRequestCode);
     }
@@ -1624,9 +1624,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (requestCode > 0 && callerAbilityRecord != nullptr) {
         bool backFlag = AmsConfigurationParameter::GetInstance().IsSupportBackToCaller();
-        long long fullRequestCode = StartAbilityUtils::GenerateFullRequestCode(
+        auto fullRequestCode = StartupUtil::GenerateFullRequestCode(
             callerAbilityRecord->GetPid(), backFlag, requestCode);
-        const_cast<Want &>(want).SetParam(CALLER_REQUEST_CODE, fullRequestCode);
+        const_cast<Want &>(want).SetParam(CALLER_REQUEST_CODE, std::to_string(fullRequestCode));
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pid: %{public}d, requestCode: %{public}d, fullRequestCode: %{public}lld.",
             callerAbilityRecord->GetPid(), requestCode, fullRequestCode);
     }
@@ -2048,7 +2048,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
     }
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId, appIndex, sessionInfo->callerToken);
     if (sessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, true)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "interceptorExecuter_ called");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "interceptorExecuter_ called");
         AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(sessionInfo->want, requestCode,
             currentUserId, true, nullptr);
         auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
@@ -3291,38 +3291,16 @@ int AbilityManagerService::BackToCallerAbilityWithResult(const sptr<IRemoteObjec
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord is Null.");
         return ERR_INVALID_VALUE;
     }
-
-    auto requestInfo = StartAbilityUtils::ParseFullRequestCode(callerRequestCode);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "pid is %{public}d, backFlag is %{public}d, requestCode is %{public}d.",
-        requestInfo.pid, requestInfo.backFlag, requestInfo.requestCode);
-
-    if (requestInfo.requestCode < 0 || requestInfo.pid <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Cant't find caller by requestCode.");
-        return ERR_CALLER_NOT_EXISTS;
-    }
-
-    auto callerAbilityRecord = abilityRecord->GetCallerByRequestCode(requestInfo.requestCode, requestInfo.pid);
-    if (callerAbilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller not exists.");
-        return ERR_CALLER_NOT_EXISTS;
-    }
-    auto abilityResult = std::make_shared<AbilityResult>(requestInfo.requestCode, resultCode, *resultWant);
-    callerAbilityRecord->SendResultByBackToCaller(abilityResult);
-
-    // remove requestCode after send result
-    abilityRecord->RemoveCallerRequestCode(callerAbilityRecord, requestInfo.requestCode);
-
-    if (!requestInfo.backFlag) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "Not support back to caller.");
-        return ERR_NOT_SUPPORT_BACK_TO_CALLER;
-    }
     auto ownerUserId = abilityRecord->GetOwnerMissionUserId();
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetUIAbilityManagerByUserId(ownerUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        return uiAbilityManager->BackToCallerAbilityWithResult(abilityRecord->GetSessionInfo(), callerAbilityRecord);
+        return uiAbilityManager->BackToCallerAbilityWithResult(abilityRecord, resultCode, resultWant,
+            callerRequestCode);
     }
-    return ERR_OK;
+    auto missionListManager = GetMissionListManagerByUserId(ownerUserId);
+    CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
+    return missionListManager->BackToCallerAbilityWithResult(abilityRecord, resultCode, resultWant, callerRequestCode);
 }
 
 int AbilityManagerService::CloseAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant)
