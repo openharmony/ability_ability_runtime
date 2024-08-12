@@ -20,8 +20,12 @@ namespace AbilityRuntime {
 namespace {
 void HandleClean(void *data)
 {
-    auto env = reinterpret_cast<napi_env>(data);
-    ApplicationContextManager::GetApplicationContextManager().RemoveGlobalObject(env);
+    EnvData* envData = static_cast<EnvData*>(data);
+    if (envData != nullptr) {
+        ApplicationContextManager::GetApplicationContextManager().RemoveGlobalObject(envData->env);
+        delete envData;
+        envData = nullptr;
+    }
 }
 }
 ApplicationContextManager::ApplicationContextManager()
@@ -44,7 +48,11 @@ ApplicationContextManager& ApplicationContextManager::GetApplicationContextManag
 void ApplicationContextManager::AddGlobalObject(napi_env env,
     std::shared_ptr<NativeReference> applicationContextObj)
 {
-    napi_add_env_cleanup_hook(env, HandleClean, env);
+    EnvData* envData = new (std::nothrow) EnvData(env);
+    if (envData == nullptr) {
+        return;
+    }
+    napi_add_env_cleanup_hook(env, HandleClean, static_cast<void*>(envData));
     std::lock_guard<std::mutex> lock(applicationContextMutex_);
     auto iter = applicationContextMap_.find(env);
     if (iter == applicationContextMap_.end()) {
