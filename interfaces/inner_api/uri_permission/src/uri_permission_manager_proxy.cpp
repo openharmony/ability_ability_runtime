@@ -311,7 +311,7 @@ std::vector<bool> UriPermissionManagerProxy::CheckUriAuthorization(const std::ve
     MessageOption option;
     int error = SendTransactCmd(UriPermMgrCmd::ON_CHECK_URI_AUTHORIZATION, data, reply, option);
     if (error != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "SendRequest failed, error:%{public}d", error);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "SendRequest error:%{public}d", error);
         return result;
     }
     auto size = reply.ReadUint32();
