@@ -11687,7 +11687,7 @@ ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> ca
     }
 
     convertedWant.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "convertedWant=%{public}s", convertedWant.ToString().c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "convertedWant=%{private}s", convertedWant.ToString().c_str());
     retCode = freeInstallManager_->StartFreeInstall(convertedWant, GetValidUserId(userId),
         requestCode, callerToken, true, 0, true, std::make_shared<Want>(want));
     if (retCode != ERR_OK) {
@@ -11728,7 +11728,7 @@ ErrCode AbilityManagerService::ConvertToExplicitWant(Want& want)
     ffrt::mutex callbackDoneMutex;
     ConvertCallbackTask task = [&retCode, &isUsed, &callbackDoneCv, &callbackDoneMutex,
         &convertedWant = want, this](int resultCode, AAFwk::Want& want) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "in convert callback task, resultCode=%{public}d,want=%{public}s",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "in convert callback task, resultCode=%{public}d,want=%{private}s",
             resultCode, want.ToString().c_str());
         retCode = resultCode;
         convertedWant = want;
