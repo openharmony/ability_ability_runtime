@@ -1027,8 +1027,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         auto fullRequestCode = StartupUtil::GenerateFullRequestCode(
             callerAbilityRecord->GetPid(), backFlag, requestCode);
         const_cast<Want &>(want).SetParam(CALLER_REQUEST_CODE, std::to_string(fullRequestCode));
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "pid: %{public}d, requestCode: %{public}d, fullRequestCode: %{public}lld.",
-            callerAbilityRecord->GetPid(), requestCode, fullRequestCode);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "pid: %{public}d, requestCode: %{public}d, fullRequestCode: %{public}s.",
+            callerAbilityRecord->GetPid(), requestCode, std::to_string(fullRequestCode).c_str());
     }
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_SCREEN
@@ -1627,8 +1627,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         auto fullRequestCode = StartupUtil::GenerateFullRequestCode(
             callerAbilityRecord->GetPid(), backFlag, requestCode);
         const_cast<Want &>(want).SetParam(CALLER_REQUEST_CODE, std::to_string(fullRequestCode));
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "pid: %{public}d, requestCode: %{public}d, fullRequestCode: %{public}lld.",
-            callerAbilityRecord->GetPid(), requestCode, fullRequestCode);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "pid: %{public}d, requestCode: %{public}d, fullRequestCode: %{public}s.",
+            callerAbilityRecord->GetPid(), requestCode, std::to_string(fullRequestCode).c_str());
     }
 
     AbilityRequest abilityRequest;
