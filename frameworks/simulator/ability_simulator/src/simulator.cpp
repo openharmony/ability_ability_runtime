@@ -64,9 +64,9 @@ const std::string IS_SO = "isSO";
 const std::string DEPENDENCY_ALIAS = "dependencyAlias";
 
 #if defined(WINDOWS_PLATFORM)
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_debugger.dll";
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.dll";
 #elif defined(MAC_PLATFORM)
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_debugger.dylib";
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.dylib";
 #else
 #error "Unsupported platform"
 #endif
