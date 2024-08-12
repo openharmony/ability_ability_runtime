@@ -41,7 +41,7 @@ constexpr const char* MAX_CHILD_PROCESS = "MaxChildProcess";
 }
 AppSpawnClient::AppSpawnClient(bool isNWebSpawn)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "AppspawnCreateClient");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     if (isNWebSpawn) {
         serviceName_ = NWEBSPAWN_SERVER_NAME;
     }
@@ -50,7 +50,7 @@ AppSpawnClient::AppSpawnClient(bool isNWebSpawn)
 
 AppSpawnClient::AppSpawnClient(const char* serviceName)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "AppspawnCreateClient");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     std::string serviceName__ = serviceName;
     if (serviceName__ == APPSPAWN_SERVER_NAME) {
         serviceName_ = APPSPAWN_SERVER_NAME;
@@ -96,7 +96,7 @@ ErrCode AppSpawnClient::OpenConnection()
 
 void AppSpawnClient::CloseConnection()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "AppspawnDestroyClient");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     if (state_ == SpawnConnectionState::STATE_CONNECTED) {
         AppSpawnClientDestroy(handle_);
     }
@@ -338,7 +338,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         TAG_LOGE(AAFwkTag::APPMGR, "Send maxChildProcess failed, ret: %{public}d", ret);
         return ret;
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "Send maxChildProcess %{public}s success.", maxChildProcessStr.c_str());
+    TAG_LOGD(AAFwkTag::APPMGR, "Send maxChildProcess %{public}s success", maxChildProcessStr.c_str());
 
     if (!startMsg.fds.empty()) {
         ret = SetExtMsgFds(reqHandle, startMsg.fds);
@@ -353,7 +353,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
 
 int32_t AppSpawnClient::AppspawnCreateDefaultMsg(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "AppspawnCreateDefaultMsg");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     int32_t ret = 0;
     do {
         ret = SetDacInfo(startMsg, reqHandle);
@@ -416,7 +416,7 @@ int32_t AppSpawnClient::AppspawnCreateDefaultMsg(const AppSpawnStartMsg &startMs
 
 bool AppSpawnClient::VerifyMsg(const AppSpawnStartMsg &startMsg)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "VerifyMsg");
+    TAG_LOGD(AAFwkTag::APPMGR, "VerifyMsg");
     if (startMsg.code == MSG_APP_SPAWN ||
         startMsg.code == MSG_SPAWN_NATIVE_PROCESS) {
         if (startMsg.uid < 0) {
@@ -465,7 +465,7 @@ int32_t AppSpawnClient::PreStartNWebSpawnProcess()
 
 int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pid)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "StartProcess");
+    TAG_LOGD(AAFwkTag::APPMGR, "StartProcess");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!VerifyMsg(startMsg)) {
         return ERR_INVALID_VALUE;
@@ -490,7 +490,7 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
         return ret; // create msg failed
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "AppspawnSendMsg");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppspawnSendMsg");
     AppSpawnResult result = {0};
     ret = AppSpawnClientSendMsg(handle_, reqHandle, &result);
     if (ret != 0) {

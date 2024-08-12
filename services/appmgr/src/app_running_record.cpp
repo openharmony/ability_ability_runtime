@@ -812,12 +812,12 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
     int32_t state, bool isAbility, bool isFromWindowFocusChanged)
 {
     if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ability is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null ability");
         return;
     }
     auto abilityInfo = ability->GetAbilityInfo();
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null abilityInfo");
         return;
     }
     AbilityStateData abilityStateData;
@@ -847,7 +847,7 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
         abilityStateData.bundleName.c_str(), abilityStateData.abilityName.c_str());
     if (isAbility && abilityInfo->type == AbilityType::EXTENSION &&
         abilityInfo->extensionAbilityType != ExtensionAbilityType::UI) {
-        TAG_LOGW(AAFwkTag::APPMGR, "extensionType:%{public}d, not notify any more.", abilityInfo->extensionAbilityType);
+        TAG_LOGD(AAFwkTag::APPMGR, "extensionType:%{public}d, not notify", abilityInfo->extensionAbilityType);
         return;
     }
     auto serviceInner = appMgrServiceInner_.lock();
@@ -1127,7 +1127,7 @@ bool AppRunningRecord::AbilityUnfocused(const std::shared_ptr<AbilityRunningReco
 
 void AppRunningRecord::PopForegroundingAbilityTokens()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "foregroundingAbility size: %{public}d",
+    TAG_LOGI(AAFwkTag::APPMGR, "fg ability size: %{public}d",
         static_cast<int32_t>(foregroundingAbilityTokens_.size()));
     for (auto iter = foregroundingAbilityTokens_.begin(); iter != foregroundingAbilityTokens_.end();) {
         auto ability = GetAbilityRunningRecordByToken(*iter);
@@ -1978,7 +1978,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (windowVisibilityInfos.empty()) {
         TAG_LOGW(AAFwkTag::APPMGR, "Window visibility info is empty.");
         return;

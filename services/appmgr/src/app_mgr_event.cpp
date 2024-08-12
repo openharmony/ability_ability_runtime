@@ -56,7 +56,7 @@ bool AppMgrEventUtil::SendCreateAtomicServiceProcessEvent(const std::shared_ptr<
     const std::shared_ptr<AppRunningRecord> &appRecord, const std::string &moduleName, const std::string &abilityName)
 {
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
     AAFwk::EventInfo eventInfo;

@@ -33,19 +33,19 @@ std::set<std::string> ShellCommandConfigLoader::commands_ = {};
 
 bool ShellCommandConfigLoader::ReadConfig(const std::string &filePath)
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", __func__);
+    TAG_LOGD(AAFwkTag::AA_TOOL, "called");
     if (configState_) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "config has been read");
+        TAG_LOGI(AAFwkTag::AA_TOOL, "config read");
         return true;
     }
 
     if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "the file is not existed due to empty file path.");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "empty file path");
         return false;
     }
 
     if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "can not access the file: %{private}s.", filePath.c_str());
+        TAG_LOGE(AAFwkTag::AA_TOOL, "access file: %{private}s failed", filePath.c_str());
         return false;
     }
 
@@ -70,7 +70,7 @@ bool ShellCommandConfigLoader::ReadConfig(const std::string &filePath)
     }
 
     if (!aaJson.contains(AA_TOOL_COMMAND_LIST)) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "json config not contains the key");
+        TAG_LOGI(AAFwkTag::AA_TOOL, "config not contains the key");
         return false;
     }
 

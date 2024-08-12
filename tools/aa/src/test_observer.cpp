@@ -59,12 +59,12 @@ ShellCommandResult TestObserver::ExecuteShellCommand(const std::string& cmd, con
 
     auto cmdExecutor = std::make_shared<ShellCommandExecutor>(cmd, timeoutSec);
     if (!cmdExecutor) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "Failed to create ShellCommandExecutor instance");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "instance create failed");
         return {};
     }
 
     if (!std::make_shared<ShellCommandConfigLoader>()->ReadConfig(AA_TOOL_COMMAND_CONFIG)) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "Failed to read config");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "Read config failed");
         return {};
     }
     
@@ -73,7 +73,7 @@ ShellCommandResult TestObserver::ExecuteShellCommand(const std::string& cmd, con
 
 bool TestObserver::WaitForFinish(const int64_t& timeoutMs)
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "enter");
+    TAG_LOGD(AAFwkTag::AA_TOOL, "enter");
 
     auto realTime = timeoutMs > 0 ? timeoutMs : 0;
     int64_t startTime = SystemTime::GetNowSysTime();
