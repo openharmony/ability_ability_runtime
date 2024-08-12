@@ -32,9 +32,15 @@
 #include "mock_sa_call.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
+#include <thread>
+#include <chrono>
 
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
+
+namespace {
+    const int32_t SLEEP_TIME = 10000;
+}
 
 namespace OHOS {
 namespace AAFwk {
@@ -154,7 +160,9 @@ std::shared_ptr<AbilityRecord> AbilityConnectManagerTest::InitAbilityRecord()
 void AbilityConnectManagerTest::SetUpTestCase(void)
 {}
 void AbilityConnectManagerTest::TearDownTestCase(void)
-{}
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+}
 
 void AbilityConnectManagerTest::SetUp(void)
 {
