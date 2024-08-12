@@ -40,6 +40,7 @@ constexpr const char *PAGE_INFO_AUTOFILLTYPE = "autoFillType";
 constexpr const char *PAGE_INFO_TAG = "tag";
 constexpr const char *PAGE_INFO_VALUE = "value";
 constexpr const char *PAGE_INFO_PLACEHOLDER = "placeholder";
+constexpr const char *PAGE_INFO_META_DATA = "metaData";
 constexpr const char *PAGE_INFO_PASSWORDRULES = "passwordRules";
 constexpr const char *PAGE_INFO_ENABLEAUTOFILL = "enableAutoFill";
 constexpr const char *PAGE_INFO_IS_FOCUS = "isFocus";
@@ -138,6 +139,9 @@ napi_value JsAutoFillExtensionUtil::WrapPageNodeInfo(const napi_env env, const A
     jsValue = WrapStringToJS(env, pageNodeInfo.placeholder);
     SetPropertyValueByPropertyName(env, jsObject, PAGE_INFO_PLACEHOLDER, jsValue);
 
+    jsValue = WrapStringToJS(env, pageNodeInfo.metaData);
+    SetPropertyValueByPropertyName(env, jsObject, PAGE_INFO_META_DATA, jsValue);
+
     jsValue = WrapBoolToJS(env, pageNodeInfo.enableAutoFill);
     SetPropertyValueByPropertyName(env, jsObject, PAGE_INFO_ENABLEAUTOFILL, jsValue);
 
@@ -225,6 +229,7 @@ void JsAutoFillExtensionUtil::UnwrapPageNodeInfo(
     UnwrapStringByPropertyName(env, jsNode, PAGE_INFO_VALUE, node.value);
     UnwrapStringByPropertyName(env, jsNode, PAGE_INFO_PASSWORDRULES, node.passwordRules);
     UnwrapStringByPropertyName(env, jsNode, PAGE_INFO_PLACEHOLDER, node.placeholder);
+    UnwrapStringByPropertyName(env, jsNode, PAGE_INFO_META_DATA, node.metaData);
     UnwrapBooleanByPropertyName(env, jsNode, PAGE_INFO_ENABLEAUTOFILL, node.enableAutoFill);
     auto jsValue = GetPropertyValueByPropertyName(env, jsNode, PAGE_INFO_PAGE_NODE_RECT, napi_object);
     UnwrapRectData(env, jsValue, node.rect);
