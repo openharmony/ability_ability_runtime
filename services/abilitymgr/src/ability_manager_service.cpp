@@ -2586,38 +2586,38 @@ int AbilityManagerService::RequestModalUIExtensionInner(Want want)
 {
     sptr<IRemoteObject> token = nullptr;
     int ret = IN_PROCESS_CALL(GetTopAbility(token));
-    if (ret != ERR_OK || token == nullptr) {
-      TAG_LOGE(AAFwkTag::ABILITYMGR, "token is nullptr.");
-    } else {
+    if (ret == ERR_OK && token != nullptr) {
       // Gets the record corresponding to the current focus appliaction
-      auto record = Token::GetAbilityRecordByToken(token);
-      if (!record) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Record is nullptr.");
-        return ERR_INVALID_VALUE;
-      }
+        auto record = Token::GetAbilityRecordByToken(token);
+        if (!record) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Record is nullptr.");
+            return ERR_INVALID_VALUE;
+        }
 
-      // Gets the abilityName, bundleName, modulename corresponding to the
-      // current focus appliaction
-      EventInfo focusInfo;
-      focusInfo.bundleName = record->GetAbilityInfo().bundleName;
+        // Gets the abilityName, bundleName, modulename corresponding to the
+        // current focus appliaction
+        std::string focusName=record->GetAbilityInfo().bundleName;
 
-      // Gets the abilityName, bundleName, modulename corresponding to the
-      // caller appliaction
-      EventInfo callerInfo;
-      callerInfo.bundleName = want.GetParams().GetStringParam("bundleName");
-      TAG_LOGI(AAFwkTag::ABILITYMGR,
-               "focusbundlname: %{public}s, callerbundlname: %{public}s.",
-               focusInfo.bundleName.c_str(), callerInfo.bundleName.c_str());
+        // Gets the abilityName, bundleName, modulename corresponding to the
+        // caller appliaction
+        std::string callerName=want.GetParams().GetStringParam("bundleName");
 
-      // Compare
-      if (record->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE &&
-          focusInfo.bundleName == callerInfo.bundleName) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "CreateModalUIExtension is called!");
-        return record->CreateModalUIExtension(want);
-      }
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+               "focusbundlename: %{public}s, callerbundlename: %{public}s.",
+               focusName.c_str(), callerName.c_str());
+
+        // Compare
+        if (record->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE &&
+            focusName == callerName) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "CreateModalUIExtension is called!");
+            return record->CreateModalUIExtension(want);
+        }
+
+    } else {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token is nullptr.");
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Window Modal System Create UIExtension is called!");
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "Window Modal System Create UIExtension is called!");
     want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
     auto connection = std::make_shared<Rosen::ModalSystemUiExtension>();
     return connection->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
