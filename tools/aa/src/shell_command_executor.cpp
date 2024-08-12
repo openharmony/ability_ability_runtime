@@ -34,10 +34,10 @@ ShellCommandExecutor::ShellCommandExecutor(const std::string& cmd, const int64_t
 
 ShellCommandResult ShellCommandExecutor::WaitWorkDone()
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "enter");
+    TAG_LOGD(AAFwkTag::AA_TOOL, "enter");
 
     if (!DoWork()) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "Failed to execute command : \"%{public}s\"", cmd_.data());
+        TAG_LOGI(AAFwkTag::AA_TOOL, "Failed cmd: \"%{public}s\"", cmd_.data());
         return cmdResult_;
     }
 
@@ -47,7 +47,7 @@ ShellCommandResult ShellCommandExecutor::WaitWorkDone()
     if (timeoutSec_ <= 0) {
         cvWork_.wait(workLock, condition);
     } else if (!cvWork_.wait_for(workLock, timeoutSec_ * 1s, condition)) {
-        TAG_LOGW(AAFwkTag::AA_TOOL, "Command execution timed out! cmd : \"%{public}s\", timeoutSec : %{public}" PRId64,
+        TAG_LOGW(AAFwkTag::AA_TOOL, "cmd timed out! cmd : \"%{public}s\", timeoutSec : %{public}" PRId64,
             cmd_.data(), timeoutSec_);
         std::cout << "Warning! Command execution timed out! cmd : " << cmd_ << ", timeoutSec : " << timeoutSec_
             << std::endl;
@@ -61,22 +61,22 @@ ShellCommandResult ShellCommandExecutor::WaitWorkDone()
         return realResult;
     }
 
-    TAG_LOGI(AAFwkTag::AA_TOOL, "Command execution complete, cmd : \"%{public}s\", exitCode : %{public}d",
+    TAG_LOGI(AAFwkTag::AA_TOOL, "cmd complete, cmd : \"%{public}s\", exitCode : %{public}d",
         cmd_.data(), cmdResult_.exitCode);
     return cmdResult_;
 }
 
 bool ShellCommandExecutor::DoWork()
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "enter");
+    TAG_LOGD(AAFwkTag::AA_TOOL, "enter");
 
     if (cmd_.empty()) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "Invalid command");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "Invalid cmd_");
         return false;
     }
 
     if (!handler_) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "Invalid event handler");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "Invalid handler_");
         return false;
     }
     
@@ -87,18 +87,18 @@ bool ShellCommandExecutor::DoWork()
 
     auto self(shared_from_this());
     handler_->PostTask([this, self]() {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "DoWork async task begin, cmd : \"%{public}s\"", cmd_.data());
+        TAG_LOGI(AAFwkTag::AA_TOOL, "DoWork task begin, cmd: \"%{public}s\"", cmd_.data());
 
         FILE* file = popen(cmd_.c_str(), "r");
         if (!file) {
-            TAG_LOGE(AAFwkTag::AA_TOOL, "Failed to call popen, cmd : \"%{public}s\"", cmd_.data());
+            TAG_LOGE(AAFwkTag::AA_TOOL, "popen failed, cmd: \"%{public}s\"", cmd_.data());
 
             {
                 std::unique_lock<std::mutex> workLock(mtxWork_);
                 isDone_ = true;
             }
             cvWork_.notify_one();
-            TAG_LOGI(AAFwkTag::AA_TOOL, "DoWork async task end, cmd : \"%{public}s\"", cmd_.data());
+            TAG_LOGI(AAFwkTag::AA_TOOL, "DoWork task end, cmd: \"%{public}s\"", cmd_.data());
             return;
         }
 
@@ -119,7 +119,7 @@ bool ShellCommandExecutor::DoWork()
             isDone_ = true;
         }
         cvWork_.notify_one();
-        TAG_LOGI(AAFwkTag::AA_TOOL, "DoWork async task end, cmd : \"%{public}s\"", cmd_.data());
+        TAG_LOGI(AAFwkTag::AA_TOOL, "DoWork task end, cmd: \"%{public}s\"", cmd_.data());
     });
 
     return true;
