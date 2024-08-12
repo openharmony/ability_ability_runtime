@@ -2687,7 +2687,12 @@ void AppMgrServiceInner::SetAppEnvInfo(const BundleInfo &bundleInfo, AppSpawnSta
 void AppMgrServiceInner::AddMountPermission(uint32_t accessTokenId, std::set<std::string> &permissions)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    auto handle = remoteClientManager_->GetSpawnClient()->GetAppSpawnClientHandle();
+    auto spawnClient = remoteClientManager_->GetSpawnClient();
+    if (!spawnClient) {
+        TAG_LOGE(AAFwkTag::APPMGR, "spawnClient is null");
+        return;
+    }
+    auto handle = spawnClient->GetAppSpawnClientHandle();
     int32_t maxPermissionIndex = GetMaxPermissionIndex(handle);
     for (int i = 0; i < maxPermissionIndex; i++) {
         std::string permission = std::string(GetPermissionByIndex(handle, i));
