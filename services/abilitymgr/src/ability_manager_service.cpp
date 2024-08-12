@@ -11810,7 +11810,7 @@ void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &ability
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         return;
     }
-
+    abilityRequest.want.RemoveParam(WANT_PARAMS_HOST_WINDOW_ID_KEY);
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if(callerAbilityRecord != nullptr) {
         sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();
