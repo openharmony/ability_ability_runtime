@@ -168,7 +168,7 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     abilityImpl_->Init(application, abilityRecord, currentAbility_, abilityHandler_, token_);
 
     // ability attach : ipc
-    TAG_LOGI(AAFwkTag::UIABILITY, "attach uiability");
+    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Attach");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::LOAD };
     std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
         "; AbilityThread::Attach start; the load lifecycle.";
@@ -235,7 +235,7 @@ void UIAbilityThread::HandleAbilityTransaction(
     std::string connector = "##";
     std::string traceName = __PRETTY_FUNCTION__ + connector + want.GetElement().GetAbilityName();
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, traceName);
-    TAG_LOGD(AAFwkTag::UIABILITY, "name: %{public}s", want.GetElement().GetAbilityName().c_str());
+    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:name %{public}s", want.GetElement().GetAbilityName().c_str());
     if (abilityImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
         return;

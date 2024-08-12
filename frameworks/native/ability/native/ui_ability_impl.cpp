@@ -427,7 +427,7 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
 void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Call");
     auto owner = owner_.lock();
     if (owner == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null owner");
@@ -468,7 +468,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:call");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
     std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
         "; UIAbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
