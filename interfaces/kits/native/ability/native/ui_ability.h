@@ -102,7 +102,7 @@ public:
      * @brief Obtains the Want object that starts this ability.
      * @return Returns the Want object that starts this ability.
      */
-    std::shared_ptr<AAFwk::Want> GetWant();
+    std::shared_ptr<AAFwk::Want> GetWant() override;
 
     /**
      * @brief Init the UIability
@@ -610,6 +610,7 @@ private:
 
     std::string identityToken_;
     bool showOnLockScreen_ = false;
+    std::mutex wantMutexlock_;
 #endif
 };
 } // namespace AbilityRuntime

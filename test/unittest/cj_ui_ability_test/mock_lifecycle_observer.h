@@ -23,27 +23,26 @@
 namespace OHOS {
 namespace AppExecFwk {
 using Want = OHOS::AAFwk::Want;
-
 class MockLifecycleObserver : public ILifecycleObserver {
 public:
-    MockLifecycleObserver() = default;
     virtual ~MockLifecycleObserver() = default;
-
-    void OnActive() override;
+    MockLifecycleObserver() = default;
 
     void OnBackground() override;
 
-    void OnForeground(const Want& want) override;
+    void OnActive() override;
 
-    void OnInactive() override;
+    void OnForeground(const Want& want) override;
 
     void OnStart(const Want& want) override;
 
+    void OnInactive() override;
+
     void OnStop() override;
 
-    void OnStateChanged(LifeCycle::Event event, const Want& want) override;
-
     void OnStateChanged(LifeCycle::Event event) override;
+
+    void OnStateChanged(LifeCycle::Event event, const Want& want) override;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

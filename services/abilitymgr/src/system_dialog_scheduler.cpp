@@ -14,25 +14,13 @@
  */
 #include "system_dialog_scheduler.h"
 
-#include <cmath>
-#include <regex>
-
-#include "app_utils.h"
-#include "display_info.h"
-#include "constants.h"
 #include "ability_record.h"
 #include "ability_util.h"
 #include "app_gallery_enable_util.h"
-#include "app_scheduler.h"
-#include "dm_common.h"
+#include "app_utils.h"
+#include "display_info.h"
 #include "display_manager.h"
-#include "errors.h"
-#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "in_process_call_wrapper.h"
-#include "locale_config.h"
-#include "parameters.h"
-#include "resource_manager.h"
 #include "scene_board_judgement.h"
 #include "ui_extension_utils.h"
 
@@ -156,7 +144,7 @@ Want SystemDialogScheduler::GetTipsDialogWant(const sptr<IRemoteObject> &callerT
 
 Want SystemDialogScheduler::GetJumpInterceptorDialogWant(Want &targetWant)
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "GetJumpInterceptorDialogWant start");
+    TAG_LOGD(AAFwkTag::DIALOG, "start");
 
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_JUMP_INTERCEPTOR, position);
@@ -189,13 +177,13 @@ void SystemDialogScheduler::DialogPortraitPositionAdaptive(
         return;
     }
 
-    TAG_LOGD(AAFwkTag::DIALOG, "dialog portrait lineNums is zero.");
+    TAG_LOGD(AAFwkTag::DIALOG, "dialog portrait lineNums is zero");
 }
 
 void SystemDialogScheduler::GetSelectorDialogPortraitPosition(
     DialogPosition &position, int32_t height, int32_t width, int lineNums, float densityPixels) const
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "PortraitPosition height %{public}d width %{public}d density %{public}f.",
+    TAG_LOGD(AAFwkTag::DIALOG, "PortraitPosition height %{public}d width %{public}d density %{public}f",
         height, width, densityPixels);
     position.width = static_cast<int32_t>(width * UI_SELECTOR_PORTRAIT_WIDTH_RATIO);
     position.height = static_cast<int32_t>(UI_SELECTOR_DIALOG_HEIGHT * densityPixels);
@@ -203,7 +191,7 @@ void SystemDialogScheduler::GetSelectorDialogPortraitPosition(
     position.height_narrow = static_cast<int32_t>(UI_SELECTOR_DIALOG_HEIGHT_NARROW * densityPixels);
 
     if (width < UI_WIDTH_780DP) {
-        TAG_LOGI(AAFwkTag::DIALOG, "show dialog narrow.");
+        TAG_LOGI(AAFwkTag::DIALOG, "show dialog narrow");
         position.width = position.width_narrow;
         position.height = position.height_narrow;
     }
@@ -214,7 +202,7 @@ void SystemDialogScheduler::GetSelectorDialogPortraitPosition(
     if (portraitMax < position.height) {
         position.oversizeHeight = true;
         position.height = static_cast<int32_t>(UI_SELECTOR_PORTRAIT_PHONE_H1 * densityPixels);
-        TAG_LOGI(AAFwkTag::DIALOG, "portrait ratio 0.9 height is %{public}d.", portraitMax);
+        TAG_LOGI(AAFwkTag::DIALOG, "portrait ratio 0.9 height is %{public}d", portraitMax);
     }
 
     position.offsetX = static_cast<int32_t>(width * UI_SELECTOR_PORTRAIT_WIDTH_EDGE_RATIO);
@@ -237,13 +225,13 @@ void SystemDialogScheduler::DialogLandscapePositionAdaptive(
         return;
     }
 
-    TAG_LOGD(AAFwkTag::DIALOG, "dialog landscape lineNums is zero.");
+    TAG_LOGD(AAFwkTag::DIALOG, "dialog landscape lineNums is zero");
 }
 
 void SystemDialogScheduler::GetSelectorDialogLandscapePosition(
     DialogPosition &position, int32_t height, int32_t width, int lineNums, float densityPixels) const
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "LandscapePosition height %{public}d width %{public}d density %{public}f.",
+    TAG_LOGD(AAFwkTag::DIALOG, "LandscapePosition height %{public}d width %{public}d density %{public}f",
         height, width, densityPixels);
     position.width = static_cast<int32_t>(width *
         (UI_SELECTOR_LANDSCAPE_GRILLE_LARGE * UI_SELECTOR_LANDSCAPE_COUNT_FOUR +
@@ -260,10 +248,10 @@ void SystemDialogScheduler::GetSelectorDialogLandscapePosition(
     if (position.height > landscapeMax) {
         position.oversizeHeight = true;
         position.height = static_cast<int32_t>(UI_SELECTOR_LANDSCAPE_PHONE_H1 * densityPixels);
-        TAG_LOGI(AAFwkTag::DIALOG, "landscape ratio 0.9 height is %{public}d.", landscapeMax);
+        TAG_LOGI(AAFwkTag::DIALOG, "landscape ratio 0.9 height is %{public}d", landscapeMax);
     }
 
-    TAG_LOGD(AAFwkTag::DIALOG, "dialog height is %{public}d.", position.height);
+    TAG_LOGD(AAFwkTag::DIALOG, "dialog height is %{public}d", position.height);
     position.offsetX = static_cast<int32_t>((width - position.width) / UI_HALF);
     position.offsetY = static_cast<int32_t>((height * UI_SELECTOR_PORTRAIT_HEIGHT_RATIO - position.height));
     TAG_LOGD(AAFwkTag::DIALOG, "dialog offset x:%{public}d y:%{public}d h:%{public}d w:%{public}d",
@@ -282,25 +270,25 @@ void SystemDialogScheduler::GetSelectorDialogPositionAndSize(
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "share dialog GetDefaultDisplay fail, try again.");
+        TAG_LOGE(AAFwkTag::DIALOG, "GetDefaultDisplay fail, try again");
         display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     }
     if (display == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "share dialog GetDefaultDisplay fail.");
+        TAG_LOGE(AAFwkTag::DIALOG, "GetDefaultDisplay fail");
         return;
     }
 
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "share dialog GetDisplayInfo fail.");
+        TAG_LOGE(AAFwkTag::DIALOG, "GetDisplayInfo fail");
         return;
     }
 
-    TAG_LOGD(AAFwkTag::DIALOG, "GetDialogPositionAndSize GetOrientation, %{public}d %{public}f",
+    TAG_LOGD(AAFwkTag::DIALOG, "GetOrientation, %{public}d %{public}f",
         displayInfo->GetDisplayOrientation(), display->GetVirtualPixelRatio());
     if (displayInfo->GetDisplayOrientation() == Rosen::DisplayOrientation::PORTRAIT ||
         displayInfo->GetDisplayOrientation() == Rosen::DisplayOrientation::PORTRAIT_INVERTED) {
-        TAG_LOGI(AAFwkTag::DIALOG, "GetDialogPositionAndSize GetOrientation, PORTRAIT or PORTRAIT_INVERTED");
+        TAG_LOGI(AAFwkTag::DIALOG, "GetOrientation, PORTRAIT or PORTRAIT_INVERTED");
         GetSelectorDialogPortraitPosition(portraitPosition, display->GetHeight(), display->GetWidth(),
             lineNums, display->GetVirtualPixelRatio());
         GetSelectorDialogLandscapePosition(landscapePosition, display->GetWidth(), display->GetHeight(),
@@ -308,7 +296,7 @@ void SystemDialogScheduler::GetSelectorDialogPositionAndSize(
         return;
     }
 
-    TAG_LOGI(AAFwkTag::DIALOG, "GetDialogPositionAndSize GetOrientation, LANDSCAPE or LANDSCAPE_INVERTED");
+    TAG_LOGI(AAFwkTag::DIALOG, "GetOrientation, LANDSCAPE or LANDSCAPE_INVERTED");
     GetSelectorDialogPortraitPosition(portraitPosition, display->GetWidth(), display->GetHeight(),
         lineNums, display->GetVirtualPixelRatio());
     GetSelectorDialogLandscapePosition(landscapePosition, display->GetHeight(), display->GetWidth(),
@@ -319,7 +307,7 @@ int SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInfo
     Want &targetWant, const sptr<IRemoteObject> &callerToken)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::DIALOG, "GetSelectorDialogWant start");
+    TAG_LOGD(AAFwkTag::DIALOG, "start");
     DialogPosition portraitPosition;
     DialogPosition landscapePosition;
     GetSelectorDialogPositionAndSize(portraitPosition, landscapePosition, static_cast<int>(dialogAppInfos.size()));
@@ -336,7 +324,7 @@ const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<Dia
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (infos.empty()) {
-        TAG_LOGW(AAFwkTag::DIALOG, "Invalid abilityInfos.");
+        TAG_LOGW(AAFwkTag::DIALOG, "Invalid abilityInfos");
         return {};
     }
 
@@ -365,7 +353,7 @@ int SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppIn
     Want &targetWant, const std::string &type, int32_t userId, const sptr<IRemoteObject> &callerToken)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::DIALOG, "GetPcSelectorDialogWant start");
+    TAG_LOGD(AAFwkTag::DIALOG, "start");
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_SELECTOR, position, static_cast<int>(dialogAppInfos.size()));
 
@@ -379,9 +367,9 @@ int SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppIn
 const std::string SystemDialogScheduler::GetPcSelectorParams(const std::vector<DialogAppInfo> &infos,
     const std::string &type, int32_t userId, const std::string &action) const
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "GetPcSelectorParams start");
+    TAG_LOGD(AAFwkTag::DIALOG, "start");
     if (infos.empty()) {
-        TAG_LOGW(AAFwkTag::DIALOG, "Invalid abilityInfos.");
+        TAG_LOGW(AAFwkTag::DIALOG, "Invalid abilityInfos");
         return {};
     }
 
@@ -418,7 +406,7 @@ int SystemDialogScheduler::GetSelectorDialogWantCommon(const std::vector<DialogA
     Want &requestWant, Want &targetWant, const sptr<IRemoteObject> &callerToken)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::DIALOG, "GetSelectorDialogWantCommon start");
+    TAG_LOGD(AAFwkTag::DIALOG, "start");
     bool isCallerStageBasedModel = true;
     if (callerToken != nullptr) {
         TAG_LOGD(AAFwkTag::DIALOG, "set callertoken to targetWant");
@@ -437,12 +425,12 @@ int SystemDialogScheduler::GetSelectorDialogWantCommon(const std::vector<DialogA
         && isCallerStageBasedModel) {
         auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
         if (bundleMgrHelper == nullptr) {
-            TAG_LOGE(AAFwkTag::DIALOG, "The bundleMgrHelper is nullptr.");
+            TAG_LOGE(AAFwkTag::DIALOG, "bundleMgrHelper null");
             return INNER_ERR;
         }
         std::string bundleName;
         if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAppGalleryBundleName(bundleName))) {
-            TAG_LOGE(AAFwkTag::DIALOG, "QueryAppGalleryBundleName failed.");
+            TAG_LOGE(AAFwkTag::DIALOG, "QueryAppGalleryBundleName failed");
             return INNER_ERR;
         }
         targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
@@ -543,14 +531,14 @@ void SystemDialogScheduler::GetDialogPositionAndSize(DialogType type, DialogPosi
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
-        TAG_LOGW(AAFwkTag::DIALOG, "share dialog GetDefaultDisplay fail, try again.");
+        TAG_LOGW(AAFwkTag::DIALOG, "GetDefaultDisplay fail, try again");
         display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     }
     if (display != nullptr) {
-        TAG_LOGI(AAFwkTag::DIALOG, "display width: %{public}d, height: %{public}d", display->GetWidth(),
+        TAG_LOGI(AAFwkTag::DIALOG, "display width:%{public}d, height:%{public}d", display->GetWidth(),
             display->GetHeight());
         if (display->GetWidth() < UI_WIDTH_780DP) {
-            TAG_LOGI(AAFwkTag::DIALOG, "show dialog narrow.");
+            TAG_LOGI(AAFwkTag::DIALOG, "show dialog narrow");
             position.width = position.width_narrow;
             position.height = position.height_narrow;
         }
@@ -582,7 +570,7 @@ void SystemDialogScheduler::GetDialogPositionAndSize(DialogType type, DialogPosi
                 break;
         }
     } else {
-        TAG_LOGW(AAFwkTag::DIALOG, "share dialog get display fail, use default wide.");
+        TAG_LOGW(AAFwkTag::DIALOG, "get display fail, use default wide");
         if (type == DialogType::DIALOG_SELECTOR) {
             DialogPositionAdaptive(position, lineNums);
         }
@@ -595,7 +583,7 @@ bool SystemDialogScheduler::GetAssertFaultDialogWant(Want &want)
 {
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "Failed to get bms.");
+        TAG_LOGE(AAFwkTag::DIALOG, "Failed get bms");
         return false;
     }
 

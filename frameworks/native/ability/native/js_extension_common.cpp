@@ -49,9 +49,9 @@ JsExtensionCommon::~JsExtensionCommon()
 
 void JsExtensionCommon::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration> &fullConfig)
 {
-    TAG_LOGI(AAFwkTag::EXT, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::EXT, "called");
     if (!fullConfig) {
-        TAG_LOGE(AAFwkTag::EXT, "invalid configuration.");
+        TAG_LOGE(AAFwkTag::EXT, "invalid config");
         return;
     }
 
@@ -65,14 +65,14 @@ void JsExtensionCommon::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk:
 
 void JsExtensionCommon::OnMemoryLevel(int level)
 {
-    TAG_LOGD(AAFwkTag::EXT, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::EXT, "called");
 
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
 
     napi_value obj = jsObj_.GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::EXT, "Failed to get js instance object");
+        TAG_LOGE(AAFwkTag::EXT, "get instance obj failed");
         return;
     }
 
@@ -91,14 +91,14 @@ napi_value JsExtensionCommon::CallObjectMethod(const char* name, napi_value cons
     auto env = jsRuntime_.GetNapiEnv();
     napi_value obj = jsObj_.GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::EXT, "Failed to get js instance object");
+        TAG_LOGE(AAFwkTag::EXT, "get instance obj failed");
         return nullptr;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, obj, name, &method);
     if (!CheckTypeForNapiValue(env, obj, napi_function)) {
-        TAG_LOGE(AAFwkTag::EXT, "Failed to get '%{public}s' from js object", name);
+        TAG_LOGE(AAFwkTag::EXT, "get '%{public}s' failed", name);
         return nullptr;
     }
     TAG_LOGD(AAFwkTag::EXT, "(%{public}s), success", name);

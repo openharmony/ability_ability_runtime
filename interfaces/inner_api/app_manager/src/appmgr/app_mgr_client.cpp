@@ -299,6 +299,39 @@ AppMgrResultCode AppMgrClient::KillApplication(const std::string &bundleName, bo
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+AppMgrResultCode AppMgrClient::ForceKillApplication(const std::string &bundleName,
+    const int userId, const int appIndex)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            int32_t result = amsService->ForceKillApplication(bundleName, userId, appIndex);
+            if (result == ERR_OK) {
+                return AppMgrResultCode::RESULT_OK;
+            }
+            return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+        }
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            int32_t result = amsService->KillProcessesByAccessTokenId(accessTokenId);
+            if (result == ERR_OK) {
+                return AppMgrResultCode::RESULT_OK;
+            }
+            return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+        }
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
 AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleName, const int uid)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -471,6 +504,18 @@ AppMgrResultCode AppMgrClient::ConnectAppMgrService()
         return mgrHolder_->ConnectAppMgrService();
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+}
+
+bool AppMgrClient::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            return amsService->IsProcessContainsOnlyUIAbility(pid);
+        }
+    }
+    return false;
 }
 
 void AppMgrClient::SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr)
@@ -1055,16 +1100,6 @@ int32_t AppMgrClient::UnregisterAppRunningStatusListener(const sptr<IRemoteObjec
     return service->UnregisterAppRunningStatusListener(listener);
 }
 
-bool AppMgrClient::IsFinalAppProcess()
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
-        return false;
-    }
-    return service->IsFinalAppProcess();
-}
-
 void AppMgrClient::ClearProcessByToken(sptr<IRemoteObject> token) const
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1078,6 +1113,16 @@ void AppMgrClient::ClearProcessByToken(sptr<IRemoteObject> token) const
         return;
     }
     amsService->ClearProcessByToken(token);
+}
+
+bool AppMgrClient::IsFinalAppProcess()
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return false;
+    }
+    return service->IsFinalAppProcess();
 }
 
 int32_t AppMgrClient::RegisterRenderStateObserver(const sptr<IRenderStateObserver> &observer)
@@ -1249,6 +1294,22 @@ AppMgrResultCode AppMgrClient::BlockProcessCacheByPids(const std::vector<int32_t
         }
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+bool AppMgrClient::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get appmgrservice is nullptr.");
+        return false;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get abilityms service is nullptr.");
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    return amsService->CleanAbilityByUserRequest(token);
 }
 
 bool AppMgrClient::IsKilledForUpgradeWeb(const std::string &bundleName)

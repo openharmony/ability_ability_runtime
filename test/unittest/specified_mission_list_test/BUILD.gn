@@ -43,6 +43,7 @@ ohos_unittest("specified_mission_list_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
@@ -82,6 +83,10 @@ ohos_unittest("specified_mission_list_test") {
       "window_manager:libwsutils",
       "window_manager:scene_session",
     ]
+  }
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
 }
 

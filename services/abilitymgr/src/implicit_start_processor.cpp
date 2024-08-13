@@ -14,26 +14,15 @@
  */
 #include "implicit_start_processor.h"
 
-#include <string>
-
 #include "ability_manager_service.h"
 #include "ability_util.h"
-#include "app_gallery_enable_util.h"
 #include "app_utils.h"
-#include "default_app_interface.h"
 #include "dialog_session_manager.h"
-#include "errors.h"
 #include "ecological_rule/ability_ecological_rule_mgr_service.h"
-#include "event_report.h"
 #include "global_constant.h"
-#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "in_process_call_wrapper.h"
-#include "parameters.h"
-#include "scene_board_judgement.h"
 #include "start_ability_utils.h"
 #include "startup_util.h"
-#include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -264,6 +253,7 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
             return "";
         }
         type = uri.substr(suffixIndex);
+#ifdef WITH_DLP
         if (type == ".dlp") {
             auto suffixDlpIndex = uri.rfind('.', suffixIndex - 1);
             if (suffixDlpIndex == std::string::npos) {
@@ -272,6 +262,7 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
             }
             type = uri.substr(suffixDlpIndex, suffixIndex - suffixDlpIndex);
         }
+#endif // WITH_DLP
     }
     return type;
 }
@@ -279,16 +270,19 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
 static void ProcessLinkType(std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
 {
     bool appLinkingExist = false;
+    bool defaultAppExist = false;
     if (!abilityInfos.size()) {
         return;
     }
     for (const auto &info : abilityInfos) {
         if (info.linkType == AppExecFwk::LinkType::APP_LINK) {
             appLinkingExist = true;
-            break;
+        }
+        if (info.linkType == AppExecFwk::LinkType::DEFAULT_APP) {
+            defaultAppExist = true;
         }
     }
-    if (!appLinkingExist) {
+    if (!appLinkingExist && !defaultAppExist) {
         return;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Open applink first!");
@@ -297,27 +291,24 @@ static void ProcessLinkType(std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
             it++;
             continue;
         }
-        if (it->linkType == AppExecFwk::LinkType::DEEP_LINK) {
+        if (it->linkType == AppExecFwk::LinkType::DEFAULT_APP && appLinkingExist) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s default deleted.", it->name.c_str());
             it = abilityInfos.erase(it);
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s deleted.", it->name.c_str());
+            continue;
         }
+        if (it->linkType == AppExecFwk::LinkType::DEEP_LINK) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s deleted.", it->name.c_str());
+            it = abilityInfos.erase(it);
+            continue;
+        }
+        it++;
     }
 }
 
-void ImplicitStartProcessor::SetUriReservedFlag(const bool flag)
-{
-    uriReservedFlag_ = flag;
-}
-
-void ImplicitStartProcessor::SetUriReservedBundle(const std::string bundleName)
-{
-    reservedBundleName_ = bundleName;
-}
-
 void ImplicitStartProcessor::OnlyKeepReserveApp(std::vector<AppExecFwk::AbilityInfo> &abilityInfos,
-    std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos)
+    std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos, const AbilityRequest &request)
 {
-    if (!uriReservedFlag_) {
+    if (!request.uriReservedFlag) {
         return;
     }
     if (extensionInfos.size() > 0) {
@@ -325,12 +316,12 @@ void ImplicitStartProcessor::OnlyKeepReserveApp(std::vector<AppExecFwk::AbilityI
     }
 
     for (auto it = abilityInfos.begin(); it != abilityInfos.end();) {
-        if (it->bundleName == reservedBundleName_) {
+        if (it->bundleName == request.reservedBundleName) {
             it++;
             continue;
         } else {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "Reserve App %{public}s dismatch with bundleName %{public}s.",
-                reservedBundleName_.c_str(), it->bundleName.c_str());
+                request.reservedBundleName.c_str(), it->bundleName.c_str());
             it = abilityInfos.erase(it);
         }
     }
@@ -371,7 +362,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
             static_cast<uint32_t>(AppExecFwk::GetAbilityInfoFlag::GET_ABILITY_INFO_WITH_APP_LINKING);
     }
 
-    if (uriReservedFlag_) {
+    if (request.uriReservedFlag) {
         abilityInfoFlag = static_cast<uint32_t>(abilityInfoFlag) |
             static_cast<uint32_t>(AppExecFwk::GetAbilityInfoFlag::GET_ABILITY_INFO_ONLY_SYSTEM_APP);
     }
@@ -386,7 +377,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, withDefault, abilityInfos, extensionInfos, findDefaultApp));
 
-    OnlyKeepReserveApp(abilityInfos, extensionInfos);
+    OnlyKeepReserveApp(abilityInfos, extensionInfos, request);
     if (isOpenLink && extensionInfos.size() > 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Clear extensionInfos when isOpenLink.");
         extensionInfos.clear();
@@ -641,7 +632,7 @@ int32_t ImplicitStartProcessor::ImplicitStartAbilityInner(const Want &targetWant
             break;
         default:
             result = abilityMgr->StartAbilityWrap(
-                targetWant, request.callerToken, request.requestCode, userId, false, 0, false, true);
+                targetWant, request.callerToken, request.requestCode, false, userId, false, 0, false, true);
             break;
     }
 

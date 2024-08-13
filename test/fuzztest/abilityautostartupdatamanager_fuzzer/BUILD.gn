@@ -66,6 +66,7 @@ ohos_fuzztest("AbilityAutoStartupDataManagerFuzzTest") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "napi:ace_napi",

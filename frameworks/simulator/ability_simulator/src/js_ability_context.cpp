@@ -111,7 +111,7 @@ napi_value JsAbilityContext::TerminateSelf(napi_env env, napi_callback_info info
 
 napi_value JsAbilityContext::OnTerminateSelf(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "TerminateSelf");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     auto abilityContext = context_.lock();
     if (abilityContext == nullptr) {
         return nullptr;
@@ -142,7 +142,7 @@ napi_value JsAbilityContext::TerminateSelfWithResult(napi_env env, napi_callback
 
 napi_value JsAbilityContext::OnTerminateSelfWithResult(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called.");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     auto abilityContext = context_.lock();
     if (abilityContext == nullptr) {
         return nullptr;
@@ -183,10 +183,10 @@ napi_value JsAbilityContext::IsTerminating(napi_env env, napi_callback_info info
 
 napi_value JsAbilityContext::OnIsTerminating(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "IsTerminating");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     auto context = context_.lock();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "OnIsTerminating context is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null context");
         return CreateJsUndefined(env);
     }
     return CreateJsValue(env, context->IsTerminating());
@@ -203,22 +203,22 @@ napi_value CreateJsErrorByNativeErr(napi_env env, int32_t err, const std::string
 void JsAbilityContext::ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
     const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called.");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     if (jsContext == nullptr || config == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "jsContext is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null jsContext");
         return;
     }
 
     napi_value value = jsContext->GetNapiValue();
     if (value == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "value is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null value");
         return;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, value, "onUpdateConfiguration", &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Failed to get onUpdateConfiguration from object");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "failed");
         return;
     }
 

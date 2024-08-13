@@ -51,7 +51,9 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const std::string DEBUG_APP = "debugApp";
+#ifdef WITH_DLP
 const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
+#endif // WITH_DLP
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string URI_PERMISSION_TABLE_NAME = "uri_permission";
@@ -2236,6 +2238,8 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_005, TestSize.Level
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     EXPECT_NE(abilityRecord, nullptr);
+    uint32_t targetTokenId = 56;
+    abilityRecord->SetCallerAccessTokenId(targetTokenId);
     Want want;
     want.SetFlags(1);
     want.SetUri("file://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
@@ -2292,6 +2296,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_RevokeUriPermission_001, TestSize.Leve
     abilityRecord->RevokeUriPermission();
 }
 
+#ifdef WITH_DLP
 /*
  * Feature: AbilityRecord
  * Function: HandleDlpClosed
@@ -2308,6 +2313,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_HandleDlpClosed_001, TestSize.Level1)
     abilityRecord->appIndex_ = 1;
     abilityRecord->HandleDlpClosed();
 }
+#endif // WITH_DLP
 
 /*
  * Feature: AbilityRecord
@@ -2575,6 +2581,25 @@ HWTEST_F(AbilityRecordTest, UpdateWantParams_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AbilityRecord_ReportAtomicServiceDrawnCompleteEvent_001
+ * @tc.desc: Test ReportAtomicServiceDrawnCompleteEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_ReportAtomicServiceDrawnCompleteEvent_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    ASSERT_NE(abilityRecord, nullptr);
+    
+    abilityRecord->applicationInfo_.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    auto ret = abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
+    EXPECT_EQ(ret, true);
+    
+    abilityRecord->applicationInfo_.bundleType = AppExecFwk::BundleType::APP;
+    ret = abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: AbilityRecord_GetAbilityVisibilityState_001
  * @tc.desc: Test GetAbilityVisibilityState
  * @tc.type: FUNC
@@ -2659,12 +2684,11 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     uint32_t sceneFlag = 0;
     Closure task;
-    sptr<SessionInfo> sessionInfo = nullptr;
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
     abilityRecord->applicationInfo_.name = "app";
     abilityRecord->isAttachDebug_ = false;
     abilityRecord->isAssertDebug_ = false;
-    abilityRecord->ForegroundAbility(task, sessionInfo, sceneFlag);
+    abilityRecord->ForegroundAbility(task, sceneFlag);
     EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
     EXPECT_NE(abilityRecord_, nullptr);
 }
@@ -2682,11 +2706,9 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_002, TestSize.Level1
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     uint32_t sceneFlag = 0;
     Closure task;
-    sptr<SessionInfo> sessionInfo = nullptr;
     bool isNewWant = true;
     abilityRecord->SetIsNewWant(isNewWant);
-    abilityRecord->ForegroundAbility(task, sessionInfo, sceneFlag);
-    EXPECT_EQ(sessionInfo, nullptr);
+    abilityRecord->ForegroundAbility(task, sceneFlag);
     EXPECT_NE(abilityRecord_, nullptr);
 }
 
@@ -2722,25 +2744,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_PrepareTerminateAbility_002, TestSize.
     bool result = abilityRecord_->lifecycleDeal_->PrepareTerminateAbility();
     EXPECT_EQ(result, false);
     EXPECT_NE(abilityRecord_, nullptr);
-}
-
-/**
- * @tc.name: AbilityRecord_ReportAtomicServiceDrawnCompleteEvent_001
- * @tc.desc: Test ReportAtomicServiceDrawnCompleteEvent
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_ReportAtomicServiceDrawnCompleteEvent_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    ASSERT_NE(abilityRecord, nullptr);
-
-    abilityRecord->applicationInfo_.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
-    auto ret = abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
-    EXPECT_EQ(ret, true);
-
-    abilityRecord->applicationInfo_.bundleType = AppExecFwk::BundleType::APP;
-    ret = abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
-    EXPECT_EQ(ret, false);
 }
 
 /*

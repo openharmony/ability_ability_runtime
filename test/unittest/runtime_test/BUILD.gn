@@ -109,6 +109,49 @@ ohos_unittest("js_runtime_test") {
   ]
 }
 
+ohos_unittest("js_runtime_first_test") {
+  module_out_path = module_output_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+  branch_protector_ret = "pac_ret"
+
+  include_dirs = [
+    "${ability_runtime_native_path}/runtime",
+    "${ability_runtime_native_path}/runtime/utils/include",
+    "//third_party/zlib/contrib/minizip",
+    "//third_party/zlib",
+  ]
+
+  sources = [
+    # add mock file
+    "js_runtime_first_test.cpp",
+    "mock_jsnapi.cpp",
+  ]
+
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+  deps = [
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_runtime:js_environment",
+    "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+}
+
 ohos_unittest("hdc_register_test") {
   module_out_path = module_output_path
 
@@ -202,6 +245,7 @@ group("unittest") {
 
   deps = [
     ":hdc_register_test",
+    ":js_runtime_first_test",
     ":js_runtime_test",
     ":js_worker_test",
     ":ohos_js_environment_test",

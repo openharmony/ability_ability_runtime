@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
@@ -207,6 +208,7 @@ ohos_moduletest("data_ability_operation_moduletest") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
     "//third_party/googletest:gmock_main",
@@ -347,7 +349,7 @@ group("moduletest") {
 
   deps = []
 
-  if (is_phone_product) {
+  if (is_phone_product && !use_libfuzzer) {
     deps += [
       ":ability_conetxt_test",
       ":ability_moduletest",

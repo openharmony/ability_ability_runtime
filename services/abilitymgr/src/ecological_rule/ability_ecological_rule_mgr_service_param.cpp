@@ -15,12 +15,6 @@
 
 #include "ecological_rule/ability_ecological_rule_mgr_service_param.h"
 
-#include <string>
-#include <vector>
-
-#include "iremote_broker.h"
-#include "iremote_object.h"
-
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -78,7 +72,7 @@ AbilityCallerInfo *AbilityCallerInfo::Unmarshalling(Parcel &in)
 {
     auto *info = new (std::nothrow) AbilityCallerInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "new callerInfo failed, return nullptr");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "info null");
         return nullptr;
     }
 

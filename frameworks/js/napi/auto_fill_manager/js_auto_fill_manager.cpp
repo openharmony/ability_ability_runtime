@@ -44,14 +44,14 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     if (info.argc < ARGC_ONE) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "The param is invalid.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "invalid argc");
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
 
     napi_value instanceIdValue = nullptr;
     if (napi_get_named_property(env, info.argv[INDEX_ZERO], "instanceId_", &instanceIdValue) != napi_ok) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Get function by name failed.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "get function by name failed");
         ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
             "Parameter error. Get instance id failed.");
         return CreateJsUndefined(env);
@@ -74,14 +74,14 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
     auto autoSaveMangerFunc = [this](const int32_t arg) { this->OnRequestAutoSaveDone(arg); };
     saveCallback = std::make_shared<JsAutoSaveRequestCallback>(env, instanceId, autoSaveMangerFunc);
     if (saveCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "saveCallback is nullptr.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null saveCallback");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
 
     if (info.argc != ARGC_ONE) {
         if (!CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
-            TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Second input parameter error.");
+            TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Second parameter error");
             ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
                 "Parameter error. The second parameter is not of type callback.");
             return CreateJsUndefined(env);
@@ -98,7 +98,7 @@ void JsAutoFillManager::OnRequestAutoSaveInner(napi_env env, int32_t instanceId,
 #ifdef SUPPORT_GRAPHICS
     auto uiContent = Ace::UIContent::GetUIContent(instanceId);
     if (uiContent == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "UIContent is nullptr.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null uiContent");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return;
     }
@@ -109,7 +109,7 @@ void JsAutoFillManager::OnRequestAutoSaveInner(napi_env env, int32_t instanceId,
         AbilityRuntime::AutoFill::AutoFillResult result;
         auto ret = AutoFillManager::GetInstance().RequestAutoSave(uiContent, request, saveRequestCallback, result);
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Request auto save error[%{public}d].", ret);
+            TAG_LOGE(AAFwkTag::AUTOFILLMGR, "RequestAutoSave error[%{public}d]", ret);
             ThrowError(env, GetJsErrorCodeByNativeError(ret));
             return;
         }
@@ -217,7 +217,7 @@ napi_value JsAutoFillManagerInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Env or exportObj nullptr.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null Env or exportObj");
         return nullptr;
     }
 

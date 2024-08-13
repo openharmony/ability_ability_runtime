@@ -25,7 +25,7 @@ void AutoFillExtensionContext::SetAutoFillExtensionCallback(
     autoFillExtensionCallback_ = autoFillExtensionCallback;
 }
 
-void AutoFillExtensionContext::SetSessionInfo(const wptr<AAFwk::SessionInfo> &sessionInfo)
+void AutoFillExtensionContext::SetSessionInfo(const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     sessionInfo_ = sessionInfo;
 }
@@ -33,17 +33,16 @@ void AutoFillExtensionContext::SetSessionInfo(const wptr<AAFwk::SessionInfo> &se
 int32_t AutoFillExtensionContext::ReloadInModal(const CustomData &customData)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
-    auto sessionInfo = sessionInfo_.promote();
-    if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Session info is nullptr.");
+    if (sessionInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null sessionInfo_");
         return ERR_NULL_OBJECT;
     }
     auto autoFillExtensionCallback = autoFillExtensionCallback_.lock();
     if (autoFillExtensionCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Auto fill extension callback is nullptr.");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null autoFillExtensionCallback");
         return ERR_NULL_OBJECT;
     }
-    return autoFillExtensionCallback->OnReloadInModal(sessionInfo, customData);
+    return autoFillExtensionCallback->OnReloadInModal(sessionInfo_, customData);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

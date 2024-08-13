@@ -56,6 +56,8 @@ private:
     int32_t HandleAttachPidToParent(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessWithAccount(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillApplication(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleForceKillApplication(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleKillProcessesByAccessTokenId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAbilityAttachTimeOut(MessageParcel &data, MessageParcel &reply);
     int32_t HandlePrepareTerminate(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillApplicationByUid(MessageParcel &data, MessageParcel &reply);
@@ -92,8 +94,12 @@ private:
         MessageParcel &reply, MessageOption &option);
     int32_t OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
     int32_t HandleBlockProcessCacheByPids(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCleanAbilityByUserRequest(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AmsMgrStub);
 };
 }  // namespace AppExecFwk

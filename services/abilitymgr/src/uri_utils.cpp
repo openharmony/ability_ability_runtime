@@ -86,7 +86,7 @@ std::vector<std::string> UriUtils::GetUriListFromWantDms(const Want &want)
 
 void UriUtils::FilterUriWithPermissionDms(Want &want, uint32_t tokenId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "FilterUriWithPermissionDms called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Flag is invalid.");
         return;
@@ -101,7 +101,7 @@ void UriUtils::FilterUriWithPermissionDms(Want &want, uint32_t tokenId)
     auto checkResult = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
         uriVec, want.GetFlags(), tokenId));
     std::vector<std::string> validUriVec;
-    for (auto i = 0; i < checkResult.size(); i++) {
+    for (size_t i = 0; i < checkResult.size(); i++) {
         if (checkResult[i]) {
             validUriVec.emplace_back(uriVec[i]);
         }

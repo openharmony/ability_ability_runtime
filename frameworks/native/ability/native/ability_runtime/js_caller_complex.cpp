@@ -67,21 +67,21 @@ public:
 
     static bool ReleaseObject(JsCallerComplex* data)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "ReleaseObject begin");
+        TAG_LOGD(AAFwkTag::DEFAULT, "called");
         if (data == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "ReleaseObject begin, but input parameters is nullptr");
+            TAG_LOGE(AAFwkTag::DEFAULT, "null data");
             return false;
         }
 
         if (!data->ChangeCurrentState(OBJSTATE::OBJ_RELEASE)) {
             auto handler = data->GetEventHandler();
             if (handler == nullptr) {
-                TAG_LOGE(AAFwkTag::DEFAULT, "ReleaseObject error end, Get eventHandler failed");
+                TAG_LOGE(AAFwkTag::DEFAULT, "null handler");
                 return false;
             }
             auto releaseObjTask = [pdata = data] () {
                 if (!FindJsCallerComplex(pdata)) {
-                    TAG_LOGE(AAFwkTag::DEFAULT, "ReleaseObject error end, but input parameters does not found");
+                    TAG_LOGE(AAFwkTag::DEFAULT, "argc not found");
                     return;
                 }
                 ReleaseObject(pdata);
@@ -93,36 +93,32 @@ public:
             // when the object is about to be destroyed, does not reset state
             std::unique_ptr<JsCallerComplex> delObj(data);
         }
-        TAG_LOGD(AAFwkTag::DEFAULT, "ReleaseObject success end");
+        TAG_LOGD(AAFwkTag::DEFAULT, "end");
         return true;
     }
 
     static void Finalizer(napi_env env, void* data, void* hint)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s begin.", __func__);
+        TAG_LOGD(AAFwkTag::DEFAULT, "called");
         if (data == nullptr) {
-            TAG_LOGE(
-                AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s is called, but input parameters is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null data");
             return;
         }
 
         auto ptr = static_cast<JsCallerComplex*>(data);
         if (!FindJsCallerComplex(ptr)) {
-            TAG_LOGE(AAFwkTag::DEFAULT,
-                "JsCallerComplex::%{public}s is called, but input parameters does not found", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "argc not found");
             return;
         }
 
         ReleaseObject(ptr);
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s end.", __func__);
+        TAG_LOGD(AAFwkTag::DEFAULT, "end");
     }
 
     static napi_value JsReleaseCall(napi_env env, napi_callback_info info)
     {
         if (env == nullptr || info == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT,
-                "JsCallerComplex::%{public}s is called, but input parameters %{public}s is nullptr", __func__,
-                ((env == nullptr) ? "env" : "info"));
+            TAG_LOGE(AAFwkTag::DEFAULT, "null %{public}s", ((env == nullptr) ? "env" : "info"));
             return nullptr;
         }
         GET_NAPI_INFO_AND_CALL(env, info, JsCallerComplex, ReleaseCallInner);
@@ -131,9 +127,7 @@ public:
     static napi_value JsSetOnReleaseCallBack(napi_env env, napi_callback_info info)
     {
         if (env == nullptr || info == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT,
-                "JsCallerComplex::%{public}s is called, but input parameters %{public}s is nullptr", __func__,
-                ((env == nullptr) ? "env" : "info"));
+            TAG_LOGE(AAFwkTag::DEFAULT, "null %{public}s", ((env == nullptr) ? "env" : "info"));
             return nullptr;
         }
         GET_NAPI_INFO_AND_CALL(env, info, JsCallerComplex, SetOnReleaseCallBackInner);
@@ -142,9 +136,7 @@ public:
     static napi_value JsSetOnRemoteStateChanged(napi_env env, napi_callback_info info)
     {
         if (env == nullptr || info == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT,
-                "JsCallerComplex::%{public}s is called, but input parameters %{public}s is nullptr", __func__,
-                ((env == nullptr) ? "env" : "info"));
+            TAG_LOGE(AAFwkTag::DEFAULT, "null %{public}s", ((env == nullptr) ? "env" : "info"));
             return nullptr;
         }
         GET_NAPI_INFO_AND_CALL(env, info, JsCallerComplex, SetOnRemoteStateChangedInner);
@@ -153,46 +145,45 @@ public:
     static bool AddJsCallerComplex(JsCallerComplex* ptr)
     {
         if (ptr == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, input parameters is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null ptr");
             return false;
         }
 
         std::lock_guard<std::mutex> lck (jsCallerComplexMutex);
         auto iter = jsCallerComplexManagerList.find(ptr);
         if (iter != jsCallerComplexManagerList.end()) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, address exists", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "address exist");
             return false;
         }
 
         auto iterRet = jsCallerComplexManagerList.emplace(ptr);
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, execution ends and retval is %{public}s", __func__,
-            iterRet.second ? "true" : "false");
+        TAG_LOGD(AAFwkTag::DEFAULT, "retval: %{public}s", iterRet.second ? "true" : "false");
         return iterRet.second;
     }
 
     static bool RemoveJsCallerComplex(JsCallerComplex* ptr)
     {
         if (ptr == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, input parameters is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null ptr");
             return false;
         }
 
         std::lock_guard<std::mutex> lck (jsCallerComplexMutex);
         auto iter = jsCallerComplexManagerList.find(ptr);
         if (iter == jsCallerComplexManagerList.end()) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, input parameters not found", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "argc not found");
             return false;
         }
 
         jsCallerComplexManagerList.erase(ptr);
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, called", __func__);
+        TAG_LOGD(AAFwkTag::DEFAULT, "end");
         return true;
     }
 
     static bool FindJsCallerComplex(JsCallerComplex* ptr)
     {
         if (ptr == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, input parameters is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null ptr");
             return false;
         }
         auto ret = true;
@@ -201,29 +192,26 @@ public:
         if (iter == jsCallerComplexManagerList.end()) {
             ret = false;
         }
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, execution ends and retval is %{public}s", __func__,
-            ret ? "true" : "false");
+        TAG_LOGD(AAFwkTag::DEFAULT, "retval %{public}s", ret ? "true" : "false");
         return ret;
     }
 
     static bool FindJsCallerComplexAndChangeState(JsCallerComplex* ptr, OBJSTATE state)
     {
         if (ptr == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, input parameters is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null ptr");
             return false;
         }
 
         std::lock_guard<std::mutex> lck (jsCallerComplexMutex);
         auto iter = jsCallerComplexManagerList.find(ptr);
         if (iter == jsCallerComplexManagerList.end()) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsAbilityContext::%{public}s, execution end, but not found", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "argc not found");
             return false;
         }
 
         auto ret = ptr->ChangeCurrentState(state);
-        TAG_LOGD(AAFwkTag::DEFAULT,
-            "JsAbilityContext::%{public}s, execution ends and ChangeCurrentState retval is %{public}s", __func__,
-            ret ? "true" : "false");
+        TAG_LOGD(AAFwkTag::DEFAULT, "ChangeCurrentState ret:%{public}s", ret ? "true" : "false");
 
         return ret;
     }
@@ -249,13 +237,13 @@ public:
         if (currentState_ == OBJSTATE::OBJ_NORMAL) {
             currentState_ = state;
             ret = true;
-            TAG_LOGD(AAFwkTag::DEFAULT, "currentState_ == OBJSTATE::OBJ_NORMAL");
+            TAG_LOGD(AAFwkTag::DEFAULT, "currentState_:OBJ_NORMAL");
         } else if (currentState_ == state) {
             ret = true;
-            TAG_LOGD(AAFwkTag::DEFAULT, "currentState_ == state");
+            TAG_LOGD(AAFwkTag::DEFAULT, "currentState_:state");
         } else {
             ret = false;
-            TAG_LOGD(AAFwkTag::DEFAULT, "ret = false");
+            TAG_LOGD(AAFwkTag::DEFAULT, "ret: false");
         }
 
         stateMechanismMutex_.unlock();
@@ -272,32 +260,56 @@ public:
         currentState_ = OBJSTATE::OBJ_NORMAL;
     }
 
+    void SetJsRemoteObj(napi_env env, napi_value value)
+    {
+        if (env == nullptr || value == nullptr) {
+            TAG_LOGE(AAFwkTag::DEFAULT, "parameter error");
+            return;
+        }
+        napi_ref ref = nullptr;
+        napi_create_reference(env, value, 1, &ref);
+        jsRemoteObj_.reset(reinterpret_cast<NativeReference*>(ref));
+        jsRemoteObjEnv_ = env;
+    }
+
+    void ReleaseJsRemoteObj()
+    {
+        if (jsRemoteObjEnv_ == nullptr || jsRemoteObj_ == nullptr) {
+            return;
+        }
+        TAG_LOGI(AAFwkTag::DEFAULT, "before release call");
+        napi_value value = jsRemoteObj_->GetNapiValue();
+        NAPI_ohos_rpc_ClearNativeRemoteProxy(jsRemoteObjEnv_, value);
+        jsRemoteObj_.reset();
+        jsRemoteObjEnv_ = nullptr;
+    }
+
 private:
 
     void OnReleaseNotify(const std::string &str)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnReleaseNotify begin");
+        TAG_LOGD(AAFwkTag::DEFAULT, "begin");
         if (handler_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "handler parameters error");
+            TAG_LOGE(AAFwkTag::DEFAULT, "null handler");
             return;
         }
 
         auto task = [notify = this, &str] () {
             if (!FindJsCallerComplex(notify)) {
-                TAG_LOGE(AAFwkTag::DEFAULT, "ptr not found, address error");
+                TAG_LOGE(AAFwkTag::DEFAULT, "address error");
                 return;
             }
             notify->OnReleaseNotifyTask(str);
         };
         handler_->PostSyncTask(task, "OnReleaseNotify");
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnReleaseNotify end");
+        TAG_LOGD(AAFwkTag::DEFAULT, "end");
     }
 
     void OnReleaseNotifyTask(const std::string &str)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnReleaseNotifyTask begin");
+        TAG_LOGD(AAFwkTag::DEFAULT, "begin");
         if (jsReleaseCallBackObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, jsreleaseObj is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null jsreleaseObj");
             return;
         }
 
@@ -305,36 +317,34 @@ private:
         napi_value callback = jsReleaseCallBackObj_->GetNapiValue();
         napi_value args[] = { CreateJsValue(releaseCallBackEngine_, str) };
         napi_call_function(releaseCallBackEngine_, value, callback, 1, args, nullptr);
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnReleaseNotifyTask CallFunction call done");
         callee_ = nullptr;
         StateReset();
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnReleaseNotifyTask end");
     }
 
     void OnRemoteStateChangedNotify(const std::string &str)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnRemoteStateChangedNotify begin");
+        TAG_LOGD(AAFwkTag::DEFAULT, "begin");
         if (handler_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "handler parameters error");
+            TAG_LOGE(AAFwkTag::DEFAULT, "null handler");
             return;
         }
 
         auto task = [notify = this, &str] () {
             if (!FindJsCallerComplex(notify)) {
-                TAG_LOGE(AAFwkTag::DEFAULT, "ptr not found, address error");
+                TAG_LOGE(AAFwkTag::DEFAULT, "ptr not found");
                 return;
             }
             notify->OnRemoteStateChangedNotifyTask(str);
         };
         handler_->PostSyncTask(task, "OnRemoteStateChangedNotify");
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnRemoteStateChangedNotify end");
+        TAG_LOGD(AAFwkTag::DEFAULT, "end");
     }
 
     void OnRemoteStateChangedNotifyTask(const std::string &str)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnRemoteStateChangedNotifyTask begin");
+        TAG_LOGD(AAFwkTag::DEFAULT, "begin");
         if (jsRemoteStateChangedObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, jsRemoteStateChangedObj is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null jsRemoteStateChangedObj");
             return;
         }
 
@@ -342,27 +352,28 @@ private:
         napi_value callback = jsRemoteStateChangedObj_->GetNapiValue();
         napi_value args[] = { CreateJsValue(remoteStateChanegdEngine_, str) };
         napi_call_function(remoteStateChanegdEngine_, value, callback, 1, args, nullptr);
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnRemoteStateChangedNotifyTask CallFunction call done");
         StateReset();
-        TAG_LOGD(AAFwkTag::DEFAULT, "OnRemoteStateChangedNotifyTask end");
+        TAG_LOGD(AAFwkTag::DEFAULT, "end");
     }
 
     napi_value ReleaseCallInner(napi_env env, NapiCallbackInfo& info)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, called", __func__);
+        TAG_LOGD(AAFwkTag::DEFAULT, "called");
         if (callerCallBackObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, CallBacker is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null CallBacker");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         }
 
         if (!releaseCallFunc_) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, releaseFunc is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null releaseFunc");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         }
+        callee_ = nullptr;
+        callerCallBackObj_->SetCallBack(nullptr);
+        ReleaseJsRemoteObj();
         int32_t innerErrorCode = releaseCallFunc_(callerCallBackObj_);
         if (innerErrorCode != ERR_OK) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, ReleaseAbility failed %{public}d",
-                __func__, static_cast<int>(innerErrorCode));
+            TAG_LOGE(AAFwkTag::DEFAULT, "ReleaseAbility failed %{public}d", static_cast<int>(innerErrorCode));
             ThrowError(env, innerErrorCode);
         }
 
@@ -371,28 +382,27 @@ private:
 
     napi_value SetOnReleaseCallBackInner(napi_env env, NapiCallbackInfo& info)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, start", __func__);
+        TAG_LOGD(AAFwkTag::DEFAULT, "start");
         constexpr size_t argcOne = 1;
         if (info.argc < argcOne) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, Invalid input parameters", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "Invalid argc");
             ThrowTooFewParametersError(env);
         }
         bool isCallable = false;
         napi_is_callable(env, info.argv[0], &isCallable);
         if (!isCallable) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, IsCallable is %{public}s.",
-                __func__, isCallable ? "true" : "false");
+            TAG_LOGE(AAFwkTag::DEFAULT, "IsCallable %{public}s", isCallable ? "true" : "false");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         }
 
         if (callerCallBackObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, CallBacker is null", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null CallBacker");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         }
 
         auto param1 = info.argv[0];
         if (param1 == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, param1 is null", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "null param1");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         }
 
@@ -401,40 +411,38 @@ private:
         jsReleaseCallBackObj_.reset(reinterpret_cast<NativeReference*>(ref));
         auto task = [notify = this] (const std::string &str) {
             if (!FindJsCallerComplexAndChangeState(notify, OBJSTATE::OBJ_EXECUTION)) {
-                TAG_LOGE(AAFwkTag::DEFAULT, "ptr not found, address error");
+                TAG_LOGE(AAFwkTag::DEFAULT, "address error");
                 return;
             }
             notify->OnReleaseNotify(str);
         };
         callerCallBackObj_->SetOnRelease(task);
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, end", __func__);
         return CreateJsUndefined(env);
     }
 
     napi_value SetOnRemoteStateChangedInner(napi_env env, NapiCallbackInfo& info)
     {
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, begin", __func__);
+        TAG_LOGD(AAFwkTag::DEFAULT, "begin");
         constexpr size_t argcOne = 1;
         if (info.argc < argcOne) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, Invalid input params", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "Invalid argc");
             ThrowTooFewParametersError(env);
         }
         bool isCallable = false;
         napi_is_callable(env, info.argv[0], &isCallable);
         if (!isCallable) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, IsCallable is %{public}s.",
-                __func__, isCallable ? "true" : "false");
+            TAG_LOGE(AAFwkTag::DEFAULT, "IsCallable %{public}s", isCallable ? "true" : "false");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         }
 
         if (callerCallBackObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, CallBacker is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "CallBacker null");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         }
 
         auto param1 = info.argv[0];
         if (param1 == nullptr) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, param1 is nullptr", __func__);
+            TAG_LOGE(AAFwkTag::DEFAULT, "param1 null");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         }
 
@@ -444,13 +452,13 @@ private:
         auto task = [notify = this] (const std::string &str) {
             TAG_LOGI(AAFwkTag::DEFAULT, "state changed");
             if (!FindJsCallerComplexAndChangeState(notify, OBJSTATE::OBJ_EXECUTION)) {
-                TAG_LOGE(AAFwkTag::DEFAULT, "ptr not found, address error");
+                TAG_LOGE(AAFwkTag::DEFAULT, "address error");
                 return;
             }
             notify->OnRemoteStateChangedNotify(str);
         };
         callerCallBackObj_->SetOnRemoteStateChanged(task);
-        TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, end", __func__);
+        TAG_LOGD(AAFwkTag::DEFAULT, "end");
         return CreateJsUndefined(env);
     }
 
@@ -459,9 +467,11 @@ private:
     sptr<IRemoteObject> callee_;
     napi_env releaseCallBackEngine_;
     napi_env remoteStateChanegdEngine_;
+    napi_env jsRemoteObjEnv_ = nullptr;
     std::shared_ptr<CallerCallBack> callerCallBackObj_;
     std::unique_ptr<NativeReference> jsReleaseCallBackObj_;
     std::unique_ptr<NativeReference> jsRemoteStateChangedObj_;
+    std::unique_ptr<NativeReference> jsRemoteObj_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::mutex stateMechanismMutex_;
     OBJSTATE currentState_;
@@ -478,9 +488,9 @@ napi_value CreateJsCallerComplex(
     napi_env env, ReleaseCallFunc releaseCallFunc, sptr<IRemoteObject> callee,
     std::shared_ptr<CallerCallBack> callerCallBack)
 {
-    TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, begin", __func__);
+    TAG_LOGD(AAFwkTag::DEFAULT, "begin");
     if (callee == nullptr || callerCallBack == nullptr || releaseCallFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "%{public}s is called, input params error. %{public}s is nullptr", __func__,
+        TAG_LOGE(AAFwkTag::DEFAULT, "%{public}s null",
             (callee == nullptr) ? ("callee") :
             ((releaseCallFunc == nullptr) ? ("releaseCallFunc") : ("callerCallBack")));
         return CreateJsUndefined(env);
@@ -491,30 +501,32 @@ napi_value CreateJsCallerComplex(
     auto jsCaller = std::make_unique<JsCallerComplex>(env, releaseCallFunc, callee, callerCallBack);
     auto remoteObj = jsCaller->GetRemoteObject();
     if (remoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "%{public}s is called,remoteObj is nullptr", __func__);
+        TAG_LOGE(AAFwkTag::DEFAULT, "remoteObj null");
         return CreateJsUndefined(env);
     }
 
+    auto jsRemoteObj = CreateJsCalleeRemoteObject(env, remoteObj);
+    jsCaller->SetJsRemoteObj(env, jsRemoteObj);
     napi_wrap(env, object, jsCaller.release(), JsCallerComplex::Finalizer, nullptr, nullptr);
-    napi_set_named_property(env, object, "callee", CreateJsCalleeRemoteObject(env, remoteObj));
+    napi_set_named_property(env, object, "callee", jsRemoteObj);
     const char *moduleName = "JsCallerComplex";
     BindNativeFunction(env, object, "release", moduleName, JsCallerComplex::JsReleaseCall);
     BindNativeFunction(env, object, "onRelease", moduleName, JsCallerComplex::JsSetOnReleaseCallBack);
     BindNativeFunction(env, object, "onRemoteStateChange", moduleName, JsCallerComplex::JsSetOnRemoteStateChanged);
 
-    TAG_LOGD(AAFwkTag::DEFAULT, "JsCallerComplex::%{public}s, end", __func__);
+    TAG_LOGD(AAFwkTag::DEFAULT, "end");
     return object;
 }
 
 napi_value CreateJsCalleeRemoteObject(napi_env env, sptr<IRemoteObject> callee)
 {
     if (callee == nullptr) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "%{public}s is called, input params is nullptr", __func__);
+        TAG_LOGE(AAFwkTag::DEFAULT, "null data");
         return CreateJsUndefined(env);
     }
     napi_value napiRemoteObject = NAPI_ohos_rpc_CreateJsRemoteObject(env, callee);
     if (napiRemoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "%{public}s is called, but remoteObj is nullptr", __func__);
+        TAG_LOGE(AAFwkTag::DEFAULT, "remoteObj null");
     }
     return napiRemoteObject;
 }

@@ -26,27 +26,27 @@ namespace OHOS {
 namespace AbilityRuntime {
 napi_value CreateJsAppStateData(napi_env env, const AppStateData &appStateData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
         return nullptr;
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, appStateData.bundleName));
     napi_set_named_property(env, object, "uid", CreateJsValue(env, appStateData.uid));
     napi_set_named_property(env, object, "state", CreateJsValue(env, appStateData.state));
-    TAG_LOGI(AAFwkTag::APPMGR, "end.");
+    TAG_LOGD(AAFwkTag::APPMGR, "end");
     return object;
 }
 
 napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilityStateData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
         return nullptr;
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, abilityStateData.bundleName));
@@ -58,17 +58,17 @@ napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilit
     napi_set_named_property(env, object, "abilityType", CreateJsValue(env, abilityStateData.abilityType));
     napi_set_named_property(env, object, "isAtomicService", CreateJsValue(env, abilityStateData.isAtomicService));
 
-    TAG_LOGD(AAFwkTag::APPMGR, "end.");
+    TAG_LOGD(AAFwkTag::APPMGR, "end");
     return object;
 }
 
 napi_value CreateJsProcessData(napi_env env, const ProcessData &processData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
         return nullptr;
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, processData.bundleName));
@@ -77,7 +77,7 @@ napi_value CreateJsProcessData(napi_env env, const ProcessData &processData)
     napi_set_named_property(env, object, "state", CreateJsValue(env, processData.state));
     napi_set_named_property(env, object, "isContinuousTask", CreateJsValue(env, processData.isContinuousTask));
     napi_set_named_property(env, object, "isKeepAlive", CreateJsValue(env, processData.isKeepAlive));
-    TAG_LOGD(AAFwkTag::APPMGR, "end.");
+    TAG_LOGD(AAFwkTag::APPMGR, "end");
     return object;
 }
 
@@ -108,7 +108,7 @@ napi_value CreateJsProcessRunningInfo(napi_env env, const RunningProcessInfo &in
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
         return nullptr;
     }
     napi_set_named_property(env, object, "processName", CreateJsValue(env, info.processName_));
@@ -140,7 +140,7 @@ JsAppProcessState ConvertToJsAppProcessState(
             processState = STATE_DESTROY;
             break;
         default:
-            TAG_LOGE(AAFwkTag::APPMGR, "Process state is invalid.");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid state");
             processState = STATE_DESTROY;
             break;
     }
