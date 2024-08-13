@@ -43,6 +43,7 @@ ohos_moduletest("call_ability_service_module_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
   ]
 
   if (ability_runtime_graphics) {

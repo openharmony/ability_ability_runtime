@@ -46,6 +46,7 @@ ohos_moduletest("on_new_want_module_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
   ]
 
   if (ability_runtime_graphics) {
