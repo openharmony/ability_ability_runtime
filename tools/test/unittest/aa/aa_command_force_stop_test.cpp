@@ -119,6 +119,7 @@ HWTEST_F(AaCommandForceStopTest, Aa_Command_Force_Stop_0200, Function | MediumTe
     managerClientPtr->proxy_ = static_cast<IAbilityManager*>(mockAbilityManagerStub);
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_FORCE_STOP_NG + "\n");
+    managerClientPtr->proxy_ = nullptr; // release MockAbilityManagerStub force
     testing::Mock::AllowLeak(mockAbilityManagerStub);
 }
 
@@ -147,5 +148,6 @@ HWTEST_F(AaCommandForceStopTest, Aa_Command_Force_Stop_0300, Function | MediumTe
     managerClientPtr->proxy_ = static_cast<IAbilityManager*>(mockAbilityManagerStub);
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_FORCE_STOP_OK + "\n");
+    managerClientPtr->proxy_ = nullptr; // release MockAbilityManagerStub force
     testing::Mock::AllowLeak(mockAbilityManagerStub);
 }
