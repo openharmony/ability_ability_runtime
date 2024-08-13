@@ -1,0 +1,185 @@
+diff --git a/interfaces/inner_api/ability_manager/include/ability_manager_interface.h b/interfaces/inner_api/ability_manager/include/ability_manager_interface.h
+index b5b5122d233c9122aeceb9bc3f3142f847fd6c89..e17be424635d167994c0d31ce3594288f10a5a4b 100644
+--- a/interfaces/inner_api/ability_manager/include/ability_manager_interface.h
++++ b/interfaces/inner_api/ability_manager/include/ability_manager_interface.h
+@@ -1536,9 +1536,10 @@ public:
+     /**
+      * @brief Restart app self.
+      * @param want The ability type must be UIAbility.
++     * @param isAppRecovery True indicates that the app is restarted because of recovery.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+-    virtual int32_t RestartApp(const AAFwk::Want &want)
++    virtual int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false)
+     {
+         return 0;
+     }
+diff --git a/services/abilitymgr/include/ability_manager_proxy.h b/services/abilitymgr/include/ability_manager_proxy.h
+index 5f36eb52220cef3ab5a00bc9154e00d8f2b977d1..011e981adb7f016e514f8e127ef4a4d031770107 100644
+--- a/services/abilitymgr/include/ability_manager_proxy.h
++++ b/services/abilitymgr/include/ability_manager_proxy.h
+@@ -1213,9 +1213,10 @@ public:
+     /**
+      * @brief Restart app self.
+      * @param want The ability type must be UIAbility.
++     * @param isAppRecovery True indicates that the app is restarted because of recovery.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+-    int32_t RestartApp(const AAFwk::Want &want) override;
++    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
+ 
+     /**
+      * @brief Pop-up launch of full-screen atomic service.
+diff --git a/services/abilitymgr/include/ability_manager_service.h b/services/abilitymgr/include/ability_manager_service.h
+index c07c6ab3172df7270be860bb59859d147dd3dae7..55c1c965c31dc4025ba928e9215e3117d9fd57be 100644
+--- a/services/abilitymgr/include/ability_manager_service.h
++++ b/services/abilitymgr/include/ability_manager_service.h
+@@ -1698,9 +1698,10 @@ public:
+     /**
+      * @brief Restart app self.
+      * @param want The ability type must be UIAbility.
++     * @param isAppRecovery True indicates that the app is restarted because of recovery.
+      * @return Returns ERR_OK on success, others on failure.
+      */
+-    int32_t RestartApp(const AAFwk::Want &want) override;
++    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
+ 
+     /**
+      * @brief Request to display assert fault dialog.
+@@ -2224,7 +2225,7 @@ private:
+ 
+     void WaitBootAnimationStart();
+ 
+-    int32_t SignRestartAppFlag(int32_t userId, const std::string &bundleName);
++    int32_t SignRestartAppFlag(int32_t userId, const std::string &bundleName, bool isAppRecovery = false);
+     int32_t CheckRestartAppWant(const AAFwk::Want &want);
+ 
+     int32_t CheckDebugAssertPermission();
+diff --git a/services/abilitymgr/include/scene_board/ui_ability_lifecycle_manager.h b/services/abilitymgr/include/scene_board/ui_ability_lifecycle_manager.h
+index aca4830569c758bf5f014b8008b9ba551a2841d9..538cd98ef829fef8131b16c25c825844167e9336 100644
+--- a/services/abilitymgr/include/scene_board/ui_ability_lifecycle_manager.h
++++ b/services/abilitymgr/include/scene_board/ui_ability_lifecycle_manager.h
+@@ -56,7 +56,7 @@ public:
+         }
+     };
+ 
+-    void SignRestartAppFlag(const std::string &bundleName);
++    void SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery = false);
+ 
+     /**
+      * StartUIAbility with request.
+diff --git a/services/abilitymgr/src/ability_manager_proxy.cpp b/services/abilitymgr/src/ability_manager_proxy.cpp
+index 5f5d3ed4be589d6656fc5cf5575819949afc90bb..56e9a330826eb51dd6f7f61f155fd4b8f38049eb 100644
+--- a/services/abilitymgr/src/ability_manager_proxy.cpp
++++ b/services/abilitymgr/src/ability_manager_proxy.cpp
+@@ -5225,7 +5225,7 @@ int32_t AbilityManagerProxy::GetUIExtensionSessionInfo(const sptr<IRemoteObject>
+     return reply.ReadInt32();
+ }
+ 
+-int32_t AbilityManagerProxy::RestartApp(const AAFwk::Want &want)
++int32_t AbilityManagerProxy::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
+ {
+     MessageParcel data;
+     MessageParcel reply;
+@@ -5238,6 +5238,10 @@ int32_t AbilityManagerProxy::RestartApp(const AAFwk::Want &want)
+         TAG_LOGE(AAFwkTag::ABILITYMGR, "want write failed.");
+         return IPC_PROXY_ERR;
+     }
++    if (!data.WriteBool(isAppRecovery)) {
++        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write isAppRecovery failed.");
++        return IPC_PROXY_ERR;
++    }
+     auto ret = SendRequest(AbilityManagerInterfaceCode::RESTART_APP, data, reply, option);
+     if (ret != NO_ERROR) {
+         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request is failed, error code: %{public}d", ret);
+diff --git a/services/abilitymgr/src/ability_manager_service.cpp b/services/abilitymgr/src/ability_manager_service.cpp
+index 2e904323ecc0c81b62f1a2f269416483b70b758f..6b4824dfcdce131eb16774bfd5672718938c3d75 100644
+--- a/services/abilitymgr/src/ability_manager_service.cpp
++++ b/services/abilitymgr/src/ability_manager_service.cpp
+@@ -7655,7 +7655,7 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
+ 
+         ReportAppRecoverResult(record->GetUid(), appInfo, abilityInfo.name, "SUCCESS");
+     }
+-    RestartApp(curWant);
++    RestartApp(curWant, true);
+ }
+ 
+ int32_t AbilityManagerService::GetRemoteMissionSnapshotInfo(const std::string& deviceId, int32_t missionId,
+@@ -10863,7 +10863,7 @@ int32_t AbilityManagerService::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
+     return ERR_OK;
+ }
+ 
+-int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want)
++int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
+ {
+     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
+     int result = CheckRestartAppWant(want);
+@@ -10886,7 +10886,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want)
+         return AAFwk::NOT_TOP_ABILITY;
+     }
+ 
+-    result = SignRestartAppFlag(userId, bundleName);
++    result = SignRestartAppFlag(userId, bundleName, isAppRecovery);
+     if (result != ERR_OK) {
+         TAG_LOGE(AAFwkTag::ABILITYMGR, "SignRestartAppFlag error.");
+         return result;
+@@ -10930,7 +10930,8 @@ int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want)
+     return ERR_OK;
+ }
+ 
+-int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::string &bundleName)
++int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::string &bundleName,
++    bool isAppRecovery)
+ {
+     auto appMgr = GetAppMgr();
+     if (appMgr == nullptr) {
+@@ -10948,7 +10949,7 @@ int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::str
+     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+         auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
+         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+-        uiAbilityManager->SignRestartAppFlag(bundleName);
++        uiAbilityManager->SignRestartAppFlag(bundleName, isAppRecovery);
+         return ERR_OK;
+     }
+     auto missionListManager = GetMissionListManagerByUserId(userId);
+diff --git a/services/abilitymgr/src/ability_manager_stub.cpp b/services/abilitymgr/src/ability_manager_stub.cpp
+index 097da49ea0919d15e6e4ecf859b436fc165b2af2..36a787a206f3d907d467aa64cf42ae65b4d20445 100644
+--- a/services/abilitymgr/src/ability_manager_stub.cpp
++++ b/services/abilitymgr/src/ability_manager_stub.cpp
+@@ -3868,7 +3868,8 @@ int32_t AbilityManagerStub::RestartAppInner(MessageParcel &data, MessageParcel &
+         TAG_LOGE(AAFwkTag::ABILITYMGR, "want is nullptr");
+         return IPC_STUB_ERR;
+     }
+-    auto result = RestartApp(*want);
++    bool isAppRecovery = data.ReadBool();
++    auto result = RestartApp(*want, isAppRecovery);
+     if (!reply.WriteInt32(result)) {
+         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to write result.");
+         return IPC_STUB_ERR;
+diff --git a/services/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp b/services/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp
+index 7a8710c9154d15f54c89391af3210479d4a9e4a9..627a75fc6c2783d11d6f02cac37a40572ba36938 100644
+--- a/services/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp
++++ b/services/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp
+@@ -2505,7 +2505,7 @@ int32_t UIAbilityLifecycleManager::UpdateSessionInfoBySCB(std::list<SessionInfo>
+     return ERR_OK;
+ }
+ 
+-void UIAbilityLifecycleManager::SignRestartAppFlag(const std::string &bundleName)
++void UIAbilityLifecycleManager::SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery)
+ {
+     std::lock_guard<ffrt::mutex> guard(sessionLock_);
+     auto tempSessionAbilityMap = sessionAbilityMap_;
+@@ -2514,8 +2514,12 @@ void UIAbilityLifecycleManager::SignRestartAppFlag(const std::string &bundleName
+             continue;
+         }
+         abilityRecord->SetRestartAppFlag(true);
++        std::string reason = "onAbilityDied";
++        if (isAppRecovery) {
++            reason = "appRecovery";
++        }
+         NotifySCBToHandleException(abilityRecord, static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_DIED),
+-            "onAbilityDied");
++            reason);
+     }
+ }
+ 
