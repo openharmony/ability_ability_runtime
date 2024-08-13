@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
+#include "file_monitor.h"
 #include "hilog_tag_wrapper.h"
 #include "os_account_manager_wrapper.h"
 
@@ -78,6 +79,7 @@ bool AbilityAutoStartupDataManager::CheckKvStore()
     while (tryTimes > 0) {
         DistributedKv::Status status = GetKvStore();
         if (status == DistributedKv::Status::SUCCESS && kvStorePtr_ != nullptr) {
+            OHOS::AAFwk::FileMonitor::SetDBDeleteMonitorFlag(AUTO_STARTUP_STORAGE_DIR);
             return true;
         }
         TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Try times: %{public}d.", tryTimes);
