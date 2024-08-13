@@ -210,6 +210,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleCleanAbilityByUserRequest(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID):
             return HandleKillProcessesByAccessTokenId(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_ATTACHED):
+            return HandleIsProcessAttached(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -833,6 +835,18 @@ int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, Me
     auto result = IsProcessContainsOnlyUIAbility(pid);
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result in HandleIsProcessContainsOnlyUIAbility.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsProcessAttached(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto isAttached = IsProcessAttached(token);
+    if (!reply.WriteBool(isAttached)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

@@ -319,26 +319,6 @@ public:
      */
     void SetTrimMemoryLevel(int32_t level);
 
-    // Kill this process with a given reason
-    /**
-     * ForceKillApp, Kill this process with a given reason.
-     *
-     * @param reason, The reason to kill the process.
-     *
-     * @return
-     */
-    void ForceKillApp(const std::string &reason) const;
-
-    // Schedule to crash this app with a given description
-    /**
-     * ScheduleAppCrash, Schedule to crash this app with a given description.
-     *
-     * @param description, the given description.
-     *
-     * @return
-     */
-    void ScheduleAppCrash(const std::string &description) const;
-
     /**
      * LaunchApplication, Notify application to launch application.
      *
@@ -846,6 +826,7 @@ public:
     void SetUserRequestCleaning();
     bool IsUserRequestCleaning() const;
     bool IsAllAbilityReadyToCleanedByUserRequest();
+    bool IsProcessAttached() const;
 
 private:
     /**
