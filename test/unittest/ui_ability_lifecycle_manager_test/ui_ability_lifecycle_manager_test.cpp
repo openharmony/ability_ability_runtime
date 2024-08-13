@@ -30,6 +30,7 @@
 #include "process_options.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
+#include "startup_util.h"
 #include "ability_manager_service.h"
 
 using namespace testing;
@@ -4231,6 +4232,182 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CheckCallerFromBackground_0400, TestSize
     abilityRequest.sessionInfo = sessionInfo;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->CheckCallerFromBackground(abilityRecord, sessionInfo);
+}
+
+/*
+ * Feature: UIAbilityLifecycleManagerTest
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: UIAbilityLifecycleManagerTest BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int64_t callerRequestCode = 0;
+    auto ret = uiAbilityLifecycleManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_CALLER_NOT_EXISTS);
+}
+
+/*
+ * Feature: UIAbilityLifecycleManagerTest
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: UIAbilityLifecycleManagerTest BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int64_t callerRequestCode = 1;
+    auto ret = uiAbilityLifecycleManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_CALLER_NOT_EXISTS);
+}
+
+/*
+ * Feature: UIAbilityLifecycleManagerTest
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: UIAbilityLifecycleManagerTest BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int32_t requestCode = 1;
+    int32_t pid = 1;
+    bool backFlag = false;
+    int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
+
+    // not support back to caller
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
+    callerAbilityRecord->pid_ = pid;
+    auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    newCallerRecord->AddHistoryRequestCode(requestCode);
+    abilityRecord->callerList_.emplace_back(newCallerRecord);
+    auto ret = uiAbilityLifecycleManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_NOT_SUPPORT_BACK_TO_CALLER);
+}
+
+/*
+ * Feature: UIAbilityLifecycleManagerTest
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: UIAbilityLifecycleManagerTest BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_004, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int32_t requestCode = 1;
+    int32_t pid = 1;
+    bool backFlag = true;
+    int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
+
+    // caller is self
+    abilityRecord->pid_ = pid;
+    auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, abilityRecord);
+    newCallerRecord->AddHistoryRequestCode(requestCode);
+    abilityRecord->callerList_.emplace_back(newCallerRecord);
+    auto ret = uiAbilityLifecycleManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UIAbilityLifecycleManagerTest
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: UIAbilityLifecycleManagerTest BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_005, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int32_t requestCode = 1;
+    int32_t pid = 1;
+    bool backFlag = true;
+    int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
+    
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
+    callerAbilityRecord->pid_ = pid;
+    auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    newCallerRecord->AddHistoryRequestCode(requestCode);
+    abilityRecord->pid_ = pid;
+    abilityRecord->callerList_.emplace_back(newCallerRecord);
+
+    // current ability is backgrounded
+    abilityRecord->currentState_ = AbilityState::BACKGROUND;
+    auto ret = uiAbilityLifecycleManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: UIAbilityLifecycleManagerTest
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: UIAbilityLifecycleManagerTest BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_006, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int32_t requestCode = 1;
+    int32_t pid = 1;
+    bool backFlag = true;
+    int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
+    
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
+    callerAbilityRecord->pid_ = pid;
+    auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    newCallerRecord->AddHistoryRequestCode(requestCode);
+    abilityRecord->pid_ = pid;
+    abilityRecord->callerList_.emplace_back(newCallerRecord);
+
+    abilityRecord->currentState_ = AbilityState::FOREGROUND;
+    auto ret = uiAbilityLifecycleManager->BackToCallerAbilityWithResult(abilityRecord, resultCode,
+        &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
