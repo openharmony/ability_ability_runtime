@@ -564,7 +564,7 @@ ErrCode AbilityContextImpl::TerminateSelf()
     }
 #ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
-        TAG_LOGI(AAFwkTag::CONTEXT, "terminateSelf SCB");
+        TAG_LOGI(AAFwkTag::CONTEXT, "Terminate %{public}s", abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str());
         AAFwk::Want resultWant;
         sptr<AAFwk::SessionInfo> info = new AAFwk::SessionInfo();
         info->want = resultWant;

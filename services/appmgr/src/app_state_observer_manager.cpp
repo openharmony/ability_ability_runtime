@@ -386,7 +386,7 @@ void AppStateObserverManager::StateChangedNotifyObserver(
             TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, StateChangedNotifyObserver failed.");
             return;
         }
-        TAG_LOGI(AAFwkTag::APPMGR, "StateChangedNotifyObserver come.");
+        TAG_LOGD(AAFwkTag::APPMGR, "StateChangedNotifyObserver come.");
         self->HandleStateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
     };
     handler_->SubmitTask(task);
