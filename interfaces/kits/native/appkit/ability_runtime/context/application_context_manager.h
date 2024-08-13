@@ -23,6 +23,11 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+struct EnvData {
+    napi_env env;
+    EnvData(napi_env napienv) : env(napienv) {}
+};
+
 class ApplicationContextManager {
 public:
     ApplicationContextManager(const ApplicationContextManager&) = delete;
