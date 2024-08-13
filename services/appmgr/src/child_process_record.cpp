@@ -102,6 +102,11 @@ std::string ChildProcessRecord::GetSrcEntry() const
     return srcEntry_;
 }
 
+ProcessType ChildProcessRecord::GetProcessType() const
+{
+    return processType_;
+}
+
 std::shared_ptr<AppRunningRecord> ChildProcessRecord::GetHostRecord() const
 {
     return hostRecord_.lock();

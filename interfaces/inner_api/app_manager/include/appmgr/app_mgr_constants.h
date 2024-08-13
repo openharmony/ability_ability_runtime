@@ -79,6 +79,7 @@ enum class ProcessType {
     EXTENSION,
     RENDER,
     GPU,
+    CHILD,
 };
 
 enum class AppStartType {
