@@ -543,7 +543,7 @@ napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo
         return CreateJsUndefined(env);
     }
     // Unwrap want and connection
-    sptr<JSUIExtensionConnection> connection = new (std::nothrow) JSUIExtensionConnection(env);
+    auto connection = sptr<JSUIExtensionConnection>::MakeSptr(env);
     if (connection == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "make conn failed");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
