@@ -785,12 +785,25 @@ void ImplicitStartProcessor::AddIdentity(int32_t tokenId, std::string identity)
     identityList_.emplace_back(IdentityNode(tokenId, identity));
 }
 
-void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId)
+void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId, bool flag)
 {
     std::lock_guard guard(identityListLock_);
     for (auto it = identityList_.begin(); it != identityList_.end(); it++) {
         if (it->tokenId == tokenId) {
             IPCSkeleton::SetCallingIdentity(it->identity);
+            if (flag) {
+                identityList_.erase(it);
+            }
+            return;
+        }
+    }
+}
+
+void ImplicitStartProcessor::RemoveIdentity(int32_t tokenId)
+{
+    std::lock_guard guard(identityListLock_);
+    for (auto it = identityList_.begin(); it != identityList_.end(); it++) {
+        if (it->tokenId == tokenId) {
             identityList_.erase(it);
             return;
         }
