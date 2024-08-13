@@ -701,7 +701,7 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
         return nullptr;
     }
-    sptr<Rosen::WindowOption> option = new (std::nothrow) Rosen::WindowOption();
+    auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
         return nullptr;
