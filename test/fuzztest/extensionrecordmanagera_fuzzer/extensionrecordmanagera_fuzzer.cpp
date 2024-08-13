@@ -141,7 +141,7 @@ void FuzztestExtensionRecordManagerFunc2(std::shared_ptr<ExtensionRecordManager>
     mgr->StartAbility(abilityRequest); // called
     mgr->IsFocused(int32Param, nullptr);  // called
     mgr->AddExtensionRecord(0, record); // 1 means id
-    mgr->GetRootCallerTokenLocked(int32Param);
+    mgr->GetRootCallerTokenLocked(int32Param, abilityRecord);
     mgr->CreateExtensionRecord(abilityRequest, stringParam, record, int32Param);
     mgr->GetUIExtensionRootHostInfo(nullptr);
     sptr<Token> token = GetFuzzAbilityToken();
