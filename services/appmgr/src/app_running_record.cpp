@@ -627,6 +627,7 @@ void AppRunningRecord::LaunchPendingAbilities()
 }
 void AppRunningRecord::ScheduleForegroundRunning()
 {
+    SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_FOREGROUNDING);
     if (appLifeCycleDeal_) {
         appLifeCycleDeal_->ScheduleForegroundRunning();
     }
@@ -634,6 +635,7 @@ void AppRunningRecord::ScheduleForegroundRunning()
 
 void AppRunningRecord::ScheduleBackgroundRunning()
 {
+    SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_BACKGROUNDING);
     int32_t recordId = GetRecordId();
     auto serviceInner = appMgrServiceInner_;
     auto appbackgroundtask = [recordId, serviceInner]() {
@@ -2101,6 +2103,16 @@ void AppRunningRecord::SetApplicationPendingState(ApplicationPendingState pendin
 ApplicationPendingState AppRunningRecord::GetApplicationPendingState() const
 {
     return pendingState_;
+}
+
+void AppRunningRecord::SetApplicationScheduleState(ApplicationScheduleState scheduleState)
+{
+    scheduleState_ = scheduleState;
+}
+
+ApplicationScheduleState AppRunningRecord::GetApplicationScheduleState() const
+{
+    return scheduleState_;
 }
 
 void AppRunningRecord::AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record)
