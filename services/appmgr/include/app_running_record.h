@@ -732,6 +732,9 @@ public:
     void SetApplicationPendingState(ApplicationPendingState pendingState);
     ApplicationPendingState GetApplicationPendingState() const;
 
+    void SetApplicationScheduleState(ApplicationScheduleState scheduleState);
+    ApplicationScheduleState GetApplicationScheduleState() const;
+
     void GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode);
 
     void AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record);
@@ -900,6 +903,7 @@ private:
     bool isStageBasedModel_ = false;
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
     ApplicationPendingState pendingState_ = ApplicationPendingState::READY;
+    ApplicationScheduleState scheduleState_ = ApplicationScheduleState::SCHEDULE_READY;
     bool isFocused_ = false; // if process is focused.
     /**
      * If there is an ability is foregrounding, this flag will be true,
