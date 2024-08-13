@@ -822,7 +822,7 @@ bool ExtensionRecordManager::IsUIExtensionFocused(
         abilityRecord->GetApplicationInfo().accessTokenId);
 
     if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "Not ui extension ability");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "Not uiextension");
         return isFocused;
     }
 
