@@ -61,6 +61,7 @@
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
 #include "dialog_session_info.h"
+#include "window_config.h"
 #ifdef SUPPORT_SCREEN
 #include "window_manager_service_handler.h"
 #include "ability_first_frame_state_observer_interface.h"
@@ -384,7 +385,7 @@ public:
      * @param isColdStart the session info of the ability is or not cold start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart)
+    virtual int StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag = 0)
     {
         return 0;
     }
@@ -438,6 +439,21 @@ public:
      */
     virtual int TerminateAbility(
         const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant = nullptr) = 0;
+
+    /**
+     * BackToCallerAbilityWithResult, return to the caller ability.
+     *
+     * @param token, the token of the ability to terminate.
+     * @param resultCode, the resultCode of the ability to terminate.
+     * @param resultWant, the Want of the ability to return.
+     * @param callerRequestCode, the requestCode of caller ability.·
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
+        const Want *resultWant, int64_t callerRequestCode)
+    {
+        return 0;
+    };
 
     /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
@@ -539,7 +555,8 @@ public:
      * @param fromUser, Whether form user.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser = false)
+    virtual int MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser = false,
+        uint32_t sceneFlag = 0)
     {
         return 0;
     };
@@ -646,6 +663,18 @@ public:
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) = 0;
 
     /**
+     * AbilityWindowConfigTransitionDone, ability call this interface after life cycle was changed.
+     *
+     * @param token,.ability's token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int AbilityWindowConfigTransitionDone(
+        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig)
+        {
+            return 0;
+        }
+
+    /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
      *
      * @param token,.service ability's token.
@@ -704,7 +733,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = true) = 0;
+    virtual int KillProcess(const std::string &bundleName, const bool clearpagestack = false) = 0;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -1161,6 +1190,7 @@ public:
     }
 
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) {};
+    virtual void SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token) {};
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
 
@@ -1505,6 +1535,17 @@ public:
     }
 
     /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @param isAppRecovery True indicates that the app is restarted because of recovery.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false)
+    {
+        return 0;
+    }
+
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1528,16 +1569,6 @@ public:
      */
     virtual int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token,
         UIExtensionSessionInfo &uiExtensionSessionInfo, int32_t userId = DEFAULT_INVAL_VALUE)
-    {
-        return 0;
-    }
-
-    /**
-     * @brief Restart app self.
-     * @param want The ability type must be UIAbility.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int32_t RestartApp(const AAFwk::Want &want)
     {
         return 0;
     }
@@ -1666,6 +1697,17 @@ public:
     }
 
     /**
+     *  Request to clean UIAbility from user.
+     *
+     * @param sessionInfo the session info of the ability to clean.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CleanUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+    {
+        return 0;
+    }
+
+    /**
      * Open atomic service window prior to finishing free install.
      *
      * @param bundleName, the bundle name of the atomic service.
@@ -1676,6 +1718,17 @@ public:
      */
     virtual int32_t PreStartMission(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const std::string& startTime)
+    {
+        return 0;
+    }
+
+    /**
+     * Terminate the mission.
+     *
+     * @param missionId, The mission id of the UIAbility need to be terminated.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateMission(int32_t missionId)
     {
         return 0;
     }

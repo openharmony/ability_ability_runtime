@@ -34,8 +34,7 @@ bool InnerWrapConfigurationString(
     napi_env env, napi_value jsObject, const std::string &key, const std::string &value)
 {
     if (!value.empty()) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. key=%{public}s, value=%{private}s",
-            __func__, key.c_str(), value.c_str());
+        TAG_LOGI(AAFwkTag::JSNAPI, "key=%{public}s, value=%{private}s", key.c_str(), value.c_str());
         napi_value jsValue = WrapStringToJS(env, value);
         if (jsValue != nullptr) {
             NAPI_CALL_BASE(env, napi_set_named_property(env, jsObject, key.c_str(), jsValue), false);
@@ -79,7 +78,7 @@ napi_value WrapConfiguration(napi_env env, const AppExecFwk::Configuration &conf
     std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
     jsValue = WrapDoubleToJS(env, fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0);
     SetPropertyValueByPropertyName(env, jsObject, "fontSizeScale", jsValue);
-    
+
     std::string fontWeightScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
     jsValue = WrapDoubleToJS(env, fontWeightScale != "" ? std::stod(fontWeightScale) : 1.0);
     SetPropertyValueByPropertyName(env, jsObject, "fontWeightScale", jsValue);
@@ -95,10 +94,10 @@ napi_value WrapConfiguration(napi_env env, const AppExecFwk::Configuration &conf
 
 bool UnwrapConfiguration(napi_env env, napi_value param, Configuration &config)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
 
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called. Params is invalid.", __func__);
+        TAG_LOGI(AAFwkTag::JSNAPI, "not napi_object");
         return false;
     }
 
@@ -115,7 +114,7 @@ bool UnwrapConfiguration(napi_env env, napi_value param, Configuration &config)
     if (UnwrapInt32ByPropertyName(env, param, "colorMode", colormode)) {
         TAG_LOGD(AAFwkTag::JSNAPI, "The parsed colormode part %{public}d", colormode);
         if (colormode != Global::Resource::DARK && colormode != Global::Resource::LIGHT) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Set colorMode to unsupported value.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "Set colorMode to unsupported value");
             return false;
         }
         if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, GetColorModeStr(colormode))) {

@@ -17,12 +17,9 @@
 
 #include "ability_record.h"
 #include "ability_util.h"
-#include "bundle_constants.h"
-#include "bundle_mgr_helper.h"
+#include "app_utils.h"
 #include "global_constant.h"
-#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "server_constant.h"
 #include "startup_util.h"
 
 namespace OHOS {
@@ -31,8 +28,8 @@ namespace {
 constexpr const char* SCREENSHOT_BUNDLE_NAME = "com.huawei.ohos.screenshot";
 constexpr const char* SCREENSHOT_ABILITY_NAME = "com.huawei.ohos.screenshot.ServiceExtAbility";
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
-constexpr const char* SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
-constexpr int32_t BROKER_UID = 5557;
+constexpr const char* PARAM_RESV_ANCO_CALLER_UID = "ohos.anco.param.callerUid";
+constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.callerBundleName";
 }
 thread_local std::shared_ptr<StartAbilityInfo> StartAbilityUtils::startAbilityInfo;
 thread_local std::shared_ptr<StartAbilityInfo> StartAbilityUtils::callerAbilityInfo;
@@ -50,6 +47,7 @@ bool StartAbilityUtils::GetAppIndex(const Want &want, sptr<IRemoteObject> caller
         appIndex = abilityRecord->GetAppIndex();
         return true;
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex: %{public}d.", want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0));
     return AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
 }
 
@@ -143,6 +141,9 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
     }
     Want localWant = want;
     if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
+        localWant.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
+        localWant.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
         localWant.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
         localWant.RemoveParam(Want::PARAM_RESV_CALLER_UID);
         localWant.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
@@ -322,12 +323,12 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateCallerAbilityInfo(cons
 bool StartAbilityUtils::IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &callerToken)
 {
     auto callingUid = IPCSkeleton::GetCallingUid();
-    if (callingUid == BROKER_UID) {
+    if (callingUid == AppUtils::GetInstance().GetCollaboratorBrokerUID()) {
         return true;
     }
     AppExecFwk::AbilityInfo callerAbilityInfo;
     if (GetCallerAbilityInfo(callerToken, callerAbilityInfo)) {
-        return callerAbilityInfo.bundleName == SHELL_ASSISTANT_BUNDLENAME;
+        return callerAbilityInfo.bundleName == AppUtils::GetInstance().GetBrokerDelegateBundleName();
     }
     return false;
 }

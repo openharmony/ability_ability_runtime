@@ -344,6 +344,28 @@ int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, const bo
     return amsMgrServiceInner_->KillApplication(bundleName, clearPageStack);
 }
 
+int32_t AmsMgrScheduler::ForceKillApplication(const std::string &bundleName,
+    const int userId, const int appIndex)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName=%{public}s,userId=%{public}d,apIndex=%{public}d",
+        bundleName.c_str(), userId, appIndex);
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+
+    return amsMgrServiceInner_->ForceKillApplication(bundleName, userId, appIndex);
+}
+
+int32_t AmsMgrScheduler::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "accessTokenId=%{public}d", accessTokenId);
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+
+    return amsMgrServiceInner_->KillProcessesByAccessTokenId(accessTokenId);
+}
+
 int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
@@ -646,6 +668,20 @@ void AmsMgrScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
     amsHandler_->SubmitTask(blockProcCacheFunc, TASK_BLOCK_PROCESS_CACHE_BY_PIDS);
 }
 
+bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+
+    if (IPCSkeleton::GetCallingPid() != getprocpid()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
+        return false;
+    }
+    return amsMgrServiceInner_->CleanAbilityByUserRequest(token);
+}
+
 bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
 {
     if (!IsReady()) {
@@ -654,5 +690,19 @@ bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
     }
     return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
 }
-}  // namespace AppExecFwk
+bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t procPid = getprocpid();
+    if (callingPid != procPid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessContainsOnlyUIAbility(pid);
+}
+} // namespace AppExecFwk
 }  // namespace OHOS

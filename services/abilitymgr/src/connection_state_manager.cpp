@@ -15,13 +15,9 @@
 
 #include "connection_state_manager.h"
 
-#include <fstream>
-
-#include "app_mgr_interface.h"
 #include "connection_observer_errors.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
-#include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -59,7 +55,7 @@ void ConnectionStateManager::Init(const std::shared_ptr<TaskHandlerWrap> &handle
     }
     handler_ = handler;
     if (!handler) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "eventhandler is invalid");
+        TAG_LOGW(AAFwkTag::CONNECTION, "invalid eventhandler");
         InitAppStateObserver();
         return;
     }
@@ -101,13 +97,13 @@ void ConnectionStateManager::AddConnection(std::shared_ptr<ConnectionRecord> con
     }
 
     if (!connectionRecord) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "connection record is invalid");
+        TAG_LOGE(AAFwkTag::CONNECTION, "invalid connection record");
         return;
     }
 
     ConnectionData connectionData;
     if (!AddConnectionInner(connectionRecord, connectionData)) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "add connection, no need to notify observers");
+        TAG_LOGD(AAFwkTag::CONNECTION, "no need notify observers");
         return;
     }
     controller->NotifyExtensionConnected(connectionData);
@@ -122,7 +118,7 @@ void ConnectionStateManager::RemoveConnection(std::shared_ptr<ConnectionRecord> 
     }
 
     if (!connectionRecord) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "connection record is invalid when remove connection");
+        TAG_LOGE(AAFwkTag::CONNECTION, "invalid connection record");
         return;
     }
 
@@ -134,7 +130,7 @@ void ConnectionStateManager::RemoveConnection(std::shared_ptr<ConnectionRecord> 
 
     ConnectionData connectionData;
     if (!RemoveConnectionInner(connectionRecord, connectionData)) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "remove connection, no need to notify observers");
+        TAG_LOGD(AAFwkTag::CONNECTION, "no need notify observers");
         return;
     }
     controller->NotifyExtensionDisconnected(connectionData);
@@ -149,7 +145,7 @@ void ConnectionStateManager::AddDataAbilityConnection(const DataAbilityCaller &c
 
     ConnectionData connectionData;
     if (!AddDataAbilityConnectionInner(caller, record, connectionData)) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "add data ability onnection, no need to notify observers");
+        TAG_LOGW(AAFwkTag::CONNECTION, "no need notify observers");
         return;
     }
     observerController_->NotifyExtensionConnected(connectionData);
@@ -164,7 +160,7 @@ void ConnectionStateManager::RemoveDataAbilityConnection(const DataAbilityCaller
 
     ConnectionData connectionData;
     if (!RemoveDataAbilityConnectionInner(caller, record, connectionData)) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "remove data ability, no need to notify observers");
+        TAG_LOGW(AAFwkTag::CONNECTION, "no need notify observers");
         return;
     }
     observerController_->NotifyExtensionDisconnected(connectionData);
@@ -178,12 +174,12 @@ bool ConnectionStateManager::CheckDataAbilityConnectionParams(const DataAbilityC
     }
 
     if (!record) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "data ability record is invalid");
+        TAG_LOGE(AAFwkTag::CONNECTION, "invalid data ability record");
         return false;
     }
 
     if (caller.callerPid == 0) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "data ability, invalid caller pid");
+        TAG_LOGE(AAFwkTag::CONNECTION, "invalid callerPid");
         return false;
     }
 
@@ -193,20 +189,20 @@ bool ConnectionStateManager::CheckDataAbilityConnectionParams(const DataAbilityC
 void ConnectionStateManager::HandleDataAbilityDied(const std::shared_ptr<DataAbilityRecord> &record)
 {
     if (!record) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "invalid data ability.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "invalid data ability");
         return;
     }
 
     auto token = record->GetToken();
     if (!token) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "invalid data ability token.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "invalid token");
         return;
     }
 
     std::vector<AbilityRuntime::ConnectionData> allData;
     HandleDataAbilityDiedInner(token, allData);
     if (allData.empty()) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "allConnectionData is empty.");
+        TAG_LOGW(AAFwkTag::CONNECTION, "empty allData");
         return;
     }
 
@@ -223,13 +219,14 @@ void ConnectionStateManager::HandleDataAbilityDied(const std::shared_ptr<DataAbi
 void ConnectionStateManager::HandleDataAbilityCallerDied(int32_t callerPid)
 {
     if (callerPid <= 0) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "invalid data ability caller pid.");
+        TAG_LOGW(AAFwkTag::CONNECTION, "invalid callerPid");
         return;
     }
 
     HandleCallerDied(callerPid);
 }
 
+#ifdef WITH_DLP
 void ConnectionStateManager::AddDlpManager(const std::shared_ptr<AbilityRecord> &dlpManger)
 {
     if (!dlpManger) {
@@ -263,7 +260,7 @@ void ConnectionStateManager::AddDlpAbility(const std::shared_ptr<AbilityRecord> 
 
     DlpStateData dlpData;
     if (!HandleDlpAbilityInner(dlpAbility, true, dlpData)) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "no need to report dlp opened connection state.");
+        TAG_LOGD(AAFwkTag::CONNECTION, "no need report dlp opened conn state");
         return;
     }
     controller->NotifyDlpAbilityOpened(dlpData);
@@ -278,17 +275,19 @@ void ConnectionStateManager::RemoveDlpAbility(const std::shared_ptr<AbilityRecor
 
     DlpStateData dlpData;
     if (!HandleDlpAbilityInner(dlpAbility, false, dlpData)) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "no need to report dlp closed connection state.");
+        TAG_LOGD(AAFwkTag::CONNECTION, "no need report dlp closed conn state");
         return;
     }
     controller->NotifyDlpAbilityClosed(dlpData);
 }
+#endif // WITH_DLP
 
 void ConnectionStateManager::HandleAppDied(int32_t pid)
 {
     HandleCallerDied(pid);
 }
 
+#ifdef WITH_DLP
 void ConnectionStateManager::GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos)
 {
     std::lock_guard<ffrt::mutex> guard(dlpLock_);
@@ -304,6 +303,7 @@ void ConnectionStateManager::GetDlpConnectionInfos(std::vector<AbilityRuntime::D
         infos.emplace_back(info);
     }
 }
+#endif // WITH_DLP
 
 void ConnectionStateManager::GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &connectionData)
 {
@@ -338,7 +338,7 @@ bool ConnectionStateManager::AddConnectionInner(std::shared_ptr<ConnectionRecord
     }
 
     if (!targetItem) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "failed to find target connection state item.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "find targetItem failed");
         return false;
     }
 
@@ -352,13 +352,13 @@ bool ConnectionStateManager::RemoveConnectionInner(std::shared_ptr<ConnectionRec
     std::lock_guard<ffrt::mutex> guard(stateLock_);
     auto it = connectionStates_.find(callerPid);
     if (it == connectionStates_.end()) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "can not find target item, connection caller pid:%{public}d.", callerPid);
+        TAG_LOGW(AAFwkTag::CONNECTION, "find target failed, callerPid:%{public}d", callerPid);
         return false;
     }
 
     auto targetItem = it->second;
     if (!targetItem) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "failed to find target connection state item.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "find targetItem failed");
         return false;
     }
 
@@ -373,14 +373,14 @@ void ConnectionStateManager::HandleCallerDied(int32_t callerPid)
 {
     auto connectionStateItem = RemoveDiedCaller(callerPid);
     if (!connectionStateItem) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "no connectionStateItem, may already handled.");
+        TAG_LOGD(AAFwkTag::CONNECTION, "no connectionStateItem");
         return;
     }
 
     std::vector<AbilityRuntime::ConnectionData> allConnectionData;
     connectionStateItem->GenerateAllConnectionData(allConnectionData);
     if (allConnectionData.empty()) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "allConnectionData is empty.");
+        TAG_LOGW(AAFwkTag::CONNECTION, "empty allConnectionData");
         return;
     }
 
@@ -399,7 +399,7 @@ std::shared_ptr<ConnectionStateItem> ConnectionStateManager::RemoveDiedCaller(in
     std::lock_guard<ffrt::mutex> guard(stateLock_);
     auto it = connectionStates_.find(callerPid);
     if (it == connectionStates_.end()) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "connection caller pid:%{public}d.", callerPid);
+        TAG_LOGW(AAFwkTag::CONNECTION, "callerPid:%{public}d.", callerPid);
         return nullptr;
     }
     auto stateItem = it->second;
@@ -424,7 +424,7 @@ bool ConnectionStateManager::AddDataAbilityConnectionInner(const DataAbilityCall
     }
 
     if (!targetItem) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "failed to find target connection state item.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "find targetItem failed");
         return false;
     }
 
@@ -437,13 +437,13 @@ bool ConnectionStateManager::RemoveDataAbilityConnectionInner(const DataAbilityC
     std::lock_guard<ffrt::mutex> guard(stateLock_);
     auto it = connectionStates_.find(caller.callerPid);
     if (it == connectionStates_.end()) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "can not find target item, connection caller pid:%{public}d.", caller.callerPid);
+        TAG_LOGW(AAFwkTag::CONNECTION, "find target item failed, callerPid:%{public}d", caller.callerPid);
         return false;
     }
 
     auto targetItem = it->second;
     if (!targetItem) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "failed to find target data ability state item.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "find targetItem failed");
         return false;
     }
 
@@ -478,29 +478,30 @@ void ConnectionStateManager::HandleDataAbilityDiedInner(const sptr<IRemoteObject
     }
 }
 
+#ifdef WITH_DLP
 bool ConnectionStateManager::HandleDlpAbilityInner(const std::shared_ptr<AbilityRecord> &dlpAbility,
     bool isAdd, AbilityRuntime::DlpStateData &dlpData)
 {
     if (!dlpAbility) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "invalid dlp ability.");
+        TAG_LOGD(AAFwkTag::CONNECTION, "invalid dlp ability");
         return false;
     }
 
     if (dlpAbility->GetAppIndex() <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "this is not dlp ability, do not report connection stat.");
+        TAG_LOGD(AAFwkTag::CONNECTION, " not dlp ability, do not report connection stat");
         return false;
     }
 
     std::lock_guard<ffrt::mutex> guard(dlpLock_);
     auto it = dlpItems_.find(dlpAbility->GetOwnerMissionUserId());
     if (it == dlpItems_.end()) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "no dlp manager, invalid state.");
+        TAG_LOGW(AAFwkTag::CONNECTION, "invalid state");
         return false;
     }
 
     auto dlpItem = it->second;
     if (!dlpItem) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "invalid dlpItem.");
+        TAG_LOGW(AAFwkTag::CONNECTION, "invalid dlpItem");
         return false;
     }
 
@@ -510,6 +511,7 @@ bool ConnectionStateManager::HandleDlpAbilityInner(const std::shared_ptr<Ability
 
     return dlpItem->RemoveDlpConnectionState(dlpAbility, dlpData);
 }
+#endif // WITH_DLP
 
 void ConnectionStateManager::InitAppStateObserver()
 {
@@ -519,7 +521,7 @@ void ConnectionStateManager::InitAppStateObserver()
 
     sptr<OHOS::AppExecFwk::IAppMgr> appManager = GetAppMgr();
     if (!appManager) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "%{public}s app manager nullptr! retry:%{public}d", __func__, retry_);
+        TAG_LOGW(AAFwkTag::CONNECTION, "null appManager, retry:%{public}d", retry_);
         if (retry_ < MAX_RETRY && handler_) {
             auto initConnectionStateManagerTask = [weak = weak_from_this()]() {
                 auto self = weak.lock();
@@ -540,7 +542,7 @@ void ConnectionStateManager::InitAppStateObserver()
     });
     int32_t err = appManager->RegisterApplicationStateObserver(appStateObserver_);
     if (err != 0) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "%{public}s register to appmanager failed. err:%{public}d", __func__, err);
+        TAG_LOGE(AAFwkTag::CONNECTION, "register to appmanager err:%{public}d", err);
         appStateObserver_ = nullptr;
         return;
     }

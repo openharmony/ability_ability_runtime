@@ -25,6 +25,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+
 struct StartAbilityInfo {
     static std::shared_ptr<StartAbilityInfo> CreateStartAbilityInfo(const Want &want, int32_t userId,
         int32_t appIndex);

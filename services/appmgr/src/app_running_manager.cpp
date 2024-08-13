@@ -20,6 +20,7 @@
 #include "iremote_object.h"
 
 #include "appexecfwk_errors.h"
+#include "app_utils.h"
 #include "common_event_support.h"
 #include "exit_resident_process_manager.h"
 #include "hilog_tag_wrapper.h"
@@ -39,12 +40,10 @@
 #include "res_sched_util.h"
 #include "ui_extension_utils.h"
 
-
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
     constexpr int32_t QUICKFIX_UID = 5524;
-    const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
     constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 }
 using EventFwk::CommonEventSupport;
@@ -54,6 +53,15 @@ AppRunningManager::AppRunningManager()
 {}
 AppRunningManager::~AppRunningManager()
 {}
+
+void AppRunningManager::initConfig(const Configuration &config)
+{
+    std::vector<std::string> changeKeyV;
+    configuration_->CompareDifferent(changeKeyV, config);
+    if (!changeKeyV.empty()) {
+        configuration_->Merge(changeKeyV, config);
+    }
+}
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo)
@@ -99,7 +107,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
     const std::string &processName, const int uid, const BundleInfo &bundleInfo,
-    const std::string &specifiedProcessFlag)
+    const std::string &specifiedProcessFlag, bool *isProCache)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -113,12 +121,9 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
 
     auto FindSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId](const auto &pair) {
         return (pair.second != nullptr) &&
-            (specifiedProcessFlag.empty() ||
-            pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
-            (pair.second->GetSignCode() == signCode) &&
-            (pair.second->GetProcessName() == processName) &&
-            (pair.second->GetJointUserId() == jointUserId) &&
-            !(pair.second->IsTerminating()) &&
+            (specifiedProcessFlag.empty() || pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
+            (pair.second->GetSignCode() == signCode) && (pair.second->GetProcessName() == processName) &&
+            (pair.second->GetJointUserId() == jointUserId) && !(pair.second->IsTerminating()) &&
             !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag());
     };
 
@@ -130,9 +135,9 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetProcessName() == processName &&
-            (specifiedProcessFlag.empty() ||
-            appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
-            !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag())) {
+            (specifiedProcessFlag.empty() || appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
+            !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
+            !(appRecord->IsUserRequestCleaning())) {
             auto appInfoList = appRecord->GetAppInfoList();
             TAG_LOGD(AAFwkTag::APPMGR,
                 "appInfoList: %{public}zu, processName: %{public}s, specifiedProcessFlag: %{public}s",
@@ -142,10 +147,15 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
                 return appInfo->name == appName && appInfo->uid == uid;
             };
             auto appInfoIter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-            if (appInfoIter != appInfoList.end()) {
-                DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
-                return appRecord;
+            if (appInfoIter == appInfoList.end()) {
+                continue;
             }
+            bool isProcCacheInner =
+                DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
+            if (isProCache != nullptr) {
+                *isProCache = isProcCacheInner;
+            }
+            return appRecord;
         }
     }
     return nullptr;
@@ -249,8 +259,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByPid(co
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByAbilityToken(
     const sptr<IRemoteObject> &abilityToken)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard guard(runningRecordMapMutex_);
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetAbilityRunningRecordByToken(abilityToken)) {
@@ -360,15 +370,30 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
     return (pids.empty() ? false : true);
 }
 
-bool AppRunningManager::ProcessExitByPid(pid_t pid)
+bool AppRunningManager::GetPidsByBundleNameUserIdAndAppIndex(const std::string &bundleName,
+    const int userId, const int appIndex, std::list<pid_t> &pids)
 {
-    auto appRecord = GetAppRunningRecordByPid(pid);
-    if (appRecord != nullptr) {
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto &item : appRunningMap) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr) {
+            continue;
+        }
+        auto appInfoList = appRecord->GetAppInfoList();
+        auto isExist = [&bundleName, &userId, &appIndex](const std::shared_ptr<ApplicationInfo> &appInfo) {
+            return appInfo->bundleName == bundleName && appInfo->uid / BASE_USER_RANGE == userId &&
+                appInfo->appIndex == appIndex;
+        };
+        auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
+        pid_t pid = appRecord->GetPriorityObject()->GetPid();
+        if (iter == appInfoList.end() || pid <= 0) {
+            continue;
+        }
+        pids.push_back(pid);
         appRecord->SetKilling();
-        appRecord->ScheduleProcessSecurityExit();
-        return true;
     }
-    return false;
+
+    return (!pids.empty());
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRemoteObject> &remote,
@@ -737,48 +762,11 @@ void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &lis
             appData.accessTokenId = appInfo ? appInfo->accessTokenId : 0;
             appData.extensionType = appRecord->GetExtensionType();
             appData.isFocused = appRecord->GetFocusFlag();
+            appData.appIndex = appRecord->GetAppIndex();
             list.push_back(appData);
             TAG_LOGD(AAFwkTag::APPMGR, "bundleName:%{public}s", appData.bundleName.c_str());
         }
     }
-}
-
-void AppRunningManager::HandleAddAbilityStageTimeOut(const int64_t eventId)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "Handle add ability stage timeout.");
-    auto abilityRecord = GetAbilityRunningRecord(eventId);
-    if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr.");
-        return;
-    }
-
-    auto abilityToken = abilityRecord->GetToken();
-    auto appRecord = GetTerminatingAppRunningRecord(abilityToken);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr.");
-        return;
-    }
-
-    appRecord->ScheduleProcessSecurityExit();
-}
-
-void AppRunningManager::HandleStartSpecifiedAbilityTimeOut(const int64_t eventId)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "Handle receive multi instances timeout.");
-    auto abilityRecord = GetAbilityRunningRecord(eventId);
-    if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr");
-        return;
-    }
-
-    auto abilityToken = abilityRecord->GetToken();
-    auto appRecord = GetTerminatingAppRunningRecord(abilityToken);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr");
-        return;
-    }
-
-    appRecord->ScheduleProcessSecurityExit();
 }
 
 int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
@@ -802,7 +790,8 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
         if (appRecord && !isCollaboratorReserveType(appRecord)) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
             std::lock_guard guard(updateConfigurationDelayedLock_);
-            if (appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
+            if (appRecord->NeedUpdateConfigurationBackground() ||
+                appRecord->GetState() != ApplicationState::APP_STATE_BACKGROUND) {
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = false;
                 result = appRecord->UpdateConfiguration(config);
             } else {
@@ -834,7 +823,7 @@ int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &
 bool AppRunningManager::isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     std::string bundleName = appRecord->GetApplicationInfo()->name;
-    bool isReserveType = bundleName == SHELL_ASSISTANT_BUNDLENAME;
+    bool isReserveType = bundleName == AAFwk::AppUtils::GetInstance().GetBrokerDelegateBundleName();
     if (isReserveType) {
         TAG_LOGI(AAFwkTag::APPMGR, "isReserveType app [%{public}s]", appRecord->GetName().c_str());
     }
@@ -995,6 +984,8 @@ std::shared_ptr<RenderRecord> AppRunningManager::OnRemoteRenderDied(const wptr<I
     if (it != appRunningRecordMap_.end()) {
         auto appRecord = it->second;
         appRecord->RemoveRenderRecord(renderRecord);
+        TAG_LOGI(AAFwkTag::APPMGR, "RemoveRenderRecord pid:%{public}d, uid:%{public}d.", renderRecord->GetPid(),
+            renderRecord->GetUid());
         return renderRecord;
     }
     return nullptr;
@@ -1003,7 +994,7 @@ std::shared_ptr<RenderRecord> AppRunningManager::OnRemoteRenderDied(const wptr<I
 bool AppRunningManager::GetAppRunningStateByBundleName(const std::string &bundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -1022,7 +1013,7 @@ bool AppRunningManager::GetAppRunningStateByBundleName(const std::string &bundle
 int32_t AppRunningManager::NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     int32_t result = ERR_OK;
     bool loadSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
@@ -1053,7 +1044,7 @@ int32_t AppRunningManager::NotifyLoadRepairPatch(const std::string &bundleName, 
 int32_t AppRunningManager::NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     int32_t result = ERR_OK;
     bool reloadPageSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
@@ -1085,7 +1076,7 @@ int32_t AppRunningManager::NotifyUnLoadRepairPatch(const std::string &bundleName
     const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     int32_t result = ERR_OK;
     bool unLoadSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
@@ -1115,7 +1106,7 @@ int32_t AppRunningManager::NotifyUnLoadRepairPatch(const std::string &bundleName
 
 bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &foregroundingRecord)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (AAFwk::UIExtensionUtils::IsUIExtension(foregroundingRecord.GetExtensionType())
         || AAFwk::UIExtensionUtils::IsWindowExtension(foregroundingRecord.GetExtensionType())) {
         return false;
@@ -1126,7 +1117,8 @@ bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &for
         const auto &appRecord = item.second;
         if (appRecord == nullptr || appRecord->GetBundleName() != foregroundingRecord.GetBundleName()
             || AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
-            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
+            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
+            || appRecord->GetAppIndex() != foregroundingRecord.GetAppIndex()) {
             continue;
         }
         auto state = appRecord->GetState();
@@ -1138,9 +1130,9 @@ bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &for
     return true;
 }
 
-bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
+bool AppRunningManager::IsApplicationBackground(const AppRunningRecord &backgroundingRecord)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -1149,11 +1141,12 @@ bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
             return false;
         }
         if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
-            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
+            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
+            || appRecord->GetAppIndex() != backgroundingRecord.GetAppIndex()) {
             continue;
         }
         auto state = appRecord->GetState();
-        if (appRecord && appRecord->GetBundleName() == bundleName &&
+        if (appRecord && appRecord->GetBundleName() == backgroundingRecord.GetBundleName() &&
             state == ApplicationState::APP_STATE_FOREGROUND) {
             return false;
         }
@@ -1187,7 +1180,7 @@ void AppRunningManager::OnWindowVisibilityChanged(
 #endif //SUPPORT_SCREEN
 bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focusedRecord)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "check focus function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -1326,6 +1319,8 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
     if (it != appRunningRecordMap_.end()) {
         auto appRecord = it->second;
         appRecord->RemoveChildProcessRecord(childRecord);
+        TAG_LOGI(AAFwkTag::APPMGR, "RemoveChildProcessRecord pid:%{public}d, uid:%{public}d.", childRecord->GetPid(),
+            childRecord->GetUid());
         return childRecord;
     }
     return nullptr;
@@ -1555,6 +1550,39 @@ int AppRunningManager::DumpFfrt(const std::vector<int32_t>& pids, std::string& r
     return DumpErrorCode::ERR_OK;
 }
 
+bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid)
+{
+    if (abilityToken == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityToken is nullptr");
+        return false;
+    }
+
+    auto appRecord = GetAppRunningRecordByAbilityToken(abilityToken);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to get appRecord.");
+        return false;
+    }
+
+    auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(abilityToken);
+    if (!abilityRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to get abilityRecord.");
+        return false;
+    }
+    abilityRecord->SetUserRequestCleaningStatus();
+
+    bool canKill = appRecord->IsAllAbilityReadyToCleanedByUserRequest();
+    if (!canKill || appRecord->IsKeepAliveApp()) {
+        return false;
+    }
+
+    appRecord->SetUserRequestCleaning();
+    if (appRecord->GetPriorityObject()) {
+        pid = appRecord->GetPriorityObject()->GetPid();
+    }
+    uid = appRecord->GetUid();
+    return true;
+}
+
 bool AppRunningManager::IsAppProcessesAllCached(const std::string &bundleName, int32_t uid,
     const std::set<std::shared_ptr<AppRunningRecord>> &cachedSet)
 {
@@ -1585,7 +1613,7 @@ int32_t AppRunningManager::UpdateConfigurationDelayed(const std::shared_ptr<AppR
     std::lock_guard guard(updateConfigurationDelayedLock_);
     int32_t result = ERR_OK;
     auto it = updateConfigurationDelayedMap_.find(appRecord->GetRecordId());
-    if (it != updateConfigurationDelayedMap_.end()) {
+    if (it != updateConfigurationDelayedMap_.end() && it->second) {
         result = appRecord->UpdateConfiguration(*configuration_);
         it->second = false;
     }

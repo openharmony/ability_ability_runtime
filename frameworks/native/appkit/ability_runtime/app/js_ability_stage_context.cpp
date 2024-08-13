@@ -29,13 +29,13 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!jsContext || !config) {
-        TAG_LOGE(AAFwkTag::APPKIT, "jsContext or config is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "jsContext or config is nullptr");
         return;
     }
 
     napi_value object = jsContext->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "object is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "object is nullptr");
         return;
     }
 
@@ -53,7 +53,7 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
 
 napi_value CreateJsAbilityStageContext(napi_env env, std::shared_ptr<AbilityRuntime::Context> context)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     napi_value objValue = CreateJsBaseContext(env, context);
     if (context == nullptr) {
         return objValue;

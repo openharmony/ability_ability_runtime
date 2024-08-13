@@ -23,7 +23,9 @@
 #include "ability_loader.h"
 #include "ability_manager_client.h"
 #include "ability_thread.h"
+#include "free_install_observer_stub.h"
 #include "iability_callback.h"
+#include "ipc_object_stub.h"
 #include "mock_context.h"
 #include "mock_lifecycle_observer.h"
 #include "mock_serviceability_manager_service.h"
@@ -41,6 +43,7 @@ using namespace OHOS::AbilityRuntime;
 namespace {
 std::string TEST_LABEL = "testLabel";
 OHOS::sptr<MockServiceAbilityManagerService> g_mockAbilityMs = nullptr;
+const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
 }
 
 class MyAbilityCallback : public IAbilityCallback {
@@ -82,6 +85,11 @@ public:
 
     void UnregisterAbilityLifecycleObserver(const std::shared_ptr<ILifecycleObserver> &observer)
     {
+    }
+
+    std::shared_ptr<AAFwk::Want> GetWant()
+    {
+        return nullptr;
     }
 };
 
@@ -231,7 +239,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_01
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, 0);
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
     }
 }
 
@@ -254,8 +262,12 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_02
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, 0);
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
     }
+
+    wptr<IRemoteObject> token(new IPCObjectStub());
+    context_->SetWeakSessionToken(token);
+    context_->SetMissionContinueState(state);
 }
 
 /**
@@ -616,7 +628,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_StartAbility_0500, Functio
 /**
  * @tc.number: Ability_Context_Impl_OnAbilityResult_0100
  * @tc.name: OnAbilityResult
- * @tc.desc: On Ability Result
+ * @tc.desc: On Ability Result GetAbilityRecordId CreateModuleResourceManager etc
  */
 HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OnAbilityResult_0100, Function | MediumTest | Level1)
 {
@@ -626,6 +638,13 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OnAbilityResult_0100, Func
     context_->OnAbilityResult(code, resultCode, resultData);
     auto count = context_->resultCallbacks_.size();
     EXPECT_EQ(count, 0);
+    int accountId = 100;
+    AAFwk::StartOptions startOpts;
+    RuntimeTask  task;
+    context_->StartAbilityForResultWithAccount(resultData, accountId, startOpts, code, std::move(task));
+    context_->OnAbilityResult(code, resultCode, resultData);
+    context_->GetAbilityRecordId();
+    context_->CreateModuleResourceManager("moduleName", "bundleName");
 }
 
 /**
@@ -1309,6 +1328,20 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_StartAbilityByType_0100, F
     const std::string type = "share";
     ErrCode ret = context_->StartAbilityByType(type, wantParams, nullptr);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
+
+    napi_env env;
+    std::shared_ptr<JsUIExtensionCallback> uiCallback = std::make_shared<JsUIExtensionCallback>(env);
+    std::shared_ptr<MyAbilityCallback> abilityCallback = std::make_shared<MyAbilityCallback>();
+    context_->RegisterAbilityCallback(abilityCallback);
+    context_->StartAbilityByType(type, wantParams, uiCallback);
+
+    AAFwk::Want want;
+    context_->IsUIExtensionExist(want);
+    int32_t sessionId = 200;
+    context_->EraseUIExtension(sessionId);
+    context_->CreateModalUIExtensionWithApp(want);
+    context_->SetRestoreEnabled(true);
+    context_->GetRestoreEnabled();
 }
 
 /**
@@ -1435,17 +1468,26 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_MoveAbilityToBackground_01
     EXPECT_TRUE(ret == ERR_OK);
 }
 
+void RequestDialogResultTaskCallBack(int32_t resultCode, const AAFwk::Want&)
+{
+}
+
 /**
  * @tc.number: Ability_Context_Impl_RestoreWindowStage_0100
  * @tc.name: RestoreWindowStage
- * @tc.desc: RestoreWindowStage
+ * @tc.desc: RestoreWindowStage  RequestDialogService
  */
 HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_RestoreWindowStage_0100, Function | MediumTest | Level1)
 {
     napi_env env = nullptr;
+    napi_value value = nullptr;
     AAFwk::Want want;
     ErrCode ret = context_->RequestDialogService(env, want, nullptr);
     EXPECT_TRUE(ret == ERR_OK);
+    context_->RestoreWindowStage(env, value);
+
+    RequestDialogResultTask task = RequestDialogResultTaskCallBack;
+    context_->RequestDialogService(want, std::move(task));
 }
 
 /**
@@ -1459,18 +1501,40 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ReportDrawnCompleted_0100,
     EXPECT_TRUE(ret == ERR_OK);
 }
 
+struct RequestResult2 {
+    int32_t resultCode {0};
+    AAFwk::Want resultWant;
+    RequestDialogResultTask task;
+};
+
 /**
  * @tc.number: Ability_Context_Impl_RequestDialogResultJSThreadWorker_0100
  * @tc.name: RequestDialogResultJSThreadWorker
- * @tc.desc: RequestDialogResultJSThreadWorker
+ * @tc.desc: RequestDialogResultJSThreadWorker, InsertResultCallbackTask etc
  */
 HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_RequestDialog_0100, Function | MediumTest | Level1)
 {
     int status = 1;
     context_->RequestDialogResultJSThreadWorker(nullptr, status);
+    uv_work_t* req = new uv_work_t;
+    RequestResult2* data = new RequestResult2;
+    RequestDialogResultTask task = RequestDialogResultTaskCallBack;
+
+    data->task = task;
+    req->data = reinterpret_cast<void *>(data);
+    context_->RequestDialogResultJSThreadWorker(req, status);
     int32_t missionId = -1;
     ErrCode ret = context_->GetMissionId(missionId);
     EXPECT_FALSE(ret == ERR_OK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        int32_t missionId2 = 1;
+        EXPECT_EQ(context_->GetMissionId(missionId2), MISSION_NOT_FOUND);
+    }
+    RuntimeTask task2 = [](const int32_t count, const Want& want, bool isInner)
+    { ; };
+    int requestCode = 22;
+    context_->InsertResultCallbackTask(requestCode, std::move(task2));
+    context_->RemoveResultCallbackTask(requestCode);
 }
 
 /**
@@ -1561,6 +1625,35 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenAtomicService_0100, Fu
     context_->OpenAtomicService(want, options, requestCode, std::move(task));
     EXPECT_TRUE(context_ != nullptr);
 }
+
+/**
+ * @tc.number: Ability_Context_Impl_OpenLink_0100
+ * @tc.name: OpenLink
+ * @tc.desc: OpenLink GetRestoreEnabled SetRestoreEnabled AddFreeInstallObserver etc
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenLink_0100, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    int requestCode = 0;
+    context_->OpenLink(want, requestCode);
+    context_->SetRestoreEnabled(true);
+    EXPECT_EQ(context_->GetRestoreEnabled(), true);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_StartUIServiceExtensionAbility_0100
+ * @tc.name: StartUIServiceExtensionAbility
+ * @tc.desc: Start Ability For Result With Account
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_StartUIServiceExtensionAbility_0100,
+    Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    int32_t accountId{1};
+    auto ret = context_->StartUIServiceExtensionAbility(want, accountId);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS
 

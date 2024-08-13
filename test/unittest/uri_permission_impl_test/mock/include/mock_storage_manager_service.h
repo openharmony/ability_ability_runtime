@@ -66,7 +66,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetBundleStats(std::string pkgName, BundleStats &bundleStats) override
+    virtual int32_t GetBundleStats(std::string pkgName, BundleStats &bundleStats, int32_t) override
     {
         return E_OK;
     }
@@ -230,6 +230,24 @@ public:
     }
 
     virtual int32_t DeleteAppkey(const std::string keyId) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t GetFileEncryptStatus(uint32_t userId, bool &isEncrypted) override
+    {
+        return E_OK;
+    }
+    
+    virtual int32_t CreateRecoverKey(uint32_t userId,
+                                     uint32_t userType,
+                                     const std::vector<uint8_t> &token,
+                                     const std::vector<uint8_t> &secret) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t SetRecoverKey(const std::vector<uint8_t> &key) override
     {
         return E_OK;
     }

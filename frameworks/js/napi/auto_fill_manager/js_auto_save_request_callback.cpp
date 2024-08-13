@@ -54,7 +54,7 @@ void JsAutoSaveRequestCallback::Register(napi_value value)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     if (IsJsCallbackEquals(callback_, value)) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "The current callback already exists.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "callback exist");
         return;
     }
 
@@ -81,7 +81,7 @@ void JsAutoSaveRequestCallback::JSCallFunction(const std::string &methodName)
 void JsAutoSaveRequestCallback::JSCallFunctionWorker(const std::string &methodName)
 {
     if (callback_ == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "callback is nullptr.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null callback_");
         return;
     }
 
@@ -93,7 +93,7 @@ void JsAutoSaveRequestCallback::JSCallFunctionWorker(const std::string &methodNa
 
     napi_value funcObject;
     if (napi_get_named_property(env_, obj, methodName.c_str(), &funcObject) != napi_ok) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Get function by name failed.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Get function failed");
         return;
     }
 
@@ -103,19 +103,19 @@ void JsAutoSaveRequestCallback::JSCallFunctionWorker(const std::string &methodNa
 bool JsAutoSaveRequestCallback::IsJsCallbackEquals(std::shared_ptr<NativeReference> callback, napi_value value)
 {
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Invalid jsCallback.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Invalid jsCallback");
         return false;
     }
 
     auto object = callback->GetNapiValue();
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Failed to get object.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null obj");
         return false;
     }
 
     bool result = false;
     if (napi_strict_equals(env_, object, value, &result) != napi_ok) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Object does not match value.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Object not match");
         return false;
     }
 

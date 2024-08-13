@@ -24,7 +24,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 napi_value CreateJsAbilityStageContext(napi_env env, const std::shared_ptr<AbilityRuntime::Context> &context)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called.");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     napi_value objValue = CreateJsBaseContext(env, context);
     if (context == nullptr) {
         return objValue;
@@ -40,26 +40,25 @@ napi_value CreateJsAbilityStageContext(napi_env env, const std::shared_ptr<Abili
 void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
     const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called.");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     if (!jsContext || !config) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "jsContext or config is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null jsContext or config");
         return;
     }
 
     napi_value value = jsContext->GetNapiValue();
     if (value == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "value is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null value");
         return;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, value, "onUpdateConfiguration", &method);
     if (!method) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Failed to get onUpdateConfiguration from object");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Failed");
         return;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "JsAbilityStageContext call onUpdateConfiguration.");
     napi_value argv[] = { CreateJsConfiguration(env, *config) };
     napi_value callResult = nullptr;
     napi_call_function(env, value, method, 1, argv, &callResult);

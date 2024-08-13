@@ -29,6 +29,7 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const std::string THREAD_NAME = "AppStateObserverManager";
+const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
 const int BUNDLE_NAME_LIST_MAX_SIZE = 128;
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 } // namespace
@@ -385,7 +386,7 @@ void AppStateObserverManager::StateChangedNotifyObserver(
             TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, StateChangedNotifyObserver failed.");
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "StateChangedNotifyObserver come.");
+        TAG_LOGI(AAFwkTag::APPMGR, "StateChangedNotifyObserver come.");
         self->HandleStateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
     };
     handler_->SubmitTask(task);
@@ -455,8 +456,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
         if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType()) &&
             !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
             AppStateData data = WrapAppStateData(appRecord, state);
-            TAG_LOGD(AAFwkTag::APPMGR,
-                "HandleAppStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
+            TAG_LOGD(AAFwkTag::APPMGR, "name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
                 data.bundleName.c_str(), data.uid, data.state, needNotifyApp);
             dummyCode_ = __LINE__;
             auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
@@ -534,6 +534,10 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
+    if (data.bundleName == XIAOYI_BUNDLE_NAME) {
+        TAG_LOGI(AAFwkTag::APPMGR, "bundleName is com.huawei.chmos.vassistant, change processType to NORMAL");
+        data.processType = ProcessType::NORMAL;
+    }
     TAG_LOGI(AAFwkTag::APPMGR,
         "Process Create, bundle:%{public}s, pid:%{public}d, uid:%{public}d, processType:%{public}d, "
         "extensionType:%{public}d, processName:%{public}s, renderUid:%{public}d, isTestMode:%{public}d",
@@ -595,6 +599,10 @@ void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
+    if (data.bundleName == XIAOYI_BUNDLE_NAME) {
+        TAG_LOGI(AAFwkTag::APPMGR, "bundleName is com.huawei.chmos.vassistant, change processType to NORMAL");
+        data.processType = ProcessType::NORMAL;
+    }
     TAG_LOGD(AAFwkTag::APPMGR,
         "bundle:%{public}s, pid:%{public}d, uid:%{public}d, state:%{public}d, "
         "isContinuousTask:%{public}d, gpuPid:%{public}d",
@@ -865,10 +873,11 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
     } else {
         appStateData.callerBundleName = "";
     }
+    appStateData.appIndex = appRecord->GetAppIndex();
     TAG_LOGD(AAFwkTag::APPMGR, "Handle state change, bundle:%{public}s, state:%{public}d,"
-        "pid:%{public}d ,uid:%{public}d, isFocused:%{public}d, callerBUndleName: %{public}s",
-        appStateData.bundleName.c_str(), appStateData.state,
-        appStateData.pid, appStateData.uid, appStateData.isFocused, appStateData.callerBundleName.c_str());
+        "pid:%{public}d ,uid:%{public}d, isFocused:%{public}d, callerBUndleName: %{public}s, appIndex:%{public}d",
+        appStateData.bundleName.c_str(), appStateData.state, appStateData.pid, appStateData.uid,
+        appStateData.isFocused, appStateData.callerBundleName.c_str(), appStateData.appIndex);
     return appStateData;
 }
 

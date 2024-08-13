@@ -80,6 +80,7 @@ public:
     ErrCode StartServiceExtensionAbility(const Want &want, int32_t accountId = -1) override;
     ErrCode StopServiceExtensionAbility(const Want& want, int32_t accountId = -1) override;
     ErrCode TerminateAbilityWithResult(const AAFwk::Want &want, int resultCode) override;
+    ErrCode BackToCallerAbilityWithResult(const AAFwk::Want &want, int resultCode, int64_t requestCode) override;
     void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) override;
     ErrCode ConnectAbility(const AAFwk::Want &want,
                         const sptr<AbilityConnectCallback> &connectCallback) override;
@@ -222,8 +223,9 @@ public:
 
     ErrCode ChangeAbilityVisibility(bool isShow) override;
 
-    ErrCode OpenLink(const AAFwk::Want& want, int requestCode) override;
     ErrCode AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
+
+    ErrCode OpenLink(const AAFwk::Want& want, int requestCode) override;
 
     ErrCode OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
         RuntimeTask &&task) override;
@@ -238,6 +240,8 @@ public:
 
     void SetRestoreEnabled(bool enabled) override;
     bool GetRestoreEnabled() override;
+
+    std::shared_ptr<AAFwk::Want> GetWant() override;
 
 #ifdef SUPPORT_SCREEN
     /**

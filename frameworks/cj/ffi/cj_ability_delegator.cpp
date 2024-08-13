@@ -43,7 +43,7 @@ std::shared_ptr<AbilityRuntime::ApplicationContext> CJAbilityDelegator::GetAppCo
 {
     auto context = delegator_->GetAppContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to get AppContext from cj delegator.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null context");
         return nullptr;
     }
     return context->GetApplicationContext();
@@ -63,16 +63,25 @@ std::string CJShellCmdResult::Dump()
 {
     return shellCmdResultr_->Dump();
 }
+
+void CJAbilityDelegator::FinishTest(const char* msg, int64_t code)
+{
+    delegator_->FinishUserTest(msg, code);
+}
  
 extern "C" {
 int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator()
 {
     auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "delegator is null.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
         return INVALID_CODE;
     }
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj delegator is null.");
+        return INVALID_CODE;
+    }
     return cjDelegator->GetID();
 }
  
@@ -80,7 +89,7 @@ int32_t FFIAbilityDelegatorStartAbility(int64_t id, WantHandle want)
 {
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "cj delegator is null.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
         return INVALID_CODE;
     }
     auto actualWant = reinterpret_cast<AAFwk::Want*>(want);
@@ -91,10 +100,14 @@ int32_t FFIAbilityDelegatorExecuteShellCommand(int64_t id, const char* cmd, int6
 {
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "cj delegator is null.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
         return INVALID_CODE;
     }
     auto cJShellCmdResult = FFI::FFIData::Create<CJShellCmdResult>(cjDelegator->ExecuteShellCommand(cmd, timeoutSec));
+    if (cJShellCmdResult == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "cj shell command result is null.");
+        return INVALID_CODE;
+    }
     return cJShellCmdResult->GetID();
 }
 
@@ -102,7 +115,7 @@ int32_t FFIGetExitCode(int64_t id)
 {
     auto cjShellCmdResult = FFI::FFIData::GetData<CJShellCmdResult>(id);
     if (cjShellCmdResult == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "cj shell command result is null.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj shellcommand result");
         return INVALID_CODE;
     }
     return cjShellCmdResult->GetExitCode();
@@ -112,7 +125,7 @@ const char* FFIGetStdResult(int64_t id)
 {
     auto cjShellCmdResult = FFI::FFIData::GetData<CJShellCmdResult>(id);
     if (cjShellCmdResult == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "cj shell command result is null.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj shellcommand result");
         return nullptr;
     }
     const char* res = CreateCStringFromString(cjShellCmdResult->GetStdResult());
@@ -123,7 +136,7 @@ const char* FFIDump(int64_t id)
 {
     auto cjShellCmdResult = FFI::FFIData::GetData<CJShellCmdResult>(id);
     if (cjShellCmdResult == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "cj shell command result is null.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj shellcommand result");
         return nullptr;
     }
     const char* dump = CreateCStringFromString(cjShellCmdResult->Dump());
@@ -134,15 +147,24 @@ int32_t FFIAbilityDelegatorApplicationContext(int64_t id)
 {
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "cj delegator is null.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
         return INVALID_CODE;
     }
     auto appContext = FFI::FFIData::Create<ApplicationContextCJ::CJApplicationContext>(cjDelegator->GetAppContext());
     if (appContext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "app context is null.");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null app context");
         return INVALID_CODE;
     }
     return appContext->GetID();
+}
+
+void FFIAbilityDelegatorFinishTest(int64_t id, const char* msg, int64_t code)
+{
+    auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
+    if (cjDelegator == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+    }
+    cjDelegator->FinishTest(msg, code);
 }
 }
 }

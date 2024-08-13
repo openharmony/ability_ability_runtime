@@ -244,6 +244,12 @@ enum class AbilityManagerInterfaceCode {
     // Set resident process enable status.
     SET_RESIDENT_PROCESS_ENABLE = 80,
 
+    // ipc id for ability window config transition done (81)
+    ABILITY_WINDOW_CONFIG_TRANSITION_DONE = 81,
+
+    // Back to caller.
+    BACK_TO_CALLER_UIABILITY = 82,
+
     // ipc id 1001-2000 for DMS
     // ipc id for starting ability (1001)
     START_ABILITY = 1001,
@@ -377,7 +383,7 @@ enum class AbilityManagerInterfaceCode {
     // request modal UIExtension by want
     REQUESET_MODAL_UIEXTENSION = 1056,
 
-    // get root host info of uiextesnion
+    // get root host info of uiextension
     GET_UI_EXTENSION_ROOT_HOST_INFO = 1057,
 
     // change current ability visibility
@@ -403,6 +409,9 @@ enum class AbilityManagerInterfaceCode {
 
     // get ui extension session info
     GET_UI_EXTENSION_SESSION_INFO = 1065,
+
+    // ipc id for clean uiability from user
+    CLEAN_UI_ABILITY_BY_SCB = 1066,
 
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
@@ -485,6 +494,8 @@ enum class AbilityManagerInterfaceCode {
 
     CLEAR_RECOVERY_PAGE_STACK = 3014,
 
+    ABILITY_RECOVERY_SUBMITINFO = 3015,
+
     ACQUIRE_SHARE_DATA = 4001,
     SHARE_DATA_DONE = 4002,
 
@@ -541,6 +552,9 @@ enum class AbilityManagerInterfaceCode {
     REQUEST_ASSERT_FAULT_DIALOG = 6116,
     // ipc id for notify the operation status of the user
     NOTIFY_DEBUG_ASSERT_RESULT = 6117,
+
+    // ipc id for terminate mission
+    TERMINATE_MISSION = 6118,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

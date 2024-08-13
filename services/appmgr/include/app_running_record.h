@@ -557,9 +557,9 @@ public:
 
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
 
-    void SetSingleton(bool isSingleton);
-
     void SetMainProcess(bool isMainProcess);
+
+    void SetSingleton(bool isSingleton);
 
     void SetStageModelState(bool isStageBasedModel);
 
@@ -675,6 +675,8 @@ public:
     int32_t GetRequestProcCode() const;
 
     void SetProcessChangeReason(ProcessChangeReason reason);
+
+    bool NeedUpdateConfigurationBackground();
 
     ProcessChangeReason GetProcessChangeReason() const;
 
@@ -795,6 +797,8 @@ public:
     void SetAttachedToStatusBar(bool isAttached);
     bool IsAttachedToStatusBar();
 
+    void ScheduleCacheProcess();
+
     void SetBrowserHost(sptr<IRemoteObject> browser);
     sptr<IRemoteObject> GetBrowserHost();
     void SetIsGPU(bool gpu);
@@ -802,8 +806,6 @@ public:
     void SetGPUPid(pid_t gpuPid);
     pid_t GetGPUPid();
 
-    void ScheduleCacheProcess();
-    
     inline void SetStrictMode(bool strictMode)
     {
         isStrictMode_ = strictMode;
@@ -840,6 +842,10 @@ public:
      * @return
      */
     void ScheduleBackgroundRunning();
+
+    void SetUserRequestCleaning();
+    bool IsUserRequestCleaning() const;
+    bool IsAllAbilityReadyToCleanedByUserRequest();
 
 private:
     /**
@@ -991,6 +997,7 @@ private:
     bool isStrictMode_ = false;
     bool isAttachedToStatusBar = false;
     bool isDependedOnArkWeb_ = false;
+    bool isUserRequestCleaning_ = false;
 };
 
 }  // namespace AppExecFwk

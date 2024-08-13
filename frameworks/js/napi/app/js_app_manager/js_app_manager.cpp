@@ -71,7 +71,7 @@ public:
     ~JsAppManager()
     {
         if (observer_ != nullptr) {
-            TAG_LOGI(AAFwkTag::APPMGR, "Set valid false");
+            TAG_LOGI(AAFwkTag::APPMGR, "set valid false");
             observer_->SetValid(false);
         }
         if (observerForeground_ != nullptr) {
@@ -81,7 +81,7 @@ public:
 
     static void Finalizer(napi_env env, void* data, void* hint)
     {
-        TAG_LOGI(AAFwkTag::APPMGR, "JsAbilityContext::Finalizer is called");
+        TAG_LOGI(AAFwkTag::APPMGR, "finalizer called");
         std::unique_ptr<JsAppManager>(static_cast<JsAppManager*>(data));
     }
 
@@ -140,6 +140,11 @@ public:
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnClearUpAppData);
     }
 
+    static napi_value TerminateMission(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnTerminateMission);
+    }
+
     static napi_value IsSharedBundleRunning(napi_env env, napi_callback_info info)
     {
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnIsSharedBundleRunning);
@@ -194,7 +199,7 @@ public:
     static bool IsJSFunctionExist(napi_env env, const napi_value para, const std::string& methodName)
     {
         if (para == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "para is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null param");
             return false;
         }
         napi_ref ref = nullptr;
@@ -232,7 +237,7 @@ private:
 
     napi_value OnOn(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnOn called");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         std::string type = ParseParamType(env, argc, argv);
         if (type == ON_OFF_TYPE_SYNC) {
             return OnOnNew(env, argc, argv);
@@ -242,7 +247,7 @@ private:
 #ifdef SUPPORT_SCREEN
             return OnOnAbilityFirstFrameState(env, argc, argv);
 #else
-            TAG_LOGE(AAFwkTag::APPMGR, "Not Supported.");
+            TAG_LOGE(AAFwkTag::APPMGR, "not support");
             return CreateJsUndefined(env);
 #endif
         }
@@ -252,9 +257,9 @@ private:
 
     napi_value OnOnOld(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnOnOld called");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) { // support 2 or 3 params, if > 3 params, ignore other params
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -301,7 +306,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) { // support 2 or 3 params, if > 3 params, ignore other params
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -344,7 +349,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params.");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -358,7 +363,7 @@ private:
         }
 
         if (appManager_ == nullptr || observerForeground_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "AppManager or observer is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null appManager or observer");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
@@ -387,7 +392,7 @@ private:
 #ifdef SUPPORT_SCREEN
             return OnOffAbilityFirstFrameState(env, argc, argv);
 #else
-            TAG_LOGE(AAFwkTag::APPMGR, "Not Supported.");
+            TAG_LOGE(AAFwkTag::APPMGR, "not support");
             return CreateJsUndefined(env);
 #endif
         }
@@ -404,9 +409,9 @@ private:
             return CreateJsUndefined(env);
         }
         JSAbilityFirstFrameStateObserverManager::GetInstance()->Init(env);
-        TAG_LOGD(AAFwkTag::APPMGR, "OnOnAbilityFirstFrameState called");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params.");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -434,7 +439,7 @@ private:
         }
 
         if (JSAbilityFirstFrameStateObserverManager::GetInstance()->IsObserverObjectExist(argv[INDEX_ONE])) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Observer is already exists.");
+            TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
             return CreateJsUndefined(env);
         }
         int32_t ret = abilityManager_->RegisterAbilityFirstFrameStateObserver(observer, bundleName);
@@ -456,9 +461,9 @@ private:
             return CreateJsUndefined(env);
         }
         JSAbilityFirstFrameStateObserverManager::GetInstance()->Init(env);
-        TAG_LOGD(AAFwkTag::APPMGR, "OnOffAbilityFirstFrameState called");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params.");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -485,7 +490,7 @@ private:
         int64_t observerId, napi_env env, NapiAsyncTask *task)
     {
         if (observer == nullptr || appManager == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "observer or appManager nullptr");
+            TAG_LOGE(AAFwkTag::APPMGR, "null observer or appManager");
             task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             return;
         }
@@ -503,7 +508,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params when off.");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -548,7 +553,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params when off.");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -584,7 +589,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params when off.");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -658,7 +663,7 @@ private:
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [appManager = appManager_, env, task = napiAsyncTask.get()]() {
             if (appManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 delete task;
                 return;
@@ -693,7 +698,7 @@ private:
 #endif
         // only support 1 params
         if (argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough arguments");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -733,13 +738,13 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params.");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
         int32_t bundleType = -1;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleType)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "get bundleType error!");
+            TAG_LOGE(AAFwkTag::APPMGR, "get bundleType error");
             ThrowInvalidParamError(env, "Parse param bundleType failed, must be a BundleType.");
             return CreateJsUndefined(env);
         }
@@ -822,7 +827,7 @@ private:
     }
     napi_value OnKillProcessesByBundleName(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnKillProcessesByBundleName called");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::APPMGR, "Params not match");
             ThrowTooFewParametersError(env);
@@ -867,7 +872,7 @@ private:
 
     napi_value OnClearUpApplicationData(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnClearUpApplicationData called");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::APPMGR, "arguments not match");
             ThrowTooFewParametersError(env);
@@ -910,7 +915,7 @@ private:
 
     napi_value OnClearUpAppData(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnClearUpAppData called");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::APPMGR, "arguments not match");
             ThrowTooFewParametersError(env);
@@ -956,9 +961,49 @@ private:
         return result;
     }
 
+    napi_value OnTerminateMission(napi_env env, size_t argc, napi_value* argv)
+    {
+        TAG_LOGD(AAFwkTag::APPMGR, "OnTerminateMission call.");
+        if (argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Params not match");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        
+        int32_t missionId = 0;
+        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], missionId)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "get missionId wrong!");
+            ThrowInvalidParamError(env, "Parse param missionId failed, must be a number.");
+            return CreateJsUndefined(env);
+        }
+
+        napi_value result = nullptr;
+        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+        auto asyncTask = [missionId, env, task = napiAsyncTask.get()]() {
+            auto amsClient = AAFwk::AbilityManagerClient::GetInstance();
+            if (amsClient == nullptr) {
+                TAG_LOGW(AAFwkTag::APPMGR, "amsClient nullptr");
+                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                delete task;
+                return;
+            }
+            auto ret = amsClient->TerminateMission(missionId);
+            (ret == ERR_OK) ? task->ResolveWithNoError(env, CreateJsUndefined(env)) :
+                task->Reject(env, CreateJsErrorByNativeErr(env, ret, "Terminate mission failed."));
+            delete task;
+        };
+        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "Terminate mission failed."));
+        } else {
+            napiAsyncTask.release();
+        }
+        return result;
+    }
+
     napi_value OnIsSharedBundleRunning(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnIsSharedBundleRunning called");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) {
             TAG_LOGE(AAFwkTag::APPMGR, "Params not match");
             ThrowTooFewParametersError(env);
@@ -1247,7 +1292,7 @@ private:
             [bundleName, appManager, innerErrorCode, isRunning]() {
             sptr<OHOS::AppExecFwk::IAppMgr> appMgr = appManager.promote();
             if (appMgr == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "App manager is nullptr.");
+                TAG_LOGE(AAFwkTag::APPMGR, "null appmgr");
                 *innerErrorCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
                 return;
             }
@@ -1322,7 +1367,7 @@ private:
 
     napi_value OnPreloadApplication(napi_env env, size_t argc, napi_value *argv)
     {
-        TAG_LOGD(AAFwkTag::APPMGR, "OnPreloadApplication called.");
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_THREE) {
             TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication Invalid param count.");
             ThrowTooFewParametersError(env);
@@ -1341,7 +1386,7 @@ private:
             [param, innerErrorCode, weak]() {
             sptr<OHOS::AppExecFwk::IAppMgr> appMgr = weak.promote();
             if (appMgr == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication appMgr is nullptr.");
+                TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
                 *innerErrorCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
                 return;
             }
@@ -1369,7 +1414,7 @@ private:
         }
 
         if (!AppExecFwk::IsTypeForNapiValue(env, argv[0], napi_string)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Param 0 is not string");
+            TAG_LOGE(AAFwkTag::APPMGR, "argv[0] not string");
             return false;
         }
 
@@ -1446,6 +1491,7 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         JsAppManager::KillProcessesByBundleName);
     BindNativeFunction(env, exportObj, "clearUpApplicationData", moduleName, JsAppManager::ClearUpApplicationData);
     BindNativeFunction(env, exportObj, "clearUpAppData", moduleName, JsAppManager::ClearUpAppData);
+    BindNativeFunction(env, exportObj, "terminateMission", moduleName, JsAppManager::TerminateMission);
     BindNativeFunction(env, exportObj, "getAppMemorySize", moduleName, JsAppManager::GetAppMemorySize);
     BindNativeFunction(env, exportObj, "isRamConstrainedDevice", moduleName, JsAppManager::IsRamConstrainedDevice);
     BindNativeFunction(env, exportObj, "isSharedBundleRunning", moduleName, JsAppManager::IsSharedBundleRunning);

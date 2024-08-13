@@ -35,9 +35,7 @@ public:
     static std::unique_ptr<CJRuntime> Create(const Options& options);
     static void SetAppLibPath(const AppLibPathMap& appLibPaths);
     static bool IsCJAbility(const std::string& info);
-    static void SetAsanVersion();
-    static void SetTsanVersion();
-    static void SetHWAsanVersion();
+    static void SetSanitizerVersion(SanitizerKind kind);
     ~CJRuntime() override = default;
 
     Language GetLanguage() const override

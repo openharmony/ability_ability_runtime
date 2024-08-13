@@ -42,7 +42,7 @@ DataAbilityHelper::DataAbilityHelper(const std::shared_ptr<DataShare::DataShareH
  */
 std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(const std::shared_ptr<Context> context)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Creator with context.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator with context");
     DataAbilityHelper *ptrDataAbilityHelper = nullptr;
     std::shared_ptr<DataAbilityHelperImpl> dataAbilityHelperImpl = DataAbilityHelperImpl::Creator(context);
     if (dataAbilityHelperImpl) {
@@ -62,9 +62,9 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(const std::shared_
 std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
     const std::shared_ptr<Context> context, const std::shared_ptr<Uri> &uri)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Creator with context & uri.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator with context & uri");
     if (!context || !uri) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Input param invalid, context or uri is nullptr.");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "invalid param");
         return nullptr;
     }
     auto sharedPtrDataAbilityHelper = DataAbilityHelper::Creator(context, uri, false);
@@ -72,8 +72,7 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
         return sharedPtrDataAbilityHelper;
     }
 
-    TAG_LOGI(AAFwkTag::DATA_ABILITY,
-        "Call DataAbilityHelperImpl Creator failed, Call DataShareHelper Creator with context & uri.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator failed");
     Uri dataShareUri("");
     if (!DataAbilityHelper::TransferScheme(*uri, dataShareUri)) {
         return nullptr;
@@ -83,7 +82,7 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
     if (dataShareHelper) {
         ptrDataAbilityHelper = new DataAbilityHelper(dataShareHelper);
     }
-    TAG_LOGD(AAFwkTag::DATA_ABILITY, "Creator end");
+    TAG_LOGD(AAFwkTag::DATA_ABILITY, "end");
     return std::shared_ptr<DataAbilityHelper>(ptrDataAbilityHelper);
 }
 
@@ -98,9 +97,9 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
 std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context, const std::shared_ptr<Uri> &uri)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Creator with ability runtime context & uri.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator with ability runtime context & uri");
     if (!context || !uri) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Input param invalid, ability runtime context or uri is nullptr.");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "invalid param");
         return nullptr;
     }
     auto sharedPtrDataAbilityHelper = DataAbilityHelper::Creator(context, uri, false);
@@ -108,8 +107,7 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
         return sharedPtrDataAbilityHelper;
     }
 
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Creator failed, "
-        "Call DataShareHelper Creator with ability runtime context & uri.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator failed");
     Uri dataShareUri("");
     if (!DataAbilityHelper::TransferScheme(*uri, dataShareUri)) {
         return nullptr;
@@ -137,7 +135,7 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
 std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
     const std::shared_ptr<Context> context, const std::shared_ptr<Uri> &uri, const bool tryBind)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Creator with context & uri & tryBind.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator with context & uri & tryBind");
     DataAbilityHelper *ptrDataAbilityHelper = nullptr;
     auto dataAbilityHelperImpl = DataAbilityHelperImpl::Creator(context, uri, tryBind);
     if (dataAbilityHelperImpl) {
@@ -162,7 +160,7 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context, const std::shared_ptr<Uri> &uri, const bool tryBind)
 {
     TAG_LOGI(
-        AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Creator with ability runtime context & uri & tryBind.");
+        AAFwkTag::DATA_ABILITY, "Creator with ability runtime context & uri & tryBind");
     DataAbilityHelper *ptrDataAbilityHelper = nullptr;
     auto dataAbilityHelperImpl = DataAbilityHelperImpl::Creator(context, uri, tryBind);
     if (dataAbilityHelperImpl) {
@@ -180,7 +178,7 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
  */
 std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(const sptr<IRemoteObject> token)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Creator with token.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator with token");
     DataAbilityHelper *ptrDataAbilityHelper = nullptr;
     auto dataAbilityHelperImpl = DataAbilityHelperImpl::Creator(token);
     if (dataAbilityHelperImpl) {
@@ -202,9 +200,9 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(const sptr<IRemote
 std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
     const sptr<IRemoteObject> token, const std::shared_ptr<Uri> &uri)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Creator with token & uri.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator with token & uri");
     if (!token || !uri) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Input param invalid, token or uri is nullptr.");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "invalid param");
         return nullptr;
     }
     DataAbilityHelper *ptrDataAbilityHelper = nullptr;
@@ -212,8 +210,7 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
     if (dataAbilityHelperImpl) {
         ptrDataAbilityHelper = new DataAbilityHelper(dataAbilityHelperImpl);
     } else {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY,
-            "Call DataAbilityHelperImpl Creator failed, Call DataShareHelper Creator with token & uri.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Creator failed");
         Uri dataShareUri("");
         if (!DataAbilityHelper::TransferScheme(*uri, dataShareUri)) {
             return nullptr;
@@ -234,14 +231,14 @@ std::shared_ptr<DataAbilityHelper> DataAbilityHelper::Creator(
  */
 bool DataAbilityHelper::Release()
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Release called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     bool ret = false;
     if (dataAbilityHelperImpl_) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Release.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "DataAbilityHelperImpl Release");
         ret = dataAbilityHelperImpl_->Release();
     }
     if (dataShareHelper_) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper Release.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "DataShareHelper Release");
         ret = dataShareHelper_->Release();
         dataShareHelper_.reset();
     }
@@ -259,16 +256,16 @@ bool DataAbilityHelper::Release()
 std::vector<std::string> DataAbilityHelper::GetFileTypes(Uri &uri, const std::string &mimeTypeFilter)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "GetFileTypes called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     std::vector<std::string> matchedMIMEs;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl GetFileTypes.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability GetFileTypes");
         matchedMIMEs = dataAbilityHelperImpl->GetFileTypes(uri, mimeTypeFilter);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper GetFileTypes.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share GetFileTypes");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             matchedMIMEs = dataShareHelper->GetFileTypes(dataShareUri, mimeTypeFilter);
@@ -294,15 +291,15 @@ int DataAbilityHelper::OpenFile(Uri &uri, const std::string &mode)
     int fd = -1;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl OpenFile.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability OpenFile");
         fd = dataAbilityHelperImpl->OpenFile(uri, mode);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
         if (callFromJs_) {
-            TAG_LOGE(AAFwkTag::DATA_ABILITY, "Call DataShareHelper OpenFile, DataShareHelper no this interface.");
+            TAG_LOGE(AAFwkTag::DATA_ABILITY, "Share no this interface");
         } else {
-            TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper OpenFile.");
+            TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share OpenFile");
             Uri dataShareUri("");
             if (TransferScheme(uri, dataShareUri)) {
                 fd = dataShareHelper->OpenFile(dataShareUri, mode);
@@ -326,16 +323,16 @@ int DataAbilityHelper::OpenFile(Uri &uri, const std::string &mode)
  */
 int DataAbilityHelper::OpenRawFile(Uri &uri, const std::string &mode)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "OpenRawFile called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     int fd = -1;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl OpenRawFile.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability OpenRawFile");
         fd = dataAbilityHelperImpl->OpenRawFile(uri, mode);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper OpenFile.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share OpenFile");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             fd = dataShareHelper->OpenRawFile(dataShareUri, mode);
@@ -355,16 +352,16 @@ int DataAbilityHelper::OpenRawFile(Uri &uri, const std::string &mode)
 int DataAbilityHelper::Insert(Uri &uri, const NativeRdb::ValuesBucket &value)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Insert called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     int index = -1;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Insert.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability Insert");
         index = dataAbilityHelperImpl->Insert(uri, value);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper Insert.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share Insert");
         DataShare::DataShareValuesBucket dataShareValue = RdbDataAbilityUtils::ToDataShareValuesBucket(value);
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
@@ -378,14 +375,14 @@ std::shared_ptr<AppExecFwk::PacMap> DataAbilityHelper::Call(
     const Uri &uri, const std::string &method, const std::string &arg, const AppExecFwk::PacMap &pacMap)
 {
     std::shared_ptr<AppExecFwk::PacMap> result = nullptr;
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Call.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability Call");
         result = dataAbilityHelperImpl->Call(uri, method, arg, pacMap);
     }
     if (dataShareHelper_) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Call DataShareHelper Call, DataShareHelper no this interface.");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Share no Call");
     }
     return result;
 }
@@ -403,16 +400,16 @@ int DataAbilityHelper::Update(
     Uri &uri, const NativeRdb::ValuesBucket &value, const NativeRdb::DataAbilityPredicates &predicates)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Update called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     int index = -1;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Update.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability Update");
         index = dataAbilityHelperImpl->Update(uri, value, predicates);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper Update.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share Update");
         DataShare::DataShareValuesBucket dataShareValue = RdbDataAbilityUtils::ToDataShareValuesBucket(value);
         DataShare::DataSharePredicates dataSharePredicates = RdbDataAbilityUtils::ToDataSharePredicates(predicates);
         Uri dataShareUri("");
@@ -434,16 +431,16 @@ int DataAbilityHelper::Update(
 int DataAbilityHelper::Delete(Uri &uri, const NativeRdb::DataAbilityPredicates &predicates)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Delete called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     int index = -1;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Delete.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability Delete");
         return dataAbilityHelperImpl->Delete(uri, predicates);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper Delete.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share Delete");
         DataShare::DataSharePredicates dataSharePredicates = RdbDataAbilityUtils::ToDataSharePredicates(predicates);
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
@@ -466,28 +463,28 @@ std::shared_ptr<NativeRdb::AbsSharedResultSet> DataAbilityHelper::Query(
     Uri &uri, std::vector<std::string> &columns, const NativeRdb::DataAbilityPredicates &predicates)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::DATA_ABILITY, "Query called.");
+    TAG_LOGD(AAFwkTag::DATA_ABILITY, "called");
     std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGD(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Query.");
+        TAG_LOGD(AAFwkTag::DATA_ABILITY, "Ability Query");
         return dataAbilityHelperImpl->Query(uri, columns, predicates);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGD(AAFwkTag::DATA_ABILITY, "Call DataShareHelper Query.");
+        TAG_LOGD(AAFwkTag::DATA_ABILITY, "Share Query");
         DataShare::DataSharePredicates dataSharePredicates = RdbDataAbilityUtils::ToDataSharePredicates(predicates);
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             std::shared_ptr<DataShare::DataShareResultSet> dataShareResultSet
                 = dataShareHelper->Query(dataShareUri, dataSharePredicates, columns);
             if (!dataShareResultSet) {
-                TAG_LOGE(AAFwkTag::DATA_ABILITY, "Return dataShareResultSet is nullptr.");
+                TAG_LOGE(AAFwkTag::DATA_ABILITY, "null dataShareResultSet");
                 return nullptr;
             }
             resultSet = RdbDataAbilityUtils::ToAbsSharedResultSet(dataShareResultSet);
             if (!resultSet) {
-                TAG_LOGE(AAFwkTag::DATA_ABILITY, "Transfer to AbsSharedResultSet failed.");
+                TAG_LOGE(AAFwkTag::DATA_ABILITY, "Transfer to AbsSharedResultSet failed");
             }
         }
     }
@@ -505,16 +502,16 @@ std::shared_ptr<NativeRdb::AbsSharedResultSet> DataAbilityHelper::Query(
 std::string DataAbilityHelper::GetType(Uri &uri)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "GetType called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     std::string type;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl GetType.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability GetType");
         type = dataAbilityHelperImpl->GetType(uri);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper GetType.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share GetType");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             type = dataShareHelper->GetType(dataShareUri);
@@ -535,15 +532,15 @@ std::string DataAbilityHelper::GetType(Uri &uri)
  */
 bool DataAbilityHelper::Reload(Uri &uri, const PacMap &extras)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Reload called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     bool ret = false;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl Reload.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability Reload");
         ret = dataAbilityHelperImpl->Reload(uri, extras);
     }
     if (dataShareHelper_) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Call DataShareHelper Reload, DataShareHelper no this interface.");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Share no Reload");
     }
     return ret;
 }
@@ -559,16 +556,16 @@ bool DataAbilityHelper::Reload(Uri &uri, const PacMap &extras)
 int DataAbilityHelper::BatchInsert(Uri &uri, const std::vector<NativeRdb::ValuesBucket> &values)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "BatchInsert called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     int ret = -1;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl BatchInsert.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability BatchInsert");
         ret = dataAbilityHelperImpl->BatchInsert(uri, values);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper BatchInsert.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share BatchInsert");
         std::vector<DataShare::DataShareValuesBucket> dataShareValues;
         for (auto value : values) {
             DataShare::DataShareValuesBucket dataShareValue = RdbDataAbilityUtils::ToDataShareValuesBucket(value);
@@ -590,15 +587,15 @@ int DataAbilityHelper::BatchInsert(Uri &uri, const std::vector<NativeRdb::Values
  */
 void DataAbilityHelper::RegisterObserver(const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "RegisterObserver called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl RegisterObserver.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability RegisterObserver");
         dataAbilityHelperImpl->RegisterObserver(uri, dataObserver);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper RegisterObserver.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share RegisterObserver");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             dataShareHelper->RegisterObserver(dataShareUri, dataObserver);
@@ -614,15 +611,15 @@ void DataAbilityHelper::RegisterObserver(const Uri &uri, const sptr<AAFwk::IData
  */
 void DataAbilityHelper::UnregisterObserver(const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "UnregisterObserver called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl UnregisterObserver.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability UnregisterObserver");
         dataAbilityHelperImpl->UnregisterObserver(uri, dataObserver);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper UnregisterObserver.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share UnregisterObserver");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             dataShareHelper->UnregisterObserver(dataShareUri, dataObserver);
@@ -638,15 +635,15 @@ void DataAbilityHelper::UnregisterObserver(const Uri &uri, const sptr<AAFwk::IDa
 void DataAbilityHelper::NotifyChange(const Uri &uri)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "NotifyChange called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl NotifyChange.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability NotifyChange");
         dataAbilityHelperImpl->NotifyChange(uri);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper NotifyChange.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share NotifyChange");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             dataShareHelper->NotifyChange(dataShareUri);
@@ -669,16 +666,16 @@ void DataAbilityHelper::NotifyChange(const Uri &uri)
 Uri DataAbilityHelper::NormalizeUri(Uri &uri)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "NormalizeUri called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     Uri urivalue("");
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl NormalizeUri.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability NormalizeUri");
         urivalue = dataAbilityHelperImpl->NormalizeUri(uri);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper NormalizeUri.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share NormalizeUri");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             urivalue = dataShareHelper->NormalizeUri(dataShareUri);
@@ -700,16 +697,16 @@ Uri DataAbilityHelper::NormalizeUri(Uri &uri)
 Uri DataAbilityHelper::DenormalizeUri(Uri &uri)
 {
     HITRACE_METER_NAME(HITRACE_TAG_DISTRIBUTEDDATA, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "DenormalizeUri called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     Uri urivalue("");
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl DenormalizeUri.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability DenormalizeUri");
         urivalue = dataAbilityHelperImpl->DenormalizeUri(uri);
     }
     auto dataShareHelper = GetDataShareHelper();
     if (dataShareHelper) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataShareHelper DenormalizeUri.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Share DenormalizeUri");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
             urivalue = dataShareHelper->DenormalizeUri(dataShareUri);
@@ -721,15 +718,15 @@ Uri DataAbilityHelper::DenormalizeUri(Uri &uri)
 std::vector<std::shared_ptr<DataAbilityResult>> DataAbilityHelper::ExecuteBatch(
     const Uri &uri, const std::vector<std::shared_ptr<DataAbilityOperation>> &operations)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "ExecuteBatch called.");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "called");
     std::vector<std::shared_ptr<DataAbilityResult>> results;
     auto dataAbilityHelperImpl = GetDataAbilityHelperImpl();
     if (dataAbilityHelperImpl) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call DataAbilityHelperImpl ExecuteBatch.");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability ExecuteBatch");
         results = dataAbilityHelperImpl->ExecuteBatch(uri, operations);
     }
     if (dataShareHelper_) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Call DataShareHelper ExecuteBatch, DataShareHelper no this interface.");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Share no ExecuteBatch");
     }
     return results;
 }
@@ -745,7 +742,7 @@ bool DataAbilityHelper::TransferScheme(const Uri &uri, Uri &dataShareUri)
     Uri inputUri = uri;
     if (inputUri.GetScheme() == dataShareScheme) {
         dataShareUri = Uri(inputUri.ToString());
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "input uri is data share uri, uri: %{public}s, no need transfer.",
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "data share uri: %{public}s no need transfer",
             inputUri.ToString().c_str());
         return true;
     }
@@ -754,7 +751,7 @@ bool DataAbilityHelper::TransferScheme(const Uri &uri, Uri &dataShareUri)
         string uriStr = inputUri.ToString();
         uriStr.replace(0, dataAbilityScheme.length(), dataShareScheme);
         dataShareUri = Uri(uriStr);
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "data ability uri: %{public}s transfer to data share uri: %{public}s.",
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "ability uri: %{public}s transfer to share uri: %{public}s",
             inputUri.ToString().c_str(), dataShareUri.ToString().c_str());
         return true;
     }
@@ -763,12 +760,12 @@ bool DataAbilityHelper::TransferScheme(const Uri &uri, Uri &dataShareUri)
         string uriStr = inputUri.ToString();
         uriStr.replace(0, filePrefix.length(), dataSharePrefix);
         dataShareUri = Uri(uriStr);
-        TAG_LOGD(AAFwkTag::DATA_ABILITY, "file uri: %{public}s transfer to data share uri: %{public}s.",
+        TAG_LOGD(AAFwkTag::DATA_ABILITY, "file uri: %{public}s transfer to share uri: %{public}s",
             inputUri.ToString().c_str(), dataShareUri.ToString().c_str());
         return true;
     }
 
-    TAG_LOGE(AAFwkTag::DATA_ABILITY, "Input param invalid, uri: %{private}s", inputUri.ToString().c_str());
+    TAG_LOGE(AAFwkTag::DATA_ABILITY, "invalid param, uri: %{private}s", inputUri.ToString().c_str());
     return false;
 }
 
