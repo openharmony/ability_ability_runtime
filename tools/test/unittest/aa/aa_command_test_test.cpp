@@ -106,6 +106,7 @@ HWTEST_F(AaCommandTestTest, Aa_Command_Test_0100, Function | MediumTest | Level1
     managerClientPtr->proxy_ = static_cast<IAbilityManager*>(mockAbilityManagerStub);
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_START_USER_TEST_NG + "\n");
+    managerClientPtr->proxy_  = nullptr;
 }
 
 /**
@@ -138,6 +139,7 @@ HWTEST_F(AaCommandTestTest, Aa_Command_Test_0200, Function | MediumTest | Level1
     managerClientPtr->proxy_ = static_cast<IAbilityManager*>(mockAbilityManagerStub);
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_START_USER_TEST_NG + "\n");
+    managerClientPtr->proxy_  = nullptr;
     testing::Mock::AllowLeak(mockAbilityManagerStub);
 }
 
@@ -172,6 +174,7 @@ HWTEST_F(AaCommandTestTest, Aa_Command_Test_0300, Function | MediumTest | Level1
     managerClientPtr->proxy_ = static_cast<IAbilityManager*>(mockAbilityManagerStub);
 
     EXPECT_EQ(cmd.ExecCommand(), "Timeout: user test is not completed within the specified time.\n");
+    managerClientPtr->proxy_  = nullptr;
     testing::Mock::AllowLeak(mockAbilityManagerStub);
 }
 
@@ -214,5 +217,6 @@ HWTEST_F(AaCommandTestTest, Aa_Command_Test_0400, Function | MediumTest | Level1
     managerClientPtr->proxy_ = static_cast<IAbilityManager*>(mockAbilityManagerStub);
 
     EXPECT_EQ(cmd.ExecCommand(), STRING_USER_TEST_FINISHED + "\n");
+    managerClientPtr->proxy_  = nullptr;
     testing::Mock::AllowLeak(mockAbilityManagerStub);
 }
