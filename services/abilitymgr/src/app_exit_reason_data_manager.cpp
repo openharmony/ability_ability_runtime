@@ -18,6 +18,7 @@
 #include <cstdint>
 
 #include "accesstoken_kit.h"
+#include "file_monitor.h"
 #include "os_account_manager_wrapper.h"
 
 namespace OHOS {
@@ -75,6 +76,7 @@ bool AppExitReasonDataManager::CheckKvStore()
     while (tryTimes > 0) {
         DistributedKv::Status status = GetKvStore();
         if (status == DistributedKv::Status::SUCCESS && kvStorePtr_ != nullptr) {
+            OHOS::AAFwk::FileMonitor::SetDBDeleteMonitorFlag(APP_EXIT_REASON_STORAGE_DIR);
             return true;
         }
         TAG_LOGD(AAFwkTag::ABILITYMGR, "try times: %{public}d", tryTimes);
