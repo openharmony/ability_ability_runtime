@@ -8357,7 +8357,7 @@ int AbilityManagerService::CheckStaticCfgPermission(const AppExecFwk::AbilityReq
     if (abilityInfo.applicationInfo.accessTokenId == tokenId) {
         return AppExecFwk::Constants::PERMISSION_GRANTED;
     }
-    
+
     if (abilityRequest.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) ==
         AppUtils::GetInstance().GetBrokerDelegateBundleName() &&
         abilityRequest.abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
