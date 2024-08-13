@@ -1084,7 +1084,7 @@ int32_t AppMgrService::NotifyHotReloadPage(const std::string &bundleName, const 
 int32_t AppMgrService::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
 {
     if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not foundation.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not foundation");
         return ERR_INVALID_OPERATION;
     }
     if (!IsReady()) {

@@ -140,7 +140,7 @@ std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemote
 
     std::string descriptor = Str16ToStr8(token->GetObjectDescriptor());
     if (descriptor != "ohos.aafwk.AbilityToken") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Input token is not an AbilityToken, token->GetObjectDescriptor(): %{public}s",
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not AbilityToken, descriptor:%{public}s",
             descriptor.c_str());
         return nullptr;
     }
@@ -370,7 +370,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     isWindowStarted_ = true;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundLifecycle: name:%{public}s.", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundLifecycle: name:%{public}s", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
@@ -400,7 +400,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability: %{public}s.", GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
     // grant uri permission
     {
@@ -1185,7 +1185,7 @@ void AbilityRecord::SetColdStartFlag(bool isColdStart)
 void AbilityRecord::BackgroundAbility(const Closure &task)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "BackgroundLifecycle: ability: %{public}s.", GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "BackgroundLifecycle: ability:%{public}s", GetURI().c_str());
     if (lifecycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Move the ability to background fail, lifecycleDeal_ is null.");
         return;
@@ -1241,7 +1241,7 @@ int AbilityRecord::TerminateAbility()
     eventInfo.bundleName = GetAbilityInfo().bundleName;
     eventInfo.abilityName = GetAbilityInfo().name;
     if (clearMissionFlag_) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "deleteAbilityRecoverInfo before clearMission.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "deleteAbilityRecoverInfo before clearMission");
         (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
             DeleteAbilityRecoverInfo(GetAbilityInfo().applicationInfo.accessTokenId, GetAbilityInfo().moduleName,
             GetAbilityInfo().name);
@@ -1318,7 +1318,7 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
     auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
         collaboratorType_);
     if (collaborator != nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "start notify collaborator, missionId:%{public}d, state:%{public}d", missionId_,
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "notify collaborator, missionId:%{public}d, state:%{public}d", missionId_,
             static_cast<int32_t>(state));
         int ret = ERR_OK;
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1689,7 +1689,7 @@ void AbilityRecord::SaveAbilityState()
 
 void AbilityRecord::SaveAbilityState(const PacMap &inState)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     stateDatas_ = inState;
 }
 
@@ -1836,7 +1836,7 @@ void AbilityRecord::SaveResultToCallers(const int resultCode, const Want *result
 {
     auto callerRecordList = GetCallerRecordList();
     if (callerRecordList.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerRecordList is empty.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerRecordList is empty");
         return;
     }
     auto latestCaller = callerRecordList.back();
@@ -1846,7 +1846,7 @@ void AbilityRecord::SaveResultToCallers(const int resultCode, const Want *result
             continue;
         }
         if (caller == latestCaller) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Caller record is the latest.");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "latestCaller");
             SaveResult(resultCode, resultWant, caller);
             continue;
         }
@@ -2006,7 +2006,7 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
     uint32_t callingTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Add caller record, callingTokenId is %{public}u", callingTokenId);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call, callingTokenId:%{public}u", callingTokenId);
     if (!srcAbilityId.empty() && IsSystemAbilityCall(callerToken, callingTokenId)) {
         AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
         return;

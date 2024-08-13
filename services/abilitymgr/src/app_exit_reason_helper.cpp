@@ -68,7 +68,7 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
     }
 
     if (abilityList.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Active abilityLists empty.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityLists empty");
         return ERR_GET_ACTIVE_ABILITY_LIST_EMPTY;
     }
     int32_t userId;
@@ -138,7 +138,7 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const st
     auto ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyAppMgrRecordExitReason(pid, exitReason.reason,
         exitReason.exitMsg);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyAppMgrRecordExitReason failed.code: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyAppMgrRecordExitReason failed:%{public}d", ret);
     }
 
     if (abilityLists.empty()) {
