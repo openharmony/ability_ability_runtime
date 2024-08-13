@@ -657,5 +657,14 @@ bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
     }
     return appMgrClient_->IsProcessContainsOnlyUIAbility(pid);
 }
+
+bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsProcessAttached(token);
+}
 } // namespace AAFwk
 }  // namespace OHOS

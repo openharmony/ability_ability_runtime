@@ -818,6 +818,8 @@ public:
      */
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**
