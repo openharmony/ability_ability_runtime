@@ -60,7 +60,7 @@ ErrCode ExtensionControlInterceptor::DoProcess(AbilityInterceptorParam param)
         return EXTENSION_BLOCKED_BY_SERVICE_LIST;
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "other ok.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "other ok");
     return ERR_OK;
 }
 

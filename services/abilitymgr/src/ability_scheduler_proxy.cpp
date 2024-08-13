@@ -1091,7 +1091,7 @@ void AbilitySchedulerProxy::DumpAbilityInfo(const std::vector<std::string> &para
 
 void AbilitySchedulerProxy::CallRequest()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilitySchedulerProxy::CallRequest start");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start");
 
     MessageParcel data;
     MessageParcel reply;
@@ -1107,7 +1107,7 @@ void AbilitySchedulerProxy::CallRequest()
         return;
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilitySchedulerProxy::CallRequest end");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "end");
 }
 
 void AbilitySchedulerProxy::OnExecuteIntent(const Want &want)

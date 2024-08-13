@@ -21,7 +21,7 @@ namespace OHOS {
 namespace AAFwk {
 bool SenderInfo::ReadFromParcel(Parcel &parcel)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
 
     code = parcel.ReadInt32();
     std::unique_ptr<Want> wantResquest(parcel.ReadParcelable<Want>());
@@ -53,7 +53,7 @@ bool SenderInfo::ReadFromParcel(Parcel &parcel)
 
 SenderInfo *SenderInfo::Unmarshalling(Parcel &parcel)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
 
     SenderInfo *info = new (std::nothrow) SenderInfo();
     if (info == nullptr) {
@@ -71,7 +71,7 @@ SenderInfo *SenderInfo::Unmarshalling(Parcel &parcel)
 
 bool SenderInfo::Marshalling(Parcel &parcel) const
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
 
     if (!parcel.WriteInt32(code)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write code");
