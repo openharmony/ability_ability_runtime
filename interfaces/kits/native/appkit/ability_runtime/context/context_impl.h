@@ -458,8 +458,9 @@ private:
     void SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
         const std::string &name, const std::string &hapModuleName, std::string &loadPath,
         std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos);
-    void UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
-        std::shared_ptr<Context> inputContext = nullptr);
+    void UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager);
+    void UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> src,
+        std::shared_ptr<Global::Resource::ResourceManager> &resourceManager);
     int32_t GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, bool &currentBundle);
     void GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, const int &accountId,
         std::shared_ptr<Context> inputContext = nullptr);
