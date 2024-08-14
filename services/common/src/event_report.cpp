@@ -54,7 +54,11 @@ constexpr const char *EVENT_KEY_APP_UID = "APP_UID";
 constexpr const char *EVENT_KEY_PROCESS_TYPE = "PROCESS_TYPE";
 constexpr const char *EVENT_KEY_TIME = "TIME";
 constexpr const char *EVENT_KEY_PID = "PID";
+constexpr const char *EVENT_KEY_REASON = "REASON";
+constexpr const char *EVENT_KEY_SUB_REASON = "SUB_REASON";
 constexpr const char *INVALID_EVENT_NAME = "INVALIDEVENTNAME";
+
+constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
 
 void EventReport::SendAppEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
@@ -472,6 +476,51 @@ void EventReport::SendProcessStartEvent(const EventName &eventName, const EventI
     }
 }
 
+void EventReport::SendProcessStartFailedEvent(const EventName &eventName, const EventInfo &eventInfo)
+{
+    std::string name = ConvertEventName(eventName);
+    if (name == INVALID_EVENT_NAME) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "eventName:%{public}s,processName:%{public}s,reason:%{public}d,subReason:%{public}d",
+        name.c_str(), eventInfo.processName.c_str(), eventInfo.reason, eventInfo.subReason);
+    if (eventInfo.extensionType == DEFAULT_EXTENSION_TYPE) {
+        HiSysEventWrite(
+            HiSysEvent::Domain::AAFWK,
+            name,
+            HiSysEventType::BEHAVIOR,
+            EVENT_KEY_STARTUP_TIME, eventInfo.time,
+            EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
+            EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
+            EVENT_KEY_CALLER_UID, eventInfo.callerUid,
+            EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName,
+            EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+            EVENT_KEY_PROCESS_NAME, eventInfo.processName,
+            EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid,
+            EVENT_KEY_PROCESS_TYPE, eventInfo.processType,
+            EVENT_KEY_REASON, eventInfo.reason,
+            EVENT_KEY_SUB_REASON, eventInfo.subReason);
+    } else {
+        HiSysEventWrite(
+            HiSysEvent::Domain::AAFWK,
+            name,
+            HiSysEventType::BEHAVIOR,
+            EVENT_KEY_STARTUP_TIME, eventInfo.time,
+            EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
+            EVENT_KEY_STARTUP_EXTENSION_TYPE, eventInfo.extensionType,
+            EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
+            EVENT_KEY_CALLER_UID, eventInfo.callerUid,
+            EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName,
+            EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+            EVENT_KEY_PROCESS_NAME, eventInfo.processName,
+            EVENT_KEY_CALLER_PROCESS_ID, eventInfo.callerPid,
+            EVENT_KEY_PROCESS_TYPE, eventInfo.processType,
+            EVENT_KEY_REASON, eventInfo.reason,
+            EVENT_KEY_SUB_REASON, eventInfo.subReason);
+    }
+}
+
 void EventReport::SendProcessExitEvent(const EventName &eventName, const EventInfo &eventInfo)
 {
     std::string name = ConvertEventName(eventName);
@@ -591,7 +640,7 @@ std::string EventReport::ConvertEventName(const EventName &eventName)
 
         // app behavior event
         "APP_ATTACH", "APP_LAUNCH", "APP_FOREGROUND", "APP_BACKGROUND", "APP_TERMINATE",
-        "PROCESS_START", "PROCESS_EXIT", "DRAWN_COMPLETED", "APP_STARTUP_TYPE",
+        "PROCESS_START", "PROCESS_EXIT", "DRAWN_COMPLETED", "APP_STARTUP_TYPE", "PROCESS_START_FAILED",
 
         // key behavior event
         "GRANT_URI_PERMISSION", "FA_SHOW_ON_LOCK", "START_PRIVATE_ABILITY",
