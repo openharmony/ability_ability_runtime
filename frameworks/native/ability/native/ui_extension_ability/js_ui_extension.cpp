@@ -707,6 +707,7 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
     option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
     option->SetParentId(sessionInfo->hostWindowId);
+    option->SetRealParentId(sessionInfo->realHostWindowId);
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }
