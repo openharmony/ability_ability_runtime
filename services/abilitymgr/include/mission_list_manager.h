@@ -129,6 +129,18 @@ public:
      * @return int error code
      */
     int MoveAbilityToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord) override;
+    
+    /**
+     * @brief Back to caller ability with result
+     *
+     * @param abilityRecord the ability to move
+     * @param resultCode result code
+     * @param resultWant result want
+     * @param callerRequestCode request code of caller
+     * @return int error code
+     */
+    int32_t BackToCallerAbilityWithResult(std::shared_ptr<AbilityRecord> abilityRecord,
+        int32_t resultCode, const Want *resultWant, int64_t callerRequestCode) override;
 
     /**
      * @brief Terminate ability with the given abilityRecord
@@ -443,7 +455,8 @@ private:
         const std::shared_ptr<MissionList> &list);
     int ClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission);
     int ClearMissionLocking(int missionId, const std::shared_ptr<Mission> &mission);
-    int MoveAbilityToBackgroundLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int MoveAbilityToBackgroundLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        const std::shared_ptr<AbilityRecord> &specifiedNextRecord = nullptr);
     void RemoveBackgroundingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
     int TerminateAbilityLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
     /**

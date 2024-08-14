@@ -57,7 +57,7 @@ public:
     int32_t GetLimitMaximumExtensionsPerDevice();
     std::string GetCacheExtensionTypeList();
     bool IsAllowStartAbilityWithoutCallerToken(const std::string& bundleName, const std::string& abilityName);
-    std::string GetShellAssistantBundleName();
+    std::string GetBrokerDelegateBundleName();
     int32_t GetCollaboratorBrokerUID();
     int32_t GetCollaboratorBrokerReserveUID();
 
@@ -86,7 +86,7 @@ private:
     volatile DeviceConfiguration<int32_t> limitMaximumExtensionsPerDevice_ = {false, DEFAULT_MAX_EXT_PER_DEV};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         startAbilityWithoutCallerToken_ = {false, {}};
-    DeviceConfiguration<std::string> shellAssistantBundleName_ = {false, ""};
+    DeviceConfiguration<std::string> brokerDelegateBundleName_ = {false, ""};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerReserveUid_ = {false, DEFAULT_INVALID_VALUE};
     DISALLOW_COPY_AND_MOVE(AppUtils);

@@ -61,11 +61,11 @@ DistributedKv::Status AbilityAutoStartupDataManager::GetKvStore()
 
     DistributedKv::Status status = dataManager_.GetSingleKvStore(options, APP_ID, STORE_ID, kvStorePtr_);
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Return error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Error: %{public}d", status);
         return status;
     }
 
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Get kvStore success.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Get kvStore success");
     return status;
 }
 
@@ -80,7 +80,7 @@ bool AbilityAutoStartupDataManager::CheckKvStore()
         if (status == DistributedKv::Status::SUCCESS && kvStorePtr_ != nullptr) {
             return true;
         }
-        TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Try times: %{public}d.", tryTimes);
+        TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Try times: %{public}d", tryTimes);
         usleep(CHECK_INTERVAL);
         tryTimes--;
     }
@@ -91,19 +91,19 @@ int32_t AbilityAutoStartupDataManager::InsertAutoStartupData(
     const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce)
 {
     if (info.bundleName.empty() || info.abilityName.empty() || info.accessTokenId.empty() || info.userId == -1) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Invalid value.");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Invalid value");
         return ERR_INVALID_VALUE;
     }
 
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
         "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
-        " accessTokenId: %{public}s, userId: %{public}d.",
+        " accessTokenId: %{public}s, userId: %{public}d",
         info.bundleName.c_str(), info.moduleName.c_str(),
         info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -117,7 +117,7 @@ int32_t AbilityAutoStartupDataManager::InsertAutoStartupData(
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Insert data to kvStore error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Insert data to kvStore error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
@@ -127,19 +127,19 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
     const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce)
 {
     if (info.bundleName.empty() || info.abilityName.empty() || info.accessTokenId.empty() || info.userId == -1) {
-        TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value!");
+        TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value");
         return ERR_INVALID_VALUE;
     }
 
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
         "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
-        " accessTokenId: %{public}s, userId: %{public}d.",
+        " accessTokenId: %{public}s, userId: %{public}d",
         info.bundleName.c_str(), info.moduleName.c_str(),
         info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -151,7 +151,7 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
         status = kvStorePtr_->Delete(key);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Delete data from kvStore error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Delete data from kvStore error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
     DistributedKv::Value value = ConvertAutoStartupStatusToValue(isAutoStartup, isEdmForce, info.abilityTypeName);
@@ -160,7 +160,7 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
         status = kvStorePtr_->Put(key, value);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Insert data to kvStore error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Insert data to kvStore error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
 
@@ -170,19 +170,19 @@ int32_t AbilityAutoStartupDataManager::UpdateAutoStartupData(
 int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const AutoStartupInfo &info)
 {
     if (info.bundleName.empty() || info.abilityName.empty() || info.accessTokenId.empty() || info.userId == -1) {
-        TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value!");
+        TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value");
         return ERR_INVALID_VALUE;
     }
 
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
         "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
-        " accessTokenId: %{public}s, userId: %{public}d.",
+        " accessTokenId: %{public}s, userId: %{public}d",
         info.bundleName.c_str(), info.moduleName.c_str(),
         info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -195,33 +195,26 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const AutoStartupIn
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Delete data from kvStore error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Delete data from kvStore error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const std::string &bundleName, int32_t uid)
+int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const std::string &bundleName, int32_t accessTokenId)
 {
-    int32_t userId;
-    if (DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
-            GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get GetOsAccountLocalIdFromUid failed.");
-        return ERR_INVALID_VALUE;
-    }
-    uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, 0);
     auto accessTokenIdStr = std::to_string(accessTokenId);
     if (bundleName.empty() || accessTokenIdStr.empty()) {
-        TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value!");
+        TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value");
         return ERR_INVALID_VALUE;
     }
 
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "bundleName: %{public}s, accessTokenId: %{public}s.",
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "bundleName: %{public}s, accessTokenId: %{public}s",
         bundleName.c_str(), accessTokenIdStr.c_str());
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -229,7 +222,7 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const std::string &
     std::vector<DistributedKv::Entry> allEntries;
     DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get entries error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get entries error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
 
@@ -240,7 +233,7 @@ int32_t AbilityAutoStartupDataManager::DeleteAutoStartupData(const std::string &
                 status = kvStorePtr_->Delete(item.key);
             }
             if (status != DistributedKv::Status::SUCCESS) {
-                TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Delete data from kvStore error: %{public}d.", status);
+                TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Delete data from kvStore error: %{public}d", status);
                 return ERR_INVALID_OPERATION;
             }
         }
@@ -253,20 +246,20 @@ AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const Auto
 {
     AutoStartupStatus asustatus;
     if (info.bundleName.empty() || info.abilityName.empty() || info.accessTokenId.empty() || info.userId == -1) {
-        TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value!");
+        TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Invalid value");
         asustatus.code = ERR_INVALID_VALUE;
         return asustatus;
     }
 
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
         "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
-        " accessTokenId: %{public}s, userId: %{public}d.",
+        " accessTokenId: %{public}s, userId: %{public}d",
         info.bundleName.c_str(), info.moduleName.c_str(),
         info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null kvStore");
             asustatus.code = ERR_NO_INIT;
             return asustatus;
         }
@@ -275,7 +268,7 @@ AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const Auto
     std::vector<DistributedKv::Entry> allEntries;
     DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get entries error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get entries error: %{public}d", status);
         asustatus.code = ERR_INVALID_OPERATION;
         return asustatus;
     }
@@ -298,7 +291,7 @@ int32_t AbilityAutoStartupDataManager::QueryAllAutoStartupApplications(std::vect
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -306,7 +299,7 @@ int32_t AbilityAutoStartupDataManager::QueryAllAutoStartupApplications(std::vect
     std::vector<DistributedKv::Entry> allEntries;
     DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get entries error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get entries error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
 
@@ -320,7 +313,7 @@ int32_t AbilityAutoStartupDataManager::QueryAllAutoStartupApplications(std::vect
             infoList.emplace_back(ConvertAutoStartupInfoFromKeyAndValue(item.key, item.value));
         }
     }
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "InfoList.size: %{public}zu.", infoList.size());
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "InfoList.size: %{public}zu", infoList.size());
     return ERR_OK;
 }
 
@@ -331,7 +324,7 @@ int32_t AbilityAutoStartupDataManager::GetCurrentAppAutoStartupData(
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -339,7 +332,7 @@ int32_t AbilityAutoStartupDataManager::GetCurrentAppAutoStartupData(
     std::vector<DistributedKv::Entry> allEntries;
     DistributedKv::Status status = kvStorePtr_->GetEntries(nullptr, allEntries);
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get entries error: %{public}d.", status);
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get entries error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
 
@@ -348,7 +341,7 @@ int32_t AbilityAutoStartupDataManager::GetCurrentAppAutoStartupData(
             infoList.emplace_back(ConvertAutoStartupInfoFromKeyAndValue(item.key, item.value));
         }
     }
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "InfoList.size: %{public}zu.", infoList.size());
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "InfoList.size: %{public}zu", infoList.size());
     return ERR_OK;
 }
 
@@ -361,7 +354,7 @@ DistributedKv::Value AbilityAutoStartupDataManager::ConvertAutoStartupStatusToVa
         { JSON_KEY_TYPE_NAME, abilityTypeName },
     };
     DistributedKv::Value value(jsonObject.dump());
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "value: %{public}s.", value.ToString().c_str());
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "value: %{public}s", value.ToString().c_str());
     return value;
 }
 
@@ -370,7 +363,7 @@ void AbilityAutoStartupDataManager::ConvertAutoStartupStatusFromValue(
 {
     nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
     if (jsonObject.is_discarded()) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to parse json string.");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Parse json string failed");
         return;
     }
     if (jsonObject.contains(JSON_KEY_IS_AUTO_STARTUP) && jsonObject[JSON_KEY_IS_AUTO_STARTUP].is_boolean()) {
@@ -392,7 +385,7 @@ DistributedKv::Key AbilityAutoStartupDataManager::ConvertAutoStartupDataToKey(co
         { JSON_KEY_USERID, info.userId },
     };
     DistributedKv::Key key(jsonObject.dump());
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "key: %{public}s.", key.ToString().c_str());
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "key: %{public}s", key.ToString().c_str());
     return key;
 }
 
@@ -402,7 +395,7 @@ AutoStartupInfo AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromKeyAndV
     AutoStartupInfo info;
     nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
     if (jsonObject.is_discarded()) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to parse jsonObject.");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Parse jsonObject failed");
         return info;
     }
 
@@ -432,7 +425,7 @@ AutoStartupInfo AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromKeyAndV
 
     nlohmann::json jsonValueObject = nlohmann::json::parse(value.ToString(), nullptr, false);
     if (jsonValueObject.is_discarded()) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to parse jsonValueObject.");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Parse jsonValueObject failed");
         return info;
     }
 
@@ -470,7 +463,7 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const
 {
     nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
     if (jsonObject.is_discarded()) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to parse json string.");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Parse json string failed");
         return false;
     }
 
@@ -489,7 +482,7 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const
 {
     nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
     if (jsonObject.is_discarded()) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to parse json string.");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Parse json string failed");
         return false;
     }
 
@@ -505,7 +498,7 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, int32
 {
     nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
     if (jsonObject.is_discarded()) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to parse json string.");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Parse json string failed");
         return false;
     }
 

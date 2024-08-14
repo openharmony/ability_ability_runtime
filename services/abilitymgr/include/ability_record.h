@@ -21,6 +21,7 @@
 #include <list>
 #include <memory>
 #include <vector>
+#include <set>
 #include <utility>
 #include "cpp/mutex.h"
 #include "cpp/condition_variable.h"
@@ -194,38 +195,23 @@ public:
     }
     bool IsHistoryRequestCode(int32_t requestCode)
     {
-        for (auto it = requestCodeList_.begin(); it != requestCodeList_.end(); it++) {
-            if (requestCode == *it) {
-                return true;
-            }
-        }
-        return false;
+        return requestCodeSet_.count(requestCode) > 0;
     }
     void RemoveHistoryRequestCode(int32_t requestCode)
     {
-        for (auto it = requestCodeList_.begin(); it != requestCodeList_.end(); it++) {
-            if (requestCode == *it) {
-                requestCodeList_.erase(it);
-                return;
-            }
-        }
+        requestCodeSet_.erase(requestCode);
     }
     void AddHistoryRequestCode(int32_t requestCode)
     {
-        if (IsHistoryRequestCode(requestCode)) {
-            return;
-        }
-        requestCodeList_.emplace_back(requestCode);
+        requestCodeSet_.insert(requestCode);
     }
-
-    void SetRequestCodeList(std::list<int32_t> requestCodeList)
+    void SetRequestCodeSet(const std::set<int32_t> &requestCodeSet)
     {
-        requestCodeList_ = requestCodeList;
+        requestCodeSet_ = requestCodeSet;
     }
-
-    std::list<int32_t> GetRequestCodeList()
+    std::set<int32_t> GetRequestCodeSet()
     {
-        return requestCodeList_;
+        return requestCodeSet_;
     }
 
 private:
@@ -233,7 +219,7 @@ private:
     std::weak_ptr<AbilityRecord> caller_;
     std::shared_ptr<SystemAbilityCallerRecord> saCaller_ = nullptr;
     std::shared_ptr<CallerAbilityInfo> callerInfo_ = nullptr;
-    std::list<int32_t> requestCodeList_;
+    std::set<int32_t> requestCodeSet_;
 };
 
 /**

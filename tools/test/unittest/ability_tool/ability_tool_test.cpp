@@ -763,6 +763,7 @@ HWTEST_F(AbilityToolTest, AbilityTool_ForceStop_0300, TestSize.Level1)
     managerClientPtr->proxy_ = static_cast<IAbilityManager*>(mockAbilityManagerStub);
 
     EXPECT_EQ(cmd.RunAsForceStop(), OHOS::ERR_OK);
+    managerClientPtr->proxy_ = nullptr;
     testing::Mock::AllowLeak(mockAbilityManagerStub);
 }
 } // namespace AAFwk

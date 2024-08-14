@@ -30,9 +30,6 @@ constexpr const char* SCREENSHOT_ABILITY_NAME = "com.huawei.ohos.screenshot.Serv
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
 constexpr const char* PARAM_RESV_ANCO_CALLER_UID = "ohos.anco.param.callerUid";
 constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.callerBundleName";
-constexpr int32_t REQUEST_CODE_LENGTH = 32;
-constexpr int32_t PID_LENGTH = 16;
-constexpr int32_t REQUEST_CODE_PID_LENGTH = 48;
 }
 thread_local std::shared_ptr<StartAbilityInfo> StartAbilityUtils::startAbilityInfo;
 thread_local std::shared_ptr<StartAbilityInfo> StartAbilityUtils::callerAbilityInfo;
@@ -50,7 +47,7 @@ bool StartAbilityUtils::GetAppIndex(const Want &want, sptr<IRemoteObject> caller
         appIndex = abilityRecord->GetAppIndex();
         return true;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex: %{public}d.", want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0));
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d", want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0));
     return AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
 }
 
@@ -224,7 +221,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
                 abilityInfoFlag, userId, extensionInfos));
         }
         if (extensionInfos.size() <= 0) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Get extension info failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Get extensionInfo failed");
             request->status = RESOLVE_ABILITY_ERR;
             return request;
         }
@@ -331,39 +328,9 @@ bool StartAbilityUtils::IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &c
     }
     AppExecFwk::AbilityInfo callerAbilityInfo;
     if (GetCallerAbilityInfo(callerToken, callerAbilityInfo)) {
-        return callerAbilityInfo.bundleName == AppUtils::GetInstance().GetShellAssistantBundleName();
+        return callerAbilityInfo.bundleName == AppUtils::GetInstance().GetBrokerDelegateBundleName();
     }
     return false;
-}
-
-int64_t StartAbilityUtils::GenerateFullRequestCode(int32_t pid, bool backFlag, int32_t requestCode)
-{
-    if (requestCode <= 0 || pid <= 0) {
-        return 0;
-    }
-    int64_t fullRequestCode = requestCode;
-    uint64_t tempNum = pid;
-    fullRequestCode |= (tempNum << REQUEST_CODE_LENGTH);
-    if (backFlag) {
-        tempNum = 1;
-        fullRequestCode |= (tempNum << REQUEST_CODE_PID_LENGTH);
-    }
-    return fullRequestCode;
-}
-
-CallerRequestInfo StartAbilityUtils::ParseFullRequestCode(int64_t fullRequestCode)
-{
-    CallerRequestInfo requestInfo;
-    if (fullRequestCode <= 0) {
-        return requestInfo;
-    }
-    uint64_t tempNum = 1;
-    requestInfo.requestCode = (fullRequestCode & ((tempNum << REQUEST_CODE_LENGTH) - 1));
-    fullRequestCode >>= REQUEST_CODE_LENGTH;
-    requestInfo.pid = (fullRequestCode & ((tempNum << PID_LENGTH) - 1));
-    fullRequestCode >>= PID_LENGTH;
-    requestInfo.backFlag = (fullRequestCode == 1);
-    return requestInfo;
 }
 }
 }

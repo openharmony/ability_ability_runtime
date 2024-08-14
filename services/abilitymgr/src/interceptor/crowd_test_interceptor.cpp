@@ -26,6 +26,7 @@ constexpr const char* ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTes
 ErrCode CrowdTestInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     if (StartAbilityUtils::skipCrowTest) {
+        StartAbilityUtils::skipCrowTest = false;
         return ERR_OK;
     }
     if (CheckCrowdtest(param.want, param.userId)) {
@@ -50,7 +51,7 @@ bool CrowdTestInterceptor::CheckCrowdtest(const Want &want, int32_t userId)
     // get crowdtest status and time
     AppExecFwk::ApplicationInfo appInfo;
     if (!StartAbilityUtils::GetApplicationInfo(want.GetBundle(), userId, appInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get application info.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetAppInfo failed");
         return false;
     }
 
