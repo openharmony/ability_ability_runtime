@@ -608,7 +608,7 @@ void JsAbility::RestorePageStack(const Want &want)
         auto env = jsRuntime_.GetNapiEnv();
         if (abilityContext_->GetContentStorage()) {
             scene_->GetMainWindow()->NapiSetUIContent(pageStack, env,
-                abilityContext_->GetContentStorage()->GetNapiValue(), Rosen::BackupAndRestoreType::CONTINUATION);
+                abilityContext_->GetContentStorage()->GetNapiValue(), true);
         } else {
             TAG_LOGE(AAFwkTag::ABILITY, "restore: content storage is nullptr");
         }
