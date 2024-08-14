@@ -5184,7 +5184,7 @@ int32_t AbilityManagerProxy::GetUIExtensionSessionInfo(const sptr<IRemoteObject>
     return reply.ReadInt32();
 }
 
-int32_t AbilityManagerProxy::RestartApp(const AAFwk::Want &want)
+int32_t AbilityManagerProxy::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -5195,6 +5195,10 @@ int32_t AbilityManagerProxy::RestartApp(const AAFwk::Want &want)
     }
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want write failed.");
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteBool(isAppRecovery)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write isAppRecovery failed.");
         return IPC_PROXY_ERR;
     }
     auto ret = SendRequest(AbilityManagerInterfaceCode::RESTART_APP, data, reply, option);
