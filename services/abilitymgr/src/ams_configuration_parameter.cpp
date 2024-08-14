@@ -271,15 +271,15 @@ int AmsConfigurationParameter::LoadSystemConfiguration(nlohmann::json& Object)
     return READ_FAIL;
 }
 
-int AmsConfigurationParameter::LoadBackToCallerConfig(nlohmann::json& Object)
+int32_t AmsConfigurationParameter::LoadBackToCallerConfig(nlohmann::json& Object)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "load backTocaller config.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "load backTocaller config");
     if (Object.contains(AmsConfig::SUPPORT_BACK_TO_CALLER) &&
         Object.at(AmsConfig::SUPPORT_BACK_TO_CALLER).is_boolean()) {
         supportBackToCaller_ = Object.at(AmsConfig::SUPPORT_BACK_TO_CALLER).get<bool>();
         return READ_OK;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "load backTocaller failed.");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "load backTocaller failed");
     return READ_FAIL;
 }
 

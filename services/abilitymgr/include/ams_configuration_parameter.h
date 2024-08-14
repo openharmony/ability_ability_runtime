@@ -151,7 +151,7 @@ private:
     void UpdateStartUpServiceConfigString(nlohmann::json& Object, const std::string &configName, std::string &value);
     void UpdatePickerConfigurationString(nlohmann::json& Object, const std::string &configName, std::string &value);
     void LoadUIExtensionPickerConfig(const std::string &filePath);
-    int LoadBackToCallerConfig(nlohmann::json& Object);
+    int32_t LoadBackToCallerConfig(nlohmann::json& Object);
 
 private:
     bool nonConfigFile_ {false};

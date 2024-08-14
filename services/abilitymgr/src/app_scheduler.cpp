@@ -242,7 +242,7 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
 
 int AppScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->KillApplication(bundleName, clearPageStack);
     if (ret != ERR_OK) {
@@ -479,13 +479,13 @@ int AppScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Appli
 int32_t AppScheduler::NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg)
 {
     if (pid < 0) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "NotifyAppMgrRecordExitReason failed, pid <= 0.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "pid<=0");
         return ERR_INVALID_VALUE;
     }
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int32_t>(IN_PROCESS_CALL(appMgrClient_->NotifyAppMgrRecordExitReason(pid, reason, exitMsg)));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyAppMgrRecordExitReason failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed");
         return ret;
     }
     return ERR_OK;

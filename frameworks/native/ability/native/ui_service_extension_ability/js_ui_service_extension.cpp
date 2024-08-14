@@ -252,39 +252,19 @@ void JsUIServiceExtension::OnStart(const AAFwk::Want &want)
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "ok");
 }
 
-void JsUIServiceExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
-{
-    Extension::OnStart(want, sessionInfo);
-    TAG_LOGD(AAFwkTag::UISERVC_EXT, "call");
-
-    auto context = GetContext();
-    if (context != nullptr) {
-        int32_t  displayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
-        displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, displayId);
-        TAG_LOGD(AAFwkTag::UISERVC_EXT, "displayId %{public}d", displayId);
-        auto configUtils = std::make_shared<ConfigurationUtils>();
-        configUtils->InitDisplayConfig(displayId, context->GetConfiguration(), context->GetResourceManager());
-    }
-
-    HandleScope handleScope(jsRuntime_);
-    napi_env env = jsRuntime_.GetNapiEnv();
-
-    // display config has changed, need update context.config
-    if (context != nullptr) {
-        JsExtensionContext::ConfigurationUpdated(env, shellContextRef_, context->GetConfiguration());
-    }
-
-    napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
-    napi_value argv[] = {napiWant};
-    CallObjectMethod("onCreate", argv, ARGC_ONE);
-
-    TAG_LOGD(AAFwkTag::UISERVC_EXT, "ok");
-}
-
 void JsUIServiceExtension::OnStop()
 {
     Extension::OnStop();
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "call");
+    auto context = GetContext();
+    if (context != nullptr) {
+        sptr<Rosen::Window> win = context->GetWindow();
+        if (win != nullptr) {
+            TAG_LOGI(AAFwkTag::UISERVC_EXT, "Destroy Window");
+            win->Destroy();
+            context->SetWindow(nullptr);
+        }
+    }
     CallObjectMethod("onDestroy");
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(GetContext()->GetToken());
     if (ret) {
@@ -379,7 +359,11 @@ void JsUIServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int 
 #ifdef SUPPORT_GRAPHICS
     auto context = GetContext();
     if (firstRequest_ && context != nullptr) {
-        int32_t hostWindowId = want.GetIntParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
+        int32_t hostWindowId = 0;
+        if (want.HasParameter(WANT_PARAMS_HOST_WINDOW_ID_KEY)) {
+            hostWindowId = want.GetIntParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
+        }
+
         TAG_LOGI(AAFwkTag::UISERVC_EXT, "try create window hostWindowId %{public}d", hostWindowId);
         auto extensionWindowConfig = std::make_shared<Rosen::ExtensionWindowConfig>();
         OnSceneWillCreated(extensionWindowConfig);

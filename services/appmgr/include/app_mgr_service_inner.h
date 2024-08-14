@@ -34,6 +34,7 @@
 #include "app_foreground_state_observer_interface.h"
 #include "app_malloc_info.h"
 #include "app_mgr_constants.h"
+#include "app_mgr_event.h"
 #include "app_preloader.h"
 #include "app_record_id.h"
 #include "app_running_manager.h"
@@ -258,7 +259,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = true);
+    virtual int32_t KillApplication(const std::string &bundleName, const bool clearpagestack = false);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -288,7 +289,7 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
 
-    virtual int32_t KillApplicationSelf(const bool clearPageStack = true);
+    virtual int32_t KillApplicationSelf(const bool clearpagestack = false);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -300,7 +301,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const bool clearPageStack = true);
+        const bool clearpagestack = false);
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -1222,7 +1223,7 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearPageStack = true);
+        const bool clearpagestack = false);
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1293,6 +1294,9 @@ private:
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
 
+    void SetRenderStartMsg(AppSpawnStartMsg &startMsg, std::shared_ptr<RenderRecord> renderRecord,
+        const int32_t renderUid, const bool isGPU);
+
     void OnRenderRemoteDied(const wptr<IRemoteObject> &remote);
 
     void AddWatchParameter();
@@ -1347,9 +1351,12 @@ private:
     bool CheckGetRunningInfoPermission() const;
 
     int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearPageStack = true);
+        const std::string &bundleName, const bool clearpagestack = false);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    bool SendProcessStartFailedEvent(std::shared_ptr<AppRunningRecord> appRecord, ProcessStartFailedReason reason,
+        int32_t subReason);
 
     void SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType);
@@ -1481,6 +1488,8 @@ private:
     void CheckCleanAbilityByUserRequest(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityRunningRecord> &abilityRecord, const AbilityState state);
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
+    void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const HapModuleInfo &hapModuleInfo, std::string &processName) const;
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<const sptr<IAppStateCallback>> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;

@@ -445,7 +445,7 @@ bool SubManagersHelper::VerificationAllToken(const sptr<IRemoteObject> &token)
             return true;
         }
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to verify all token.");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "fail");
     return false;
 }
 

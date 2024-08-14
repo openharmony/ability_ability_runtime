@@ -242,6 +242,7 @@ void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, c
 
 int UIExtensionContext::GenerateCurRequestCode()
 {
+    std::lock_guard lock(requestCodeMutex_);
     curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
     return curRequestCode_;
 }
@@ -287,9 +288,12 @@ ErrCode UIExtensionContext::AddFreeInstallObserver(const sptr<IFreeInstallObserv
 {
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(token_, observer);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "AddFreeInstallObserver error, ret: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::UI_EXT, "error, ret: %{public}d", ret);
     }
     return ret;
 }
+
+int32_t UIExtensionContext::curRequestCode_ = 0;
+std::mutex UIExtensionContext::requestCodeMutex_;
 }  // namespace AbilityRuntime
 }  // namespace OHOS

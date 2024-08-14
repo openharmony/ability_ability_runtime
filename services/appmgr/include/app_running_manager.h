@@ -169,7 +169,7 @@ public:
      * @return Return true if found, otherwise return false.
      */
     bool ProcessExitByBundleName(
-        const std::string &bundleName, std::list<pid_t> &pids, const bool clearPageStack = true);
+        const std::string &bundleName, std::list<pid_t> &pids, const bool clearpagestack = false);
     /**
      * Get Foreground Applications.
      *
@@ -253,7 +253,7 @@ public:
     int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
 
     bool ProcessExitByBundleNameAndUid(
-        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack = true);
+        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearpagestack = false);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
 
     void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
@@ -272,7 +272,7 @@ public:
     int32_t NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
     int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
     bool IsApplicationFirstForeground(const AppRunningRecord &foregroundingRecord);
-    bool IsApplicationBackground(const std::string &bundleName);
+    bool IsApplicationBackground(const AppRunningRecord &backgroundingRecord);
     bool IsApplicationFirstFocused(const AppRunningRecord &foregroundingRecord);
     bool IsApplicationUnfocused(const std::string &bundleName);
 #ifdef SUPPORT_SCREEN

@@ -827,11 +827,9 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
     if (applicationInfo && applicationInfo->bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
         abilityStateData.isAtomicService = true;
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "The ability(bundle:%{public}s, ability:%{public}s) state will change.",
-        abilityStateData.bundleName.c_str(), abilityStateData.abilityName.c_str());
     if (isAbility && abilityInfo->type == AbilityType::EXTENSION &&
         abilityInfo->extensionAbilityType != ExtensionAbilityType::UI) {
-        TAG_LOGW(AAFwkTag::APPMGR, "extensionType:%{public}d, not notify any more.", abilityInfo->extensionAbilityType);
+        TAG_LOGD(AAFwkTag::APPMGR, "extensionType:%{public}d, not notify any more.", abilityInfo->extensionAbilityType);
         return;
     }
     auto serviceInner = appMgrServiceInner_.lock();

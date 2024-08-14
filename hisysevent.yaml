@@ -312,6 +312,21 @@ PROCESS_EXIT:
   PROCESS_NAME: {type: STRING, desc: process name}
   EXTENSION_TYPE: {type: INT32, desc: process exit extension type}
 
+PROCESS_START_FAILED:
+  __BASE: {type: FAULT, level: CRITICAL, tag: app, desc: process start failed, preserve: true}
+  STARTUP_TIME: {type: INT64, desc: process start failed time}
+  STARTUP_ABILITY_TYPE: {type: INT32, desc: process start ability type}
+  STARTUP_EXTENSION_TYPE: {type: INT32, desc: process start extension type}
+  CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
+  CALLER_UID: {type: INT32, desc: caller uid}
+  CALLER_PROCESS_NAME: {type: STRING, desc: caller process name}
+  CALLER_PROCESS_ID: {type: INT32, desc: caller processId}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  PROCESS_TYPE: {type: INT32, desc: process type}
+  REASON: {type: INT32, desc: failed reason}
+  SUB_REASON: {type: INT32, desc: failed sub reason}
+
 DRAWN_COMPLETED:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: app, desc: drawn completed event reporting}
   APP_UID: {type: INT32, desc: app uid}

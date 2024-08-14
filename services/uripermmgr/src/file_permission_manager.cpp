@@ -65,7 +65,7 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
     uint32_t callerTokenId, uint32_t flag, std::vector<PolicyInfo> &pathPolicies)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR,
-        "CheckUriPersistentPermission called, size of uri is %{public}zu", uriVec.size());
+        "call, uri size:%{public}zu", uriVec.size());
     std::vector<bool> resultCodes(uriVec.size(), false);
     pathPolicies.clear();
     if (CheckPermission(callerTokenId, PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER)) {
@@ -89,7 +89,7 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
         resultIndex.emplace_back(i);
         persistPolicys.emplace_back(policyInfo);
     }
-    
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     std::vector<bool> persistResultCodes;
     int32_t ret = SandboxManagerKit::CheckPersistPolicy(callerTokenId, persistPolicys, persistResultCodes);
     if (ret == SANDBOX_MANAGER_OK && persistResultCodes.size() == resultIndex.size()) {
@@ -98,6 +98,7 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
             resultCodes[index] = persistResultCodes[i];
         }
     }
+#endif
     return resultCodes;
 }
 }
