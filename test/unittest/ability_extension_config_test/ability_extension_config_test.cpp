@@ -137,5 +137,20 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionConfig_001, TestSize.Level1)
     jsOnFile[EXTENSION_CONFIG_NAME] = {jsOnItem, jsOnItem2, "cc"};
     extensionConfig_->LoadExtensionConfig(jsOnFile);
 }
+
+/*
+ * @tc.number    : ReadFileInfoJson_001
+ * @tc.name      : AbilityExtensionConfigTest
+ * @tc.desc      : Test Function ReadFileInfoJson CheckServiceExtensionUriValid IsExtensionStartServiceEnable
+ */
+HWTEST_F(AbilityExtensionConfigTest, ReadFileInfoJson_001, TestSize.Level1)
+{
+    extensionConfig_->IsExtensionStartServiceEnable("aa", "http://aaa/bb/cc/");
+    extensionConfig_->CheckServiceExtensionUriValid("http://aaa/bb/");
+    extensionConfig_->CheckServiceExtensionUriValid("http://aaa/bb/cc/");
+    extensionConfig_->CheckServiceExtensionUriValid("http://aaa//cc/");
+    nlohmann::json jsOne;
+    extensionConfig_->ReadFileInfoJson("d://dddd", jsOne);
+}
 }
 }
