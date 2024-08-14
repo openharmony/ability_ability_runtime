@@ -34,6 +34,7 @@
 #include "app_foreground_state_observer_interface.h"
 #include "app_malloc_info.h"
 #include "app_mgr_constants.h"
+#include "app_mgr_event.h"
 #include "app_preloader.h"
 #include "app_record_id.h"
 #include "app_running_manager.h"
@@ -1293,6 +1294,9 @@ private:
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
 
+    void SetRenderStartMsg(AppSpawnStartMsg &startMsg, std::shared_ptr<RenderRecord> renderRecord,
+        const int32_t renderUid, const bool isGPU);
+
     void OnRenderRemoteDied(const wptr<IRemoteObject> &remote);
 
     void AddWatchParameter();
@@ -1350,6 +1354,9 @@ private:
         const std::string &bundleName, const bool clearpagestack = false);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    bool SendProcessStartFailedEvent(std::shared_ptr<AppRunningRecord> appRecord, ProcessStartFailedReason reason,
+        int32_t subReason);
 
     void SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType);

@@ -193,5 +193,110 @@ HWTEST_F(AppMgrEventTest, SendProcessStartEvent_0300, TestSize.Level1)
     bool ret = AppMgrEventUtil::SendProcessStartEvent(callerAppRecord, appRecord, eventInfo);
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: SendProcessStartFailedEvent_0100
+ * @tc.desc: Send process start failed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrEventTest, SendProcessStartFailedEvent_0100, TestSize.Level1)
+{
+    std::shared_ptr<AppRunningRecord> callerAppRecord = nullptr;
+    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
+    AAFwk::EventInfo eventInfo;
+    bool ret = AppMgrEventUtil::SendProcessStartFailedEvent(callerAppRecord, appRecord, eventInfo);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: SendProcessStartFailedEvent_0200
+ * @tc.desc: Send process start failed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrEventTest, SendProcessStartFailedEvent_0200, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+
+    appInfo->bundleName = "testBundleName";
+    appInfo->name = "testBundleName";
+
+    int32_t recordId = 1;
+    std::string processName = "testProcess";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRecord->SetCallerUid(-1);
+    appRecord->priorityObject_->SetPid(1001);
+    EXPECT_NE(appRecord, nullptr);
+
+    std::shared_ptr<AppRunningRecord> callerAppRecord = nullptr;
+
+    AAFwk::EventInfo eventInfo;
+    bool ret = AppMgrEventUtil::SendProcessStartFailedEvent(callerAppRecord, appRecord, eventInfo);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SendProcessStartFailedEvent_0300
+ * @tc.desc: Send process start failed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrEventTest, SendProcessStartFailedEvent_0300, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->bundleName = "testBundleName";
+    appInfo->name = "testBundleName";
+
+    int32_t recordId = 1;
+    std::string processName = "testProcess";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    EXPECT_NE(appRecord, nullptr);
+    appRecord->SetCallerUid(-1);
+    
+    auto callerAppInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(callerAppInfo, nullptr);
+    callerAppInfo->bundleName = "testCallerBundleName";
+    callerAppInfo->name = "testCallerBundleName";
+    std::string callerProcessName = "testCallerProcess";
+    int32_t callerRecordId = 2;
+    auto callerAppRecord = std::make_shared<AppRunningRecord>(callerAppInfo, callerRecordId, callerProcessName);
+    EXPECT_NE(callerAppRecord, nullptr);
+    
+    AAFwk::EventInfo eventInfo;
+    bool ret = AppMgrEventUtil::SendProcessStartFailedEvent(callerAppRecord, appRecord, eventInfo);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SendRenderProcessStartFailedEvent_0100
+ * @tc.desc: Send render process start failed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrEventTest, SendRenderProcessStartFailedEvent_0100, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->bundleName = "testBundleName";
+    appInfo->name = "testBundleName";
+
+    std::string processName = "testProcess";
+    int32_t recordId = 1;
+    pid_t hostPid = 1001;
+    auto hostRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    hostRecord->priorityObject_->SetPid(hostPid);
+    hostRecord->SetUid(100);
+    EXPECT_NE(hostRecord, nullptr);
+
+    std::string renderParam = "test_render_param";
+    int32_t ipcFd = 1;
+    int32_t sharedFd = 1;
+    int32_t crashFd = 1;
+    std::shared_ptr<RenderRecord> renderRecord =
+        RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, hostRecord);
+
+    bool ret = AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
+        ProcessStartFailedReason::APPSPAWN_FAILED, 123);
+    EXPECT_EQ(ret, true);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
