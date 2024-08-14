@@ -478,6 +478,7 @@ group("unittest") {
       "dynamic_loader_ohos_test:unittest",
       "event_report_test:unittest",
       "extension_config_mgr_test:unittest",
+      "extension_control_interceptor_test:unittest",
       "extension_manager_client_test:unittest",
       "extension_permissions_util_test:unittest",
       "fault_data:unittest",
