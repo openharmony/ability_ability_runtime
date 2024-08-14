@@ -1143,7 +1143,12 @@ void UIAbilityLifecycleManager::CompleteBackground(const std::shared_ptr<Ability
 int32_t UIAbilityLifecycleManager::BackToCallerAbilityWithResult(std::shared_ptr<AbilityRecord> abilityRecord,
     int resultCode, const Want *resultWant, int64_t callerRequestCode)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord nullptr.");
+        return ERR_INVALID_VALUE;
+    }
     auto requestInfo = StartupUtil::ParseFullRequestCode(callerRequestCode);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, backFlag:%{public}d, requestCode:%{public}d.",
         requestInfo.pid, requestInfo.backFlag, requestInfo.requestCode);
