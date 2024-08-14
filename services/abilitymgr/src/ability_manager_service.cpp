@@ -9349,6 +9349,11 @@ bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequ
         return true;
     }
 
+    if (PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND)) {
+        return true;
+    }
+
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller app %{public}s is not foreground, can't start %{public}s",
         processInfo.processName_.c_str(), abilityRequest.want.GetElement().GetURI().c_str());
     return false;
