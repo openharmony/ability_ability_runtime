@@ -164,5 +164,17 @@ HWTEST_F(AbilityManagerServiceSixthTest, IsAbilityControllerStart_003, TestSize.
     EXPECT_TRUE(abilityMs_->IsAbilityControllerStart(want));
 }
 
+/*
+ * Feature: AbilityManagerService
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService BackToCallerAbilityWithResult
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, BackToCallerAbilityWithResult_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    EXPECT_EQ(abilityMs_->BackToCallerAbilityWithResult(nullptr, 0, &want, 0), ERR_INVALID_VALUE);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
