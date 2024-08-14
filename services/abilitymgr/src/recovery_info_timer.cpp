@@ -15,10 +15,11 @@
 
 #include "recovery_info_timer.h"
 #include "app_exit_reason_data_manager.h"
-#include "app_recovery/default_recovery_config.h"
 
 namespace OHOS {
 namespace AAFwk {
+constexpr int32_t RESERVE_NUMBER_WHEN_TIMEOUT = 5;
+constexpr int32_t RECOVERY_DATA_TIMEOUT_DELETE_TIME = 168;
 constexpr int32_t HOURS_TO_SECOND = 60 * 60;
 
 RecoveryInfoTimer& RecoveryInfoTimer::GetInstance()
@@ -40,9 +41,8 @@ void RecoveryInfoTimer::SubmitSaveRecoveryInfo(RecoveryInfo recoveryInfo)
     recoveryInfoQueue_.push_back(recoveryInfo);
 
     int64_t now = recoveryInfo.time;
-    auto timeoutDeleteTime = AbilityRuntime::DefaultRecoveryConfig::GetInstance().
-        GetTimeoutDeleteTime() * HOURS_TO_SECOND;
-    auto reserveNumber = AbilityRuntime::DefaultRecoveryConfig::GetInstance().GetReserveNumber();
+    auto timeoutDeleteTime = RECOVERY_DATA_TIMEOUT_DELETE_TIME * HOURS_TO_SECOND;
+    auto reserveNumber = RESERVE_NUMBER_WHEN_TIMEOUT;
     int timeoutCount = 0;
     for (auto p = recoveryInfoQueue_.begin(); p != recoveryInfoQueue_.end(); p++) {
         if (now - p->time >= timeoutDeleteTime) {
