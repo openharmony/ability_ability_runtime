@@ -1485,7 +1485,8 @@ int32_t MissionListManager::BackToCallerAbilityWithResult(std::shared_ptr<Abilit
         return CHECK_PERMISSION_FAILED;
     }
     // find host of UI Extension
-    if (UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    while (callerAbilityRecord &&
+        UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is uiExtension.");
         callerAbilityRecord = callerAbilityRecord->GetCallerRecord();
     }
