@@ -78,7 +78,7 @@ HWTEST_F(ExtensionRecordManagerTest, IsFocused_0100, TestSize.Level1)
     ASSERT_NE(token, nullptr);
     extRecordMgr->SetCachedFocusedCallerToken(extensionRecordId, token);
 
-    bool isFocused = extRecordMgr->IsFocused(extensionRecordId, token);
+    bool isFocused = extRecordMgr->IsFocused(extensionRecordId, token, token);
     EXPECT_EQ(isFocused, true);
 
     auto focusedToken = extRecordMgr->GetCachedFocusedCallerToken(extensionRecordId);
