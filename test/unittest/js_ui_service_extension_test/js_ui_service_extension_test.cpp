@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <gtest/hwext/gtest-multithread.h>
+#include <gmock/gmock.h>
 
 #define private public
 #define protected public
@@ -40,6 +41,39 @@ public:
     virtual int32_t SendData(OHOS::AAFwk::WantParams &data)
     {
         return 0;
+    }
+};
+
+class MockWindow : public Rosen::Window {
+public:
+    virtual Ace::UIContent* GetUIContent() const
+    {
+        return uiContent_.get();
+    }
+
+    std::unique_ptr<Ace::UIContent> uiContent_ = Ace::UIContent::Create(nullptr, nullptr);
+};
+
+class NativeReferenceMock : public NativeReference {
+public:
+    NativeReferenceMock() = default;
+    virtual ~NativeReferenceMock() = default;
+    MOCK_METHOD0(Ref, uint32_t());
+    MOCK_METHOD0(Unref, uint32_t());
+    MOCK_METHOD0(Get, napi_value());
+    MOCK_METHOD0(GetData, void*());
+    virtual operator napi_value() override
+    {
+        return reinterpret_cast<napi_value>(this);
+    }
+    MOCK_METHOD0(SetDeleteSelf, void());
+    MOCK_METHOD0(GetRefCount, uint32_t());
+    MOCK_METHOD0(GetFinalRun, bool());
+    napi_value GetNapiValue() override
+    {
+        napi_env env{nullptr};
+        napi_value object = AppExecFwk::CreateJSObject(env);
+        return object;
     }
 };
 
@@ -94,6 +128,9 @@ HWTEST_F(JsUIServiceExtensionTest, OnAddSystemAbility_0100, TestSize.Level1)
     JsUIServiceExtension::SystemAbilityStatusChangeListener systemAbilityStatusChangeListener{nullptr};
     systemAbilityStatusChangeListener.OnAddSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
 
+    constexpr int32_t UNAVAILABLE_SERVICE_ID = 0;
+    systemAbilityStatusChangeListener.OnAddSystemAbility(UNAVAILABLE_SERVICE_ID, deviceId);
+
     TAG_LOGI(AAFwkTag::TEST, "OnAddSystemAbility_0100 end");
 }
 
@@ -143,7 +180,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnCommand_0100, TestSize.Level1)
     AAFwk::Want want;
     bool restart{true};
     int startId{0};
-
+    jsUIServiceExtension->firstRequest_ = true;
     jsUIServiceExtension->OnCommand(want, restart, startId);
 
     TAG_LOGI(AAFwkTag::TEST, "OnCommand_0100 end");
@@ -160,10 +197,28 @@ HWTEST_F(JsUIServiceExtensionTest, CallObjectMethod_0100, TestSize.Level1)
 
     napi_value object{nullptr};
     size_t argc{0};
-
+    jsUIServiceExtension->jsObj_ = nullptr;
     jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
 
     TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0100 end");
+}
+
+/**
+ * @tc.number: CallObjectMethod_0200
+ * @tc.name: CallObjectMethod
+ * @tc.desc: JsUIServiceExtension CallObjectMethod
+ */
+HWTEST_F(JsUIServiceExtensionTest, CallObjectMethod_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0200 start");
+
+    napi_value object{nullptr};
+    size_t argc{0};
+
+    jsUIServiceExtension->jsObj_ = std::make_unique<NativeReferenceMock>();
+    jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+
+    TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0200 end");
 }
 
 /**
@@ -175,28 +230,40 @@ HWTEST_F(JsUIServiceExtensionTest, GetSrcPath_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetSrcPath_0100 start");
 
-    std::string srcPath{""};
-
+    std::string srcPath{"Test.Test"};
+    jsUIServiceExtension->abilityInfo_->srcEntrance = "Test";
     jsUIServiceExtension->GetSrcPath(srcPath);
 
     TAG_LOGI(AAFwkTag::TEST, "GetSrcPath_0100 end");
 }
 
 /**
- * @tc.number: OnConfigurationUpdatedAndConfigurationUpdated_0100
- * @tc.name: OnConfigurationUpdatedAndConfigurationUpdated
- * @tc.desc: JsUIServiceExtension OnConfigurationUpdated and ConfigurationUpdated
+ * @tc.number: OnConfigurationUpdated_0100
+ * @tc.name: OnConfigurationUpdated
+ * @tc.desc: JsUIServiceExtension OnConfigurationUpdated
  */
-HWTEST_F(JsUIServiceExtensionTest, OnConfigurationUpdatedAndConfigurationUpdated_0100, TestSize.Level1)
+HWTEST_F(JsUIServiceExtensionTest, OnConfigurationUpdated_0100, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdatedAndConfigurationUpdated_0100 start");
+    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0100 start");
 
     AppExecFwk::Configuration configuration;
-
     jsUIServiceExtension->OnConfigurationUpdated(configuration);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0100 end");
+}
+
+/**
+ * @tc.number: ConfigurationUpdated_0100
+ * @tc.name: ConfigurationUpdated
+ * @tc.desc: JsUIServiceExtension ConfigurationUpdated
+ */
+HWTEST_F(JsUIServiceExtensionTest, ConfigurationUpdated_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ConfigurationUpdated_0100 start");
+
     jsUIServiceExtension->ConfigurationUpdated();
 
-    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdatedAndConfigurationUpdated_0100 end");
+    TAG_LOGI(AAFwkTag::TEST, "ConfigurationUpdated_0100 end");
 }
 
 /**
