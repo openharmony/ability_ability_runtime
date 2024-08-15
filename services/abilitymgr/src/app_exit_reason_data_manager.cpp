@@ -374,20 +374,6 @@ int32_t AppExitReasonDataManager::AddAbilityRecoverInfo(uint32_t accessTokenId,
     return ERR_OK;
 }
 
-int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByTokenId(uint32_t tokenId)
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "tokenId: %{private}u", tokenId);
-    {
-        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-        if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "kvStore is nullptr!");
-            return ERR_NO_INIT;
-        }
-    }
-    InnerDeleteAbilityRecoverInfo(tokenId);
-    return ERR_OK;
-}
-
 int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfo(
     uint32_t accessTokenId, const std::string &moduleName, const std::string &abilityName)
 {

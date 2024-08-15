@@ -53,7 +53,6 @@ public:
     uint16_t GetSaveOccasionFlag() const;
     uint16_t GetSaveModeFlag() const;
     void DeleteInValidMissionFiles();
-    void ClearPageStack(std::string bundleName);
 
 private:
     AppRecovery();

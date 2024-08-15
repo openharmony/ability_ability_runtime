@@ -357,7 +357,7 @@ void AmsMgrProxy::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr
 }
 
 int32_t AmsMgrProxy::KillProcessWithAccount(
-    const std::string &bundleName, const int accountId, const bool clearPageStack)
+    const std::string &bundleName, const int accountId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start");
 
@@ -378,11 +378,6 @@ int32_t AmsMgrProxy::KillProcessWithAccount(
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteBool(clearPageStack)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESS_WITH_ACCOUNT), data, reply, option);
     if (ret != NO_ERROR) {
@@ -395,7 +390,7 @@ int32_t AmsMgrProxy::KillProcessWithAccount(
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool clearPageStack)
+int32_t AmsMgrProxy::KillApplication(const std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -407,11 +402,6 @@ int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool c
 
     if (!data.WriteString(bundleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel WriteString failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteBool(clearPageStack)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -537,18 +527,13 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack)
+int32_t AmsMgrProxy::KillApplicationSelf()
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
         return ERR_INVALID_DATA;
-    }
-
-    if (!data.WriteBool(clearPageStack)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
-        return ERR_FLATTEN_OBJECT;
     }
 
     int32_t ret =
