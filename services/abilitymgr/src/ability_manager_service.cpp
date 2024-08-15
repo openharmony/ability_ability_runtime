@@ -46,7 +46,6 @@
 #include "app_utils.h"
 #include "app_exit_reason_data_manager.h"
 #include "application_util.h"
-#include "recovery_info_timer.h"
 #include "assert_fault_callback_death_mgr.h"
 #include "assert_fault_proxy.h"
 #include "bundle_mgr_client.h"
@@ -6115,10 +6114,10 @@ void AbilityManagerService::ReleaseAbilityTokenMap(const sptr<IRemoteObject> &to
     }
 }
 
-int AbilityManagerService::KillProcess(const std::string &bundleName, const bool clearPageStack)
+int AbilityManagerService::KillProcess(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s, clearPageStack: %{public}d",
-        bundleName.c_str(), clearPageStack);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s",
+        bundleName.c_str());
     CHECK_CALLER_IS_SYSTEM_APP;
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
@@ -6137,7 +6136,7 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, const bool
         return KILL_PROCESS_KEEP_ALIVE;
     }
 
-    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, clearPageStack);
+    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName);
     if (ret != ERR_OK) {
         return KILL_PROCESS_FAILED;
     }
@@ -7344,32 +7343,6 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
     }
 }
 
-void AbilityManagerService::ScheduleClearRecoveryPageStack()
-{
-    int32_t callerUid = IPCSkeleton::GetCallingUid();
-    std::string bundleName;
-    auto bms = GetBundleManager();
-    if (bms == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack failed to get bms");
-        return;
-    }
-
-    if (IN_PROCESS_CALL(bms->GetNameForUid(callerUid, bundleName)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack failed to get bundleName by uid");
-        return;
-    }
-
-    auto tokenId = IPCSkeleton::GetCallingTokenID();
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "ScheduleClearRecoveryPageStack bundleName = %{public}s, callerUid = %{public}d, tokenId = %{public}d",
-        bundleName.c_str(), callerUid, tokenId);
-    (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
-        DeleteAppExitReason(bundleName, tokenId);
-    (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
-        DeleteAllRecoverInfoByTokenId(tokenId);
-}
-
 void AbilityManagerService::ReportAppRecoverResult(const int32_t appId, const AppExecFwk::ApplicationInfo &appInfo,
     const std::string& abilityName, const std::string& result)
 {
@@ -7380,52 +7353,6 @@ void AbilityManagerService::ReportAppRecoverResult(const int32_t appId, const Ap
         "BUNDLE_NAME", appInfo.bundleName,
         "ABILITY_NAME", abilityName,
         "RECOVERY_RESULT", result);
-}
-
-void AbilityManagerService::SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token)
-{
-    if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "submitInfo token is nullptr");
-        return;
-    }
-    auto abilityRecord = Token::GetAbilityRecordByToken(token);
-    if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "submitInfo abilityRecord is nullptr");
-        return;
-    }
-    auto abilityInfo = abilityRecord->GetAbilityInfo();
-    auto userId = abilityRecord->GetOwnerMissionUserId();
-    auto tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
-    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    if (callingTokenId != tokenId) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "SubmitSaveRecoveryInfo not self, not enabled");
-        return;
-    }
-    std::string abilityName = abilityInfo.name;
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
-        CHECK_POINTER(uiAbilityManager);
-        auto sessionId = uiAbilityManager->GetSessionIdByAbilityToken(token);
-        if (abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD) {
-            abilityName += std::to_string(sessionId);
-        }
-    } else {
-        auto missionListMgr = GetMissionListManagerByUserId(userId);
-        if (missionListMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListMgr is nullptr");
-            return;
-        }
-        abilityName += std::to_string(abilityRecord->GetMissionId());
-    }
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "submitInfo bundleName = %{public}s, moduleName = %{public}s, abilityName = %{public}s, tokenId = %{public}d",
-        abilityInfo.bundleName.c_str(),  abilityInfo.moduleName.c_str(), abilityName.c_str(), tokenId);
-    RecoveryInfo recoveryInfo;
-    recoveryInfo.bundleName = abilityInfo.bundleName;
-    recoveryInfo.moduleName = abilityInfo.moduleName;
-    recoveryInfo.abilityName = abilityName;
-    recoveryInfo.time = time(nullptr);
-    OHOS::AAFwk::RecoveryInfoTimer::GetInstance().SubmitSaveRecoveryInfo(recoveryInfo);
 }
 
 void AbilityManagerService::AppRecoverKill(pid_t pid, int32_t reason)

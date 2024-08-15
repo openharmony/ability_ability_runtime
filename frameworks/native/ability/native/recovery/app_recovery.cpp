@@ -467,17 +467,6 @@ void AppRecovery::DeleteInValidMissionFileById(std::string fileDir, int32_t miss
     }
 }
 
-void AppRecovery::ClearPageStack(std::string bundleName)
-{
-    DeleteInValidMissionFiles();
-    std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
-    if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "abilityMgr not exist.");
-        return;
-    }
-    abilityMgr->ScheduleClearRecoveryPageStack();
-}
-
 bool AppRecovery::GetMissionIds(std::string path, std::vector<int32_t> &missionIds)
 {
     DIR *dir = opendir(path.c_str());
