@@ -1181,8 +1181,9 @@ int32_t UIAbilityLifecycleManager::BackToCallerAbilityWithResult(std::shared_ptr
         return CHECK_PERMISSION_FAILED;
     }
     // find host of UI Extension
-    if (UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "caller is uiExtension.");
+    while (callerAbilityRecord &&
+        UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is uiExtension.");
         callerAbilityRecord = callerAbilityRecord->GetCallerRecord();
     }
     return BackToCallerAbilityWithResultLocked(abilityRecord->GetSessionInfo(), callerAbilityRecord);
@@ -1745,6 +1746,8 @@ int UIAbilityLifecycleManager::MoveAbilityToFront(const AbilityRequest &abilityR
     sptr<SessionInfo> sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     sessionInfo->want = abilityRequest.want;
+    sessionInfo->callerToken = abilityRequest.callerToken;
+    sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->processOptions = nullptr;
     SendSessionInfoToSCB(callerAbility, sessionInfo);
     abilityRecord->RemoveWindowMode();
