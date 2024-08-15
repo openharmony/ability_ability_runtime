@@ -121,7 +121,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetCallerTokenList_0100, TestSize.Level1)
     extRecordMgr->AddExtensionRecord(extensionRecordId, extRecord);
 
     std::list<sptr<IRemoteObject>> callerList;
-    auto rootCallerToken = extRecordMgr->GetCallerTokenList(abilityRecord, callerList);
+    extRecordMgr->GetCallerTokenList(abilityRecord, callerList);
     EXPECT_EQ(callerList.size(), 1);
     EXPECT_EQ(callerList.front(), callerToken);
 
