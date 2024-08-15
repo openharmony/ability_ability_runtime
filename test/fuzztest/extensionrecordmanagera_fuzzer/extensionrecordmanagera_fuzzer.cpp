@@ -139,7 +139,7 @@ void FuzztestExtensionRecordManagerFunc2(std::shared_ptr<ExtensionRecordManager>
     mgr->RemovePreloadUIExtensionRecord(key);  // called
     mgr->GetOrCreateExtensionRecordInner(abilityRequest, stringParam, record, boolParam);  // called
     mgr->StartAbility(abilityRequest); // called
-    mgr->IsFocused(int32Param, nullptr);  // called
+    mgr->IsFocused(int32Param, nullptr, nullptr); // called
     mgr->AddExtensionRecord(0, record); // 1 means id
     mgr->GetRootCallerTokenLocked(int32Param, abilityRecord);
     mgr->CreateExtensionRecord(abilityRequest, stringParam, record, int32Param);
