@@ -30,6 +30,7 @@
 #include "hilog_tag_wrapper.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_sa_call.h"
+#include "mock_task_handler_wrap.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
 #include <thread>
@@ -37,6 +38,8 @@
 
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
+using testing::_;
+using testing::Return;
 
 namespace {
     const int32_t SLEEP_TIME = 10000;
@@ -167,7 +170,9 @@ void AbilityConnectManagerTest::TearDownTestCase(void)
 void AbilityConnectManagerTest::SetUp(void)
 {
     connectManager_ = std::make_unique<AbilityConnectManager>(0);
-    taskHandler_ = TaskHandlerWrap::CreateQueueHandler("AbilityConnectManagerTest");
+    taskHandler_ = MockTaskHandlerWrap::CreateQueueHandler("AbilityConnectManagerTest");
+    EXPECT_CALL(*std::static_pointer_cast<MockTaskHandlerWrap>(taskHandler_), SubmitTask(_, _))
+        .WillRepeatedly(Return(TaskHandle()));
     eventHandler_ = std::make_shared<EventHandlerWrap>(taskHandler_);
     // generate ability request
     std::string deviceName = "device";
