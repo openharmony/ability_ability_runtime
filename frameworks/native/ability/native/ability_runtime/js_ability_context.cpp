@@ -1581,7 +1581,7 @@ napi_value JsAbilityContext::OnTerminateSelf(napi_env env, NapiCallbackInfo& inf
 
     NapiAsyncTask::CompleteCallback complete =
         [weak = context_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            TAG_LOGI(AAFwkTag::CONTEXT, "async terminate self");
+            TAG_LOGD(AAFwkTag::CONTEXT, "async terminate self");
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "released context");
