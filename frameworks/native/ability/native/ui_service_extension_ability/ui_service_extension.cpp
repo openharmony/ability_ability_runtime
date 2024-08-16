@@ -78,7 +78,7 @@ std::shared_ptr<UIServiceExtensionContext> UIServiceExtension::CreateAndInitCont
 #ifdef SUPPORT_GRAPHICS
 sptr<Rosen::WindowOption> UIServiceExtension::GetWindowOption(const AAFwk::Want &want,
     const std::shared_ptr< Rosen::ExtensionWindowConfig>& extensionWindowConfig,
-    const int32_t hostWindowId)
+    const sptr<AAFwk::SessionInfo>& sessionInfo)
 {
     auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
@@ -87,9 +87,7 @@ sptr<Rosen::WindowOption> UIServiceExtension::GetWindowOption(const AAFwk::Want 
     }
     if (extensionWindowConfig->windowAttribute == Rosen::ExtensionWindowAttribute::SUB_WINDOW) {
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-        if (hostWindowId != 0) {
-            option->SetParentId(hostWindowId);
-        }
+        option->SetParentId(sessionInfo->hostWindowId);
         option->SetExtensionTag(true);
         option->SetSubWindowTitle(extensionWindowConfig->subWindowOptions.title);
         option->SetSubWindowDecorEnable(extensionWindowConfig->subWindowOptions.decorEnabled);
