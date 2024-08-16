@@ -61,7 +61,7 @@ void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid parameters");
         return;
     }
-    g_eventHandler->PostTask(task, prio);
+    g_eventHandler->PostTask(task, "uv_io_cb", 0, prio);
 }
 OHOSJsEnvironmentImpl::OHOSJsEnvironmentImpl()
 {
