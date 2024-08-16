@@ -54,9 +54,9 @@ public:
 private:
     napi_value OnGetAbilityDelegator(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGI(AAFwkTag::DELEGATOR, "called");
+        TAG_LOGD(AAFwkTag::DELEGATOR, "called");
         if (!AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator()) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "get delegator failed");
+            TAG_LOGE(AAFwkTag::DELEGATOR, "null dgt");
             return CreateJsNull(env);
         }
 
