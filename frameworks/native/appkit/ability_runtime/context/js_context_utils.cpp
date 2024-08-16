@@ -455,23 +455,30 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
         ThrowInvalidParamError(env, "Parse param groupId failed, groupId must be string.");
         return CreateJsUndefined(env);
     }
-
-    auto complete = [context = context_, groupId]
-        (napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    std::string path = "";
+    NapiAsyncTask::ExecuteCallback execute = [context = context_, groupId, path, innerErrCode]() {
         auto completeContext = context.lock();
         if (!completeContext) {
-            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
-                "completeContext if already released."));
+            *innerErrCode = static_cast<int>(AbilityErrorCode::ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
             return;
         }
-        std::string path = completeContext->GetGroupDir(groupId);
-        task.ResolveWithNoError(env, CreateJsValue(env, path));
+        path = completeContext->GetGroupDir(groupId);
+    };
+    auto complete = [innerErrCode, path]
+        (napi_env env, NapiAsyncTask& task, int32_t status) {
+        if(*innerErrCode == ERR_OK){
+            task.ResolveWithNoError(env, CreateJsValue(env, path));
+        }else{
+            task.Reject(env, CreateJsError(env, *innerErrCode,
+                "completeContext if already released."));
+        }
     };
 
     napi_value lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsBaseContext::OnGetGroupDir",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
