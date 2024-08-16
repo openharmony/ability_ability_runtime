@@ -998,6 +998,12 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         TAG_LOGE(AAFwkTag::APPMGR, "get app record failed");
         return;
     }
+    // Prevent forged requests from changing the app's state.
+    if (appRecord->GetApplicationScheduleState() != ApplicationScheduleState::SCHEDULE_FOREGROUNDING) {
+        TAG_LOGE(AAFwkTag::APPMGR, "app is not scheduling to foreground.");
+        return;
+    }
+    appRecord->SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_READY);
     ApplicationState appState = appRecord->GetState();
     if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND) {
         if (appState == ApplicationState::APP_STATE_BACKGROUND) {
@@ -1038,6 +1044,12 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         TAG_LOGE(AAFwkTag::APPMGR, "get app record failed");
         return;
     }
+    // Prevent forged requests from changing the app's state.
+    if (appRecord->GetApplicationScheduleState() != ApplicationScheduleState::SCHEDULE_BACKGROUNDING) {
+        TAG_LOGE(AAFwkTag::APPMGR, "app is not scheduling to background.");
+        return;
+    }
+    appRecord->SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_READY);
     if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
         appRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
         bool needNotifyApp = !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
