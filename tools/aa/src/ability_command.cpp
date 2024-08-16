@@ -44,10 +44,6 @@ constexpr int OPTION_PARAMETER_INTEGER = 257;
 constexpr int OPTION_PARAMETER_STRING = 258;
 constexpr int OPTION_PARAMETER_BOOL = 259;
 constexpr int OPTION_PARAMETER_NULL_STRING = 260;
-constexpr int OPTION_WINDOW_LEFT = 261;
-constexpr int OPTION_WINDOW_TOP = 262;
-constexpr int OPTION_WINDOW_HEIGHT = 263;
-constexpr int OPTION_WINDOW_WIDTH = 264;
 
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
@@ -73,10 +69,6 @@ constexpr struct option LONG_OPTIONS[] = {
     {"ps", required_argument, nullptr, OPTION_PARAMETER_STRING},
     {"pb", required_argument, nullptr, OPTION_PARAMETER_BOOL},
     {"psn", required_argument, nullptr, OPTION_PARAMETER_NULL_STRING},
-    {"wl", required_argument, nullptr, OPTION_WINDOW_LEFT},
-    {"wt", required_argument, nullptr, OPTION_WINDOW_TOP},
-    {"wh", required_argument, nullptr, OPTION_WINDOW_HEIGHT},
-    {"ww", required_argument, nullptr, OPTION_WINDOW_WIDTH},
     {nullptr, 0, nullptr, 0},
 };
 const std::string SHORT_OPTIONS_APPLICATION_NOT_RESPONDING = "hp:";
@@ -216,8 +208,6 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[ERR_NOT_DEVELOPER_MODE] = "error: not developer mode.";
     messageMap_[KILL_PROCESS_KEEP_ALIVE] = "error: keep alive process can not be killed.";
     messageMap_[ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE] = "error: unlock screen failed in developer mode.";
-    messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = "error: not supported in the current product type.";
-    messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = "error: not supported in non-app-provision mode.";
     return OHOS::ERR_OK;
 }
 
@@ -970,6 +960,14 @@ bool AbilityManagerShellCommand::CheckPerfCmdString(
     return true;
 }
 
+bool IsNum(const std::string& s)
+{
+    for (auto c : s)
+        if (!std::isdigit(c))
+            return false;
+    return true;
+}
+
 bool AbilityManagerShellCommand::CheckParameters(int extraArguments)
 {
     if (optind + extraArguments >= argc_) return false;
@@ -987,7 +985,7 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi)
 {
     std::string key = optarg;
     std::string intString = argv_[optind + OPTION_PARAMETER_VALUE_OFFSET];
-    if (!std::regex_match(intString, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
+    if (!IsNum(intString)) {
         resultReceiver_.append("invalid parameter ");
         resultReceiver_.append(intString);
         resultReceiver_.append(" for integer option\n");
@@ -1387,14 +1385,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
     bool isSandboxApp = false;
     bool isNativeDebug = false;
     bool isMultiThread = false;
-    int windowLeft = 0;
-    bool hasWindowLeft = false;
-    int windowTop = 0;
-    bool hasWindowTop = false;
-    int windowHeight = 0;
-    bool hasWindowHeight = false;
-    int windowWidth = 0;
-    bool hasWindowWidth = false;
 
     while (true) {
         counter++;
@@ -1554,50 +1544,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case OPTION_PARAMETER_NULL_STRING: {
                     // 'aa start --psn' with no argument
                     TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --psn' with no argument.", cmd_.c_str());
-
-                    resultReceiver_.append("error: option ");
-                    resultReceiver_.append("requires a value.\n");
-
-                    result = OHOS::ERR_INVALID_VALUE;
-
-                    break;
-                }
-                case OPTION_WINDOW_LEFT: {
-                    // 'aa start --wl' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wl' with no argument.", cmd_.c_str());
-
-                    resultReceiver_.append("error: option ");
-                    resultReceiver_.append("requires a value.\n");
-
-                    result = OHOS::ERR_INVALID_VALUE;
-
-                    break;
-                }
-                case OPTION_WINDOW_TOP: {
-                    // 'aa start --wt' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wt' with no argument.", cmd_.c_str());
-
-                    resultReceiver_.append("error: option ");
-                    resultReceiver_.append("requires a value.\n");
-
-                    result = OHOS::ERR_INVALID_VALUE;
-
-                    break;
-                }
-                case OPTION_WINDOW_HEIGHT: {
-                    // 'aa start --wh' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wh' with no argument.", cmd_.c_str());
-
-                    resultReceiver_.append("error: option ");
-                    resultReceiver_.append("requires a value.\n");
-
-                    result = OHOS::ERR_INVALID_VALUE;
-
-                    break;
-                }
-                case OPTION_WINDOW_WIDTH: {
-                    // 'aa start --ww' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --ww' with no argument.", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1793,58 +1739,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                 break;
             }
-            case OPTION_WINDOW_LEFT: {
-                // 'aa start --wl xxx'
-                if (!std::regex_match(optarg, std::regex(STRING_REGEX_ALL_NUMBERS))) {
-                    resultReceiver_.append("invalid argument for option --wl\n");
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
-                windowLeft = int(atof(optarg));
-                hasWindowLeft = true;
-                TAG_LOGI(AAFwkTag::AA_TOOL, "windowLeft=%{public}d", windowLeft);
-
-                break;
-            }
-            case OPTION_WINDOW_TOP: {
-                // 'aa start --wt xxx'
-                if (!std::regex_match(optarg, std::regex(STRING_REGEX_ALL_NUMBERS))) {
-                    resultReceiver_.append("invalid argument for option --wt\n");
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
-                windowTop = int(atof(optarg));
-                hasWindowTop = true;
-                TAG_LOGI(AAFwkTag::AA_TOOL, "windowTop=%{public}d", windowTop);
-
-                break;
-            }
-            case OPTION_WINDOW_HEIGHT: {
-                // 'aa start --wh xxx'
-                if (!std::regex_match(optarg, std::regex(STRING_REGEX_ALL_NUMBERS))) {
-                    resultReceiver_.append("invalid argument for option --wh\n");
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
-                windowHeight = int(atof(optarg));
-                hasWindowHeight = true;
-                TAG_LOGI(AAFwkTag::AA_TOOL, "windowHeight=%{public}d", windowHeight);
-
-                break;
-            }
-            case OPTION_WINDOW_WIDTH: {
-                // 'aa start --ww xxx'
-                if (!std::regex_match(optarg, std::regex(STRING_REGEX_ALL_NUMBERS))) {
-                    resultReceiver_.append("invalid argument for option --ww\n");
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
-                windowWidth = int(atof(optarg));
-                hasWindowWidth = true;
-                TAG_LOGI(AAFwkTag::AA_TOOL, "windowWidth=%{public}d", windowWidth);
-
-                break;
-            }
             case 'U': {
                 // 'aa start -U xxx'
 
@@ -1973,18 +1867,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             if (isMultiThread) {
                 want.SetParam("multiThread", isMultiThread);
             }
-            if (hasWindowLeft) {
-                want.SetParam(Want::PARAM_RESV_WINDOW_LEFT, windowLeft);
-            }
-            if (hasWindowTop) {
-                want.SetParam(Want::PARAM_RESV_WINDOW_TOP, windowTop);
-            }
-            if (hasWindowHeight) {
-                want.SetParam(Want::PARAM_RESV_WINDOW_HEIGHT, windowHeight);
-            }
-            if (hasWindowWidth) {
-                want.SetParam(Want::PARAM_RESV_WINDOW_WIDTH, windowWidth);
-            }
         }
     }
 
@@ -2014,7 +1896,9 @@ ErrCode AbilityManagerShellCommand::RunAsTestCommand()
             }
 
             std::string argv = argv_[++i];
-            if (!std::regex_match(argv, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
+            std::smatch sm;
+            auto isNumber = std::regex_match(argv, sm, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS));
+            if (!isNumber) {
                 return TestCommandError("error: option [" + opt + "] only supports integer numbers.\n");
             }
 
