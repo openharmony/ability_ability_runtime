@@ -40,7 +40,7 @@ int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, sptr<IDataAbilityObs
 
     for (auto obs = obsPair->second.begin(); obs != obsPair->second.end(); obs++) {
         if ((*obs)->AsObject() == dataObserver->AsObject()) {
-            TAG_LOGE(AAFwkTag::DBOBSMGR, "obs registered: %{public}s",
+            TAG_LOGE(AAFwkTag::DBOBSMGR, "obs registered:%{public}s",
                 CommonUtils::Anonymous(uri.ToString()).c_str());
             return OBS_EXIST;
         }
@@ -60,11 +60,11 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, sptr<IDataAbilityO
     auto obsPair = observers_.find(uri.ToString());
     if (obsPair == observers_.end()) {
         TAG_LOGW(
-            AAFwkTag::DBOBSMGR, "uri no obs: %{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
+            AAFwkTag::DBOBSMGR, "uri no obs:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
     }
 
-    TAG_LOGD(AAFwkTag::DBOBSMGR, "obs num:%{public}zu: %{public}s", obsPair->second.size(),
+    TAG_LOGD(AAFwkTag::DBOBSMGR, "obs num:%{public}zu:%{public}s", obsPair->second.size(),
         CommonUtils::Anonymous(uri.ToString()).c_str());
     auto obs = obsPair->second.begin();
     for (; obs != obsPair->second.end(); obs++) {
@@ -74,7 +74,7 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, sptr<IDataAbilityO
     }
     if (obs == obsPair->second.end()) {
         TAG_LOGW(
-            AAFwkTag::DBOBSMGR, "uri no obs: %{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
+            AAFwkTag::DBOBSMGR, "uri no obs:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
     }
     obsPair->second.remove(*obs);
@@ -96,7 +96,7 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
     {
         auto obsPair = observers_.find(uri.ToString());
         if (obsPair == observers_.end()) {
-            TAG_LOGD(AAFwkTag::DBOBSMGR, "uri no obs: %{public}s",
+            TAG_LOGD(AAFwkTag::DBOBSMGR, "uri no obs:%{public}s",
                 CommonUtils::Anonymous(uri.ToString()).c_str());
             return NO_OBS_FOR_URI;
         }
@@ -109,7 +109,7 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
         }
     }
 
-    TAG_LOGD(AAFwkTag::DBOBSMGR, "uri end: %{public}s,obs num: %{public}zu",
+    TAG_LOGD(AAFwkTag::DBOBSMGR, "uri end:%{public}s,obs num:%{public}zu",
         CommonUtils::Anonymous(uri.ToString()).c_str(), obsList.size());
     return NO_ERROR;
 }
@@ -134,7 +134,7 @@ void DataObsMgrInner::AddObsDeathRecipient(sptr<IDataAbilityObserver> dataObserv
                 }
             });
         if (!dataObserver->AsObject()->AddDeathRecipient(deathRecipient)) {
-            TAG_LOGE(AAFwkTag::DBOBSMGR, "failed.");
+            TAG_LOGE(AAFwkTag::DBOBSMGR, "failed");
         }
         obsRecipient_.emplace(dataObserver->AsObject(), deathRecipient);
     }
