@@ -492,7 +492,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::CreateModuleReso
         TAG_LOGE(AAFwkTag::APPKIT, "InitResourceManagerInner create resourceManager failed");
         return nullptr;
     }
-    UpdateResConfig(resourceManager);
+    UpdateResConfig(GetResourceManager(), resourceManager);
     return resourceManager;
 }
 
@@ -543,7 +543,7 @@ int32_t ContextImpl::CreateSystemHspModuleResourceManager(const std::string &bun
         TAG_LOGE(AAFwkTag::APPKIT, "InitResourceManagerInner create resourceManager failed");
         return ERR_INVALID_VALUE;
     }
-    UpdateResConfig(resourceManager);
+    UpdateResConfig(GetResourceManager(), resourceManager);
     return ERR_OK;
 }
 
@@ -718,11 +718,11 @@ int32_t ContextImpl::CreateBundleContext(std::shared_ptr<Context> &context, cons
 
     TAG_LOGD(AAFwkTag::APPKIT, "length: %{public}zu, bundleName: %{public}s",
         (size_t)bundleName.length(), bundleName.c_str());
-    errCode = bundleMgr_->GetBundleInfoV9(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT,
-        bundleInfo, accountId);
-    if (errCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
-        return errCode;
+    bundleMgr_->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, accountId);
+
+    if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "bundleInfo is empty");
+        return ERR_INVALID_VALUE;
     }
 
     std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
@@ -811,7 +811,11 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
     if (resourceManager == nullptr) {
         return;
     }
-    UpdateResConfig(resourceManager, inputContext);
+    std::shared_ptr<Global::Resource::ResourceManager> src = nullptr;
+    if (inputContext) {
+        src = inputContext->GetResourceManager();
+    }
+    UpdateResConfig(src, resourceManager);
     appContext->SetResourceManager(resourceManager);
 }
 
@@ -962,8 +966,7 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
     TAG_LOGI(AAFwkTag::APPKIT, "Overlay event subscriber register result is %{public}d", subResult);
 }
 
-void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
-    std::shared_ptr<Context> inputContext)
+void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -972,14 +975,6 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
         return;
     }
 
-    if (inputContext) {
-        std::shared_ptr<Global::Resource::ResourceManager> currentResMgr = inputContext->GetResourceManager();
-        if (currentResMgr != nullptr) {
-            currentResMgr->GetResConfig(*resConfig);
-        }
-        resourceManager->UpdateResConfig(*resConfig);
-        return;
-    }
     if (GetHapModuleInfo() != nullptr && GetApplicationInfo() != nullptr) {
         std::vector<AppExecFwk::Metadata> metadata = GetHapModuleInfo()->metadata;
         bool load = std::any_of(metadata.begin(), metadata.end(), [](const auto &metadataItem) {
@@ -1016,6 +1011,23 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
     } catch (...) {
         TAG_LOGD(AAFwkTag::APPKIT, "Set mcc,mnc failed mcc:%{public}s mnc:%{public}s", mcc.c_str(), mnc.c_str());
     }
+    resourceManager->UpdateResConfig(*resConfig);
+}
+
+void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> src,
+    std::shared_ptr<Global::Resource::ResourceManager> &resourceManager)
+{
+    if (src == nullptr) {
+        UpdateResConfig(resourceManager);
+        return;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "create ResConfig failed");
+        return;
+    }
+    src->GetResConfig(*resConfig);
     resourceManager->UpdateResConfig(*resConfig);
 }
 
