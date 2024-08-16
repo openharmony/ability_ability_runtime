@@ -104,6 +104,7 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0200, TestSize.Level1)
     ASSERT_NE(jsRuntime, nullptr);
     bool isDebugApp = true;
     bool isStartWithDebug = false;
+    jsRuntime->jsEnv_->vm_ = nullptr;
     jsRuntime->DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
     jsRuntime.reset();
 }
@@ -174,6 +175,7 @@ HWTEST_F(JsRuntimeTest, DebuggerConnectionManager_0200, TestSize.Level1)
     dOption.processName = "test";
     dOption.isDebugApp = true;
     dOption.isStartWithNative = false;
+    jsRuntime->jsEnv_->vm_ = nullptr;
     jsRuntime->DebuggerConnectionManager(isDebugApp, isStartWithDebug, dOption);
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
