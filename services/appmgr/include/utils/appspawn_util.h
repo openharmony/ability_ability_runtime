@@ -67,6 +67,9 @@ static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
     if (applicationInfo.hwasanEnabled) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::HWASANENABLED);
     }
+    if (applicationInfo.ubsanEnabled) {
+        startFlags = startFlags | (START_FLAG_BASE << StartFlags::UBSANENABLED);
+    }
 
     return startFlags;
 }
