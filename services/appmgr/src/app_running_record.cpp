@@ -2415,5 +2415,15 @@ bool AppRunningRecord::IsProcessAttached() const
     }
     return appLifeCycleDeal_->GetApplicationClient() != nullptr;
 }
+
+void AppRunningRecord::SetUIAbilityLaunched(bool hasLaunched)
+{
+    hasUIAbilityLaunched_ = hasLaunched;
+}
+
+bool AppRunningRecord::HasUIAbilityLaunched()
+{
+    return hasUIAbilityLaunched_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
