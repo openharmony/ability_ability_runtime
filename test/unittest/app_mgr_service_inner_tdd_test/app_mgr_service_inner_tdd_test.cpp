@@ -778,5 +778,43 @@ HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_002, TestSize.Level1)
     EXPECT_EQ(startMsg.appEnv.find(hwasanEnabled)->second, "0");
     TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_002 end");
 }
+
+/**
+ * @tc.name: SetAppEnvInfo_003
+ * @tc.desc: The ubsanEnabled is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    info.applicationInfo.ubsanEnabled = false;
+    AppSpawnStartMsg startMsg;
+    appMgrServiceInner->SetAppEnvInfo(info, startMsg);
+    std::string ubsanEnabled = "ubsanEnabled";
+    EXPECT_EQ(startMsg.appEnv.find(ubsanEnabled)->second, "0");
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_003 end");
+}
+
+/**
+ * @tc.name: SetAppEnvInfo_004
+ * @tc.desc: The ubsanEnabled is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    info.applicationInfo.ubsanEnabled = true;
+    AppSpawnStartMsg startMsg;
+    appMgrServiceInner->SetAppEnvInfo(info, startMsg);
+    std::string ubsanEnabled = "ubsanEnabled";
+    EXPECT_EQ(startMsg.appEnv.find(ubsanEnabled)->second, "1");
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_004 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
