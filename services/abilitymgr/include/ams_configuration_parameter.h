@@ -49,6 +49,7 @@ constexpr const char* UIEATENSION_TYPE = "type";
 constexpr const char* UIEATENSION_TYPE_PICKER = "typePicker";
 constexpr const char* MULTI_USER_TYPE = "multiUserType";
 constexpr const char* SUPPORT_BACK_TO_CALLER = "supportBackToCaller";
+constexpr const char* SUPPORT_SCB_CRASH_REBOOT = "supportSCBCrashReboot";
 }  // namespace AmsConfig
 
 enum class SatrtUiMode { STATUSBAR = 1, NAVIGATIONBAR = 2, STARTUIBOTH = 3 };
@@ -117,6 +118,8 @@ public:
 
     bool IsSupportBackToCaller() const;
 
+    bool IsSupportSCBCrashReboot() const;
+
     /**
      * set picker json object.
      */
@@ -152,6 +155,7 @@ private:
     void UpdatePickerConfigurationString(nlohmann::json& Object, const std::string &configName, std::string &value);
     void LoadUIExtensionPickerConfig(const std::string &filePath);
     int32_t LoadBackToCallerConfig(nlohmann::json& Object);
+    int32_t LoadSupportSCBCrashRebootConfig(nlohmann::json& Object);
 
 private:
     bool nonConfigFile_ {false};
@@ -171,6 +175,7 @@ private:
     std::map<std::string, std::string> picker_;
     int multiUserType_ {0};
     bool supportBackToCaller_ {true};
+    bool supportSceneboardCrashReboot_{true};
 };
 }  // namespace AAFwk
 }  // namespace OHOS

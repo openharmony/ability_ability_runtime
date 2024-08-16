@@ -2146,7 +2146,7 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         }
     }
 
-    if (abilityRecord->IsSceneBoard()) {
+    if (abilityRecord->IsSceneBoard() && AmsConfigurationParameter::GetInstance().IsSupportSCBCrashReboot()) {
         static int sceneBoardCrashCount = 0;
         static int64_t tickCount = GetTickCount();
         int64_t tickNow = GetTickCount();
