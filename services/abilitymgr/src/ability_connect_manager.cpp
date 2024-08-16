@@ -2893,7 +2893,7 @@ bool AbilityConnectManager::IsUIExtensionFocused(uint32_t uiExtensionTokenId, co
         auto uiExtension = item.second.first.lock();
         auto sessionInfo = item.second.second;
         if (uiExtension && uiExtension->GetApplicationInfo().accessTokenId == uiExtensionTokenId) {
-            if (sessionInfo && uiExtensionAbilityRecordMgr_->IsUIExtensionFocused(
+            if (sessionInfo && uiExtensionAbilityRecordMgr_->IsFocused(
                 uiExtension->GetUIExtensionAbilityId(), sessionInfo->callerToken, focusToken)) {
                 TAG_LOGD(AAFwkTag::ABILITYMGR, "Focused");
                 return true;

@@ -10911,6 +10911,14 @@ int32_t AbilityManagerService::GetUIExtensionRootHostInfo(const sptr<IRemoteObje
     }
 
     auto callerRecord = connectManager->GetUIExtensionRootHostInfo(token);
+    if (callerRecord == nullptr && validUserId != U0_USER_ID) {
+        connectManager = GetConnectManagerByUserId(U0_USER_ID);
+        if (connectManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect manager is nullptr, userId: %{public}d.", U0_USER_ID);
+            return ERR_INVALID_VALUE;
+        }
+        callerRecord = connectManager->GetUIExtensionRootHostInfo(token);
+    }
     if (callerRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get root host info failed.");
         return ERR_INVALID_VALUE;
