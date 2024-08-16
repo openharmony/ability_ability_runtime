@@ -41,7 +41,7 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObs
     uri.GetPathSegments(path);
     if (root_ != nullptr && !root_->AddObserver(path, 0, Entry(dataObserver, deathRecipientRef, isDescendants))) {
         TAG_LOGE(AAFwkTag::DBOBSMGR,
-            "subscribers: %{public}s num maxed",
+            "subscribers:%{public}s num maxed",
             CommonUtils::Anonymous(uri.ToString()).c_str());
         RemoveObsDeathRecipient(dataObserver->AsObject());
         return DATAOBS_SERVICE_OBS_LIMMIT;
@@ -52,7 +52,7 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObs
 Status DataObsMgrInnerExt::HandleUnregisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObserver, uri : %{public}s num maxed",
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObserver, uri:%{public}s num maxed",
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATA_OBSERVER_IS_NULL;
     }

@@ -49,7 +49,7 @@ int DataObsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
         TAG_LOGE(AAFwkTag::DBOBSMGR,
-            "local descriptor unequals to remote, descriptor: %{public}s, remoteDescriptor: %{public}s",
+            "local descriptor≠remote, descriptor:%{public}s, remoteDescriptor:%{public}s",
             CommonUtils::Anonymous(Str16ToStr8(descriptor)).c_str(),
             CommonUtils::Anonymous(Str16ToStr8(remoteDescriptor)).c_str());
         return ERR_INVALID_STATE;
