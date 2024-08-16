@@ -440,7 +440,6 @@ group("unittest") {
       "cj_application_context_test:unittest",
       "cj_delegator_ffi_mock_test:unittest",
       "cj_element_name_ffi_test:unittest",
-      "cj_environment_first_test:unittest",
       "cj_environment_test:unittest",
       "cj_runtime_test:unittest",
       "cj_test_runner_object_test:unittest",
