@@ -1644,5 +1644,26 @@ int32_t AppMgrService::GetAppIndexByPid(pid_t pid, int32_t &appIndex)
     }
     return appMgrServiceInner_->GetAppIndexByPid(pid, appIndex);
 }
+
+int32_t AppMgrService::GetSupportedProcessCachePids(const std::string &bundleName,
+    std::vector<int32_t> &pidList)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "The caller is not system-app, can not use system-api");
+        return AAFwk::ERR_NOT_SYSTEM_APP;
+    }
+    auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+    if (!isPerm) {
+        return AAFwk::CHECK_PERMISSION_FAILED;
+    }
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    return appMgrServiceInner_->GetSupportedProcessCachePids(bundleName, pidList);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
