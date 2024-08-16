@@ -93,7 +93,7 @@ private:
     std::map<int, std::set<int>> BinderParser(std::ifstream& fin, std::string& stack) const;
     void ParseBinderPids(const std::map<int, std::set<int>>& binderInfo, std::set<int>& pids, int pid, int layer) const;
     std::set<int> GetBinderPeerPids(std::string& stack, int pid) const;
-    void FindStackByPid(std::string& ret, int pid, const std::string& msg) const;
+    void FindStackByPid(std::string& ret, int pid) const;
     std::string CatchJsonStacktrace(int pid, const std::string& faultType) const;
     std::string CatcherStacktrace(int pid) const;
     int AcquireStack(const FaultData& faultData, const AppInfo& appInfo, const std::string& memoryContent);
