@@ -174,6 +174,11 @@ public:
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnIsAppRunning);
     }
 
+    static napi_value GetSupportedProcessCachePids(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnGetSupportedProcessCachePids);
+    }
+
     static bool CheckCallerIsSystemApp()
     {
         auto selfToken = IPCSkeleton::GetSelfTokenID();
@@ -1376,6 +1381,51 @@ private:
         return result;
     }
 
+    napi_value OnGetSupportedProcessCachePids(napi_env env, size_t argc, napi_value *argv)
+    {
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
+        if (argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Params not enough.");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::string bundleName;
+        if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "get bundleName wrong.");
+            ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
+            return CreateJsUndefined(env);
+        }
+
+        napi_value lastParam = (argc > ARGC_ONE) ? argv[INDEX_ONE] : nullptr;
+        napi_value result = nullptr;
+        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+        auto asyncTask = [bundleName, appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            if (appManager == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "appManager nullptr");
+                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                delete task;
+                return;
+            }
+            std::vector<int32_t> list;
+            int32_t ret = appManager->GetSupportedProcessCachePids(bundleName, list);
+            if (ret == 0) {
+                TAG_LOGD(AAFwkTag::APPMGR, "success.");
+                task->ResolveWithNoError(env, CreateNativeArray(env, list));
+            } else {
+                TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
+                task->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
+            }
+            delete task;
+        };
+        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
+        } else {
+            napiAsyncTask.release();
+        }
+        return result;
+    }
+
     bool CheckOnOffType(napi_env env, size_t argc, napi_value* argv)
     {
         if (argc < ARGC_ONE) {
@@ -1474,6 +1524,8 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "preloadApplication", moduleName, JsAppManager::PreloadApplication);
     BindNativeFunction(env, exportObj, "getRunningProcessInformationByBundleType", moduleName,
         JsAppManager::GetRunningProcessInformationByBundleType);
+    BindNativeFunction(env, exportObj, "getSupportedProcessCachePids", moduleName,
+        JsAppManager::GetSupportedProcessCachePids);
     TAG_LOGD(AAFwkTag::APPMGR, "end");
     return CreateJsUndefined(env);
 }
