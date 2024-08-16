@@ -79,7 +79,7 @@ HWTEST_F(ExtensionRecordManagerTest, IsFocused_0100, TestSize.Level1)
     ASSERT_NE(token, nullptr);
     extRecordMgr->SetCachedFocusedCallerToken(extensionRecordId, token);
 
-    bool isFocused = extRecordMgr->IsFocused(extensionRecordId, token);
+    bool isFocused = extRecordMgr->IsFocused(extensionRecordId, token, token);
     EXPECT_EQ(isFocused, true);
 
     auto focusedToken = extRecordMgr->GetCachedFocusedCallerToken(extensionRecordId);
@@ -122,7 +122,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetCallerTokenList_0100, TestSize.Level1)
     extRecordMgr->AddExtensionRecord(extensionRecordId, extRecord);
 
     std::list<sptr<IRemoteObject>> callerList;
-    auto rootCallerToken = extRecordMgr->GetCallerTokenList(extensionRecordId, callerList);
+    extRecordMgr->GetCallerTokenList(abilityRecord, callerList);
     EXPECT_EQ(callerList.size(), 1);
     EXPECT_EQ(callerList.front(), callerToken);
 
