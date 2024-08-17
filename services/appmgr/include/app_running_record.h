@@ -830,6 +830,9 @@ public:
     bool IsUserRequestCleaning() const;
     bool IsAllAbilityReadyToCleanedByUserRequest();
     bool IsProcessAttached() const;
+    // records whether uiability has launched before.
+    void SetUIAbilityLaunched(bool hasLaunched);
+    bool HasUIAbilityLaunched();
 
 private:
     /**
@@ -983,6 +986,7 @@ private:
     bool isAttachedToStatusBar = false;
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
+    bool hasUIAbilityLaunched_ = false;
 };
 
 }  // namespace AppExecFwk

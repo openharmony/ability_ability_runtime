@@ -1818,5 +1818,48 @@ HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0100, TestSize.Level1)
     int32_t res = appMgrService->StartNativeChildProcess("test.so", 1, callback);
     EXPECT_EQ(res, ERR_OK);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: GetSupportedProcessCachePids
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetSupportedProcessCachePids
+ * EnvConditions: NA
+ * CaseDescription: Verify GetSupportedProcessCachePids
+ */
+HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_001, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+
+    std::string bundleName = "testBundleName";
+    std::vector<int32_t> pidList;
+    int32_t res = appMgrService->GetSupportedProcessCachePids(bundleName, pidList);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetSupportedProcessCachePids
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetSupportedProcessCachePids
+ * EnvConditions: NA
+ * CaseDescription: Verify GetSupportedProcessCachePids
+ */
+HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+
+    std::string bundleName = "testBundleName";
+    std::vector<int32_t> pidList;
+    int32_t res = appMgrService->GetSupportedProcessCachePids(bundleName, pidList);
+    EXPECT_EQ(res, AAFwk::CHECK_PERMISSION_FAILED);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

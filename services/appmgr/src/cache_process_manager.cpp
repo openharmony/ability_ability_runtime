@@ -293,6 +293,11 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
     }
+    if (!appRecord->HasUIAbilityLaunched()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s has not created uiability before.",
+            appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
+        return false;
+    }
     auto supportState = appRecord->GetSupportProcessCacheState();
     switch (supportState) {
         case SupportProcessCacheState::UNSPECIFIED:
