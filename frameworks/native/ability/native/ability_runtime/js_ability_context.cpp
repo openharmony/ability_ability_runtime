@@ -354,11 +354,6 @@ napi_value JsAbilityContext::MoveAbilityToBackground(napi_env env, napi_callback
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnMoveAbilityToBackground);
 }
 
-napi_value JsAbilityContext::SetRestoreEnabled(napi_env env, napi_callback_info info)
-{
-    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnSetRestoreEnabled);
-}
-
 napi_value JsAbilityContext::StartUIServiceExtension(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnStartUIServiceExtension);
@@ -1870,7 +1865,6 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
     BindNativeFunction(env, object, "openAtomicService", moduleName,
         JsAbilityContext::OpenAtomicService);
     BindNativeFunction(env, object, "moveAbilityToBackground", moduleName, JsAbilityContext::MoveAbilityToBackground);
-    BindNativeFunction(env, object, "setRestoreEnabled", moduleName, JsAbilityContext::SetRestoreEnabled);
     BindNativeFunction(env, object, "startUIServiceExtensionAbility", moduleName,
         JsAbilityContext::StartUIServiceExtension);
     BindNativeFunction(env, object, "connectUIServiceExtensionAbility", moduleName,
@@ -2518,33 +2512,6 @@ napi_value JsAbilityContext::OnMoveAbilityToBackground(napi_env env, NapiCallbac
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnMoveAbilityToBackground",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
-}
-
-napi_value JsAbilityContext::OnSetRestoreEnabled(napi_env env, NapiCallbackInfo& info)
-{
-    TAG_LOGD(AAFwkTag::CONTEXT, "called");
-    if (info.argc == ARGC_ZERO) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "not enough params");
-        ThrowTooFewParametersError(env);
-        return CreateJsUndefined(env);
-    }
-
-    auto abilityContext = context_.lock();
-    if (abilityContext == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "null abilityContext");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-        return CreateJsUndefined(env);
-    }
-
-    bool enabled = true;
-    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], enabled)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "parse param failed");
-        ThrowInvalidParamError(env, "Parse param enabled failed.");
-        return CreateJsUndefined(env);
-    }
-
-    abilityContext->SetRestoreEnabled(enabled);
-    return CreateJsUndefined(env);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

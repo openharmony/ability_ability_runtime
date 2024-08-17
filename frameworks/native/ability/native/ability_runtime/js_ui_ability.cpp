@@ -508,7 +508,6 @@ void JsUIAbility::OnSceneCreated()
 
 void JsUIAbility::OnSceneRestored()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     UIAbility::OnSceneRestored();
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     HandleScope handleScope(jsRuntime_);
@@ -749,7 +748,7 @@ void JsUIAbility::RestorePageStack(const Want &want)
         auto env = jsRuntime_.GetNapiEnv();
         if (abilityContext_->GetContentStorage()) {
             scene_->GetMainWindow()->NapiSetUIContent(pageStack, env,
-                abilityContext_->GetContentStorage()->GetNapiValue(), Rosen::BackupAndRestoreType::CONTINUATION);
+                abilityContext_->GetContentStorage()->GetNapiValue(), true);
         } else {
             TAG_LOGE(AAFwkTag::UIABILITY, "null content storage");
         }
@@ -772,21 +771,12 @@ void JsUIAbility::AbilityContinuationOrRecover(const Want &want)
         auto env = jsRuntime_.GetNapiEnv();
         auto mainWindow = scene_->GetMainWindow();
         if (mainWindow != nullptr) {
-            mainWindow->NapiSetUIContent(pageStack, env, abilityContext_->GetContentStorage()->GetNapiValue(),
-                Rosen::BackupAndRestoreType::APP_RECOVERY);
+            mainWindow->NapiSetUIContent(pageStack, env, abilityContext_->GetContentStorage()->GetNapiValue(), true);
         } else {
             TAG_LOGE(AAFwkTag::UIABILITY, "null mainWindow");
         }
         OnSceneRestored();
     } else {
-        if (ShouldDefaultRecoverState(want) && abilityRecovery_ != nullptr && scene_ != nullptr) {
-            TAG_LOGD(AAFwkTag::UIABILITY, "need restore");
-            std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::DEVELOPER_REQUEST);
-            auto mainWindow = scene_->GetMainWindow();
-            if (!pageStack.empty() && mainWindow != nullptr) {
-                mainWindow->SetRestoredRouterStack(pageStack);
-            }
-        }
         OnSceneCreated();
     }
 }

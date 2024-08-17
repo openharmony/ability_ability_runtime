@@ -1031,16 +1031,6 @@ ErrCode AbilityContextImpl::OpenAtomicService(AAFwk::Want& want, const AAFwk::St
     return err;
 }
 
-void AbilityContextImpl::SetRestoreEnabled(bool enabled)
-{
-    restoreEnabled_.store(enabled);
-}
-
-bool AbilityContextImpl::GetRestoreEnabled()
-{
-    return restoreEnabled_.load();
-}
-
 ErrCode AbilityContextImpl::OpenLink(const AAFwk::Want& want, int requestCode)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
