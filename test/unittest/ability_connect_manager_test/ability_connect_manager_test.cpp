@@ -3296,5 +3296,20 @@ HWTEST_F(AbilityConnectManagerTest, UnloadUIExtensionAbility_0100, TestSize.Leve
     auto ret = connectManager->UnloadUIExtensionAbility(abilityRecord, hostBundleName);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: AbilityWindowConfigTransactionDone_0100
+ * @tc.desc: AbilityWindowConfigTransactionDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, AbilityWindowConfigTransactionDone_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    WindowConfig windowConfig;
+    auto ret = connectManager->AbilityWindowConfigTransactionDone(serviceToken_, windowConfig);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
