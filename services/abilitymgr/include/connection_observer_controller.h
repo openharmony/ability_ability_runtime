@@ -62,7 +62,6 @@ public:
      */
     void NotifyExtensionDisconnected(const AbilityRuntime::ConnectionData& data);
 
-#ifdef WITH_DLP
     /**
      * notify observers that dlp ability was opened.
      *
@@ -76,7 +75,6 @@ public:
      * @param data dlp state data.
      */
     void NotifyDlpAbilityClosed(const AbilityRuntime::DlpStateData& data);
-#endif // WITH_DLP
 
 private:
     std::vector<sptr<AbilityRuntime::IConnectionObserver>> GetObservers();

@@ -33,9 +33,7 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace AAFwk {
 namespace {
-#ifdef WITH_DLP
 const std::string DLP_INDEX = "ohos.dlp.params.index";
-#endif // WITH_DLP
 }
 class MissionListManagerTest : public testing::Test {
 public:
@@ -960,7 +958,6 @@ HWTEST_F(MissionListManagerTest, CreateOrReusedMissionInfo_007, TestSize.Level1)
     missionListManager.reset();
 }
 
-#ifdef WITH_DLP
 /*
  * Feature: MissionListManager
  * Function: BuildInnerMissionInfo
@@ -1007,7 +1004,6 @@ HWTEST_F(MissionListManagerTest, BuildInnerMissionInfo_002, TestSize.Level1)
     missionListManager->BuildInnerMissionInfo(info, missionName, abilityRequest);
     missionListManager.reset();
 }
-#endif // WITH_DLP
 
 /*
  * Feature: MissionListManager

@@ -42,7 +42,6 @@ void DlpUtilsTest::SetUp()
 void DlpUtilsTest::TearDown()
 {}
 
-#ifdef WITH_DLP
 /**
  * @tc.name: OtherAppsAccessDlpCheck_0100
  * @tc.desc: OtherAppsAccessDlpCheck Test
@@ -91,6 +90,5 @@ HWTEST_F(DlpUtilsTest, DlpAccessOtherAppsCheck_0100, TestSize.Level0)
     bool result = DlpUtils::DlpAccessOtherAppsCheck(abilityRecord->GetToken(), want);
     EXPECT_TRUE(result);
 }
-#endif // WITH_DLP
 }  // namespace AAFwk
 }  // namespace OHOS
