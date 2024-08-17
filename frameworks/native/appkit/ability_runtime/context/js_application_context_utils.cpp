@@ -510,9 +510,9 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
         path = context->GetGroupDir(groupId);
     };
     auto complete = [innerErrCode, groupId, path](napi_env env, NapiAsyncTask& task, int32_t status) {
-        if(*innerErrCode == ERR_OK){
+        if (*innerErrCode == ERR_OK){
             task.ResolveWithNoError(env, CreateJsValue(env, path));
-        }else{
+        } else {
             TAG_LOGE(AAFwkTag::APPKIT, "GetGroupDir is failed %{public}d", *innerErrCode);
             task.Reject(env,CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST),
                 "applicationContext if already released");
@@ -801,9 +801,9 @@ napi_value JsApplicationContextUtils::OnClearUpApplicationData(napi_env env, Nap
     };
     NapiAsyncTask::CompleteCallback complete =
         [applicationContext = applicationContext_, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if(*innerErrCode == ERR_OK){
+            if (*innerErrCode == ERR_OK){
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
-            }else{
+            } else {
                 TAG_LOGE(AAFwkTag::APPKIT, "OnClearUpApplicationData is failed %{public}d", *innerErrCode);
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }

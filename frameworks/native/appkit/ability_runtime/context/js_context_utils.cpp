@@ -467,9 +467,9 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
     };
     auto complete = [innerErrCode, path]
         (napi_env env, NapiAsyncTask& task, int32_t status) {
-        if(*innerErrCode == ERR_OK){
+        if (*innerErrCode == ERR_OK){
             task.ResolveWithNoError(env, CreateJsValue(env, path));
-        }else{
+        } else {
             task.Reject(env, CreateJsError(env, *innerErrCode,
                 "completeContext if already released."));
         }
