@@ -964,10 +964,10 @@ public:
 
     void OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord);
     void OnCallConnectDied(std::shared_ptr<CallRecord> callRecord);
-    void HandleLoadTimeOut(int64_t abilityRecordId, bool isHalf = false);
+    void HandleLoadTimeOut(int64_t abilityRecordId, bool isHalf = false, bool isExtension = false);
     void HandleActiveTimeOut(int64_t abilityRecordId);
     void HandleInactiveTimeOut(int64_t abilityRecordId);
-    void HandleForegroundTimeOut(int64_t abilityRecordId, bool isHalf = false);
+    void HandleForegroundTimeOut(int64_t abilityRecordId, bool isHalf = false, bool isExtension = false);
     void HandleShareDataTimeOut(int64_t uniqueId);
     int32_t GetShareDataPairAndReturnData(std::shared_ptr<AbilityRecord> abilityRecord,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
@@ -1956,6 +1956,7 @@ private:
     std::shared_ptr<AbilityConnectManager> GetCurrentConnectManager();
     std::shared_ptr<AbilityConnectManager> GetConnectManagerByUserId(int32_t userId);
     std::shared_ptr<AbilityConnectManager> GetConnectManagerByToken(const sptr<IRemoteObject> &token);
+    std::shared_ptr<AbilityConnectManager> GetConnectManagerByAbilityRecordId(const int64_t &abilityRecordId);
     std::shared_ptr<PendingWantManager> GetCurrentPendingWantManager();
     std::shared_ptr<PendingWantManager> GetPendingWantManagerByUserId(int32_t userId);
     std::unordered_map<int, std::shared_ptr<MissionListManagerInterface>> GetMissionListManagers();

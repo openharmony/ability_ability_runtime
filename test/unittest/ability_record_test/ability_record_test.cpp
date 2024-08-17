@@ -22,6 +22,7 @@
 #undef protected
 
 #include "ability_connect_callback_stub.h"
+#include "ability_manager_service.h"
 #include "ability_scheduler.h"
 #include "ability_util.h"
 #include "connection_record.h"
@@ -916,19 +917,18 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_003, TestSize.Leve
 
 /*
  * Feature: AbilityRecord
- * Function: ForegroundAbility
- * SubFunction: ForegroundAbility
+ * Function: ForegroundUIExtensionAbility
+ * SubFunction: ForegroundUIExtensionAbility
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundAbility
+ * CaseDescription: Verify AbilityRecord ForegroundUIExtensionAbility
  */
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_004, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     EXPECT_NE(abilityRecord, nullptr);
-    Closure task = []() {};
     abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    abilityRecord->ForegroundAbility(task);
+    abilityRecord->ForegroundUIExtensionAbility();
 }
 
 /*
@@ -2585,11 +2585,11 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ReportAtomicServiceDrawnCompleteEvent_
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     ASSERT_NE(abilityRecord, nullptr);
-    
+
     abilityRecord->applicationInfo_.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
     auto ret = abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
     EXPECT_EQ(ret, true);
-    
+
     abilityRecord->applicationInfo_.bundleType = AppExecFwk::BundleType::APP;
     ret = abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
     EXPECT_EQ(ret, false);
@@ -2669,22 +2669,21 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_005, TestSize.Leve
 
 /*
  * Feature: AbilityRecord
- * Function: ForegroundAbility
- * SubFunction: ForegroundAbility
+ * Function: ForegroundUIExtensionAbility
+ * SubFunction: ForegroundUIExtensionAbility
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundAbility
+ * CaseDescription: Verify AbilityRecord ForegroundUIExtensionAbility
  */
 HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     uint32_t sceneFlag = 0;
-    Closure task;
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
     abilityRecord->applicationInfo_.name = "app";
     abilityRecord->isAttachDebug_ = false;
     abilityRecord->isAssertDebug_ = false;
-    abilityRecord->ForegroundAbility(task, sceneFlag);
+    abilityRecord->ForegroundUIExtensionAbility(sceneFlag);
     EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
     EXPECT_NE(abilityRecord_, nullptr);
 }
@@ -2701,11 +2700,27 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_002, TestSize.Level1
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     uint32_t sceneFlag = 0;
-    Closure task;
     bool isNewWant = true;
     abilityRecord->SetIsNewWant(isNewWant);
-    abilityRecord->ForegroundAbility(task, sceneFlag);
+    abilityRecord->ForegroundUIExtensionAbility(sceneFlag);
     EXPECT_NE(abilityRecord_, nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PostUIExtensionAbilityTimeoutTask
+ * SubFunction: PostUIExtensionAbilityTimeoutTask
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PostUIExtensionAbilityTimeoutTask
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_PostUIExtensionAbilityTimeoutTask_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    ASSERT_NE(abilityRecord, nullptr);
+    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::LOAD_TIMEOUT_MSG);
+    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
+    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
 }
 
 /*
@@ -3023,3 +3038,4 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetRestartCount_001, TestSize.Level1)
 }
 }  // namespace AAFwk
 }  // namespace OHOS
+
