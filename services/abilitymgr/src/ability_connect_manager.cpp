@@ -2922,6 +2922,13 @@ sptr<IRemoteObject> AbilityConnectManager::GetUIExtensionSourceToken(const sptr<
     return nullptr;
 }
 
+void AbilityConnectManager::GetUIExtensionCallerTokenList(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    std::list<sptr<IRemoteObject>> &callerList)
+{
+    CHECK_POINTER(uiExtensionAbilityRecordMgr_);
+    uiExtensionAbilityRecordMgr_->GetCallerTokenList(abilityRecord, callerList);
+}
+
 bool AbilityConnectManager::IsWindowExtensionFocused(uint32_t extensionTokenId, const sptr<IRemoteObject>& focusToken)
 {
     std::lock_guard guard(windowExtensionMapMutex_);
