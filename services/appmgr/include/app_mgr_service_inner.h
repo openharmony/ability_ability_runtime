@@ -162,6 +162,7 @@ public:
      * @return
      */
     virtual void RegisterAppStateCallback(const sptr<IAppStateCallback> &callback);
+    void RemoveDeadAppStateCallback(const wptr<IRemoteObject> &remote);
 
     /**
      * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
