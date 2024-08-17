@@ -36,7 +36,6 @@ struct ConnectionInfo {
     sptr<AbilityConnection> abilityConnection;
 
     int32_t userid;
-    void* uiServiceExtProxy = nullptr;
 
     ConnectionInfo(const sptr<IRemoteObject> &connectCaller, const AAFwk::Operation &connectReceiver,
         const sptr<AbilityConnection> &abilityConnection, int32_t accountId = -1) : connectCaller(connectCaller),
@@ -44,17 +43,9 @@ struct ConnectionInfo {
     {
     }
 
-    void SetUIServiceExtProxyPtr(void* proxyPtr)
-    {
-        uiServiceExtProxy = proxyPtr;
-    }
-
     inline bool operator < (const ConnectionInfo &that) const
     {
         if (userid < that.userid) {
-            return true;
-        }
-        if (uiServiceExtProxy < that.uiServiceExtProxy) {
             return true;
         }
         if (connectCaller < that.connectCaller) {
@@ -176,7 +167,6 @@ private:
     bool IsConnectCallerEqual(const sptr<IRemoteObject> &connectCaller, const sptr<IRemoteObject> &connectCallerOther);
     bool IsConnectReceiverEqual(AAFwk::Operation &connectReceiver,
         const AppExecFwk::ElementName &connectReceiverOther);
-    void* GetUIServiceExtProxyPtr(const AAFwk::Want& want);
     bool MatchConnection(
         const sptr<IRemoteObject>& connectCaller, const AAFwk::Want& connectReceiver, int32_t accountId,
         const std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>>::value_type& connection);
