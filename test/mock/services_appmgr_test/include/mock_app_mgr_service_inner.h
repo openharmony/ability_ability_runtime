@@ -21,6 +21,9 @@
 #include "app_mgr_service_inner.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace AppExecFwk {
 class MockAppMgrServiceInner : public AppMgrServiceInner {
 public:
@@ -29,10 +32,8 @@ public:
     virtual ~MockAppMgrServiceInner()
     {}
 
-    MOCK_METHOD6(LoadAbility,
-        void(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-            std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
-            std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId));
+    MOCK_METHOD4(LoadAbility, void(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
+        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam));
     MOCK_METHOD2(AttachApplication, void(const pid_t pid, const sptr<IAppScheduler>& app));
     MOCK_METHOD1(ApplicationForegrounded, void(const int32_t recordId));
     MOCK_METHOD1(ApplicationBackgrounded, void(const int32_t recordId));
