@@ -179,6 +179,22 @@ CallerRecord::CallerRecord(int requestCode, std::weak_ptr<AbilityRecord> caller)
     }
 }
 
+void LaunchDebugInfo::Update(const OHOS::AAFwk::Want &want)
+{
+    isDebugAppSet = want.HasParameter(DEBUG_APP);
+    if (isDebugAppSet) {
+        debugApp = want.GetBoolParam(DEBUG_APP, false);
+    }
+    isNativeDebugSet = want.HasParameter(NATIVE_DEBUG);
+    if (isNativeDebugSet) {
+        nativeDebug = want.GetBoolParam(NATIVE_DEBUG, false);
+    }
+    isPerfCmdSet = want.HasParameter(PERF_CMD);
+    if (isPerfCmdSet) {
+        perfCmd = want.GetStringParam(PERF_CMD);
+    }
+}
+
 AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
     const AppExecFwk::ApplicationInfo &applicationInfo, int requestCode)
     : want_(want), abilityInfo_(abilityInfo), applicationInfo_(applicationInfo), requestCode_(requestCode)
@@ -197,6 +213,7 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
         want_.RemoveParam(Want::PARAM_APP_AUTO_STARTUP_LAUNCH_REASON);
     }
     SetDebugAppByWaitingDebugFlag();
+    launchDebugInfo_.Update(want_);
 }
 
 AbilityRecord::~AbilityRecord()
@@ -384,6 +401,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     {
         std::lock_guard guard(wantLock_);
         InsightIntentExecuteParam::RemoveInsightIntent(want_);
+        isLaunching_ = false;
     }
 
     // update ability state to appMgr service when restart.
@@ -419,6 +437,7 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     {
         std::lock_guard guard(wantLock_);
         InsightIntentExecuteParam::RemoveInsightIntent(want_);
+        isLaunching_ = false;
     }
 
     // update ability state to appMgr service when restart
@@ -2621,22 +2640,29 @@ void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut, int32_t param, boo
 void AbilityRecord::SetWant(const Want &want)
 {
     std::lock_guard guard(wantLock_);
-    auto debugApp = want_.GetBoolParam(DEBUG_APP, false);
-    auto nativeDebug = want_.GetBoolParam(NATIVE_DEBUG, false);
-    auto perfCmd = want_.GetStringParam(PERF_CMD);
+    if (abilityInfo_.type == AppExecFwk::AbilityType::PAGE && isLaunching_) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "the UIAbility is launching, ignore SetWant.");
+        return;
+    }
     auto multiThread = want_.GetBoolParam(MULTI_THREAD, false);
     auto errorInfoEnhance = want_.GetBoolParam(ERROR_INFO_ENHANCE, false);
     want_.CloseAllFd();
 
     want_ = want;
-    if (debugApp) {
-        want_.SetParam(DEBUG_APP, true);
+    if (launchDebugInfo_.isDebugAppSet) {
+        want_.SetParam(DEBUG_APP, launchDebugInfo_.debugApp);
+    } else {
+        want_.RemoveParam(DEBUG_APP);
     }
-    if (nativeDebug) {
-        want_.SetParam(NATIVE_DEBUG, true);
+    if (launchDebugInfo_.isNativeDebugSet) {
+        want_.SetParam(NATIVE_DEBUG, launchDebugInfo_.nativeDebug);
+    } else {
+        want_.RemoveParam(NATIVE_DEBUG);
     }
-    if (!perfCmd.empty()) {
-        want_.SetParam(PERF_CMD, perfCmd);
+    if (launchDebugInfo_.isPerfCmdSet) {
+        want_.SetParam(PERF_CMD, launchDebugInfo_.perfCmd);
+    } else {
+        want_.RemoveParam(PERF_CMD);
     }
     if (multiThread) {
         want_.SetParam(MULTI_THREAD, true);
@@ -2664,14 +2690,14 @@ AppExecFwk::ElementName AbilityRecord::GetElementName() const
 bool AbilityRecord::IsDebugApp() const
 {
     std::lock_guard guard(wantLock_);
-    return want_.GetBoolParam(DEBUG_APP, false);
+    return launchDebugInfo_.debugApp;
 }
 
 bool AbilityRecord::IsDebug() const
 {
     std::lock_guard guard(wantLock_);
-    if (want_.GetBoolParam(DEBUG_APP, false) || want_.GetBoolParam(NATIVE_DEBUG, false) ||
-        !want_.GetStringParam(PERF_CMD).empty() || isAttachDebug_ || isAssertDebug_) {
+    if (launchDebugInfo_.debugApp || launchDebugInfo_.nativeDebug ||
+        !launchDebugInfo_.perfCmd.empty() || isAttachDebug_ || isAssertDebug_) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Is debug mode, no need to handle time out.");
         return true;
     }
@@ -3636,6 +3662,8 @@ void AbilityRecord::SetDebugAppByWaitingDebugFlag()
     if (IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsWaitingDebugApp(
         applicationInfo_.bundleName))) {
         want_.SetParam(DEBUG_APP, true);
+        launchDebugInfo_.isDebugAppSet = true;
+        launchDebugInfo_.debugApp = true;
         IN_PROCESS_CALL_WITHOUT_RET(
             DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearNonPersistWaitingDebugFlag());
     }
