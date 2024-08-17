@@ -571,7 +571,7 @@ napi_value JsAbilityContext::OnConnectUIServiceExtension(napi_env env, NapiCallb
     }
 
     sptr<JSUIServiceExtAbilityConnection> connection = sptr<JSUIServiceExtAbilityConnection>::MakeSptr(env);
-    sptr<UIAbilityServiceHostStubImpl> stub = connection->GetServiceHostStub();
+    sptr<UIAbilityServiceHostStubImpl>& stub = connection->GetServiceHostStub();
     want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
 
     result = nullptr;
@@ -1895,13 +1895,11 @@ void JSAbilityConnection::ReleaseNativeReference(NativeReference* ref)
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null uv loop");
-        delete ref;
         return;
     }
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null work");
-        delete ref;
         return;
     }
     work->data = reinterpret_cast<void *>(ref);
