@@ -312,6 +312,9 @@ public:
      */
     int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo);
 
+    void GetUIExtensionCallerTokenList(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        std::list<sptr<IRemoteObject>> &callerList);
+
     void CloseAssertDialog(const std::string &assertSessionId);
 
     void SignRestartAppFlag(const std::string &bundleName);
