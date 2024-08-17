@@ -3991,15 +3991,19 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         return result;
     }
 
-    if (abilityRequest.abilityInfo.isStageBasedModel) {
-        bool isService =
-            (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE);
+    auto abilityInfo = abilityRequest.abilityInfo;
+    if (abilityInfo.isStageBasedModel) {
+        bool isService = (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE);
         if (isService && extensionType != AppExecFwk::ExtensionAbilityType::SERVICE) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Service extension type, please use ConnectAbility.");
             return ERR_WRONG_INTERFACE_CALL;
         }
+        // not allow app to connect other extension by using connectServiceExtensionAbility
+        if (callerToken && extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && !isService) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect service extension ability, but target type is not Service.");
+            return TARGET_ABILITY_NOT_SERVICE;
+        }
     }
-    auto abilityInfo = abilityRequest.abilityInfo;
     int32_t validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : userId;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "validUserId : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
