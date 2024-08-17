@@ -1340,8 +1340,6 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_StartAbilityByType_0100, F
     int32_t sessionId = 200;
     context_->EraseUIExtension(sessionId);
     context_->CreateModalUIExtensionWithApp(want);
-    context_->SetRestoreEnabled(true);
-    context_->GetRestoreEnabled();
 }
 
 /**
@@ -1634,8 +1632,6 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenLink_0100, Function | 
     AAFwk::Want want;
     int requestCode = 0;
     context_->OpenLink(want, requestCode);
-    context_->SetRestoreEnabled(true);
-    EXPECT_EQ(context_->GetRestoreEnabled(), true);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

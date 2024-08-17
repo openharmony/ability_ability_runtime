@@ -282,14 +282,14 @@ void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const 
 }
 
 int32_t AmsMgrScheduler::KillProcessWithAccount(
-    const std::string &bundleName, const int accountId, const bool clearPageStack)
+    const std::string &bundleName, const int accountId)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d, clearPageStack = %{public}d",
-        bundleName.c_str(), accountId, clearPageStack);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d",
+        bundleName.c_str(), accountId);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId, clearPageStack);
+    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId);
 }
 
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
@@ -333,15 +333,15 @@ int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundl
     return amsMgrServiceInner_->UpdateApplicationInfoInstalled(bundleName, uid);
 }
 
-int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
+int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, clearPageStack = %{public}d",
-        bundleName.c_str(), clearPageStack);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s",
+        bundleName.c_str());
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
 
-    return amsMgrServiceInner_->KillApplication(bundleName, clearPageStack);
+    return amsMgrServiceInner_->KillApplication(bundleName);
 }
 
 int32_t AmsMgrScheduler::ForceKillApplication(const std::string &bundleName,
@@ -375,12 +375,12 @@ int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, con
     return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid);
 }
 
-int32_t AmsMgrScheduler::KillApplicationSelf(const bool clearPageStack)
+int32_t AmsMgrScheduler::KillApplicationSelf()
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationSelf(clearPageStack);
+    return amsMgrServiceInner_->KillApplicationSelf();
 }
 
 bool AmsMgrScheduler::IsReady() const

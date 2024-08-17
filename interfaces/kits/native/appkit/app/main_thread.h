@@ -339,7 +339,6 @@ public:
      */
     int32_t ScheduleDumpIpcStat(std::string& result) override;
 
-    void ScheduleClearPageStack() override;
     /**
      * ScheduleDumpFfrt, call ScheduleDumpFfrt(std::string& result) through proxy project,
      * Start querying the application's ffrt usage.
@@ -670,7 +669,7 @@ private:
      */
     void LoadAbilityLibrary(const std::vector<std::string> &libraryPaths);
     void LoadAceAbilityLibrary();
-    
+
     void CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
     void LoadNativeLiabrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
 
