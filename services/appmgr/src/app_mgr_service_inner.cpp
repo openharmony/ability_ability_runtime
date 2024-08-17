@@ -2251,6 +2251,29 @@ void AppMgrServiceInner::RegisterAppStateCallback(const sptr<IAppStateCallback> 
     if (callback != nullptr) {
         std::lock_guard lock(appStateCallbacksLock_);
         appStateCallbacks_.push_back(callback);
+        auto remoteObjedct = callback->AsObject();
+        if (remoteObjedct) {
+            remoteObjedct->AddDeathRecipient(sptr<AppStateCallbackDeathRecipient>(
+                new AppStateCallbackDeathRecipient(weak_from_this())));
+        }
+    }
+}
+
+void AppMgrServiceInner::RemoveDeadAppStateCallback(const wptr<IRemoteObject> &remote)
+{
+    auto remoteObject = remote.promote();
+    if (remoteObject == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "remoteObject null");
+        return;
+    }
+
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (auto it = appStateCallbacks_.begin(); it != appStateCallbacks_.end(); ++it) {
+        auto callback = *it;
+        if (callback && callback->AsObject() == remoteObject) {
+            appStateCallbacks_.erase(it);
+            break;
+        }
     }
 }
 
