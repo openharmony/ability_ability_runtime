@@ -217,6 +217,8 @@ public:
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromAbilityCache(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromTerminatingMap(const sptr<IRemoteObject> &token);
+    std::shared_ptr<AbilityRecord> GetExtensionByIdFromServiceMap(const int64_t &abilityRecordId);
+    std::shared_ptr<AbilityRecord> GetExtensionByIdFromTerminatingMap(const int64_t &abilityRecordId);
     ConnectListType GetConnectRecordListByCallback(sptr<IAbilityConnection> callback);
 
     void GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info,
@@ -277,9 +279,8 @@ public:
 
     void PauseExtensions();
 
-    void OnTimeOut(uint32_t msgId, int64_t abilityRecordId);
+    void OnTimeOut(uint32_t msgId, int64_t abilityRecordId, bool isHalf = false);
 
-    void MoveToForeground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     /**
      * @brief schedule to background
      *
@@ -543,7 +544,7 @@ private:
 
     void CompleteForeground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId);
+    void PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId, bool isHalf = false);
 
     void PostRestartResidentTask(const AbilityRequest &abilityRequest);
 
@@ -551,7 +552,6 @@ private:
 
     void ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const;
 
-    std::shared_ptr<AbilityRecord> GetAbilityRecordById(int64_t abilityRecordId);
     void HandleInactiveTimeout(const std::shared_ptr<AbilityRecord> &ability);
     void MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord);
 
@@ -593,7 +593,6 @@ private:
     int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord,
         bool callerDied) const;
     void DisconnectRecordForce(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord);
-    std::shared_ptr<AbilityRecord> GetExtensionByIdFromServiceMap(int32_t abilityRecordId);
     int TerminateAbilityInner(const sptr<IRemoteObject> &token);
     bool IsLauncher(std::shared_ptr<AbilityRecord> serviceExtension) const;
     void KillProcessesByUserId() const;

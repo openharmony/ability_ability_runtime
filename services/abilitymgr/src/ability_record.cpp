@@ -397,7 +397,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
+void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", GetURI().c_str());
@@ -406,19 +406,6 @@ void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
     {
         std::lock_guard guard(wantLock_);
         GrantUriPermission(want_, applicationInfo_.bundleName, false, 0);
-    }
-
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    if (handler && task) {
-        std::lock_guard guard(wantLock_);
-        if (!want_.GetBoolParam(DEBUG_APP, false) && !want_.GetBoolParam(NATIVE_DEBUG, false) &&
-            !isAttachDebug_ && !isAssertDebug_) {
-            int foregroundTimeout =
-                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * FOREGROUND_TIMEOUT_MULTIPLE;
-            handler->SubmitTask(task, "foreground_" + std::to_string(recordId_), foregroundTimeout, false);
-        } else {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Is debug mode, no need to handle time out.");
-        }
     }
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
@@ -487,6 +474,32 @@ void AbilityRecord::PostForegroundTimeoutTask()
     SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, foregroundTimeout / HALF_TIMEOUT);
     std::string methodName = "ForegroundAbility";
     g_addLifecycleEventTask(token_, FreezeUtil::TimeoutState::FOREGROUND, methodName);
+}
+
+void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
+{
+    if (IsDebug()) {
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "post timeout %{public}d, id %{public}d", messageId, recordId_);
+    switch (messageId) {
+        case AbilityManagerService::LOAD_TIMEOUT_MSG: {
+            uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+                LOAD_TIMEOUT_MULTIPLE;
+            SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
+            break;
+        }
+        case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
+            uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+                FOREGROUND_TIMEOUT_MULTIPLE;
+            SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 
 std::string AbilityRecord::GetLabel()
@@ -2594,12 +2607,12 @@ bool AbilityRecord::IsActiveState() const
             IsAbilityState(AbilityState::FOREGROUNDING));
 }
 
-void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut, int32_t param)
+void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut, int32_t param, bool isExtension)
 {
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER(handler);
     param = (param == -1) ? recordId_ : param;
-    auto eventWrap = EventWrap(msg, param);
+    auto eventWrap = EventWrap(msg, param, isExtension);
     eventWrap.SetTimeout(timeOut);
     if (!handler->SendEvent(eventWrap, timeOut, false)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "SendTimeOut event failed: %{public}u, %{public}d.", msg, param);

@@ -249,6 +249,25 @@ std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByTok
     return nullptr;
 }
 
+std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByAbilityRecordId(
+    const int64_t &abilityRecordId)
+{
+    std::lock_guard<ffrt::mutex> lock(managersMutex_);
+    for (auto& item: connectManagers_) {
+        if (item.second == nullptr) {
+            continue;
+        }
+        if (item.second->GetExtensionByIdFromServiceMap(abilityRecordId)) {
+            return item.second;
+        }
+        if (item.second->GetExtensionByIdFromTerminatingMap(abilityRecordId)) {
+            return item.second;
+        }
+    }
+
+    return nullptr;
+}
+
 std::shared_ptr<PendingWantManager> SubManagersHelper::GetCurrentPendingWantManager()
 {
     std::lock_guard<ffrt::mutex> lock(managersMutex_);
