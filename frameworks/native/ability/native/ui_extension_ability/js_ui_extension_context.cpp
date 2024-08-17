@@ -576,9 +576,9 @@ napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo
     };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if(*innerErrCode==ERR_OK){
+            if (*innerErrCode==ERR_OK){
                 task.Resolve(env, CreateJsUndefined(env));
-            }else{
+            } else {
                 task.Reject(env, CreateJsError(env, *innerErrCode));
             }
         };
@@ -830,7 +830,7 @@ napi_value JsUIExtensionContext::OnDisconnectUIServiceExtension(napi_env env, Na
             UIServiceConnection::RemoveUIServiceExtensionConnection(connectId);
             return;
         }
-        if(!connection){
+        if (!connection){
             TAG_LOGW(AAFwkTag::UISERVC_EXT, "connection nullptr");
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER);
             UIServiceConnection::RemoveUIServiceExtensionConnection(connectId);
@@ -841,9 +841,9 @@ napi_value JsUIExtensionContext::OnDisconnectUIServiceExtension(napi_env env, Na
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
-            if(*innerErrCode == ERR_OK){
+            if (*innerErrCode == ERR_OK){
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
-            }else{
+            } else {
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
             }
         };

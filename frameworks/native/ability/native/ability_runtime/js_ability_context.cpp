@@ -690,7 +690,7 @@ napi_value JsAbilityContext::OnDisconnectUIServiceExtension(napi_env env, NapiCa
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
-        if(!connection){
+        if (!connection){
             TAG_LOGW(AAFwkTag::UISERVC_EXT, "onDisconnectUIServiceExtension connection nullptr");
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER);
             return;
@@ -1634,7 +1634,7 @@ napi_value JsAbilityContext::OnConnectAbilityWithAccount(napi_env env, NapiCallb
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
-                if(*innerErrCode == ERR_OK){
+                if (*innerErrCode == ERR_OK){
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -1686,7 +1686,7 @@ napi_value JsAbilityContext::OnDisconnectAbility(napi_env env, NapiCallbackInfo&
                 *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
-            if(!connection){
+            if (!connection){
                 TAG_LOGW(AAFwkTag::CONTEXT, "null connection");
                 *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER);
                 return;
@@ -1733,7 +1733,7 @@ napi_value JsAbilityContext::OnTerminateSelf(napi_env env, NapiCallbackInfo& inf
     };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if(*innerErrCode == ERR_OK){
+            if (*innerErrCode == ERR_OK){
                 task.Resolve(env, CreateJsUndefined(env));
             } else {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -2392,7 +2392,7 @@ napi_value JsAbilityContext::OnSetMissionLabel(napi_env env, NapiCallbackInfo& i
     };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if(*innerErrCode == ERR_OK){
+            if (*innerErrCode == ERR_OK){
                 task.resolve(env, CreateJsUndefined(env));
             } else {
                 task.reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -2489,7 +2489,7 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
     };
     NapiAsyncTask::CompleteCallback complete =
         [weak = context_, type, wantParam, callback](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-           if( *innerErrCode == ERR_OK){
+           if ( *innerErrCode == ERR_OK){
                task.Resolve(env, CreateJsUndefined(env));
            } else {
                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -2568,7 +2568,7 @@ napi_value JsAbilityContext::ChangeAbilityVisibility(napi_env env, NapiCallbackI
     };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if(*innerErrCode == ERR_OK){
+            if (*innerErrCode == ERR_OK){
                 task.Resolve(env, CreateJsUndefined(env));
             } else {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
