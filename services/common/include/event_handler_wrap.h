@@ -36,6 +36,11 @@ public:
     {
         eventData_ = std::make_shared<EventDataBase>();
     }
+    EventWrap(uint32_t eventId, int64_t param, bool isExtension) : eventId_(eventId), param_(param),
+        isExtension_(isExtension)
+    {
+        eventData_ = std::make_shared<EventDataBase>();
+    }
     EventWrap(uint32_t eventId, std::shared_ptr<EventDataBase> data)
         : eventId_(eventId), param_(0), eventData_(data)
     {
@@ -87,6 +92,10 @@ public:
     {
         return timeout_;
     }
+    bool IsExtension() const
+    {
+        return isExtension_;
+    }
 private:
     uint32_t eventId_;
     int64_t param_;
@@ -94,6 +103,7 @@ private:
     TaskHandle eventTask_;
     int runCount_ = 0;
     uint32_t timeout_ = 0;
+    bool isExtension_ = false;
 };
 
 class EventHandlerWrap : public std::enable_shared_from_this<EventHandlerWrap> {
