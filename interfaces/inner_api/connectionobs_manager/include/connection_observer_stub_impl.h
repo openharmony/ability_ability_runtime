@@ -34,11 +34,9 @@ public:
 
     void OnExtensionDisconnected(const ConnectionData &data) override;
 
-#ifdef WITH_DLP
     void OnDlpAbilityOpened(const DlpStateData &data) override;
 
     void OnDlpAbilityClosed(const DlpStateData &data) override;
-#endif // WITH_DLP
 
 private:
     std::weak_ptr<ConnectionObserverClientImpl> owner_;
