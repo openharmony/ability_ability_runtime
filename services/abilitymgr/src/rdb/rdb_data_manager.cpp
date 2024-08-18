@@ -15,6 +15,7 @@
 
 #include "rdb_data_manager.h"
 
+#include "file_monitor.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -37,6 +38,7 @@ int32_t RdbDataManager::Init(NativeRdb::RdbOpenCallback &rdbCallback)
         return NativeRdb::E_ERROR;
     }
 
+    OHOS::AAFwk::FileMonitor::SetDBDeleteMonitorFlag(ABILITY_RDB_PATH);
     return NativeRdb::E_OK;
 }
 

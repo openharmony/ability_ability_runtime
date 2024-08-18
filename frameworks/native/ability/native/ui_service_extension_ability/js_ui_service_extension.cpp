@@ -356,6 +356,20 @@ void JsUIServiceExtension::OnDisconnect(const AAFwk::Want &want,
 
 void JsUIServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
 {
+    Extension::OnCommand(want, restart, startId);
+    TAG_LOGD(AAFwkTag::UISERVC_EXT, "restart=%{public}s,startId=%{public}d.",
+        restart ? "true" : "false",
+        startId);
+    // wrap want
+    HandleScope handleScope(jsRuntime_);
+    napi_env env = jsRuntime_.GetNapiEnv();
+    napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
+    // wrap startId
+    napi_value napiStartId = nullptr;
+    napi_create_int32(env, startId, &napiStartId);
+    napi_value argv[] = {napiWant, napiStartId};
+    CallObjectMethod("onRequest", argv, ARGC_TWO);
+
 #ifdef SUPPORT_GRAPHICS
     auto context = GetContext();
     if (firstRequest_ && context != nullptr) {
@@ -379,20 +393,6 @@ void JsUIServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int 
         firstRequest_ = false;
     }
 #endif
-
-    Extension::OnCommand(want, restart, startId);
-    TAG_LOGD(AAFwkTag::UISERVC_EXT, "restart=%{public}s,startId=%{public}d.",
-        restart ? "true" : "false",
-        startId);
-    // wrap want
-    HandleScope handleScope(jsRuntime_);
-    napi_env env = jsRuntime_.GetNapiEnv();
-    napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
-    // wrap startId
-    napi_value napiStartId = nullptr;
-    napi_create_int32(env, startId, &napiStartId);
-    napi_value argv[] = {napiWant, napiStartId};
-    CallObjectMethod("onRequest", argv, ARGC_TWO);
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "ok");
 }
 

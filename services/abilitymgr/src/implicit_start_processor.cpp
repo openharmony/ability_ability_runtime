@@ -44,18 +44,18 @@ const std::string HTTPS_SCHEME_NAME = "https";
 const std::string APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr const char* SUPPORT_ACTION_START_SELECTOR = "persist.sys.ability.support.action_start_selector";
 
-const std::vector<std::string> ImplicitStartProcessor::blackList = {
-    std::vector<std::string>::value_type(BLACK_ACTION_SELECT_DATA),
-};
-
-const std::unordered_set<AppExecFwk::ExtensionAbilityType> ImplicitStartProcessor::extensionWhiteList = {
-    AppExecFwk::ExtensionAbilityType::FORM,
-    AppExecFwk::ExtensionAbilityType::INPUTMETHOD,
-    AppExecFwk::ExtensionAbilityType::WALLPAPER,
-    AppExecFwk::ExtensionAbilityType::WINDOW,
-    AppExecFwk::ExtensionAbilityType::THUMBNAIL,
-    AppExecFwk::ExtensionAbilityType::PREVIEW
-};
+bool ImplicitStartProcessor::IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type)
+{
+    switch (type) {
+        case AppExecFwk::ExtensionAbilityType::FORM: return true;
+        case AppExecFwk::ExtensionAbilityType::INPUTMETHOD: return true;
+        case AppExecFwk::ExtensionAbilityType::WALLPAPER: return true;
+        case AppExecFwk::ExtensionAbilityType::WINDOW: return true;
+        case AppExecFwk::ExtensionAbilityType::THUMBNAIL: return true;
+        case AppExecFwk::ExtensionAbilityType::PREVIEW: return true;
+        default: return false;
+    }
+}
 
 bool ImplicitStartProcessor::IsImplicitStartAction(const Want &want)
 {
@@ -69,7 +69,7 @@ bool ImplicitStartProcessor::IsImplicitStartAction(const Want &want)
         return false;
     }
 
-    if (std::find(blackList.begin(), blackList.end(), want.GetAction()) == blackList.end()) {
+    if (want.GetAction() != BLACK_ACTION_SELECT_DATA) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start, the action is %{public}s", want.GetAction().data());
         return true;
     }
@@ -594,7 +594,7 @@ bool ImplicitStartProcessor::CheckImplicitStartExtensionIsValid(const AbilityReq
     }
     TAG_LOGD(
         AAFwkTag::ABILITYMGR, "ImplicitStartExtension type: %{public}d.", static_cast<int32_t>(extensionInfo.type));
-    if (extensionWhiteList.find(extensionInfo.type) == extensionWhiteList.end()) {
+    if (!IsExtensionInWhiteList(extensionInfo.type)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "The extension without UI is not allowed ImplicitStart");
         return false;
     }
@@ -765,12 +765,25 @@ void ImplicitStartProcessor::AddIdentity(int32_t tokenId, std::string identity)
     identityList_.emplace_back(IdentityNode(tokenId, identity));
 }
 
-void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId)
+void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId, bool flag)
 {
     std::lock_guard guard(identityListLock_);
     for (auto it = identityList_.begin(); it != identityList_.end(); it++) {
         if (it->tokenId == tokenId) {
             IPCSkeleton::SetCallingIdentity(it->identity);
+            if (flag) {
+                identityList_.erase(it);
+            }
+            return;
+        }
+    }
+}
+
+void ImplicitStartProcessor::RemoveIdentity(int32_t tokenId)
+{
+    std::lock_guard guard(identityListLock_);
+    for (auto it = identityList_.begin(); it != identityList_.end(); it++) {
+        if (it->tokenId == tokenId) {
             identityList_.erase(it);
             return;
         }

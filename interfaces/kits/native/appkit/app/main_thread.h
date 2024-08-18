@@ -363,6 +363,8 @@ private:
 
     void HandleScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
 
+    void HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
+
     /**
      *
      * @brief Schedule the application process exit safely.

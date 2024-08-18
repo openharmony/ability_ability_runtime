@@ -68,5 +68,16 @@ void AppDeathRecipient::SetIsChildProcess(bool isChildProcess)
 {
     isChildProcess_ = isChildProcess;
 }
+
+AppStateCallbackDeathRecipient::AppStateCallbackDeathRecipient(std::weak_ptr<AppMgrServiceInner> appMgrServiceInner)
+    : appMgrServiceInner_(appMgrServiceInner) {}
+
+void AppStateCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    auto appMgrInner = appMgrServiceInner_.lock();
+    if (appMgrInner) {
+        appMgrInner->RemoveDeadAppStateCallback(remote);
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
