@@ -403,7 +403,7 @@ napi_value JsUIExtensionContext::OnTerminateSelf(napi_env env, NapiCallbackInfo&
     };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (innerErrCode == ERR_OK) {
+            if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
