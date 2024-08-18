@@ -96,7 +96,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
         return CreateJsUndefined(env);
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weak = context_, uri, innerErrCode](napi_env env) {
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, uri, packOption = std::move(packOption), innerErrCode](napi_env env) {
         TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithUri begin");
         auto context = weak.lock();
         if (!context) {
@@ -105,7 +105,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
             return;
         }
         AAFwk::Want newWant;
-        *innerErrCode = context->SaveEditedContent(uri, newWant);
+        *innerErrCode = context->SaveEditedContent(uri, packOption, newWant);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
         if (abilityResult == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
