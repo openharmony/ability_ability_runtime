@@ -115,7 +115,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
     };
     NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask &task,
         int32_t status) {
-        if (*innerErrCode == ERR_OK){
+        if (*innerErrCode == ERR_OK) {
             task.Resolve(env, abilityResult);
         } else {
             task.Reject(env, CreateJsError(env, *innerErrCode));
@@ -172,7 +172,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
     };
     NapiAsyncTask::CompleteCallback complete = [innerErrCode](
         napi_env env, NapiAsyncTask &task, int32_t status) {
-        if (*innerErrCode == ERR_OK){
+        if (*innerErrCode == ERR_OK) {
             task.Resolve(env, abilityResult);
         } else {
             task.Reject(env, CreateJsError(env, *innerErrCode));

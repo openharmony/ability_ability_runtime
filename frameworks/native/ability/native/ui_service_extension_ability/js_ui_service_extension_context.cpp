@@ -223,7 +223,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-                if(*innerErrCode == ERR_OK){
+                if(*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 }else{
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -410,15 +410,15 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =[innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
-                if(*innerErrCode == ERROR_CODE_ONE){
+                if(*innerErrCode == ERROR_CODE_ONE) {
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
                     return;
                 }
-                if(*innerErrCode == ERROR_CODE_TWO){
+                if(*innerErrCode == ERROR_CODE_TWO) {
                     task.Reject(env, CreateJsError(env, ERROR_CODE_TWO, "not found connection"));
                     return;
                 }
-                if(*innerErrCode == ERR_OK){
+                if(*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 }else{
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
