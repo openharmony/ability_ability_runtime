@@ -168,7 +168,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
             napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
             if (abilityResult == nullptr) {
                 TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)))
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)));
                 return;
             }
             task.Resolve(env, abilityResult);
