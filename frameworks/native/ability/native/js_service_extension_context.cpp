@@ -1029,7 +1029,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                if (*innerErrCode == 0) {
+                if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, innerErrorCode));
