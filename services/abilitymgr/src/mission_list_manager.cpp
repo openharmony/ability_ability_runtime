@@ -67,6 +67,7 @@ constexpr int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 constexpr int32_t TRACE_ATOMIC_SERVICE_ID = 201;
 const std::string TRACE_ATOMIC_SERVICE = "StartAtomicService";
 constexpr int GET_TARGET_MISSION_OVER = 200;
+constexpr int32_t MAX_FIND_UIEXTENSION_CALLER_TIMES = 10;
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -1485,7 +1486,8 @@ int32_t MissionListManager::BackToCallerAbilityWithResult(std::shared_ptr<Abilit
         return CHECK_PERMISSION_FAILED;
     }
     // find host of UI Extension
-    while (callerAbilityRecord &&
+    auto foundCount = 0;
+    while (((++foundCount) <= MAX_FIND_UIEXTENSION_CALLER_TIMES) && callerAbilityRecord &&
         UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is uiExtension.");
         callerAbilityRecord = callerAbilityRecord->GetCallerRecord();

@@ -105,7 +105,7 @@ int64_t StartupUtil::GenerateFullRequestCode(int32_t pid, bool backFlag, int32_t
     if (requestCode <= 0 || pid <= 0) {
         return 0;
     }
-    uint64_t fullRequestCode = requestCode;
+    uint64_t fullRequestCode = static_cast<uint64_t>(requestCode);
     uint64_t tempNum = pid;
     fullRequestCode |= (tempNum << REQUEST_CODE_LENGTH);
     if (backFlag) {
@@ -121,7 +121,7 @@ CallerRequestInfo StartupUtil::ParseFullRequestCode(int64_t fullRequestCode)
     if (fullRequestCode <= 0) {
         return requestInfo;
     }
-    uint64_t tempFullRequestCode = fullRequestCode;
+    uint64_t tempFullRequestCode = static_cast<uint64_t>(fullRequestCode);
     if ((tempFullRequestCode >> VALID_REQUEST_CODE_LENGTH) > 0) {
         return requestInfo;
     }
