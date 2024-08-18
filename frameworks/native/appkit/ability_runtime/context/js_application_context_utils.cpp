@@ -500,7 +500,7 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
     TAG_LOGD(AAFwkTag::APPKIT, "Get Group Dir");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     std::string path = "";
-    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, innerErrCode, path]() {
+    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, innerErrCode, &path]() {
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
