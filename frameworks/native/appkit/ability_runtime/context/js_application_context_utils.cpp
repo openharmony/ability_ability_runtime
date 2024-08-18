@@ -514,8 +514,8 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
             task.ResolveWithNoError(env, CreateJsValue(env, path));
         } else {
             TAG_LOGE(AAFwkTag::APPKIT, "GetGroupDir is failed %{public}d", *innerErrCode);
-            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST),
-                "applicationContext if already released");
+            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
+                "applicationContext if already released"));
         }
     };
     napi_value lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
