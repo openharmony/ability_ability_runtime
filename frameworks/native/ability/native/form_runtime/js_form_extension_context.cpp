@@ -291,7 +291,7 @@ private:
             }
             if (!connection) {
                 TAG_LOGW(AAFwkTag::FORM_EXT, "Connection null");
-                *innerErrCode = AbilityErrorCode::ERROR_CODE_INNER
+                *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER);
                 return;
             }
             *innerErrCode = context->DisconnectAbility(want, connection);
