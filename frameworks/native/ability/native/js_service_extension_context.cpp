@@ -840,8 +840,7 @@ private:
             *innerErrCode = context->DisconnectAbility(want, connection, accountId);
         };
         NapiAsyncTask::CompleteCallback complete =
-            [innerErrCode](
-                napi_env env, NapiAsyncTask& task, int32_t status) {
+            [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERROR_CODE_ONE) {
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
                     return;
@@ -989,7 +988,7 @@ private:
             *innerErrCode = context->StartServiceExtensionAbility(want, accountId);
         };
         NapiAsyncTask::CompleteCallback complete =
-            [*innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
