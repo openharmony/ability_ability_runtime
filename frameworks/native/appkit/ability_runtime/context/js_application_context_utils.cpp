@@ -611,7 +611,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
 
     TAG_LOGD(AAFwkTag::APPKIT, "kill self process");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, innerErrCode]() {
+    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, clearPageStack, innerErrCode]() {
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
@@ -621,7 +621,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
         context->KillProcessBySelf(clearPageStack);
     };
     NapiAsyncTask::CompleteCallback complete =
-        [applicationContext = applicationContext_, clearPageStack](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
