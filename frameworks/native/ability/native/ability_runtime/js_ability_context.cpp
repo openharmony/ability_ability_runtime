@@ -900,7 +900,7 @@ napi_value JsAbilityContext::OnStartAbilityAsCaller(napi_env env, NapiCallbackIn
         auto context = weak.lock();
         if (!context) {
             TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
-            task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
         *innerErrCode = (unwrapArgc == ARGC_ONE) ?
