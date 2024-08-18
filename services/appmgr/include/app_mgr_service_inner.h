@@ -151,6 +151,7 @@ public:
      * @return
      */
     virtual void RegisterAppStateCallback(const sptr<IAppStateCallback> &callback);
+    void RemoveDeadAppStateCallback(const wptr<IRemoteObject> &remote);
 
     /**
      * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
@@ -1138,6 +1139,17 @@ public:
 
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
+    /**
+     * Get pids of processes which belong to specific bundle name and support process cache feature.
+     *
+     * @param bundleName bundle name.
+     * @param pidList pid list of processes that support process cache.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);
@@ -1491,7 +1503,7 @@ private:
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
-    std::vector<const sptr<IAppStateCallback>> appStateCallbacks_;
+    std::vector<sptr<IAppStateCallback>> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
     std::shared_ptr<AppRunningManager> appRunningManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;

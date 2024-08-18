@@ -23,6 +23,7 @@
 #include "mission.h"
 #include "mission_info_mgr.h"
 #include "mission_list_manager.h"
+#include "startup_util.h"
 #undef private
 #undef protected
 
@@ -6531,6 +6532,194 @@ HWTEST_F(MissionListManagerTest, OnStartSpecifiedAbilityTimeoutResponse_005, Tes
     missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
     missionListManager->waitingAbilityQueue_.push(abilityRequest2);
     missionListManager->OnStartSpecifiedAbilityTimeoutResponse(want);
+}
+
+/*
+ * Feature: MissionListManager
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: MissionListManager BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(MissionListManagerTest, BackToCallerAbilityWithResult_001, TestSize.Level1)
+{
+    constexpr int32_t userId = -1;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    EXPECT_NE(missionListManager, nullptr);
+    missionListManager->Init();
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int64_t callerRequestCode = 0;
+    auto ret = missionListManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_CALLER_NOT_EXISTS);
+}
+
+/*
+ * Feature: MissionListManager
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: MissionListManager BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(MissionListManagerTest, BackToCallerAbilityWithResult_002, TestSize.Level1)
+{
+    constexpr int32_t userId = -1;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    EXPECT_NE(missionListManager, nullptr);
+    missionListManager->Init();
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int64_t callerRequestCode = 1;
+    auto ret = missionListManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_CALLER_NOT_EXISTS);
+}
+
+/*
+ * Feature: MissionListManager
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: MissionListManager BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(MissionListManagerTest, BackToCallerAbilityWithResult_003, TestSize.Level1)
+{
+    constexpr int32_t userId = -1;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    EXPECT_NE(missionListManager, nullptr);
+    missionListManager->Init();
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int32_t requestCode = 1;
+    int32_t pid = 1;
+    bool backFlag = false;
+    int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
+
+    // not support back to caller
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
+    callerAbilityRecord->pid_ = pid;
+    auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    newCallerRecord->AddHistoryRequestCode(requestCode);
+    abilityRecord->callerList_.emplace_back(newCallerRecord);
+    auto ret = missionListManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_NOT_SUPPORT_BACK_TO_CALLER);
+}
+
+/*
+ * Feature: MissionListManager
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: MissionListManager BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(MissionListManagerTest, BackToCallerAbilityWithResult_004, TestSize.Level1)
+{
+    constexpr int32_t userId = -1;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    EXPECT_NE(missionListManager, nullptr);
+    missionListManager->Init();
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int32_t requestCode = 1;
+    int32_t pid = 1;
+    bool backFlag = true;
+    int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
+
+    // caller is self
+    abilityRecord->pid_ = pid;
+    auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, abilityRecord);
+    newCallerRecord->AddHistoryRequestCode(requestCode);
+    abilityRecord->callerList_.emplace_back(newCallerRecord);
+    auto ret = missionListManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: MissionListManager
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: MissionListManager BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(MissionListManagerTest, BackToCallerAbilityWithResult_005, TestSize.Level1)
+{
+    constexpr int32_t userId = -1;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    EXPECT_NE(missionListManager, nullptr);
+    missionListManager->Init();
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int32_t requestCode = 1;
+    int32_t pid = 1;
+    bool backFlag = true;
+    int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
+    
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
+    callerAbilityRecord->pid_ = pid;
+    auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    newCallerRecord->AddHistoryRequestCode(requestCode);
+    abilityRecord->pid_ = pid;
+    abilityRecord->callerList_.emplace_back(newCallerRecord);
+
+    // current ability is backgrounded
+    abilityRecord->currentState_ = AbilityState::BACKGROUND;
+    auto ret = missionListManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: MissionListManager
+ * Function: BackToCallerAbilityWithResult
+ * SubFunction: NA
+ * FunctionPoints: MissionListManager BackToCallerAbilityWithResult
+ * EnvConditions: NA
+ * CaseDescription: Verify BackToCallerAbilityWithResult
+ */
+HWTEST_F(MissionListManagerTest, BackToCallerAbilityWithResult_006, TestSize.Level1)
+{
+    constexpr int32_t userId = -1;
+    auto missionListManager = std::make_shared<MissionListManager>(userId);
+    EXPECT_NE(missionListManager, nullptr);
+    missionListManager->Init();
+    
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    Want resultWant;
+    int32_t resultCode = 100;
+    int32_t requestCode = 1;
+    int32_t pid = 1;
+    bool backFlag = true;
+    int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
+    
+    std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
+    callerAbilityRecord->pid_ = pid;
+    auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
+    newCallerRecord->AddHistoryRequestCode(requestCode);
+    abilityRecord->pid_ = pid;
+    abilityRecord->callerList_.emplace_back(newCallerRecord);
+
+    abilityRecord->currentState_ = AbilityState::FOREGROUND;
+    auto ret = missionListManager->BackToCallerAbilityWithResult(abilityRecord,
+        resultCode, &resultWant, callerRequestCode);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

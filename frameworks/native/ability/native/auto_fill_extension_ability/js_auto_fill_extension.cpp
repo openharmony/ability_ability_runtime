@@ -492,6 +492,7 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
         option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
         option->SetParentId(sessionInfo->hostWindowId);
+        option->SetRealParentId(sessionInfo->realHostWindowId);
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
         auto uiWindow = Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
         if (uiWindow == nullptr) {
@@ -509,6 +510,9 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         CallJsOnRequest(want, sessionInfo, uiWindow);
         uiWindowMap_[obj] = uiWindow;
         context->SetSessionInfo(sessionInfo);
+#ifdef SUPPORT_GRAPHICS
+        context->SetWindow(uiWindow);
+#endif // SUPPORT_GRAPHICS
     }
     return true;
 }

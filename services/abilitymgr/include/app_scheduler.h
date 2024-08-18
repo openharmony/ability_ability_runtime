@@ -471,6 +471,8 @@ public:
      */
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.

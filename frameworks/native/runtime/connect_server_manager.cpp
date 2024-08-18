@@ -78,7 +78,7 @@ void ConnectServerManager::LoadConnectServerDebuggerSo()
 {
     std::lock_guard<std::mutex> lock(g_loadsoMutex);
     if (handlerConnectServerSo_ == nullptr) {
-        handlerConnectServerSo_ = dlopen("libconnectserver_debugger.z.so", RTLD_LAZY);
+        handlerConnectServerSo_ = dlopen("libark_connect_inspector.z.so", RTLD_LAZY);
         if (handlerConnectServerSo_ == nullptr) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "null handlerConnectServerSo_");
             return;

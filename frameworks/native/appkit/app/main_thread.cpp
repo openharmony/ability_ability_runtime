@@ -639,24 +639,19 @@ void MainThread::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocI
  */
 void MainThread::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "pid: %{public}d, tid: %{public}d, needGc: %{public}d, needSnapshot: %{public}d",
-        info.pid, info.tid, info.needGc, info.needSnapshot);
-    auto app = applicationForDump_.lock();
-    if (app == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "app nullptr");
-        return;
-    }
-    auto &runtime = app->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime nullptr");
-        return;
-    }
-    if (info.needSnapshot == true) {
-        runtime->DumpHeapSnapshot(info.tid, info.needGc);
-    } else {
-        if (info.needGc == true) {
-            runtime->ForceFullGC(info.tid);
+    TAG_LOGI(AAFwkTag::APPKIT, "pid: %{public}d, tid: %{public}d, needGc: %{public}d, needSnapshot: %{public}d,\n"
+        "needLeakobj: %{public}d", info.pid, info.tid, info.needGc, info.needSnapshot, info.needLeakobj);
+    wptr<MainThread> weak = this;
+    auto task = [weak, info]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            return;
         }
+        appThread->HandleJsHeapMemory(info);
+    };
+    if (!mainHandler_->PostTask(task, "MainThread:HandleJsHeapMemory")) {
+        TAG_LOGE(AAFwkTag::APPKIT, "PostTask HandleJsHeapMemory failed");
     }
 }
 
@@ -958,6 +953,22 @@ void MainThread::HandleTerminateApplicationLocal()
     TAG_LOGD(AAFwkTag::APPKIT, "runner is stopped");
     SetRunnerStarted(false);
     HandleCancelAssertFaultTask();
+}
+
+void MainThread::HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (mainHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
+        return;
+    }
+    auto app = applicationForDump_.lock();
+    if (app == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null app");
+        return;
+    }
+    auto helper = std::make_shared<DumpRuntimeHelper>(app);
+    helper->DumpJsHeap(info);
 }
 
 /**

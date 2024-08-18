@@ -166,6 +166,8 @@ constexpr const char* SERVICE_EXTENSION = ":ServiceExtension";
 constexpr const char* KEEP_ALIVE = ":KeepAlive";
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 constexpr const char* TSAN_FLAG_NAME = "tsanEnabled";
+constexpr const char* HWASAN_FLAG_NAME = "hwasanEnabled";
+constexpr const char* UBSAN_FLAG_NAME = "ubsanEnabled";
 constexpr const char* UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
 constexpr const char* UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 constexpr const char* MEMMGR_PROC_NAME = "memmgrservice";
@@ -540,6 +542,9 @@ void AppMgrServiceInner::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObje
         }
     }
 
+    if (abilityInfo->type == AppExecFwk::AbilityType::PAGE && appRecord != nullptr) {
+        appRecord->SetUIAbilityLaunched(true);
+    }
     PerfProfile::GetInstance().SetAbilityLoadEndTime(GetTickCount());
     PerfProfile::GetInstance().Dump();
     PerfProfile::GetInstance().Reset();
@@ -998,6 +1003,12 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         TAG_LOGE(AAFwkTag::APPMGR, "get app record failed");
         return;
     }
+    // Prevent forged requests from changing the app's state.
+    if (appRecord->GetApplicationScheduleState() != ApplicationScheduleState::SCHEDULE_FOREGROUNDING) {
+        TAG_LOGE(AAFwkTag::APPMGR, "app is not scheduling to foreground.");
+        return;
+    }
+    appRecord->SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_READY);
     ApplicationState appState = appRecord->GetState();
     if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND) {
         if (appState == ApplicationState::APP_STATE_BACKGROUND) {
@@ -1038,6 +1049,12 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         TAG_LOGE(AAFwkTag::APPMGR, "get app record failed");
         return;
     }
+    // Prevent forged requests from changing the app's state.
+    if (appRecord->GetApplicationScheduleState() != ApplicationScheduleState::SCHEDULE_BACKGROUNDING) {
+        TAG_LOGE(AAFwkTag::APPMGR, "app is not scheduling to background.");
+        return;
+    }
+    appRecord->SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_READY);
     if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
         appRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
         bool needNotifyApp = !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
@@ -1910,8 +1927,8 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
             TAG_LOGI(AAFwkTag::APPMGR, "pid %{public}d is thread tid in foundation, don't kill.", pid);
             return AAFwk::ERR_KILL_FOUNDATION_UID;
         }
-        TAG_LOGI(AAFwkTag::APPMGR, "kill pid %{public}d", pid);
         ret = kill(pid, SIGNAL_KILL);
+        TAG_LOGI(AAFwkTag::APPMGR, "kill pid %{public}d, ret:%{public}d", pid, ret);
     }
     AAFwk::EventInfo eventInfo;
     if (!appRecord) {
@@ -2234,6 +2251,29 @@ void AppMgrServiceInner::RegisterAppStateCallback(const sptr<IAppStateCallback> 
     if (callback != nullptr) {
         std::lock_guard lock(appStateCallbacksLock_);
         appStateCallbacks_.push_back(callback);
+        auto remoteObjedct = callback->AsObject();
+        if (remoteObjedct) {
+            remoteObjedct->AddDeathRecipient(sptr<AppStateCallbackDeathRecipient>(
+                new AppStateCallbackDeathRecipient(weak_from_this())));
+        }
+    }
+}
+
+void AppMgrServiceInner::RemoveDeadAppStateCallback(const wptr<IRemoteObject> &remote)
+{
+    auto remoteObject = remote.promote();
+    if (remoteObject == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "remoteObject null");
+        return;
+    }
+
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (auto it = appStateCallbacks_.begin(); it != appStateCallbacks_.end(); ++it) {
+        auto callback = *it;
+        if (callback && callback->AsObject() == remoteObject) {
+            appStateCallbacks_.erase(it);
+            break;
+        }
     }
 }
 
@@ -2678,6 +2718,18 @@ void AppMgrServiceInner::SetAppEnvInfo(const BundleInfo &bundleInfo, AppSpawnSta
         startMsg.appEnv.emplace(TSAN_FLAG_NAME, std::to_string(1));
     } else {
         startMsg.appEnv.emplace(TSAN_FLAG_NAME, std::to_string(0));
+    }
+
+    if (bundleInfo.applicationInfo.hwasanEnabled) {
+        startMsg.appEnv.emplace(HWASAN_FLAG_NAME, std::to_string(1));
+    } else {
+        startMsg.appEnv.emplace(HWASAN_FLAG_NAME, std::to_string(0));
+    }
+
+    if (bundleInfo.applicationInfo.ubsanEnabled) {
+        startMsg.appEnv.emplace(UBSAN_FLAG_NAME, std::to_string(1));
+    } else {
+        startMsg.appEnv.emplace(UBSAN_FLAG_NAME, std::to_string(0));
     }
 
     if (!bundleInfo.applicationInfo.appEnvironments.empty()) {
@@ -3328,7 +3380,7 @@ void AppMgrServiceInner::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &t
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
         return;
     }
-    appRunningManager_->HandleAbilityAttachTimeOut(token);
+    appRunningManager_->HandleAbilityAttachTimeOut(token, shared_from_this());
 }
 
 void AppMgrServiceInner::PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag)
@@ -7415,6 +7467,52 @@ void AppMgrServiceInner::MakeIsolateSandBoxProcessName(const std::shared_ptr<Abi
             processName = (processName + ":" + abilityInfo->name);
         }
     }
+}
+
+bool AppMgrServiceInner::IsProcessAttached(sptr<IRemoteObject> token) const
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return false;
+    }
+    auto appRecord = GetAppRunningRecordByAbilityToken(token);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr");
+        return false;
+    }
+    return appRecord->IsProcessAttached();
+}
+
+int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bundleName,
+    std::vector<int32_t> &pidList)
+{
+    auto cachePrcoMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
+    auto osAccountMgr = DelayedSingleton<OsAccountManagerWrapper>::GetInstance();
+    if (cachePrcoMgr == nullptr || osAccountMgr == nullptr || appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Inner manager is nullptr.");
+        return AAFwk::INNER_ERR;
+    }
+    pidList.clear();
+    int32_t callderUserId = -1;
+    if (osAccountMgr->GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), callderUserId) != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Get caller local id failed.");
+        return AAFwk::INNER_ERR;
+    }
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        auto appRecord = item.second;
+        if (appRecord == nullptr) {
+            continue;
+        }
+        int32_t procUserId = -1;
+        if (appRecord->GetBundleName() == bundleName &&
+            osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), procUserId) == 0 &&
+            procUserId == callderUserId && cachePrcoMgr->IsAppSupportProcessCache(appRecord) &&
+            appRecord->GetPriorityObject() != nullptr) {
+            pidList.push_back(appRecord->GetPriorityObject()->GetPid());
+        }
+    }
+    return ERR_OK;
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

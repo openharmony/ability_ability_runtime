@@ -1327,5 +1327,18 @@ bool AppMgrClient::IsKilledForUpgradeWeb(const std::string &bundleName)
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     return amsService->IsKilledForUpgradeWeb(bundleName);
 }
+
+bool AppMgrClient::IsProcessAttached(sptr<IRemoteObject> token) const
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return false;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        return false;
+    }
+    return amsService->IsProcessAttached(token);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
