@@ -521,7 +521,7 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
     napi_value lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplicationContextUtils::OnGetGroupDir",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, std:move(execute), std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
