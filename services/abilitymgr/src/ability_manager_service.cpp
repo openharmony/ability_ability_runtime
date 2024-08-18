@@ -1052,18 +1052,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return ERR_CROSS_USER;
     }
 
-    if (want.HasParameter(CALLER_REQUEST_CODE)) {
-        const_cast<Want &>(want).RemoveParam(CALLER_REQUEST_CODE);
-    }
-    auto callerAbilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (requestCode > 0 && callerAbilityRecord != nullptr) {
-        bool backFlag = AmsConfigurationParameter::GetInstance().IsSupportBackToCaller();
-        auto fullRequestCode = StartupUtil::GenerateFullRequestCode(
-            callerAbilityRecord->GetPid(), backFlag, requestCode);
-        const_cast<Want &>(want).SetParam(CALLER_REQUEST_CODE, std::to_string(fullRequestCode));
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "pid: %{public}d, requestCode: %{public}d, fullRequestCode: %{public}s.",
-            callerAbilityRecord->GetPid(), requestCode, std::to_string(fullRequestCode).c_str());
-    }
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
@@ -1203,6 +1191,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         TAG_LOGE(AAFwkTag::ABILITYMGR, "IsAbilityControllerStart failed: %{public}s.", abilityInfo.bundleName.c_str());
         return ERR_WOULD_BLOCK;
     }
+
+    auto backFlag = StartAbilityUtils::ermsSupportBackToCallerFlag;
+    UpdateBackToCallerFlag(callerToken, abilityRequest.want, requestCode, backFlag);
+    StartAbilityUtils::ermsSupportBackToCallerFlag = false;
 
     abilityRequest.want.RemoveParam(SPECIFY_TOKEN_ID);
     if (specifyTokenId > 0) {
@@ -1660,18 +1652,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_CROSS_USER;
     }
-    if (want.HasParameter(CALLER_REQUEST_CODE)) {
-        const_cast<Want &>(want).RemoveParam(CALLER_REQUEST_CODE);
-    }
-    auto callerAbilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (requestCode > 0 && callerAbilityRecord != nullptr) {
-        bool backFlag = AmsConfigurationParameter::GetInstance().IsSupportBackToCaller();
-        auto fullRequestCode = StartupUtil::GenerateFullRequestCode(
-            callerAbilityRecord->GetPid(), backFlag, requestCode);
-        const_cast<Want &>(want).SetParam(CALLER_REQUEST_CODE, std::to_string(fullRequestCode));
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "pid: %{public}d, requestCode: %{public}d, fullRequestCode: %{public}s.",
-            callerAbilityRecord->GetPid(), requestCode, std::to_string(fullRequestCode).c_str());
-    }
 
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_SCREEN
@@ -1818,6 +1798,10 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return CreateCloneSelectorDialog(abilityRequest, GetUserId());
     }
 #endif // SUPPORT_GRAPHICS
+    auto backFlag = StartAbilityUtils::ermsSupportBackToCallerFlag;
+    UpdateBackToCallerFlag(callerToken, abilityRequest.want, requestCode, backFlag);
+    StartAbilityUtils::ermsSupportBackToCallerFlag = false;
+
     abilityRequest.want.RemoveParam(SPECIFY_TOKEN_ID);
     if (specifyTokenId > 0) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Set specifyTokenId, the specifyTokenId is %{public}d.", specifyTokenId);
@@ -8276,6 +8260,27 @@ void AbilityManagerService::UpdateCallerInfoFromToken(Want& want, const sptr<IRe
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+}
+
+void AbilityManagerService::UpdateBackToCallerFlag(const sptr<IRemoteObject> &callerToken, Want &want,
+    int32_t requestCode, bool backFlag)
+{
+    if (want.HasParameter(CALLER_REQUEST_CODE)) {
+        want.RemoveParam(CALLER_REQUEST_CODE);
+    }
+    auto callerAbilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (requestCode > 0 && callerAbilityRecord != nullptr) {
+        // default return true on oh
+        if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+            backFlag = AmsConfigurationParameter::GetInstance().IsSupportBackToCaller();
+        }
+        auto fullRequestCode = StartupUtil::GenerateFullRequestCode(
+            callerAbilityRecord->GetPid(), backFlag, requestCode);
+        want.SetParam(CALLER_REQUEST_CODE, std::to_string(fullRequestCode));
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "pid: %{public}d, backFlag:%{private}d, requestCode: %{private}d, fullRequestCode: %{private}s",
+            callerAbilityRecord->GetPid(), backFlag, requestCode, std::to_string(fullRequestCode).c_str());
+    }
 }
 
 bool AbilityManagerService::JudgeMultiUserConcurrency(const int32_t userId)

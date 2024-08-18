@@ -40,6 +40,11 @@ AbilityExperienceRule *AbilityExperienceRule::Unmarshalling(Parcel &in)
 
     rule->replaceWant = in.ReadParcelable<Want>();
 
+    if (!in.ReadBool(rule->isBackSkuExempt)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "read isBackSkuExempt failed");
+        rule->isBackSkuExempt = true;
+    }
+
     return rule;
 }
 
@@ -57,6 +62,10 @@ bool AbilityExperienceRule::Marshalling(Parcel &parcel) const
     if (!parcel.WriteParcelable(replaceWant)) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write replaceWant failed");
         return false;
+    }
+
+    if (!parcel.WriteBool(isBackSkuExempt)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write isBackSkuExempt failed");
     }
 
     return true;

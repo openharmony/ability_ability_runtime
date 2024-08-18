@@ -50,6 +50,7 @@ constexpr int KILL_TIMEOUT_MULTIPLE = 45;
 constexpr int KILL_TIMEOUT_MULTIPLE = 3;
 #endif
 constexpr int32_t DEFAULT_USER_ID = 0;
+constexpr int32_t MAX_FIND_UIEXTENSION_CALLER_TIMES = 10;
 
 FreezeUtil::TimeoutState MsgId2State(uint32_t msgId)
 {
@@ -1181,7 +1182,8 @@ int32_t UIAbilityLifecycleManager::BackToCallerAbilityWithResult(std::shared_ptr
         return CHECK_PERMISSION_FAILED;
     }
     // find host of UI Extension
-    while (callerAbilityRecord &&
+    auto foundCount = 0;
+    while (((++foundCount) <= MAX_FIND_UIEXTENSION_CALLER_TIMES) && callerAbilityRecord &&
         UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is uiExtension.");
         callerAbilityRecord = callerAbilityRecord->GetCallerRecord();
