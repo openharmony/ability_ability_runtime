@@ -830,7 +830,7 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
     TAG_LOGD(AAFwkTag::APPKIT, "Get Process Info");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     AppExecFwk::RunningProcessInfo processInfo;
-    NapiAsyncTask::ExecuteCallback = [applicationContext = applicationContext_, innerErrCode, processInfo]() {
+    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, innerErrCode, &processInfo]() {
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
@@ -839,7 +839,7 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
         }
         *innerErrCode = context->GetProcessRunningInformation(processInfo);
     };
-    auto complete = [innerErrCode, processInfo](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [innerErrCode, &processInfo](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == ERR_OK) {
             napi_value object = nullptr;
             napi_create_object(env, &object);
