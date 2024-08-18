@@ -125,7 +125,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
     napi_value lastParam = (info.argc > INDEX_ONE) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsPhotoEditorExtensionContext OnSaveEditedContentWithUri", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, std::move(excute), std::move(complete), &result));
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
