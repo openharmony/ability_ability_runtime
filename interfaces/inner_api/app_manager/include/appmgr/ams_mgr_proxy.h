@@ -332,6 +332,8 @@ public:
      */
     virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid) override;
 
+    virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);

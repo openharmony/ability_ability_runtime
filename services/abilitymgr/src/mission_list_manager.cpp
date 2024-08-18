@@ -1449,6 +1449,10 @@ int32_t MissionListManager::BackToCallerAbilityWithResult(std::shared_ptr<Abilit
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(managerLock_);
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord nullptr.");
+        return ERR_INVALID_VALUE;
+    }
     auto requestInfo = StartupUtil::ParseFullRequestCode(callerRequestCode);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, backFlag:%{public}d, requestCode:%{public}d.",
         requestInfo.pid, requestInfo.backFlag, requestInfo.requestCode);
@@ -1481,7 +1485,8 @@ int32_t MissionListManager::BackToCallerAbilityWithResult(std::shared_ptr<Abilit
         return CHECK_PERMISSION_FAILED;
     }
     // find host of UI Extension
-    if (UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
+    while (callerAbilityRecord &&
+        UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is uiExtension.");
         callerAbilityRecord = callerAbilityRecord->GetCallerRecord();
     }

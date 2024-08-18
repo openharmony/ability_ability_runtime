@@ -339,6 +339,8 @@ public:
      */
     virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid) override;
 
+    virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
+
 private:
     /**
      * @brief Judge whether the application service is ready.

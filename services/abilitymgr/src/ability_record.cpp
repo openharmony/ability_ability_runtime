@@ -1815,12 +1815,12 @@ std::shared_ptr<AbilityRecord> AbilityRecord::GetCallerByRequestCode(int32_t req
 {
     for (auto caller : GetCallerRecordList()) {
         if (caller == nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "null caller");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "null caller");
             continue;
         }
         std::shared_ptr<AbilityRecord> callerAbilityRecord = caller->GetCaller();
         if (callerAbilityRecord == nullptr || callerAbilityRecord->GetPid() != pid) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbility not match");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "callerAbility not match");
             continue;
         }
         if (caller->IsHistoryRequestCode(requestCode)) {

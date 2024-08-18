@@ -751,6 +751,14 @@ public:
     {
         return;
     }
+
+    /**
+     * Get pids of processes which belong to specific bundle name and support process cache feature.
+     * @param bundleName bundle name.
+     * @param pidList pid list of processes that support process cache..
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList) = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

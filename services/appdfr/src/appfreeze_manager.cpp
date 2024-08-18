@@ -34,6 +34,7 @@
 
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
+#include "time_util.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -53,6 +54,7 @@ constexpr int FREEZEMAP_SIZE_MAX = 20;
 constexpr int FREEZE_TIME_LIMIT = 60000;
 static constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nano second
 static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias second
+constexpr uint64_t SEC_TO_MILLISEC = 1000;
 const std::string LOG_FILE_PATH = "data/log/eventlog";
 }
 std::shared_ptr<AppfreezeManager> AppfreezeManager::instance_ = nullptr;
@@ -171,6 +173,10 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
         fullStackPath = WriteToFile(fileName, catcherStack);
         faultNotifyData.errorObject.stack = fullStackPath;
     } else {
+        auto start = GetMilliseconds();
+        std::string timeStamp = "\nTimestamp:" + AbilityRuntime::TimeUtil::FormatTime("%Y-%m-%d %H:%M:%S") +
+            ":" + std::to_string(start % SEC_TO_MILLISEC);
+        faultNotifyData.errorObject.message += timeStamp;
         catchJsonStack += CatchJsonStacktrace(appInfo.pid, faultData.errorObject.name);
         fullStackPath = WriteToFile(fileName, catchJsonStack);
         faultNotifyData.errorObject.stack = fullStackPath;

@@ -1931,5 +1931,38 @@ void AppMgrProxy::RestartResidentProcessDependedOnWeb()
 
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::RESTART_RESIDENT_PROCESS_DEPENDED_ON_WEB, data, reply, option);
 }
+
+int32_t AppMgrProxy::GetSupportedProcessCachePids(const std::string &bundleName,
+    std::vector<int32_t> &pidList)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write bundleName failed.");
+        return ERR_INVALID_VALUE;
+    }
+    auto ret = SendRequest(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed with error code %{public}d.", ret);
+        return ret;
+    }
+
+    pidList.clear();
+    int32_t infoSize = reply.ReadInt32();
+    if (infoSize > CYCLE_LIMIT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "infoSize is too large");
+        return ERR_INVALID_VALUE;
+    }
+    for (int32_t i = 0; i < infoSize; i++) {
+        pidList.push_back(reply.ReadInt32());
+    }
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

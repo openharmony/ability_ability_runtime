@@ -425,12 +425,6 @@ void AppRunningRecord::RemoveModuleRecord(
     }
 }
 
-void AppRunningRecord::ForceKillApp([[maybe_unused]] const std::string &reason) const
-{}
-
-void AppRunningRecord::ScheduleAppCrash([[maybe_unused]] const std::string &description) const
-{}
-
 void AppRunningRecord::LaunchApplication(const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -632,6 +626,7 @@ void AppRunningRecord::LaunchPendingAbilities()
 }
 void AppRunningRecord::ScheduleForegroundRunning()
 {
+    SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_FOREGROUNDING);
     if (appLifeCycleDeal_) {
         appLifeCycleDeal_->ScheduleForegroundRunning();
     }
@@ -639,6 +634,7 @@ void AppRunningRecord::ScheduleForegroundRunning()
 
 void AppRunningRecord::ScheduleBackgroundRunning()
 {
+    SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_BACKGROUNDING);
     int32_t recordId = GetRecordId();
     auto serviceInner = appMgrServiceInner_;
     auto appbackgroundtask = [recordId, serviceInner]() {
@@ -2118,6 +2114,16 @@ ApplicationPendingState AppRunningRecord::GetApplicationPendingState() const
     return pendingState_;
 }
 
+void AppRunningRecord::SetApplicationScheduleState(ApplicationScheduleState scheduleState)
+{
+    scheduleState_ = scheduleState;
+}
+
+ApplicationScheduleState AppRunningRecord::GetApplicationScheduleState() const
+{
+    return scheduleState_;
+}
+
 void AppRunningRecord::AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record)
 {
     if (!record) {
@@ -2412,6 +2418,24 @@ void AppRunningRecord::SetUserRequestCleaning()
 bool AppRunningRecord::IsUserRequestCleaning() const
 {
     return isUserRequestCleaning_;
+}
+
+bool AppRunningRecord::IsProcessAttached() const
+{
+    if (appLifeCycleDeal_ == nullptr) {
+        return false;
+    }
+    return appLifeCycleDeal_->GetApplicationClient() != nullptr;
+}
+
+void AppRunningRecord::SetUIAbilityLaunched(bool hasLaunched)
+{
+    hasUIAbilityLaunched_ = hasLaunched;
+}
+
+bool AppRunningRecord::HasUIAbilityLaunched()
+{
+    return hasUIAbilityLaunched_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
