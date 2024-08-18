@@ -96,7 +96,8 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
         return CreateJsUndefined(env);
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weak = context_, uri, packOption = std::move(packOption), innerErrCode](napi_env env) {
+    AAFwk::Want newWant;
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, uri, &newWant, innerErrCode]() {
         TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithUri begin");
         auto context = weak.lock();
         if (!context) {
@@ -104,18 +105,17 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
             *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        AAFwk::Want newWant;
-        *innerErrCode = context->SaveEditedContent(uri, packOption, newWant);
-        napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
-        if (abilityResult == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
-            *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
-            return;
-        }
+        *innerErrCode = context->SaveEditedContent(uri, newWant);
     };
-    NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask &task,
+    NapiAsyncTask::CompleteCallback complete = [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task,
         int32_t status) {
         if (*innerErrCode == ERR_OK) {
+            napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
+            if (abilityResult == nullptr) {
+                TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)));
+                return;
+            }
             task.Resolve(env, abilityResult);
         } else {
             task.Reject(env, CreateJsError(env, *innerErrCode));
