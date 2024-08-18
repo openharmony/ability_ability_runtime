@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <gtest/hwext/gtest-multithread.h>
+#include <gmock/gmock.h>
 
 #define private public
 #define protected public
@@ -40,6 +41,39 @@ public:
     virtual int32_t SendData(OHOS::AAFwk::WantParams &data)
     {
         return 0;
+    }
+};
+
+class MockWindow : public Rosen::Window {
+public:
+    virtual Ace::UIContent* GetUIContent() const
+    {
+        return uiContent_.get();
+    }
+
+    std::unique_ptr<Ace::UIContent> uiContent_ = Ace::UIContent::Create(nullptr, nullptr);
+};
+
+class NativeReferenceMock : public NativeReference {
+public:
+    NativeReferenceMock() = default;
+    virtual ~NativeReferenceMock() = default;
+    MOCK_METHOD0(Ref, uint32_t());
+    MOCK_METHOD0(Unref, uint32_t());
+    MOCK_METHOD0(Get, napi_value());
+    MOCK_METHOD0(GetData, void*());
+    virtual operator napi_value() override
+    {
+        return reinterpret_cast<napi_value>(this);
+    }
+    MOCK_METHOD0(SetDeleteSelf, void());
+    MOCK_METHOD0(GetRefCount, uint32_t());
+    MOCK_METHOD0(GetFinalRun, bool());
+    napi_value GetNapiValue() override
+    {
+        napi_env env{nullptr};
+        napi_value object = AppExecFwk::CreateJSObject(env);
+        return object;
     }
 };
 
@@ -74,6 +108,14 @@ void JsUIServiceExtensionTest::SetUp()
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
 
+    AppExecFwk::Configuration configuration;
+    std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    contextImpl->SetConfiguration(std::make_shared<AppExecFwk::Configuration>(configuration));
+    std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
+        AbilityRuntime::ApplicationContext::GetInstance();
+    applicationContext->AttachContextImpl(contextImpl);
+    application->SetApplicationContext(applicationContext);
+
     jsUIServiceExtension->Init(record, application, handler, token);
 }
 
@@ -93,6 +135,9 @@ HWTEST_F(JsUIServiceExtensionTest, OnAddSystemAbility_0100, TestSize.Level1)
     std::string deviceId{"deviceId"};
     JsUIServiceExtension::SystemAbilityStatusChangeListener systemAbilityStatusChangeListener{nullptr};
     systemAbilityStatusChangeListener.OnAddSystemAbility(WINDOW_MANAGER_SERVICE_ID, deviceId);
+
+    constexpr int32_t UNAVAILABLE_SERVICE_ID = 0;
+    systemAbilityStatusChangeListener.OnAddSystemAbility(UNAVAILABLE_SERVICE_ID, deviceId);
 
     TAG_LOGI(AAFwkTag::TEST, "OnAddSystemAbility_0100 end");
 }
@@ -143,7 +188,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnCommand_0100, TestSize.Level1)
     AAFwk::Want want;
     bool restart{true};
     int startId{0};
-
+    jsUIServiceExtension->firstRequest_ = true;
     jsUIServiceExtension->OnCommand(want, restart, startId);
 
     TAG_LOGI(AAFwkTag::TEST, "OnCommand_0100 end");
@@ -160,10 +205,28 @@ HWTEST_F(JsUIServiceExtensionTest, CallObjectMethod_0100, TestSize.Level1)
 
     napi_value object{nullptr};
     size_t argc{0};
-
+    jsUIServiceExtension->jsObj_ = nullptr;
     jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
 
     TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0100 end");
+}
+
+/**
+ * @tc.number: CallObjectMethod_0200
+ * @tc.name: CallObjectMethod
+ * @tc.desc: JsUIServiceExtension CallObjectMethod
+ */
+HWTEST_F(JsUIServiceExtensionTest, CallObjectMethod_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0200 start");
+
+    napi_value object{nullptr};
+    size_t argc{0};
+
+    jsUIServiceExtension->jsObj_ = std::make_unique<NativeReferenceMock>();
+    jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+
+    TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0200 end");
 }
 
 /**
@@ -175,28 +238,73 @@ HWTEST_F(JsUIServiceExtensionTest, GetSrcPath_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetSrcPath_0100 start");
 
-    std::string srcPath{""};
-
+    std::string srcPath{"Test.Test"};
+    jsUIServiceExtension->abilityInfo_->srcEntrance = "Test";
     jsUIServiceExtension->GetSrcPath(srcPath);
 
     TAG_LOGI(AAFwkTag::TEST, "GetSrcPath_0100 end");
 }
 
 /**
- * @tc.number: OnConfigurationUpdatedAndConfigurationUpdated_0100
- * @tc.name: OnConfigurationUpdatedAndConfigurationUpdated
- * @tc.desc: JsUIServiceExtension OnConfigurationUpdated and ConfigurationUpdated
+ * @tc.number: OnConfigurationUpdated_0100
+ * @tc.name: OnConfigurationUpdated
+ * @tc.desc: JsUIServiceExtension OnConfigurationUpdated
  */
-HWTEST_F(JsUIServiceExtensionTest, OnConfigurationUpdatedAndConfigurationUpdated_0100, TestSize.Level1)
+HWTEST_F(JsUIServiceExtensionTest, OnConfigurationUpdated_0100, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdatedAndConfigurationUpdated_0100 start");
+    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0100 start");
 
     AppExecFwk::Configuration configuration;
-
     jsUIServiceExtension->OnConfigurationUpdated(configuration);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0100 end");
+}
+
+/**
+ * @tc.number: OnConfigurationUpdated_0200
+ * @tc.name: OnConfigurationUpdated
+ * @tc.desc: JsUIServiceExtension OnConfigurationUpdated
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnConfigurationUpdated_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0200 start");
+
+    AppExecFwk::Configuration configuration;
+    jsUIServiceExtension->context_ = nullptr;
+    jsUIServiceExtension->OnConfigurationUpdated(configuration);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0200 end");
+}
+
+/**
+ * @tc.number: OnConfigurationUpdated_0300
+ * @tc.name: OnConfigurationUpdated
+ * @tc.desc: JsUIServiceExtension OnConfigurationUpdated
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnConfigurationUpdated_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0300 start");
+
+    AppExecFwk::Configuration configuration;
+    std::shared_ptr<AppExecFwk::Configuration> config{nullptr};
+    jsUIServiceExtension->context_->SetConfiguration(config);
+    jsUIServiceExtension->OnConfigurationUpdated(configuration);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0300 end");
+}
+
+/**
+ * @tc.number: ConfigurationUpdated_0100
+ * @tc.name: ConfigurationUpdated
+ * @tc.desc: JsUIServiceExtension ConfigurationUpdated
+ */
+HWTEST_F(JsUIServiceExtensionTest, ConfigurationUpdated_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ConfigurationUpdated_0100 start");
+
     jsUIServiceExtension->ConfigurationUpdated();
 
-    TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdatedAndConfigurationUpdated_0100 end");
+    TAG_LOGI(AAFwkTag::TEST, "ConfigurationUpdated_0100 end");
 }
 
 /**
@@ -215,6 +323,45 @@ HWTEST_F(JsUIServiceExtensionTest, OnCreateAndOnChangeAndOnDestroy_0100, TestSiz
     jsUIServiceExtension->OnDestroy(displayId);
 
     TAG_LOGI(AAFwkTag::TEST, "OnCreate_0100 end");
+}
+
+/**
+ * @tc.number: OnCreateAndOnChangeAndOnDestroy_0200
+ * @tc.name: OnCreateAndOnChangeAndOnDestroy
+ * @tc.desc: JsUIServiceExtension OnCreate And OnChange And OnDestroy
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnCreateAndOnChangeAndOnDestroy_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnCreate_0200 start");
+
+    Rosen::DisplayId displayId{0};
+
+    jsUIServiceExtension->context_ = nullptr;
+    jsUIServiceExtension->OnCreate(displayId);
+    jsUIServiceExtension->OnChange(displayId);
+    jsUIServiceExtension->OnDestroy(displayId);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnCreate_0200 end");
+}
+
+/**
+ * @tc.number: OnCreateAndOnChangeAndOnDestroy_0300
+ * @tc.name: OnCreateAndOnChangeAndOnDestroy
+ * @tc.desc: JsUIServiceExtension OnCreate And OnChange And OnDestroy
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnCreateAndOnChangeAndOnDestroy_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnCreate_0300 start");
+
+    Rosen::DisplayId displayId{0};
+
+    std::shared_ptr<AppExecFwk::Configuration> config{nullptr};
+    jsUIServiceExtension->context_->SetConfiguration(config);
+    jsUIServiceExtension->OnCreate(displayId);
+    jsUIServiceExtension->OnChange(displayId);
+    jsUIServiceExtension->OnDestroy(displayId);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnCreate_0300 end");
 }
 
 /**
@@ -310,6 +457,22 @@ HWTEST_F(JsUIServiceExtensionTest, OnConnect_0300, TestSize.Level1)
 HWTEST_F(JsUIServiceExtensionTest, OnDisconnect_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "OnDisconnect_0100 start");
+    AAFwk::Want want;
+    bool isAsyncCallback = false;
+
+    jsUIServiceExtension->OnDisconnect(want, nullptr, isAsyncCallback);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnDisconnect_0100 end");
+}
+
+/**
+ * @tc.number: OnDisconnect_0200
+ * @tc.name: OnDisconnect
+ * @tc.desc: JsUIServiceExtension OnDisconnect
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnDisconnect_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnDisconnect_0200 start");
     sptr<ServiceHostStubImpl> stub = sptr<ServiceHostStubImpl>::MakeSptr();
     AAFwk::Want want;
     want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
@@ -322,7 +485,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnDisconnect_0100, TestSize.Level1)
 
     jsUIServiceExtension->OnDisconnect(want, nullptr, isAsyncCallback);
 
-    TAG_LOGI(AAFwkTag::TEST, "OnDisconnect_0100 end");
+    TAG_LOGI(AAFwkTag::TEST, "OnDisconnect_0200 end");
 }
 
 /**
@@ -345,6 +508,38 @@ HWTEST_F(JsUIServiceExtensionTest, HandleSendData_0100, TestSize.Level1)
     jsUIServiceExtension->HandleSendData(stub->AsObject(), params);
 
     TAG_LOGI(AAFwkTag::TEST, "HandleSendData_0100 end");
+}
+
+/**
+ * @tc.number: HandleSendData_0200
+ * @tc.name: HandleSendData
+ * @tc.desc: JsUIServiceExtension HandleSendData
+ */
+HWTEST_F(JsUIServiceExtensionTest, HandleSendData_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleSendData_0200 start");
+
+    AAFwk::WantParams params;
+    jsUIServiceExtension->HandleSendData(nullptr, params);
+
+    TAG_LOGI(AAFwkTag::TEST, "HandleSendData_0200 end");
+}
+
+/**
+ * @tc.number: HandleSendData_0300
+ * @tc.name: HandleSendData
+ * @tc.desc: JsUIServiceExtension HandleSendData
+ */
+HWTEST_F(JsUIServiceExtensionTest, HandleSendData_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleSendData_0300 start");
+
+    sptr<ServiceHostStubImpl> stub = sptr<ServiceHostStubImpl>::MakeSptr();
+
+    AAFwk::WantParams params;
+    jsUIServiceExtension->HandleSendData(stub->AsObject(), params);
+
+    TAG_LOGI(AAFwkTag::TEST, "HandleSendData_0300 end");
 }
 
 /**
@@ -431,6 +626,27 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbility_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.number: OnStartAbility_0200
+ * @tc.name: OnStartAbility
+ * @tc.desc: JSUIServiceExtensionContext OnStartAbility
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnStartAbility_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnStartAbility_0200 start");
+
+    napi_env env{nullptr};
+    NapiCallbackInfo info{2};
+
+    std::shared_ptr<UIServiceExtensionContext> uiServiceExtensionContext =
+        std::make_shared<UIServiceExtensionContext>();
+    JSUIServiceExtensionContext jsUIServiceExtensionContext(uiServiceExtensionContext);
+
+    jsUIServiceExtensionContext.OnStartAbility(env, info);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnStartAbility_0200 end");
+}
+
+/**
  * @tc.number: CheckStartAbilityInputParam_0100
  * @tc.name: CheckStartAbilityInputParam
  * @tc.desc: JSUIServiceExtensionContext CheckStartAbilityInputParam
@@ -449,9 +665,36 @@ HWTEST_F(JsUIServiceExtensionTest, CheckStartAbilityInputParam_0100, TestSize.Le
         std::make_shared<UIServiceExtensionContext>();
     JSUIServiceExtensionContext jsUIServiceExtensionContext(uiServiceExtensionContext);
 
-    jsUIServiceExtensionContext.CheckStartAbilityInputParam(env, info, want, startOptions, unwrapArgc);
+    auto ret = jsUIServiceExtensionContext.CheckStartAbilityInputParam(env, info, want, startOptions, unwrapArgc);
+    EXPECT_EQ(ret, false);
 
     TAG_LOGI(AAFwkTag::TEST, "CheckStartAbilityInputParam_0100 end");
+}
+
+/**
+ * @tc.number: CheckStartAbilityInputParam_0200
+ * @tc.name: CheckStartAbilityInputParam
+ * @tc.desc: JSUIServiceExtensionContext CheckStartAbilityInputParam
+ */
+HWTEST_F(JsUIServiceExtensionTest, CheckStartAbilityInputParam_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckStartAbilityInputParam_0200 start");
+
+    napi_env env{nullptr};
+    NapiCallbackInfo info{1};
+    info.argv[0] = AppExecFwk::CreateJSObject(env);
+    AAFwk::Want want;
+    AAFwk::StartOptions startOptions;
+    size_t unwrapArgc{0};
+
+    std::shared_ptr<UIServiceExtensionContext> uiServiceExtensionContext =
+        std::make_shared<UIServiceExtensionContext>();
+    JSUIServiceExtensionContext jsUIServiceExtensionContext(uiServiceExtensionContext);
+
+    auto ret = jsUIServiceExtensionContext.CheckStartAbilityInputParam(env, info, want, startOptions, unwrapArgc);
+    EXPECT_EQ(ret, false);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckStartAbilityInputParam_0200 end");
 }
 
 /**

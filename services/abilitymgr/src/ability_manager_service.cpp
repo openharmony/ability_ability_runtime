@@ -695,6 +695,39 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
     return StartAbility(want, startOptions, callerToken, userId, requestCode);
 }
 
+int AbilityManagerService::StartAbilityOnlyUIAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
+    uint32_t specifyTokenId)
+{
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbility with specialId, the current process is not foundation process.");
+        return ERR_INVALID_CONTINUATION_FLAG;
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    auto flags = want.GetFlags();
+    EventInfo eventInfo = BuildEventInfo(want, DEFAULT_INVAL_VALUE);
+    SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbility with continuation flags is not allowed.");
+        eventInfo.errCode = ERR_INVALID_VALUE;
+        SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        return ERR_INVALID_CONTINUATION_FLAG;
+    }
+
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "Start ability come, ability is %{public}s, userId is %{public}d, specifyTokenId is %{public}u.",
+        want.GetElement().GetAbilityName().c_str(), DEFAULT_INVAL_VALUE, specifyTokenId);
+
+    int32_t ret = StartAbilityWrap(want, callerToken, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, specifyTokenId, false, false, true);
+    if (ret != ERR_OK) {
+        eventInfo.errCode = ret;
+        SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+    }
+    return ret;
+}
+
 int AbilityManagerService::StartAbilityAsCaller(const Want &want, const sptr<IRemoteObject> &callerToken,
     sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode)
 {
@@ -812,7 +845,7 @@ bool AbilityManagerService::StartAbilityInChain(StartAbilityParams &params, int 
 
 int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyToken,
-    bool isForegroundToRestartApp, bool isImplicit)
+    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     StartAbilityParams startParams(const_cast<Want &>(want));
@@ -828,7 +861,8 @@ int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemote
     }
 
     return StartAbilityInner(want, callerToken,
-        requestCode, isPendingWantCaller, userId, isStartAsCaller, specifyToken, isForegroundToRestartApp, isImplicit);
+        requestCode, isPendingWantCaller, userId, isStartAsCaller, specifyToken, isForegroundToRestartApp, isImplicit,
+        isUIAbilityOnly);
 }
 
 void AbilityManagerService::SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest)
@@ -943,7 +977,7 @@ int AbilityManagerService::CheckCallPermission(const Want& want, const AppExecFw
 
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyTokenId,
-    bool isForegroundToRestartApp, bool isImplicit)
+    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string dialogSessionId = want.GetStringParam("dialogSessionId");
@@ -1091,12 +1125,20 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         (isSendDialogResult && want.GetBoolParam("isSelector", false))) {
 #ifdef SUPPORT_SCREEN
         CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
-        implicitStartProcessor_->ResetCallingIdentityAsCaller(abilityRequest.want.GetIntParam(
-            Want::PARAM_RESV_CALLER_TOKEN, 0));
+        int32_t flag = false;
+        if (callerBundleName == BUNDLE_NAME_DIALOG) {
+            flag = true;
+        }
+        implicitStartProcessor_->ResetCallingIdentityAsCaller(
+            abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0), flag);
 #endif // SUPPORT_SCREEN
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
+    if (isUIAbilityOnly && abilityInfo.type != AbilityType::PAGE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability type is not UIAbility");
+        return ERR_INVALID_VALUE;
+    }
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
@@ -2600,33 +2642,34 @@ int AbilityManagerService::RequestModalUIExtensionInner(Want want)
 {
     sptr<IRemoteObject> token = nullptr;
     int ret = IN_PROCESS_CALL(GetTopAbility(token));
-    if (ret != ERR_OK || token == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "token is nullptr.");
-        return ERR_INVALID_VALUE;
-    }
+    if (ret == ERR_OK && token != nullptr) {
+        // Gets the record corresponding to the current focus appliaction
+        auto record = Token::GetAbilityRecordByToken(token);
+        if (!record) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Record is nullptr.");
+            return ERR_INVALID_VALUE;
+        }
 
-    // Gets the record corresponding to the current focus appliaction
-    auto record = Token::GetAbilityRecordByToken(token);
-    if (!record) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Record is nullptr.");
-        return ERR_INVALID_VALUE;
-    }
+        // Gets the bundleName corresponding to the
+        // current focus appliaction
+        std::string focusName = record->GetAbilityInfo().bundleName;
 
-    // Gets the abilityName, bundleName, modulename corresponding to the current focus appliaction
-    EventInfo focusInfo;
-    focusInfo.bundleName = record->GetAbilityInfo().bundleName;
+        // Gets the bundleName corresponding to the
+        // current focus appliaction
+        std::string callerName = want.GetParams().GetStringParam("bundleName");
 
-    // Gets the abilityName, bundleName, modulename corresponding to the caller appliaction
-    EventInfo callerInfo;
-    callerInfo.bundleName = want.GetParams().GetStringParam("bundleName");
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "focusbundlname: %{public}s, callerbundlname: %{public}s.",
-        focusInfo.bundleName.c_str(), callerInfo.bundleName.c_str());
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+               "focusbundlename: %{public}s, callerbundlename: %{public}s.",
+               focusName.c_str(), callerName.c_str());
 
-    // Compare
-    if (record->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE &&
-        focusInfo.bundleName == callerInfo.bundleName) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "CreateModalUIExtension is called!");
-        return record->CreateModalUIExtension(want);
+        // Compare
+        if (record->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE &&
+            focusName == callerName) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "CreateModalUIExtension is called!");
+            return record->CreateModalUIExtension(want);
+        }
+    } else {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "token is nullptr.");
     }
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Window Modal System Create UIExtension is called!");
@@ -10575,6 +10618,12 @@ int AbilityManagerService::CreateCloneSelectorDialog(AbilityRequest &request, in
     return implicitStartProcessor_->ImplicitStartAbility(request, userId, 0, replaceWantString, true);
 }
 #endif // SUPPORT_SCREEN
+void AbilityManagerService::RemoveSelectorIdentity(int32_t tokenId)
+{
+    CHECK_POINTER(implicitStartProcessor_);
+    implicitStartProcessor_->RemoveIdentity(tokenId);
+}
+
 void AbilityManagerService::SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken)
 {
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
@@ -10862,6 +10911,14 @@ int32_t AbilityManagerService::GetUIExtensionRootHostInfo(const sptr<IRemoteObje
     }
 
     auto callerRecord = connectManager->GetUIExtensionRootHostInfo(token);
+    if (callerRecord == nullptr && validUserId != U0_USER_ID) {
+        connectManager = GetConnectManagerByUserId(U0_USER_ID);
+        if (connectManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect manager is nullptr, userId: %{public}d.", U0_USER_ID);
+            return ERR_INVALID_VALUE;
+        }
+        callerRecord = connectManager->GetUIExtensionRootHostInfo(token);
+    }
     if (callerRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get root host info failed.");
         return ERR_INVALID_VALUE;
@@ -11558,8 +11615,8 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
     } else if (callerBundleName == BUNDLE_NAME_DIALOG) {
 #ifdef SUPPORT_SCREEN
         CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
-        implicitStartProcessor_->ResetCallingIdentityAsCaller(abilityRequest.want.GetIntParam(
-            Want::PARAM_RESV_CALLER_TOKEN, 0));
+        implicitStartProcessor_->ResetCallingIdentityAsCaller(
+            abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0), true);
 #endif // SUPPORT_SCREEN
     }
 
@@ -11816,7 +11873,7 @@ void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &ability
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         return;
     }
-
+    abilityRequest.want.RemoveParam(WANT_PARAMS_HOST_WINDOW_ID_KEY);
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if(callerAbilityRecord != nullptr) {
         sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();

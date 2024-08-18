@@ -538,7 +538,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecord(const i
     return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
 }
 
-void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token)
+void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token,
+    std::shared_ptr<AppMgrServiceInner> serviceInner)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (token == nullptr) {
@@ -553,11 +554,17 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
     }
 
     std::shared_ptr<AbilityRunningRecord> abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
+    bool isSCB = false;
     if (abilityRecord) {
         abilityRecord->SetTerminating();
+        isSCB = abilityRecord->IsSceneBoard();
+        if (isSCB && appRecord->GetPriorityObject() && serviceInner != nullptr) {
+            pid_t pid = appRecord->GetPriorityObject()->GetPid();
+            (void)serviceInner->KillProcessByPid(pid, "AttachTimeoutKillSCB");
+        }
     }
 
-    if (appRecord->IsLastAbilityRecord(token) && (!appRecord->IsKeepAliveApp() ||
+    if ((isSCB || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
         appRecord->SetTerminating();
     }
@@ -1370,7 +1377,7 @@ int32_t AppRunningManager::GetAllUIExtensionRootHostPid(pid_t pid, std::vector<p
         [](const std::string& a, pid_t b) {
             return a + std::to_string(b) + " ";
         });
-    TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}s, hostPid: %{public}s.", std::to_string(pid).c_str(),
+    TAG_LOGD(AAFwkTag::APPMGR, "pid: %{public}s, hostPid: %{public}s.", std::to_string(pid).c_str(),
         hostPidStr.c_str());
     return ERR_OK;
 }

@@ -2228,11 +2228,6 @@ HWTEST_F(AmsAppRunningRecordTest, NewAppRunningRecord_001, TestSize.Level1)
 
     appRunningRecord1->SetState(ApplicationState::APP_STATE_READY);
     EXPECT_EQ(appRunningRecord1->GetState(), ApplicationState::APP_STATE_READY);
-
-    std::string reason = "test_reason";
-    appRunningRecord1->ForceKillApp(reason);
-    std::string description = "test_description";
-    appRunningRecord1->ScheduleAppCrash(description);
 }
 
 /*

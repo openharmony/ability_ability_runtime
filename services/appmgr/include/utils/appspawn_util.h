@@ -64,6 +64,12 @@ static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
         applicationInfo.appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         startFlags = startFlags | (START_FLAG_BASE << APP_FLAGS_CLONE_ENABLE);
     }
+    if (applicationInfo.hwasanEnabled) {
+        startFlags = startFlags | (START_FLAG_BASE << StartFlags::HWASANENABLED);
+    }
+    if (applicationInfo.ubsanEnabled) {
+        startFlags = startFlags | (START_FLAG_BASE << StartFlags::UBSANENABLED);
+    }
 
     return startFlags;
 }

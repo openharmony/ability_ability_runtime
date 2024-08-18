@@ -346,6 +346,19 @@ public:
         int requestCode) override;
 
     /**
+     * Start ui ability
+     *
+     * @param want the want of the ability to start.
+     * @param callerToken caller ability token.
+     * @param specifyTokenId The Caller ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartAbilityOnlyUIAbility(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        uint32_t specifyTokenId) override;
+
+    /**
      * Open link of ability and atomic service.
      *
      * @param want Ability want.
@@ -996,7 +1009,8 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false);
+        bool isImplicit = false,
+        bool isUIAbilityOnly = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -1007,7 +1021,8 @@ public:
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
-        bool isImplicit = false);
+        bool isImplicit = false,
+        bool isUIAbilityOnly = false);
 
     int StartExtensionAbilityInner(
         const Want &want,
@@ -1180,6 +1195,8 @@ public:
     virtual int SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed) override;
 
     int CreateCloneSelectorDialog(AbilityRequest &request, int32_t userId, const std::string &replaceWantString = "");
+
+    void RemoveSelectorIdentity(int32_t tokenId);
 
     void SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken);
 

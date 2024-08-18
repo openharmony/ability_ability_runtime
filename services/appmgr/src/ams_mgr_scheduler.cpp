@@ -704,5 +704,14 @@ bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
     }
     return amsMgrServiceInner_->IsProcessContainsOnlyUIAbility(pid);
 }
+
+bool AmsMgrScheduler::IsProcessAttached(sptr<IRemoteObject> token)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessAttached(token);
+}
 } // namespace AppExecFwk
 }  // namespace OHOS

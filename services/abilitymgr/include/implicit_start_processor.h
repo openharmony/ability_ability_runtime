@@ -61,7 +61,9 @@ public:
     int ImplicitStartAbility(AbilityRequest &request, int32_t userId, int32_t windowMode = 0,
         const std::string &replaceWantString = "", bool isAppCloneSelector = false);
 
-    void ResetCallingIdentityAsCaller(int32_t tokenId);
+    void ResetCallingIdentityAsCaller(int32_t tokenId, bool flag);
+
+    void RemoveIdentity(int32_t tokenId);
 
 private:
     int GenerateAbilityRequestByAction(int32_t userId, AbilityRequest &request,
@@ -107,8 +109,7 @@ private:
     bool IsActionImplicitStart(const Want &want, bool findDeafultApp);
 
 private:
-    const static std::vector<std::string> blackList;
-    const static std::unordered_set<AppExecFwk::ExtensionAbilityType> extensionWhiteList;
+    bool IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type);
     std::shared_ptr<AppExecFwk::BundleMgrHelper> iBundleManagerHelper_;
     ffrt::mutex identityListLock_;
     std::list<IdentityNode> identityList_;
