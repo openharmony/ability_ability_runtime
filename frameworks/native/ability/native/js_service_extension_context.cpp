@@ -747,7 +747,8 @@ private:
         }
         int64_t connectId = connection->GetConnectionId();
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, accountId, connection, connectId, innerErrCode]() {
+        NapiAsyncTask::ExecuteCallback execute = [weak = context_,
+            want, accountId, connection, connectId, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "context released");
@@ -1020,7 +1021,7 @@ private:
         }
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
         NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrCode]() {
-           auto context = weak.lock();
+            auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
                 *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
