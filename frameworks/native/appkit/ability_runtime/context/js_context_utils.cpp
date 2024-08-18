@@ -457,7 +457,7 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     std::string path = "";
-    NapiAsyncTask::ExecuteCallback execute = [context = context_, groupId, path, innerErrCode]() {
+    NapiAsyncTask::ExecuteCallback execute = [context = context_, groupId, &path, innerErrCode]() {
         auto completeContext = context.lock();
         if (!completeContext) {
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
@@ -465,7 +465,7 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
         }
         path = completeContext->GetGroupDir(groupId);
     };
-    auto complete = [innerErrCode, path]
+    auto complete = [innerErrCode, &path]
         (napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == ERR_OK) {
             task.ResolveWithNoError(env, CreateJsValue(env, path));
