@@ -510,7 +510,7 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
         path = context->GetGroupDir(groupId);
     };
     auto complete = [innerErrCode, groupId, path](napi_env env, NapiAsyncTask& task, int32_t status) {
-        if (*innerErrCode == ERR_OK){
+        if (*innerErrCode == ERR_OK) {
             task.ResolveWithNoError(env, CreateJsValue(env, path));
         } else {
             TAG_LOGE(AAFwkTag::APPKIT, "GetGroupDir is failed %{public}d", *innerErrCode);
@@ -624,7 +624,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
     };
     NapiAsyncTask::CompleteCallback complete =
         [applicationContext = applicationContext_, clearPageStack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrCode == ERR_OK){
+            if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             }else{
                 TAG_LOGE(AAFwkTag::APPKIT, "OnKillProcessBySelf is failed %{public}d", *innerErrCode);
@@ -801,7 +801,7 @@ napi_value JsApplicationContextUtils::OnClearUpApplicationData(napi_env env, Nap
     };
     NapiAsyncTask::CompleteCallback complete =
         [applicationContext = applicationContext_, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrCode == ERR_OK){
+            if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
                 TAG_LOGE(AAFwkTag::APPKIT, "OnClearUpApplicationData is failed %{public}d", *innerErrCode);
