@@ -219,7 +219,8 @@ private:
                 return;
             }
             TAG_LOGD(AAFwkTag::UISERVC_EXT, "JSUIServiceExtensionContext OnStartAbilityByType");
-            *innerErrCode = context->StartAbilityByType(type, wantParam, callback);
+            auto mutableWantParam = wantParam;
+            *innerErrCode = context->StartAbilityByType(type, mutableWantParam, callback);
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {

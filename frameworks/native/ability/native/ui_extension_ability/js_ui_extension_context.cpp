@@ -211,7 +211,7 @@ napi_value JsUIExtensionContext::OnStartAbility(napi_env env, NapiCallbackInfo& 
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
-        *innerErrorCode = (unwrapArgc == 1) ? context->StartAbility(want) :
+        *innerErrCode = (unwrapArgc == 1) ? context->StartAbility(want) :
             context->StartAbility(want, startOptions);
     };
 
@@ -220,7 +220,7 @@ napi_value JsUIExtensionContext::OnStartAbility(napi_env env, NapiCallbackInfo& 
             if (*innerErrCode == ERR_OK) {
                 task.Resolve(env, CreateJsUndefined(env));
             } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }
         };
 
@@ -399,14 +399,14 @@ napi_value JsUIExtensionContext::OnTerminateSelf(napi_env env, NapiCallbackInfo&
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
-        *innerErrorCode = context->TerminateSelf();
+        *innerErrCode = context->TerminateSelf();
     };
     NapiAsyncTask::CompleteCallback complete =
-        [](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (innerErrorCode == ERR_OK) {
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, innerErrorCode));
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }
         };
 
