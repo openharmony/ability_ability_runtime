@@ -182,7 +182,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
     }
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsPhotoEditorExtensionContext OnSaveEditedContentWithImage", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, std::move(complete), std::move(complete), &result));
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
