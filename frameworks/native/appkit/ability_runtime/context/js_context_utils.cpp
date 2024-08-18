@@ -460,7 +460,7 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
     NapiAsyncTask::ExecuteCallback execute = [context = context_, groupId, path, innerErrCode]() {
         auto completeContext = context.lock();
         if (!completeContext) {
-            *innerErrCode = static_cast<int>(AbilityErrorCode::ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
+            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
         path = completeContext->GetGroupDir(groupId);

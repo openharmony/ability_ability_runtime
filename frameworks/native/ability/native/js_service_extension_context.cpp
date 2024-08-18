@@ -818,13 +818,12 @@ private:
             ThrowInvalidParamError(env, "Parse param connection failed, must be a number.");
             return CreateJsUndefined(env);
         }
-
         AAFwk::Want want;
         sptr<JSServiceExtensionConnection> connection = nullptr;
         int32_t accountId = -1;
         FindConnection(want, connection, connectId, accountId);
         // begin disconnect
-         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+        auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
         NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, connection, accountId, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
@@ -857,7 +856,6 @@ private:
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
             };
-
         napi_value lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JSServiceExtensionConnection::OnDisconnectAbility",
@@ -1176,7 +1174,8 @@ private:
         }
 
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-        NapiAsyncTask::ExecuteCallback execute = [weak = context_, bundleName, moduleName, abilityName, startTime, innerErrCode](
+        NapiAsyncTask::ExecuteCallback execute = [weak = context_,
+            bundleName, moduleName, abilityName, startTime, innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
                 auto context = weak.lock();
                 if (!context) {
