@@ -254,7 +254,7 @@ private:
             };
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSFormExtensionConnection::OnConnectAbility",
-            env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(excute), std::move(complete), &result));
+            env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
         return CreateJsValue(env, connectId);
     }
 
