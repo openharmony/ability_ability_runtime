@@ -408,7 +408,7 @@ private:
             TAG_LOGD(AAFwkTag::UISERVC_EXT, "context->DisconnectServiceExtensionAbility");
             *innerErrCode = context->DisConnectServiceExtensionAbility(want, connection, accountId);
         };
-        NapiAsyncTask::CompleteCallback complete =[innerErrCode](
+        NapiAsyncTask::CompleteCallback complete = [innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
                 if(*innerErrCode == ERROR_CODE_ONE) {
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));

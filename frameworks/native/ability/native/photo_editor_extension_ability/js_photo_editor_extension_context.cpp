@@ -153,7 +153,8 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
         return CreateJsUndefined(env);
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weak = context_, image, packOption = std::move(packOption), innerErrCode]() {
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_,
+        image, packOption = std::move(packOption), innerErrCode]() {
         TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage begin");
         auto context = weak.lock();
         if (!context) {
