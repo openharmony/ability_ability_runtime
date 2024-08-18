@@ -223,9 +223,9 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-                if(*innerErrCode == ERR_OK) {
+                if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
-                }else{
+                } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
             };
@@ -385,7 +385,6 @@ private:
             ThrowInvalidParamError(env, "Parse param connection failed, must be a number.");
             return CreateJsUndefined(env);
         }
-
         AAFwk::Want want;
         sptr<JSUIServiceExtensionConnection> connection = nullptr;
         int32_t accountId = -1;
@@ -402,7 +401,6 @@ private:
             if (!connection) {
                 TAG_LOGW(AAFwkTag::UISERVC_EXT, "connection null");
                 *innerErrCode = static_cast<int>(ERROR_CODE_TWO);
-                task.Reject(env, CreateJsError(env, ERROR_CODE_TWO, "not found connection"));
                 return;
             }
             TAG_LOGD(AAFwkTag::UISERVC_EXT, "context->DisconnectServiceExtensionAbility");
@@ -410,21 +408,20 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete = [innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
-                if(*innerErrCode == ERROR_CODE_ONE) {
+                if (*innerErrCode == ERROR_CODE_ONE) {
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
                     return;
                 }
-                if(*innerErrCode == ERROR_CODE_TWO) {
+                if (*innerErrCode == ERROR_CODE_TWO) {
                     task.Reject(env, CreateJsError(env, ERROR_CODE_TWO, "not found connection"));
                     return;
                 }
-                if(*innerErrCode == ERR_OK) {
+                if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
-                }else{
+                } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
             };
-
         napi_value lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JSUIServiceExtensionContext::OnDisConnectServiceExtensionAbility",

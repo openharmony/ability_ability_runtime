@@ -125,7 +125,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
     napi_value lastParam = (info.argc > INDEX_ONE) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsPhotoEditorExtensionContext OnSaveEditedContentWithUri", env,
-                                   CreateAsyncTaskWithLastParam(env, lastParam, std::move(excute), std::move(complete), &result));
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(excute), std::move(complete), &result));
     return result;
 }
 
@@ -133,19 +133,16 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called: param size: %{public}d",
         static_cast<int32_t>(info.argc));
-
     auto image = Media::PixelMapNapi::GetPixelMap(env, info.argv[INDEX_ZERO]);
     if (!image) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Get edited image fail");
         ThrowError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR), ERR_MSG_PARAMS_ERROR);
         return CreateJsUndefined(env);
     }
-
     Media::PackOption packOption;
     if (!UnwrapPackOption(env, info.argv[INDEX_ONE], packOption)) {
         return CreateJsUndefined(env);
     }
-
     auto context = context_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Context is released");
@@ -178,16 +175,14 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
         } else {
             task.Reject(env, CreateJsError(env, *innerErrCode));
         }
-
     };
-
     napi_value lastParam = nullptr;
     if (AppExecFwk::IsTypeForNapiValue(env, info.argv[INDEX_TWO], napi_function)) {
         lastParam = info.argv[INDEX_TWO];
     }
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsPhotoEditorExtensionContext OnSaveEditedContentWithImage", env,
-                                   CreateAsyncTaskWithLastParam(env, lastParam, std::move(complete), std::move(complete), &result));
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(complete), std::move(complete), &result));
     return result;
 }
 

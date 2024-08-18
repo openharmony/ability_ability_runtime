@@ -1272,7 +1272,7 @@ napi_value JsAbilityContext::OnStartExtensionAbility(napi_env env, NapiCallbackI
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, want, innerErrCode,]() {
+        [weak = context_, want, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
@@ -1465,7 +1465,7 @@ napi_value JsAbilityContext::OnTerminateSelfWithResult(napi_env env, NapiCallbac
             if (*innerErrCode == ERR_OK) {
                 task.Resolve(env, CreateJsUndefined(env));
             } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode ));
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }
         };
 
@@ -1654,10 +1654,8 @@ napi_value JsAbilityContext::OnDisconnectAbility(napi_env env, NapiCallbackInfo&
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-
-    // unwrap want
+    // unwrap want and connectId
     AAFwk::Want want;
-    // unwrap connectId
     int64_t connectId = -1;
     sptr<JSAbilityConnection> connection = nullptr;
     int32_t accountId = -1;
@@ -2488,15 +2486,13 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
 #endif
     };
     NapiAsyncTask::CompleteCallback complete =
-        [weak = context_, type, wantParam, callback](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-           if ( *innerErrCode == ERR_OK) {
-               task.Resolve(env, CreateJsUndefined(env));
-           } else {
-               task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
-           }
-
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+            if ( *innerErrCode == ERR_OK) {
+                task.Resolve(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            }
         };
-
     napi_value lastParam = (info.argc > ARGC_THREE) ? info.argv[INDEX_THREE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityByType",
