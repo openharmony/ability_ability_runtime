@@ -759,7 +759,7 @@ private:
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "connection:%{public}d",
                 static_cast<int32_t>(connectId));
             *innerErrCode = context->ConnectAbilityWithAccount(want, accountId, connection);
-            int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrCode));
+            int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
             if (errcode) {
                 connection->CallJsFailed(errcode);
                 RemoveConnection(connectId);
@@ -1174,8 +1174,7 @@ private:
 
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
         NapiAsyncTask::ExecuteCallback execute = [weak = context_,
-            bundleName, moduleName, abilityName, startTime, innerErrCode](
-            napi_env env, NapiAsyncTask& task, int32_t status) {
+            bundleName, moduleName, abilityName, startTime, innerErrCode]() {
                 auto context = weak.lock();
                 if (!context) {
                     TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
@@ -1183,17 +1182,16 @@ private:
                     return;
                 }
                 *innerErrCode = context->PreStartMission(bundleName, moduleName, abilityName, startTime);
-        };
+            };
 
         NapiAsyncTask::CompleteCallback complete =
-            [innerErrCode](
-                napi_env env, NapiAsyncTask& task, int32_t status) {
+            [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
-        };
+            };
 
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnPreStartMission",
