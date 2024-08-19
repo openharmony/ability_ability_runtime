@@ -562,13 +562,12 @@ napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo
         if (!context) {
             TAG_LOGE(AAFwkTag::UI_EXT, "context is released");
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-            task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
             RemoveConnection(connectId);
             return;
         }
         TAG_LOGD(AAFwkTag::UI_EXT, "ConnectAbility connection:%{public}d", static_cast<int32_t>(connectId));
-        *innerErrorCode = context->ConnectAbility(want, connection);
-        int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode));
+        *innerErrCode = context->ConnectAbility(want, connection);
+        int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
         if (errcode) {
             connection->CallJsFailed(errcode);
             RemoveConnection(connectId);
@@ -621,14 +620,14 @@ napi_value JsUIExtensionContext::OnDisconnectAbility(napi_env env, NapiCallbackI
             return;
         }
         TAG_LOGD(AAFwkTag::UI_EXT, "context->DisconnectAbility");
-        *innerErrorCode = context->DisconnectAbility(want, connection);
+        *innerErrCode = context->DisconnectAbility(want, connection);
     };
     NapiAsyncTask::CompleteCallback complete =
-        [weak = context_, want, connection](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrorCode == ERR_OK) {
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
                 task.Resolve(env, CreateJsUndefined(env));
             } else {
-                task.Reject(env, CreateJsError(env, *innerErrorCode));
+                task.Reject(env, CreateJsError(env, *innerErrCode));
             }
         };
 
@@ -670,10 +669,10 @@ napi_value JsUIExtensionContext::OnStartUIServiceExtension(napi_env env, NapiCal
     };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrorCode == ERR_OK) {
+            if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }
         };
 
