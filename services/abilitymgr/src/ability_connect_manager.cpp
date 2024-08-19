@@ -1568,7 +1568,8 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
     TAG_LOGW(AAFwkTag::ABILITYMGR, "Load time out , remove target service record from services map.");
     RemoveServiceAbility(abilityRecord);
     if (abilityRecord->IsSceneBoard()) {
-        auto isAttached = DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(abilityRecord->GetToken());
+        auto isAttached = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(
+            abilityRecord->GetToken()));
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
         if (!isAttached) {
             RestartAbility(abilityRecord, userId_);
