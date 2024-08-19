@@ -371,7 +371,8 @@ void MissionListManager::AddRecord(const AbilityRequest &abilityRequest,
         newWant->RemoveParam(Want::PARAM_RESV_FOR_RESULT);
         srcAbilityId = srcDeviceId + "_" + std::to_string(missionId);
     }
-    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, srcAbilityId);
+    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want,
+        srcAbilityId);
 }
 
 int MissionListManager::GetTargetMission(const AbilityRequest &abilityRequest, std::shared_ptr<Mission> &targetMission,
@@ -1201,7 +1202,7 @@ int MissionListManager::AbilityTransactionDone(const sptr<IRemoteObject> &token,
         abilityRecord = GetAbilityRecordByTokenInner(token);
         CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     }
-
+    abilityRecord->RemoveSignatureInfo();
     std::string element = abilityRecord->GetElementName().GetURI();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
 
@@ -3310,7 +3311,7 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
         return ERR_INVALID_VALUE;
     }
 
-    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode);
+    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
 
     // mission is first created, add mission to default call mission list.
