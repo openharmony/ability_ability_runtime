@@ -120,15 +120,20 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
         return false;
     }
 
-    if (isEnable_ && !abilityRecoverys_.empty() && !abilityInfo->recoverable) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "recoverable is false");
+    if (!isEnable_) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "not enabled.");
+        return false;
+    }
+
+    if (!abilityRecoverys_.empty() && !abilityInfo->recoverable) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "ability recoverable is false.");
         return false;
     }
     ability_ = ability;
     std::shared_ptr<AbilityRecovery> abilityRecovery = std::make_shared<AbilityRecovery>();
     abilityRecovery->InitAbilityInfo(ability, abilityInfo, token);
-    abilityRecovery->EnableAbilityRecovery(useAppSettedValue_.load(), restartFlag_, saveOccasion_, saveMode_);
-    ability->EnableAbilityRecovery(abilityRecovery, useAppSettedValue_.load());
+    abilityRecovery->EnableAbilityRecovery(restartFlag_, saveOccasion_, saveMode_);
+    ability->EnableAbilityRecovery(abilityRecovery);
     abilityRecoverys_.push_back(abilityRecovery);
     auto handler = mainHandler_.lock();
     if (handler != nullptr) {
@@ -144,6 +149,11 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
 
 bool AppRecovery::RemoveAbility(const sptr<IRemoteObject>& tokenId)
 {
+    if (!isEnable_) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery not enabled. not removeAbility");
+        return false;
+    }
+
     if (!tokenId) {
         TAG_LOGE(AAFwkTag::RECOVERY, "tokenId is null");
         return false;
@@ -331,7 +341,6 @@ void AppRecovery::EnableAppRecovery(uint16_t restartFlag, uint16_t saveFlag, uin
     restartFlag_ = restartFlag;
     saveOccasion_ = saveFlag;
     saveMode_ = saveMode;
-    useAppSettedValue_.store(true);
 }
 
 bool AppRecovery::ShouldSaveAppState(StateReason reason)
@@ -456,17 +465,6 @@ void AppRecovery::DeleteInValidMissionFileById(std::string fileDir, int32_t miss
     if (!ret) {
         TAG_LOGE(AAFwkTag::RECOVERY, "file: %{public}s failed", file.c_str());
     }
-}
-
-void AppRecovery::ClearPageStack(std::string bundleName)
-{
-    DeleteInValidMissionFiles();
-    std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
-    if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "abilityMgr not exist.");
-        return;
-    }
-    abilityMgr->ScheduleClearRecoveryPageStack();
 }
 
 bool AppRecovery::GetMissionIds(std::string path, std::vector<int32_t> &missionIds)

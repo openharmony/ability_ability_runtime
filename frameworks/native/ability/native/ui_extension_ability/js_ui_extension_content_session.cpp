@@ -742,8 +742,7 @@ napi_value JsUIExtensionContentSession::OnLoadContent(napi_env env, NapiCallback
         isFirstTriggerBindModal_ = false;
     }
     sptr<IRemoteObject> parentToken = sessionInfo_->parentToken;
-    Rosen::WMError ret = uiWindow_->NapiSetUIContent(contextPath, env, storage,
-        Rosen::BackupAndRestoreType::NONE, parentToken);
+    Rosen::WMError ret = uiWindow_->NapiSetUIContent(contextPath, env, storage, false, parentToken);
     if (ret == Rosen::WMError::WM_OK) {
         TAG_LOGD(AAFwkTag::UI_EXT, "NapiSetUIContent success");
     } else {
@@ -1056,7 +1055,7 @@ void JsUIExtensionContentSession::AddFreeInstallObserver(napi_env env,
         freeInstallObserver_ = new JsFreeInstallObserver(env);
         auto context = context_.lock();
         if (!context) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "context is nullptr.");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null context");
             return;
         }
         ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(context->GetToken(),

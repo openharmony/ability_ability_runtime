@@ -56,7 +56,7 @@ public:
         }
     };
 
-    void SignRestartAppFlag(const std::string &bundleName);
+    void SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery = false);
 
     /**
      * StartUIAbility with request.
@@ -77,16 +77,6 @@ public:
      * @return execute error code
      */
     int AbilityTransactionDone(const sptr<IRemoteObject> &token, int state, const AppExecFwk::PacMap &saveData);
-
-    /**
-     * @brief execute after the ability schedule the lifecycle
-     *
-     * @param token the ability token
-     * @param windowConfig the windowconfig
-     * @return execute error code
-     */
-    int AbilityWindowConfigTransactionDone(
-        const sptr<IRemoteObject> &token, const AppExecFwk::WindowConfig &windowConfig);
 
     /**
      * attach ability thread ipc object.

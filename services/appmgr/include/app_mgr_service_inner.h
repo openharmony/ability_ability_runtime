@@ -258,7 +258,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = true);
+    virtual int32_t KillApplication(const std::string &bundleName);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -288,7 +288,7 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
 
-    virtual int32_t KillApplicationSelf(const bool clearPageStack = true);
+    virtual int32_t KillApplicationSelf();
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -299,8 +299,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const bool clearPageStack = true);
+    virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId);
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -749,7 +748,7 @@ public:
      */
     void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
 
-    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation", int32_t uid = -1);
+    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
 
     bool GetAppRunningStateByBundleName(const std::string &bundleName);
 
@@ -1221,8 +1220,7 @@ private:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearPageStack = true);
+    int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId);
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1241,7 +1239,7 @@ private:
      *
      * @return true, return back existed，others non-existent.
      */
-    bool ProcessExist(pid_t pid, int32_t uid = -1);
+    bool ProcessExist(pid_t pid);
 
     /**
      * CheckAllProcessExist, Determine whether all processes exist .
@@ -1347,7 +1345,7 @@ private:
     bool CheckGetRunningInfoPermission() const;
 
     int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearPageStack = true);
+        const std::string &bundleName);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -1469,8 +1467,10 @@ private:
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void InitAppWaitingDebugList();
     void HandleConfigurationChange(const Configuration &config);
+    bool CheckIsThreadInFoundation(pid_t pid);
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
-    int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData);
+    int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
+        bool isNeedExit = false);
     void AddUIExtensionLauncherItem(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord,
         sptr<IRemoteObject> token);
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos);

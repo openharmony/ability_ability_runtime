@@ -93,7 +93,6 @@ public:
     int AttachAbilityThread(const sptr<IAbilityScheduler>& scheduler, const sptr<IRemoteObject>& token) override;
 
     int AbilityTransitionDone(const sptr<IRemoteObject>& token, int state, const PacMap& saveData) override;
-    int AbilityWindowConfigTransitionDone(const sptr<IRemoteObject>& token, const WindowConfig& windowConfig) override;
     int ScheduleConnectAbilityDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& remoteObject) override;
     int ScheduleDisconnectAbilityDone(const sptr<IRemoteObject>& token) override;
     int ScheduleCommandAbilityDone(const sptr<IRemoteObject>& token) override;
@@ -110,7 +109,7 @@ public:
     int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
         const sptr<IRemoteObject> &token = nullptr) override;
 
-    MOCK_METHOD2(KillProcess, int(const std::string& bundleName, const bool clearPageStack));
+    MOCK_METHOD1(KillProcess, int(const std::string& bundleName));
     MOCK_METHOD2(UninstallApp, int(const std::string& bundleName, int32_t uid));
     MOCK_METHOD3(UninstallApp, int32_t(const std::string& bundleName, int32_t uid, int32_t appIndex));
     MOCK_METHOD2(
