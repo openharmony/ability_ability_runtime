@@ -308,7 +308,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_003, TestSize.Level1)
         EXPECT_TRUE(abilityRecord != nullptr);
         EXPECT_TRUE(mission != nullptr);
         abilityRecord->SetMissionId(mission->GetMissionId());
-        abilityRecord->AddCallerRecord(caller->GetToken(), -1);
+        abilityRecord->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(mission);
         curListManager->MoveMissionListToTop(missionList);
         EXPECT_TRUE(curListManager->GetAbilityRecordByToken(abilityRecord->GetToken()) != nullptr);
@@ -371,7 +371,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_004, TestSize.Level1)
         EXPECT_TRUE(mission != nullptr);
         EXPECT_TRUE(missionList != nullptr);
         abilityRecord->SetMissionId(mission->GetMissionId());
-        abilityRecord->AddCallerRecord(caller->GetToken(), -1);
+        abilityRecord->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(mission);
         curListManager->MoveMissionListToTop(missionList);
         EXPECT_TRUE(curListManager->GetAbilityRecordByToken(abilityRecord->GetToken()) != nullptr);
@@ -435,7 +435,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_005, TestSize.Level1)
         EXPECT_TRUE(mission != nullptr);
         EXPECT_TRUE(missionList != nullptr);
         abilityRecord->SetMissionId(mission->GetMissionId());
-        abilityRecord->AddCallerRecord(caller->GetToken(), -1);
+        abilityRecord->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(mission);
         curListManager->MoveMissionListToTop(missionList);
         EXPECT_TRUE(curListManager->GetAbilityRecordByToken(abilityRecord->GetToken()) != nullptr);
@@ -497,7 +497,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_006, TestSize.Level1)
         EXPECT_TRUE(mission != nullptr);
         EXPECT_TRUE(missionList != nullptr);
         abilityRecord->SetMissionId(mission->GetMissionId());
-        abilityRecord->AddCallerRecord(caller->GetToken(), -1);
+        abilityRecord->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(mission);
         curListManager->MoveMissionListToTop(missionList);
         EXPECT_TRUE(curListManager->GetAbilityRecordByToken(abilityRecord->GetToken()) != nullptr);
@@ -561,7 +561,7 @@ HWTEST_F(AbilityTimeoutTest, HandleLoadTimeOut_007, TestSize.Level1)
         EXPECT_TRUE(mission != nullptr);
         EXPECT_TRUE(missionList != nullptr);
         abilityRecord->SetMissionId(mission->GetMissionId());
-        abilityRecord->AddCallerRecord(caller->GetToken(), -1);
+        abilityRecord->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(mission);
         curListManager->MoveMissionListToTop(missionList);
         EXPECT_TRUE(curListManager->GetAbilityRecordByToken(abilityRecord->GetToken()) != nullptr);
@@ -680,7 +680,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_003, TestSize.Level1)
             std::make_shared<Mission>(MOCK_MISSION_ID + 2, commonLauncher, abilityRequest.abilityInfo.bundleName);
         EXPECT_TRUE(commonMissionLauncher != nullptr);
         commonLauncher->SetMissionId(commonMissionLauncher->GetMissionId());
-        commonLauncher->AddCallerRecord(caller->GetToken(), -1);
+        commonLauncher->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(commonMissionLauncher);
         curListManager->MoveMissionListToTop(missionList);
         commonLauncher->SetAbilityState(AbilityState::FOREGROUNDING);
@@ -742,7 +742,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_004, TestSize.Level1)
         EXPECT_TRUE(commonMissionLauncher != nullptr);
         missionList = std::make_shared<MissionList>(MissionListType::CURRENT);
         commonLauncher->SetMissionId(commonMissionLauncher->GetMissionId());
-        commonLauncher->AddCallerRecord(caller->GetToken(), -1);
+        commonLauncher->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(commonMissionLauncher);
         curListManager->MoveMissionListToTop(missionList);
         commonLauncher->SetAbilityState(AbilityState::FOREGROUNDING);
@@ -806,7 +806,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_005, TestSize.Level1)
         EXPECT_TRUE(commonMissionLauncher != nullptr);
         missionList = std::make_shared<MissionList>(MissionListType::CURRENT);
         commonLauncher->SetMissionId(commonMissionLauncher->GetMissionId());
-        commonLauncher->AddCallerRecord(caller->GetToken(), -1);
+        commonLauncher->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(commonMissionLauncher);
         curListManager->MoveMissionListToTop(missionList);
         commonLauncher->SetAbilityState(AbilityState::FOREGROUNDING);
@@ -870,7 +870,7 @@ HWTEST_F(AbilityTimeoutTest, HandleForgroundNewTimeout_006, TestSize.Level1)
         EXPECT_TRUE(commonMissionLauncher != nullptr);
         missionList = std::make_shared<MissionList>(MissionListType::CURRENT);
         commonAbility->SetMissionId(commonMissionLauncher->GetMissionId());
-        commonAbility->AddCallerRecord(caller->GetToken(), -1);
+        commonAbility->AddCallerRecord(caller->GetToken(), -1, abilityRequest.want);
         missionList->AddMissionToTop(commonMissionLauncher);
         curListManager->MoveMissionListToTop(missionList);
         commonAbility->SetAbilityState(AbilityState::FOREGROUNDING);

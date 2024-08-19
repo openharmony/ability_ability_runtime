@@ -8123,10 +8123,20 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!abilityRecord) {
-        std::string bundleName = "";
+        std::string bundleName;
         auto bundleMgr = GetBundleManager();
         if (bundleMgr != nullptr) {
             IN_PROCESS_CALL(bundleMgr->GetNameForUid(callerUid, bundleName));
+        }
+        if (bundleName == "") {
+            std::string nativeName;
+            Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+            int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+            if (result == ERR_OK) {
+                nativeName = "_" + nativeTokenInfo.processName;
+            }
+            want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+            want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, nativeName);
         }
         want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
         want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, bundleName);
@@ -8140,6 +8150,20 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateSignatureInfo(callerBundleName, want);
+}
+
+void AbilityManagerService::UpdateSignatureInfo(std::string bundleName, Want& want)
+{
+    auto bundleMgr = GetBundleManager();
+    if (bundleMgr != nullptr) {
+        AppExecFwk::SignatureInfo signatureInfo;
+        IN_PROCESS_CALL(bundleMgr->GetSignatureInfoByBundleName(bundleName, signatureInfo));
+        want.RemoveParam(Want::PARAM_RESV_CALLER_APP_ID);
+        want.SetParam(Want::PARAM_RESV_CALLER_APP_ID, signatureInfo.appId);
+        want.RemoveParam(Want::PARAM_RESV_CALLER_APP_IDENTIFIER);
+        want.SetParam(Want::PARAM_RESV_CALLER_APP_IDENTIFIER, signatureInfo.appIdentifier);
+    }
 }
 
 void AbilityManagerService::UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObject> asCallerSourceToken,
@@ -8189,6 +8213,7 @@ void AbilityManagerService::UpdateAsCallerInfoFromToken(Want& want, sptr<IRemote
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateSignatureInfo(callerBundleName, want);
 }
 
 void AbilityManagerService::UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken)
@@ -8203,15 +8228,22 @@ void AbilityManagerService::UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<
     want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
     want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER(callerRecord);
     auto sourceInfo = callerRecord->GetCallerInfo();
     CHECK_POINTER(sourceInfo);
+    std::string callerBundleName = sourceInfo->callerBundleName;
     want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, sourceInfo->callerTokenId);
     want.SetParam(Want::PARAM_RESV_CALLER_UID, sourceInfo->callerUid);
     want.SetParam(Want::PARAM_RESV_CALLER_PID, sourceInfo->callerPid);
-    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, sourceInfo->callerBundleName);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, sourceInfo->callerAbilityName);
+    if (callerBundleName == "") {
+        want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, sourceInfo->callerNativeName);
+        return;
+    }
+    UpdateSignatureInfo(callerBundleName, want);
 }
 
 bool AbilityManagerService::UpdateAsCallerInfoFromDialog(Want& want)
@@ -8233,6 +8265,13 @@ bool AbilityManagerService::UpdateAsCallerInfoFromDialog(Want& want)
     want.SetParam(Want::PARAM_RESV_CALLER_PID, pid);
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+    if (callerBundleName == "") {
+        want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME,
+            dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME));
+        return true;
+    }
+    UpdateSignatureInfo(callerBundleName, want);
     return true;
 }
 
@@ -8260,6 +8299,7 @@ void AbilityManagerService::UpdateCallerInfoFromToken(Want& want, const sptr<IRe
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateSignatureInfo(callerBundleName, want);
 }
 
 void AbilityManagerService::UpdateBackToCallerFlag(const sptr<IRemoteObject> &callerToken, Want &want,
