@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
+#include "param.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -28,11 +29,11 @@ public:
     MockAppMgrClient() {};
     virtual ~MockAppMgrClient() {};
 
-    virtual AppMgrResultCode LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-        const AbilityInfo& abilityInfo, const ApplicationInfo& appInfo, const AAFwk::Want& want, int32_t)
+    virtual AppMgrResultCode LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
+        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam)
     {
         TAG_LOGI(AAFwkTag::TEST, "MockAppMgrClient LoadAbility enter.");
-        token_ = token;
+        token_ = loadParam.token;
         return AppMgrResultCode::RESULT_OK;
     }
 
