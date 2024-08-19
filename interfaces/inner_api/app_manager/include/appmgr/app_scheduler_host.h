@@ -49,7 +49,6 @@ private:
     int32_t HandleScheduleProfileChanged(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleConfigurationUpdated(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleProcessSecurityExit(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleScheduleClearPageStack(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleAcceptWant(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleNewProcessRequest(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);

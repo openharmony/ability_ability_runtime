@@ -1095,11 +1095,10 @@ void ContextImpl::AppHasDarkRes(bool &darkRes)
     TAG_LOGD(AAFwkTag::APPKIT, "darkRes %{public}d", darkRes);
 }
 
-void ContextImpl::KillProcessBySelf(const bool clearPageStack)
+void ContextImpl::KillProcessBySelf()
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "killProcessBySelf called clearPageStack is %{public}d", clearPageStack);
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
-    appMgrClient->KillApplicationSelf(clearPageStack);
+    appMgrClient->KillApplicationSelf();
 }
 
 int32_t ContextImpl::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
