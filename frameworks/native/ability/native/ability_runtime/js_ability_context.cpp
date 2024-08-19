@@ -2328,22 +2328,23 @@ napi_value JsAbilityContext::SyncSetMissionContinueState(napi_env env, NapiCallb
     TAG_LOGI(AAFwkTag::CONTEXT, "called");
     auto innerErrCode = std::make_shared<int32_t>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
-        [state, innerErrCode]() {
-            auto context = context_.lock();
-            if (context) {
-                *innerErrCode = context->SetMissionContinueState(state);
-            } else {
+        [weak = context_, &state, innerErrCode]() {
+            auto context = weak.lock();
+            if (!context){
                 TAG_LOGW(AAFwkTag::CONTEXT, "released context");
                 *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                return;
             }
-    };
-    NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-        if (*innerErrCode == ERR_OK) {
-            task.Resolve(env, CreateJsUndefined(env));
-        } else {
-            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
-        }
-    };
+            *innerErrCode = context->SetMissionContinueState(state);
+        };
+    NapiAsyncTask::CompleteCallback complete =
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
+                task.Resolve(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            }
+        };
     napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnSetMissionContinueState",
@@ -2391,9 +2392,9 @@ napi_value JsAbilityContext::OnSetMissionLabel(napi_env env, NapiCallbackInfo& i
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrCode == ERR_OK) {
-                task.resolve(env, CreateJsUndefined(env));
+                task.Resolve(env, CreateJsUndefined(env));
             } else {
-                task.reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }
     };
 
@@ -2425,7 +2426,7 @@ napi_value JsAbilityContext::OnSetMissionIcon(napi_env env, NapiCallbackInfo& in
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "context is released when set mission icon");
-                *innerErrCode = AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT;
+                *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
             *innerErrCode = context->SetMissionIcon(icon);
@@ -2482,9 +2483,10 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
                 return;
             }
 #ifdef SUPPORT_SCREEN
-            *innerErrCode = context->StartAbilityByType(type, wantParam, callback);
+            auto mutableWantParam = wantParam;
+            *innerErrCode = context->StartAbilityByType(type, mutableWantParam, callback);
 #endif
-    };
+        };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
             if ( *innerErrCode == ERR_OK) {
