@@ -752,14 +752,14 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "context released");
-                task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
+                *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 RemoveConnection(connectId);
                 return;
             }
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "connection:%{public}d",
                 static_cast<int32_t>(connectId));
             *innerErrCode = context->ConnectAbilityWithAccount(want, accountId, connection);
-            int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode));
+            int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrCode));
             if (errcode) {
                 connection->CallJsFailed(errcode);
                 RemoveConnection(connectId);
@@ -833,7 +833,7 @@ private:
             }
             if (!connection) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "null connection");
-                *innerErrCode = ERROR_CODE_TWO
+                *innerErrCode = ERROR_CODE_TWO;
                 return;
             }
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "context->DisconnectAbility");
@@ -911,7 +911,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, innerErrorCode));
+                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
             };
 
@@ -938,7 +938,7 @@ private:
             return CreateJsUndefined(env);
         }
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-        NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, want, innerErrCode]() {
+        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
@@ -952,7 +952,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, errcode));
+                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
             };
 
@@ -978,7 +978,7 @@ private:
             return CreateJsUndefined(env);
         }
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-        NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, want, innerErrCode]() {
+        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, accountId, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
@@ -992,7 +992,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, innerErrorCode));
+                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
             };
 
@@ -1031,7 +1031,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, innerErrorCode));
+                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
             };
 
@@ -1069,7 +1069,7 @@ private:
 
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                if (**innerErrCode == ERR_OK) {
+                if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -1191,7 +1191,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, errcode));
+                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
         };
 
