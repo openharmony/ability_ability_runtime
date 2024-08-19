@@ -6385,9 +6385,17 @@ bool AbilityManagerService::IsSystemUI(const std::string &bundleName) const
     return bundleName == AbilityConfig::SYSTEM_UI_BUNDLE_NAME;
 }
 
-void AbilityManagerService::HandleLoadTimeOut(int64_t abilityRecordId, bool isHalf)
+void AbilityManagerService::HandleLoadTimeOut(int64_t abilityRecordId, bool isHalf, bool isExtension)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle load timeout.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "load timeout %{public}" PRId64, abilityRecordId);
+    if (isExtension) {
+        auto connectManager = GetConnectManagerByAbilityRecordId(abilityRecordId);
+        if (connectManager != nullptr) {
+            connectManager->OnTimeOut(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecordId, isHalf);
+        }
+        return;
+    }
+
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManagers = GetUIAbilityManagers();
         for (auto& item : uiAbilityManagers) {
@@ -6401,7 +6409,7 @@ void AbilityManagerService::HandleLoadTimeOut(int64_t abilityRecordId, bool isHa
     for (auto& item : missionListManagers) {
         if (item.second) {
             item.second->OnTimeOut(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecordId, isHalf);
-}
+        }
     }
 }
 
@@ -6433,9 +6441,17 @@ void AbilityManagerService::HandleInactiveTimeOut(int64_t abilityRecordId)
     }
 }
 
-void AbilityManagerService::HandleForegroundTimeOut(int64_t abilityRecordId, bool isHalf)
+void AbilityManagerService::HandleForegroundTimeOut(int64_t abilityRecordId, bool isHalf, bool isExtension)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle foreground timeout.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "foreground timeout %{public}" PRId64, abilityRecordId);
+    if (isExtension) {
+        auto connectManager = GetConnectManagerByAbilityRecordId(abilityRecordId);
+        if (connectManager != nullptr) {
+            connectManager->OnTimeOut(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecordId, isHalf);
+        }
+        return;
+    }
+
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManagers = GetUIAbilityManagers();
         for (auto& item : uiAbilityManagers) {
@@ -6449,7 +6465,7 @@ void AbilityManagerService::HandleForegroundTimeOut(int64_t abilityRecordId, boo
     for (auto& item : missionListManagers) {
         if (item.second) {
             item.second->OnTimeOut(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecordId, isHalf);
-}
+        }
     }
 }
 
@@ -6587,6 +6603,13 @@ std::shared_ptr<AbilityConnectManager> AbilityManagerService::GetConnectManagerB
 {
     CHECK_POINTER_AND_RETURN(subManagersHelper_, nullptr);
     return subManagersHelper_->GetConnectManagerByToken(token);
+}
+
+std::shared_ptr<AbilityConnectManager> AbilityManagerService::GetConnectManagerByAbilityRecordId(
+    const int64_t &abilityRecordId)
+{
+    CHECK_POINTER_AND_RETURN(subManagersHelper_, nullptr);
+    return subManagersHelper_->GetConnectManagerByAbilityRecordId(abilityRecordId);
 }
 
 std::shared_ptr<PendingWantManager> AbilityManagerService::GetCurrentPendingWantManager()
