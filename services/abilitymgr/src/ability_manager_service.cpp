@@ -84,6 +84,7 @@
 #include "application_anr_listener.h"
 #include "input_manager.h"
 #include "ability_first_frame_state_observer_manager.h"
+#include "session_manager_lite.h"
 #include "window_focus_changed_listener.h"
 #endif
 
@@ -9363,6 +9364,10 @@ int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abil
         return CHECK_PERMISSION_FAILED;
     }
 
+    if (!CheckUIExtensionCallerPidByHostWindowId(abilityRequest)) {
+        return ERR_INVALID_CALLER;
+    }
+
     return ERR_OK;
 }
 
@@ -9409,6 +9414,64 @@ bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequ
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller app %{public}s is not foreground, can't start %{public}s",
         processInfo.processName_.c_str(), abilityRequest.want.GetElement().GetURI().c_str());
     return false;
+}
+
+bool AbilityManagerService::CheckUIExtensionCallerPidByHostWindowId(const AbilityRequest &abilityRequest)
+{
+#ifdef SUPPORT_SCREEN
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return true;
+    }
+
+    auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    CHECK_POINTER_AND_RETURN(callerAbility, false);
+    if (callerAbility->IsSceneBoard()) {
+        return true;
+    }
+
+    auto sessionInfo = abilityRequest.sessionInfo;
+    CHECK_POINTER_AND_RETURN(sessionInfo, false);
+    auto hostWindowId = sessionInfo->hostWindowId;
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN(sceneSessionManager, false);
+    pid_t hostPid = 0;
+    // If host window id is scb, it will return with error.
+    auto ret = sceneSessionManager->CheckWindowId(hostWindowId, hostPid);
+    TAG_LOGD(AAFwkTag::UI_EXT, "get pid %{public}d by windowId %{public}d", hostPid, hostWindowId);
+    if (hostPid != 0 && callerAbility->GetPid() == hostPid) {
+        return true;
+    }
+
+    if (UIExtensionUtils::IsUIExtension(callerAbility->GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "caller is nested uiextability");
+        auto connectManager = GetCurrentConnectManager();
+        CHECK_POINTER_AND_RETURN(connectManager, false);
+        bool matched = false;
+        std::list<sptr<IRemoteObject>> callerList;
+        connectManager->GetUIExtensionCallerTokenList(callerAbility, callerList);
+        for (auto &item : callerList) {
+            auto ability = AAFwk::Token::GetAbilityRecordByToken(item);
+            if (ability == nullptr) {
+                TAG_LOGW(AAFwkTag::UI_EXT, "wrong ability");
+                continue;
+            }
+
+            if ((hostPid != 0 && ability->GetPid() == hostPid) || ability->IsSceneBoard()) {
+                matched = true;
+                return true;
+            }
+        }
+        if (!matched) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "Check nested uiextability failed");
+        }
+    }
+
+    TAG_LOGE(AAFwkTag::UI_EXT, "Check pid by windowId %{public}d failed, got %{public}d but actual is %{public}d",
+        hostWindowId, hostPid, callerAbility->GetPid());
+    return false;
+#else
+    return true;
+#endif // SUPPORT_SCREEN
 }
 
 int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityRequest &abilityRequest)
