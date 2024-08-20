@@ -92,6 +92,11 @@ ErrCode AbilityManagerClient::TerminateAbility(sptr<IRemoteObject> token, int re
     return -1;
 }
 
+ErrCode AbilityManagerClient::ConnectAbility(const Want &want, sptr<IAbilityConnection> connect, int32_t userId)
+{
+    return -1;
+}
+
 ErrCode AbilityManagerClient::ConnectAbility(
     const Want& want, sptr<IAbilityConnection> connect, sptr<IRemoteObject> callerToken, int32_t userId)
 {
@@ -129,6 +134,12 @@ ErrCode AbilityManagerClient::Connect()
 }
 
 ErrCode AbilityManagerClient::StopServiceAbility(const Want& want, sptr<IRemoteObject> token)
+{
+    return -1;
+}
+
+ErrCode AbilityManagerClient::SetAbilityController(sptr<AppExecFwk::IAbilityController> abilityController,
+    bool imAStabilityTest)
 {
     return -1;
 }
