@@ -313,7 +313,7 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "invalid object.");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "null object");
         return object;
     }
 

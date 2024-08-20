@@ -150,43 +150,43 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
 {
     napi_value launchReason = InitLaunchReasonObject(env);
     if (launchReason == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create launch reason object failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null launchReason");
         return nullptr;
     }
 
     napi_value lastExitReason = InitLastExitReasonObject(env);
     if (lastExitReason == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create last exit reason object failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null lastExitReason");
         return nullptr;
     }
 
     napi_value onContinueResult = InitOnContinueResultObject(env);
     if (onContinueResult == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create onContinue result object failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null onContinueResult");
         return nullptr;
     }
 
     napi_value windowMode = InitWindowModeObject(env);
     if (windowMode == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create window mode object failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null windowMode");
         return nullptr;
     }
 
     napi_value memoryLevel = InitMemoryLevelObject(env);
     if (memoryLevel == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create memory level object failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null memoryLevel");
         return nullptr;
     }
 
     napi_value stateType = InitStateTypeEnum(env);
     if (stateType == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create state type object failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null stateType");
         return nullptr;
     }
 
     napi_value saveResult = InitOnSaveResultEnum(env);
     if (saveResult == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create save result object failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null saveResult");
         return nullptr;
     }
 
@@ -201,7 +201,7 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
     };
     napi_status status = napi_define_properties(env, exports, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "define properties for exports failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "define properties failed");
         return nullptr;
     }
 
