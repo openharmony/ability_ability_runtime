@@ -119,7 +119,7 @@ bool ConfigurationUtils::GetDisplayConfig(Rosen::DisplayId displayId, float &den
     TAG_LOGD(AAFwkTag::ABILITY, "get display by id %{public}" PRIu64"", displayId);
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get display %{public}" PRIu64" failed", displayId);
+        TAG_LOGE(AAFwkTag::ABILITY, "display %{public}" PRIu64" failed", displayId);
         return false;
     }
 

@@ -179,7 +179,7 @@ ErrCode AbilityWindow::SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMa
 
     auto ret = window->SetAPPWindowIcon(icon);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "failed, errCode:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITY, "errCode:%{public}d", ret);
         return -1;
     }
 

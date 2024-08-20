@@ -106,7 +106,7 @@ int32_t DataAbilityObserverProxy::SendTransactCmd(uint32_t code, MessageParcel &
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "null remote ");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null remote");
         return ERR_NULL_OBJECT;
     }
 

@@ -57,7 +57,7 @@ std::shared_ptr<HapModuleInfo> BundleContainer::GetHapModuleInfo(const std::stri
     if (bundleInfo_ != nullptr) {
         auto uid = Constants::UNSPECIFIED_USERID;
         TAG_LOGI(AAFwkTag::ABILITY_SIM,
-            "modulePackage %{public}s", modulePackage.c_str());
+            "modulePackage:%{public}s", modulePackage.c_str());
         std::optional<HapModuleInfo> hapMouduleInfo = bundleInfo_->FindHapModuleInfo(modulePackage, uid);
         if (hapMouduleInfo) {
             auto hapInfo = std::make_shared<HapModuleInfo>();
