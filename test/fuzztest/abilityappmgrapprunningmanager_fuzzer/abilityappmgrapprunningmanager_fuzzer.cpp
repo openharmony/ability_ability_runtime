@@ -83,8 +83,7 @@ void DoSomethingInterestingWithMyAPIadda(const char* data, size_t size)
     ApplicationInfo appInfos;
     manager->ProcessUpdateApplicationInfoInstalled(appInfos);
     std::list<pid_t> pids;
-    bool clearPageStack = *data % ENABLE;
-    manager->ProcessExitByBundleNameAndUid(jsonStr, uid, pids, clearPageStack);
+    manager->ProcessExitByBundleNameAndUid(jsonStr, uid, pids);
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     manager->GetPidsByUserId(userId, pids);
     manager->PrepareTerminate(token, clearMissionFlag);
@@ -195,8 +194,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     manager->RemoveAppRunningRecordById(recordId);
     manager->ClearAppRunningRecordMap();
     std::list<pid_t> pids;
-    bool clearPageStack = *data % ENABLE;
-    manager->ProcessExitByBundleName(jsonStr, pids, clearPageStack);
+    manager->ProcessExitByBundleName(jsonStr, pids);
     std::vector<AppStateData> list;
     manager->GetForegroundApplications(list);
     Configuration config;

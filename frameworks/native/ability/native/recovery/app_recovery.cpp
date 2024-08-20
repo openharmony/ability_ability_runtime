@@ -115,13 +115,8 @@ bool AppRecovery::InitApplicationInfo(const std::shared_ptr<EventHandler>& mainH
 bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     const std::shared_ptr<AbilityInfo>& abilityInfo, const sptr<IRemoteObject>& token)
 {
-    if (!isEnable_) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "not enabled");
-        return false;
-    }
-
-    if (!abilityRecoverys_.empty() && !abilityInfo->recoverable) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "ability recoverable is false");
+    if (isEnable_ && !abilityRecoverys_.empty() && !abilityInfo->recoverable) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "recoverable is false");
         return false;
     }
     ability_ = ability;

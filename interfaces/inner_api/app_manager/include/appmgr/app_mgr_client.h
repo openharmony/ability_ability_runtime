@@ -199,7 +199,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillApplicationSelf(const bool clearPageStack = true, const std::string& reason = "KillApplicationSelf");
+    virtual AppMgrResultCode KillApplicationSelf(const bool clearPageStack = true,
+        const std::string& reason = "KillApplicationSelf");
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,

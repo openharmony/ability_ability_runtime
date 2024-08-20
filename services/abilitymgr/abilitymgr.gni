@@ -54,8 +54,6 @@ abilityms_files = [
   "src/insight_intent_utils.cpp",
   "src/insight_intent_profile.cpp",
   "src/recovery_info_timer.cpp",
-
-  # interceptor
   "src/interceptor/ability_interceptor_executer.cpp",
   "src/interceptor/ability_jump_interceptor.cpp",
   "src/interceptor/control_interceptor.cpp",
@@ -94,7 +92,6 @@ abilityms_files = [
   "src/scene_board/status_bar_delegate_manager.cpp",
   "src/scene_board/ui_ability_lifecycle_manager.cpp",
   "src/deeplink_reserve/deeplink_reserve_config.cpp",
-  "src/app_recovery/default_recovery_config.cpp",
 
   #connection observer
   "src/connection_observer_controller.cpp",

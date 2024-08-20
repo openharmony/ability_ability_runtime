@@ -270,7 +270,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByAbilit
     return nullptr;
 }
 
-bool AppRunningManager::ProcessExitByBundleName(const std::string &bundleName, std::list<pid_t> &pids, const bool clearPageStack)
+bool AppRunningManager::ProcessExitByBundleName(const std::string &bundleName, std::list<pid_t> &pids,
+    const bool clearPageStack)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {

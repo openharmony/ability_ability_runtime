@@ -1486,6 +1486,20 @@ ErrCode AbilityManagerClient::AddFreeInstallObserver(const sptr<IRemoteObject> c
     return abms->AddFreeInstallObserver(callerToken, observer);
 }
 
+void AbilityManagerClient::SubmitSaveRecoveryInfo(sptr<IRemoteObject> token)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->SubmitSaveRecoveryInfo(token);
+}
+
+void AbilityManagerClient::ScheduleClearRecoveryPageStack()
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->ScheduleClearRecoveryPageStack();
+}
+
 int32_t AbilityManagerClient::IsValidMissionIds(
     const std::vector<int32_t> &missionIds, std::vector<MissionValidResult> &results)
 {

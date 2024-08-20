@@ -171,7 +171,8 @@ public:
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid") override;
 
-    virtual int KillApplicationSelf(const bool clearPageStack = true, const std::string& reason = "KillApplicationSelf") override;
+    virtual int KillApplicationSelf(const bool clearPageStack = true,
+        const std::string& reason = "KillApplicationSelf") override;
 
     virtual int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application,
         bool &debug) override;

@@ -27,7 +27,6 @@
 #endif
 #include "app_utils.h"
 #include "app_exit_reason_data_manager.h"
-#include "app_recovery/default_recovery_config.h"
 #include "application_util.h"
 #include "recovery_info_timer.h"
 #include "assert_fault_callback_death_mgr.h"
@@ -348,7 +347,6 @@ bool AbilityManagerService::Init()
     InitInterceptor();
     InitStartAbilityChain();
     InitDeepLinkReserve();
-    InitDefaultRecoveryList();
 
     abilityAutoStartupService_ = std::make_shared<AbilityRuntime::AbilityAutoStartupService>();
     InitPushTask();
@@ -365,13 +363,6 @@ void AbilityManagerService::InitDeepLinkReserve()
 {
     if (!DeepLinkReserveConfig::GetInstance().LoadConfiguration()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "InitDeepLinkReserve failed.");
-    }
-}
-
-void AbilityManagerService::InitDefaultRecoveryList()
-{
-    if (!DefaultRecoveryConfig::GetInstance().LoadConfiguration()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Load default recovery list failed.");
     }
 }
 
@@ -6039,11 +6030,6 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     request.callerToken = callerToken;
     auto setting = AbilityStartSetting::GetEmptySetting();
     if (setting != nullptr) {
-        auto bundleName = want.GetElement().GetBundleName();
-        auto defaultRecovery = DefaultRecoveryConfig::GetInstance().IsBundleDefaultRecoveryEnabled(bundleName);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, defaultRecovery: %{public}d.", bundleName.c_str(),
-            defaultRecovery);
-        setting->AddProperty(AbilityStartSetting::DEFAULT_RECOVERY_KEY, defaultRecovery ? "true" : "false");
         setting->AddProperty(AbilityStartSetting::IS_START_BY_SCB_KEY, "false"); // default is false
         request.startSetting = std::make_shared<AbilityStartSetting>(*(setting.get()));
     }
@@ -6275,9 +6261,7 @@ void AbilityManagerService::ReleaseAbilityTokenMap(const sptr<IRemoteObject> &to
 
 int AbilityManagerService::KillProcess(const std::string &bundleName, const bool clearPageStack)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s, clearPageStack: %{public}d",
-        bundleName.c_str(), clearPageStack);
-    CHECK_CALLER_IS_SYSTEM_APP;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s", bundleName.c_str());
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
     int32_t userId = GetUserId();
@@ -11205,7 +11189,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
         TAG_LOGE(AAFwkTag::ABILITYMGR, "SignRestartAppFlag error.");
         return result;
     }
-    result = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf("RestartApp");
+    result = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf(false, "RestartApp");
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "KillApplicationSelf error.");
         return result;

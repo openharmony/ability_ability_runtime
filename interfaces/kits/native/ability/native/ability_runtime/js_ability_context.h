@@ -127,11 +127,7 @@ private:
     napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo& info);
     napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
         AAFwk::StartOptions &options);
-    napi_value OnMoveAbilityToBackground(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetRestoreEnabled(napi_env env, NapiCallbackInfo& info);
-    bool CreateOpenLinkTask(const napi_env &env, const napi_value &lastParam, AAFwk::Want &want,
-        int &requestCode);
-    napi_value OnStartUIServiceExtension(napi_env env, NapiCallbackInfo& info);
     void RemoveOpenLinkTask(int requestCode);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);
