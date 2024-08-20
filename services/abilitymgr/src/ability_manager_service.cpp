@@ -27,7 +27,6 @@
 #endif
 #include "app_utils.h"
 #include "app_exit_reason_data_manager.h"
-#include "app_recovery/default_recovery_config.h"
 #include "application_util.h"
 #include "recovery_info_timer.h"
 #include "assert_fault_callback_death_mgr.h"
@@ -329,7 +328,6 @@ bool AbilityManagerService::Init()
     InitInterceptor();
     InitStartAbilityChain();
     InitDeepLinkReserve();
-    InitDefaultRecoveryList();
 
     abilityAutoStartupService_ = std::make_shared<AbilityRuntime::AbilityAutoStartupService>();
     InitPushTask();
@@ -346,13 +344,6 @@ void AbilityManagerService::InitDeepLinkReserve()
 {
     if (!DeepLinkReserveConfig::GetInstance().LoadConfiguration()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "InitDeepLinkReserve failed.");
-    }
-}
-
-void AbilityManagerService::InitDefaultRecoveryList()
-{
-    if (!DefaultRecoveryConfig::GetInstance().LoadConfiguration()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Load default recovery list failed.");
     }
 }
 
@@ -5995,11 +5986,6 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     request.callerToken = callerToken;
     auto setting = AbilityStartSetting::GetEmptySetting();
     if (setting != nullptr) {
-        auto bundleName = want.GetElement().GetBundleName();
-        auto defaultRecovery = DefaultRecoveryConfig::GetInstance().IsBundleDefaultRecoveryEnabled(bundleName);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, defaultRecovery: %{public}d.", bundleName.c_str(),
-            defaultRecovery);
-        setting->AddProperty(AbilityStartSetting::DEFAULT_RECOVERY_KEY, defaultRecovery ? "true" : "false");
         setting->AddProperty(AbilityStartSetting::IS_START_BY_SCB_KEY, "false"); // default is false
         request.startSetting = std::make_shared<AbilityStartSetting>(*(setting.get()));
     }
