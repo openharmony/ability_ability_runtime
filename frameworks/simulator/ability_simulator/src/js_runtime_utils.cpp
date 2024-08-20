@@ -350,7 +350,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(napi_env en
     napi_create_reference(env, ref, 1, &methodRequireNapiRef);
     methodRequireNapiRef_.reset(reinterpret_cast<NativeReference *>(methodRequireNapiRef));
     if (!methodRequireNapiRef_) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create reference for global.requireNapi failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create reference failed");
         return nullptr;
     }
     napi_value className = nullptr;
