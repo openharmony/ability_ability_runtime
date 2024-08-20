@@ -29,6 +29,13 @@ namespace AppExecFwk {
 enum class ExtensionAbilityType;
 }  // namespace AppExecFwk
 namespace AbilityRuntime {
+
+struct CallerRequestInfo {
+    int32_t requestCode = 0;
+    int32_t pid = 0;
+    bool backFlag = false;
+};
+
 class StartupUtil {
 public:
     static bool GetAppIndex(const AAFwk::Want &want, int32_t &appIndex);
@@ -36,6 +43,8 @@ public:
     static bool IsSupportAppClone(AppExecFwk::ExtensionAbilityType type);
     static void InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo &extensionInfo,
         AppExecFwk::AbilityInfo &abilityInfo);
+    static int64_t GenerateFullRequestCode(int32_t pid, bool backFlag, int32_t requestCode);
+    static CallerRequestInfo ParseFullRequestCode(int64_t fullRequestCode);
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
