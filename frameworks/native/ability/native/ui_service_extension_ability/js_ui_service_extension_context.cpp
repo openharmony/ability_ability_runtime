@@ -125,7 +125,7 @@ private:
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
-            } else if (*innerErrCode == AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT) {
+            } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                 task.Reject(env, CreateJsError(env, *innerErrCode));
             } else {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -230,7 +230,7 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
                 if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT) {
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsError(env, *innerErrCode));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));

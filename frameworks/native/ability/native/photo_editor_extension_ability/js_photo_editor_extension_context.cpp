@@ -105,11 +105,11 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
             *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        *innerErrCode = context->SaveEditedContent(uri, newWant);
+        *innerErrCode = static_cast<int32_t>(context->SaveEditedContent(uri, newWant));
     };
     NapiAsyncTask::CompleteCallback complete =
         [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task,int32_t status) {
-            if (*innerErrCode == PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR) {
+            if (*innerErrCode == static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)) {
                 task.Reject(env, CreateJsError(env, *innerErrCode));
             }
             napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
@@ -159,11 +159,11 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
                 *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
                 return;
             }
-            *innerErrCode = context->SaveEditedContent(image, packOption, newWant);
+            *innerErrCode = static_cast<int32_t>(context->SaveEditedContent(image, packOption, newWant));
         };
     NapiAsyncTask::CompleteCallback complete =
         [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
-            if (*innerErrCode == PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR) {
+            if (*innerErrCode == static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)) {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }
             napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
