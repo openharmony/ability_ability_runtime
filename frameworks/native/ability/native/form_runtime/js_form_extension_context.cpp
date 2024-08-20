@@ -131,7 +131,7 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::FORM_EXT, "Context released");
-                *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                *innerErrCode = static_cast<int>(1);
                 return;
             }
             *innerErrCode = context->UpdateForm(formId, formProviderData);
@@ -233,7 +233,6 @@ private:
             if (!context) {
                 TAG_LOGE(AAFwkTag::FORM_EXT, "Context is free");
                 *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-                RemoveConnection(connectId);
                 return;
             }
             TAG_LOGD(AAFwkTag::FORM_EXT, "ConnectAbility connection:%{public}d", static_cast<int32_t>(connectId));
@@ -245,11 +244,12 @@ private:
             }
         };
         NapiAsyncTask::CompleteCallback complete =
-            [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                if (*innerErrCode == ERR_OK) {
-                    task.Resolve(env, CreateJsUndefined(env));
+            [connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+                if (*innerErrCode == AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT) {
+                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    RemoveConnection(connectId);
                 } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+                    task.Resolve(env, CreateJsUndefined(env));
                 }
             };
         napi_value result = nullptr;
@@ -301,6 +301,9 @@ private:
                 napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
+                } else if (*innerErrCode == AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT ||
+                    *innerErrCode == AbilityErrorCode::ERROR_CODE_INNER) {
+                    task.Reject(env, CreateJsError(env, *innerErrCode));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
