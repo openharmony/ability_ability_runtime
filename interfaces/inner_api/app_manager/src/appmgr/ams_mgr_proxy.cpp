@@ -545,6 +545,11 @@ int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack, const std::s
         return ERR_INVALID_DATA;
     }
 
+    if (!data.WriteString(reason)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to write reason");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     if (!data.WriteBool(clearPageStack)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
         return ERR_FLATTEN_OBJECT;

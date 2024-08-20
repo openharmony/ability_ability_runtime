@@ -2140,8 +2140,13 @@ void UIAbilityLifecycleManager::GetActiveAbilityList(int32_t uid, std::vector<st
         }
         const auto &abilityInfo = abilityRecord->GetAbilityInfo();
         if (abilityInfo.applicationInfo.uid == uid && !abilityInfo.name.empty()) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "find ability name is %{public}s", abilityInfo.name.c_str());
-            abilityList.push_back(abilityInfo.name);
+            std::string abilityName = abilityInfo.name;
+            if (abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD &&
+                abilityRecord->GetSessionInfo() != nullptr) {
+                abilityName += std::to_string(abilityRecord->GetSessionInfo()->persistentId);
+            }
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "find ability name is %{public}s.", abilityName.c_str());
+            abilityList.push_back(abilityName);
         }
     }
     if (!abilityList.empty()) {

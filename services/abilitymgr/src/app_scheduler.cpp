@@ -238,13 +238,6 @@ void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
     callback->NotifyAppPreCache(pid, userId);
 }
 
-void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
-{
-    auto callback = callback_.lock();
-    CHECK_POINTER(callback);
-    callback->NotifyAppPreCache(pid, userId);
-}
-
 int AppScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);

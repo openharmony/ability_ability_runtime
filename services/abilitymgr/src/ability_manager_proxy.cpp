@@ -1983,7 +1983,7 @@ sptr<IWantSender> AbilityManagerProxy::GetWantSender(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uid write fail");
         return nullptr;
     }
-    
+
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);

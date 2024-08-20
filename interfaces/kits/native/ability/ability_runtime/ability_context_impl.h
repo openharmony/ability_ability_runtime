@@ -308,7 +308,7 @@ private:
     wptr<IRemoteObject> sessionToken_;
     std::mutex uiExtensionMutex_;
     std::map<int32_t, Want> uiExtensionMap_;
-    std::atomic<bool> restoreEnabled_ = true;
+    std::atomic<bool> restoreEnabled_ = false;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);

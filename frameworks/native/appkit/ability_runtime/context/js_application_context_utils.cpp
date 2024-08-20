@@ -626,7 +626,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
         }
         task.ResolveWithNoError(env, CreateJsUndefined(env));
     };
-    napi_value lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
+    napi_value lastParam = (info.argc == ARGC_ONE && !hasClearPageStack) ? info.argv[INDEX_ZERO] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplicationContextUtils::OnkillProcessBySelf",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));

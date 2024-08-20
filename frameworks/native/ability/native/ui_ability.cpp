@@ -197,10 +197,7 @@ void UIAbility::OnStop()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 #ifdef SUPPORT_GRAPHICS
-    if (abilityRecovery_ != nullptr) {
-        abilityRecovery_->ScheduleSaveAbilityState(AppExecFwk::StateReason::LIFECYCLE);
-    }
-    TAG_LOGI(AAFwkTag::UIABILITY, "UnregisterDisplayInfoChangedListener");
+    TAG_LOGI(AAFwkTag::UIABILITY, "unregisterDisplayInfoChangedListener.");
     (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(token_, abilityDisplayListener_);
     auto &&window = GetWindow();
     if (window != nullptr) {
@@ -1197,18 +1194,12 @@ bool UIAbility::CheckRecoveryEnabled()
 
 bool UIAbility::CheckDefaultRecoveryEnabled()
 {
-    if (setting_ == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "null setting_");
+    if (abilityContext_ == nullptr) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "context invalid");
         return false;
     }
 
-    auto value = setting_->GetProperty(AppExecFwk::AbilityStartSetting::DEFAULT_RECOVERY_KEY);
-    if ((!useAppSettedRecoveryValue_.load()) && (value == "true")) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "default recovery enabled");
-        return true;
-    }
-
-    return false;
+    return abilityContext_->GetRestoreEnabled();
 }
 
 bool UIAbility::IsStartByScb()

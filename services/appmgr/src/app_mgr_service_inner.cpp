@@ -1484,7 +1484,7 @@ int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack, const
     auto callingUid = IPCSkeleton::GetCallingUid();
     TAG_LOGI(AAFwkTag::APPMGR, "uid value: %{public}d", callingUid);
     std::list<pid_t> pids;
-    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, callingUid, pids)) {
+    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, callingUid, pids, clearPageStack)) {
         TAG_LOGI(AAFwkTag::APPMGR, "unstart");
         return ERR_OK;
     }
@@ -1496,15 +1496,15 @@ int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack, const
         auto result = KillProcessByPid(*iter, reason);
         if (result < 0) {
             TAG_LOGE(AAFwkTag::APPMGR, "killApplication fail for bundleName:%{public}s pid:%{public}d",
-                bundleName.c_str(), *iter, clearPageStack);
+                bundleName.c_str(), *iter);
             return result;
         }
     }
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::KillApplicationByBundleName(
-    const std::string &bundleName, const bool clearPageStack, const std::string& reason)
+int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundleName, const bool clearPageStack,
+    const std::string& reason)
 {
     int result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();
@@ -1532,8 +1532,8 @@ int32_t AppMgrServiceInner::KillApplicationByBundleName(
 }
 
 int32_t AppMgrServiceInner::KillApplicationByUserId(
-    const std::string &bundleName, int32_t appCloneIndex, int32_t userId, const bool clearPageStack,
-    const std::string& reason)
+    const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
+    const bool clearPageStack, const std::string& reason)
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     if (VerifyAccountPermission(
@@ -1651,8 +1651,8 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
     // 3.kill application
     // 4.revoke user rights
     result =
-        isBySelf ? KillApplicationSelf(reason)
-            : KillApplicationByUserId(bundleName, appCloneIndex, userId, reason);
+        isBySelf ? KillApplicationSelf(false, reason)
+            : KillApplicationByUserId(bundleName, appCloneIndex, userId, false, reason);
     if (result < 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "Kill Application by bundle name is fail");
         return ERR_INVALID_OPERATION;
@@ -3959,7 +3959,7 @@ int AppMgrServiceInner::StartUserTestProcess(
         return ERR_INVALID_VALUE;
     }
 
-    if (KillApplicationByUserIdLocked(bundleName, 0, userId, "StartUserTestProcess")) {
+    if (KillApplicationByUserIdLocked(bundleName, 0, userId, false, "StartUserTestProcess")) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to kill the application");
         return ERR_INVALID_VALUE;
     }
@@ -4112,7 +4112,7 @@ int AppMgrServiceInner::FinishUserTest(
 
     FinishUserTestLocked(msg, resultCode, appRecord);
 
-    int ret = KillApplicationByUserIdLocked(bundleName, 0, userTestRecord->userId, "FinishUserTest");
+    int ret = KillApplicationByUserIdLocked(bundleName, 0, userTestRecord->userId, false, "FinishUserTest");
     if (ret) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to kill process.");
         return ret;

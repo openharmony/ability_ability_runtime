@@ -905,7 +905,6 @@ public:
      */
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
         const std::shared_ptr<Media::PixelMap> &pixelMap) override;
-#endif // SUPPORT_SCREEN
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
     virtual void SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token) override;
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
