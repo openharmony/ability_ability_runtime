@@ -33,11 +33,11 @@ DisposedObserver::DisposedObserver(const AppExecFwk::DisposedRule &disposedRule,
 
 void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
     std::lock_guard<ffrt::mutex> guard(observerLock_);
     if (abilityStateData.abilityState != static_cast<int32_t>(AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND)) {
         return;
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
     token_ = abilityStateData.token;
     auto abilityRecord = Token::GetAbilityRecordByToken(token_);
     if (abilityRecord && !abilityRecord->GetAbilityInfo().isStageBasedModel) {
@@ -50,6 +50,7 @@ void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData 
         } else {
             want.SetParam(INTERCEPT_MISSION_ID, abilityRecord->GetMissionId());
         }
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "FA modal system");
         bool ret = IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want));
         if (!ret) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start system UIExtension");
@@ -60,8 +61,8 @@ void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData 
 
 void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
     if (disposedRule_.componentType == AppExecFwk::ComponentType::UI_ABILITY) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
         int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*disposedRule_.want));
         if (ret != ERR_OK) {
             interceptor_->UnregisterObserver(pageStateData.bundleName);
@@ -70,10 +71,12 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
         }
     }
     if (disposedRule_.componentType == AppExecFwk::ComponentType::UI_EXTENSION) {
-        if (!token_) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(token_);
+        if (abilityRecord == nullptr || abilityRecord->GetAbilityInfo().type != AppExecFwk::AbilityType::PAGE) {
             auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
             Want want = *disposedRule_.want;
             want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "modal system");
             bool ret = IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want));
             if (!ret) {
                 interceptor_->UnregisterObserver(pageStateData.bundleName);
@@ -81,12 +84,6 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
                 return;
             }
         } else {
-            auto abilityRecord = Token::GetAbilityRecordByToken(token_);
-            if (!abilityRecord) {
-                interceptor_->UnregisterObserver(pageStateData.bundleName);
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord is nullptr");
-                return;
-            }
             Want want = *disposedRule_.want;
             auto sessionInfo = abilityRecord->GetSessionInfo();
             if (sessionInfo != nullptr) {
@@ -94,6 +91,7 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
             } else {
                 want.SetParam(INTERCEPT_MISSION_ID, abilityRecord->GetMissionId());
             }
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "modal app");
             int ret = abilityRecord->CreateModalUIExtension(want);
             if (ret != ERR_OK) {
                 interceptor_->UnregisterObserver(pageStateData.bundleName);

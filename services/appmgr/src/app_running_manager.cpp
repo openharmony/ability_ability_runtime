@@ -555,6 +555,7 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
 
     std::shared_ptr<AbilityRunningRecord> abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
     bool isSCB = false;
+    bool isPage = false;
     if (abilityRecord) {
         abilityRecord->SetTerminating();
         isSCB = abilityRecord->IsSceneBoard();
@@ -562,9 +563,12 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
             pid_t pid = appRecord->GetPriorityObject()->GetPid();
             (void)serviceInner->KillProcessByPid(pid, "AttachTimeoutKillSCB");
         }
+        if (abilityRecord->GetAbilityInfo() != nullptr) {
+            isPage = (abilityRecord->GetAbilityInfo()->type == AbilityType::PAGE);
+        }
     }
 
-    if ((isSCB || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
+    if ((isSCB || isPage || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
         appRecord->SetTerminating();
     }

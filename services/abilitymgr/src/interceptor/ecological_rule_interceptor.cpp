@@ -57,12 +57,14 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
         callerInfo, rule));
+    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "isBackSkuExempt: %{public}d.", rule.isBackSkuExempt);
     if (ret != ERR_OK) {
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule failed");
         return ERR_OK;
     }
     TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule success");
     StartAbilityUtils::ermsResultCode = rule.resultCode;
+    StartAbilityUtils::ermsSupportBackToCallerFlag = rule.isBackSkuExempt;
     if (rule.resultCode == ERMS_ISALLOW_RESULTCODE) {
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "allow ecological rule");
         return ERR_OK;

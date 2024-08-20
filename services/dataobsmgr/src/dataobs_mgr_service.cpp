@@ -49,18 +49,18 @@ DataObsMgrService::~DataObsMgrService()
 void DataObsMgrService::OnStart()
 {
     if (state_ == DataObsServiceRunningState::STATE_RUNNING) {
-        TAG_LOGI(AAFwkTag::DBOBSMGR, "dms started.");
+        TAG_LOGI(AAFwkTag::DBOBSMGR, "dms started");
         return;
     }
     if (!Init()) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "init failed!");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "init failed");
         return;
     }
     state_ = DataObsServiceRunningState::STATE_RUNNING;
     /* Publish service maybe failed, so we need call this function at the last,
      * so it can't affect the TDD test program */
     if (!Publish(DelayedSingleton<DataObsMgrService>::GetInstance().get())) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "publish init failed!");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "publish init failed");
         return;
     }
 
@@ -88,13 +88,13 @@ DataObsServiceRunningState DataObsMgrService::QueryServiceState() const
 int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObserver, uri:%{public}s.",
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObserver, uri:%{public}s",
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATA_OBSERVER_IS_NULL;
     }
 
     if (dataObsMgrInner_ == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObsMgrInner, uri:%{public}s.",
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObsMgrInner, uri:%{public}s",
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
@@ -107,7 +107,7 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserve
     }
 
     if (status != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "register failed: %{public}d, uri:%{public}s", status,
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "register failed:%{public}d, uri:%{public}s", status,
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return status;
     }
@@ -136,7 +136,7 @@ int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObser
     }
 
     if (status != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "unregister failed: %{public}d, uri:%{public}s", status,
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "unregister failed:%{public}d, uri:%{public}s", status,
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return status;
     }
@@ -306,7 +306,7 @@ int DataObsMgrService::Dump(int fd, const std::vector<std::u16string>& args)
     Dump(args, result);
     int ret = dprintf(fd, "%s\n", result.c_str());
     if (ret < 0) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "dprintf error.");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "dprintf error");
         return DATAOBS_HIDUMP_ERROR;
     }
     return SUCCESS;

@@ -70,6 +70,9 @@
 #include "running_multi_info.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace Rosen {
 class WindowVisibilityInfo;
 class FocusChangeInfo;
@@ -78,7 +81,7 @@ namespace AppExecFwk {
 using OHOS::AAFwk::Want;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
-using LoabAbilityTaskFunc = std::function<void()>;
+using LoadAbilityTaskFunc = std::function<void()>;
 constexpr int32_t BASE_USER_RANGE = 200000;
 
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
@@ -101,9 +104,8 @@ public:
      *
      * @return
      */
-    virtual void LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-        std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
-        std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
+    virtual void LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
+        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
     /**
      * TerminateAbility, terminate the token ability.
@@ -1114,9 +1116,9 @@ public:
 
     void SetSceneBoardAttachFlag(bool flag);
 
-    void CacheLoabAbilityTask(const LoabAbilityTaskFunc& func);
+    void CacheLoadAbilityTask(const LoadAbilityTaskFunc& func);
 
-    void SubmitCacheLoabAbilityTask();
+    void SubmitCacheLoadAbilityTask();
     /**
      * Notifies that one ability is attached to status bar.
      *
@@ -1437,7 +1439,7 @@ private:
     std::string GetSpecifiedProcessFlag(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want);
 
     void LoadAbilityNoAppRecord(const std::shared_ptr<AppRunningRecord> appRecord,
-        sptr<IRemoteObject> preToken, std::shared_ptr<ApplicationInfo> appInfo,
+        bool isShellCall, std::shared_ptr<ApplicationInfo> appInfo,
         std::shared_ptr<AbilityInfo> abilityInfo, const std::string &processName,
         const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want,
@@ -1545,7 +1547,7 @@ private:
     std::atomic<bool> sceneBoardAttachFlag_ = true;
 
     std::mutex loadTaskListMutex_;
-    std::vector<LoabAbilityTaskFunc> loadAbilityTaskFuncList_;
+    std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
