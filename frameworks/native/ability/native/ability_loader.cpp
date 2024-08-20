@@ -68,7 +68,7 @@ AbilityRuntime::UIAbility *AbilityLoader::GetUIAbilityByName(const std::string &
     if (it != uiAbilities_.end()) {
         return it->second();
     }
-    TAG_LOGE(AAFwkTag::ABILITY, "failed: %{public}s", abilityName.c_str());
+    TAG_LOGE(AAFwkTag::ABILITY, "failed:%{public}s", abilityName.c_str());
     return nullptr;
 }
 

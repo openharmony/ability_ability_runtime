@@ -279,7 +279,7 @@ void from_json(const nlohmann::json &jsonObject, ExtensionAbilityInfo &extension
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "ExtensionAbilityInfo from_json error:%{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "ExtensionAbilityInfo error:%{public}d", parseResult);
     }
 }
 }  // namespace AppExecFwk

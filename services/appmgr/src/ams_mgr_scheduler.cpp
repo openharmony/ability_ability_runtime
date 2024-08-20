@@ -63,9 +63,9 @@ AmsMgrScheduler::~AmsMgrScheduler()
     TAG_LOGI(AAFwkTag::APPMGR, "AmsMgrScheduler instance destroyed");
 }
 
-void AmsMgrScheduler::LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-    const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-    const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId)
+void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
+    const std::shared_ptr<ApplicationInfo> &appInfo,
+    const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
 {
     if (!abilityInfo || !appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
@@ -83,14 +83,14 @@ void AmsMgrScheduler::LoadAbility(const sptr<IRemoteObject> &token, const sptr<I
     PerfProfile::GetInstance().SetAbilityLoadStartTime(GetTickCount());
     TAG_LOGI(AAFwkTag::APPMGR, "SubmitLoadTask: %{public}s-%{public}s", abilityInfo->bundleName.c_str(),
         abilityInfo->name.c_str());
-    std::function<void()> loadAbilityFunc = [amsMgrServiceInner = amsMgrServiceInner_, token, preToken,
-        abilityInfo, appInfo, want, abilityRecordId]() {
-        amsMgrServiceInner->LoadAbility(token, preToken, abilityInfo, appInfo, want, abilityRecordId);
+    std::function<void()> loadAbilityFunc = [amsMgrServiceInner = amsMgrServiceInner_,
+        abilityInfo, appInfo, want, loadParam]() {
+        amsMgrServiceInner->LoadAbility(abilityInfo, appInfo, want, loadParam);
     };
 
     // cache other application load ability task before scene board attach
     if (!amsMgrServiceInner_->GetSceneBoardAttachFlag() && abilityInfo->bundleName != SCENE_BOARD_BUNDLE_NAME) {
-        amsMgrServiceInner_->CacheLoabAbilityTask(loadAbilityFunc);
+        amsMgrServiceInner_->CacheLoadAbilityTask(loadAbilityFunc);
         return;
     }
     if (abilityInfo->bundleName == SCENE_BOARD_BUNDLE_NAME && abilityInfo->name == SCENEBOARD_ABILITY_NAME) {

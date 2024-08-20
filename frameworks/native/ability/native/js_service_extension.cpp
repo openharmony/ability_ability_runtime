@@ -286,7 +286,7 @@ void JsServiceExtension::BindContext(napi_env env, napi_value obj)
 void JsServiceExtension::OnStart(const AAFwk::Want &want)
 {
     Extension::OnStart(want);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "call");
 
     auto context = GetContext();
     if (context != nullptr) {

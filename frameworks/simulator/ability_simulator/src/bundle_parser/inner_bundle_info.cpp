@@ -736,7 +736,7 @@ void from_json(const nlohmann::json &jsonObject, Dependency &dependency)
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Dependency from_json error:%{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Dependency error:%{public}d", parseResult);
     }
 }
 
@@ -779,7 +779,7 @@ void from_json(const nlohmann::json &jsonObject, Distro &distro)
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Distro from_json error:%{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Distro error:%{public}d", parseResult);
     }
 }
 

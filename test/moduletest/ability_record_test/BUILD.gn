@@ -42,6 +42,7 @@ ohos_moduletest("AbilityRecordModuleTest") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:perm_verification",
     "${distributedschedule_path}/safwk/interfaces/innerkits/safwk:system_ability_fwk",

@@ -65,6 +65,7 @@ struct StartAbilityUtils {
     static thread_local bool skipErms;
     static thread_local int32_t ermsResultCode;
     static thread_local bool isWantWithAppCloneIndex;
+    static thread_local bool ermsSupportBackToCallerFlag;
 };
 
 struct StartAbilityInfoWrap {
