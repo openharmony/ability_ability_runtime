@@ -15,6 +15,7 @@
 
 #include "js_application_context_utils.h"
 
+#include <cstdint>
 #include <map>
 
 #include "ability_business_error.h"
@@ -504,7 +505,7 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            *innerErrCode = static_cast<int>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
             return;
         }
         path = context->GetGroupDir(groupId);
@@ -513,8 +514,7 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
         if (*innerErrCode == ERR_OK) {
             task.ResolveWithNoError(env, CreateJsValue(env, path));
         } else {
-            TAG_LOGE(AAFwkTag::APPKIT, "GetGroupDir is failed %{public}d", *innerErrCode);
-            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
+            task.Reject(env, CreateJsError(env, *innerErrCode,
                 "applicationContext if already released"));
         }
     };
@@ -615,7 +615,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            *innerErrCode = static_cast<int32_t>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
             return;
         }
         context->KillProcessBySelf(clearPageStack);
@@ -625,10 +625,8 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
-                TAG_LOGE(AAFwkTag::APPKIT, "OnKillProcessBySelf is failed %{public}d", *innerErrCode);
-                task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
+                task.Reject(env, CreateJsError(env, *innerErrCode,
                     "applicationContext if already released."));
-                return;
             }
         };
     napi_value lastParam = (info.argc == ARGC_ONE && !hasClearPageStack) ? info.argv[INDEX_ZERO] : nullptr;
@@ -792,7 +790,7 @@ napi_value JsApplicationContextUtils::OnClearUpApplicationData(napi_env env, Nap
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            *innerErrCode = static_cast<int32_t>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
             return;
         }
         context->ClearUpApplicationData();
@@ -802,8 +800,7 @@ napi_value JsApplicationContextUtils::OnClearUpApplicationData(napi_env env, Nap
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
-                TAG_LOGE(AAFwkTag::APPKIT, "OnClearUpApplicationData is failed %{public}d", *innerErrCode);
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+                task.Reject(env, CreateJsError(env, *innerErrCode));
             }
     };
     napi_value lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
@@ -834,12 +831,17 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            *innerErrCode = static_cast<int32_t>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
             return;
         }
         *innerErrCode = context->GetProcessRunningInformation(processInfo);
     };
     auto complete = [innerErrCode, &processInfo](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrCode == ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST) {
+            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
+                "applicationContext if already released."));
+            return;
+        }
         if (*innerErrCode == ERR_OK) {
             napi_value object = nullptr;
             napi_create_object(env, &object);

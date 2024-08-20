@@ -26,6 +26,8 @@
 #include "js_runtime_utils.h"
 #include "tokenid_kit.h"
 #include "js_error_utils.h"
+#include <atomic>
+#include <cstdint>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -460,7 +462,7 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
     NapiAsyncTask::ExecuteCallback execute = [context = context_, groupId, &path, innerErrCode]() {
         auto completeContext = context.lock();
         if (!completeContext) {
-            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            *innerErrCode = static_cast<int32_t>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
             return;
         }
         path = completeContext->GetGroupDir(groupId);

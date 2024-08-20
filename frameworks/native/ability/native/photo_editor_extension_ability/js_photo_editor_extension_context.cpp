@@ -105,11 +105,13 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
             *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        *innerErrCode = static_cast<int32_t>(context->SaveEditedContent(uri, newWant));
+        *innerErrCode = context->SaveEditedContent(uri, newWant);
     };
-    NapiAsyncTask::CompleteCallback complete = [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task,
-        int32_t status) {
-        if (*innerErrCode == ERR_OK) {
+    NapiAsyncTask::CompleteCallback complete =
+        [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task,int32_t status) {
+            if (*innerErrCode == PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR) {
+                task.Reject(env, CreateJsError(env, *innerErrCode));
+            }
             napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
             if (abilityResult == nullptr) {
                 TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
@@ -117,10 +119,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
                 return;
             }
             task.Resolve(env, abilityResult);
-        } else {
-            task.Reject(env, CreateJsError(env, *innerErrCode));
-        }
-    };
+        };
 
     napi_value lastParam = (info.argc > INDEX_ONE) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
@@ -151,20 +150,22 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     AAFwk::Want newWant;
-    NapiAsyncTask::ExecuteCallback execute = [weak = context_,
-        image, packOption = std::move(packOption), &newWant, innerErrCode]() {
-        TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage begin");
-        auto context = weak.lock();
-        if (!context) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "Context is released");
-            *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
-            return;
-        }
-        *innerErrCode = static_cast<int32_t>(context->SaveEditedContent(image, packOption, newWant));
-    };
-    NapiAsyncTask::CompleteCallback complete = [&newWant, innerErrCode](
-        napi_env env, NapiAsyncTask &task, int32_t status) {
-        if (*innerErrCode == ERR_OK) {
+    NapiAsyncTask::ExecuteCallback execute =
+        [weak = context_, image, packOption = std::move(packOption), &newWant, innerErrCode]() {
+            TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage begin");
+            auto context = weak.lock();
+            if (!context) {
+                TAG_LOGE(AAFwkTag::UI_EXT, "Context is released");
+                *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
+                return;
+            }
+            *innerErrCode = context->SaveEditedContent(image, packOption, newWant);
+        };
+    NapiAsyncTask::CompleteCallback complete =
+        [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+            if (*innerErrCode == PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR) {
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            }
             napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
             if (abilityResult == nullptr) {
                 TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
@@ -172,10 +173,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
                 return;
             }
             task.Resolve(env, abilityResult);
-        } else {
-            task.Reject(env, CreateJsError(env, *innerErrCode));
-        }
-    };
+        };
     napi_value lastParam = nullptr;
     if (AppExecFwk::IsTypeForNapiValue(env, info.argv[INDEX_TWO], napi_function)) {
         lastParam = info.argv[INDEX_TWO];
