@@ -121,6 +121,8 @@ public:
     void TerminateTimeout(int32_t extensionRecordId);
 
     int32_t GetHostBundleNameForExtensionId(int32_t extensionRecordId, std::string& hostBundleName);
+    void GetCallerTokenList(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
+        std::list<sptr<IRemoteObject>> &callerList);
 private:
     inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);
 
@@ -149,9 +151,6 @@ private:
 
     bool IsHostSpecifiedProcessValid(const AAFwk::AbilityRequest &abilityRequest,
         std::shared_ptr<ExtensionRecord> &record, const std::string &process);
-
-    void GetCallerTokenList(
-        const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::list<sptr<IRemoteObject>> &callerList);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

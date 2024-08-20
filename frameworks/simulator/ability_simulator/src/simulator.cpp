@@ -232,7 +232,7 @@ void CallObjectMethod(napi_env env, napi_value obj, const char *name, napi_value
     napi_value methodOnCreate = nullptr;
     napi_get_named_property(env, obj, name, &methodOnCreate);
     if (methodOnCreate == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "get '%{public}s' from Ability object failed", name);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "get '%{public}s' failed", name);
         return;
     }
     napi_status status = napi_call_function(env, obj, methodOnCreate, argc, argv, nullptr);
@@ -680,7 +680,7 @@ panda::ecmascript::EcmaVM *SimulatorImpl::CreateJSVM()
 bool SimulatorImpl::OnInit()
 {
     if (!ParseBundleAndModuleInfo()) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "parse bundle and module info failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "failed");
         return false;
     }
 
@@ -941,7 +941,7 @@ void SimulatorImpl::GetPkgContextInfoListInner(nlohmann::json &itemObject, std::
 std::string SimulatorImpl::GetNativeStrFromJsTaggedObj(napi_value obj, const char* key)
 {
     if (obj == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "get value from key failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "get value failed");
         return "";
     }
 
@@ -950,7 +950,7 @@ std::string SimulatorImpl::GetNativeStrFromJsTaggedObj(napi_value obj, const cha
     napi_valuetype valueType = napi_undefined;
     napi_typeof(nativeEngine_, valueStr, &valueType);
     if (valueType != napi_string) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "convert value from key failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "convert value failed");
         return "";
     }
 

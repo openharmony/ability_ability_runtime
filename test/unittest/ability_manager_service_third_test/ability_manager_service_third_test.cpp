@@ -2686,5 +2686,48 @@ HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_OpenLink_001,
     int res = abilityMs->OpenLink(want, callerToken, 0, -1);
     EXPECT_NE(res, ERR_OK);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckUIExtensionCallerPidByHostWindowId
+ * FunctionPoints: AbilityManagerService CheckUIExtensionCallerPidByHostWindowId
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    ASSERT_NE(token, nullptr);
+    abilityRequest.callerToken = token;
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    ASSERT_NE(sessionInfo, nullptr);
+    sessionInfo->hostWindowId = 1;
+    abilityRequest.sessionInfo = sessionInfo;
+    abilityMs->CheckUIExtensionCallerPidByHostWindowId(abilityRequest);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckUIExtensionCallerPidByHostWindowId
+ * FunctionPoints: AbilityManagerService CheckUIExtensionCallerPidByHostWindowId
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId_002, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    callerRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    auto callerRecord = AbilityRecord::CreateAbilityRecord(callerRequest);
+    ASSERT_NE(callerRecord, nullptr);
+
+    AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
+    abilityRequest.callerToken = callerRecord->GetToken();
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    ASSERT_NE(sessionInfo, nullptr);
+    sessionInfo->hostWindowId = 1;
+    abilityRequest.sessionInfo = sessionInfo;
+    abilityMs->CheckUIExtensionCallerPidByHostWindowId(abilityRequest);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

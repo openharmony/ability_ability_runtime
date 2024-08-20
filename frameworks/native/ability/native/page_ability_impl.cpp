@@ -45,7 +45,7 @@ void PageAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Li
             ability_->RequestFocus(want);
             AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, targetState.state, GetRestoreData());
         }
-        TAG_LOGE(AAFwkTag::ABILITY, "org lifeCycleState equals Dst lifeCycleState");
+        TAG_LOGE(AAFwkTag::ABILITY, "lifeCycleStat:org=Dst");
         return;
     }
 
@@ -193,7 +193,7 @@ void PageAbilityImpl::DoKeyUp(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         return;
     }
     auto abilityInfo = ability_->GetAbilityInfo();
-    TAG_LOGI(AAFwkTag::ABILITY, "called %{public}s And Focus is %{public}s",
+    TAG_LOGI(AAFwkTag::ABILITY, "called %{public}s,Focus:%{public}s",
         abilityInfo->name.c_str(),
         ability_->HasWindowFocus() ? "true" : "false");
 

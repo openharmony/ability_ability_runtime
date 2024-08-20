@@ -573,7 +573,7 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
                 "%{public}s failed", focuseMode ? "AfterFocused" : "AfterUnFocused");
             return;
         }
-        TAG_LOGI(AAFwkTag::ABILITY, "isStageBasedModel: %{public}d",
+        TAG_LOGI(AAFwkTag::ABILITY, "isStageBasedModel:%{public}d",
             impl->ability_->GetAbilityInfo()->isStageBasedModel);
 
         if (impl->ability_->GetAbilityInfo()->isStageBasedModel) {
@@ -641,7 +641,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
     }
 
     if (needNotifyAMS) {
-        TAG_LOGI(AAFwkTag::ABILITY, "lifecycle: window notify ams");
+        TAG_LOGI(AAFwkTag::ABILITY, "window notify ams");
         PacMap restoreData;
         auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
             AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW, restoreData);
@@ -664,7 +664,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         "; AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
-    TAG_LOGI(AAFwkTag::ABILITY, "lifecycle: window after background");
+    TAG_LOGI(AAFwkTag::ABILITY, "window after background");
     PacMap restoreData;
     auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
         AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);

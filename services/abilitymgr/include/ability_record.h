@@ -393,7 +393,7 @@ public:
      *
      */
     void ForegroundAbility(uint32_t sceneFlag = 0);
-    void ForegroundAbility(const Closure &task, uint32_t sceneFlag = 0);
+    void ForegroundUIExtensionAbility(uint32_t sceneFlag = 0);
 
     /**
      * process request of foregrounding the ability.
@@ -406,6 +406,8 @@ public:
      *
      */
     void PostForegroundTimeoutTask();
+
+    void PostUIExtensionAbilityTimeoutTask(uint32_t messageId);
 
     /**
      * move the ability to back ground.
@@ -1062,7 +1064,7 @@ public:
     void RemoveConnectWant();
 
 protected:
-    void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1);
+    void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms
     std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life

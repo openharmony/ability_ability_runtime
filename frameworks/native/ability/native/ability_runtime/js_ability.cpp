@@ -135,7 +135,7 @@ void JsAbility::Init(const std::shared_ptr<AbilityInfo> &abilityInfo,
     jsAbilityObj_ = jsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
     if (jsAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "AbilityStage object failed");
         return;
     }
 
@@ -190,7 +190,7 @@ void JsAbility::BindContext()
     }
     contextObj = shellContextRef_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get ability native object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "ability native object failed");
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(context);
@@ -224,7 +224,7 @@ void JsAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get Ability object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "Ability object failed");
         return;
     }
 
@@ -280,12 +280,12 @@ int32_t JsAbility::OnShare(WantParams &wantParam)
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "AbilityStage object failed");
         return ERR_INVALID_VALUE;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get Ability object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "Ability object failed");
         return ERR_INVALID_VALUE;
     }
 
@@ -385,7 +385,7 @@ void JsAbility::OnSceneCreated()
     Ability::OnSceneCreated();
     auto jsAppWindowStage = CreateAppWindowStage();
     if (jsAppWindowStage == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "create jsAppWindowStage object by LoadSystemModule");
+        TAG_LOGE(AAFwkTag::ABILITY, "create jsAppWindowStage object");
         return;
     }
 
@@ -421,7 +421,7 @@ void JsAbility::OnSceneRestored()
     HandleScope handleScope(jsRuntime_);
     auto jsAppWindowStage = CreateAppWindowStage();
     if (jsAppWindowStage == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "create jsAppWindowStage object by LoadSystemModule");
+        TAG_LOGE(AAFwkTag::ABILITY, "create jsAppWindowStage object");
         return;
     }
     napi_value argv[] = {jsAppWindowStage->GetNapiValue()};
@@ -477,12 +477,12 @@ void JsAbility::OnForeground(const Want &want)
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "AbilityStage object failed");
         return;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get Ability object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "Ability object failed");
         return;
     }
 
@@ -708,7 +708,7 @@ bool JsAbility::InitWindowScene(const Want &want)
 
 void JsAbility::RequestFocus(const Want &want)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "lifecycle: begin");
+    TAG_LOGI(AAFwkTag::ABILITY, "begin");
     if (scene_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "null scene_");
         return;
@@ -756,19 +756,19 @@ int32_t JsAbility::OnContinue(WantParams &wantParams)
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get AbilityStage object");
+        TAG_LOGE(AAFwkTag::ABILITY, "AbilityStage object");
         return AppExecFwk::ContinuationManager::OnContinueResult::REJECT;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get Ability object");
+        TAG_LOGE(AAFwkTag::ABILITY, "Ability object");
         return AppExecFwk::ContinuationManager::OnContinueResult::REJECT;
     }
 
     napi_value methodOnCreate = nullptr;
     napi_get_named_property(env, obj, "onContinue", &methodOnCreate);
     if (methodOnCreate == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get 'onContinue' from Ability object");
+        TAG_LOGE(AAFwkTag::ABILITY, "get 'onContinue'");
         return AppExecFwk::ContinuationManager::OnContinueResult::REJECT;
     }
 
@@ -822,7 +822,7 @@ int32_t JsAbility::OnSaveState(int32_t reason, WantParams &wantParams)
 
     int32_t numberResult = 0;
     if (!ConvertFromJsValue(env, result, numberResult)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "appRecovery no result return from onSaveState");
+        TAG_LOGE(AAFwkTag::ABILITY, "appRecovery no result");
         return -1;
     }
     return numberResult;
@@ -855,12 +855,12 @@ void JsAbility::OnMemoryLevel(int level)
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "AbilityStage object failed");
         return;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get Ability object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "Ability object failed");
         return;
     }
 
@@ -893,18 +893,18 @@ void JsAbility::OnNewWant(const Want &want)
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "AbilityStage object failed");
         return;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get Ability object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "Ability object failed");
         return;
     }
 
     napi_value jsWant = OHOS::AppExecFwk::WrapWant(env, want);
     if (jsWant == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get want failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "want failed");
         return;
     }
 
@@ -928,7 +928,7 @@ void JsAbility::OnAbilityResult(int requestCode, int resultCode, const Want &res
     Ability::OnAbilityResult(requestCode, resultCode, resultData);
     std::shared_ptr<AbilityRuntime::AbilityContext> context = GetAbilityContext();
     if (context == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITY, "jsAbility not attached to any runtime context");
+        TAG_LOGW(AAFwkTag::ABILITY, "null context");
         return;
     }
     context->OnAbilityResult(requestCode, resultCode, resultData);
@@ -953,7 +953,7 @@ sptr<IRemoteObject> JsAbility::CallRequest()
     auto env = jsRuntime_.GetNapiEnv();
     auto obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "object failed");
         return nullptr;
     }
 
@@ -962,7 +962,7 @@ sptr<IRemoteObject> JsAbility::CallRequest()
     bool isCallable = false;
     napi_is_callable(env, method, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::ABILITY, "method is %{public}s",
+        TAG_LOGE(AAFwkTag::ABILITY, "method:%{public}s",
             method == nullptr ? "nullptr" : "not func");
         return nullptr;
     }
@@ -982,7 +982,7 @@ sptr<IRemoteObject> JsAbility::CallRequest()
 napi_value JsAbility::CallObjectMethod(const char *name, napi_value const *argv, size_t argc, bool withResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITY, "lifecycle: the begin of %{public}s", name);
+    TAG_LOGI(AAFwkTag::ABILITY, "begin:%{public}s", name);
 
     if (!jsAbilityObj_) {
         TAG_LOGW(AAFwkTag::ABILITY, "not found Ability.js");
@@ -994,14 +994,14 @@ napi_value JsAbility::CallObjectMethod(const char *name, napi_value const *argv,
 
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get Ability object failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "Ability object failed");
         return nullptr;
     }
 
     napi_value methodOnCreate = nullptr;
     napi_get_named_property(env, obj, name, &methodOnCreate);
     if (methodOnCreate == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get '%{public}s' from Ability object failed", name);
+        TAG_LOGE(AAFwkTag::ABILITY, "'%{public}s' failed", name);
         return nullptr;
     }
     if (withResult) {
@@ -1010,7 +1010,7 @@ napi_value JsAbility::CallObjectMethod(const char *name, napi_value const *argv,
         return handleEscape.Escape(result);
     }
     napi_call_function(env, obj, methodOnCreate, argc, argv, nullptr);
-    TAG_LOGI(AAFwkTag::ABILITY, "lifecycle:end of %{public}s", name);
+    TAG_LOGI(AAFwkTag::ABILITY, "end:%{public}s", name);
     return nullptr;
 }
 
@@ -1040,7 +1040,7 @@ bool JsAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCal
     napi_value then = nullptr;
     napi_get_named_property(env, result, "then", &then);
     if (then == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "failed get property: then");
+        TAG_LOGE(AAFwkTag::ABILITY, "failed get property:then");
         return false;
     }
     bool isCallable = false;
@@ -1160,7 +1160,7 @@ sptr<IRemoteObject> JsAbility::SetNewRuleFlagToCallee(napi_env env, napi_value r
     bool isCallable = false;
     napi_is_callable(env, setFlagMethod, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::ABILITY, "setFlagMethod is %{public}s",
+        TAG_LOGE(AAFwkTag::ABILITY, "setFlagMethod:%{public}s",
             setFlagMethod == nullptr ? "nullptr" : "not func");
         return nullptr;
     }
@@ -1170,7 +1170,7 @@ sptr<IRemoteObject> JsAbility::SetNewRuleFlagToCallee(napi_env env, napi_value r
 
     auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(env, remoteJsObj);
     if (remoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "jsAbility::Callnull Request obj");
+        TAG_LOGE(AAFwkTag::ABILITY, "Callnull Request obj");
         return nullptr;
     }
     return remoteObj;

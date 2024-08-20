@@ -57,7 +57,6 @@ std::shared_ptr<UIExtensionContext> UIExtension::CreateAndInitContext(
         ExtensionBase<UIExtensionContext>::CreateAndInitContext(record, application, handler, token);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "UIExtension CreateAndInitContext context is nullptr");
-        return context;
     }
     return context;
 }

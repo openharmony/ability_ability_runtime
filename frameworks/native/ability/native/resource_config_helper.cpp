@@ -108,7 +108,7 @@ void ResourceConfigHelper::UpdateResConfig(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "resourceManager->UpdateResConfig");
     Global::Resource::RState ret = resourceManager->UpdateResConfig(*resConfig);
     if (ret != Global::Resource::RState::SUCCESS) {
-        TAG_LOGE(AAFwkTag::ABILITY, "update resource config failed with %{public}d", static_cast<int>(ret));
+        TAG_LOGE(AAFwkTag::ABILITY, "update resConfig failed:%{public}d", static_cast<int>(ret));
         return;
     }
     TAG_LOGD(AAFwkTag::ABILITY, "current colorMode: %{public}d, hasPointerDevice: %{public}d",

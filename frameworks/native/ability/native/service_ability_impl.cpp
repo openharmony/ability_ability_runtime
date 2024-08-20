@@ -29,7 +29,7 @@ void ServiceAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk:
         targetState.state,
         targetState.isNewWant);
     if (lifecycleState_ == targetState.state) {
-        TAG_LOGE(AAFwkTag::ABILITY, "org lifeCycleState equals Dst lifeCycleState.");
+        TAG_LOGE(AAFwkTag::ABILITY, "lifeCycleStat:org=Dst");
         return;
     }
 
