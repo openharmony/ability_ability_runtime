@@ -161,6 +161,7 @@ public:
     int32_t callerTokenId = 0;
     int32_t callerUid = 0;
     int32_t callerPid = 0;
+    std::string callerNativeName;
 };
 
 /**
@@ -708,6 +709,12 @@ public:
     Want GetWant() const;
 
     /**
+     * remove signature info of want.
+     *
+     */
+    void RemoveSignatureInfo();
+
+    /**
      * remove specified wantParam for start ability.
      *
      */
@@ -811,8 +818,8 @@ public:
      * add caller record
      *
      */
-    void AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, std::string srcAbilityId = "",
-        uint32_t callingTokenId = 0);
+    void AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, const Want &want,
+        std::string srcAbilityId = "", uint32_t callingTokenId = 0);
 
     /**
      * get caller record to list.
@@ -1092,6 +1099,8 @@ private:
 
     bool IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken, uint32_t callingTokenId = 0);
 
+    void RecordSaCallerInfo(const Want &want);
+
 #ifdef WITH_DLP
     void HandleDlpAttached();
     void HandleDlpClosed();
@@ -1283,6 +1292,7 @@ private:
     uint32_t specifyTokenId_ = 0;
 
     std::shared_ptr<Want> connectWant_ = nullptr;
+    std::shared_ptr<CallerAbilityInfo> saCallerInfo_ = nullptr;
     ffrt::mutex connectWantLock_;
 };
 }  // namespace AAFwk
