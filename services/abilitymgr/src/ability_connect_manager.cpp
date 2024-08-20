@@ -824,7 +824,16 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
     auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
     if (abilityRecord == nullptr) {
         abilityRecord = GetExtensionByTokenFromTerminatingMap(token);
-        if (abilityRecord != nullptr && !IsUIExtensionAbility(abilityRecord)) {
+        if (abilityRecord != nullptr) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "Ability:%{public}s, user:%{public}d",
+                abilityRecord->GetURI().c_str(), userId_);
+        }
+        auto tmpRecord = Token::GetAbilityRecordByToken(token);
+        if (tmpRecord && tmpRecord != abilityRecord) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "Token:%{public}s, user:%{public}d",
+                tmpRecord->GetURI().c_str(), userId_);
+        }
+        if (!IsUIExtensionAbility(abilityRecord)) {
             abilityRecord = nullptr;
         }
     }
@@ -1576,8 +1585,8 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         return;
     }
     MoveToTerminatingMap(abilityRecord);
-
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "Load time out , remove target service record from services map.");
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "Load timeout:%{public}s,user:%{public}d.",
+        abilityRecord->GetURI().c_str(), userId_);
     RemoveServiceAbility(abilityRecord);
     if (abilityRecord->IsSceneBoard()) {
         auto isAttached = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(
@@ -2809,7 +2818,9 @@ void AbilityConnectManager::MoveToTerminatingMap(const std::shared_ptr<AbilityRe
             abilityInfo.moduleName);
         serviceKey = element.GetURI() + std::to_string(abilityRecord->GetWant().GetIntParam(FRS_APP_INDEX, 0));
     }
-    serviceMap_.erase(serviceKey);
+    if (serviceMap_.erase(serviceKey) == 0) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "Unknown: %{public}s", serviceKey.c_str());
+    }
     AbilityCacheManager::GetInstance().Remove(abilityRecord);
     if (IsSpecialAbility(abilityRecord->GetAbilityInfo())) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Moving ability: %{public}s", abilityRecord->GetURI().c_str());
@@ -3132,6 +3143,9 @@ bool AbilityConnectManager::AddToServiceMap(const std::string &key, std::shared_
         return false;
     }
     auto insert = serviceMap_.emplace(key, abilityRecord);
+    if (!insert.second) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "record exist: %{public}s.", key.c_str());
+    }
     return insert.second;
 }
 
