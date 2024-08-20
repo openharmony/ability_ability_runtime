@@ -88,6 +88,7 @@
 #include "param.h"
 #include "window_focus_changed_listener.h"
 #include "window_visibility_changed_listener.h"
+#include "window_pid_visibility_changed_listener.h"
 #include "cache_process_manager.h"
 #ifdef APP_NO_RESPONSE_DIALOG
 #include "fault_data.h"
@@ -136,6 +137,7 @@ constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 200;
 // delay register focus listener to wms
 constexpr int REGISTER_FOCUS_DELAY = 5000;
 constexpr int REGISTER_VISIBILITY_DELAY = 5000;
+constexpr int REGISTER_PID_VISIBILITY_DELAY = 5000;
 // Max render process number limitation for phone device.
 constexpr int PHONE_MAX_RENDER_PROCESS_NUM = 40;
 constexpr int PROCESS_RESTART_MARGIN_MICRO_SECONDS = 2000;
@@ -5143,6 +5145,72 @@ void AppMgrServiceInner::HandleWindowVisibilityChanged(
         return;
     }
     appRunningManager_->OnWindowVisibilityChanged(windowVisibilityInfos);
+}
+
+void AppMgrServiceInner::InitWindowPidVisibilityChangedListener()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (windowPidVisibilityChangedListener_ != nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "Pid visibility listener has been initiated.");
+        return;
+    }
+    windowPidVisibilityChangedListener_ =
+        sptr<WindowPidVisibilityChangedListener>::MakeSptr(weak_from_this(), taskHandler_);
+    auto registerTask = [innerService = weak_from_this()] () {
+        auto inner = innerService.lock();
+        if (inner == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Service inner is nullptr.");
+            return;
+        }
+        if (inner->windowPidVisibilityChangedListener_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Window pid visibility changed listener is nullptr.");
+            return;
+        }
+        WMError ret = WindowManager::GetInstance().RegisterWindowPidVisibilityChangedListener(
+            inner->windowPidVisibilityChangedListener_);
+        if (ret != WMError::WM_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "RegisterWindowPidVisibilityChangedListener failed.");
+            return;
+        }
+    };
+
+    if (taskHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Task handler is nullptr.");
+        return;
+    }
+    taskHandler_->SubmitTask(registerTask, "RegisterPidVisibilityListener.", REGISTER_PID_VISIBILITY_DELAY);
+}
+
+void AppMgrServiceInner::FreeWindowPidVisibilityChangedListener()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (windowPidVisibilityChangedListener_ == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "pid visibility changed listener has been freed.");
+        return;
+    }
+    WindowManager::GetInstance().UnregisterWindowPidVisibilityChangedListener(windowPidVisibilityChangedListener_);
+}
+
+void AppMgrServiceInner::HandleWindowPidVisibilityChanged(
+    const sptr<WindowPidVisibilityInfo>& windowPidVisibilityInfo)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (!windowPidVisibilityInfo) {
+        TAG_LOGW(AAFwkTag::APPMGR, "Window pid visibility info is empty.");
+        return;
+    }
+    auto appRecord = GetAppRunningRecordByPid(windowPidVisibilityInfo->pid_);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "App running record is nullptr.");
+        return;
+    }
+
+    if (windowPidVisibilityInfo->visibilityState_ == OHOS::Rosen::WindowPidVisibilityState::VISIBILITY_STATE) {
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnWindowShow(appRecord);
+    }
+    if (windowPidVisibilityInfo->visibilityState_ == OHOS::Rosen::WindowPidVisibilityState::INVISIBILITY_STATE) {
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnWindowHidden(appRecord);
+    }
 }
 #endif // SUPPORT_SCREEN
 void AppMgrServiceInner::PointerDeviceEventCallback(const char *key, const char *value, void *context)
