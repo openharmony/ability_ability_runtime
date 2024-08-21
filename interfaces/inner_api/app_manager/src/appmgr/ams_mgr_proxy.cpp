@@ -256,7 +256,7 @@ void AmsMgrProxy::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, cons
 
 void AmsMgrProxy::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -277,7 +277,7 @@ void AmsMgrProxy::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 
 void AmsMgrProxy::KillProcessesByUserId(int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -298,7 +298,7 @@ void AmsMgrProxy::KillProcessesByUserId(int32_t userId)
 
 void AmsMgrProxy::KillProcessesByPids(std::vector<int32_t> &pids)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -353,7 +353,7 @@ void AmsMgrProxy::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr
 int32_t AmsMgrProxy::KillProcessWithAccount(
     const std::string &bundleName, const int accountId, const bool clearPageStack)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
 
     MessageParcel data;
     MessageParcel reply;
@@ -391,7 +391,7 @@ int32_t AmsMgrProxy::KillProcessWithAccount(
 
 int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool clearPageStack)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -421,7 +421,7 @@ int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool c
 int32_t AmsMgrProxy::ForceKillApplication(const std::string &bundleName,
     const int userId, const int appIndex)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -455,7 +455,7 @@ int32_t AmsMgrProxy::ForceKillApplication(const std::string &bundleName,
 
 int32_t AmsMgrProxy::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -507,7 +507,7 @@ int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleNam
 
 int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const int uid)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -533,6 +533,7 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
 
 int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack)
 {
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
