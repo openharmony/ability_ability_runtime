@@ -51,9 +51,7 @@ public:
 
     bool VerifyControllerPerm() const;
 
-#ifdef WITH_DLP
     bool VerifyDlpPermission(Want &want) const;
-#endif // WITH_DLP
 
     int VerifyAccountPermission() const;
 

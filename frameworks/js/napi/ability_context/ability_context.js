@@ -112,17 +112,9 @@ class AbilityContext extends Context {
   startAbilityForResultWithAccount(want, accountId, options, callback) {
     return this.__context_impl__.startAbilityForResultWithAccount(want, accountId, options, callback);
   }
-  
+
   startUIServiceExtensionAbility(want, callback) {
     return this.__context_impl__.startUIServiceExtensionAbility(want, callback);
-  }
-
-  connectUIServiceExtensionAbility(want, callback) {
-    return this.__context_impl__.connectUIServiceExtensionAbility(want, callback);
-  }
-
-  disconnectUIServiceExtensionAbility(proxy) {
-    return this.__context_impl__.disconnectUIServiceExtensionAbility(proxy);
   }
 
   startServiceExtensionAbility(want, callback) {
@@ -219,10 +211,6 @@ class AbilityContext extends Context {
 
   moveAbilityToBackground(callback) {
     return this.__context_impl__.moveAbilityToBackground(callback);
-  }
-
-  setRestoreEnabled(enabled) {
-    this.__context_impl__.setRestoreEnabled(enabled);
   }
 }
 

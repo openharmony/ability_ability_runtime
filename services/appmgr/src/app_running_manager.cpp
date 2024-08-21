@@ -107,7 +107,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
     const std::string &processName, const int uid, const BundleInfo &bundleInfo,
-    const std::string &specifiedProcessFlag, bool *isProCache)
+    const std::string &specifiedProcessFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -121,9 +121,12 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
 
     auto FindSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId](const auto &pair) {
         return (pair.second != nullptr) &&
-            (specifiedProcessFlag.empty() || pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
-            (pair.second->GetSignCode() == signCode) && (pair.second->GetProcessName() == processName) &&
-            (pair.second->GetJointUserId() == jointUserId) && !(pair.second->IsTerminating()) &&
+            (specifiedProcessFlag.empty() ||
+            pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
+            (pair.second->GetSignCode() == signCode) &&
+            (pair.second->GetProcessName() == processName) &&
+            (pair.second->GetJointUserId() == jointUserId) &&
+            !(pair.second->IsTerminating()) &&
             !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag());
     };
 
@@ -135,7 +138,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetProcessName() == processName &&
-            (specifiedProcessFlag.empty() || appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
+            (specifiedProcessFlag.empty() ||
+            appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
             !(appRecord->IsUserRequestCleaning())) {
             auto appInfoList = appRecord->GetAppInfoList();
@@ -147,15 +151,10 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
                 return appInfo->name == appName && appInfo->uid == uid;
             };
             auto appInfoIter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-            if (appInfoIter == appInfoList.end()) {
-                continue;
-            }
-            bool isProcCacheInner =
+            if (appInfoIter != appInfoList.end()) {
                 DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
-            if (isProCache != nullptr) {
-                *isProCache = isProcCacheInner;
+                return appRecord;
             }
-            return appRecord;
         }
     }
     return nullptr;
@@ -271,7 +270,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByAbilit
 }
 
 bool AppRunningManager::ProcessExitByBundleName(
-    const std::string &bundleName, std::list<pid_t> &pids, const bool clearPageStack)
+    const std::string &bundleName, std::list<pid_t> &pids)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -290,9 +289,6 @@ bool AppRunningManager::ProcessExitByBundleName(
                 continue;
             }
             pids.push_back(pid);
-            if (clearPageStack) {
-                appRecord->ScheduleClearPageStack();
-            }
             appRecord->ScheduleProcessSecurityExit();
         }
     }
@@ -342,7 +338,7 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const Applicati
 }
 
 bool AppRunningManager::ProcessExitByBundleNameAndUid(
-    const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack)
+    const std::string &bundleName, const int uid, std::list<pid_t> &pids)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -360,9 +356,6 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
             continue;
         }
         pids.push_back(pid);
-        if (clearPageStack) {
-            appRecord->ScheduleClearPageStack();
-        }
         appRecord->SetKilling();
         appRecord->ScheduleProcessSecurityExit();
     }

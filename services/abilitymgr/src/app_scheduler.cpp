@@ -245,11 +245,11 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     callback->OnAppRemoteDied(abilityTokens);
 }
 
-int AppScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
+int AppScheduler::KillApplication(const std::string &bundleName)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int ret = (int)appMgrClient_->KillApplication(bundleName, clearPageStack);
+    int ret = (int)appMgrClient_->KillApplication(bundleName);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to kill application.");
         return INNER_ERR;

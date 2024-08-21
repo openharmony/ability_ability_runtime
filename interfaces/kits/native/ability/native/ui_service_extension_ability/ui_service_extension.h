@@ -87,7 +87,7 @@ public:
      */
     sptr<Rosen::WindowOption> GetWindowOption(const AAFwk::Want &want,
         const std::shared_ptr< Rosen::ExtensionWindowConfig>& extensionWindowConfig,
-            const int32_t hostWindowId);
+            const sptr<AAFwk::SessionInfo>& sessionInfo);
 #endif
 };
 }  // namespace AbilityRuntime

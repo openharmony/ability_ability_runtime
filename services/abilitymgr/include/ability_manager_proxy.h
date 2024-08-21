@@ -479,15 +479,6 @@ public:
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) override;
 
     /**
-     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
-     *
-     * @param token,.ability's token.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int AbilityWindowConfigTransitionDone(
-        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig) override;
-
-    /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
      *
      * @param token,.service ability's token.
@@ -564,7 +555,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = true) override;
+    virtual int KillProcess(const std::string &bundleName) override;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -915,11 +906,9 @@ public:
         const std::shared_ptr<Media::PixelMap> &pixelMap) override;
 #endif // SUPPORT_SCREEN
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
-    virtual void SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token) override;
+
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
-
-    virtual void ScheduleClearRecoveryPageStack() override;
 
     /**
      * Called to verify that the MissionId is valid.
@@ -1201,9 +1190,10 @@ public:
     /**
      * @brief Restart app self.
      * @param want The ability type must be UIAbility.
+     * @param isAppRecovery True indicates that the app is restarted because of recovery.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t RestartApp(const AAFwk::Want &want) override;
+    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
 
     /**
      * @brief Pop-up launch of full-screen atomic service.

@@ -69,7 +69,6 @@ void ConnectionObserverProxy::OnExtensionDisconnected(const ConnectionData& conn
     }
 }
 
-#ifdef WITH_DLP
 void ConnectionObserverProxy::OnDlpAbilityOpened(const DlpStateData& dlpData)
 {
     MessageParcel data;
@@ -117,7 +116,6 @@ void ConnectionObserverProxy::OnDlpAbilityClosed(const DlpStateData& dlpData)
         return;
     }
 }
-#endif // WITH_DLP
 
 int32_t ConnectionObserverProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)

@@ -271,6 +271,33 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_02
 }
 
 /**
+ * @tc.name: Ability_Context_Impl_SetMissionContinueState_0300
+ * @tc.desc: test set mission continue state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_0300, Function | MediumTest | Level1)
+{
+    ASSERT_TRUE(g_mockAbilityMs != nullptr);
+    ASSERT_TRUE(context_ != nullptr);
+    AAFwk::AbilityManagerClient::GetInstance()->proxy_ = g_mockAbilityMs;
+    g_mockAbilityMs->SetCommonMockResult(false);
+
+    AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_MAX;
+    auto ret = context_->SetMissionContinueState(state);
+    EXPECT_NE(ret, 0);
+
+    g_mockAbilityMs->SetCommonMockResult(true);
+    ret = context_->SetMissionContinueState(state);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    }
+
+    wptr<IRemoteObject> token(new IPCObjectStub());
+    context_->SetWeakSessionToken(token);
+    context_->SetMissionContinueState(state);
+}
+
+/**
  * @tc.name: Ability_Context_Impl_SetMissionLabel_0100
  * @tc.desc: test set mission label.
  * @tc.type: FUNC
@@ -1340,8 +1367,6 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_StartAbilityByType_0100, F
     int32_t sessionId = 200;
     context_->EraseUIExtension(sessionId);
     context_->CreateModalUIExtensionWithApp(want);
-    context_->SetRestoreEnabled(true);
-    context_->GetRestoreEnabled();
 }
 
 /**
@@ -1634,8 +1659,6 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenLink_0100, Function | 
     AAFwk::Want want;
     int requestCode = 0;
     context_->OpenLink(want, requestCode);
-    context_->SetRestoreEnabled(true);
-    EXPECT_EQ(context_->GetRestoreEnabled(), true);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -29,9 +29,6 @@
 #include "reverse_continuation_scheduler_primary_stage.h"
 #include "runtime.h"
 #include "resource_config_helper.h"
-#ifdef SUPPORT_GRAPHICS
-#include "wm_common.h"
-#endif
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -45,9 +42,7 @@ constexpr char LAUNCHER_ABILITY_NAME[] = "com.ohos.launcher.MainAbility";
 constexpr char SHOW_ON_LOCK_SCREEN[] = "ShowOnLockScreen";
 #endif
 
-#ifdef WITH_DLP
 constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
-#endif // WITH_DLP
 constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 #ifdef SUPPORT_SCREEN
 constexpr int32_t ERR_INVALID_VALUE = -1;
@@ -76,9 +71,9 @@ void UIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "AbilityLocalRecord is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null localRecord");
         return;
     }
     application_ = application;
@@ -97,20 +92,20 @@ void UIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         sptr<AppExecFwk::ReverseContinuationSchedulerPrimaryStage> primary =
             new (std::nothrow) AppExecFwk::ReverseContinuationSchedulerPrimaryStage(continuationHandler, handler_);
         if (primary == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "Primary is nullptr.");
+            TAG_LOGE(AAFwkTag::UIABILITY, "null primary");
         } else {
             continuationHandler_->SetPrimaryStub(primary);
             continuationHandler_->SetAbilityInfo(abilityInfo_);
         }
     }
     // register displayid change callback
-    TAG_LOGD(AAFwkTag::UIABILITY, "Call RegisterDisplayListener.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "registerDisplayListener");
     abilityDisplayListener_ = new (std::nothrow) UIAbilityDisplayListener(weak_from_this());
     if (abilityDisplayListener_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityDisplayListener_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityDisplayListener_");
         return;
     }
-    TAG_LOGI(AAFwkTag::UIABILITY, "RegisterDisplayInfoChangedListener.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "end register");
     Rosen::WindowManager::GetInstance().RegisterDisplayInfoChangedListener(token_, abilityDisplayListener_);
 #endif
     lifecycle_ = std::make_shared<AppExecFwk::LifeCycle>();
@@ -119,7 +114,7 @@ void UIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     if (abilityContext_ != nullptr) {
         abilityContext_->RegisterAbilityCallback(weak_from_this());
     }
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
 std::shared_ptr<OHOS::AppExecFwk::LifeCycle> UIAbility::GetLifecycle()
@@ -132,11 +127,11 @@ void UIAbility::RegisterAbilityLifecycleObserver(const std::shared_ptr<AppExecFw
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "register UIAbility lifecycle observer failed, observer is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null observer");
         return;
     }
     if (lifecycle_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "register UIAbility lifecycle observer failed, lifecycle_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null lifecycle_");
         return;
     }
     lifecycle_->AddObserver(observer);
@@ -146,11 +141,11 @@ void UIAbility::UnregisterAbilityLifecycleObserver(const std::shared_ptr<AppExec
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "unregister UIAbility lifecycle observer failed, observer is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null observer");
         return;
     }
     if (lifecycle_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "unregister UIAbility lifecycle observer failed, lifecycle_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null lifecycle_");
         return;
     }
     lifecycle_->RemoveObserver(observer);
@@ -165,16 +160,14 @@ void UIAbility::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessio
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "AbilityInfo_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
         return;
     }
 
-#ifdef WITH_DLP
     securityFlag_ = want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false);
     (const_cast<AAFwk::Want &>(want)).RemoveParam(DLP_PARAMS_SECURITY_FLAG);
-#endif // WITH_DLP
     SetWant(want);
-    TAG_LOGD(AAFwkTag::UIABILITY, "Begin ability is %{public}s.", abilityInfo_->name.c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", abilityInfo_->name.c_str());
 #ifdef SUPPORT_SCREEN
     if (sessionInfo != nullptr) {
         SetSessionToken(sessionInfo->sessionToken);
@@ -183,30 +176,30 @@ void UIAbility::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessio
     OnStartForSupportGraphics(want);
 #endif
     if (abilityLifecycleExecutor_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityLifecycleExecutor_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityLifecycleExecutor_");
         return;
     }
     abilityLifecycleExecutor_->DispatchLifecycleState(
         AppExecFwk::AbilityLifecycleExecutor::LifecycleState::STARTED_NEW);
 
     if (lifecycle_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "lifecycle_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null lifecycle_");
         return;
     }
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_START, want);
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
 void UIAbility::OnStop()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
 #ifdef SUPPORT_SCREEN
-    TAG_LOGI(AAFwkTag::UIABILITY, "UnregisterDisplayInfoChangedListener.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "unregisterDisplayInfoChangedListener");
     (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(token_, abilityDisplayListener_);
     auto &&window = GetWindow();
     if (window != nullptr) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "Call UnregisterDisplayMoveListener.");
+        TAG_LOGD(AAFwkTag::UIABILITY, "UnregisterDisplayMoveListener");
         window->UnregisterDisplayMoveListener(abilityDisplayMoveListener_);
     }
     // Call JS Func(onWindowStageDestroy) and Release the scene.
@@ -217,17 +210,17 @@ void UIAbility::OnStop()
     }
 #endif
     if (abilityLifecycleExecutor_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityLifecycleExecutor_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityLifecycleExecutor_");
         return;
     }
     abilityLifecycleExecutor_->DispatchLifecycleState(AppExecFwk::AbilityLifecycleExecutor::LifecycleState::INITIAL);
 
     if (lifecycle_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "lifecycle_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null lifecycle_");
         return;
     }
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_STOP);
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
 void UIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback)
@@ -249,53 +242,40 @@ void UIAbility::DestroyInstance()
 bool UIAbility::IsRestoredInContinuation() const
 {
     if (abilityContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityContext_ is null.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
         return false;
     }
 
     if (launchParam_.launchReason != AAFwk::LaunchReason::LAUNCHREASON_CONTINUATION) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "LaunchReason is %{public}d.", launchParam_.launchReason);
+        TAG_LOGD(AAFwkTag::UIABILITY, "launchReason: %{public}d", launchParam_.launchReason);
         return false;
     }
 
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
     return true;
 }
 
 bool UIAbility::ShouldRecoverState(const AAFwk::Want &want)
 {
     if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "AppRecovery not recovery restart.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
         return false;
     }
 
     if (abilityRecovery_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityRecovery_ is null.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityRecovery_");
         return false;
     }
 
     if (abilityContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityContext_ is null.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
         return false;
     }
 
     if (abilityContext_->GetContentStorage() == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Get content failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "get content failed");
         return false;
     }
     return true;
-}
-
-bool UIAbility::ShouldDefaultRecoverState(const AAFwk::Want &want)
-{
-    auto launchParam = GetLaunchParam();
-    if (CheckDefaultRecoveryEnabled() && IsStartByScb() &&
-        want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false) &&
-        (launchParam.lastExitReason == AAFwk::LastExitReason::LASTEXITREASON_PERFORMANCE_CONTROL ||
-        launchParam.lastExitReason == AAFwk::LastExitReason::LASTEXITREASON_RESOURCE_CONTROL)) {
-        return true;
-    }
-    return false;
 }
 
 void UIAbility::NotifyContinuationResult(const AAFwk::Want &want, bool success)
@@ -305,7 +285,7 @@ void UIAbility::NotifyContinuationResult(const AAFwk::Want &want, bool success)
     std::string originDeviceId = want.GetStringParam(DMS_ORIGIN_DEVICE_ID);
 
     if (continuationManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "continuationManager_ is null.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null continuationManager_");
         return;
     }
     continuationManager_->NotifyCompleteContinuation(
@@ -325,7 +305,7 @@ void UIAbility::OnConfigurationUpdatedNotify(const AppExecFwk::Configuration &co
     }
     // Notify Ability Subclass
     OnConfigurationUpdated(configuration);
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
 void UIAbility::InitConfigurationProperties(const AppExecFwk::Configuration &changeConfiguration,
@@ -345,7 +325,7 @@ void UIAbility::InitConfigurationProperties(const AppExecFwk::Configuration &cha
         resourceConfig.SetHasPointerDevice(changeConfiguration.GetItem(displayId,
             AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE));
         TAG_LOGD(AAFwkTag::UIABILITY, "displayId: [%{public}d], language: [%{public}s], colormode: [%{public}s], "
-            "hasPointerDevice: [%{public}s] mcc: [%{public}s], mnc: [%{public}s].", displayId,
+            "hasPointerDevice: [%{public}s] mcc: [%{public}s], mnc: [%{public}s]", displayId,
             resourceConfig.GetLanguage().c_str(), resourceConfig.GetColormode().c_str(),
             resourceConfig.GetHasPointerDevice().c_str(), resourceConfig.GetMcc().c_str(),
             resourceConfig.GetMnc().c_str());
@@ -355,8 +335,8 @@ void UIAbility::InitConfigurationProperties(const AppExecFwk::Configuration &cha
         resourceConfig.SetHasPointerDevice(changeConfiguration.GetItem(
             AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE));
         TAG_LOGD(AAFwkTag::UIABILITY,
-            "Language: [%{public}s], colormode: [%{public}s], hasPointerDevice: [%{public}s] "
-            "mcc: [%{public}s], mnc: [%{public}s].",
+            "language: [%{public}s], colormode: [%{public}s], hasPointerDevice: [%{public}s] "
+            "mcc: [%{public}s], mnc: [%{public}s]",
             resourceConfig.GetLanguage().c_str(), resourceConfig.GetColormode().c_str(),
             resourceConfig.GetHasPointerDevice().c_str(), resourceConfig.GetMcc().c_str(),
             resourceConfig.GetMnc().c_str());
@@ -368,7 +348,7 @@ void UIAbility::OnMemoryLevel(int level)
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 #ifdef SUPPORT_SCREEN
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "WindowScene is null.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene");
         return;
     }
     scene_->NotifyMemoryLevel(level);
@@ -378,7 +358,7 @@ void UIAbility::OnMemoryLevel(int level)
 std::string UIAbility::GetAbilityName()
 {
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityInfo_ is nullptr");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
         return "";
     }
     return abilityInfo_->name;
@@ -387,7 +367,7 @@ std::string UIAbility::GetAbilityName()
 std::string UIAbility::GetModuleName()
 {
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityInfo_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
         return "";
     }
 
@@ -433,7 +413,7 @@ AppExecFwk::AbilityLifecycleExecutor::LifecycleState UIAbility::GetState()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (abilityLifecycleExecutor_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityLifecycleExecutor_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityLifecycleExecutor_");
         return AppExecFwk::AbilityLifecycleExecutor::LifecycleState::UNINITIALIZED;
     }
     return static_cast<AppExecFwk::AbilityLifecycleExecutor::LifecycleState>(abilityLifecycleExecutor_->GetState());
@@ -447,12 +427,12 @@ int32_t UIAbility::OnContinue(AAFwk::WantParams &wantParams)
 void UIAbility::ContinueAbilityWithStack(const std::string &deviceId, uint32_t versionCode)
 {
     if (deviceId.empty()) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "DeviceId is empty.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "empty deviceId");
         return;
     }
 
     if (continuationManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "continuationManager_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null continuationManager_");
         return;
     }
     continuationManager_->ContinueAbilityWithStack(deviceId, versionCode);
@@ -482,7 +462,7 @@ void UIAbility::OnCompleteContinuation(int result)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (continuationManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Continuation manager is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null continuationManager_");
         return;
     }
 
@@ -497,14 +477,14 @@ void UIAbility::OnRemoteTerminated()
 void UIAbility::DispatchLifecycleOnForeground(const AAFwk::Want &want)
 {
     if (abilityLifecycleExecutor_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityLifecycleExecutor_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityLifecycleExecutor_");
         return;
     }
     abilityLifecycleExecutor_->DispatchLifecycleState(
         AppExecFwk::AbilityLifecycleExecutor::LifecycleState::FOREGROUND_NEW);
 
     if (lifecycle_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "lifecycle_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null lifecycle_");
         return;
     }
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_FOREGROUND, want);
@@ -513,7 +493,7 @@ void UIAbility::DispatchLifecycleOnForeground(const AAFwk::Want &want)
 void UIAbility::HandleCreateAsRecovery(const AAFwk::Want &want)
 {
     if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "AppRecovery not recovery restart.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
         return;
     }
 
@@ -558,11 +538,9 @@ bool UIAbility::IsUseNewStartUpRule()
     return startUpNewRule_;
 }
 
-void UIAbility::EnableAbilityRecovery(const std::shared_ptr<AppExecFwk::AbilityRecovery> &abilityRecovery,
-    bool useAppSettedRecoveryValue)
+void UIAbility::EnableAbilityRecovery(const std::shared_ptr<AppExecFwk::AbilityRecovery> &abilityRecovery)
 {
     abilityRecovery_ = abilityRecovery;
-    useAppSettedRecoveryValue_.store(useAppSettedRecoveryValue);
 }
 
 int32_t UIAbility::OnShare(AAFwk::WantParams &wantParams)
@@ -604,14 +582,13 @@ void UIAbility::onSceneDestroyed()
 void UIAbility::OnForeground(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     DoOnForeground(want);
     if (isSilentForeground_) {
         TAG_LOGD(AAFwkTag::UIABILITY, "silent foreground, return");
         return;
     }
     DispatchLifecycleOnForeground(want);
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
     AAFwk::EventInfo eventInfo;
     eventInfo.bundleName = want.GetElement().GetBundleName();
     eventInfo.moduleName = want.GetElement().GetModuleName();
@@ -620,7 +597,7 @@ void UIAbility::OnForeground(const AAFwk::Want &want)
     if (abilityInfo_ != nullptr) {
         eventInfo.bundleType = static_cast<int32_t>(abilityInfo_->applicationInfo.bundleType);
     } else {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityInfo_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
     }
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONFOREGROUND, HiSysEventType::BEHAVIOR, eventInfo);
 }
@@ -628,35 +605,32 @@ void UIAbility::OnForeground(const AAFwk::Want &want)
 void UIAbility::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityInfo_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
         return;
     }
 
     if (scene_ != nullptr) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "GoBackground sceneFlag: %{public}d.", sceneFlag_);
+        TAG_LOGD(AAFwkTag::UIABILITY, "goBackground sceneFlag: %{public}d", sceneFlag_);
         scene_->GoBackground(sceneFlag_);
     }
-
-    if (abilityRecovery_ != nullptr && abilityContext_ != nullptr && abilityContext_->GetRestoreEnabled() &&
-        CheckRecoveryEnabled()) {
+    if (abilityRecovery_ != nullptr) {
         abilityRecovery_->ScheduleSaveAbilityState(AppExecFwk::StateReason::LIFECYCLE);
     }
 
     if (abilityLifecycleExecutor_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityLifecycleExecutor_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityLifecycleExecutor_");
         return;
     }
     abilityLifecycleExecutor_->DispatchLifecycleState(
         AppExecFwk::AbilityLifecycleExecutor::LifecycleState::BACKGROUND_NEW);
 
     if (lifecycle_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "lifecycle_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null lifecycle_");
         return;
     }
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_BACKGROUND);
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
     AAFwk::EventInfo eventInfo;
     eventInfo.bundleName = abilityInfo_->bundleName;
     eventInfo.moduleName = abilityInfo_->moduleName;
@@ -689,32 +663,11 @@ void UIAbility::OnLeaveForeground()
 
 std::string UIAbility::GetContentInfo()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Scene invalid.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene");
         return "";
     }
-    return scene_->GetContentInfo(Rosen::BackupAndRestoreType::CONTINUATION);
-}
-
-std::string UIAbility::GetContentInfoForRecovery()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Scene invalid.");
-        return "";
-    }
-    return scene_->GetContentInfo(Rosen::BackupAndRestoreType::APP_RECOVERY);
-}
-
-std::string UIAbility::GetContentInfoForDefaultRecovery()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Scene invalid.");
-        return "";
-    }
-    return scene_->GetContentInfo(Rosen::BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
+    return scene_->GetContentInfo();
 }
 
 void UIAbility::SetSceneListener(const sptr<Rosen::IWindowLifeCycle> &listener)
@@ -745,22 +698,22 @@ ErrCode UIAbility::SetMissionLabel(const std::string &label)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (!abilityInfo_ || abilityInfo_->type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Invalid ability info.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "invalid ability info");
         return ERR_INVALID_VALUE;
     }
 
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Scene is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene");
         return ERR_INVALID_VALUE;
     }
     auto window = scene_->GetMainWindow();
     if (window == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Get window scene failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "get window scene failed");
         return ERR_INVALID_VALUE;
     }
 
     if (window->SetAPPWindowLabel(label) != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "SetAPPWindowLabel failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "setAPPWindowLabel failed");
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
@@ -770,22 +723,22 @@ ErrCode UIAbility::SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (!abilityInfo_ || abilityInfo_->type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityInfo_ is nullptr or not page type.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "abilityInfo_ is nullptr or not page type");
         return ERR_INVALID_VALUE;
     }
 
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Scene_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene_");
         return ERR_INVALID_VALUE;
     }
     auto window = scene_->GetMainWindow();
     if (window == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Window is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null window");
         return ERR_INVALID_VALUE;
     }
 
     if (window->SetAPPWindowIcon(icon) != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "SetAPPWindowIcon failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "setAPPWindowIcon failed");
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
@@ -795,19 +748,19 @@ void UIAbility::GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Scene is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene");
         return;
     }
     auto window = scene_->GetMainWindow();
     if (window == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Window is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null window");
         return;
     }
     left = window->GetRect().posX_;
     top = window->GetRect().posY_;
     width = static_cast<int32_t>(window->GetRect().width_);
     height = static_cast<int32_t>(window->GetRect().height_);
-    TAG_LOGD(AAFwkTag::UIABILITY, "left: %{public}d, top: %{public}d, width: %{public}d, height: %{public}d.",
+    TAG_LOGD(AAFwkTag::UIABILITY, "left: %{public}d, top: %{public}d, width: %{public}d, height: %{public}d",
         left, top, width, height);
 }
 
@@ -815,12 +768,12 @@ Ace::UIContent *UIAbility::GetUIContent()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Get window scene failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene_");
         return nullptr;
     }
     auto window = scene_->GetMainWindow();
     if (window == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Get window failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null window");
         return nullptr;
     }
     return window->GetUIContent();
@@ -839,11 +792,11 @@ void UIAbility::OnDestroy(Rosen::DisplayId displayId)
 void UIAbility::OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
     Rosen::DisplayOrientation orientation)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "Begin displayId: %{public}" PRIu64, displayId);
+    TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}" PRIu64, displayId);
     // Get display
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (!display) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Get display by displayId %{public}" PRIu64 " failed.", displayId);
+        TAG_LOGE(AAFwkTag::UIABILITY, "get display by displayId %{public}" PRIu64 " failed", displayId);
         return;
     }
 
@@ -858,7 +811,7 @@ void UIAbility::OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::Dis
             resConfig->SetScreenDensity(density);
             resConfig->SetDirection(AppExecFwk::ConvertDirection(height, width));
             resourceManager->UpdateResConfig(*resConfig);
-            TAG_LOGD(AAFwkTag::UIABILITY, "Notify ResourceManager, Density: %{public}f, Direction: %{public}d",
+            TAG_LOGD(AAFwkTag::UIABILITY, "notify resourceManager, density: %{public}f, direction: %{public}d",
                 resConfig->GetScreenDensity(), resConfig->GetDirection());
         }
     }
@@ -871,21 +824,21 @@ void UIAbility::OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::Dis
         displayId, AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI, AppExecFwk::GetDensityStr(density));
 
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "application_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application_");
         return;
     }
 
     OnChangeForUpdateConfiguration(newConfig);
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
 void UIAbility::OnChange(Rosen::DisplayId displayId)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "Begin displayId: %{public}" PRIu64 "", displayId);
+    TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}" PRIu64 "", displayId);
     // Get display
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (!display) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Get display by displayId %{public}" PRIu64 " failed.", displayId);
+        TAG_LOGE(AAFwkTag::UIABILITY, "get display by displayId %{public}" PRIu64 " failed", displayId);
         return;
     }
 
@@ -901,7 +854,7 @@ void UIAbility::OnChange(Rosen::DisplayId displayId)
             resConfig->SetScreenDensity(density);
             resConfig->SetDirection(AppExecFwk::ConvertDirection(height, width));
             resourceManager->UpdateResConfig(*resConfig);
-            TAG_LOGD(AAFwkTag::UIABILITY, "Notify ResourceManager, Density: %{public}f, Direction: %{public}d",
+            TAG_LOGD(AAFwkTag::UIABILITY, "notify ResourceManager, density: %{public}f, direction: %{public}d",
                 resConfig->GetScreenDensity(), resConfig->GetDirection());
         }
     }
@@ -914,20 +867,20 @@ void UIAbility::OnChange(Rosen::DisplayId displayId)
         displayId, AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI, AppExecFwk::GetDensityStr(density));
 
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "application_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application_");
         return;
     }
 
     OnChangeForUpdateConfiguration(newConfig);
-    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
 void UIAbility::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "From displayId %{public}" PRIu64 " to %{public}" PRIu64 "", from, to);
+    TAG_LOGD(AAFwkTag::UIABILITY, "from displayId %{public}" PRIu64 " to %{public}" PRIu64 "", from, to);
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(to);
     if (!display) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Get display by displayId %{public}" PRIu64 " failed.", to);
+        TAG_LOGE(AAFwkTag::UIABILITY, "get display by displayId %{public}" PRIu64 " failed", to);
         return;
     }
     // Get new display config
@@ -943,7 +896,7 @@ void UIAbility::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
             resConfig->SetDirection(AppExecFwk::ConvertDirection(height, width));
             resourceManager->UpdateResConfig(*resConfig);
             TAG_LOGD(AAFwkTag::UIABILITY,
-                "Density: %{public}f, Direction: %{public}d", resConfig->GetScreenDensity(), resConfig->GetDirection());
+                "Density: %{public}f, direction: %{public}d", resConfig->GetScreenDensity(), resConfig->GetDirection());
         }
     }
         UpdateConfiguration(to, density, width, height);
@@ -957,24 +910,24 @@ void UIAbility::UpdateConfiguration(Rosen::DisplayId to, float density, int32_t 
         to, AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION, AppExecFwk::GetDirectionStr(height, width));
     newConfig.AddItem(to, AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI, AppExecFwk::GetDensityStr(density));
     if (application_ == nullptr || handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "application_ or handler_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application_ or handler_");
         return;
     }
     std::vector<std::string> changeKeyV;
     auto configuration = application_->GetConfiguration();
     if (!configuration) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Configuration is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null configuration");
         return;
     }
 
     configuration->CompareDifferent(changeKeyV, newConfig);
-    TAG_LOGD(AAFwkTag::UIABILITY, "changeKeyV size: %{public}zu.", changeKeyV.size());
+    TAG_LOGD(AAFwkTag::UIABILITY, "changeKeyV size: %{public}zu", changeKeyV.size());
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
         auto task = [abilityWptr = weak_from_this(), configuration = *configuration]() {
             auto ability = abilityWptr.lock();
             if (ability == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "ability is nullptr.");
+                TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
                 return;
             }
             ability->OnConfigurationUpdated(configuration);
@@ -997,12 +950,12 @@ sptr<Rosen::WindowOption> UIAbility::GetWindowOption(const AAFwk::Want &want)
 {
     auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Option is null.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null option");
         return nullptr;
     }
     auto windowMode = want.GetIntParam(
         AAFwk::Want::PARAM_RESV_WINDOW_MODE, AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
-    TAG_LOGD(AAFwkTag::UIABILITY, "Window mode is %{public}d.", windowMode);
+    TAG_LOGD(AAFwkTag::UIABILITY, "window mode: %{public}d", windowMode);
     option->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
     bool showOnLockScreen = false;
     if (abilityInfo_) {
@@ -1014,13 +967,13 @@ sptr<Rosen::WindowOption> UIAbility::GetWindowOption(const AAFwk::Want &want)
         }
     }
     if (showOnLockScreen_ || showOnLockScreen) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "Add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED.");
+        TAG_LOGD(AAFwkTag::UIABILITY, "add window flag WINDOW_FLAG_SHOW_WHEN_LOCKED");
         option->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
 
     if (want.GetElement().GetBundleName() == LAUNCHER_BUNDLE_NAME &&
         want.GetElement().GetAbilityName() == LAUNCHER_ABILITY_NAME) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "Set window type for launcher.");
+        TAG_LOGD(AAFwkTag::UIABILITY, "set window type for launcher");
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_DESKTOP);
     }
     return option;
@@ -1036,13 +989,13 @@ void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
         int32_t defualtDisplayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
         int32_t displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
-        TAG_LOGD(AAFwkTag::UIABILITY, "abilityName: %{public}s, displayId: %{public}d.",
+        TAG_LOGD(AAFwkTag::UIABILITY, "abilityName: %{public}s, displayId: %{public}d",
             abilityInfo_->name.c_str(), displayId);
         auto option = GetWindowOption(want);
         InitWindow(displayId, option);
 
         // Update resMgr, Configuration
-        TAG_LOGD(AAFwkTag::UIABILITY, "DisplayId is %{public}d.", displayId);
+        TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}d", displayId);
         auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
         if (display) {
             float density = display->GetVirtualPixelRatio();
@@ -1064,7 +1017,7 @@ void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
 
             std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
             if (resConfig == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "ResConfig is nullptr.");
+                TAG_LOGE(AAFwkTag::UIABILITY, "null resConfig");
                 return;
             }
             auto resourceManager = GetResourceManager();
@@ -1073,7 +1026,7 @@ void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
                 resConfig->SetScreenDensity(density);
                 resConfig->SetDirection(AppExecFwk::ConvertDirection(height, width));
                 resourceManager->UpdateResConfig(*resConfig);
-                TAG_LOGD(AAFwkTag::UIABILITY, "Density: %{public}f, Direction: %{public}d",
+                TAG_LOGD(AAFwkTag::UIABILITY, "density: %{public}f, direction: %{public}d",
                     resConfig->GetScreenDensity(), resConfig->GetDirection());
             }
         }
@@ -1083,24 +1036,24 @@ void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
 void UIAbility::OnChangeForUpdateConfiguration(const AppExecFwk::Configuration &newConfig)
 {
     if (application_ == nullptr || handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "application_ or handler_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application_ or handler_");
         return;
     }
     auto configuration = application_->GetConfiguration();
     if (!configuration) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "Configuration is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null configuration");
         return;
     }
 
     std::vector<std::string> changeKeyV;
     configuration->CompareDifferent(changeKeyV, newConfig);
-    TAG_LOGD(AAFwkTag::UIABILITY, "ChangeKeyV size: %{public}zu.", changeKeyV.size());
+    TAG_LOGD(AAFwkTag::UIABILITY, "changeKeyV size: %{public}zu", changeKeyV.size());
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
         auto task = [abilityWptr = weak_from_this(), configuration = *configuration]() {
             auto ability = abilityWptr.lock();
             if (ability == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "ability is nullptr.");
+                TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
                 return;
             }
             ability->OnConfigurationUpdated(configuration);
@@ -1140,7 +1093,7 @@ int UIAbility::CreateModalUIExtension(const AAFwk::Want &want)
     TAG_LOGD(AAFwkTag::UIABILITY, "call");
     auto abilityContextImpl = GetAbilityContext();
     if (abilityContextImpl == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityContext is nullptr");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return ERR_INVALID_VALUE;
     }
     return abilityContextImpl->CreateModalUIExtensionWithApp(want);
@@ -1152,7 +1105,7 @@ void UIAbility::SetSessionToken(sptr<IRemoteObject> sessionToken)
     sessionToken_ = sessionToken;
     auto abilityContextImpl = GetAbilityContext();
     if (abilityContextImpl == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityContext is nullptr");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return;
     }
     abilityContextImpl->SetWeakSessionToken(sessionToken);
@@ -1168,7 +1121,7 @@ void UIAbility::EraseUIExtension(int32_t sessionId)
     TAG_LOGD(AAFwkTag::UIABILITY, "call");
     auto abilityContextImpl = GetAbilityContext();
     if (abilityContextImpl == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityContext is nullptr");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return;
     }
     abilityContextImpl->EraseUIExtension(sessionId);
@@ -1182,49 +1135,6 @@ void UIAbility::SetIdentityToken(const std::string &identityToken)
 std::string UIAbility::GetIdentityToken() const
 {
     return identityToken_;
-}
-
-bool UIAbility::CheckRecoveryEnabled()
-{
-    if (useAppSettedRecoveryValue_.load()) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "Use app setted value.");
-        // Check in app recovery, here return true.
-        return true;
-    }
-
-    return CheckDefaultRecoveryEnabled();
-}
-
-bool UIAbility::CheckDefaultRecoveryEnabled()
-{
-    if (setting_ == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "setting is nullptr.");
-        return false;
-    }
-
-    auto value = setting_->GetProperty(AppExecFwk::AbilityStartSetting::DEFAULT_RECOVERY_KEY);
-    if ((!useAppSettedRecoveryValue_.load()) && (value == "true")) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "default recovery enabled.");
-        return true;
-    }
-
-    return false;
-}
-
-bool UIAbility::IsStartByScb()
-{
-    if (setting_ == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "setting is nullptr.");
-        return false;
-    }
-
-    auto value = setting_->GetProperty(AppExecFwk::AbilityStartSetting::IS_START_BY_SCB_KEY);
-    if (value == "true") {
-        TAG_LOGD(AAFwkTag::UIABILITY, "Start by scb.");
-        return true;
-    }
-
-    return false;
 }
 #endif
 } // namespace AbilityRuntime

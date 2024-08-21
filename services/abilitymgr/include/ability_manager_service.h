@@ -718,15 +718,6 @@ public:
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) override;
 
     /**
-     * AbilityWindowConfigTransitionDone, ability call this interface after lift cycle was changed.
-     *
-     * @param token,.ability's token.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int AbilityWindowConfigTransitionDone(
-        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig) override;
-
-    /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
      *
      * @param token,.service ability's token.
@@ -813,7 +804,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = true) override;
+    virtual int KillProcess(const std::string &bundleName) override;
 
     /**
      * Uninstall app
@@ -876,9 +867,7 @@ public:
 
     virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
 
-#ifdef WITH_DLP
     virtual int GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos) override;
-#endif // WITH_DLP
 
     virtual int GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &connectionData) override;
 
@@ -1355,11 +1344,9 @@ public:
         const std::shared_ptr<Media::PixelMap> &pixelMap) override;
 #endif // SUPPORT_SCREEN
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
-    virtual void SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token) override;
+
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
-
-    virtual void ScheduleClearRecoveryPageStack() override;
 
     /**
      * Called to verify that the MissionId is valid.
@@ -1684,9 +1671,10 @@ public:
     /**
      * @brief Restart app self.
      * @param want The ability type must be UIAbility.
+     * @param isAppRecovery True indicates that the app is restarted because of recovery.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t RestartApp(const AAFwk::Want &want) override;
+    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
 
     /**
      * @brief Request to display assert fault dialog.
@@ -1993,8 +1981,6 @@ private:
     int CheckStaticCfgPermission(const AppExecFwk::AbilityRequest &abilityRequest, bool isStartAsCaller,
         uint32_t callerTokenId, bool isData = false, bool isSaCall = false, bool isImplicit = false);
 
-    int CheckPermissionForUIService(const Want &want, const AbilityRequest &abilityRequest);
-
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
     int GenerateExtensionAbilityRequest(const Want &want, AbilityRequest &request,
@@ -2121,11 +2107,9 @@ private:
 
     AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
 
-#ifdef WITH_DLP
     int CheckDlpForExtension(
         const Want &want, const sptr<IRemoteObject> &callerToken,
         int32_t userId, AAFwk::EventInfo &eventInfo, const EventName &eventName);
-#endif // WITH_DLP
 
     void InitStartupFlag();
 
@@ -2198,7 +2182,6 @@ private:
     void InitInterceptor();
     void InitPushTask();
     void InitDeepLinkReserve();
-    void InitDefaultRecoveryList();
 
     bool CheckSenderWantInfo(int32_t callerUid, const WantSenderInfo &wantSenderInfo);
 
@@ -2210,7 +2193,7 @@ private:
 
     void WaitBootAnimationStart();
 
-    int32_t SignRestartAppFlag(int32_t userId, const std::string &bundleName);
+    int32_t SignRestartAppFlag(int32_t userId, const std::string &bundleName, bool isAppRecovery = false);
     int32_t CheckRestartAppWant(const AAFwk::Want &want);
 
     int32_t CheckDebugAssertPermission();

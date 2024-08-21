@@ -234,7 +234,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStartByCallPermission_002, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckStartByCallPermission_002 end");
 }
 
-#ifdef WITH_DLP
 /*
  * Feature: AbilityManagerService
  * Function: GetDlpConnectionInfos
@@ -254,7 +253,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, GetDlpConnectionInfos_001, TestSize.Lev
     MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GetDlpConnectionInfos_001 end");
 }
-#endif // WITH_DLP
 
 /*
  * Feature: AbilityManagerService
@@ -2198,21 +2196,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
 
     ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.name: AbilityManagerServiceFirstTest_CheckPermissionForUIService_0001
- * @tc.desc: Test the state of CheckPermissionForUIService
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceFirstTest, CheckPermissionForUIService_0001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityManagerService> abilityMs = std::make_shared<AbilityManagerService>();
-    Want want {};
-    AbilityRequest abilityRequest;
-
-    int ret = abilityMs->CheckPermissionForUIService(want, abilityRequest);
     EXPECT_EQ(ret, ERR_OK);
 }
 
