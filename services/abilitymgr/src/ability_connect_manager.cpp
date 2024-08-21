@@ -2182,7 +2182,7 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->ClearProcessByToken(
             token->AsObject()));
         if (abilityRecord->IsSceneBoard() && currentUserId != userId_) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Not the current user's SCB, clear the user and do not restart");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "Not the current user's SCB, clear the user and do not restart");
             KillProcessesByUserId();
             return;
         }

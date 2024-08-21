@@ -1406,6 +1406,7 @@ void AbilityManagerClient::EnableRecoverAbility(sptr<IRemoteObject> token)
 
 void AbilityManagerClient::ScheduleRecoverAbility(sptr<IRemoteObject> token, int32_t reason, const Want *want)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->ScheduleRecoverAbility(token, reason, want);
@@ -1604,7 +1605,7 @@ ErrCode AbilityManagerClient::ShareDataDone(
 
 ErrCode AbilityManagerClient::ForceExitApp(const int32_t pid, const ExitReason &exitReason)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "begin.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "begin.");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->ForceExitApp(pid, exitReason);
@@ -1885,7 +1886,7 @@ ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject
 int32_t AbilityManagerClient::RestartApp(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_INVALID_VALUE(abms);
     return abms->RestartApp(want);
