@@ -107,7 +107,7 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
 }
 
 Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char* entry,
-    NativeChildProcess_Args args, NativeChildProcess_Options options, int32_t &pid)
+    NativeChildProcess_Args args, NativeChildProcess_Options options, int32_t *pid)
 {
     if (entry == nullptr || *entry == '\0') {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Invalid entry");
@@ -115,13 +115,17 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
     }
 
     std::string entryName(entry);
-    if (entryName.find(":") != std::string::npos) {
+    if (entryName.find(":") == std::string::npos) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "entry point misses a colon");
         return NCP_ERR_INVALID_PARAM;
     }
 
     if (args.entryParams == nullptr || *(args.entryParams) == '\0') {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Invalid args.entryParams");
+        return NCP_ERR_INVALID_PARAM;
+    }
+    if (pid == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "pid null.");
         return NCP_ERR_INVALID_PARAM;
     }
     std::string entryParams(args.entryParams);
@@ -151,7 +155,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
     int32_t childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS;
 
     ChildProcessManager &mgr = ChildProcessManager::GetInstance();
-    auto cpmErr = mgr.StartChildProcessWithArgs(entryName, pid, childProcessType, childArgs, childProcessOptions);
+    auto cpmErr = mgr.StartChildProcessWithArgs(entryName, *pid, childProcessType, childArgs, childProcessOptions);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
         return CvtChildProcessManagerErrCode(cpmErr);
     }

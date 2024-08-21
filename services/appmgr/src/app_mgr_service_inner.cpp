@@ -6370,7 +6370,8 @@ int32_t AppMgrServiceInner::StartChildProcessPreCheck(const pid_t callingPid, co
         TAG_LOGE(AAFwkTag::APPMGR, "Already in child process.");
         return AAFwk::ERR_ALREADY_IN_CHILD_PROCESS;
     }
-    if (appRunningManager_->IsNativeArgsChildProcessReachLimit(callingPid)) {
+    if (childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS &&
+        appRunningManager_->IsNativeArgsChildProcessReachLimit(callingPid)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Native child process count reach limit.");
         return AAFwk::ERR_NATIVE_ARGS_CHILD_PROCESS_REACH_LIMIT;
     }
