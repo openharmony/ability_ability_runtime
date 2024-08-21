@@ -1075,12 +1075,13 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
 #if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::PreferredLanguage::GetAppPreferredLanguage(), status);
-    resConfig->SetLocaleInfo(locale);
-    const icu::Locale *localeInfo = resConfig->GetLocaleInfo();
-    if (localeInfo != nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Language: %{public}s, script: %{public}s, region: %{public}s",
-            localeInfo->getLanguage(), localeInfo->getScript(), localeInfo->getCountry());
+    icu::Locale systemLocale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    resConfig->SetLocaleInfo(systemLocale);
+
+    if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
+        icu::Locale preferredLocale =
+            icu::Locale::forLanguageTag(Global::I18n::PreferredLanguage::GetAppPreferredLanguage(), status);
+        resConfig->SetPreferredLocaleInfo(preferredLocale);
     }
 #endif
     std::string colormode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
