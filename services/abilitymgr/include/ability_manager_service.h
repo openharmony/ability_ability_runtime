@@ -2315,8 +2315,7 @@ private:
 
     bool GetJsonFromFile(const char *filePath, Json::Value &root);
 
-    bool ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath,
-        const std::string &WHITE_LIST);
+    bool ParseJsonFromBoot(const std::string &relativePath);
 
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId);
