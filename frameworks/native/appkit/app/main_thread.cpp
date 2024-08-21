@@ -74,6 +74,7 @@
 #ifdef CJ_FRONTEND
 #include "cj_runtime.h"
 #endif
+#include "native_lib_util.h"
 #include "nlohmann/json.hpp"
 #include "ohos_application.h"
 #include "overlay_module_info.h"
@@ -166,89 +167,6 @@ const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 
 extern "C" int DFX_SetAppRunningUniqueId(const char* appRunningId, size_t len) __attribute__((weak));
-
-std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp)
-{
-    std::string libPath = LOCAL_CODE_PATH;
-    if (isPreInstallApp) {
-        auto pos = hapPath.rfind("/");
-        libPath = hapPath.substr(0, pos);
-    }
-    return libPath;
-}
-
-void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
-{
-    if (hapInfo.nativeLibraryPath.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Lib path of %{public}s is empty, lib isn't isolated or compressed",
-            hapInfo.moduleName.c_str());
-        return;
-    }
-
-    std::string appLibPathKey = hapInfo.bundleName + "/" + hapInfo.moduleName;
-    std::string libPath = LOCAL_CODE_PATH;
-    if (!hapInfo.compressNativeLibs) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Lib of %{public}s will not be extracted from hap", hapInfo.moduleName.c_str());
-        libPath = GetLibPath(hapInfo.hapPath, isPreInstallApp);
-    }
-
-    libPath += (libPath.back() == '/') ? hapInfo.nativeLibraryPath : "/" + hapInfo.nativeLibraryPath;
-    TAG_LOGD(
-        AAFwkTag::APPKIT, "appLibPathKey: %{private}s, lib path: %{private}s", appLibPathKey.c_str(), libPath.c_str());
-    appLibPaths[appLibPathKey].emplace_back(libPath);
-}
-
-void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
-{
-    if (hspInfo.nativeLibraryPath.empty()) {
-        return;
-    }
-
-    std::string appLibPathKey = hspInfo.bundleName + "/" + hspInfo.moduleName;
-    std::string libPath = LOCAL_CODE_PATH;
-    if (!hspInfo.compressNativeLibs) {
-        libPath = GetLibPath(hspInfo.hapPath, isPreInstallApp);
-        libPath = libPath.back() == '/' ? libPath : libPath + "/";
-        if (isPreInstallApp) {
-            libPath += hspInfo.nativeLibraryPath;
-        } else {
-            libPath += hspInfo.bundleName + "/" + hspInfo.moduleName + "/" + hspInfo.nativeLibraryPath;
-        }
-    } else {
-        libPath = libPath.back() == '/' ? libPath : libPath + "/";
-        libPath += hspInfo.bundleName + "/" + hspInfo.nativeLibraryPath;
-    }
-
-    TAG_LOGD(
-        AAFwkTag::APPKIT, "appLibPathKey: %{private}s, libPath: %{private}s", appLibPathKey.c_str(), libPath.c_str());
-    appLibPaths[appLibPathKey].emplace_back(libPath);
-}
-
-void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativeLibraryPath,
-    AppLibPathMap &appLibPaths)
-{
-    if (hapInfo.isLibIsolated) {
-        patchNativeLibraryPath = hapInfo.hqfInfo.nativeLibraryPath;
-    }
-
-    if (patchNativeLibraryPath.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Patch lib path of %{public}s is empty", hapInfo.moduleName.c_str());
-        return;
-    }
-
-    if (hapInfo.compressNativeLibs && !hapInfo.isLibIsolated) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Lib of %{public}s has compressed and isn't isolated, no need to set",
-            hapInfo.moduleName.c_str());
-        return;
-    }
-
-    std::string appLibPathKey = hapInfo.bundleName + "/" + hapInfo.moduleName;
-    std::string patchLibPath = LOCAL_CODE_PATH;
-    patchLibPath += (patchLibPath.back() == '/') ? patchNativeLibraryPath : "/" + patchNativeLibraryPath;
-    TAG_LOGD(AAFwkTag::APPKIT, "appLibPathKey: %{public}s, patch lib path: %{private}s", appLibPathKey.c_str(),
-        patchLibPath.c_str());
-    appLibPaths[appLibPathKey].emplace_back(patchLibPath);
-}
 } // namespace
 
 void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths)

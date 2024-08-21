@@ -57,6 +57,8 @@ AppSpawnClient::AppSpawnClient(const char* serviceName)
         serviceName_ = CJAPPSPAWN_SERVER_NAME;
     } else if (serviceName__ == NWEBSPAWN_SERVER_NAME) {
         serviceName_ = NWEBSPAWN_SERVER_NAME;
+    } else if (serviceName__ == NATIVESPAWN_SERVER_NAME) {
+        serviceName_ = NATIVESPAWN_SERVER_NAME;
     } else {
         TAG_LOGE(AAFwkTag::APPMGR, "unknown service name");
         serviceName_ = NWEBSPAWN_SERVER_NAME;
@@ -239,6 +241,7 @@ int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawn
         TAG_LOGE(AAFwkTag::APPMGR, "Set childProcessType flag failed, ret: %{public}d", ret);
         return ret;
     }
+    ret = SetIsolationModeFlag(startMsg, reqHandle);
     return ret;
 }
 
@@ -560,6 +563,25 @@ int32_t AppSpawnClient::SetExtMsgFds(const AppSpawnReqMsgHandle &reqHandle,
                 item.first.c_str(), item.second, ret);
             return ret;
         }
+    }
+    return ERR_OK;
+}
+
+int32_t AppSpawnClient::SetIsolationModeFlag(const AppSpawnStartMsg &startMsg, const AppSpawnReqMsgHandle &reqHandle)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "SetIsolationFlag, isolationMode:%{public}d", startMsg.isolationMode);
+    if (!startMsg.isolationMode) {
+        return ERR_OK;
+    }
+    auto ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_ISOLATED_SANDBOX_TYPE);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetIsolationFlag failed, ret: %{public}d", ret);
+        return ret;
+    }
+    ret = AppSpawnReqMsgSetAppFlag(reqHandle, APP_FLAGS_ISOLATED_NETWORK);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetIsolationFlag failed, ret: %{public}d", ret);
+        return ret;
     }
     return ERR_OK;
 }

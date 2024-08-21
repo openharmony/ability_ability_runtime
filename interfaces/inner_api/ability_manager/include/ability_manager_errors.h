@@ -575,6 +575,21 @@ enum {
      */
     ERR_KILL_FOUNDATION_UID = 2097261,
 
+    /*
+     * Result (2097264) for not support child process.
+     */
+    ERR_NOT_SUPPORT_CHILD_PROCESS = 2097264,
+
+    /*
+     * Result (2097265) for already in child process.
+     */
+    ERR_ALREADY_IN_CHILD_PROCESS = 2097265,
+
+    /*
+     * Result (2097266) for native args child process reach limit.
+     */
+    ERR_NATIVE_ARGS_CHILD_PROCESS_REACH_LIMIT = 2097266,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

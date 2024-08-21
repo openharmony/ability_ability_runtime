@@ -99,13 +99,13 @@ HWTEST_F(ChildMainThreadTest, Attach_0100, TestSize.Level0)
 }
 
 /**
- * @tc.number: ScheduleLoadJs_0100
- * @tc.desc: Test ScheduleLoadJs_0100 works
+ * @tc.number: ScheduleLoadChild_0100
+ * @tc.desc: Test ScheduleLoadChild_0100 works
  * @tc.type: FUNC
  */
-HWTEST_F(ChildMainThreadTest, ScheduleLoadJs_0100, TestSize.Level0)
+HWTEST_F(ChildMainThreadTest, ScheduleLoadChild_0100, TestSize.Level0)
 {
-    TAG_LOGD(AAFwkTag::TEST, "ScheduleLoadJs_0100 called.");
+    TAG_LOGD(AAFwkTag::TEST, "ScheduleLoadChild_0100 called.");
     sptr<ChildMainThread> thread = sptr<ChildMainThread>(new (std::nothrow) ChildMainThread());
     ASSERT_NE(thread, nullptr);
 
@@ -114,7 +114,7 @@ HWTEST_F(ChildMainThreadTest, ScheduleLoadJs_0100, TestSize.Level0)
     thread->mainHandler_ = handler;
     thread->processInfo_ = std::make_shared<ChildProcessInfo>();
 
-    auto ret = thread->ScheduleLoadJs();
+    auto ret = thread->ScheduleLoadChild();
     EXPECT_TRUE(ret);
 }
 

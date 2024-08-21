@@ -27,6 +27,7 @@ constexpr int32_t CHILD_PROCESS_TYPE_NOT_CHILD = -1;
 constexpr int32_t CHILD_PROCESS_TYPE_JS = 0;
 constexpr int32_t CHILD_PROCESS_TYPE_NATIVE = 1;
 constexpr int32_t CHILD_PROCESS_TYPE_ARK = 2;
+constexpr int32_t CHILD_PROCESS_TYPE_NATIVE_ARGS = 3;
 
 struct ChildProcessInfo : public Parcelable {
     int32_t pid = 0;
@@ -36,6 +37,7 @@ struct ChildProcessInfo : public Parcelable {
     std::string bundleName;
     std::string processName;
     std::string srcEntry;
+    std::string entryFunc;
     std::string entryParams;
     bool jitEnabled = false;
     bool isDebugApp = true;

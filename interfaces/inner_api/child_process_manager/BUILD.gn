@@ -16,7 +16,10 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("child_process_manager_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "${ability_runtime_ndk_path}/ability/ability_runtime/child_process",
+    "include",
+  ]
 
   if (target_cpu == "arm") {
     cflags = [ "-DBINDER_IPC_32BIT" ]
@@ -32,6 +35,7 @@ ohos_shared_library("child_process_manager") {
     "${ability_runtime_native_path}/ability/native/child_process_manager/child_process_manager.cpp",
     "${ability_runtime_native_path}/ability/native/child_process_manager/child_process_manager_error_utils.cpp",
     "${ability_runtime_native_path}/ability/native/child_process_manager/js_child_process.cpp",
+    "${ability_runtime_native_path}/ability/native/child_process_manager/native_args_child_process.cpp",
     "${ability_runtime_native_path}/ability/native/child_process_manager/native_child_ipc_process.cpp",
   ]
 
