@@ -2202,21 +2202,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
 }
 
 /**
- * @tc.name: AbilityManagerServiceFirstTest_CheckPermissionForUIService_0001
- * @tc.desc: Test the state of CheckPermissionForUIService
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceFirstTest, CheckPermissionForUIService_0001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityManagerService> abilityMs = std::make_shared<AbilityManagerService>();
-    Want want {};
-    AbilityRequest abilityRequest;
-
-    int ret = abilityMs->CheckPermissionForUIService(want, abilityRequest);
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
  * @tc.name: AbilityManagerServiceFirstTest_IsNeedTimeoutForTest_0001
  * @tc.desc: Test the state of IsNeedTimeoutForTest
  * @tc.type: FUNC

@@ -39,7 +39,6 @@
 #include "startup_util.h"
 #include "extension_record.h"
 #include "ui_extension_utils.h"
-#include "ui_service_extension_connection_constants.h"
 #include "cache_extension_utils.h"
 #include "datetime_ex.h"
 #include "init_reboot.h"
@@ -647,9 +646,6 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     CHECK_POINTER_AND_RETURN(connectRecord, ERR_INVALID_VALUE);
     connectRecord->AttachCallerInfo();
     connectRecord->SetConnectState(ConnectionState::CONNECTING);
-    if (targetService->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        connectRecord->SetConnectWant(abilityRequest.want);
-    }
     targetService->AddConnectRecordToList(connectRecord);
     targetService->SetSessionInfo(sessionInfo);
     connectRecordList.push_back(connectRecord);
@@ -692,9 +688,7 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
         TAG_LOGW(AAFwkTag::ABILITYMGR, "null target service.");
         return;
     }
-    AppExecFwk::ExtensionAbilityType extType = targetService->GetAbilityInfo().extensionAbilityType;
-    bool isAbilityUIServiceExt = (extType == AppExecFwk::ExtensionAbilityType::UI_SERVICE);
-    if (targetService->GetConnectRecordList().size() > 1 && !isAbilityUIServiceExt) {
+    if (targetService->GetConnectRecordList().size() > 1) {
         if (taskHandler_ != nullptr && targetService->GetConnRemoteObject()) {
             auto task = [connectRecord]() { connectRecord->CompleteConnect(ERR_OK); };
             taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
@@ -702,12 +696,7 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
             TAG_LOGI(AAFwkTag::ABILITYMGR, "Target service is connecting, wait for callback");
         }
     } else {
-        if (isAbilityUIServiceExt) {
-            Want want = connectRecord->GetConnectWant();
-            ConnectUIServiceExtAbility(targetService, want);
-        } else {
-            ConnectAbility(targetService);
-        }
+        ConnectAbility(targetService);
     }
 }
 
@@ -1742,44 +1731,8 @@ void AbilityConnectManager::ConnectAbility(const std::shared_ptr<AbilityRecord> 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(abilityRecord);
-    AppExecFwk::ExtensionAbilityType extType = abilityRecord->GetAbilityInfo().extensionAbilityType;
-    if (extType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        ResumeConnectAbility(abilityRecord);
-    } else {
-        PostTimeOutTask(abilityRecord, AbilityConnectManager::CONNECT_TIMEOUT_MSG);
-        abilityRecord->ConnectAbility();
-    }
-}
-
-void AbilityConnectManager::ConnectUIServiceExtAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
-    const Want &want)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    CHECK_POINTER(abilityRecord);
     PostTimeOutTask(abilityRecord, AbilityConnectManager::CONNECT_TIMEOUT_MSG);
-    abilityRecord->ConnectUIServiceExtAbility(want);
-}
-
-void AbilityConnectManager::ResumeConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ResumeConnectAbility");
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    CHECK_POINTER(abilityRecord);
-    AppExecFwk::ExtensionAbilityType extType = abilityRecord->GetAbilityInfo().extensionAbilityType;
-    if (extType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ResumeConnectAbility only support UI_SERVICE");
-        return;
-    }
-
-    PostTimeOutTask(abilityRecord, AbilityConnectManager::CONNECT_TIMEOUT_MSG);
-    std::list<std::shared_ptr<ConnectionRecord>> connectingList = abilityRecord->GetConnectingRecordList();
-    for (auto &connectRecord : connectingList) {
-        if (connectRecord == nullptr) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "ConnectRecord is nullptr.");
-            continue;
-        }
-        abilityRecord->ConnectUIServiceExtAbility(connectRecord->GetConnectWant());
-    }
+    abilityRecord->ConnectAbility();
 }
 
 void AbilityConnectManager::CommandAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
