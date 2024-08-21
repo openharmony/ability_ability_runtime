@@ -1576,6 +1576,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
     }
     NotifyAppStatusByCallerUid(bundleName, tokenId, userId, callerUid,
         EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
+    TAG_LOGI(AAFwkTag::APPMGR, "cleared up");
     return ERR_OK;
 }
 
@@ -2965,7 +2966,7 @@ void AppMgrServiceInner::QueryExtensionSandBox(const std::string &moduleName, co
     }
     auto infoExisted = [&moduleName, &abilityName, &strictMode, &isExist, &isolatedSandbox](
                            const ExtensionAbilityInfo &info) {
-        auto ret = info.moduleName == moduleName && info.name == abilityName && info.needCreateSandbox && strictMode;
+        auto ret = info.moduleName == moduleName && info.name == abilityName && info.needCreateSandbox;
         if (isExist) {
             return ret && isolatedSandbox;
         }
@@ -2974,7 +2975,9 @@ void AppMgrServiceInner::QueryExtensionSandBox(const std::string &moduleName, co
     auto infoIter = std::find_if(extensionInfos.begin(), extensionInfos.end(), infoExisted);
     DataGroupInfoList extensionDataGroupInfoList;
     if (infoIter != extensionInfos.end()) {
-        startMsg.isolatedExtension = true;
+        if (strictMode) {
+            startMsg.isolatedExtension = true;
+        }
         startMsg.extensionSandboxPath = infoIter->moduleName + "-" + infoIter->name;
         for (auto dataGroupInfo : dataGroupInfoList) {
             auto groupIdExisted = [&dataGroupInfo](const std::string &dataGroupId) {
