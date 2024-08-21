@@ -82,7 +82,7 @@ public:
      */
     bool GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLowResolution);
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     /**
      * Get low resoultion pixelmap of source.
      *
@@ -112,7 +112,7 @@ private:
 
     bool CheckFileNameValid(const std::string &fileName);
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     template<typename T>
     void WriteToJpeg(const std::string &filePath, T &snapshot) const;
 

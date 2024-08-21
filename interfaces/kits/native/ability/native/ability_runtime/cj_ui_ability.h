@@ -167,7 +167,6 @@ public:
     int32_t OnShare(WantParams &wantParams) override;
 
 #ifdef SUPPORT_GRAPHICS
-#ifdef SUPPORT_SCREEN
 public:
     /**
      * @brief Called after instantiating WindowScene.
@@ -271,7 +270,7 @@ private:
     sptr<Rosen::CJWindowStageImpl> cjWindowStage_;
     int32_t windowMode_ = 0;
 #endif
-#endif
+
 private:
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);

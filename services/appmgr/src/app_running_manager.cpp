@@ -29,16 +29,13 @@
 #include "parameters.h"
 #include "quick_fix_callback_with_record.h"
 #include <cstddef>
-#ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
-#include "window_visibility_info.h"
-#endif //SUPPORT_SCREEN
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
 #include "cache_process_manager.h"
 #include "res_sched_util.h"
 #include "ui_extension_utils.h"
-
+#include "window_visibility_info.h"
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
@@ -638,13 +635,11 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 
     auto isLastAbility =
         clearMissionFlag ? appRecord->IsLastPageAbilityRecord(token) : appRecord->IsLastAbilityRecord(token);
-#ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         appRecord->TerminateAbility(token, true);
     } else {
         appRecord->TerminateAbility(token, false);
     }
-#endif //SUPPORT_SCREEN
     auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isLauncherApp) {
@@ -1143,7 +1138,7 @@ bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
     }
     return true;
 }
-#ifdef SUPPORT_SCREEN
+
 void AppRunningManager::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {
@@ -1167,7 +1162,7 @@ void AppRunningManager::OnWindowVisibilityChanged(
         pids.emplace(info->pid_);
     }
 }
-#endif //SUPPORT_SCREEN
+
 bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focusedRecord)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");

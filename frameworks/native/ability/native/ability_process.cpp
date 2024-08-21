@@ -70,7 +70,7 @@ ErrCode AbilityProcess::StartAbility(Ability *ability, CallAbilityParam param, C
         TAG_LOGE(AAFwkTag::ABILITY, "null ability");
         return ERR_NULL_OBJECT;
     }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     // inherit split mode
     auto windowMode = ability->GetCurrentWindowMode();
     if (windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_PRIMARY ||

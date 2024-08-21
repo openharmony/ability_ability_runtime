@@ -95,9 +95,7 @@ void MissionDataStorage::SaveMissionInfo(const InnerMissionInfo &missionInfo)
             TAG_LOGE(AAFwkTag::ABILITYMGR, "create dir %{public}s failed.", dirPath.c_str());
             return;
         }
-#ifdef SUPPORT_GRAPHICS
         chmod(dirPath.c_str(), MODE);
-#endif // SUPPORT_GRAPHICS
     }
 
     std::string jsonStr = missionInfo.ToJsonStr();
@@ -120,7 +118,7 @@ void MissionDataStorage::DeleteMissionInfo(int missionId)
 
 void MissionDataStorage::SaveMissionSnapshot(int32_t missionId, const MissionSnapshot& missionSnapshot)
 {
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     TAG_LOGI(AAFwkTag::ABILITYMGR, "snapshot: save snapshot from cache, missionId = %{public}d", missionId);
     SaveCachedSnapshot(missionId, missionSnapshot);
     SaveSnapshotFile(missionId, missionSnapshot);
@@ -131,7 +129,7 @@ void MissionDataStorage::SaveMissionSnapshot(int32_t missionId, const MissionSna
 
 void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId)
 {
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     DeleteMissionSnapshot(missionId, false);
     DeleteMissionSnapshot(missionId, true);
 #endif
@@ -139,7 +137,7 @@ void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId)
 
 bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLowResolution)
 {
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (GetCachedSnapshot(missionId, missionSnapshot)) {
         if (isLowResolution) {
@@ -209,7 +207,7 @@ bool MissionDataStorage::CheckFileNameValid(const std::string &fileName)
     return true;
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const MissionSnapshot& missionSnapshot)
 {
     SaveSnapshotFile(missionId, missionSnapshot.snapshot, missionSnapshot.isPrivate, false);

@@ -16,9 +16,8 @@
 #include "idle_time.h"
 
 #include "hilog_tag_wrapper.h"
-#ifdef SUPPORT_SCREEN
 #include "transaction/rs_interfaces.h"
-#endif // SUPPORT_SCREEN
+
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
@@ -43,7 +42,7 @@ void IdleTime::InitVSyncReceiver()
     if (needStop_) {
         return;
     }
-#ifdef SUPPORT_SCREEN
+
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         receiver_ = rsClient.CreateVSyncReceiver("ABILITY", eventHandler_);
@@ -53,7 +52,6 @@ void IdleTime::InitVSyncReceiver()
         }
         receiver_->Init();
     }
-#endif // SUPPORT_SCREEN
 }
 
 void IdleTime::EventTask()
@@ -70,13 +68,10 @@ void IdleTime::EventTask()
 
     int64_t period = 0;
     int64_t lastVSyncTime = 0;
-#ifdef SUPPORT_SCREEN
     VsyncError err = receiver_->GetVSyncPeriodAndLastTimeStamp(period, lastVSyncTime, true);
-#endif // SUPPORT_SCREEN
     TAG_LOGD(AAFwkTag::APPKIT, "EventTask period %{public}" PRId64 ", lastVSyncTime is %{public}" PRId64, period,
         lastVSyncTime);
     int64_t occurTimestamp = GetSysTimeNs();
-#ifdef SUPPORT_SCREEN
     if (GSERROR_OK == err && period > 0 && lastVSyncTime > 0 && occurTimestamp > lastVSyncTime) {
         int64_t elapsedTime = occurTimestamp - lastVSyncTime;
         int64_t idleTime = period - (elapsedTime % period) ;
@@ -88,7 +83,6 @@ void IdleTime::EventTask()
             callback_(idleTime / MS_PER_NS);
         }
     }
-#endif // SUPPORT_SCREEN
     PostTask();
 }
 

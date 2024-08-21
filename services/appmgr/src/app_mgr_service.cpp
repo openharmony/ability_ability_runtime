@@ -1241,9 +1241,7 @@ void AppMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::strin
     }
 
     appMgrServiceInner_->InitFocusListener();
-#ifdef SUPPORT_SCREEN
     appMgrServiceInner_->InitWindowVisibilityChangedListener();
-#endif
 }
 
 void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -1259,9 +1257,7 @@ void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::st
     }
 
     appMgrServiceInner_->FreeFocusListener();
-#ifdef SUPPORT_SCREEN
     appMgrServiceInner_->FreeWindowVisibilityChangedListener();
-#endif
 }
 
 int32_t AppMgrService::ChangeAppGcState(pid_t pid, int32_t state)

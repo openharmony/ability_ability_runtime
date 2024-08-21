@@ -68,7 +68,6 @@ ohos_unittest("app_running_manager_test") {
       "window_manager:libwm",
       "window_manager:libwsutils",
     ]
-    defines = [ "SUPPORT_SCREEN" ]
   }
 }
 

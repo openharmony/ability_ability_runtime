@@ -25,13 +25,10 @@
 #include "nocopyable.h"
 #include "save_request_callback_interface.h"
 #include "task_handler_wrap.h"
-#ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
-#endif // SUPPORT_GRAPHICS
 
 namespace OHOS {
 namespace AbilityRuntime {
-#ifdef SUPPORT_GRAPHICS
 class AutoFillManager {
 public:
     static AutoFillManager &GetInstance();
@@ -82,7 +79,6 @@ private:
 
     std::shared_ptr<AutoFillEventHandler> eventHandler_;
 };
-#endif // SUPPORT_GRAPHICS
 } // AbilityRuntime
 } // OHOS
 #endif // OHOS_ABILITY_RUNTIME_AUTO_FILL_MANAGER_H

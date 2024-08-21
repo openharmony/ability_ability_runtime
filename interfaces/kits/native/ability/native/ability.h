@@ -40,7 +40,7 @@
 #include "pac_map.h"
 #include "want.h"
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 #include "ability_window.h"
 #include "display_manager.h"
 #include "form_constants.h"
@@ -64,7 +64,7 @@ class ValuesBucket;
 namespace AbilityRuntime {
 class Runtime;
 }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 class KeyEvent;
 namespace Ace {
 class UIContent;
@@ -77,7 +77,7 @@ class DataAbilityOperation;
 class AbilityPostEventTimeout;
 class OHOSApplication;
 class AbilityHandler;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 class AbilityWindow;
 #endif
 class ILifeCycle;
@@ -827,7 +827,7 @@ public:
      */
     virtual int32_t OnShare(WantParams &wantParams);
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 public:
     friend class PageAbilityImpl;
     uint32_t sceneFlag_ = 0;
@@ -1376,7 +1376,7 @@ private:
     bool isNewRuleFlagSetted_ = false;
     bool startUpNewRule_ = false;
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 private:
     void InitFAWindow(const Want &want, int32_t displayId);
     bool UpdateResMgrAndConfiguration(int32_t displayId);
