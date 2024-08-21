@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 #include "js_ui_service_extension.h"
+#include "ui_service_extension_module_loader.h"
 #include "js_ui_service_extension_context.cpp"
 #undef private
 #undef protected
@@ -207,7 +208,8 @@ HWTEST_F(JsUIServiceExtensionTest, CallObjectMethod_0100, TestSize.Level1)
     napi_value object{nullptr};
     size_t argc{0};
     jsUIServiceExtension->jsObj_ = nullptr;
-    jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+    auto result = jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+    EXPECT_EQ(result, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0100 end");
 }
@@ -225,7 +227,8 @@ HWTEST_F(JsUIServiceExtensionTest, CallObjectMethod_0200, TestSize.Level1)
     size_t argc{0};
 
     jsUIServiceExtension->jsObj_ = std::make_unique<NativeReferenceMock>();
-    jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+    auto result = jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+    EXPECT_EQ(result, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0200 end");
 }
@@ -822,5 +825,22 @@ HWTEST_F(JsUIServiceExtensionTest, CreateJsUIServiceExtensionContext_0100, TestS
 
     TAG_LOGI(AAFwkTag::TEST, "CreateJsUIServiceExtensionContext_0100 end");
 }
+
+/**
+ * @tc.number: ListenWMS_0100
+ * @tc.name: ListenWMS
+ * @tc.desc: ListenWMS
+ */
+HWTEST_F(JsUIServiceExtensionTest, ListenWMS_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ListenWMS_0100 start");
+
+    jsUIServiceExtension->ListenWMS();
+
+    EXPECT_NE(jsUIServiceExtension->displayListener_, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "ListenWMS_0100 end");
+}
+
 } // namespace AbilityRuntime
 } // namespace OHOS
