@@ -25,6 +25,7 @@ namespace AAFwk {
 constexpr const int32_t DEFAULT_MAX_EXT_PER_PROC = 10;
 constexpr const int32_t DEFAULT_MAX_EXT_PER_DEV = 100;
 constexpr const int32_t DEFAULT_INVALID_VALUE = -1;
+constexpr const int32_t DEFAULT_MAX_NATIVE_ARGS_CHILD_PROCESS = 0;
 template<typename T>
 class DeviceConfiguration {
 public:
@@ -60,6 +61,7 @@ public:
     std::string GetBrokerDelegateBundleName();
     int32_t GetCollaboratorBrokerUID();
     int32_t GetCollaboratorBrokerReserveUID();
+    int32_t MaxNativeArgsChildProcess();
 
 private:
     void LoadResidentProcessInExtremeMemory();
@@ -89,6 +91,7 @@ private:
     DeviceConfiguration<std::string> brokerDelegateBundleName_ = {false, ""};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerReserveUid_ = {false, DEFAULT_INVALID_VALUE};
+    volatile DeviceConfiguration<int32_t> maxNativeArgsChildProcess_ = {false, DEFAULT_MAX_NATIVE_ARGS_CHILD_PROCESS};
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk

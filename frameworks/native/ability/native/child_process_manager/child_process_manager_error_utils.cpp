@@ -28,5 +28,16 @@ AbilityErrorCode ChildProcessManagerErrorUtil::GetAbilityErrorCode(const ChildPr
 
     return AbilityErrorCode::ERROR_CODE_INNER;
 }
+
+ChildProcessManagerErrorCode ChildProcessManagerErrorUtil::GetChildProcessManagerErrorCode(
+    int32_t abilityManagerErrorCode)
+{
+    auto it = ABILITY_MANAGER_ERR_CODE_MAP.find(abilityManagerErrorCode);
+    if (it != ABILITY_MANAGER_ERR_CODE_MAP.end()) {
+        return it->second;
+    }
+
+    return ChildProcessManagerErrorCode::ERR_APP_MGR_FAILED_INNER;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
