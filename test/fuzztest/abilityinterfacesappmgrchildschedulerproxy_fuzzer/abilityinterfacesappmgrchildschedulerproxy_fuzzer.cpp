@@ -69,7 +69,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
     sptr<IRemoteObject> impl;
     std::shared_ptr<ChildSchedulerProxy> infosProxy = std::make_shared<ChildSchedulerProxy>(impl);
-    infosProxy->ScheduleLoadJs();
+    infosProxy->ScheduleLoadChild();
     infosProxy->ScheduleExitProcessSafely();
     sptr<IRemoteObject> mainProcessCb;
     infosProxy->ScheduleRunNativeProc(mainProcessCb);

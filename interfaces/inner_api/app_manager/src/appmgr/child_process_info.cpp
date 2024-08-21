@@ -41,6 +41,7 @@ bool ChildProcessInfo::ReadFromParcel(Parcel &parcel)
     bundleName = Str16ToStr8(parcel.ReadString16());
     processName = Str16ToStr8(parcel.ReadString16());
     srcEntry = Str16ToStr8(parcel.ReadString16());
+    entryFunc = Str16ToStr8(parcel.ReadString16());
     entryParams = Str16ToStr8(parcel.ReadString16());
     jitEnabled = parcel.ReadBool();
     isDebugApp = parcel.ReadBool();
@@ -70,6 +71,7 @@ bool ChildProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(bundleName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(processName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(srcEntry));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(entryFunc));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(entryParams));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, jitEnabled);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isDebugApp);
