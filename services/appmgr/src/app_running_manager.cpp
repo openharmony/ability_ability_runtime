@@ -541,7 +541,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecord(const i
 void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token,
     std::shared_ptr<AppMgrServiceInner> serviceInner)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "token is nullptr.");
         return;
