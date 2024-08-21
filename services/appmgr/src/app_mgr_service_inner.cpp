@@ -6297,8 +6297,8 @@ int32_t AppMgrServiceInner::UnregisterAppRunningStatusListener(const sptr<IRemot
 
 int32_t AppMgrServiceInner::StartChildProcess(const pid_t hostPid, pid_t &childPid, const ChildProcessRequest &request)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "StarChildProcess, hostPid:%{public}d", hostPid);
-    auto errCode = StartChildProcessPreCheck(hostPid);
+    TAG_LOGI(AAFwkTag::APPMGR, "StartChildProcess, hostPid:%{public}d", hostPid);
+    auto errCode = StartChildProcessPreCheck(hostPid, request);
     if (errCode != ERR_OK) {
         return errCode;
     }
@@ -6318,18 +6318,24 @@ int32_t AppMgrServiceInner::StartChildProcess(const pid_t hostPid, pid_t &childP
         return ERR_NULL_OBJECT;
     }
     auto &args = request.args;
+    auto &options = request.options;
     childProcessRecord->SetEntryParams(args.entryParams);
-    TAG_LOGI(AAFwkTag::APPMGR, "StartChildProcess, srcEntry:%{private}s, args.entryParams:%{public}s,"
-        " args.fds size:%{public}zu, options.isolationMode:%{public}d", request.srcEntry.c_str(),
-        args.entryParams.c_str(), args.fds.size(), request.options.isolationMode);
-    return StartChildProcessImpl(childProcessRecord, appRecord, childPid, args);
+    TAG_LOGI(AAFwkTag::APPMGR, "StartChildProcess, srcEntry:%{private}s, args.entryParams:%{private}s,"
+        " processName:%{public}s, args.fds size:%{public}zu, options.isolationMode:%{public}d",
+        request.srcEntry.c_str(), args.entryParams.c_str(), childProcessRecord->GetProcessName().c_str(),
+        args.fds.size(), options.isolationMode);
+    return StartChildProcessImpl(childProcessRecord, appRecord, childPid, args, options);
 }
 
-int32_t AppMgrServiceInner::StartChildProcessPreCheck(const pid_t callingPid)
+int32_t AppMgrServiceInner::StartChildProcessPreCheckNative(const pid_t callingPid)
 {
     if (!AAFwk::AppUtils::GetInstance().IsMultiProcessModel()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Multi process model is not enabled");
         return ERR_INVALID_OPERATION;
+    }
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager nullptr");
+        return ERR_NO_INIT;
     }
     auto appRecord = appRunningManager_->GetAppRunningRecordByChildProcessPid(callingPid);
     if (appRecord) {
@@ -6339,8 +6345,41 @@ int32_t AppMgrServiceInner::StartChildProcessPreCheck(const pid_t callingPid)
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::StartChildProcessPreCheck(const pid_t callingPid, const ChildProcessRequest &request)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    auto childProcessType = request.childProcessType;
+    auto isMultiProcessModel = AAFwk::AppUtils::GetInstance().IsMultiProcessModel();
+    if (!isMultiProcessModel) {
+        if (childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS) {
+            if (!AAFwk::PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
+                return ERR_PERMISSION_DENIED;
+            }
+        } else {
+            TAG_LOGE(AAFwkTag::APPMGR, "Not support child process.");
+            return AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS;
+        }
+    }
+    
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager nullptr.");
+        return ERR_NO_INIT;
+    }
+    auto appRecord = appRunningManager_->GetAppRunningRecordByChildProcessPid(callingPid);
+    if (appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Already in child process.");
+        return AAFwk::ERR_ALREADY_IN_CHILD_PROCESS;
+    }
+    if (appRunningManager_->IsNativeArgsChildProcessReachLimit(callingPid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Native child process count reach limit.");
+        return AAFwk::ERR_NATIVE_ARGS_CHILD_PROCESS_REACH_LIMIT;
+    }
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-    const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args)
+    const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args,
+    const ChildProcessOptions &options)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appRecord) {
@@ -6351,7 +6390,9 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
         TAG_LOGE(AAFwkTag::APPMGR, "No such child process record, childPid:%{public}d.", childPid);
         return ERR_NAME_NOT_FOUND;
     }
-    auto spawnClient = remoteClientManager_->GetSpawnClient();
+    bool isNativeFromJs = childProcessRecord->GetChildProcessType() == CHILD_PROCESS_TYPE_NATIVE_ARGS;
+    auto spawnClient =  isNativeFromJs ? remoteClientManager_->GetNativeSpawnClient() :
+        remoteClientManager_->GetSpawnClient();
     if (!spawnClient) {
         TAG_LOGE(AAFwkTag::APPMGR, "spawnClient is null");
         AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
@@ -6368,6 +6409,7 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
     startMsg.procName = childProcessRecord->GetProcessName();
     startMsg.childProcessType = childProcessRecord->GetChildProcessType();
     startMsg.fds = args.fds;
+    startMsg.isolationMode = options.isolationMode;
     pid_t pid = 0;
     {
         std::lock_guard<ffrt::mutex> lock(startChildProcessLock_);
@@ -6378,14 +6420,15 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
                 ProcessStartFailedReason::APPSPAWN_FAILED, static_cast<int32_t>(errCode));
             return ERR_APPEXECFWK_BAD_APPSPAWN_CLIENT;
         }
-
         childPid = pid;
         childProcessRecord->SetPid(pid);
         childProcessRecord->SetUid(startMsg.uid);
         appRecord->AddChildProcessRecord(pid, childProcessRecord);
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "Start child process success, pid:%{public}d, hostPid:%{public}d,uid:%{public}d",
-        pid, childProcessRecord->GetHostPid(), startMsg.uid);
+    TAG_LOGI(AAFwkTag::APPMGR, "Start child process success,pid:%{public}d,hostPid:%{public}d,uid:%{public}d,"
+        "processName:%{public}s", pid, childProcessRecord->GetHostPid(), startMsg.uid,
+        childProcessRecord->GetProcessName().c_str());
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessCreated(childProcessRecord);
     return ERR_OK;
 }
 
@@ -6435,6 +6478,7 @@ int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProce
     info.bundleName = appRecord->GetBundleName();
     info.processName = childProcessRecord->GetProcessName();
     info.srcEntry = childProcessRecord->GetSrcEntry();
+    info.entryFunc = childProcessRecord->GetEntryFunc();
     info.entryParams = childProcessRecord->GetEntryParams();
     info.jitEnabled = appRecord->IsJITEnabled();
     info.isStartWithDebug = childProcessRecord->isStartWithDebug();
@@ -6482,7 +6526,7 @@ void AppMgrServiceInner::AttachChildProcess(const pid_t pid, const sptr<IChildSc
     childRecord->RegisterDeathRecipient();
 
     if (childRecord->GetChildProcessType() != CHILD_PROCESS_TYPE_NATIVE) {
-        childScheduler->ScheduleLoadJs();
+        childScheduler->ScheduleLoadChild();
     } else {
         childScheduler->ScheduleRunNativeProc(childRecord->GetMainProcessCallback());
         childRecord->ClearMainProcessCallback();
@@ -6492,7 +6536,10 @@ void AppMgrServiceInner::AttachChildProcess(const pid_t pid, const sptr<IChildSc
 void AppMgrServiceInner::OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote)
 {
     if (appRunningManager_) {
-        appRunningManager_->OnChildProcessRemoteDied(remote);
+        auto childRecord = appRunningManager_->OnChildProcessRemoteDied(remote);
+        if (childRecord) {
+            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childRecord);
+        }
     }
 }
 
@@ -6515,6 +6562,7 @@ void AppMgrServiceInner::KillChildProcess(const std::shared_ptr<AppRunningRecord
             TAG_LOGI(AAFwkTag::APPMGR, "Kill child process when host died, childPid:%{public}d, childUid:%{public}d.",
                 childPid, childRecord->GetUid());
             KillProcessByPid(childPid, "KillChildProcess");
+            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childRecord);
         }
     }
 }
@@ -6543,6 +6591,7 @@ void AppMgrServiceInner::ExitChildProcessSafelyByChildPid(const pid_t pid)
     if (WaitForRemoteProcessExit(pids, startTime)) {
         TAG_LOGI(AAFwkTag::APPMGR, "The remote child process exited successfully, pid:%{public}d.", pid);
         appRecord->RemoveChildProcessRecord(childRecord);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childRecord);
         return;
     }
     childRecord->RegisterDeathRecipient();
@@ -7138,7 +7187,7 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
         return ERR_INVALID_OPERATION;
     }
 
-    int32_t errCode = StartChildProcessPreCheck(hostPid);
+    int32_t errCode = StartChildProcessPreCheckNative(hostPid);
     if (errCode != ERR_OK) {
         return errCode;
     }
@@ -7164,7 +7213,8 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     auto nativeChildRecord = ChildProcessRecord::CreateNativeChildProcessRecord(
         hostPid, libName, appRecord, callback, childProcessCount, false);
     ChildProcessArgs args;
-    return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args);
+    ChildProcessOptions options;
+    return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
 }
 
 void AppMgrServiceInner::CacheLoabAbilityTask(const LoabAbilityTaskFunc& func)

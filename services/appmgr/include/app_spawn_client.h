@@ -76,6 +76,7 @@ struct AppSpawnStartMsg {
     int32_t maxChildProcess = 0;
     int32_t childProcessType = CHILD_PROCESS_TYPE_NOT_CHILD;
     std::map<std::string, int32_t> fds;
+    bool isolationMode = false;
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
@@ -227,6 +228,8 @@ private:
     int32_t SetChildProcessTypeStartFlag(const AppSpawnReqMsgHandle &reqHandle, int32_t childProcessType);
 
     int32_t SetExtMsgFds(const AppSpawnReqMsgHandle &reqHandle, const std::map<std::string, int32_t> &fds);
+
+    int32_t SetIsolationModeFlag(const AppSpawnStartMsg &startMsg, const AppSpawnReqMsgHandle &reqHandle);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
