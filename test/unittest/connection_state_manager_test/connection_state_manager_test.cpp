@@ -21,9 +21,7 @@
 #include "ability_record.h"
 #include "connection_observer_errors.h"
 #include "data_ability_record.h"
-#ifdef WITH_DLP
 #include "dlp_state_item.h"
-#endif // WITH_DLP
 
 using namespace testing::ext;
 using namespace OHOS::AbilityRuntime;
@@ -411,7 +409,6 @@ HWTEST_F(ConnectionStateManagerTest, HandleDataAbilityCallerDied_002, TestSize.L
     manager_->HandleDataAbilityCallerDied(callerPid);
 }
 
-#ifdef WITH_DLP
 /*
  * Feature: ConnectionStateManager
  * Function: AddDlpManager
@@ -547,7 +544,6 @@ HWTEST_F(ConnectionStateManagerTest, RemoveDlpAbility_002, TestSize.Level1)
     manager_->Init();
     manager_->RemoveDlpAbility(abilityRecord);
 }
-#endif // WITH_DLP
 
 /*
  * Feature: ConnectionStateManager
@@ -564,7 +560,6 @@ HWTEST_F(ConnectionStateManagerTest, HandleAppDied_001, TestSize.Level1)
     manager_->HandleAppDied(pid);
 }
 
-#ifdef WITH_DLP
 /*
  * Feature: ConnectionStateManager
  * Function: GetDlpConnectionInfos
@@ -581,7 +576,6 @@ HWTEST_F(ConnectionStateManagerTest, GetDlpConnectionInfos_001, TestSize.Level1)
     manager_->dlpItems_[1] = nullptr;
     manager_->GetDlpConnectionInfos(infos);
 }
-#endif // WITH_DLP
 
 /*
  * Feature: ConnectionStateManager
@@ -712,7 +706,6 @@ HWTEST_F(ConnectionStateManagerTest, HandleDataAbilityDiedInner_001, TestSize.Le
     manager_->HandleDataAbilityDiedInner(abilityToken, allData);
 }
 
-#ifdef WITH_DLP
 /*
  * Feature: ConnectionStateManager
  * Function: HandleDlpAbilityInner
@@ -828,6 +821,5 @@ HWTEST_F(ConnectionStateManagerTest, HandleDlpAbilityInner_006, TestSize.Level1)
     bool res = manager_->HandleDlpAbilityInner(dlpAbility, isAdd, dlpData);
     EXPECT_FALSE(res);
 }
-#endif // WITH_DLP
 }  // namespace AAFwk
 }  // namespace OHOS

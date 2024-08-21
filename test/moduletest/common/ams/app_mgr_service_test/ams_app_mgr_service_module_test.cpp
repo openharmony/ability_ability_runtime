@@ -131,9 +131,6 @@ public:
     {
         return 0;
     }
-
-    void ScheduleClearPageStack() override
-    {}
 };
 class AppMgrServiceModuleTest : public testing::Test {
 public:
@@ -417,8 +414,7 @@ HWTEST_F(AppMgrServiceModuleTest, KillApplication_001, TestSize.Level1)
     bool testResult = false;
     Semaphore sem(0);
 
-    auto mockHandler = [&testResult, testBundleName, &sem](
-        const std::string& bundleName, const bool clearPageStack = true) {
+    auto mockHandler = [&testResult, testBundleName, &sem](const std::string& bundleName) {
         testResult = (bundleName == testBundleName);
         sem.Post();
         return 0;
@@ -427,7 +423,7 @@ HWTEST_F(AppMgrServiceModuleTest, KillApplication_001, TestSize.Level1)
     for (int i = 0; i < COUNT; ++i) {
         testResult = false;
 
-        EXPECT_CALL(*mockAppMgrServiceInner_, KillApplication(_, _)).Times(1).WillOnce(Invoke(mockHandler));
+        EXPECT_CALL(*mockAppMgrServiceInner_, KillApplication(_)).Times(1).WillOnce(Invoke(mockHandler));
 
         int ret = appMgrService_->GetAmsMgr()->KillApplication(testBundleName);
 

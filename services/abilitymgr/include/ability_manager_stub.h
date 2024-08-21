@@ -20,9 +20,8 @@
 
 #include <iremote_object.h>
 #include <iremote_stub.h>
-#ifdef WITH_DLP
+
 #include "dlp_connection_info.h"
-#endif // WITH_DLP
 #include "iconnection_observer.h"
 
 namespace OHOS {
@@ -61,9 +60,7 @@ public:
 
     virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
 
-#ifdef WITH_DLP
     virtual int GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos);
-#endif // WITH_DLP
 
     virtual int GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &connectionData);
 
@@ -77,7 +74,6 @@ private:
     int MinimizeUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int AttachAbilityThreadInner(MessageParcel &data, MessageParcel &reply);
     int AbilityTransitionDoneInner(MessageParcel &data, MessageParcel &reply);
-    int AbilityWindowConfigTransitionDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleConnectAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleDisconnectAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleCommandAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
@@ -192,9 +188,7 @@ private:
     int UpdateMissionSnapShotFromWMSInner(MessageParcel &data, MessageParcel &reply);
     int RegisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
     int UnregisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
-#ifdef WITH_DLP
     int GetDlpConnectionInfosInner(MessageParcel &data, MessageParcel &reply);
-#endif // WITH_DLP
     int GetConnectionDataInner(MessageParcel &data, MessageParcel &reply);
     int MoveAbilityToBackgroundInner(MessageParcel &data, MessageParcel &reply);
     int32_t MoveUIAbilityToBackgroundInner(MessageParcel &data, MessageParcel &reply);
@@ -225,9 +219,7 @@ private:
     int BlockAppServiceInner(MessageParcel &data, MessageParcel &reply);
     #endif
     int EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
-    int SubmitSaveRecoveryInfoInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
-    int ScheduleClearRecoveryPageStackInner(MessageParcel &data, MessageParcel &reply);
     int GetTopAbilityInner(MessageParcel &data, MessageParcel &reply);
     int GetElementNameByTokenInner(MessageParcel &data, MessageParcel &reply);
     int DumpAbilityInfoDoneInner(MessageParcel &data, MessageParcel &reply);

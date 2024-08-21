@@ -107,14 +107,6 @@ ErrCode AbilityManagerClient::AbilityTransitionDone(sptr<IRemoteObject> token, i
     return abms->AbilityTransitionDone(token, state, saveData);
 }
 
-ErrCode AbilityManagerClient::AbilityWindowConfigTransitionDone(
-    sptr<IRemoteObject> token, const WindowConfig &windowConfig)
-{
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->AbilityWindowConfigTransitionDone(token, windowConfig);
-}
-
 ErrCode AbilityManagerClient::ScheduleConnectAbilityDone(
     sptr<IRemoteObject> token, sptr<IRemoteObject> remoteObject)
 {
@@ -655,12 +647,12 @@ ErrCode AbilityManagerClient::StopServiceAbility(const Want &want, sptr<IRemoteO
     return abms->StopServiceAbility(want, -1, token);
 }
 
-ErrCode AbilityManagerClient::KillProcess(const std::string &bundleName, const bool clearPageStack)
+ErrCode AbilityManagerClient::KillProcess(const std::string &bundleName)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "enter");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->KillProcess(bundleName, clearPageStack);
+    return abms->KillProcess(bundleName);
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
@@ -1252,7 +1244,7 @@ ErrCode AbilityManagerClient::SetMissionContinueState(sptr<IRemoteObject> token,
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "SetMissionContinueState called. state: %{public}d", state);
 #ifdef SUPPORT_SCREEN
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
@@ -1397,20 +1389,6 @@ void AbilityManagerClient::ScheduleRecoverAbility(sptr<IRemoteObject> token, int
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->ScheduleRecoverAbility(token, reason, want);
-}
-
-void AbilityManagerClient::SubmitSaveRecoveryInfo(sptr<IRemoteObject> token)
-{
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN(abms);
-    return abms->SubmitSaveRecoveryInfo(token);
-}
-
-void AbilityManagerClient::ScheduleClearRecoveryPageStack()
-{
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN(abms);
-    return abms->ScheduleClearRecoveryPageStack();
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

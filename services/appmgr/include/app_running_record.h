@@ -411,13 +411,6 @@ public:
     void ScheduleProcessSecurityExit();
 
     /**
-     * ScheduleTerminate, Notify application clear page stack.
-     *
-     * @return
-     */
-    void ScheduleClearPageStack();
-
-    /**
      * ScheduleTrimMemory, Notifies the application of the memory seen.
      *
      * @return

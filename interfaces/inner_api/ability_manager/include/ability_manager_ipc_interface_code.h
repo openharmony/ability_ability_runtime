@@ -244,9 +244,6 @@ enum class AbilityManagerInterfaceCode {
     // Set resident process enable status.
     SET_RESIDENT_PROCESS_ENABLE = 80,
 
-    // ipc id for ability window config transition done (81)
-    ABILITY_WINDOW_CONFIG_TRANSITION_DONE = 81,
-
     // ipc id 1001-2000 for DMS
     // ipc id for starting ability (1001)
     START_ABILITY = 1001,
@@ -488,10 +485,6 @@ enum class AbilityManagerInterfaceCode {
     QUERY_MISSION_VAILD = 3012,
 
     VERIFY_PERMISSION = 3013,
-
-    CLEAR_RECOVERY_PAGE_STACK = 3014,
-
-    ABILITY_RECOVERY_SUBMITINFO = 3015,
 
     ACQUIRE_SHARE_DATA = 4001,
     SHARE_DATA_DONE = 4002,

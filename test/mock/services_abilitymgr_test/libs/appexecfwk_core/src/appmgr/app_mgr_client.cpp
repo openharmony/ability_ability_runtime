@@ -77,8 +77,7 @@ AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId)
     return AppMgrResultCode::RESULT_OK;
 }
 
-AppMgrResultCode AppMgrClient::KillApplication(
-    const std::string& bundleName, const bool clearPageStack = true)
+AppMgrResultCode AppMgrClient::KillApplication(const std::string& bundleName)
 {
     return AppMgrResultCode::RESULT_OK;
 }

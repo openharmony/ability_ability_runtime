@@ -71,7 +71,7 @@ public:
      */
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordIsExist(const std::string &appName,
         const std::string &processName, const int uid, const BundleInfo &bundleInfo,
-        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr);
+        const std::string &specifiedProcessFlag = "");
 
 #ifdef APP_NO_RESPONSE_DIALOG
     /**
@@ -169,7 +169,7 @@ public:
      * @return Return true if found, otherwise return false.
      */
     bool ProcessExitByBundleName(
-        const std::string &bundleName, std::list<pid_t> &pids, const bool clearPageStack = true);
+        const std::string &bundleName, std::list<pid_t> &pids);
     /**
      * Get Foreground Applications.
      *
@@ -253,7 +253,7 @@ public:
     int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
 
     bool ProcessExitByBundleNameAndUid(
-        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack = true);
+        const std::string &bundleName, const int uid, std::list<pid_t> &pids);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
 
     void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);

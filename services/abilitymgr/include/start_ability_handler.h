@@ -45,12 +45,9 @@ struct StartAbilityParams {
         validUserId = value;
     }
     bool IsCallerSandboxApp();
-
-#ifdef WITH_DLP
     bool OtherAppsAccessDlp();
     bool DlpAccessOtherApps();
     bool SandboxExternalAuth();
-#endif // WITH_DLP
     bool IsCallerSysApp();
     std::shared_ptr<AbilityRecord> GetCallerRecord();
     int32_t GetCallerAppIndex();
@@ -58,10 +55,8 @@ struct StartAbilityParams {
     EventInfo BuildEventInfo();
 private:
     int32_t validUserId = 0;
-#ifdef WITH_DLP
     std::optional<bool> otherAppsAccessDlp;
     std::optional<bool> dlpAccessOtherApps;
-#endif // WITH_DLP
     std::optional<bool> sandboxExternalAuth;
     std::optional<bool> isCallerSysApp;
     std::optional<std::shared_ptr<AbilityRecord>> callerRecord;

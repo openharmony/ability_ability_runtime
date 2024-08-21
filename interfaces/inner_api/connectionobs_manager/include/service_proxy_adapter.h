@@ -16,10 +16,7 @@
 #ifndef ABILITY_RUNTIME_SERVICE_PROXY_ADAPTER_H
 #define ABILITY_RUNTIME_SERVICE_PROXY_ADAPTER_H
 
-#ifdef WITH_DLP
 #include "dlp_connection_info.h"
-#endif // WITH_DLP
-
 #include "iconnection_observer.h"
 
 namespace OHOS {
@@ -42,9 +39,7 @@ public:
 
     int32_t UnregisterObserver(const sptr<IConnectionObserver> &observer);
 
-#ifdef WITH_DLP
     int32_t GetDlpConnectionInfos(std::vector<DlpConnectionInfo> &infos);
-#endif // WITH_DLP
 
     int32_t GetConnectionData(std::vector<ConnectionData> &infos);
 

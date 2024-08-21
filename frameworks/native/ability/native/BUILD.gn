@@ -188,10 +188,7 @@ ohos_shared_library("abilitykit_utils") {
 }
 
 ohos_shared_library("abilitykit_native") {
-  include_dirs = [
-    "${ability_runtime_path}/utils/global/time/include",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
-  ]
+  include_dirs = [ "${ability_runtime_path}/utils/global/time/include" ]
 
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/process_info.cpp",
@@ -207,8 +204,6 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_caller_complex.cpp",
-    "${ability_runtime_native_path}/ability/native/ability_runtime/js_uiservice_ability_connection.cpp",
-    "${ability_runtime_native_path}/ability/native/ability_runtime/ui_ability_servicehost_stub_impl.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_handler.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_manager.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/reverse_continuation_scheduler_primary.cpp",
@@ -238,7 +233,6 @@ ohos_shared_library("abilitykit_native") {
   deps = [
     ":continuation_ipc",
     ":extension_blocklist_config",
-    ":ui_service_extension_connection",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
@@ -813,51 +807,6 @@ ohos_shared_library("service_extension") {
   part_name = "ability_runtime"
 }
 
-ohos_shared_library("ui_service_extension_connection") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
-  branch_protector_ret = "pac_ret"
-
-  defines = [ "AMS_LOG_TAG = \"Ability\"" ]
-  defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
-  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection" ]
-
-  sources = [
-    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/js_ui_service_host_proxy.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/js_ui_service_proxy.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/ui_service_host_proxy.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/ui_service_host_stub.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/ui_service_proxy.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/ui_service_stub.cpp",
-  ]
-
-  deps = [
-    "${ability_runtime_innerkits_path}/runtime:runtime",
-    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${ability_runtime_native_path}/ability/native:ability_business_error",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "access_token:libtokenid_sdk",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "ipc:ipc_core",
-    "ipc:ipc_napi",
-    "napi:ace_napi",
-  ]
-
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
 ohos_shared_library("ui_service_extension") {
   sanitize = {
     integer_overflow = true
@@ -892,7 +841,6 @@ ohos_shared_library("ui_service_extension") {
 
   deps = [
     ":abilitykit_native",
-    ":ui_service_extension_connection",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
@@ -1290,24 +1238,20 @@ config("ui_extension_public_config") {
 }
 
 ohos_shared_library("ui_extension") {
-  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection" ]
   sources = [
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_embeddable_ui_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_base.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_content_session.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_uiservice_uiext_connection.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension_servicehost_stub_impl.cpp",
   ]
 
   public_configs = [ ":ui_extension_public_config" ]
 
   deps = [
     ":abilitykit_native",
-    ":ui_service_extension_connection",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/runtime:runtime",
@@ -1871,6 +1815,7 @@ ohos_shared_library("photo_editor_extension") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "app_file_service:fileuri_native",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",

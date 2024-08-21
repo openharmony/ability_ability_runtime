@@ -61,7 +61,6 @@
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
 #include "dialog_session_info.h"
-#include "window_config.h"
 #ifdef SUPPORT_SCREEN
 #include "window_manager_service_handler.h"
 #include "ability_first_frame_state_observer_interface.h"
@@ -647,18 +646,6 @@ public:
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) = 0;
 
     /**
-     * AbilityWindowConfigTransitionDone, ability call this interface after life cycle was changed.
-     *
-     * @param token,.ability's token.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int AbilityWindowConfigTransitionDone(
-        const sptr<IRemoteObject> &token, const WindowConfig &windowConfig)
-        {
-            return 0;
-        }
-
-    /**
      * ScheduleConnectAbilityDone, service ability call this interface while session was connected.
      *
      * @param token,.service ability's token.
@@ -717,7 +704,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = true) = 0;
+    virtual int KillProcess(const std::string &bundleName) = 0;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -1174,7 +1161,7 @@ public:
     }
 
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) {};
-    virtual void SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token) {};
+
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
 
@@ -1521,9 +1508,10 @@ public:
     /**
      * @brief Restart app self.
      * @param want The ability type must be UIAbility.
+     * @param isAppRecovery True indicates that the app is restarted because of recovery.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RestartApp(const AAFwk::Want &want)
+    virtual int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false)
     {
         return 0;
     }
