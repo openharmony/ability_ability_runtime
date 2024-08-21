@@ -24,6 +24,7 @@
 #undef private
 #undef protected
 
+#include "native_runtime_impl.h"
 #include "mock_ability_token.h"
 #include "ability_handler.h"
 #include "ohos_application.h"
@@ -740,6 +741,70 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.number: OnStartAbilityByType_0200
+ * @tc.name: OnStartAbilityByType
+ * @tc.desc: JSUIServiceExtensionContext OnStartAbilityByType
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnStartAbilityByType_0200 start");
+
+    OHOS::AbilityRuntime::Runtime::Options options;
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    EXPECT_EQ(err, napi_status::napi_ok);
+    napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+
+    NapiCallbackInfo info{3};
+    string test{"TEST"};
+    info.argv[0] = AppExecFwk::WrapStringToJS(env, test);
+    info.argv[1] = AppExecFwk::WrapStringToJS(env, test);
+    info.argv[2] = AppExecFwk::CreateJSObject(env);
+
+    std::shared_ptr<UIServiceExtensionContext> uiServiceExtensionContext =
+        std::make_shared<UIServiceExtensionContext>();
+    JSUIServiceExtensionContext jsUIServiceExtensionContext(uiServiceExtensionContext);
+
+    jsUIServiceExtensionContext.OnStartAbilityByType(env, info);
+
+    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+
+    TAG_LOGI(AAFwkTag::TEST, "OnStartAbilityByType_0200 end");
+}
+
+/**
+ * @tc.number: OnStartAbilityByType_0300
+ * @tc.name: OnStartAbilityByType
+ * @tc.desc: JSUIServiceExtensionContext OnStartAbilityByType
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnStartAbilityByType_0300 start");
+
+    OHOS::AbilityRuntime::Runtime::Options options;
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    EXPECT_EQ(err, napi_status::napi_ok);
+    napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+
+    NapiCallbackInfo info{3};
+    string test{"TEST"};
+    info.argv[0] = AppExecFwk::WrapStringToJS(env, test);
+    info.argv[1] = AppExecFwk::CreateJSObject(env);
+    info.argv[2] = AppExecFwk::CreateJSObject(env);
+
+    std::shared_ptr<UIServiceExtensionContext> uiServiceExtensionContext =
+        std::make_shared<UIServiceExtensionContext>();
+    JSUIServiceExtensionContext jsUIServiceExtensionContext(uiServiceExtensionContext);
+
+    jsUIServiceExtensionContext.OnStartAbilityByType(env, info);
+
+    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+
+    TAG_LOGI(AAFwkTag::TEST, "OnStartAbilityByType_0300 end");
+}
+
+/**
  * @tc.number: CreateJsUIServiceExtensionContext_0100
  * @tc.name: CreateJsUIServiceExtensionContext
  * @tc.desc: CreateJsUIServiceExtensionContext
@@ -749,6 +814,8 @@ HWTEST_F(JsUIServiceExtensionTest, CreateJsUIServiceExtensionContext_0100, TestS
     TAG_LOGI(AAFwkTag::TEST, "CreateJsUIServiceExtensionContext_0100 start");
 
     napi_env env{nullptr};
+    CreateJsUIServiceExtensionContext(env, nullptr);
+
     std::shared_ptr<UIServiceExtensionContext> uiServiceExtensionContext =
         std::make_shared<UIServiceExtensionContext>();
     CreateJsUIServiceExtensionContext(env, uiServiceExtensionContext);
