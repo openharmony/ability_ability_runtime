@@ -115,7 +115,7 @@ bool AbilityRecovery::SaveAbilityState()
         return false;
     }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     std::string pageStack = ability->GetContentInfo();
     if (!pageStack.empty()) {
         wantParams.SetParam("pageStack", AAFwk::String::Box(pageStack));

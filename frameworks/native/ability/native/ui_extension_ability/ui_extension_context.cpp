@@ -246,7 +246,7 @@ int UIExtensionContext::GenerateCurRequestCode()
     curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
     return curRequestCode_;
 }
-#ifdef SUPPORT_SCREEN
+
 void UIExtensionContext::SetWindow(sptr<Rosen::Window> window)
 {
     window_ = window;
@@ -264,7 +264,7 @@ Ace::UIContent* UIExtensionContext::GetUIContent()
     }
     return window_->GetUIContent();
 }
-#endif // SUPPORT_SCREEN
+
 ErrCode UIExtensionContext::OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
     RuntimeTask &&task)
 {

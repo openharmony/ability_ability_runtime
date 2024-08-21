@@ -61,7 +61,7 @@
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
 #include "dialog_session_info.h"
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 #include "window_manager_service_handler.h"
 #include "ability_first_frame_state_observer_interface.h"
 #endif
@@ -78,7 +78,7 @@ using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
 using UIExtensionAbilityConnectInfo = AbilityRuntime::UIExtensionAbilityConnectInfo;
 using UIExtensionHostInfo = AbilityRuntime::UIExtensionHostInfo;
 using UIExtensionSessionInfo = AbilityRuntime::UIExtensionSessionInfo;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 using IAbilityFirstFrameStateObserver = AppExecFwk::IAbilityFirstFrameStateObserver;
 #endif
 
@@ -898,7 +898,7 @@ public:
         return 0;
     };
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) = 0;
 
     virtual int SetMissionIcon(const sptr<IRemoteObject> &token,

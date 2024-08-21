@@ -236,7 +236,7 @@ void JsServiceExtension::ListenWMS()
     }
 #endif
 }
-#ifdef SUPPORT_GRAPHICS
+
 void JsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(int32_t systemAbilityId,
     const std::string& deviceId)
 {
@@ -246,7 +246,7 @@ void JsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(i
         Rosen::WindowManager::GetInstance().RegisterDisplayInfoChangedListener(token_, tmpDisplayListener_);
     }
 }
-#endif //SUPPORT_GRAPHICS
+
 void JsServiceExtension::BindContext(napi_env env, napi_value obj)
 {
     auto context = GetContext();
@@ -290,13 +290,11 @@ void JsServiceExtension::OnStart(const AAFwk::Want &want)
 
     auto context = GetContext();
     if (context != nullptr) {
-#ifdef SUPPORT_GRAPHICS
         int32_t  displayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
         displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, displayId);
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "displayId %{public}d", displayId);
         auto configUtils = std::make_shared<ConfigurationUtils>();
         configUtils->InitDisplayConfig(displayId, context->GetConfiguration(), context->GetResourceManager());
-#endif //SUPPORT_GRAPHICS
     }
 
     HandleScope handleScope(jsRuntime_);
@@ -329,10 +327,8 @@ void JsServiceExtension::OnStop()
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Param invalid");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
     Rosen::WindowManager::GetInstance()
         .UnregisterDisplayInfoChangedListener(context->GetToken(), displayListener_);
-#endif //SUPPORT_GRAPHICS
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "ok");
 }
 

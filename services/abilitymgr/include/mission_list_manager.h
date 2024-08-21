@@ -329,9 +329,7 @@ public:
      * @param token The target ability.
      * @param pixelMap The snapshot.
      */
-#ifdef SUPPORT_SCREEN
     void UpdateSnapShot(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &pixelMap) override;
-#endif // SUPPORT_SCREEN
 
     /**
      * Get ability number.
@@ -378,7 +376,7 @@ public:
     void SignRestartAppFlag(const std::string &bundleName) override;
 
     void SetAnimationFlag(bool IsAnimationEnabled);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 public:
     /**
      * Set mission label of this ability.

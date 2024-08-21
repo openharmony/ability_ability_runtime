@@ -356,7 +356,7 @@ bool AbilityManagerService::Init()
     subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler_, eventHandler_);
     subManagersHelper_->InitSubManagers(MAIN_USER_ID, true);
     SwitchManagers(U0_USER_ID, false);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         InitFocusListener();
@@ -417,10 +417,9 @@ void AbilityManagerService::InitPushTask()
 
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     taskHandler_->SubmitTask(initStartupFlagTask, "InitStartupFlag");
-#ifdef SUPPORT_SCREEN
+
     auto initPrepareTerminateConfigTask = [aams = shared_from_this()]() { aams->InitPrepareTerminateConfig(); };
     taskHandler_->SubmitTask(initPrepareTerminateConfigTask, "InitPrepareTerminateConfig");
-#endif // SUPPORT_SCREEN
 
     auto initExtensionConfigTask = []() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
@@ -639,7 +638,7 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> token;
-#ifdef SUPPORT_SCREEN
+
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
         Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusChangeInfo);
@@ -651,7 +650,7 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
         }
         wmsHandler_->GetFocusWindow(token);
     }
-#endif // SUPPORT_SCREEN
+
     if (!token) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "token is nullptr");
         return ERR_INVALID_VALUE;
@@ -672,7 +671,7 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> token;
-#ifdef SUPPORT_SCREEN
+
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
         Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusChangeInfo);
@@ -684,7 +683,6 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
         }
         wmsHandler_->GetFocusWindow(token);
     }
-#endif // SUPPORT_SCREEN
 
     if (!token) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "token is nullptr");
@@ -841,7 +839,6 @@ void AbilityManagerService::SetReserveInfo(const std::string &linkString, Abilit
     }
 
     std::string reservedBundleName = "";
-#ifdef SUPPORT_SCREEN
     if (DeepLinkReserveConfig::GetInstance().isLinkReserved(linkString, reservedBundleName)) {
         abilityRequest.uriReservedFlag = true;
         abilityRequest.reservedBundleName = reservedBundleName;
@@ -849,7 +846,6 @@ void AbilityManagerService::SetReserveInfo(const std::string &linkString, Abilit
         abilityRequest.uriReservedFlag = false;
         abilityRequest.reservedBundleName = reservedBundleName;
     }
-#endif // SUPPORT_SCREEN
 }
 
 int AbilityManagerService::CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest)
@@ -1019,7 +1015,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
 
     AbilityRequest abilityRequest;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(want, requestCode, callerToken);
         if (specifyTokenId > 0 && callerToken != nullptr) { // for sa specify tokenId and caller token
@@ -1077,11 +1073,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         UpdateCallerInfo(abilityRequest.want, callerToken);
     } else if (callerBundleName == BUNDLE_NAME_DIALOG ||
         (isSendDialogResult && want.GetBoolParam("isSelector", false))) {
-#ifdef SUPPORT_SCREEN
         CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
         implicitStartProcessor_->ResetCallingIdentityAsCaller(abilityRequest.want.GetIntParam(
             Want::PARAM_RESV_CALLER_TOKEN, 0));
-#endif // SUPPORT_SCREEN
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -1322,7 +1316,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     }
 
     AbilityRequest abilityRequest;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(
             want, requestCode, callerToken, std::make_shared<AbilityStartSetting>(abilityStartSetting));
@@ -1607,7 +1601,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     }
 
     AbilityRequest abilityRequest;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(want, requestCode, callerToken);
         if (PermissionVerification::GetInstance()->IsSystemAppCall()) {
@@ -1723,7 +1717,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_WOULD_BLOCK;
     }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (abilityInfo.isStageBasedModel && !CheckWindowMode(startOptions.GetWindowMode(), abilityInfo.windowModes)) {
         return ERR_AAFWK_INVALID_WINDOW_MODE;
     }
@@ -1778,7 +1772,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         TAG_LOGE(AAFwkTag::ABILITYMGR, "DoProcess failed or replaceWant not exist");
         return result;
     }
-#ifdef SUPPORT_SCREEN
     if (result != ERR_OK && isReplaceWantExist) {
         return DialogSessionManager::GetInstance().HandleErmsResult(abilityRequest, GetUserId(), newWant);
     }
@@ -1787,7 +1780,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         TAG_LOGI(AAFwkTag::ABILITYMGR, "create clone selector dialog");
         return CreateCloneSelectorDialog(abilityRequest, GetUserId());
     }
-#endif // SUPPORT_GRAPHICS
     auto backFlag = StartAbilityUtils::ermsSupportBackToCallerFlag;
     UpdateBackToCallerFlag(callerToken, abilityRequest.want, requestCode, backFlag);
     StartAbilityUtils::ermsSupportBackToCallerFlag = false;
@@ -2704,7 +2696,7 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
     }
 
     AbilityRequest abilityRequest;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(want, DEFAULT_INVAL_VALUE, callerToken);
         abilityRequest.callType = AbilityCallType::START_EXTENSION_TYPE;
@@ -2966,14 +2958,14 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-#ifdef SUPPORT_GRAPHICS
+
     if (ImplicitStartProcessor::IsImplicitStartAction(extensionSessionInfo->want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "UI extension ability donot support implicit start.");
         eventInfo.errCode = ERR_INVALID_VALUE;
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-#endif // SUPPORT_GRAPHICS
+
     AbilityRequest abilityRequest;
     abilityRequest.Voluation(extensionSessionInfo->want, DEFAULT_INVAL_VALUE, callerToken);
     abilityRequest.callType = AbilityCallType::START_EXTENSION_TYPE;
@@ -3140,7 +3132,7 @@ void AbilityManagerService::StopSwitchUserDialog()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get last userId error.");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
+
     auto sysDialog = DelayedSingleton<SystemDialogScheduler>::GetInstance();
     if (sysDialog == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "System dialog scheduler instance is nullptr.");
@@ -3148,7 +3140,7 @@ void AbilityManagerService::StopSwitchUserDialog()
     }
     Want stopWant = sysDialog->GetSwitchUserDialogWant();
     StopSwitchUserDialogInner(stopWant, userController_->GetFreezingNewUserId());
-#endif // SUPPORT_GRAPHICS
+
     userController_->SetFreezingNewUserId(DEFAULT_INVAL_VALUE);
     return;
 }
@@ -4757,7 +4749,6 @@ int AbilityManagerService::MoveMissionsToForeground(const std::vector<int32_t>& 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
         return CHECK_PERMISSION_FAILED;
     }
-#ifdef SUPPORT_SCREEN
     if (wmsHandler_) {
         auto ret = wmsHandler_->MoveMissionsToForeground(missionIds, topMissionId);
         if (ret) {
@@ -4767,7 +4758,6 @@ int AbilityManagerService::MoveMissionsToForeground(const std::vector<int32_t>& 
             return NO_ERROR;
         }
     }
-#endif // SUPPORT_SCREEN
     return ERR_NO_INIT;
 }
 
@@ -4779,7 +4769,6 @@ int AbilityManagerService::MoveMissionsToBackground(const std::vector<int32_t>& 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
         return CHECK_PERMISSION_FAILED;
     }
-#ifdef SUPPORT_SCREEN
     if (wmsHandler_) {
         auto ret = wmsHandler_->MoveMissionsToBackground(missionIds, result);
         if (ret) {
@@ -4789,7 +4778,6 @@ int AbilityManagerService::MoveMissionsToBackground(const std::vector<int32_t>& 
             return NO_ERROR;
         }
     }
-#endif // SUPPORT_SCREEN
     return ERR_NO_INIT;
 }
 
@@ -5366,9 +5354,7 @@ void AbilityManagerService::DumpMissionInfosInner(const std::string &args, std::
 {
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
-#ifdef SUPPORT_GRAPHICS
         Rosen::WindowManager::GetInstance().DumpSessionAll(info);
-#endif // SUPPORT_GRAPHICS
         return;
     }
     auto missionListManager = GetCurrentMissionListManager();
@@ -5393,9 +5379,7 @@ void AbilityManagerService::DumpMissionInner(const std::string &args, std::vecto
 
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
-#ifdef SUPPORT_GRAPHICS
         Rosen::WindowManager::GetInstance().DumpSessionWithId(missionId, info);
-#endif // SUPPORT_GRAPHICS
         return;
     }
 
@@ -7273,7 +7257,7 @@ int32_t AbilityManagerService::GetMissionSnapshot(const std::string& deviceId, i
     }
     return ERR_OK;
 }
-#ifdef SUPPORT_SCREEN
+
 void AbilityManagerService::UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
     const std::shared_ptr<Media::PixelMap> &pixelMap)
 {
@@ -7285,7 +7269,7 @@ void AbilityManagerService::UpdateMissionSnapShot(const sptr<IRemoteObject> &tok
         missionListManager->UpdateSnapShot(token, pixelMap);
     }
 }
-#endif // SUPPORT_SCREEN
+
 void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& token)
 {
     if (token == nullptr) {
@@ -7496,7 +7480,7 @@ void AbilityManagerService::StartSwitchUserDialog()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "User Controller instance is nullptr.");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
+
     auto sysDialog = DelayedSingleton<SystemDialogScheduler>::GetInstance();
     if (sysDialog == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "System dialog scheduler instance is nullptr.");
@@ -7505,7 +7489,6 @@ void AbilityManagerService::StartSwitchUserDialog()
 
     Want dialogWant = sysDialog->GetSwitchUserDialogWant();
     StartSwitchUserDialogInner(dialogWant, userController_->GetFreezingNewUserId());
-#endif // SUPPORT_GRAPHICS
 }
 
 
@@ -7779,7 +7762,7 @@ int AbilityManagerService::GetTopAbility(sptr<IRemoteObject> &token)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verification failed");
         return CHECK_PERMISSION_FAILED;
     }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
         Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusChangeInfo);
@@ -8642,7 +8625,7 @@ int AbilityManagerService::SetMissionContinueState(const sptr<IRemoteObject> &to
     return ERR_OK;
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 int AbilityManagerService::SetMissionLabel(const sptr<IRemoteObject> &token, const std::string &label)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
@@ -9429,7 +9412,7 @@ bool AbilityManagerService::IsAppSelfCalled(const std::shared_ptr<AbilityRecord>
 
 std::shared_ptr<AbilityRecord> AbilityManagerService::GetFocusAbility()
 {
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     sptr<IRemoteObject> token;
     if (!wmsHandler_) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "wmsHandler_ is nullptr.");
@@ -10305,7 +10288,7 @@ int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
     }
     return collaborator->OpenFile(uri, flag);
 }
-#ifdef SUPPORT_SCREEN
+
 int AbilityManagerService::GetDialogSessionInfo(const std::string &dialogSessionId,
     sptr<DialogSessionInfo> &dialogSessionInfo)
 {
@@ -10331,7 +10314,7 @@ int AbilityManagerService::CreateCloneSelectorDialog(AbilityRequest &request, in
     CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
     return implicitStartProcessor_->ImplicitStartAbility(request, userId, 0, replaceWantString, true);
 }
-#endif // SUPPORT_SCREEN
+
 void AbilityManagerService::RemoveLauncherDeathRecipient(int32_t userId)
 {
     auto connectManager = GetConnectManagerByUserId(userId);
@@ -10451,7 +10434,6 @@ int32_t AbilityManagerService::RequestAssertFaultDialog(
     }
     auto debugDeal = ConnectInitAbilityDebugDeal();
     Want want;
-#ifdef SUPPORT_SCREEN
     auto sysDialog = DelayedSingleton<SystemDialogScheduler>::GetInstance();
     if (sysDialog == nullptr || debugDeal == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sysDialog or debugDeal is nullptr.");
@@ -10461,7 +10443,6 @@ int32_t AbilityManagerService::RequestAssertFaultDialog(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get assert fault dialog want failed.");
         return ERR_INVALID_VALUE;
     }
-#endif // SUPPORT_SCREEN
     uint64_t assertFaultSessionId = reinterpret_cast<uint64_t>(remoteCallback.GetRefPtr());
     want.SetParam(Want::PARAM_ASSERT_FAULT_SESSION_ID, std::to_string(assertFaultSessionId));
     want.SetParam(ASSERT_FAULT_DETAIL, wantParams.GetStringParam(ASSERT_FAULT_DETAIL));

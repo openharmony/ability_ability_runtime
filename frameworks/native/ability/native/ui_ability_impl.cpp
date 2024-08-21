@@ -24,9 +24,7 @@
 #include "js_ui_ability.h"
 #include "ohos_application.h"
 #include "process_options.h"
-#ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
-#endif
 #include "time_util.h"
 
 namespace OHOS {
@@ -45,7 +43,7 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
     token_ = record->GetToken();
     ability_ = ability;
     handler_ = handler;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     ability_->SetSceneListener(sptr<WindowLifeCycleImpl>(
         new (std::nothrow) WindowLifeCycleImpl(token_, shared_from_this())));
 #endif
@@ -172,7 +170,7 @@ void UIAbilityImpl::HandleAbilityTransaction(
         "srcState:%{public}d; targetState: %{public}d; isNewWant: %{public}d, sceneFlag: %{public}d",
         lifecycleState_, targetState.state, targetState.isNewWant, targetState.sceneFlag);
     UpdateSilentForeground(targetState, sessionInfo);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (ability_ != nullptr) {
         ability_->sceneFlag_ = targetState.sceneFlag;
     }
@@ -236,7 +234,7 @@ void UIAbilityImpl::ExecuteInsightIntentDone(uint64_t intentId, const InsightInt
         TAG_LOGE(AAFwkTag::UIABILITY, "notify execute done faild");
     }
 }
-#ifdef SUPPORT_SCREEN
+
 bool UIAbilityImpl::PrepareTerminateAbility()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
@@ -248,7 +246,7 @@ bool UIAbilityImpl::PrepareTerminateAbility()
     TAG_LOGD(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
     return ret;
 }
-#endif
+
 void UIAbilityImpl::SendResult(int requestCode, int resultCode, const AAFwk::Want &resultData)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
@@ -270,7 +268,7 @@ void UIAbilityImpl::NewWant(const AAFwk::Want &want)
     }
     ability_->SetWant(want);
     ability_->OnNewWant(want);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     ability_->ContinuationRestore(want);
 #endif
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
@@ -375,7 +373,7 @@ void UIAbilityImpl::UpdateSilentForeground(const AAFwk::LifeCycleStateInfo &targ
     ability_->SetIsSilentForeground(false);
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 void UIAbilityImpl::AfterUnFocused()
 {
     AfterFocusedCommon(false);
@@ -595,7 +593,7 @@ bool UIAbilityImpl::AbilityTransaction(const AAFwk::Want &want, const AAFwk::Lif
             if (targetState.isNewWant) {
                 NewWant(want);
             }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
             if (!InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
                 HandleForegroundNewState(want, ret);
             } else {
@@ -644,7 +642,7 @@ void UIAbilityImpl::HandleInitialState(bool &ret)
     }
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 void UIAbilityImpl::HandleForegroundNewState(const AAFwk::Want &want, bool &bflag)
 {
     if (lifecycleState_ == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {

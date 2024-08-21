@@ -21,9 +21,7 @@
 #include "auto_fill_custom_config.h"
 #include "fill_request_callback_interface.h"
 #include "save_request_callback_interface.h"
-#ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
-#endif // SUPPORT_GRAPHICS
 #include "want.h"
 
 namespace OHOS {
@@ -34,7 +32,6 @@ enum AutoFillWindowType {
     POPUP_WINDOW
 };
 }
-#ifdef SUPPORT_GRAPHICS
 class AutoFillExtensionCallback : public std::enable_shared_from_this<AutoFillExtensionCallback> {
 public:
     AutoFillExtensionCallback();
@@ -90,7 +87,6 @@ private:
     std::shared_ptr<Ace::ModalUIExtensionProxy> modalUIExtensionProxy_;
     std::mutex closeMutex_;
 };
-#endif // SUPPORT_GRAPHICS
 } // AbilityRuntime
 } // OHOS
 #endif // OHOS_ABILITY_RUNTIME_AUTO_FILL_EXTENSION_CALLBACK_H

@@ -38,6 +38,7 @@
 #include "hdc_register.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "hot_reloader.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "js_environment.h"
@@ -62,11 +63,10 @@
 #include "source_map.h"
 #include "source_map_operator.h"
 
-#ifdef SUPPORT_SCREEN
-#include "hot_reloader.h"
+#ifdef SUPPORT_GRAPHICS
 #include "ace_forward_compatibility.h"
 #include "declarative_module_preloader.h"
-#endif //SUPPORT_SCREEN
+#endif
 
 
 using namespace OHOS::AbilityBase;
@@ -225,7 +225,7 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
     SetChildOptions(options);
     if (!options.preload && options.isStageModel) {
         auto preloadedInstance = Runtime::GetPreloaded();
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
         // reload ace if compatible mode changes
         if (Ace::AceForwardCompatibility::PipelineChanged() && preloadedInstance) {
             preloadedInstance.reset();
@@ -595,9 +595,7 @@ bool JsRuntime::UnLoadRepairPatch(const std::string& hqfFile)
 bool JsRuntime::NotifyHotReloadPage()
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
-#ifdef SUPPORT_SCREEN
     Ace::HotReloader::HotReload();
-#endif // SUPPORT_SCREEN
     return true;
 }
 
@@ -713,7 +711,7 @@ void JsRuntime::LoadAotFile(const Options& options)
 bool JsRuntime::Initialize(const Options& options)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (Ace::AceForwardCompatibility::PipelineChanged()) {
         preloaded_ = false;
     }
@@ -889,7 +887,7 @@ void JsRuntime::PreloadAce(const Options& options)
 {
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (options.loadAce) {
         // ArkTsCard start
         if (options.isUnique) {
@@ -909,9 +907,7 @@ void JsRuntime::ReloadFormComponent()
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
     // ArkTsCard update condition, need to reload new component
-#ifdef SUPPORT_SCREEN
     OHOS::Ace::DeclarativeModulePreloader::ReloadCard(*nativeEngine, bundleName_, pkgContextInfoJsonStringMap_);
-#endif
 }
 
 void JsRuntime::DoCleanWorkAfterStageCleaned()

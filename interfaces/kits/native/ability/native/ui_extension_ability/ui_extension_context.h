@@ -23,9 +23,7 @@
 #include "free_install_observer_interface.h"
 #include "start_options.h"
 #include "want.h"
-#ifdef SUPPORT_SCREEN
 #include "window.h"
-#endif // SUPPORT_SCREEN
 
 namespace OHOS {
 namespace Ace {
@@ -139,11 +137,11 @@ public:
     virtual int GenerateCurRequestCode();
 
     virtual ErrCode ReportDrawnCompleted();
-#ifdef SUPPORT_SCREEN
+
     void SetWindow(sptr<Rosen::Window> window);
 
     sptr<Rosen::Window> GetWindow();
-#endif // SUPPORT_SCREEN
+
     Ace::UIContent* GetUIContent();
 
     ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
@@ -159,21 +157,19 @@ public:
 
     using SelfType = UIExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
-#ifdef SUPPORT_SCREEN
+
 protected:
     bool IsContext(size_t contextTypeId) override
     {
         return contextTypeId == CONTEXT_TYPE_ID || ExtensionContext::IsContext(contextTypeId);
     }
-#endif // SUPPORT_SCREEN
+
 private:
     static int ILLEGAL_REQUEST_CODE;
     std::map<int, RuntimeTask> resultCallbacks_;
     static int32_t curRequestCode_;
     static std::mutex requestCodeMutex_;
-#ifdef SUPPORT_SCREEN
     sptr<Rosen::Window> window_ = nullptr;
-#endif // SUPPORT_SCREEN
     std::mutex mutexlock_;
     /**
      * @brief Get Current Ability Type

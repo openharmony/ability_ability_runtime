@@ -1629,7 +1629,7 @@ napi_value JsAbilityContext::WrapRequestDialogResult(napi_env env,
 void JsAbilityContext::InheritWindowMode(AAFwk::Want &want)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     // only split mode need inherit
     auto context = context_.lock();
     if (!context) {
@@ -2081,7 +2081,7 @@ napi_value JsAbilityContext::SyncSetMissionContinueState(napi_env env, NapiCallb
     TAG_LOGI(AAFwkTag::CONTEXT, "end");
     return result;
 }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 napi_value JsAbilityContext::SetMissionLabel(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnSetMissionLabel);
@@ -2206,11 +2206,9 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 return;
             }
-#ifdef SUPPORT_SCREEN
             auto errcode = context->StartAbilityByType(type, wantParam, callback);
             (errcode != 0) ? task.Reject(env, CreateJsErrorByNativeErr(env, errcode)) :
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
-#endif
         };
 
     napi_value lastParam = (info.argc > ARGC_THREE) ? info.argv[INDEX_THREE] : nullptr;
