@@ -100,6 +100,12 @@ HWTEST_F(CjElementNameFfiTest, CJElementNameFFITestFFICJElementNameDelete_0100, 
 
     ElementNameHandle elementNameHandle =
         FFICJElementNameCreateWithContent(deviceId, bundleName, abilityName, moduleName);
+    auto actualElementName = reinterpret_cast<ElementName*>(elementNameHandle);
+    EXPECT_EQ(actualElementName->GetDeviceID(), deviceId);
+    EXPECT_EQ(actualElementName->GetBundleName(), bundleName);
+    EXPECT_EQ(actualElementName->GetAbilityName(), abilityName);
+    EXPECT_EQ(actualElementName->GetModuleName(), moduleName);
+
     FFICJElementNameDelete(elementNameHandle);
 }
 
@@ -162,4 +168,8 @@ HWTEST_F(CjElementNameFfiTest, CJElementNameFFITestFFICJElementNameParamsDelete_
     elementNameParams->moduleName = CreateCStringFromString(moduleName);
 
     FFICJElementNameParamsDelete(elementNameParams);
+    EXPECT_TRUE(elementNameParams->deviceId != nullptr);
+    EXPECT_TRUE(elementNameParams->bundleName != nullptr);
+    EXPECT_TRUE(elementNameParams->abilityName != nullptr);
+    EXPECT_TRUE(elementNameParams->moduleName != nullptr);
 }
