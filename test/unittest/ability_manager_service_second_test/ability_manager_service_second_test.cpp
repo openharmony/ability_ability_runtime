@@ -1762,7 +1762,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, ParseJsonFromBoot_001, TestSize.Level1
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     const std::string file = "/etc/efficiency_manager/prevent_startability_whitelist.json";
     nlohmann::json whiteListJsonObj;
-    abilityMs_->ParseJsonFromBoot(whiteListJsonObj, file, "white_list");
+    abilityMs_->ParseJsonFromBoot(file);
     EXPECT_TRUE(abilityMs_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ParseJsonFromBoot_001 end");
 }
