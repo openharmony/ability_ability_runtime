@@ -490,5 +490,17 @@ bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
     TAG_LOGW(AAFwkTag::APPMGR, "Permission denied");
     return false;
 }
+
+bool PermissionVerification::VerifyStartNativeChildProcessPermission() const
+{
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission %{public}s granted",
+            PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS);
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission %{public}s denied",
+        PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS);
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

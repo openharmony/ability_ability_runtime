@@ -55,6 +55,7 @@ constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN = "/system/etc/start_abi
 constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_PATH =
     "/etc/ability_runtime/start_ability_without_caller_token.json";
 constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_TITLE = "startAbilityWithoutCallerToken";
+constexpr const char* MAX_NATIVE_ARGS_CHILD_PROCESS = "const.max_native_child_process";
 }
 
 AppUtils::~AppUtils() {}
@@ -347,6 +348,17 @@ void AppUtils::LoadStartAbilityWithoutCallerToken()
         std::string abilityName = jsonObject.at(ABILITY_NAME).get<std::string>();
         startAbilityWithoutCallerToken_.value.emplace_back(std::make_pair(bundleName, abilityName));
     }
+}
+
+int32_t AppUtils::MaxNativeArgsChildProcess()
+{
+    if (!maxNativeArgsChildProcess_.isLoaded) {
+        maxNativeArgsChildProcess_.value =
+            system::GetIntParameter<int32_t>(MAX_NATIVE_ARGS_CHILD_PROCESS, DEFAULT_MAX_NATIVE_ARGS_CHILD_PROCESS);
+        maxNativeArgsChildProcess_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "maxNativeArgsChildProcess: %{public}d", maxNativeArgsChildProcess_.value);
+    return maxNativeArgsChildProcess_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
