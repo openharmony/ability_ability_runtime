@@ -152,6 +152,7 @@ constexpr const char* ENTER_SANDBOX = "sandboxApp";
 constexpr const char* PERMISSION_INTERNET = "ohos.permission.INTERNET";
 constexpr const char* PERMISSION_MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 constexpr const char* PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
+constexpr const char* PERMISSION_TEMP_JIT_ALLOW = "TEMPJITALLOW";
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 constexpr const char* SUPPORT_ISOLATION_MODE = "persist.bms.supportIsolationMode";
 constexpr const char* SUPPORT_SERVICE_EXT_MULTI_PROCESS = "component.startup.extension.multiprocess.enable";
@@ -825,7 +826,8 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
         bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(appInfo->bundleName,
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) |
-            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo, userId));
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_REQUESTED_PERMISSION), bundleInfo, userId));
     } else if (appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(appInfo->bundleName,
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION), appIndex, bundleInfo, userId));
@@ -2802,6 +2804,7 @@ void AppMgrServiceInner::SetAtomicServiceInfo(BundleType bundleType, AppSpawnSta
 void AppMgrServiceInner::SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartMsg &startMsg)
 {
     bool hasAccessBundleDirReq;
+    bool tempJitAllow = false;
     uint8_t setAllowInternet = 0;
     uint8_t allowInternet = 1;
     std::vector<int32_t> gids;
@@ -2821,6 +2824,14 @@ void AppMgrServiceInner::SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartM
     startMsg.allowInternet = allowInternet;
     startMsg.gids = gids;
     startMsg.flags |= hasAccessBundleDirReq ? APP_ACCESS_BUNDLE_DIR : 0;
+    tempJitAllow = std::any_of(bundleInfo.reqPermissions.begin(), bundleInfo.reqPermissions.end(),
+        [] (const auto &reqPermission) {
+            if (PERMISSION_TEMP_JIT_ALLOW == reqPermission) {
+                return true;
+            }
+            return false;
+        });
+    startMsg.flags |= tempJitAllow ? START_FLAG_BASE << StartFlags::TEMP_JIT_ALLOW : 0;
     SetAppEnvInfo(bundleInfo, startMsg);
 }
 
@@ -5539,7 +5550,8 @@ int32_t AppMgrServiceInner::IsAppRunning(const std::string &bundleName, int32_t 
         bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(bundleName,
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) |
-            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo, userId));
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_REQUESTED_PERMISSION), bundleInfo, userId));
     } else {
         bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(bundleName,
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
