@@ -514,7 +514,7 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
         if (*innerErrCode == ERR_OK) {
             task.ResolveWithNoError(env, CreateJsValue(env, path));
         } else {
-            task.Reject(env, CreateJsError(env, *innerErrCode,
+            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
                 "applicationContext if already released"));
         }
     };
@@ -625,7 +625,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
-                task.Reject(env, CreateJsError(env, *innerErrCode,
+                task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
                     "applicationContext if already released."));
             }
         };
@@ -800,7 +800,7 @@ napi_value JsApplicationContextUtils::OnClearUpApplicationData(napi_env env, Nap
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
-                task.Reject(env, CreateJsError(env, *innerErrCode));
+                task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST));
             }
     };
     napi_value lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
