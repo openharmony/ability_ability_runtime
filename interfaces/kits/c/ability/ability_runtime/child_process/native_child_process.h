@@ -270,7 +270,7 @@ typedef struct NativeChildProcess_Args {
  */
 Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(
     const char* entry, NativeChildProcess_Args args,
-    NativeChildProcess_Options options, int32_t &pid);
+    NativeChildProcess_Options options, int32_t *pid);
  
 #ifdef __cplusplus
 } // extern "C"
