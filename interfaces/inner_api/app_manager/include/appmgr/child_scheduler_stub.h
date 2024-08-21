@@ -34,7 +34,7 @@ public:
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
-    int32_t HandleScheduleLoadJs(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleScheduleLoadChild(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleExitProcessSafely(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleRunNativeProc(MessageParcel &data, MessageParcel &reply);
 

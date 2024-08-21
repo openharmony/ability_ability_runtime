@@ -57,7 +57,7 @@ public:
     virtual ~ ChildSchedulerStubFUZZ() {};
     int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override{ return 0; };
-    bool ScheduleLoadJs() override{ return true; };
+    bool ScheduleLoadChild() override{ return true; };
     bool ScheduleExitProcessSafely() override{ return true; };
     bool ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb) override{ return true; };
 };

@@ -24,6 +24,7 @@ namespace OHOS {
 namespace AAFwk {
 constexpr const int32_t DEFAULT_MAX_EXT_PER_PROC = 10;
 constexpr const int32_t DEFAULT_MAX_EXT_PER_DEV = 100;
+constexpr const int32_t DEFAULT_MAX_NATIVE_ARGS_CHILD_PROCESS = 0;
 template<typename T>
 class DeviceConfiguration {
 public:
@@ -56,6 +57,7 @@ public:
     int32_t GetLimitMaximumExtensionsPerDevice();
     std::string GetCacheExtensionTypeList();
     bool IsAllowStartAbilityWithoutCallerToken(const std::string& bundleName, const std::string& abilityName);
+    int32_t MaxNativeArgsChildProcess();
 
 private:
     void LoadResidentProcessInExtremeMemory();
@@ -82,6 +84,7 @@ private:
     volatile DeviceConfiguration<int32_t> limitMaximumExtensionsPerDevice_ = {false, DEFAULT_MAX_EXT_PER_DEV};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         startAbilityWithoutCallerToken_ = {false, {}};
+    volatile DeviceConfiguration<int32_t> maxNativeArgsChildProcess_ = {false, DEFAULT_MAX_NATIVE_ARGS_CHILD_PROCESS};
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk
