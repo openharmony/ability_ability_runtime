@@ -175,7 +175,6 @@ constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestC
 
 constexpr char ASSERT_FAULT_DETAIL[] = "assertFaultDialogDetail";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
-const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_SETTINGSDATA };
 const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
 };
@@ -243,7 +242,6 @@ constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr const char* PARAM_PREVENT_STARTABILITY = "persist.sys.abilityms.prevent_startability";
 constexpr const char* SUSPEND_SERVICE_CONFIG_FILE = "/etc/efficiency_manager/prevent_startability_whitelist.json";
 constexpr int32_t MAX_BUFFER = 2048;
-nlohmann::json whiteListJsonObj;
 constexpr int32_t API12 = 12;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr const char* WHITE_LIST = "white_list";
@@ -413,7 +411,7 @@ void AbilityManagerService::InitPushTask()
             WatchParameter(BOOTEVENT_BOOT_COMPLETED, ApplicationUtil::AppFwkBootEventCallback, nullptr);
         }
     };
-    if (!ParseJsonFromBoot(whiteListJsonObj, SUSPEND_SERVICE_CONFIG_FILE, WHITE_LIST)) {
+    if (!ParseJsonFromBoot(SUSPEND_SERVICE_CONFIG_FILE)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Parse json from boot fail");
     }
     isParamStartAbilityEnable_ = system::GetBoolParameter(PARAM_PREVENT_STARTABILITY, false);
@@ -9229,7 +9227,7 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call ServiceAbility or DataAbility, target bundleName: %{public}s.",
         abilityRequest.appInfo.bundleName.c_str());
     if (whiteListassociatedWakeUpFlag_ &&
-        WHITE_LIST_ASS_WAKEUP_SET.find(abilityRequest.appInfo.bundleName) != WHITE_LIST_ASS_WAKEUP_SET.end()) {
+        abilityRequest.appInfo.bundleName == BUNDLE_NAME_SETTINGSDATA) {
         TAG_LOGD(AAFwkTag::ABILITYMGR,
             "Call ServiceAbility or DataAbility, target bundle in white-list, allow associatedWakeUp.");
         verificationInfo.associatedWakeUp = true;
@@ -11321,9 +11319,9 @@ bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, c
     return false;
 }
 
-bool AbilityManagerService::ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath,
-    const std::string &WHITE_LIST)
+bool AbilityManagerService::ParseJsonFromBoot(const std::string &relativePath)
 {
+    nlohmann::json jsonObj;
     std::string absolutePath = GetConfigFileAbsolutePath(relativePath);
     if (ParseJsonValueFromFile(jsonObj, absolutePath) != ERR_OK) {
         return false;
