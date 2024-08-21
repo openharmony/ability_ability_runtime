@@ -69,7 +69,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestPostTask_001, TestSize.Level0)
 {
     CJEnvironment::GetInstance()->PostTask(nullptr);
     void (*func)() = TestFunc;
-    CJEnvironment::GetInstance()->PostTask(func);
+    auto ret = CJEnvironment::GetInstance()->PostTask(func);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -79,7 +80,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestPostTask_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestHasHigherPriorityTask_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->HasHigherPriorityTask();
+    auto ret = CJEnvironment::GetInstance()->HasHigherPriorityTask();
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -90,6 +92,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestHasHigherPriorityTask_001, TestSize
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJChipSDKNS_001, TestSize.Level0)
 {
     CJEnvironment::GetInstance()->InitCJChipSDKNS("path/to/hap");
+    EXPECT_NE(CJEnvironment::GetInstance()->cjAppNSName, nullptr);
 }
 
 /**
@@ -100,6 +103,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJChipSDKNS_001, TestSize.Level
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppNS_001, TestSize.Level0)
 {
     CJEnvironment::GetInstance()->InitCJAppNS("path/to/hap");
+    EXPECT_NE(CJEnvironment::GetInstance()->cjAppNSName, nullptr);
 }
 
 /**
@@ -110,6 +114,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppNS_001, TestSize.Level0)
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSDKNS_001, TestSize.Level0)
 {
     CJEnvironment::GetInstance()->InitCJSDKNS("path/to/hap");
+    EXPECT_NE(CJEnvironment::GetInstance()->cjAppNSName, nullptr);
 }
 
 /**
@@ -120,6 +125,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSDKNS_001, TestSize.Level0)
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSysNS_001, TestSize.Level0)
 {
     CJEnvironment::GetInstance()->InitCJSysNS("path/to/hap");
+    EXPECT_NE(CJEnvironment::GetInstance()->cjAppNSName, nullptr);
 }
 
 /**
@@ -129,8 +135,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJSysNS_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartRuntime_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->StartRuntime();
-    CJEnvironment::GetInstance()->StartRuntime();
+    auto ret = CJEnvironment::GetInstance()->StartRuntime();
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -141,7 +147,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartRuntime_001, TestSize.Level0)
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopRuntime_001, TestSize.Level0)
 {
     CJEnvironment::GetInstance()->StopRuntime();
-    CJEnvironment::GetInstance()->StopRuntime();
+    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
 }
 
 /**
@@ -152,6 +158,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopRuntime_001, TestSize.Level0)
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopUIScheduler_001, TestSize.Level0)
 {
     CJEnvironment::GetInstance()->StopUIScheduler();
+    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
 }
 
 /**
@@ -161,7 +168,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStopUIScheduler_001, TestSize.Level
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->LoadCJLibrary("dlName");
+    auto ret = CJEnvironment::GetInstance()->LoadCJLibrary("dlName");
+    EXPECT_EQ(ret, nullptr);
 }
 
 /**
@@ -174,6 +182,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_002, TestSize.Level0)
     CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::APP, "dlName");
     CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::SYSTEM, "dlName");
     CJEnvironment::GetInstance()->LoadCJLibrary(CJEnvironment::GetInstance()->LibraryKind::SDK, "dlName");
+    EXPECT_NE(CJEnvironment::GetInstance(), nullptr);
 }
 
 /**
@@ -183,7 +192,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestLoadCJLibrary_002, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartDebugger_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->StartDebugger();
+    auto ret = CJEnvironment::GetInstance()->StartDebugger();
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -193,5 +203,6 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestStartDebugger_001, TestSize.Level0)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestGetSymbol_001, TestSize.Level0)
 {
-    CJEnvironment::GetInstance()->GetSymbol(nullptr, "dlName");
+    auto ret = CJEnvironment::GetInstance()->GetSymbol(nullptr, "dlName");
+    EXPECT_EQ(ret, nullptr);
 }
