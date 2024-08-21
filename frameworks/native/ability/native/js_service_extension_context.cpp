@@ -399,7 +399,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
@@ -914,7 +914,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
@@ -957,7 +957,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
@@ -999,7 +999,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
@@ -1040,7 +1040,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
@@ -1083,7 +1083,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
@@ -1202,7 +1202,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }

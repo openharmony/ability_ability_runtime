@@ -472,7 +472,7 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
         if (*innerErrCode == ERR_OK) {
             task.ResolveWithNoError(env, CreateJsValue(env, path));
         } else {
-            task.Reject(env, CreateJsError(env, *innerErrCode,
+            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
                 "completeContext if already released."));
         }
     };
