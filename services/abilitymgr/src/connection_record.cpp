@@ -20,7 +20,6 @@
 #include "ability_util.h"
 #include "connection_state_manager.h"
 #include "hilog_tag_wrapper.h"
-#include "ui_service_extension_connection_constants.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -99,9 +98,7 @@ int ConnectionRecord::DisconnectAbility()
     SetConnectState(ConnectionState::DISCONNECTING);
     CHECK_POINTER_AND_RETURN(targetService_, ERR_INVALID_VALUE);
     std::size_t connectNums = targetService_->GetConnectRecordList().size();
-    AppExecFwk::ExtensionAbilityType extAbilityType = targetService_->GetAbilityInfo().extensionAbilityType;
-    bool isAbilityUIServiceExt = (extAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE);
-    if (connectNums == 1 || isAbilityUIServiceExt) {
+    if (connectNums == 1) {
         /* post timeout task to taskhandler */
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (handler == nullptr) {
@@ -118,12 +115,7 @@ int ConnectionRecord::DisconnectAbility()
             handler->SubmitTask(disconnectTask, taskName, disconnectTimeout);
         }
         /* schedule disconnect to target ability */
-        if (isAbilityUIServiceExt) {
-            TAG_LOGI(AAFwkTag::CONNECTION, "Disconnect UIServiceExtension ability, set correct want");
-            targetService_->DisconnectUIServiceExtAbility(GetConnectWant());
-        } else {
-            targetService_->DisconnectAbility();
-        }
+        targetService_->DisconnectAbility();
     } else {
         TAG_LOGD(AAFwkTag::CONNECTION,
             "The current connection count is %{public}zu, no need to disconnect, just remove connection.", connectNums);
@@ -324,16 +316,6 @@ sptr<IRemoteObject> ConnectionRecord::GetConnection() const
     }
 
     return callback->AsObject();
-}
-
-void ConnectionRecord::SetConnectWant(const Want &want)
-{
-    connectWant_ = want;
-}
-
-Want ConnectionRecord::GetConnectWant()
-{
-    return connectWant_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

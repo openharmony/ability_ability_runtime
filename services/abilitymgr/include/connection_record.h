@@ -140,8 +140,6 @@ public:
     sptr<IRemoteObject> GetTargetToken() const;
     sptr<IRemoteObject> GetConnection() const;
 
-    void SetConnectWant(const Want &want);
-    Want GetConnectWant();
 private:
     static int64_t connectRecordId;
     int recordId_ = 0;                                  // record id
@@ -155,8 +153,6 @@ private:
     int32_t callerPid_ = 0;                             // caller pid
     uint32_t callerTokenId_ = 0;                        // caller pid
     std::string callerName_;                        // caller bundleName or processName
-
-    Want connectWant_;
 
     DISALLOW_COPY_AND_MOVE(ConnectionRecord);
 };
