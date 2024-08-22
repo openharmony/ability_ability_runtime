@@ -242,6 +242,7 @@ void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, c
 
 int UIExtensionContext::GenerateCurRequestCode()
 {
+    std::lock_guard lock(requestCodeMutex_);
     curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
     return curRequestCode_;
 }
@@ -291,5 +292,8 @@ ErrCode UIExtensionContext::AddFreeInstallObserver(const sptr<IFreeInstallObserv
     }
     return ret;
 }
+
+int32_t UIExtensionContext::curRequestCode_ = 0;
+std::mutex UIExtensionContext::requestCodeMutex_;
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -25,6 +25,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+
 struct StartAbilityInfo {
     static std::shared_ptr<StartAbilityInfo> CreateStartAbilityInfo(const Want &want, int32_t userId,
         int32_t appIndex);
@@ -64,6 +65,7 @@ struct StartAbilityUtils {
     static thread_local bool skipErms;
     static thread_local int32_t ermsResultCode;
     static thread_local bool isWantWithAppCloneIndex;
+    static thread_local bool ermsSupportBackToCallerFlag;
 };
 
 struct StartAbilityInfoWrap {

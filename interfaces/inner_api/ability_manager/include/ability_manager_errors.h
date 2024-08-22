@@ -565,6 +565,16 @@ enum {
      */
     ERR_KILL_FOUNDATION_UID = 2097261,
 
+    /*
+     * Result (2097262) caller not exists.
+     */
+    ERR_CALLER_NOT_EXISTS = 2097262,
+    
+    /*
+     * Result (2097263) Not support back to caller.
+     */
+    ERR_NOT_SUPPORT_BACK_TO_CALLER = 2097263,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
