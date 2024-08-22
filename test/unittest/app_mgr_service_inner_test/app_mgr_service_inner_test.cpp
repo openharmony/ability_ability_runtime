@@ -1685,11 +1685,11 @@ HWTEST_F(AppMgrServiceInnerTest, OnAppStateChanged_001, TestSize.Level0)
     sptr<MockAppStateCallback> mockCallback(new MockAppStateCallback());
     EXPECT_CALL(*mockCallback, OnAppStateChanged(_)).Times(2);
     sptr<IAppStateCallback> callback1 = iface_cast<IAppStateCallback>(mockCallback);
-    appMgrServiceInner->appStateCallbacks_.push_back(callback1);
+    appMgrServiceInner->appStateCallbacks_.push_back({ callback1, 100 });
     appMgrServiceInner->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, true, false);
 
     sptr<IAppStateCallback> callback;
-    appMgrServiceInner->appStateCallbacks_.push_back(callback);
+    appMgrServiceInner->appStateCallbacks_.push_back({ callback, 100 });
     appMgrServiceInner->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, true, false);
 
     TAG_LOGI(AAFwkTag::TEST, "OnAppStateChanged_001 end");
@@ -1717,11 +1717,11 @@ HWTEST_F(AppMgrServiceInnerTest, OnAbilityStateChanged_001, TestSize.Level0)
     sptr<MockAppStateCallback> mockCallback(new MockAppStateCallback());
     EXPECT_CALL(*mockCallback, OnAbilityRequestDone(_, _)).Times(2);
     sptr<IAppStateCallback> callback1 = iface_cast<IAppStateCallback>(mockCallback);
-    appMgrServiceInner->appStateCallbacks_.push_back(callback1);
+    appMgrServiceInner->appStateCallbacks_.push_back({ callback1, 100 });
     appMgrServiceInner->OnAbilityStateChanged(abilityRunningRecord, AbilityState::ABILITY_STATE_CREATE);
 
     sptr<IAppStateCallback> callback;
-    appMgrServiceInner->appStateCallbacks_.push_back(callback);
+    appMgrServiceInner->appStateCallbacks_.push_back({ callback, 100 });
     appMgrServiceInner->OnAbilityStateChanged(abilityRunningRecord, AbilityState::ABILITY_STATE_CREATE);
 
     TAG_LOGI(AAFwkTag::TEST, "OnAbilityStateChanged_001 end");
@@ -2639,10 +2639,10 @@ HWTEST_F(AppMgrServiceInnerTest, UpdateConfiguration_001, TestSize.Level0)
     appMgrServiceInner->UpdateConfiguration(config);
 
     sptr<MockConfigurationObserver> observer(new (std::nothrow) MockConfigurationObserver());
-    appMgrServiceInner->configurationObservers_.push_back(observer);
+    appMgrServiceInner->configurationObservers_.push_back({ observer, 100 });
     sptr<IConfigurationObserver> observer1;
-    appMgrServiceInner->configurationObservers_.push_back(observer1);
-    appMgrServiceInner->configurationObservers_.push_back(nullptr);
+    appMgrServiceInner->configurationObservers_.push_back({ observer1, 100 });
+    appMgrServiceInner->configurationObservers_.push_back({ nullptr, 100 });
     appMgrServiceInner->UpdateConfiguration(config);
 
     appMgrServiceInner->appRunningManager_ = nullptr;

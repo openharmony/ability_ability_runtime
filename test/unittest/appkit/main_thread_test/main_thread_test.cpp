@@ -215,7 +215,7 @@ class MockAppMgrStub : public AppMgrStub {
         return 0;
     }
 
-    int32_t UpdateConfiguration(const Configuration &config) override
+    int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override
     {
         return 0;
     }

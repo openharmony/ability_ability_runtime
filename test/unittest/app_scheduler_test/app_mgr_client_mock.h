@@ -50,7 +50,7 @@ public:
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId));
     MOCK_METHOD3(FinishUserTest, int(
         const std::string &msg, const int64_t &resultCode, const std::string &bundleName));
-    MOCK_METHOD1(UpdateConfiguration, AppMgrResultCode(const Configuration &config));
+    MOCK_METHOD2(UpdateConfiguration, AppMgrResultCode(const Configuration &config, const int32_t userId));
     MOCK_METHOD1(GetConfiguration, AppMgrResultCode(Configuration& config));
     MOCK_METHOD2(GetAbilityRecordsByProcessID, int(
         const int pid, std::vector<sptr<IRemoteObject>> &tokens));
