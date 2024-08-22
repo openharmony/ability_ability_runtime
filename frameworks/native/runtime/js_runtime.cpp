@@ -474,14 +474,14 @@ bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFull
 
     std::string fileName = fileNames.front();
     fileFullName = filePath + "/" + fileName;
-    std::ostringstream outStream;
-    if (!extractor.ExtractByName(fileName, outStream)) {
+    std::unique_ptr<uint8_t[]> data;
+    size_t dataLen = 0;
+    if (!extractor.ExtractToBufByName(fileName, data, dataLen)) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Extract %{public}s failed", fileFullName.c_str());
         return false;
     }
 
-    const auto &outStr = outStream.str();
-    buffer.assign(outStr.begin(), outStr.end());
+    buffer.assign(data.get(), data.get() + dataLen);
     return true;
 }
 
@@ -1176,14 +1176,14 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
             }
             return LoadScript(abcPath, safeData->GetDataPtr(), safeData->GetDataLen(), isBundle_);
         } else {
-            std::ostringstream outStream;
-            if (!extractor->GetFileBuffer(modulePath, outStream)) {
+            std::unique_ptr<uint8_t[]> data;
+            size_t dataLen = 0;
+            if (!extractor->ExtractToBufByName(modulePath, data, dataLen)) {
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "Get File  Buffer abc file failed");
                 return false;
             }
-            const auto& outStr = outStream.str();
             std::vector<uint8_t> buffer;
-            buffer.assign(outStr.begin(), outStr.end());
+            buffer.assign(data.get(), data.get() + dataLen);
 
             return LoadScript(abcPath, &buffer, isBundle_);
         }
@@ -1658,12 +1658,13 @@ void JsRuntime::GetPkgContextInfoListMap(const std::map<std::string, std::string
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s load hapPath failed", it->first.c_str());
             continue;
         }
-        std::ostringstream outStream;
-        if (!extractor->ExtractByName("pkgContextInfo.json", outStream)) {
+        std::unique_ptr<uint8_t[]> data;
+        size_t dataLen = 0;
+        if (!extractor->ExtractToBufByName("pkgContextInfo.json", data, dataLen)) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
             continue;
         }
-        auto jsonObject = nlohmann::json::parse(outStream.str(), nullptr, false);
+        auto jsonObject = nlohmann::json::parse(data.get(), data.get() + dataLen, nullptr, false);
         if (jsonObject.is_discarded()) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());
             continue;
