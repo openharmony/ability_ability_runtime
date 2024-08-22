@@ -85,7 +85,19 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
     BuildSendWant(senderInfo, want);
 
     bool sendFinish = (senderInfo.finishedReceiver != nullptr);
-    int res = NO_ERROR;
+    int32_t res = ExecuteOperation(pendingWantManager, senderInfo, want);
+    if (sendFinish && res != START_CANCELED) {
+        WantParams wantParams = {};
+        senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
+    }
+
+    return res;
+}
+
+int32_t PendingWantRecord::ExecuteOperation(
+    std::shared_ptr<PendingWantManager> pendingWantManager, SenderInfo &senderInfo, Want &want)
+{
+    int32_t res = NO_ERROR;
     switch (key_->GetType()) {
         case static_cast<int32_t>(OperationType::START_ABILITY):
             res = pendingWantManager->PendingWantStartAbility(want, senderInfo.startOptions,
@@ -112,12 +124,6 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
         default:
             break;
     }
-
-    if (sendFinish && res != START_CANCELED) {
-        WantParams wantParams = {};
-        senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
-    }
-
     return res;
 }
 
