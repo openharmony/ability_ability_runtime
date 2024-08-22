@@ -2574,15 +2574,12 @@ void UIAbilityLifecycleManager::CheckCallerFromBackground(
     CHECK_POINTER(callerAbility);
     CHECK_POINTER(sessionInfo);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    bool hasContinousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->
-        IsBackgroundTaskUid(callerAbility->GetUid());
-
     auto permission = AAFwk::PermissionVerification::GetInstance();
     bool hasPermission =
         permission->VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND) ||
         permission->VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILIIES_FROM_BACKGROUND);
 
-    sessionInfo->canStartAbilityFromBackground = hasContinousTask || hasPermission;
+    sessionInfo->canStartAbilityFromBackground = hasPermission;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckCallerFromBackground: %{public}d", sessionInfo->canStartAbilityFromBackground);
 }
 }  // namespace AAFwk
