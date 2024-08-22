@@ -3923,47 +3923,6 @@ bool MissionListManager::IsExcludeFromMissions(const std::shared_ptr<Mission> &m
     return abilityRecord && abilityRecord->GetAbilityInfo().excludeFromMissions;
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-int MissionListManager::BlockAbility(int32_t abilityRecordId)
-{
-    int ret = -1;
-    for (const auto &missionList : currentMissionLists_) {
-        if (missionList && missionList != launcherList_) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "missionList begin to call BlockAbilityByRecordId %{public}s", __func__);
-            if (missionList->BlockAbilityByRecordId(abilityRecordId) == ERR_OK) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "missionList call BlockAbilityByRecordId success");
-                ret = ERR_OK;
-            }
-        }
-    }
-
-    if (defaultStandardList_) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "defaultStandardList begin to call BlockAbilityByRecordId %{public}s", __func__);
-        if (defaultStandardList_->BlockAbilityByRecordId(abilityRecordId) == ERR_OK) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "defaultStandardList call BlockAbilityByRecordId success");
-            ret = ERR_OK;
-        }
-    }
-
-    if (defaultSingleList_) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "defaultSingleList begin to call BlockAbilityByRecordId %{public}s", __func__);
-        if (defaultSingleList_->BlockAbilityByRecordId(abilityRecordId) == ERR_OK) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "defaultSingleList_ call BlockAbilityByRecordId success");
-            ret = ERR_OK;
-        }
-    }
-
-    if (launcherList_) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "launcherList begin to call BlockAbilityByRecordId %{public}s", __func__);
-        if (launcherList_->BlockAbilityByRecordId(abilityRecordId) == ERR_OK) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "launcherList_ call BlockAbilityByRecordId success");
-            ret = ERR_OK;
-        }
-    }
-    return ret;
-}
-#endif
-
 void MissionListManager::SetMissionANRStateByTokens(const std::vector<sptr<IRemoteObject>> &tokens)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");

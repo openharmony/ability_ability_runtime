@@ -115,12 +115,6 @@ public:
         return 0;
     };
     virtual void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override {}
-#ifdef ABILITY_COMMAND_FOR_TEST
-    virtual int BlockAbility() override
-    {
-        return 0;
-    };
-#endif
 private:
     AbilityResult result_;
 };
