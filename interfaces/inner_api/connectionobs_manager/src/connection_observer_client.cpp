@@ -35,7 +35,7 @@ ConnectionObserverClient& ConnectionObserverClient::GetInstance()
 int32_t ConnectionObserverClient::RegisterObserver(const std::shared_ptr<ConnectionObserver> &observer)
 {
     if (!clientImpl_) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "ConnectionObserverClient::RegisterObserver impl is nullptr.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "null clientImpl_");
         return ERR_NO_CLIENT_IMPL;
     }
 
@@ -45,7 +45,7 @@ int32_t ConnectionObserverClient::RegisterObserver(const std::shared_ptr<Connect
 int32_t ConnectionObserverClient::UnregisterObserver(const std::shared_ptr<ConnectionObserver> &observer)
 {
     if (!clientImpl_) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "ConnectionObserverClient::UnregisterObserver impl is nullptr.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "null clientImpl_");
         return ERR_NO_CLIENT_IMPL;
     }
 
@@ -55,7 +55,7 @@ int32_t ConnectionObserverClient::UnregisterObserver(const std::shared_ptr<Conne
 int32_t ConnectionObserverClient::GetDlpConnectionInfos(std::vector<DlpConnectionInfo> &infos)
 {
     if (!clientImpl_) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "ConnectionObserverClient::GetDlpConnectionInfos impl is nullptr.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "null clientImpl_");
         return ERR_NO_CLIENT_IMPL;
     }
 
@@ -65,7 +65,7 @@ int32_t ConnectionObserverClient::GetDlpConnectionInfos(std::vector<DlpConnectio
 int32_t ConnectionObserverClient::GetConnectionData(std::vector<ConnectionData> &connectionData)
 {
     if (!clientImpl_) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "ConnectionObserverClient::GetConnectionData impl is nullptr.");
+        TAG_LOGE(AAFwkTag::CONNECTION, "null clientImpl_");
         return ERR_NO_CLIENT_IMPL;
     }
 
