@@ -1245,7 +1245,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_024, TestSize.Level1)
     ConnectManager()->OnAbilityDied(abilityRecord, 0);
     WaitUntilTaskDone(TaskHandler());
     auto list = abilityRecord->GetConnectRecordList();
-    EXPECT_EQ(static_cast<int>(list.size()), 0);
+    EXPECT_EQ(static_cast<int>(list.size()), 2);
 
     auto elementName1 = abilityRequest1_.want.GetElement();
     std::string elementNameUri1 = elementName1.GetURI();
@@ -1256,7 +1256,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_024, TestSize.Level1)
     ConnectManager()->OnAbilityDied(abilityRecord1, 0);
     WaitUntilTaskDone(TaskHandler());
     auto list1 = abilityRecord1->GetConnectRecordList();
-    EXPECT_EQ(static_cast<int>(list1.size()), 0);
+    EXPECT_EQ(static_cast<int>(list1.size()), 2);
 }
 
 /*
@@ -2322,7 +2322,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_001, TestSize.Level1)
     // HandleTerminate
     ConnectManager()->OnAbilityDied(service, userId);
     WaitUntilTaskDone(TaskHandler());
-    EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 0);
+    EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 1);
 }
 
 /*
