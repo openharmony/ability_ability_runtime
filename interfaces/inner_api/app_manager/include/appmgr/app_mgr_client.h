@@ -812,6 +812,8 @@ public:
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
+    bool IsAppKilling(sptr<IRemoteObject> token) const;
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

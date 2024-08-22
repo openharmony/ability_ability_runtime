@@ -983,6 +983,13 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is invalid.");
         return ERR_INVALID_CALLER;
     }
+    if (callerToken != nullptr) {
+        bool isAppKilling = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsAppKilling(callerToken));
+        if (isAppKilling) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is killing.");
+            return ERR_INVALID_CALLER;
+        }
+    }
     {
 #ifdef WITH_DLP
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "CHECK_DLP");

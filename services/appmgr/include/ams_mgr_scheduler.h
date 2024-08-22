@@ -341,6 +341,8 @@ public:
 
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
+    virtual bool IsAppKilling(sptr<IRemoteObject> token) override;
+
 private:
     /**
      * @brief Judge whether the application service is ready.

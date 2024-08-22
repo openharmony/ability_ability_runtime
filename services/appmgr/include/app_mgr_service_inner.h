@@ -1143,6 +1143,8 @@ public:
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
+    bool IsAppKilling(sptr<IRemoteObject> token) const;
+
     /**
      * Get pids of processes which belong to specific bundle name and support process cache feature.
      *
