@@ -57,7 +57,7 @@ const std::unordered_map<std::string, ExtensionAbilityType> EXTENSION_TYPE_MAP =
 
 ExtensionAbilityType ConvertToExtensionAbilityType(const std::string &type)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "ConvertToExtensionAbilityType start");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     if (EXTENSION_TYPE_MAP.find(type) != EXTENSION_TYPE_MAP.end()) {
         return EXTENSION_TYPE_MAP.at(type);
     }
@@ -67,7 +67,7 @@ ExtensionAbilityType ConvertToExtensionAbilityType(const std::string &type)
 
 std::string ConvertToExtensionTypeName(ExtensionAbilityType type)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "ConvertToExtensionTypeName start");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     for (const auto &[key, val] : EXTENSION_TYPE_MAP) {
         if (val == type) {
             return key;
@@ -1424,7 +1424,7 @@ bool CheckModuleNameIsValid(const std::string &moduleName)
         return false;
     }
     if (moduleName.find(Constants::MODULE_NAME_SEPARATOR) != std::string::npos) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "module name should not contain ,");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "module name contain");
         return false;
     }
     return true;
@@ -1725,7 +1725,7 @@ bool ParseExtensionInfo(const Profile::ModuleJson &moduleJson, InnerBundleInfo &
     for (const Profile::Extension &extension : moduleJson.module.extensionAbilities) {
         ExtensionAbilityInfo extensionInfo;
         if (!ToExtensionInfo(moduleJson, extension, transformParam, extensionInfo)) {
-            TAG_LOGE(AAFwkTag::ABILITY_SIM, "To extensionInfo failed");
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "extensionInfo failed");
             return false;
         }
 
@@ -1807,7 +1807,7 @@ ErrCode ModuleProfile::TransformTo(const std::vector<uint8_t> &buf, InnerBundleI
 
     Profile::ModuleJson moduleJson = jsonObject.get<Profile::ModuleJson>();
     if (Profile::g_parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "g_parseResult is %{public}d", Profile::g_parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "g_parseResult:%{public}d", Profile::g_parseResult);
         int32_t ret = Profile::g_parseResult;
         // need recover parse result to ERR_OK
         Profile::g_parseResult = ERR_OK;

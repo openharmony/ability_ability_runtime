@@ -133,9 +133,9 @@ InnerBundleInfo::InnerBundleInfo()
 {
     baseApplicationInfo_ = std::make_shared<ApplicationInfo>();
     if (baseApplicationInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "baseApplicationInfo_ is nullptr, create failed");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null baseApplicationInfo_");
     }
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "inner bundle info instance is created");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "instance created");
 }
 
 InnerBundleInfo &InnerBundleInfo::operator=(const InnerBundleInfo &info)
@@ -166,7 +166,7 @@ InnerBundleInfo &InnerBundleInfo::operator=(const InnerBundleInfo &info)
 
 InnerBundleInfo::~InnerBundleInfo()
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "inner bundle info instance is destroyed");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "instance destroyed");
 }
 
 void to_json(nlohmann::json &jsonObject, const Distro &distro)
@@ -703,7 +703,7 @@ void from_json(const nlohmann::json &jsonObject, InnerModuleInfo &info)
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(
-            AAFwkTag::ABILITY_SIM, "read InnerModuleInfo from database error, error code : %{public}d", parseResult);
+            AAFwkTag::ABILITY_SIM, "read InnerModuleInfo from database error:%{public}d", parseResult);
     }
 }
 
@@ -736,13 +736,13 @@ void from_json(const nlohmann::json &jsonObject, Dependency &dependency)
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Dependency from_json error, error code : %{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Dependency error:%{public}d", parseResult);
     }
 }
 
 void from_json(const nlohmann::json &jsonObject, Distro &distro)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "from_json start.");
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
     GetValueIfFindKey<bool>(jsonObject,
@@ -779,7 +779,7 @@ void from_json(const nlohmann::json &jsonObject, Distro &distro)
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Distro from_json error, error code : %{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Distro error:%{public}d", parseResult);
     }
 }
 
@@ -885,7 +885,7 @@ int32_t InnerBundleInfo::FromJson(const nlohmann::json &jsonObject)
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(
-            AAFwkTag::ABILITY_SIM, "read InnerBundleInfo from database error, error code : %{public}d", parseResult);
+            AAFwkTag::ABILITY_SIM, "read InnerBundleInfo from database error:%{public}d", parseResult);
     }
     return parseResult;
 }
@@ -894,7 +894,7 @@ std::optional<HapModuleInfo> InnerBundleInfo::FindHapModuleInfo(const std::strin
 {
     auto it = innerModuleInfos_.find(modulePackage);
     if (it == innerModuleInfos_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "can not find module %{public}s", modulePackage.c_str());
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "not find module %{public}s", modulePackage.c_str());
         return std::nullopt;
     }
     HapModuleInfo hapInfo;
