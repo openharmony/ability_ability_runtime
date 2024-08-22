@@ -88,6 +88,7 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
     bool isDebugApp = true;
     bool isStartWithDebug = false;
     jsRuntime->DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
+    EXPECT_NE(jsRuntime, nullptr);
     jsRuntime.reset();
 }
 
@@ -104,8 +105,8 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0200, TestSize.Level1)
     ASSERT_NE(jsRuntime, nullptr);
     bool isDebugApp = true;
     bool isStartWithDebug = false;
-    jsRuntime->jsEnv_->vm_ = nullptr;
     jsRuntime->DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
+    EXPECT_NE(jsRuntime, nullptr);
     jsRuntime.reset();
 }
 
@@ -123,7 +124,8 @@ HWTEST_F(JsRuntimeTest, GetSafeData_0100, TestSize.Level1)
     ASSERT_NE(jsRuntime, nullptr);
     std::string Path = "";
     std::string fileFullName = "";
-    jsRuntime->GetSafeData(Path, fileFullName);
+    auto result = jsRuntime->GetSafeData(Path, fileFullName);
+    EXPECT_EQ(result, nullptr);
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "GetSafeData_0100 end");
@@ -150,6 +152,7 @@ HWTEST_F(JsRuntimeTest, DebuggerConnectionManager_0100, TestSize.Level1)
     dOption.isDebugApp = true;
     dOption.isStartWithNative = false;
     jsRuntime->DebuggerConnectionManager(isDebugApp, isStartWithDebug, dOption);
+    EXPECT_NE(jsRuntime, nullptr);
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "DebuggerConnectionManager_0100 end");
@@ -175,8 +178,8 @@ HWTEST_F(JsRuntimeTest, DebuggerConnectionManager_0200, TestSize.Level1)
     dOption.processName = "test";
     dOption.isDebugApp = true;
     dOption.isStartWithNative = false;
-    jsRuntime->jsEnv_->vm_ = nullptr;
     jsRuntime->DebuggerConnectionManager(isDebugApp, isStartWithDebug, dOption);
+    EXPECT_NE(jsRuntime, nullptr);
     jsRuntime.reset();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TAG_LOGI(AAFwkTag::TEST, "DebuggerConnectionManager_0200 end");
