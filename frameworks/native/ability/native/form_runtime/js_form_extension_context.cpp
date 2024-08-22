@@ -131,7 +131,7 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::FORM_EXT, "Context released");
-                *innerErrCode = static_cast<int>(1);
+                *innerErrCode = 1;
                 return;
             }
             *innerErrCode = context->UpdateForm(formId, formProviderData);
@@ -246,7 +246,7 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+                    task.Reject(env, CreateJsError(env, *innerErrCode));
                     RemoveConnection(connectId);
                 } else {
                     task.Resolve(env, CreateJsUndefined(env));
@@ -301,10 +301,9 @@ private:
                 napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
-                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)) {
-                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)
+                    || *innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)) {
+                    task.Reject(env, CreateJsError(env, *innerErrCode));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
