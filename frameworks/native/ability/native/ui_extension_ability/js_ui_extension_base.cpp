@@ -727,7 +727,7 @@ napi_value JsUIExtensionBase::CallObjectMethod(const char *name, napi_value cons
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get object");
         return nullptr;
     }
-
+    HandleEscape handleEscape(jsRuntime_);
     napi_value method = nullptr;
     napi_get_named_property(env, obj, name, &method);
     if (!CheckTypeForNapiValue(env, method, napi_function)) {
