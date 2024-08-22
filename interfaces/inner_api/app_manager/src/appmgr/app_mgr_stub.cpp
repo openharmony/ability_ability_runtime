@@ -902,7 +902,8 @@ int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read configuration error");
         return ERR_INVALID_VALUE;
     }
-    int32_t ret = UpdateConfiguration(*config);
+    int32_t userId = data.ReadInt32();
+    int32_t ret = UpdateConfiguration(*config, userId);
     if (!reply.WriteInt32(ret)) {
         return ERR_INVALID_VALUE;
     }
