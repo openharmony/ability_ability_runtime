@@ -209,21 +209,6 @@ void MockAbilityDelegatorStub::GetAbilityTokenByCalleeObj(const sptr<IRemoteObje
     return;
 }
 
-int MockAbilityDelegatorStub::BlockAmsService()
-{
-    return 0;
-}
-
-int MockAbilityDelegatorStub::BlockAbility(int32_t abilityRecordId)
-{
-    return 0;
-}
-
-int MockAbilityDelegatorStub::BlockAppService()
-{
-    return 0;
-}
-
 bool MockAbilityDelegatorStub2::finishFlag_ = false;
 TESTCASE_BRANCH MockAbilityDelegatorStub2::testcaseBranch_ = TESTCASE_BRANCH::BRANCH_1;
 
@@ -423,22 +408,7 @@ void MockAbilityDelegatorStub2::GetAbilityTokenByCalleeObj(const sptr<IRemoteObj
     return;
 }
 
-int MockAbilityDelegatorStub2::BlockAmsService()
-{
-    return 0;
-}
-
-int MockAbilityDelegatorStub2::BlockAbility(int32_t abilityRecordId)
-{
-    return 0;
-}
-
 int32_t MockAbilityDelegatorStub2::ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken)
-{
-    return 0;
-}
-
-int MockAbilityDelegatorStub2::BlockAppService()
 {
     return 0;
 }
