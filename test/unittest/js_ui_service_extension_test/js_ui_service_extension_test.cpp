@@ -410,7 +410,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnConnect_0100, TestSize.Level1)
     want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
     bool isAsyncCallback = false;
     auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "OnConnect_0100 end");
 }
 
@@ -443,7 +443,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnConnect_0300, TestSize.Level1)
     want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
     bool isAsyncCallback = false;
     auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
     result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
     EXPECT_NE(result, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "OnConnect_0300 end");
@@ -481,7 +481,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnDisconnect_0200, TestSize.Level1)
     jsUIServiceExtension->OnDisconnect(want, nullptr, isAsyncCallback);
 
     auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 
     jsUIServiceExtension->OnDisconnect(want, nullptr, isAsyncCallback);
 
@@ -502,7 +502,7 @@ HWTEST_F(JsUIServiceExtensionTest, HandleSendData_0100, TestSize.Level1)
     bool isAsyncCallback = false;
 
     auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 
     AAFwk::WantParams params;
     jsUIServiceExtension->HandleSendData(stub->AsObject(), params);

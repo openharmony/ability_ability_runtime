@@ -26,10 +26,7 @@ struct WindowConfig : public Parcelable {
     WindowConfig() = default;
 
     int32_t windowType = 0;
-    int32_t posx = 0;
-    int32_t posy = 0;
-    uint32_t width = 0;
-    uint32_t height = 0;
+    uint32_t windowId = 0;
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static WindowConfig *Unmarshalling(Parcel &parcel);

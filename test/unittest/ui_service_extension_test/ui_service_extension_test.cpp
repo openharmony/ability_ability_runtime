@@ -301,7 +301,6 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0100 start");
 
-    AAFwk::Want want;
     std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig
         = std::make_shared<Rosen::ExtensionWindowConfig>();
     extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SUB_WINDOW;
@@ -312,7 +311,7 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0100, TestSize.Level1)
     Runtime::Options options;
     auto runtime = Runtime::Create(options);
     auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
-    uIServiceExtensionPtr->GetWindowOption(want, extensionWindowConfig, hostWindowId);
+    uIServiceExtensionPtr->GetWindowOption(extensionWindowConfig, hostWindowId);
 
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0100 end");
 }
@@ -326,7 +325,6 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0200 start");
 
-    AAFwk::Want want;
     std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig
         = std::make_shared<Rosen::ExtensionWindowConfig>();
     extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SUB_WINDOW;
@@ -337,7 +335,7 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0200, TestSize.Level1)
     Runtime::Options options;
     auto runtime = Runtime::Create(options);
     auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
-    uIServiceExtensionPtr->GetWindowOption(want, extensionWindowConfig, hostWindowId);
+    uIServiceExtensionPtr->GetWindowOption(extensionWindowConfig, hostWindowId);
 
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0200 end");
 }
@@ -351,7 +349,6 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0300 start");
 
-    AAFwk::Want want;
     std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig
         = std::make_shared<Rosen::ExtensionWindowConfig>();
     extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SUB_WINDOW;
@@ -362,7 +359,7 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0300, TestSize.Level1)
     Runtime::Options options;
     auto runtime = Runtime::Create(options);
     auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
-    uIServiceExtensionPtr->GetWindowOption(want, extensionWindowConfig, hostWindowId);
+    uIServiceExtensionPtr->GetWindowOption(extensionWindowConfig, hostWindowId);
 
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0300 end");
 }
@@ -376,7 +373,6 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0400, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0400 start");
 
-    AAFwk::Want want;
     std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig
         = std::make_shared<Rosen::ExtensionWindowConfig>();
     extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SYSTEM_WINDOW;
@@ -385,7 +381,7 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0400, TestSize.Level1)
     Runtime::Options options;
     auto runtime = Runtime::Create(options);
     auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
-    uIServiceExtensionPtr->GetWindowOption(want, extensionWindowConfig, hostWindowId);
+    uIServiceExtensionPtr->GetWindowOption(extensionWindowConfig, hostWindowId);
 
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0400 end");
 }
