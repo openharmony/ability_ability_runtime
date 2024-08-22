@@ -204,9 +204,6 @@ constexpr int32_t NON_ANONYMIZE_LENGTH = 6;
 constexpr uint32_t SCENE_FLAG_NORMAL = 0;
 constexpr int32_t MAX_NUMBER_OF_DISTRIBUTED_MISSIONS = 20;
 constexpr int32_t SWITCH_ACCOUNT_TRY = 3;
-#ifdef ABILITY_COMMAND_FOR_TEST
-constexpr int32_t BLOCK_AMS_SERVICE_TIME = 65;
-#endif
 constexpr int32_t CONVERT_CALLBACK_TIMEOUT_SECONDS = 2; // 2s
 constexpr const char* EMPTY_DEVICE_ID = "";
 constexpr int32_t APP_MEMORY_SIZE = 512;
@@ -8598,56 +8595,6 @@ int AbilityManagerService::VerifyAccountPermission(int32_t userId)
     }
     return AAFwk::PermissionVerification::GetInstance()->VerifyAccountPermission();
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AbilityManagerService::BlockAmsService()
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
-    if (AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not shell call");
-        return ERR_PERMISSION_DENIED;
-    }
-    if (taskHandler_) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s begin post block ability manager service task", __func__);
-        auto BlockAmsServiceTask = [aams = shared_from_this()]() {
-            while (1) {
-                TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s begin waiting", __func__);
-                std::this_thread::sleep_for(BLOCK_AMS_SERVICE_TIME*1s);
-            }
-        };
-        taskHandler_->SubmitTask(BlockAmsServiceTask, "blockamsservice");
-        return ERR_OK;
-    }
-    return ERR_NO_INIT;
-}
-
-int AbilityManagerService::BlockAbility(int32_t abilityRecordId)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
-    if (AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not shell call");
-        return ERR_PERMISSION_DENIED;
-    }
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
-        CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        return uiAbilityManager->BlockAbility(abilityRecordId);
-    }
-    auto missionListManager = GetCurrentMissionListManager();
-    CHECK_POINTER_AND_RETURN(missionListManager, ERR_NO_INIT);
-    return missionListManager->BlockAbility(abilityRecordId);
-}
-
-int AbilityManagerService::BlockAppService()
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
-    if (AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not shell call");
-        return ERR_PERMISSION_DENIED;
-    }
-    return DelayedSingleton<AppScheduler>::GetInstance()->BlockAppService();
-}
-#endif
 
 int AbilityManagerService::FreeInstallAbilityFromRemote(const Want &want, const sptr<IRemoteObject> &callback,
     int32_t userId, int requestCode)

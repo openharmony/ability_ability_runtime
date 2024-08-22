@@ -338,15 +338,6 @@ public:
 
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService() override;
-    #endif
-
     bool GetAppRunningStateByBundleName(const std::string &bundleName) override;
 
     int32_t NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) override;

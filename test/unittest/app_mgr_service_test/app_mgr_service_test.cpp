@@ -998,42 +998,6 @@ HWTEST_F(AppMgrServiceTest, UnregisterConfigurationObserver_002, TestSize.Level0
     EXPECT_NE(res, ERR_INVALID_OPERATION);
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-/*
- * Feature: AppMgrService
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AppMgrService BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify BlockAppService
- */
-HWTEST_F(AppMgrServiceTest, BlockAppService_001, TestSize.Level0)
-{
-    auto appMgrService = std::make_shared<AppMgrService>();
-    appMgrService->SetInnerService(nullptr);
-    int res = appMgrService->BlockAppService();
-    EXPECT_EQ(res, ERR_INVALID_OPERATION);
-}
-
-/*
- * Feature: AppMgrService
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AppMgrService BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify BlockAppService
- */
-HWTEST_F(AppMgrServiceTest, BlockAppService_002, TestSize.Level0)
-{
-    auto appMgrService = std::make_shared<AppMgrService>();
-    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
-    appMgrService->taskHandler_ = taskHandler_;
-    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
-    int res = appMgrService->BlockAppService();
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
-}
-#endif
-
 /*
  * Feature: AppMgrService
  * Function: GetAppRunningStateByBundleName

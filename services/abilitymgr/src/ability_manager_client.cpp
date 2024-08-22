@@ -1426,32 +1426,6 @@ void AbilityManagerClient::ScheduleClearRecoveryPageStack()
     return abms->ScheduleClearRecoveryPageStack();
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-ErrCode AbilityManagerClient::BlockAmsService()
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "enter");
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->BlockAmsService();
-}
-
-ErrCode AbilityManagerClient::BlockAbility(int32_t abilityRecordId)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "enter");
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->BlockAbility(abilityRecordId);
-}
-
-ErrCode AbilityManagerClient::BlockAppService()
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "enter");
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->BlockAppService();
-}
-#endif
-
 sptr<IAbilityManager> AbilityManagerClient::GetAbilityManager()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

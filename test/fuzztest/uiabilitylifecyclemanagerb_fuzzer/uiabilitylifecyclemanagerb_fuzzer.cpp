@@ -106,10 +106,6 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     uIAbilityLifecycleManager->GetAbilityRunningInfos(info, boolParam);
     int intParam = static_cast<int>(GetU32Data(data));
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    uIAbilityLifecycleManager->BlockAbility(intParam);
-    #endif
-
     std::vector<std::string> info1;
     uIAbilityLifecycleManager->Dump(info1);
     uIAbilityLifecycleManager->DumpMissionList(info1, boolParam, strParam);

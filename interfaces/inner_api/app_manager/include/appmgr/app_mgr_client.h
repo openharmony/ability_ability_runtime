@@ -378,15 +378,6 @@ public:
      */
     virtual AppMgrResultCode UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer);
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService();
-    #endif
-
     /**
      * Start a user test
      */
