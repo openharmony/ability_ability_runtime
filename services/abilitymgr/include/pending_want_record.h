@@ -54,6 +54,8 @@ public:
 
 private:
     void BuildSendWant(SenderInfo &senderInfo, Want &want);
+    int32_t ExecuteOperation(
+        std::shared_ptr<PendingWantManager> pendingWantManager, SenderInfo &senderInfo, Want &want);
 
 private:
     std::weak_ptr<PendingWantManager> pendingWantManager_ = {};
