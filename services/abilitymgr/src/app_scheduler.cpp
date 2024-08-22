@@ -645,5 +645,14 @@ bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
     }
     return appMgrClient_->IsProcessAttached(token);
 }
+
+bool AppScheduler::IsAppKilling(sptr<IRemoteObject> token) const
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsAppKilling(token);
+}
 } // namespace AAFwk
 }  // namespace OHOS

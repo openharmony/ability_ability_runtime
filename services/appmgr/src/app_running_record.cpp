@@ -1847,12 +1847,12 @@ bool AppRunningRecord::GetSecurityFlag() const
 
 void AppRunningRecord::SetKilling()
 {
-    isKilling_ = true;
+    isKilling_.store(true);
 }
 
 bool AppRunningRecord::IsKilling() const
 {
-    return isKilling_;
+    return isKilling_.load();
 }
 
 bool AppRunningRecord::NeedUpdateConfigurationBackground()
