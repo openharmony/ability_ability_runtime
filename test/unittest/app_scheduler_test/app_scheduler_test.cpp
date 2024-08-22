@@ -1009,7 +1009,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_FinishUserTest_002, TestSize.Level1)
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_UpdateConfiguration_001, TestSize.Level1)
 {
-    EXPECT_CALL(*clientMock_, UpdateConfiguration(_)).Times(1)
+    EXPECT_CALL(*clientMock_, UpdateConfiguration(_, _)).Times(1)
         .WillOnce(Return(AppMgrResultCode::RESULT_OK));
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     AppExecFwk::Configuration config;
@@ -1027,7 +1027,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_UpdateConfiguration_001, TestSize.Level1
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_UpdateConfiguration_002, TestSize.Level1)
 {
-    EXPECT_CALL(*clientMock_, UpdateConfiguration(_)).Times(1)
+    EXPECT_CALL(*clientMock_, UpdateConfiguration(_, _)).Times(1)
         .WillOnce(Return(AppMgrResultCode::ERROR_SERVICE_NOT_READY));
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     AppExecFwk::Configuration config;
