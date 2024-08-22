@@ -389,6 +389,15 @@ public:
     virtual int32_t GetAllRenderProcesses(std::vector<RenderProcessInfo> &info);
 
     /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info);
+
+    /**
      * NotifyMemoryLevel, Notify applications background the current memory level.
      *
      * @param level, current memory level.
@@ -1305,6 +1314,8 @@ private:
 
     void GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<RenderProcessInfo> &info);
 
+    void GetChildrenProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<ChildProcessInfo> &info);
+
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
 
@@ -1339,7 +1350,8 @@ private:
         const ChildProcessOptions &options);
 
     int32_t GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
+        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info,
+        bool isCallFromGetChildrenProcesses = false);
 
     void OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
 
