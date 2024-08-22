@@ -51,19 +51,19 @@ constexpr const char* JUMP_INTERCEPTOR_DIALOG_CALLER_PKG = "interceptor_callerPk
 
 #define CHECK_POINTER_CONTINUE(object)                         \
     if (!object) {                                             \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "pointer is nullptr."); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null pointer");        \
         continue;                                              \
     }
 
 #define CHECK_POINTER_IS_NULLPTR(object)                       \
     if (object == nullptr) {                                   \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "pointer is nullptr."); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null pointer");        \
         return;                                                \
     }
 
 #define CHECK_POINTER(object)                                  \
     if (!object) {                                             \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "pointer is nullptr."); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null pointer");        \
         return;                                                \
     }
 
@@ -75,7 +75,7 @@ constexpr const char* JUMP_INTERCEPTOR_DIALOG_CALLER_PKG = "interceptor_callerPk
 
 #define CHECK_POINTER_AND_RETURN(object, value)                \
     if (!object) {                                             \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "pointer is nullptr."); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null pointer");        \
         return value;                                          \
     }
 
@@ -87,7 +87,7 @@ constexpr const char* JUMP_INTERCEPTOR_DIALOG_CALLER_PKG = "interceptor_callerPk
 
 #define CHECK_POINTER_RETURN_BOOL(object)                      \
     if (!object) {                                             \
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "pointer is nullptr."); \
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null pointer");        \
         return false;                                          \
     }
 
@@ -171,7 +171,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
 [[maybe_unused]] static bool ParseJumpInterceptorWant(Want &targetWant, const std::string callerPkg)
 {
     if (callerPkg.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s error, get empty callerPkg.", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty callerPkg");
         return false;
     }
     targetWant.SetParam(JUMP_INTERCEPTOR_DIALOG_CALLER_PKG, callerPkg);
@@ -182,7 +182,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     std::string &targetPkg)
 {
     if (!targetWant.HasParameter(JUMP_INTERCEPTOR_DIALOG_CALLER_PKG)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s error, the interceptor parameter invalid.", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid interceptor param");
         return false;
     }
     callerPkg = targetWant.GetStringParam(JUMP_INTERCEPTOR_DIALOG_CALLER_PKG);
@@ -194,12 +194,12 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     int32_t userId)
 {
     if (callerPkg.empty() || targetPkg.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get invalid inputs");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid inputs");
         return false;
     }
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get bundle manager helper failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleManagerHelper failed");
         return false;
     }
     auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
@@ -215,7 +215,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
 {
     const std::unordered_set<std::string> whiteListDlpSet = { BUNDLE_NAME_SELECTOR_DIALOG };
     if (whiteListDlpSet.find(want.GetBundle()) != whiteListDlpSet.end()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s, enter special app", __func__);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "enter special app");
         return false;
     }
 
@@ -237,7 +237,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
 {
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get bundle manager helper failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleManagerHelper failed");
         return false;
     }
 
@@ -246,11 +246,11 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     bool getTargetResult = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(targetBundleName,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, targetAppInfo));
     if (!getTargetResult) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get targetAppInfo failed in check atomic service.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get targetAppInfo failed");
         return false;
     }
     if (targetAppInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "the target is atomic service");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "target is atomic service");
         return true;
     }
 
@@ -258,18 +258,18 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     std::string callerBundleName;
     ErrCode err = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callerUid, callerBundleName));
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get bms failed in check atomic service.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get bms failed");
         return false;
     }
     AppExecFwk::ApplicationInfo callerAppInfo;
     bool getCallerResult = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(callerBundleName,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, callerAppInfo));
     if (!getCallerResult) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get callerAppInfo failed in check atomic service.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get callerAppInfo failed");
         return false;
     }
     if (callerAppInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "the caller is atomic service");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "caller is atomic service");
         return true;
     }
     return false;
@@ -316,10 +316,10 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
         windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_PRIMARY ||
         windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY)) {
         want.SetParam(Want::PARAM_RESV_WINDOW_MODE, windowMode);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "set parameter windownMode for inner application split-screen mode");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "set windownMode for inner application split-screen mode");
     } else if (windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_FULLSCREEN) {
         want.SetParam(Want::PARAM_RESV_WINDOW_MODE, windowMode);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "set parameter windownMode for full screen mode");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "set windownMode for full screen mode");
     } else {
         RemoveWindowModeKey(want);
     }
@@ -331,7 +331,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     std::string appGalleryBundleName;
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr || !bundleMgrHelper->QueryAppGalleryBundleName(appGalleryBundleName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get bundle manager helper failed or QueryAppGalleryBundleName failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleManagerHelper or QueryAppGalleryBundleName failed");
         appGalleryBundleName = MARKET_BUNDLE_NAME;
     }
 
