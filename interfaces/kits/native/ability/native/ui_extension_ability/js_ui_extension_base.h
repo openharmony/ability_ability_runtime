@@ -24,7 +24,7 @@
 #include "native_engine/native_engine.h"
 #include "ohos_application.h"
 #include "session_info.h"
-#include "ui_extension_base.h"
+#include "ui_extension_base_impl.h"
 #include "ui_extension_context.h"
 #include "ui_extension_window_command.h"
 #include "want.h"
@@ -95,6 +95,11 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnStop() override;
+    virtual void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback);
+    /**
+     * @brief The callback of OnStop.
+     */
+    virtual void OnStopCallBack();
 
     /**
      * @brief Called when the system configuration is updated.
@@ -153,7 +158,10 @@ public:
 
     void BindContext() override;
 protected:
-    napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0);
+    napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
+        bool withResult = false);
+    bool CheckPromise(napi_value result);
+    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
     void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
     void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
@@ -171,7 +179,7 @@ protected:
 protected:
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
-    std::unique_ptr<NativeReference> jsObj_;
+    std::shared_ptr<NativeReference> jsObj_;
     std::shared_ptr<UIExtensionContext> context_;
     std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
     std::set<uint64_t> foregroundWindows_;

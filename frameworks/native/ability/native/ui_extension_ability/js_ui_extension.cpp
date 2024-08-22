@@ -353,6 +353,7 @@ bool JsUIExtension::CheckPromise(napi_value result)
     return true;
 }
 
+namespace {
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
     void *data = nullptr;
@@ -366,6 +367,7 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
     data = nullptr;
     return nullptr;
+}
 }
 
 bool JsUIExtension::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo)

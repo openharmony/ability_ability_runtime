@@ -21,7 +21,10 @@
 #include "ability_info.h"
 #include "ability_manager_client.h"
 #include "configuration_utils.h"
+#include "connection_manager.h"
+#include "context.h"
 #include "hilog_tag_wrapper.h"
+#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
@@ -227,6 +230,123 @@ void JsUIExtensionBase::OnStop()
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
+    OnStopCallBack();
+    TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension OnStop end.");
+}
+
+void JsUIExtensionBase::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback)
+{
+    if (callbackInfo == nullptr) {
+        isAsyncCallback = false;
+        OnStop();
+        return;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnStop begin.");
+    HandleScope handleScope(jsRuntime_);
+    napi_value result = CallObjectMethod("onDestroy", nullptr, 0, true);
+    if (!CheckPromise(result)) {
+        OnStopCallBack();
+        isAsyncCallback = false;
+        return;
+    }
+
+    std::weak_ptr<JsUIExtensionBase> weakPtr = shared_from_this();
+    auto asyncCallback = [extensionWeakPtr = weakPtr]() {
+        auto jsUIExtensionBase = extensionWeakPtr.lock();
+        if (jsUIExtensionBase == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "extension is nullptr.");
+            return;
+        }
+        jsUIExtensionBase->OnStopCallBack();
+    };
+    callbackInfo->Push(asyncCallback);
+    isAsyncCallback = CallPromise(result, callbackInfo);
+    if (!isAsyncCallback) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call promise.");
+        OnStopCallBack();
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnStop end.");
+}
+
+void JsUIExtensionBase::OnStopCallBack()
+{
+    if (context_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        return;
+    }
+    bool ret = ConnectionManager::GetInstance().DisconnectCaller(context_->GetToken());
+    if (ret) {
+        ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
+        TAG_LOGD(AAFwkTag::UI_EXT, "The service connection is not disconnected.");
+    }
+
+    auto applicationContext = Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        applicationContext->DispatchOnAbilityDestroy(jsObj_);
+    }
+}
+
+bool JsUIExtensionBase::CheckPromise(napi_value result)
+{
+    if (result == nullptr) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "result is null, no need to call promise.");
+        return false;
+    }
+    napi_env env = jsRuntime_.GetNapiEnv();
+    bool isPromise = false;
+    napi_is_promise(env, result, &isPromise);
+    if (!isPromise) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "result is not promise, no need to call promise.");
+        return false;
+    }
+    return true;
+}
+
+namespace {
+napi_value PromiseCallback(napi_env env, napi_callback_info info)
+{
+    void *data = nullptr;
+    NAPI_CALL_NO_THROW(napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &data), nullptr);
+    auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(data);
+    if (callbackInfo == nullptr) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "Invalid input info.");
+        return nullptr;
+    }
+    callbackInfo->Call();
+    AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
+    data = nullptr;
+    return nullptr;
+}
+}
+
+bool JsUIExtensionBase::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo)
+{
+    auto env = jsRuntime_.GetNapiEnv();
+    if (!CheckTypeForNapiValue(env, result, napi_object)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to convert native value to NativeObject.");
+        return false;
+    }
+    napi_value then = nullptr;
+    napi_get_named_property(env, result, "then", &then);
+    if (then == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get property: then.");
+        return false;
+    }
+    bool isCallable = false;
+    napi_is_callable(env, then, &isCallable);
+    if (!isCallable) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "property then is not callable.");
+        return false;
+    }
+    HandleScope handleScope(jsRuntime_);
+    napi_value promiseCallback = nullptr;
+    napi_create_function(env, "promiseCallback", strlen("promiseCallback"), PromiseCallback,
+        callbackInfo, &promiseCallback);
+    napi_value argv[1] = { promiseCallback };
+    napi_call_function(env, result, then, 1, argv, nullptr);
+    TAG_LOGD(AAFwkTag::UI_EXT, "exit");
+    return true;
 }
 
 void JsUIExtensionBase::OnCommandWindow(
@@ -594,7 +714,7 @@ void JsUIExtensionBase::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInf
     }
 }
 
-napi_value JsUIExtensionBase::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
+napi_value JsUIExtensionBase::CallObjectMethod(const char *name, napi_value const *argv, size_t argc, bool withResult)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "CallObjectMethod(%{public}s), begin", name);
     if (!jsObj_) {
@@ -613,6 +733,11 @@ napi_value JsUIExtensionBase::CallObjectMethod(const char *name, napi_value cons
     if (!CheckTypeForNapiValue(env, method, napi_function)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get '%{public}s' object", name);
         return nullptr;
+    }
+    if (withResult) {
+        napi_value result = nullptr;
+        napi_call_function(env, obj, method, argc, argv, &result);
+        return handleEscape.Escape(result);
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "CallFunction(%{public}s), success", name);
     napi_value result = nullptr;
