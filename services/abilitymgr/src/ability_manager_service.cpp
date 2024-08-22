@@ -3715,6 +3715,10 @@ int AbilityManagerService::ConnectAbilityCommon(
         "elementUri:%{public}s", want.GetElement().GetURI().c_str());
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
+    if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE && want.HasParameter(UISERVICEHOSTPROXY_KEY)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "error to have UISERVICEHOSTPROXY_KEY");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
     if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE && IsCrossUserCall(userId)) {
         CHECK_CALLER_IS_SYSTEM_APP;
     }
@@ -3956,7 +3960,7 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     if (!UriUtils::GetInstance().CheckNonImplicitShareFileUri(abilityRequest)) {
         return ERR_SHARE_FILE_URI_NON_IMPLICITLY;
     }
-    result = CheckPermissionForUIService(want, abilityRequest);
+    result = CheckPermissionForUIService(extensionType, want, abilityRequest);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckPermissionForUIService failed");
         return result;
@@ -4044,6 +4048,7 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         return ERR_INVALID_VALUE;
     }
 
+    SetAbilityRequestSessionInfo(abilityRequest, targetExtensionType);
     ReportEventToRSS(abilityInfo, callerToken);
     return connectManager->ConnectAbilityLocked(abilityRequest, connect, callerToken, sessionInfo, connectInfo);
 }
@@ -8506,22 +8511,21 @@ int AbilityManagerService::CheckStaticCfgPermission(const AppExecFwk::AbilityReq
     return CheckStaticCfgPermissionForSkill(abilityRequest, tokenId);
 }
 
-int AbilityManagerService::CheckPermissionForUIService(const Want &want, const AbilityRequest &abilityRequest)
+int AbilityManagerService::CheckPermissionForUIService(AppExecFwk::ExtensionAbilityType extensionType,
+    const Want &want, const AbilityRequest &abilityRequest)
 {
-    AppExecFwk::ExtensionAbilityType extType = abilityRequest.abilityInfo.extensionAbilityType;
-    if (want.HasParameter(UISERVICEHOSTPROXY_KEY) && extType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Target ability is not UI_SERVICE");
-        return ERR_WRONG_INTERFACE_CALL;
+    AppExecFwk::ExtensionAbilityType targetExtType = abilityRequest.abilityInfo.extensionAbilityType;
+    if (targetExtType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        return ERR_OK;
     }
-    if (!want.HasParameter(UISERVICEHOSTPROXY_KEY) && extType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+    if (!want.HasParameter(UISERVICEHOSTPROXY_KEY)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "need UISERVICEHOSTPROXY_KEY to connect UI_SERVICE");
         return ERR_WRONG_INTERFACE_CALL;
     }
-
-    if (extType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
-        return ERR_OK;
+    if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interface not support connect UI_SERVICE");
+        return ERR_WRONG_INTERFACE_CALL;
     }
-
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "!IsSceneBoardEnabled");
         return ERR_CAPABILITY_NOT_SUPPORT;

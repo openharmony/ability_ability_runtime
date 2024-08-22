@@ -2410,11 +2410,9 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
         if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
             info.emplace_back("      ability type [UI_SERVICE]");
             info.emplace_back("      windowConfig windowType [" +
-                              std::to_string(GetAbilityWindowConfig().windowType) + "]");
-            info.emplace_back("      windowConfig rect [" + std::to_string(GetAbilityWindowConfig().posx) + ", " +
-                              std::to_string(GetAbilityWindowConfig().posy) + ", " +
-                              std::to_string(GetAbilityWindowConfig().width) + ", " +
-                              std::to_string(GetAbilityWindowConfig().height) + "]");
+                std::to_string(GetAbilityWindowConfig().windowType) + "]");
+            info.emplace_back("      windowConfig windowId [" +
+                std::to_string(GetAbilityWindowConfig().windowId) + "]");
         } else {
             info.emplace_back("      ability type [SERVICE]");
         }
