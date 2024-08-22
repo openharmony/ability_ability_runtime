@@ -257,6 +257,15 @@ public:
     virtual AppMgrResultCode GetAllRenderProcesses(std::vector<RenderProcessInfo> &info);
 
     /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual AppMgrResultCode GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info);
+
+    /**
      * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
      * Notify abilities background the current memory level.
      *
