@@ -600,7 +600,7 @@ public:
      * @param clearPageStack.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode KillProcess(const std::string &bundleName, const bool clearpagestack = false);
+    ErrCode KillProcess(const std::string &bundleName, const bool clearPageStack = true);
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
