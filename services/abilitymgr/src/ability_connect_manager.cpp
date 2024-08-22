@@ -689,10 +689,12 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
             int connectRecordId = connectRecord->GetRecordId();
             ConnectUIServiceExtAbility(targetService, connectRecordId, want);
         }
+        targetService->RemoveSignatureInfo();
         return;
     }
 
     if (targetService->GetConnectRecordList().size() > 1) {
+        targetService->RemoveSignatureInfo();
         if (taskHandler_ != nullptr && targetService->GetConnRemoteObject()) {
             auto task = [connectRecord]() { connectRecord->CompleteConnect(ERR_OK); };
             taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
@@ -941,7 +943,6 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     }
 
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    abilityRecord->RemoveSignatureInfo();
     std::string element = abilityRecord->GetURI();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability:%{public}s, state:%{public}s", element.c_str(), abilityState.c_str());
 
@@ -968,6 +969,7 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
             return DispatchInactive(abilityRecord, state);
         }
         case AbilityState::FOREGROUND: {
+            abilityRecord->RemoveSignatureInfo();
             return DispatchForeground(abilityRecord);
         }
         case AbilityState::BACKGROUND: {
@@ -1032,6 +1034,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
         return INVALID_CONNECTION_STATE;
     }
     abilityRecord->RemoveConnectWant();
+    abilityRecord->RemoveSignatureInfo();
 
     if (abilityRecord->GetAbilityInfo().type == AbilityType::SERVICE) {
         DelayedSingleton<AppScheduler>::GetInstance()->UpdateAbilityState(
@@ -1177,6 +1180,7 @@ int AbilityConnectManager::ScheduleCommandAbilityDoneLocked(const sptr<IRemoteOb
     }
     EventInfo eventInfo = BuildEventInfo(abilityRecord);
     EventReport::SendStartServiceEvent(EventName::START_SERVICE, eventInfo);
+    abilityRecord->RemoveSignatureInfo();
     // complete command and pop waiting start ability from queue.
     CompleteCommandAbility(abilityRecord);
 
