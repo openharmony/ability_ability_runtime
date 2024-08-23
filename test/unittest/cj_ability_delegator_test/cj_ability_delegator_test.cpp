@@ -192,6 +192,7 @@ HWTEST_F(CjAbilityDelegatorTest, CjAbilityDelegatorTestDump_001, TestSize.Level1
     auto shellResult = std::make_shared<AppExecFwk::ShellCmdResult>();
     CJShellCmdResult shellCmdResult(shellResult);
     shellCmdResult.Dump();
+    EXPECT_TRUE(shellResult != nullptr);
 }
 
 /**
@@ -202,7 +203,8 @@ HWTEST_F(CjAbilityDelegatorTest, CjAbilityDelegatorTestDump_001, TestSize.Level1
 HWTEST_F(CjAbilityDelegatorTest,
     CJAbilityDelegatorTestFFIAbilityDelegatorRegistryGetAbilityDelegator_001, TestSize.Level1)
 {
-    FFIAbilityDelegatorRegistryGetAbilityDelegator();
+    auto result = FFIAbilityDelegatorRegistryGetAbilityDelegator();
+    EXPECT_NE(result, ERR_OK);
 }
 
 /**
@@ -233,7 +235,8 @@ HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIAbilityDelegatorExecut
     auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
     int64_t id = cjDelegator->GetID();
-    FFIAbilityDelegatorExecuteShellCommand(id, cmd, timeoutSec);
+    auto result = FFIAbilityDelegatorExecuteShellCommand(id, cmd, timeoutSec);
+    EXPECT_TRUE(cjDelegator != nullptr);
 }
 
 /**
@@ -249,7 +252,8 @@ HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIGetExitCode_001, TestS
     auto shellResult = std::make_shared<AppExecFwk::ShellCmdResult>();
     auto cJShellCmdResult = FFI::FFIData::Create<CJShellCmdResult>(shellResult);
     int64_t id = cJShellCmdResult->GetID();
-    FFIGetExitCode(id);
+    auto result = FFIGetExitCode(id);
+    EXPECT_TRUE(cJShellCmdResult != nullptr);
 }
 
 /**
@@ -264,7 +268,8 @@ HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIGetStdResult_001, Test
     auto shellResult = std::make_shared<AppExecFwk::ShellCmdResult>();
     auto cJShellCmdResult = FFI::FFIData::Create<CJShellCmdResult>(shellResult);
     int64_t id = cJShellCmdResult->GetID();
-    FFIGetStdResult(id);
+    auto result = FFIGetStdResult(id);
+    EXPECT_TRUE(result == nullptr);
 }
 
 /**
@@ -279,7 +284,8 @@ HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIDump_001, TestSize.Lev
     auto shellResult = std::make_shared<AppExecFwk::ShellCmdResult>();
     auto cJShellCmdResult = FFI::FFIData::Create<CJShellCmdResult>(shellResult);
     int64_t id = cJShellCmdResult->GetID();
-    FFIDump(id);
+    auto result = FFIDump(id);
+    EXPECT_TRUE(result != nullptr);
 }
 
 /**
@@ -292,7 +298,8 @@ HWTEST_F(CjAbilityDelegatorTest, CJAbilityDelegatorTestFFIAbilityDelegatorApplic
     auto delegator = OHOS::AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto cjDelegator = FFI::FFIData::Create<CJAbilityDelegator>(delegator);
     int64_t id = cjDelegator->GetID();
-    FFIAbilityDelegatorApplicationContext(id);
+    auto result = FFIAbilityDelegatorApplicationContext(id);
+    EXPECT_TRUE(cjDelegator != nullptr);
 }
 
 }  // namespace AbilityRuntime
