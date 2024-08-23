@@ -113,22 +113,15 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Invalid entry");
         return NCP_ERR_INVALID_PARAM;
     }
-
     std::string entryName(entry);
     if (entryName.find(":") == std::string::npos) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "entry point misses a colon");
-        return NCP_ERR_INVALID_PARAM;
-    }
-
-    if (args.entryParams == nullptr || *(args.entryParams) == '\0') {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Invalid args.entryParams");
         return NCP_ERR_INVALID_PARAM;
     }
     if (pid == nullptr) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "pid null.");
         return NCP_ERR_INVALID_PARAM;
     }
-    std::string entryParams(args.entryParams);
 
     std::map<std::string, int32_t> fds;
     NativeChildProcess_Fd* cur = args.fdList.head;
@@ -146,8 +139,11 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
         return NCP_ERR_INVALID_PARAM;
     }
     AppExecFwk::ChildProcessArgs childArgs;
-    childArgs.entryParams = entryParams;
     childArgs.fds = fds;
+    if (args.entryParams != nullptr && *(args.entryParams) != '\0') {
+        std::string entryParams(args.entryParams);
+        childArgs.entryParams = entryParams;
+    }
 
     AppExecFwk::ChildProcessOptions childProcessOptions;
     childProcessOptions.isolationMode = options.isolationMode == NCP_ISOLATION_MODE_ISOLATED;
