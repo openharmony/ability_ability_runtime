@@ -120,7 +120,7 @@ public:
     void AppHasDarkRes(bool &darkRes);
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
-    void KillProcessBySelf(const bool clearpagestack = false);
+    void KillProcessBySelf(const bool clearPageStack = true);
     int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
     int32_t RestartApp(const AAFwk::Want& want);
 
