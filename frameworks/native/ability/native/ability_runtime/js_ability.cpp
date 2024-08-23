@@ -1070,7 +1070,7 @@ std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> JsAbility::CreateADelegat
     } else {
         std::string::size_type pos = GetAbilityName().find(GetApplicationInfo()->bundleName);
         if (pos == std::string::npos || pos != 0) {
-            property->fullName_ = GetApplicationInfo()->bundleName + "" + GetAbilityName();
+            property->fullName_ = GetApplicationInfo()->bundleName + "." + GetAbilityName();
         } else {
             property->fullName_ = GetAbilityName();
         }

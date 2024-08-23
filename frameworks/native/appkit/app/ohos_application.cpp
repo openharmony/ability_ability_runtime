@@ -39,6 +39,7 @@
 #include "system_ability_definition.h"
 #include "syspara/parameter.h"
 #include "ui_ability.h"
+#include "application_configuration_manager.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window.h"
 #endif
@@ -812,15 +813,6 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
             abilityStage->OnDestroy();
             abilityStages_.erase(moduleName);
         }
-        DoCleanWorkAfterStageCleaned(*abilityInfo);
-    }
-}
-
-void OHOSApplication::DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "language: %{public}s", abilityInfo.srcLanguage.c_str());
-    if (runtime_) {
-        runtime_->DoCleanWorkAfterStageCleaned();
     }
 }
 
@@ -1039,6 +1031,9 @@ bool OHOSApplication::isUpdateLanguage(Configuration &config, const std::string 
         TAG_LOGD(AAFwkTag::APPKIT, "language is empty, need not update");
         return false;
     }
+    AbilityRuntime::SetLevel currentSetLevel = !globalLanguageIsSetByApp.empty() ?
+        AbilityRuntime::SetLevel::Application : AbilityRuntime::SetLevel::System;
+    AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(currentSetLevel);
     return true;
 }
 }  // namespace AppExecFwk

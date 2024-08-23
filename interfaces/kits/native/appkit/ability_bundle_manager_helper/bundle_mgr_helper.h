@@ -101,6 +101,7 @@ public:
     ErrCode QueryCloneExtensionAbilityInfoWithAppIndex(const ElementName &element, int32_t flags, int32_t appCloneIndex,
         ExtensionAbilityInfo &extensionInfo, int32_t userId);
     ErrCode GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes, int32_t userId);
+    ErrCode GetSignatureInfoByBundleName(const std::string &bundleName, SignatureInfo &signatureInfo);
 
 private:
     sptr<IBundleMgr> Connect();

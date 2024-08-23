@@ -76,9 +76,6 @@ public:
     MOCK_METHOD2(UpdateConfigurationByBundleName, int32_t(const Configuration& config, const std::string &name));
     MOCK_METHOD1(RegisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));
     MOCK_METHOD1(UnregisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));
-#ifdef ABILITY_COMMAND_FOR_TEST
-    MOCK_METHOD0(BlockAppService, int());
-#endif
     MOCK_METHOD1(GetAppRunningStateByBundleName, bool(const std::string& bundleName));
     MOCK_METHOD2(NotifyLoadRepairPatch, int32_t(const std::string& bundleName,
         const sptr<IQuickFixCallback>& callback));

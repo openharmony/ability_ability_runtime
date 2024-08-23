@@ -26,6 +26,7 @@
 #include "app_process_data.h"
 #include "system_ability_definition.h"
 #include "ability_manager_errors.h"
+#include "want.h"
 #include "mock_ability_scheduler.h"
 #include "mock_app_mgr_client.h"
 #include "mock_bundle_mgr.h"
@@ -523,7 +524,8 @@ HWTEST_F(AbilityTimeoutModuleTest, HandleLoadTimeOut_003, TestSize.Level1)
 
     // add common ability to abilityMs
     auto commonAbility = CreateCommonAbility();
-    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1);
+    Want want;
+    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1, want);
     topAbility = curListManager->GetCurrentTopAbilityLocked();
     EXPECT_EQ(topAbility, commonAbility);
 
@@ -567,7 +569,8 @@ HWTEST_F(AbilityTimeoutModuleTest, HandleLoadTimeOut_004, TestSize.Level1)
 
     // add common ability to abilityMs
     auto commonAbility = CreateCommonAbility();
-    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1);
+    Want want;
+    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1, want);
     topAbility = curListManager->GetCurrentTopAbilityLocked();
     EXPECT_EQ(topAbility, commonAbility);
 
@@ -608,7 +611,8 @@ HWTEST_F(AbilityTimeoutModuleTest, HandleLoadTimeOut_005, TestSize.Level1)
 
     // add common ability to abilityMs
     auto commonAbility = CreateCommonAbility();
-    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1);
+    Want want;
+    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1, want);
     auto currentList = curListManager->currentMissionLists_;
     auto topAbility = curListManager->GetCurrentTopAbilityLocked();
     EXPECT_EQ(topAbility, commonAbility);
@@ -650,7 +654,8 @@ HWTEST_F(AbilityTimeoutModuleTest, HandleLoadTimeOut_006, TestSize.Level1)
 
     // add common ability to abilityMs
     auto commonAbility = CreateCommonAbility();
-    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1);
+    Want want;
+    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1, want);
     auto currentList = curListManager->currentMissionLists_;
     auto topAbility = curListManager->GetCurrentTopAbilityLocked();
     EXPECT_EQ(topAbility, commonAbility);
@@ -802,7 +807,8 @@ HWTEST_F(AbilityTimeoutModuleTest, HandleForegroundTimeOut_003, TestSize.Level1)
 
     // add common ability to abilityMs
     auto commonAbility = CreateCommonAbility();
-    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1);
+    Want want;
+    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1, want);
     topAbility = curListManager->GetCurrentTopAbilityLocked();
     EXPECT_EQ(topAbility, commonAbility);
     commonAbility->SetAbilityState(AbilityState::FOREGROUNDING);
@@ -847,7 +853,8 @@ HWTEST_F(AbilityTimeoutModuleTest, HandleForegroundTimeOut_004, TestSize.Level1)
 
     // add common ability to abilityMs
     auto commonAbility = CreateCommonAbility();
-    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1);
+    Want want;
+    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1, want);
     topAbility = curListManager->GetCurrentTopAbilityLocked();
     EXPECT_EQ(topAbility, commonAbility);
     commonAbility->SetAbilityState(AbilityState::FOREGROUNDING);
@@ -889,7 +896,8 @@ HWTEST_F(AbilityTimeoutModuleTest, HandleForegroundTimeOut_005, TestSize.Level1)
 
     // add common ability to abilityMs
     auto commonAbility = CreateCommonAbility();
-    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1);
+    Want want;
+    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1, want);
     auto currentList = curListManager->currentMissionLists_;
     auto topAbility = curListManager->GetCurrentTopAbilityLocked();
     EXPECT_EQ(topAbility, commonAbility);
@@ -932,7 +940,8 @@ HWTEST_F(AbilityTimeoutModuleTest, HandleForegroundTimeOut_006, TestSize.Level1)
 
     // add common ability to abilityMs
     auto commonAbility = CreateCommonAbility();
-    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1);
+    Want want;
+    commonAbility->AddCallerRecord(callerAbility->GetToken(), -1, want);
     auto currentList = curListManager->currentMissionLists_;
     auto topAbility = curListManager->GetCurrentTopAbilityLocked();
     EXPECT_EQ(topAbility, commonAbility);

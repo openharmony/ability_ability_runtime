@@ -46,6 +46,7 @@ ohos_moduletest("specified_ability_service_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
   ]
 

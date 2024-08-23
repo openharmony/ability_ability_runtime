@@ -161,6 +161,7 @@ public:
     int32_t callerTokenId = 0;
     int32_t callerUid = 0;
     int32_t callerPid = 0;
+    std::string callerNativeName;
 };
 
 /**
@@ -347,6 +348,18 @@ enum class AbilityVisibilityState {
     FOREGROUND_HIDE,
     FOREGROUND_SHOW,
     UNSPECIFIED,
+};
+
+struct LaunchDebugInfo {
+public:
+    void Update(const Want &want);
+
+    bool isDebugAppSet = false;
+    bool isNativeDebugSet = false;
+    bool isPerfCmdSet = false;
+    bool debugApp = false;
+    bool nativeDebug = false;
+    std::string perfCmd;
 };
 
 /**
@@ -708,6 +721,12 @@ public:
     Want GetWant() const;
 
     /**
+     * remove signature info of want.
+     *
+     */
+    void RemoveSignatureInfo();
+
+    /**
      * remove specified wantParam for start ability.
      *
      */
@@ -811,8 +830,8 @@ public:
      * add caller record
      *
      */
-    void AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, std::string srcAbilityId = "",
-        uint32_t callingTokenId = 0);
+    void AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, const Want &want,
+        std::string srcAbilityId = "", uint32_t callingTokenId = 0);
 
     /**
      * get caller record to list.
@@ -983,9 +1002,6 @@ public:
     void SetWindowMode(int32_t windowMode);
     void RemoveWindowMode();
     LifeCycleStateInfo lifeCycleStateInfo_;                // target life state info
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    int BlockAbility();
-    #endif
 
     bool CanRestartRootLauncher();
 
@@ -1091,6 +1107,8 @@ private:
         std::string srcAbilityId);
 
     bool IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken, uint32_t callingTokenId = 0);
+
+    void RecordSaCallerInfo(const Want &want);
 
 #ifdef WITH_DLP
     void HandleDlpAttached();
@@ -1283,7 +1301,10 @@ private:
     uint32_t specifyTokenId_ = 0;
 
     std::shared_ptr<Want> connectWant_ = nullptr;
+    std::shared_ptr<CallerAbilityInfo> saCallerInfo_ = nullptr;
     ffrt::mutex connectWantLock_;
+    bool isLaunching_ = true;
+    LaunchDebugInfo launchDebugInfo_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -146,6 +146,7 @@ sptr<IAmsMgr> AppMgrProxy::GetAmsMgr()
 
 int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, const int32_t userId)
 {
+    TAG_LOGI(AAFwkTag::APPMGR, "Called.");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -162,6 +163,7 @@ int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, int32
 
 int32_t AppMgrProxy::ClearUpApplicationDataBySelf(int32_t userId)
 {
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -962,26 +964,6 @@ int32_t AppMgrProxy::UnregisterConfigurationObserver(const sptr<IConfigurationOb
     return reply.ReadInt32();
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AppMgrProxy::BlockAppService()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    int32_t ret = SendRequest(AppMgrInterfaceCode::BLOCK_APP_SERVICE, data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
-        return ret;
-    }
-    return reply.ReadInt32();
-}
-#endif
-
 bool AppMgrProxy::GetAppRunningStateByBundleName(const std::string &bundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1229,7 +1211,7 @@ int32_t AppMgrProxy::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFw
 
 int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     MessageParcel data;
 
     if (!WriteInterfaceToken(data)) {
@@ -1251,7 +1233,7 @@ int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
 
 int32_t AppMgrProxy::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     MessageParcel data;
 
     if (!WriteInterfaceToken(data)) {
