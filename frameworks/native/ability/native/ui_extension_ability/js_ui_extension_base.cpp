@@ -360,14 +360,14 @@ bool JsUIExtensionBase::CallPromise(napi_value result, AppExecFwk::AbilityTransa
     napi_value promiseCallback = nullptr;
     napi_status createStatus = napi_create_function(env, "promiseCallback", strlen("promiseCallback"), PromiseCallback,
         callbackInfo, &promiseCallback);
-    if(createStatus != napi_ok) {
-        TAG_LOGE("Failed to create promiseCallback, %{public}d", createStatus);
+    if (createStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to create promiseCallback, %{public}d", createStatus);
         return false;
     }
     napi_value argv[1] = { promiseCallback };
     napi_status callStatus = napi_call_function(env, result, then, 1, argv, nullptr);
-    if(callStatus != napi_ok) {
-        TAG_LOGE("Failed to call promiseCallback, %{public}d", callStatus);
+    if (callStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call promiseCallback, %{public}d", callStatus);
         return false;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "exit");
