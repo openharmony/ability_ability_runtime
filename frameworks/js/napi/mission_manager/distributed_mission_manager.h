@@ -227,6 +227,10 @@ enum ErrorCode {
      */
     PERMISSION_DENIED = 201,
     /**
+     * Result(202) for not syatem app call.
+     */
+    NOT_SYSTEM_APP = 202,
+    /**
      * Result(401) for parameter check failed.
      */
     PARAMETER_CHECK_FAILED = 401,
