@@ -489,7 +489,7 @@ void EventReport::SendProcessStartFailedEvent(const EventName &eventName, const 
         HiSysEventWrite(
             HiSysEvent::Domain::AAFWK,
             name,
-            HiSysEventType::BEHAVIOR,
+            HiSysEventType::FAULT,
             EVENT_KEY_STARTUP_TIME, eventInfo.time,
             EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
             EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
@@ -505,7 +505,7 @@ void EventReport::SendProcessStartFailedEvent(const EventName &eventName, const 
         HiSysEventWrite(
             HiSysEvent::Domain::AAFWK,
             name,
-            HiSysEventType::BEHAVIOR,
+            HiSysEventType::FAULT,
             EVENT_KEY_STARTUP_TIME, eventInfo.time,
             EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
             EVENT_KEY_STARTUP_EXTENSION_TYPE, eventInfo.extensionType,
