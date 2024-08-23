@@ -31,6 +31,7 @@ bool MissionInfo::ReadFromParcel(Parcel &parcel)
         return false;
     }
     want = *parcelWant;
+    want.CloseAllFd();
     abilityState = parcel.ReadInt32();
     unclearable = parcel.ReadBool();
     continueState = static_cast<AAFwk::ContinueState>(parcel.ReadInt32());
