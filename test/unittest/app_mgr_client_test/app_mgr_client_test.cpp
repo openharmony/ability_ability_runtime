@@ -605,25 +605,6 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartRenderProcess_001, TestSize.Level0)
     EXPECT_EQ(ret, ERROR_STATE);
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-/**
- * @tc.name: AppMgrClient_BlockAppService_001
- * @tc.desc: block app service.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_BlockAppService_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-
-    auto result = appMgrClient->ConnectAppMgrService();
-    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
-
-    int ret = appMgrClient->BlockAppService();
-    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
-}
-#endif
-
 /**
  * @tc.name: AppMgrClient_SetCurrentUserId_001
  * @tc.desc: set current userId.

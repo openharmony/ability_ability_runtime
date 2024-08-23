@@ -58,11 +58,11 @@ const std::string CACHE_DIRECTORY = "el2";
 const std::string RESTRICTED_PREFIX_PATH = "abcs/";
 const int PATH_THREE = 3;
 #ifdef APP_USE_ARM
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib/platformsdk/libark_inspector.z.so";
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib/libark_inspector.z.so";
 #elif defined(APP_USE_X86_64)
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/platformsdk/libark_inspector.z.so";
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/libark_inspector.z.so";
 #else
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/platformsdk/libark_inspector.z.so";
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/libark_inspector.z.so";
 #endif
 
 bool g_debugMode = false;
@@ -103,7 +103,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
         std::string instanceName = "workerThread_" + std::to_string(instanceId);
         bool needBreakPoint = ConnectServerManager::Get().AddInstance(instanceId, instanceId, instanceName);
         if (g_nativeStart) {
-            TAG_LOGD(AAFwkTag::APPMGR, "native is true, set needBreakPoint = false.");
+            TAG_LOGD(AAFwkTag::APPMGR, "native: true, set needBreakPoint: false");
             needBreakPoint = false;
         }
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {

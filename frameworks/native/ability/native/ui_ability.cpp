@@ -1197,18 +1197,12 @@ bool UIAbility::CheckRecoveryEnabled()
 
 bool UIAbility::CheckDefaultRecoveryEnabled()
 {
-    if (setting_ == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "null setting_");
+    if (abilityContext_ == nullptr) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "context invalid");
         return false;
     }
 
-    auto value = setting_->GetProperty(AppExecFwk::AbilityStartSetting::DEFAULT_RECOVERY_KEY);
-    if ((!useAppSettedRecoveryValue_.load()) && (value == "true")) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "default recovery enabled");
-        return true;
-    }
-
-    return false;
+    return abilityContext_->GetRestoreEnabled();
 }
 
 bool UIAbility::IsStartByScb()

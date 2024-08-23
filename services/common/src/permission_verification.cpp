@@ -364,11 +364,6 @@ bool PermissionVerification::JudgeStartAbilityFromBackground(
         return true;
     }
 
-    if (withContinuousTask) {
-        TAG_LOGD(AAFwkTag::DEFAULT, "continuousTask: true");
-        return true;
-    }
-
     // Temporarily supports permissions with two different spellings
     // PERMISSION_START_ABILIIES_FROM_BACKGROUND will be removed later due to misspelling
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND) ||
@@ -494,6 +489,18 @@ bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
         return true;
     }
     TAG_LOGW(AAFwkTag::APPMGR, "Permission denied");
+    return false;
+}
+
+bool PermissionVerification::VerifyStartNativeChildProcessPermission() const
+{
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission %{public}s granted",
+            PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS);
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission %{public}s denied",
+        PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS);
     return false;
 }
 }  // namespace AAFwk

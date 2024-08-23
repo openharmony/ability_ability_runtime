@@ -79,7 +79,6 @@ constexpr size_t PARAM_TWO = 2;
 constexpr uint8_t SYSCAP_MAX_SIZE = 100;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 constexpr int32_t DEFAULT_INTER_VAL = 500;
-constexpr int32_t TRIGGER_GC_AFTER_CLEAR_STAGE_MS = 3000;
 constexpr int32_t API8 = 8;
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
@@ -912,18 +911,6 @@ void JsRuntime::ReloadFormComponent()
 #ifdef SUPPORT_SCREEN
     OHOS::Ace::DeclarativeModulePreloader::ReloadCard(*nativeEngine, bundleName_, pkgContextInfoJsonStringMap_);
 #endif
-}
-
-void JsRuntime::DoCleanWorkAfterStageCleaned()
-{
-    // Force gc. If the jsRuntime is destroyed, this task should not be executed.
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
-    RemoveTask("ability_destruct_gc");
-    auto gcTask = [this]() {
-        panda::JSNApi::TriggerGC(GetEcmaVm(), panda::ecmascript::GCReason::TRIGGER_BY_ABILITY,
-            panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
-    };
-    PostTask(gcTask, "ability_destruct_gc", TRIGGER_GC_AFTER_CLEAR_STAGE_MS);
 }
 
 bool JsRuntime::InitLoop(bool isStage)
