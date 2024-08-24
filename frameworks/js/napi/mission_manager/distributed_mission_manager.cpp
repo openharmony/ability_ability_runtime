@@ -74,6 +74,8 @@ static int32_t ErrorCodeReturn(int32_t code)
             return CONTINUE_ALREADY_IN_PROGRESS;
         case MISSION_FOR_CONTINUING_IS_NOT_ALIVE:
             return MISSION_FOR_CONTINUING_IS_NOT_ALIVE;
+        case ERR_NOT_SYSTEM_APP_CALL:
+            return NOT_SYSTEM_APP;
         default:
             return SYSTEM_WORK_ABNORMALLY;
     };
