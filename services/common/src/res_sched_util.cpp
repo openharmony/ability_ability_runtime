@@ -48,7 +48,7 @@ int64_t ResSchedUtil::convertType(int64_t resSchedType)
     return -1;
 }
 
-void ResSchedUtil::ReportAbilitStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart)
+void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_APP_ABILITY_START;
@@ -64,7 +64,7 @@ void ResSchedUtil::ReportAbilitStartInfoToRSS(const AbilityInfo &abilityInfo, in
 #endif
 }
 
-void ResSchedUtil::ReportAbilitAssociatedStartInfoToRSS(
+void ResSchedUtil::ReportAbilityAssociatedStartInfoToRSS(
     const AbilityInfo &abilityInfo, int64_t resSchedType, int32_t callerUid, int32_t callerPid)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -150,6 +150,24 @@ bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
     return reply["ShouldForceKillProcess"].get<int32_t>() == 1;
 #else
     return true;
+#endif
+}
+
+void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid, int64_t timeDuration)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t resType = ResourceSchedule::ResType::RES_TYPE_KEY_PERF_SCENE;
+    std::unordered_map<std::string, std::string> eventParams {
+        { "extType", "10015"},
+        { "pid", std::to_string(pid) },
+        { "uid", std::to_string(uid) },
+    };
+    if (timeDuration > 0) { // millisecond
+        eventParams.emplace("timeoutDuration", std::to_string(timeDuration));
+    }
+    int64_t type = static_cast<int64_t>(stage);
+    TAG_LOGD(AAFwkTag::DEFAULT, "call");
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, type, eventParams);
 #endif
 }
 } // namespace AAFwk

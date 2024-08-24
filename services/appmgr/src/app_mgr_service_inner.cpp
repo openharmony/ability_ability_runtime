@@ -69,6 +69,7 @@
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "render_state_observer_manager.h"
+#include "res_sched_util.h"
 #include "startup_util.h"
 #include "string_ex.h"
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
@@ -559,13 +560,36 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             abilityRunningRecord->SetUIExtensionAbilityId(uiExtensionAbilityId);
         }
     }
+    AfterLoadAbility(appRecord, abilityInfo, loadParam);
+}
 
-    if (abilityInfo->type == AppExecFwk::AbilityType::PAGE && appRecord != nullptr) {
+void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord,
+    std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!appRecord || !abilityInfo || !loadParam) {
+        return;
+    }
+    if (abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         appRecord->SetUIAbilityLaunched(true);
     }
     PerfProfile::GetInstance().SetAbilityLoadEndTime(GetTickCount());
     PerfProfile::GetInstance().Dump();
     PerfProfile::GetInstance().Reset();
+
+    auto reportLoadTask = [appRecord]() {
+        auto priorityObj = appRecord->GetPriorityObject();
+        if (priorityObj) {
+            auto timeOut = AbilityRuntime::GlobalConstant::GetLoadTimeOutBase() *
+                AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
+            AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::LOAD_BEGIN,
+                priorityObj->GetPid(), appRecord->GetUid(), timeOut);
+        }
+    };
+    if (taskHandler_) {
+        taskHandler_->SubmitTask(reportLoadTask);
+    }
+
     appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
 }
 

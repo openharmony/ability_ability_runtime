@@ -55,6 +55,7 @@ using AbilityRuntime::FreezeUtil;
 namespace AAFwk {
 using namespace OHOS::Security;
 using namespace OHOS::AAFwk::PermissionConstants;
+using namespace OHOS::AbilityRuntime::GlobalConstant;
 const std::string DEBUG_APP = "debugApp";
 const std::string NATIVE_DEBUG = "nativeDebug";
 const std::string PERF_CMD = "perfCmd";
@@ -94,29 +95,6 @@ const int TERMINATE_TIMEOUT_ASANENABLED = 150;
 const int HALF_TIMEOUT = 2;
 const int MAX_URI_COUNT = 500;
 const int RESTART_SCENEBOARD_DELAY = 500;
-#ifdef SUPPORT_ASAN
-const int COLDSTART_TIMEOUT_MULTIPLE = 15000;
-const int LOAD_TIMEOUT_MULTIPLE = 15000;
-const int FOREGROUND_TIMEOUT_MULTIPLE = 7500;
-const int BACKGROUND_TIMEOUT_MULTIPLE = 4500;
-const int ACTIVE_TIMEOUT_MULTIPLE = 7500;
-const int TERMINATE_TIMEOUT_MULTIPLE = 15000;
-const int INACTIVE_TIMEOUT_MULTIPLE = 800;
-const int DUMP_TIMEOUT_MULTIPLE = 1500;
-const int SHAREDATA_TIMEOUT_MULTIPLE = 7500;
-#else
-const int COLDSTART_TIMEOUT_MULTIPLE = 10;
-const int LOAD_TIMEOUT_MULTIPLE = 10;
-const int FOREGROUND_TIMEOUT_MULTIPLE = 5;
-const int BACKGROUND_TIMEOUT_MULTIPLE = 3;
-const int ACTIVE_TIMEOUT_MULTIPLE = 5;
-const int TERMINATE_TIMEOUT_MULTIPLE = 10;
-const int INACTIVE_TIMEOUT_MULTIPLE = 1;
-const int DUMP_TIMEOUT_MULTIPLE = 1000;
-const int SHAREDATA_TIMEOUT_MULTIPLE = 5;
-const int32_t TYPE_RESERVE = 1;
-const int32_t TYPE_OTHERS = 2;
-#endif
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, FreezeUtil::TimeoutState state, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -497,6 +475,8 @@ void AbilityRecord::PostForegroundTimeoutTask()
     SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, foregroundTimeout);
     std::string methodName = "ForegroundAbility";
     g_addLifecycleEventTask(token_, FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
+        foregroundTimeout);
 }
 
 void AbilityRecord::RemoveForegroundTimeoutTask()
@@ -535,6 +515,8 @@ void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
                 static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout, recordId_, true);
+            ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
+                timeout);
             break;
         }
         default: {
@@ -1442,6 +1424,9 @@ void AbilityRecord::SetAbilityState(AbilityState state)
     if (state == AbilityState::FOREGROUND || state == AbilityState::ACTIVE || state == AbilityState::BACKGROUND) {
         SetRestarting(false);
     }
+    if (state == AbilityState::FOREGROUND) {
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_END, GetPid(), GetUid());
+    }
 }
 #endif // SUPPORT_SCREEN
 void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
@@ -1457,9 +1442,8 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
             }
         }
         if (schedulerDeathRecipient_ == nullptr) {
-            std::weak_ptr<AbilityRecord> thisWeakPtr(shared_from_this());
             schedulerDeathRecipient_ =
-                new AbilitySchedulerRecipient([thisWeakPtr](const wptr<IRemoteObject> &remote) {
+                new AbilitySchedulerRecipient([thisWeakPtr = weak_from_this()](const wptr<IRemoteObject> &remote) {
                     auto abilityRecord = thisWeakPtr.lock();
                     if (abilityRecord) {
                         abilityRecord->OnSchedulerDied(remote);
@@ -1477,6 +1461,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
             TAG_LOGI(AAFwkTag::ABILITYMGR, "Sceneboard DeathRecipient Added");
         }
         pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid());
         // add collaborator mission bind pid
         NotifyMissionBindPid();
 #ifdef WITH_DLP
