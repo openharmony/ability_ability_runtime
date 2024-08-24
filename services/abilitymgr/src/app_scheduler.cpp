@@ -496,20 +496,6 @@ int32_t AppScheduler::NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, 
     return ERR_OK;
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AppScheduler::BlockAppService()
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
-    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    auto ret = static_cast<int>(IN_PROCESS_CALL(appMgrClient_->BlockAppService()));
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "BlockAppService failed.");
-        return INNER_ERR;
-    }
-    return ERR_OK;
-}
-#endif
-
 int32_t AppScheduler::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
 {
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);

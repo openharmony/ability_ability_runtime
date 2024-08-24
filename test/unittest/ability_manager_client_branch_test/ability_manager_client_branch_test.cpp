@@ -1095,61 +1095,6 @@ HWTEST_F(AbilityManagerClientBranchTest, SetAbilityController_0100, TestSize.Lev
     GTEST_LOG_(INFO) << "SetAbilityController_0100 end";
 }
 
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-/**
- * @tc.name: AbilityManagerClient_BlockAmsService_0100
- * @tc.desc: BlockAmsService
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, BlockAmsService_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "BlockAmsService_0100 start";
-    EXPECT_CALL(*mock_, BlockAmsService())
-        .Times(1)
-        .WillOnce(Return(0));
-    auto result = client_->BlockAmsService();
-
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "BlockAmsService_0100 end";
-}
-
-/**
- * @tc.name: AbilityManagerClient_BlockAppService_0100
- * @tc.desc: BlockAppService
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, BlockAppService_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "BlockAppService_0100 start";
-    EXPECT_CALL(*mock_, BlockAppService())
-        .Times(1)
-        .WillOnce(Return(0));
-    auto result = client_->BlockAppService(info);
-
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "BlockAppService_0100 end";
-}
-
-/**
- * @tc.name: AbilityManagerClient_BlockAbility_0100
- * @tc.desc: BlockAbility
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, BlockAbility_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "BlockAbility_0100 start";
-    EXPECT_CALL(*mock_, BlockAbility(_))
-        .Times(1)
-        .WillOnce(Return(0));
-    int32_t abilityRecordId = 1;
-    auto result = client_->BlockAbility(abilityRecordId);
-
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "BlockAbility_0100 end";
-}
-#endif
-
 /**
  * @tc.name: AbilityManagerClient_DumpAbilityInfoDone_0100
  * @tc.desc: DumpAbilityInfoDone
