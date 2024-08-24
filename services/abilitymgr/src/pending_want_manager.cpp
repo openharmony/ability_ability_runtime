@@ -125,7 +125,7 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
         rec->SetCallerUid(callingUid);
         pendingKey->SetCode(PendingRecordIdCreate());
         wantRecords_.insert(std::make_pair(pendingKey, rec));
-        TAG_LOGI(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
+        TAG_LOGD(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
         return rec;
     }
     return nullptr;
