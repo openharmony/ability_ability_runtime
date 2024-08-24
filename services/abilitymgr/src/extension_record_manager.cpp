@@ -265,6 +265,14 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
             abilityRecord->SetProcessName(process);
             break;
         }
+        case PROCESS_MODE_RUN_WITH_MAIN_PROCESS: {
+            if (!abilityRequest.appInfo.process.empty()) {
+                abilityRecord->SetProcessName(abilityRequest.appInfo.process);
+            } else {
+                abilityRecord->SetProcessName(abilityRequest.abilityInfo.bundleName);
+            }
+            break;
+        }
         default: // AppExecFwk::ExtensionProcessMode::UNDEFINED or AppExecFwk::ExtensionProcessMode::BUNDLE
             // no need to update
             break;
