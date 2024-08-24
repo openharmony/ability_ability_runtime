@@ -3182,7 +3182,7 @@ int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::Abili
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "bundleName is com.huawei.hmos.vassistant extension, abilityName:%{public}s, report to rss.",
         abilityInfo.name.c_str());
-    auto ret = ReportAbilitStartInfoToRSS(abilityInfo);
+    auto ret = ReportAbilityStartInfoToRSS(abilityInfo);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ReportAbilitStartInfoToRSS failed, ret:%{public}d", ret);
         return ret;
@@ -3190,7 +3190,7 @@ int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::Abili
     return ERR_OK;
 }
 
-int32_t AbilityConnectManager::ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
+int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::vector<AppExecFwk::RunningProcessInfo> runningProcessInfos;
@@ -3208,8 +3208,8 @@ int32_t AbilityConnectManager::ReportAbilitStartInfoToRSS(const AppExecFwk::Abil
             break;
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilitStartInfoToRSS, abilityName:%{public}s.", abilityInfo.name.c_str());
-    ResSchedUtil::GetInstance().ReportAbilitStartInfoToRSS(abilityInfo, pid, isColdStart);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS, abilityName:%{public}s.", abilityInfo.name.c_str());
+    ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
     return ERR_OK;
 }
 }  // namespace AAFwk
