@@ -356,8 +356,7 @@ void AmsMgrProxy::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }
 
-int32_t AmsMgrProxy::KillProcessWithAccount(
-    const std::string &bundleName, const int accountId)
+int32_t AmsMgrProxy::KillProcessWithAccount(const std::string &bundleName, const int accountId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start");
 
@@ -399,12 +398,10 @@ int32_t AmsMgrProxy::KillApplication(const std::string &bundleName)
     if (!WriteInterfaceToken(data)) {
         return ERR_INVALID_DATA;
     }
-
     if (!data.WriteString(bundleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel WriteString failed.");
         return ERR_FLATTEN_OBJECT;
     }
-
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_APPLICATION), data, reply, option);
     if (ret != NO_ERROR) {
@@ -535,7 +532,6 @@ int32_t AmsMgrProxy::KillApplicationSelf()
     if (!WriteInterfaceToken(data)) {
         return ERR_INVALID_DATA;
     }
-
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_APPLICATION_SELF), data, reply, option);
     if (ret != NO_ERROR) {
