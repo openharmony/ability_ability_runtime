@@ -30,6 +30,15 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace AAFwk {
+#ifdef SUPPORT_ASAN
+constexpr uint32_t LOAD_TIMEOUT = 150000;            // ms
+constexpr uint32_t ACTIVE_TIMEOUT = 75000;          // ms
+constexpr uint32_t INACTIVE_TIMEOUT = 7500;         // ms
+#else
+constexpr uint32_t LOAD_TIMEOUT = 10000;            // ms
+constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
+constexpr uint32_t INACTIVE_TIMEOUT = 500;         // ms
+#endif
 class LifecycleTest : public testing::Test, public LifecycleTestBase {
 public:
     static void SetUpTestCase();
@@ -145,7 +154,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_StartLauncherAbilityLifeCycle_003, TestS
         pthread_t tid = 0;
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
         int ret =
-            LifecycleTest::SemTimedWaitMillis(AbilityManagerService::LOAD_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
+            LifecycleTest::SemTimedWaitMillis(LOAD_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
         EXPECT_NE(ret, 0);
         // check timeout handler
         EXPECT_EQ(launcherAbilityRecord_->GetAbilityState(), OHOS::AAFwk::AbilityState::ACTIVE);
@@ -175,7 +184,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_StartLauncherAbilityLifeCycle_004, TestS
         pthread_t tid = 0;
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
         int ret =
-            LifecycleTest::SemTimedWaitMillis(AbilityManagerService::LOAD_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
+            LifecycleTest::SemTimedWaitMillis(LOAD_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
         if (ret != 0) {
             // check timeout handler
             GTEST_LOG_(INFO) << "timeout. It shouldn't happen.";
@@ -209,7 +218,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_StartLauncherAbilityLifeCycle_005, TestS
 
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
         int ret =
-            LifecycleTest::SemTimedWaitMillis(AbilityManagerService::LOAD_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
+            LifecycleTest::SemTimedWaitMillis(LOAD_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
         if (ret != 0) {
             // check timeout handler. It won't happen normally.
             GTEST_LOG_(INFO) << "timeout. It shouldn't happen.";
@@ -243,7 +252,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_StartLauncherAbilityLifeCycle_006, TestS
         command_->state_ = OHOS::AAFwk::AbilityState::INITIAL;
         pthread_t tid = 0;
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
-        int ret = LifecycleTest::SemTimedWaitMillis(AbilityManagerService::ACTIVE_TIMEOUT, command_->sem_);
+        int ret = LifecycleTest::SemTimedWaitMillis(ACTIVE_TIMEOUT, command_->sem_);
         EXPECT_NE(ret, 0);
         // check AttachAbilityThread timeout handler
         EXPECT_EQ(launcherAbilityRecord_->IsReady(), false);
@@ -272,7 +281,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_startAbilityLifeCycle_001, TestSize.Leve
         launcherAbilityRecord_->SetAbilityState(OHOS::AAFwk::AbilityState::INACTIVATING);
         pthread_t tid = 0;
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
-        int ret = LifecycleTest::SemTimedWaitMillis(AbilityManagerService::INACTIVE_TIMEOUT, command_->sem_);
+        int ret = LifecycleTest::SemTimedWaitMillis(INACTIVE_TIMEOUT, command_->sem_);
         EXPECT_NE(ret, 0);
         // check AbilityTransitionDone timeout handler
         EXPECT_NE(nextAbilityRecord_->GetAbilityState(), OHOS::AAFwk::AbilityState::INACTIVATING);
@@ -328,7 +337,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_startAbilityLifeCycle_003, TestSize.Leve
         pthread_t tid = 0;
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
         int ret = LifecycleTest::SemTimedWaitMillis(
-            AbilityManagerService::INACTIVE_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
+            INACTIVE_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
         EXPECT_NE(ret, 0);
         // check timeout handler
         EXPECT_EQ(nextAbilityRecord_->GetAbilityState(), OHOS::AAFwk::AbilityState::ACTIVATING);
@@ -391,7 +400,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_startAbilityLifeCycle_005, TestSize.Leve
         pthread_t tid = 0;
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
         int ret =
-            LifecycleTest::SemTimedWaitMillis(AbilityManagerService::LOAD_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
+            LifecycleTest::SemTimedWaitMillis(LOAD_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
         if (ret != 0) {
             // check timeout handler
             pthread_join(tid, nullptr);
@@ -424,7 +433,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_startAbilityLifeCycle_006, TestSize.Leve
         pthread_t tid = 0;
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
         int ret =
-            LifecycleTest::SemTimedWaitMillis(AbilityManagerService::ACTIVE_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
+            LifecycleTest::SemTimedWaitMillis(ACTIVE_TIMEOUT + DELAY_TEST_TIME, command_->sem_);
         EXPECT_NE(ret, 0);
         pthread_join(tid, nullptr);
         return;
@@ -459,7 +468,7 @@ HWTEST_F(LifecycleTest, AAFWK_AbilityMS_startAbilityLifeCycle_007, TestSize.Leve
         EXPECT_EQ(AttachAbility(nextScheduler_, nextToken_), 0);
         pthread_t tid = 0;
         pthread_create(&tid, nullptr, LifecycleTest::AbilityStartThread, command_.get());
-        int ret = LifecycleTest::SemTimedWaitMillis(AbilityManagerService::ACTIVE_TIMEOUT * 2, command_->sem_);
+        int ret = LifecycleTest::SemTimedWaitMillis(ACTIVE_TIMEOUT * 2, command_->sem_);
         if (ret != 0) {
             // check timeout handler
             pthread_join(tid, nullptr);

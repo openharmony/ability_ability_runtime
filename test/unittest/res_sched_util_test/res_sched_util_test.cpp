@@ -50,7 +50,7 @@ void ResSchedUtilTest::TearDown()
 
 /**
  * @tc.number: ResSchedUtilTest_0100
- * @tc.desc: Test ReportAbilitStartInfoToRSS works
+ * @tc.desc: Test ReportAbilityStartInfoToRSS works
  * @tc.type: FUNC
  */
 HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0100, TestSize.Level0)
@@ -58,15 +58,15 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0100, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "ResSchedUtilTest_0100 called.");
     AbilityInfo abilityInfo;
     int64_t resSchedType = -1;
-    AAFwk::ResSchedUtil::GetInstance().ReportAbilitStartInfoToRSS(abilityInfo, -1, false);
-    AAFwk::ResSchedUtil::GetInstance().ReportAbilitAssociatedStartInfoToRSS(abilityInfo, resSchedType, 0, 0);
+    AAFwk::ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, -1, false);
+    AAFwk::ResSchedUtil::GetInstance().ReportAbilityAssociatedStartInfoToRSS(abilityInfo, resSchedType, 0, 0);
     int64_t ret = AAFwk::ResSchedUtil::GetInstance().convertType(resSchedType);
     EXPECT_EQ(resSchedType, ret);
 }
 
 /**
  * @tc.number: ResSchedUtilTest_0200
- * @tc.desc: Test ReportAbilitStartInfoToRSS works
+ * @tc.desc: Test ReportAbilityStartInfoToRSS works
  * @tc.type: FUNC
  */
 HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0200, TestSize.Level0)
@@ -76,6 +76,21 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0200, TestSize.Level0)
     AAFwk::ResSchedUtil::GetInstance().ReportEventToRSS(0, testName, testName);
     std::unordered_set<int32_t> frozenPids;
     AAFwk::ResSchedUtil::GetInstance().GetAllFrozenPidsFromRSS(frozenPids);
+    int64_t resSchedType = AAFwk::RES_TYPE_SCB_START_ABILITY;
+    int64_t ret = AAFwk::ResSchedUtil::GetInstance().convertType(resSchedType);
+    EXPECT_EQ(resSchedType, ret);
+}
+
+/**
+ * @tc.number: ResSchedUtilTest_0300
+ * @tc.desc: Test ReportLoadingEventToRss works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0300, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ResSchedUtilTest_0300 called.");
+    AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::LOAD_BEGIN,
+        0, 0, 0);
     int64_t resSchedType = AAFwk::RES_TYPE_SCB_START_ABILITY;
     int64_t ret = AAFwk::ResSchedUtil::GetInstance().convertType(resSchedType);
     EXPECT_EQ(resSchedType, ret);
