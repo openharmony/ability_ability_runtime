@@ -49,7 +49,7 @@ uint32_t GetU32Data(const char* ptr)
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
     for (uint32_t code = 0;
-        code <= static_cast<uint32_t>(AppMgrInterfaceCode::RESTART_RESIDENT_PROCESS_DEPENDED_ON_WEB); ++code) {
+        code <= static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_CHILDREN_PROCESSES); ++code) {
         MessageParcel parcel;
         parcel.WriteInterfaceToken(APPMGR_INTERFACE_TOKEN);
         parcel.WriteBuffer(data, size);
