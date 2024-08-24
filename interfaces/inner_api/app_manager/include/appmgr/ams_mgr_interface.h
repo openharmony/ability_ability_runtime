@@ -126,8 +126,7 @@ public:
      * @param accountId, account ID.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillProcessWithAccount(
-        const std::string &bundleName, const int accountId) = 0;
+    virtual int KillProcessWithAccount(const std::string &bundleName, const int accountId) = 0;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
