@@ -1330,6 +1330,9 @@ private:
 
     void PresetMaxChildProcess(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &maxChildProcess);
 
+    void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
+        sptr<IRemoteObject> token);
+
 private:
     /**
      * ClearUpApplicationData, clear the application data.
