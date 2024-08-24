@@ -8460,6 +8460,21 @@ int AbilityManagerService::CheckStaticCfgPermission(const AppExecFwk::AbilityReq
 {
     auto abilityInfo = abilityRequest.abilityInfo;
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (AppUtils::GetInstance().IsSupportAncoApp() &&
+        StartAbilityUtils::IsCallFromAncoShellOrBroker(abilityRequest.callerToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR,
+            "Check static permission, name is %{public}s.", abilityInfo.name.c_str());
+        auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
+        if (collaborator == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Collaborator is nullptr.");
+            return AppExecFwk::Constants::PERMISSION_NOT_GRANTED;
+        }
+        int result = collaborator->CheckStaticCfgPermission(abilityRequest.want);
+        if (result != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Check permission failed from broker.");
+            return AppExecFwk::Constants::PERMISSION_NOT_GRANTED;
+        }
+    }
     if (!isData) {
         isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     }
