@@ -385,6 +385,42 @@ HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_002, TestSize.Level0)
 
 /*
  * Feature: AppMgrService
+ * Function: GetAllChildrenProcesses
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllChildrenProcesses
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllChildrenProcesses
+ */
+HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_001, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    std::vector<ChildProcessInfo> info;
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->GetAllChildrenProcesses(info);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllChildrenProcesses
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllChildrenProcesses
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllChildrenProcesses
+ */
+HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_002, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    std::vector<ChildProcessInfo> info;
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    int32_t res = appMgrService->GetAllChildrenProcesses(info);
+    EXPECT_NE(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
  * Function: NotifyMemoryLevel
  * SubFunction: NA
  * FunctionPoints: AppMgrService NotifyMemoryLevel

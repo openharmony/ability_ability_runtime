@@ -286,6 +286,23 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Leve
 }
 
 /**
+ * @tc.name: AppMgrClient_GetAllChildrenProcesses_001
+ * @tc.desc: get all children processes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllChildrenProcesses_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllChildrenProcesses_001 start");
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    std::vector<ChildProcessInfo> info;
+    auto result = appMgrClient->GetAllChildrenProcesses(info);
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    TAG_LOGI(AAFwkTag::TEST, "GetAllChildrenProcesses_001 end");
+}
+
+/**
  * @tc.name: AppMgrClient_GetRenderProcessTerminationStatus_001
  * @tc.desc: can not get render process termination status with error pid.
  * @tc.type: FUNC
