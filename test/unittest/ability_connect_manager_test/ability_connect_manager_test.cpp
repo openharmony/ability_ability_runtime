@@ -1178,6 +1178,10 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_022, TestSize.Level1)
     OHOS::sptr<OHOS::IRemoteObject> nullToken = nullptr;
     auto ability1 = ConnectManager()->GetExtensionByTokenFromServiceMap(nullToken);
     EXPECT_EQ(nullptr, ability1);
+
+    auto recordId = abilityRecord->GetAbilityRecordId();
+    EXPECT_EQ(ConnectManager()->GetExtensionByIdFromServiceMap(recordId), abilityRecord);
+    EXPECT_EQ(ConnectManager()->GetExtensionByIdFromServiceMap(0), nullptr);
 }
 
 /*
@@ -1719,11 +1723,11 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_GetConnectRecordListByCallba
 
 /*
  * Feature: AbilityConnectManager
- * Function: GetAbilityRecordById
- * SubFunction: GetAbilityRecordById
+ * Function: GetExtensionByIdFromServiceMap
+ * SubFunction: GetExtensionByIdFromServiceMap
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityConnectManager GetAbilityRecordById
+ * CaseDescription: Verify AbilityConnectManager GetExtensionByIdFromServiceMap
  */
 HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_GetAbilityRecordById_001, TestSize.Level1)
 {
@@ -1732,7 +1736,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_GetAbilityRecordById_001, Te
     int64_t abilityRecordId = abilityRecord->GetRecordId();
     connectManager->serviceMap_.emplace("first", abilityRecord);
     connectManager->serviceMap_.emplace("second", nullptr);
-    auto res = connectManager->GetAbilityRecordById(abilityRecordId);
+    auto res = connectManager->GetExtensionByIdFromServiceMap(abilityRecordId);
     EXPECT_NE(res, nullptr);
 }
 
@@ -2839,18 +2843,16 @@ HWTEST_F(AbilityConnectManagerTest, ScheduleCommandAbilityWindowDone_001, TestSi
 
 /*
  * Feature: AbilityConnectManager
- * Function: MoveToForeground
+ * Function: ForegroundUIExtensionAbility
  * SubFunction: NA
- * FunctionPoints: MissionListManager MoveToForeground
+ * FunctionPoints: MissionListManager ForegroundUIExtensionAbility
  * EnvConditions: NA
- * CaseDescription: Verify MoveToForeground
+ * CaseDescription: Verify ForegroundUIExtensionAbility
  * @tc.require: AR000I8B26
  */
 HWTEST_F(AbilityConnectManagerTest, MoveToForeground_001, TestSize.Level1)
 {
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(3);
-    ASSERT_NE(connectManager, nullptr);
-    connectManager->MoveToForeground(serviceRecord_);
+    serviceRecord_->ForegroundUIExtensionAbility();
     EXPECT_EQ(serviceRecord_->GetAbilityState(), AbilityState::FOREGROUNDING);
     serviceRecord_->SetAbilityState(AbilityState::INITIAL);
 }
