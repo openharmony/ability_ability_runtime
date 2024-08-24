@@ -292,7 +292,7 @@ int PendingWant::SendAndReturnResult(int resultCode, const std::shared_ptr<Want>
     const std::shared_ptr<WantParams> &options, const std::shared_ptr<StartOptions> &startOptions,
     const sptr<AAFwk::IWantSender> &target)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "call");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "call");
     SenderInfo senderInfo;
     senderInfo.resolvedType = want != nullptr ? want->GetType() : "";
     if (want != nullptr) {
