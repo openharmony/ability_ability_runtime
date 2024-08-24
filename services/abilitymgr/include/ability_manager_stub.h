@@ -342,7 +342,6 @@ private:
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int32_t OpenLinkInner(MessageParcel &data, MessageParcel &reply);
-    int32_t TerminateMissionInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
