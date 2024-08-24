@@ -951,37 +951,6 @@ HWTEST_F(MissionListTest, mission_list_dump_list_001, TestSize.Level1)
     missionList->DumpList(info, isClient);
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-/*
- * Feature: MissionList
- * Function: BlockAbilityByRecordId
- * SubFunction: NA
- * FunctionPoints: MissionList BlockAbilityByRecordId
- * EnvConditions: NA
- * CaseDescription: Verify BlockAbilityByRecordId
- */
-HWTEST_F(MissionListTest, mission_block_ability_by_record_id_001, TestSize.Level1)
-{
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->recordId_ = 0;
-    auto mission1 = std::make_shared<Mission>(1, abilityRecord, "name");
-    auto mission2 = std::make_shared<Mission>(1, nullptr, "name");
-    auto missionList = std::make_shared<MissionList>();
-    ASSERT_NE(missionList, nullptr);
-    std::vector<std::string> info;
-    bool isClient = false;
-    std::vector<std::string> params;
-    missionList->missions_.push_front(nullptr);
-    missionList->missions_.push_front(mission1);
-    missionList->missions_.push_front(mission2);
-    missionList->DumpStateByRecordId(info, isClient, 1, params);
-    missionList->DumpStateByRecordId(info, isClient, 0, params);
-}
-#endif
-
 /*
  * Feature: MissionList
  * Function: GetMissionCountByUid

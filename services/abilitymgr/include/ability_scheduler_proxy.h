@@ -331,10 +331,6 @@ public:
      */
     void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override;
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    int BlockAbility() override;
-    #endif
-
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);

@@ -440,17 +440,6 @@ int AbilityManagerStub::OnRemoteRequestInnerEleventh(uint32_t code, MessageParce
     if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_SESSION_HANDLER) {
         return RegisterSessionHandlerInner(data, reply);
     }
-#ifdef ABILITY_COMMAND_FOR_TEST
-    if (interfaceCode == AbilityManagerInterfaceCode::BLOCK_ABILITY) {
-        return BlockAbilityInner(data, reply);
-    }
-    if (interfaceCode == AbilityManagerInterfaceCode::BLOCK_AMS_SERVICE) {
-        return BlockAmsServiceInner(data, reply);
-    }
-    if (interfaceCode == AbilityManagerInterfaceCode::BLOCK_APP_SERVICE) {
-        return BlockAppServiceInner(data, reply);
-    }
-#endif
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -2662,37 +2651,6 @@ int AbilityManagerStub::ForceTimeoutForTestInner(MessageParcel &data, MessagePar
     int result = ForceTimeoutForTest(abilityName, state);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "force ability timeout error");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::BlockAbilityInner(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t abilityRecordId = data.ReadInt32();
-    int32_t result = BlockAbility(abilityRecordId);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write failed.");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::BlockAmsServiceInner(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t result = BlockAmsService();
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write failed.");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::BlockAppServiceInner(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t result = BlockAppService();
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write failed.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

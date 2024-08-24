@@ -361,12 +361,6 @@ public:
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
     MOCK_METHOD1(MoveUIAbilityToBackground, int(const sptr<IRemoteObject> token));
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-    MOCK_METHOD0(BlockAppService, int());
-    MOCK_METHOD0(BlockAmsService, int());
-    MOCK_METHOD1(BlockAbility, int(int32_t abilityRecordId));
-#endif
-
     int StartUserTest(const Want& want, const sptr<IRemoteObject>& observer) override
     {
         return 0;

@@ -1258,26 +1258,6 @@ public:
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
-     * Block ability manager service.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAmsService() override;
-
-    /**
-     * Block ability.
-     *
-     * @param abilityRecordId The Ability Record Id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAbility(int32_t abilityRecordId) override;
-
-    /**
-     * Block app manager service.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService() override;
-
-    /**
      * force timeout ability.
      *
      * @param abilityName.
