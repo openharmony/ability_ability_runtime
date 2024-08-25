@@ -19,9 +19,7 @@
 #include "ability_manager_radar.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "ipc_skeleton.h"
 #include "status_bar_delegate_interface.h"
-#include "tokenid_kit.h"
 #include <iterator>
 
 namespace OHOS {
@@ -1930,10 +1928,6 @@ int AbilityManagerStub::IsRamConstrainedDeviceInner(MessageParcel &data, Message
 
 int AbilityManagerStub::ContinueMissionInner(MessageParcel &data, MessageParcel &reply)
 {
-    if (!IsSystemApp()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not system app.");
-        return ERR_NOT_SYSTEM_APP;
-    }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     std::string srcDeviceId = data.ReadString();
     std::string dstDeviceId = data.ReadString();
@@ -1955,10 +1949,6 @@ int AbilityManagerStub::ContinueMissionInner(MessageParcel &data, MessageParcel 
 
 int AbilityManagerStub::ContinueMissionOfBundleNameInner(MessageParcel &data, MessageParcel &reply)
 {
-    if (!IsSystemApp()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not system app.");
-        return ERR_NOT_SYSTEM_APP;
-    }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "amsStub %{public}s called!", __func__);
     ContinueMissionInfo continueMissionInfo;
     continueMissionInfo.srcDeviceId = data.ReadString();
@@ -2396,10 +2386,6 @@ int AbilityManagerStub::GetProcessRunningInfosInner(MessageParcel &data, Message
 
 int AbilityManagerStub::StartSyncRemoteMissionsInner(MessageParcel &data, MessageParcel &reply)
 {
-    if (!IsSystemApp()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not system app.");
-        return ERR_NOT_SYSTEM_APP;
-    }
     std::string deviceId = data.ReadString();
     bool fixConflict = data.ReadBool();
     int64_t tag = data.ReadInt64();
@@ -2413,10 +2399,6 @@ int AbilityManagerStub::StartSyncRemoteMissionsInner(MessageParcel &data, Messag
 
 int AbilityManagerStub::StopSyncRemoteMissionsInner(MessageParcel &data, MessageParcel &reply)
 {
-    if (!IsSystemApp()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not system app.");
-        return ERR_NOT_SYSTEM_APP;
-    }
     int result = StopSyncRemoteMissions(data.ReadString());
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StopSyncRemoteMissionsInner failed.");
@@ -2427,10 +2409,6 @@ int AbilityManagerStub::StopSyncRemoteMissionsInner(MessageParcel &data, Message
 
 int AbilityManagerStub::RegisterRemoteMissionListenerInner(MessageParcel &data, MessageParcel &reply)
 {
-    if (!IsSystemApp()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not system app.");
-        return ERR_NOT_SYSTEM_APP;
-    }
     std::string deviceId = data.ReadString();
     if (deviceId.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AbilityManagerStub: RegisterRemoteMissionListenerInner deviceId empty!");
@@ -2450,10 +2428,6 @@ int AbilityManagerStub::RegisterRemoteMissionListenerInner(MessageParcel &data, 
 
 int AbilityManagerStub::RegisterRemoteOnListenerInner(MessageParcel &data, MessageParcel &reply)
 {
-    if (!IsSystemApp()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not system app.");
-        return ERR_NOT_SYSTEM_APP;
-    }
     std::string type = data.ReadString();
     if (type.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AbilityManagerStub: RegisterRemoteOnListenerInner type empty!");
@@ -2472,10 +2446,6 @@ int AbilityManagerStub::RegisterRemoteOnListenerInner(MessageParcel &data, Messa
 
 int AbilityManagerStub::RegisterRemoteOffListenerInner(MessageParcel &data, MessageParcel &reply)
 {
-    if (!IsSystemApp()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not system app.");
-        return ERR_NOT_SYSTEM_APP;
-    }
     std::string type = data.ReadString();
     if (type.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AbilityManagerStub: RegisterRemoteOffListenerInner type empty!");
@@ -2494,10 +2464,6 @@ int AbilityManagerStub::RegisterRemoteOffListenerInner(MessageParcel &data, Mess
 
 int AbilityManagerStub::UnRegisterRemoteMissionListenerInner(MessageParcel &data, MessageParcel &reply)
 {
-    if (!IsSystemApp()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not system app.");
-        return ERR_NOT_SYSTEM_APP;
-    }
     std::string deviceId = data.ReadString();
     if (deviceId.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AbilityManagerStub: UnRegisterRemoteMissionListenerInner deviceId empty!");
@@ -2950,12 +2916,6 @@ int AbilityManagerStub::UnregisterConnectionObserverInner(MessageParcel &data, M
     }
 
     return UnregisterObserver(observer);
-}
-
-bool AbilityManagerStub::IsSystemApp()
-{
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    return OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
 }
 
 #ifdef WITH_DLP

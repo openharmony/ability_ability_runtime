@@ -227,7 +227,7 @@ enum ErrorCode {
      */
     PERMISSION_DENIED = 201,
     /**
-     * Result(202) for not syatem app call.
+     * Result(202) for non-system-app use system-api.
      */
     NOT_SYSTEM_APP = 202,
     /**
