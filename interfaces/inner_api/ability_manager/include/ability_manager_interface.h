@@ -454,7 +454,7 @@ public:
      */
     virtual int TerminateAbility(
         const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant = nullptr) = 0;
-    
+
     /**
      * BackToCallerAbilityWithResult, return to the caller ability.
      *
@@ -1171,8 +1171,6 @@ public:
 
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
-
-    virtual void ScheduleClearRecoveryPageStack() {};
 
     /**
      * Called to verify that the MissionId is valid.
