@@ -590,11 +590,6 @@ enum {
      */
     ERR_NATIVE_ARGS_CHILD_PROCESS_REACH_LIMIT = 2097266,
 
-    /*
-     * Result (2097267) for not syatem app call.
-     */
-    ERR_NOT_SYSTEM_APP_CALL = 2097267,
-
     /**
      * Native error(3000000) for target bundle not exist.
      */

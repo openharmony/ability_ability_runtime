@@ -4121,6 +4121,7 @@ int AbilityManagerService::DisconnectRemoteAbility(const sptr<IRemoteObject> &co
 int AbilityManagerService::ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
     int32_t missionId, const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ContinueMission missionId: %{public}d", missionId);
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
@@ -4134,6 +4135,7 @@ int AbilityManagerService::ContinueMission(const std::string &srcDeviceId, const
 int AbilityManagerService::ContinueMission(AAFwk::ContinueMissionInfo continueMissionInfo,
     const sptr<IRemoteObject> &callback)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     AAFWK::ContinueRadar::GetInstance().ClickIconContinue("ContinueMission");
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
@@ -4265,6 +4267,7 @@ int AbilityManagerService::NotifyContinuationResult(int32_t missionId, int32_t r
 
 int AbilityManagerService::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
         return CHECK_PERMISSION_FAILED;
@@ -4275,6 +4278,7 @@ int AbilityManagerService::StartSyncRemoteMissions(const std::string& devId, boo
 
 int AbilityManagerService::StopSyncRemoteMissions(const std::string& devId)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
         return CHECK_PERMISSION_FAILED;
