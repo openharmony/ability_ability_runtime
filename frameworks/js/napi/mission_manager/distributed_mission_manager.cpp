@@ -74,7 +74,7 @@ static int32_t ErrorCodeReturn(int32_t code)
             return CONTINUE_ALREADY_IN_PROGRESS;
         case MISSION_FOR_CONTINUING_IS_NOT_ALIVE:
             return MISSION_FOR_CONTINUING_IS_NOT_ALIVE;
-        case ERR_NOT_SYSTEM_APP_CALL:
+        case ERR_NOT_SYSTEM_APP:
             return NOT_SYSTEM_APP;
         default:
             return SYSTEM_WORK_ABNORMALLY;
@@ -117,6 +117,8 @@ static std::string ErrorMessageReturn(int32_t code)
         case ERR_BIND_REMOTE_IN_BUSY_LINK:
             return std::string("the remote device has been linked with other devices, try again when "
                 "the remote device is idle.");
+        case NOT_SYSTEM_APP:
+            return std::string("The app is not system-app.");
         default:
             return std::string("the system ability work abnormally.");
     };
