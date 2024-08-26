@@ -46,12 +46,31 @@ napi_value CreateInt32(napi_env &env, int32_t num, const std::string &paramName)
 class NAPIMissionContinue : public MissionContinueStub {
 public:
     void OnContinueDone(int32_t result) override;
-    void SetContinueEnv(const napi_env &env);
-    void SetEnv(const napi_env &env);
-    void SetContinueAbilityEnv(const napi_env &env);
-    void SetContinueAbilityCBRef(const napi_ref &ref);
-    void SetContinueAbilityHasBundleName(bool hasBundleName);
-    void SetContinueAbilityPromiseRef(const napi_deferred &promiseDeferred);
+
+    void SetEnv(const napi_env &env)
+    {
+        env_ = env;
+    }
+
+    void SetContinueAbilityEnv(const napi_env &env)
+    {
+        env_ = env;
+    }
+
+    void SetContinueAbilityCBRef(const napi_ref &ref)
+    {
+        onContinueDoneRef_ = ref;
+    }
+
+    void SetContinueAbilityHasBundleName(bool hasBundleName)
+    {
+        onContinueDoneHasBundleName_ = hasBundleName;
+    }
+
+    void SetContinueAbilityPromiseRef(const napi_deferred &promiseDeferred)
+    {
+        promiseDeferred_ = promiseDeferred;
+    }
 
 private:
     bool onContinueDoneHasBundleName_ = false;
@@ -81,7 +100,7 @@ private:
 
 class NAPIRemoteOnListener : public AAFwk::RemoteOnListenerStub {
 public:
-    virtual ~NAPIRemoteOnListener();
+    virtual ~NAPIRemoteOnListener() {};
 
     void OnCallback(const uint32_t continueState, const std::string &srcDeviceId,
         const std::string &bundleName, const std::string &continueType = "",
@@ -207,6 +226,10 @@ enum ErrorCode {
      * Result(201) for permission denied.
      */
     PERMISSION_DENIED = 201,
+    /**
+     * Result(202) for non-system-app use system-api.
+     */
+    NOT_SYSTEM_APP = 202,
     /**
      * Result(401) for parameter check failed.
      */
