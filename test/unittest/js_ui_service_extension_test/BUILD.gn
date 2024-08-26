@@ -52,9 +52,11 @@ ohos_unittest("js_ui_service_extension_test") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
+    "ability_runtime:js_environment",
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",

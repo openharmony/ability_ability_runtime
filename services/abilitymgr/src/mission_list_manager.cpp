@@ -371,7 +371,8 @@ void MissionListManager::AddRecord(const AbilityRequest &abilityRequest,
         newWant->RemoveParam(Want::PARAM_RESV_FOR_RESULT);
         srcAbilityId = srcDeviceId + "_" + std::to_string(missionId);
     }
-    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, srcAbilityId);
+    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want,
+        srcAbilityId);
 }
 
 int MissionListManager::GetTargetMission(const AbilityRequest &abilityRequest, std::shared_ptr<Mission> &targetMission,
@@ -1201,7 +1202,7 @@ int MissionListManager::AbilityTransactionDone(const sptr<IRemoteObject> &token,
         abilityRecord = GetAbilityRecordByTokenInner(token);
         CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     }
-
+    abilityRecord->RemoveSignatureInfo();
     std::string element = abilityRecord->GetElementName().GetURI();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
 
@@ -3310,7 +3311,7 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
         return ERR_INVALID_VALUE;
     }
 
-    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode);
+    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
 
     // mission is first created, add mission to default call mission list.
@@ -3921,47 +3922,6 @@ bool MissionListManager::IsExcludeFromMissions(const std::shared_ptr<Mission> &m
     auto abilityRecord = mission->GetAbilityRecord();
     return abilityRecord && abilityRecord->GetAbilityInfo().excludeFromMissions;
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int MissionListManager::BlockAbility(int32_t abilityRecordId)
-{
-    int ret = -1;
-    for (const auto &missionList : currentMissionLists_) {
-        if (missionList && missionList != launcherList_) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "missionList begin to call BlockAbilityByRecordId %{public}s", __func__);
-            if (missionList->BlockAbilityByRecordId(abilityRecordId) == ERR_OK) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "missionList call BlockAbilityByRecordId success");
-                ret = ERR_OK;
-            }
-        }
-    }
-
-    if (defaultStandardList_) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "defaultStandardList begin to call BlockAbilityByRecordId %{public}s", __func__);
-        if (defaultStandardList_->BlockAbilityByRecordId(abilityRecordId) == ERR_OK) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "defaultStandardList call BlockAbilityByRecordId success");
-            ret = ERR_OK;
-        }
-    }
-
-    if (defaultSingleList_) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "defaultSingleList begin to call BlockAbilityByRecordId %{public}s", __func__);
-        if (defaultSingleList_->BlockAbilityByRecordId(abilityRecordId) == ERR_OK) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "defaultSingleList_ call BlockAbilityByRecordId success");
-            ret = ERR_OK;
-        }
-    }
-
-    if (launcherList_) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "launcherList begin to call BlockAbilityByRecordId %{public}s", __func__);
-        if (launcherList_->BlockAbilityByRecordId(abilityRecordId) == ERR_OK) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "launcherList_ call BlockAbilityByRecordId success");
-            ret = ERR_OK;
-        }
-    }
-    return ret;
-}
-#endif
 
 void MissionListManager::SetMissionANRStateByTokens(const std::vector<sptr<IRemoteObject>> &tokens)
 {

@@ -499,6 +499,28 @@ void AbilityManagerCollaboratorProxy::NotifyMissionBindPid(int32_t missionId, in
     }
 }
 
+int32_t AbilityManagerCollaboratorProxy::CheckStaticCfgPermission(const Want &want)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write failed.");
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::CHECK_STATIC_CFG_PERMISSION,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AbilityManagerCollaboratorProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {

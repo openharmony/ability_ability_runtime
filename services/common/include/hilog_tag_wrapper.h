@@ -22,7 +22,7 @@
 #include "hilog/log.h"
 
 #ifndef AAFWK_FUNC_FMT
-#define AAFWK_FUNC_FMT "[%{public}s(%{public}s:%{public}d)]"
+#define AAFWK_FUNC_FMT "[%{public}s:%{public}d]"
 #endif
 
 #ifndef AAFWK_FILE_NAME
@@ -30,7 +30,7 @@
 #endif
 
 #ifndef AAFWK_FUNC_INFO
-#define AAFWK_FUNC_INFO AAFWK_FILE_NAME, __FUNCTION__, __LINE__
+#define AAFWK_FUNC_INFO AAFWK_FILE_NAME, __LINE__
 #endif
 
 

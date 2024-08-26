@@ -444,6 +444,21 @@ AppMgrResultCode AppMgrClient::GetAllRenderProcesses(std::vector<RenderProcessIn
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+AppMgrResultCode AppMgrClient::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    int32_t result = service->GetAllChildrenProcesses(info);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "service->GetAllChildrenProcesses failed,result=%{public}d", result);
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    return AppMgrResultCode::RESULT_OK;
+}
+
 AppMgrResultCode AppMgrClient::NotifyMemoryLevel(MemoryLevel level)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -840,19 +855,6 @@ sptr<IRemoteObject> AppMgrClient::GetRemoteObject()
 {
     return mgrHolder_->GetRemoteObject();
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AppMgrClient::BlockAppService()
-{
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s", __func__);
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
-    }
-    return service->BlockAppService();
-}
-#endif
 
 void AppMgrClient::SetCurrentUserId(const int32_t userId)
 {

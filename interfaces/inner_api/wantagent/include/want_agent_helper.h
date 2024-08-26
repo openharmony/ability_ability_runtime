@@ -108,7 +108,7 @@ public:
      *
      * @param agent Indicates the WantAgent to cancel.
      */
-    static ErrCode Cancel(const std::shared_ptr<WantAgent> &agent);
+    static ErrCode Cancel(const std::shared_ptr<WantAgent> agent);
 
     /**
      * Checks whether two WantAgent objects are the same.

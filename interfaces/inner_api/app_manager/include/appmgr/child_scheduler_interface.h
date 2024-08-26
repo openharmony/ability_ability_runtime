@@ -27,7 +27,7 @@ public:
     /**
      * Notify chile process to load js file.
      */
-    virtual bool ScheduleLoadJs() = 0;
+    virtual bool ScheduleLoadChild() = 0;
 
     /**
      * Notify chile process to exit safely.

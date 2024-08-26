@@ -55,6 +55,12 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
     }
 
     WantSenderInfo info = wantSenderInfo;
+
+    if (!isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        info.allWants.size() > 0) {
+        info.allWants.back().want.RemoveParam("ohos.extra.param.key.appCloneIndex");
+    }
+        
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
 }
 
@@ -112,7 +118,7 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
         rec->SetCallerUid(callingUid);
         pendingKey->SetCode(PendingRecordIdCreate());
         wantRecords_.insert(std::make_pair(pendingKey, rec));
-        TAG_LOGI(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
+        TAG_LOGD(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
         return rec;
     }
     return nullptr;
