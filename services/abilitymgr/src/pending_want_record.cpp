@@ -140,7 +140,11 @@ void PendingWantRecord::BuildSendWant(SenderInfo &senderInfo, Want &want)
             wantParams.SetParam(sendInfoWantParamKey, mapIter->second);
         }
     }
-    wantParams.SetParam("ohos.extra.param.key.appCloneIndex", Integer::Box(key_->GetAppIndex()));
+    
+    if (!wantParams.HasParam("ohos.extra.param.key.appCloneIndex")) {
+        wantParams.SetParam("ohos.extra.param.key.appCloneIndex", Integer::Box(key_->GetAppIndex()));
+    }
+    
     want.SetParams(wantParams);
 }
 

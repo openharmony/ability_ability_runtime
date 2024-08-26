@@ -62,6 +62,12 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
     }
 
     WantSenderInfo info = wantSenderInfo;
+    
+    if (!isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        info.allWants.size() > 0) {
+        info.allWants.back().want.RemoveParam("ohos.extra.param.key.appCloneIndex");
+    }
+       
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
 }
 
