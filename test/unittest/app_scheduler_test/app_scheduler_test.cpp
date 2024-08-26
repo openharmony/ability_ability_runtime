@@ -1075,50 +1075,6 @@ HWTEST_F(AppSchedulerTest, AppScheduler_GetAbilityRecordsByProcessID_002, TestSi
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_.reset();
 }
 
-/*
- * Feature: AppScheduler
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AppScheduler BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify BlockAppService
- */
-#ifdef ABILITY_COMMAND_FOR_TEST
-HWTEST_F(AppSchedulerTest, AppScheduler_BlockAppService_001, TestSize.Level1)
-{
-    clientMock_ = std::make_unique<AppMgrClientMock>();
-    EXPECT_CALL(*clientMock_, BlockAppService()).Times(1)
-        .WillOnce(Return(AppMgrResultCode::ERROR_SERVICE_NOT_READY));
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
-    int res = DelayedSingleton<AppScheduler>::GetInstance()->BlockAppService();
-    EXPECT_EQ(res, INNER_ERR);
-    clientMock_.reset();
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_.reset();
-}
-#endif
-
-/*
- * Feature: AppScheduler
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AppScheduler BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify BlockAppService
- */
-#ifdef ABILITY_COMMAND_FOR_TEST
-HWTEST_F(AppSchedulerTest, AppScheduler_BlockAppService_002, TestSize.Level1)
-{
-    clientMock_ = std::make_unique<AppMgrClientMock>();
-    EXPECT_CALL(*clientMock_, BlockAppService()).Times(1)
-        .WillOnce(Return(AppMgrResultCode::ERROR_SERVICE_NOT_READY));
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
-    int res = DelayedSingleton<AppScheduler>::GetInstance()->BlockAppService();
-    EXPECT_EQ(res, INNER_ERR);
-    clientMock_.reset();
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_.reset();
-}
-#endif
-
 /**
  * @tc.name: SetCurrentUserId_001
  * @tc.desc: set current userId.

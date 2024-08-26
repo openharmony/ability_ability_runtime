@@ -179,10 +179,6 @@ int32_t AppMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
     MessageParcel &reply, MessageOption &option)
 {
     switch (static_cast<uint32_t>(code)) {
-    #ifdef ABILITY_COMMAND_FOR_TEST
-        case AppMgrInterfaceCode::BLOCK_APP_SERVICE:
-            return HandleBlockAppServiceDone(data, reply);
-    #endif
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_RUNNING_STATE):
             return HandleGetAppRunningStateByBundleName(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_LOAD_REPAIR_PATCH):
@@ -931,16 +927,6 @@ int32_t AppMgrStub::HandleUnregisterConfigurationObserver(MessageParcel &data, M
     reply.WriteInt32(result);
     return NO_ERROR;
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int32_t AppMgrStub::HandleBlockAppServiceDone(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s", __func__);
-    int32_t result = BlockAppService();
-    reply.WriteInt32(result);
-    return result;
-}
-#endif
 
 int32_t AppMgrStub::HandleGetAppRunningStateByBundleName(MessageParcel &data, MessageParcel &reply)
 {

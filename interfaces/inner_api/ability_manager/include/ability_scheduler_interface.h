@@ -296,10 +296,6 @@ public:
 
     virtual void OnExecuteIntent(const Want &want) = 0;
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    virtual int BlockAbility() = 0;
-    #endif
-
     virtual void CallRequest() = 0;
 
     /**
@@ -391,9 +387,6 @@ public:
 
         // ipc id for dump ability runner
         DUMP_ABILITY_RUNNER_INNER,
-
-        // block ability runner
-        BLOCK_ABILITY_INNER,
 
         SCHEDULE_CALL,
         
