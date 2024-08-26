@@ -110,12 +110,9 @@ HWTEST_F(SpecifiedAbilityServiceTest, OnAcceptWantResponse_001, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->SetAbilityState(OHOS::AAFwk::AbilityState::FOREGROUND);
 
-    abilityMgrServ_->subManagersHelper_->InitMissionListManager(11, true);
+    abilityMgrServ_->subManagersHelper_->InitSubManagers(11, true);
     Want want;
     want.SetElementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
-    auto missionListMgr = abilityMgrServ_->subManagersHelper_->currentMissionListManager_;
-    EXPECT_TRUE(missionListMgr);
-    reinterpret_cast<MissionListManager*>(missionListMgr.get())->EnqueueWaitingAbility(abilityRequest);
     abilityMgrServ_->OnAcceptWantResponse(want, "flag");
 
     EXPECT_EQ(false, abilityRecord->IsNewWant());
