@@ -3480,6 +3480,7 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     faultData.errorObject.name = "1234";
     faultData.faultType = FaultDataType::APP_FREEZE;
     appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, faultData);
+    EXPECT_NE(taskHandler, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 end");
 }
 
