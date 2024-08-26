@@ -111,6 +111,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
         [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             if (*innerErrCode == static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)) {
                 task.Reject(env, CreateJsError(env, *innerErrCode));
+                return;
             }
             napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
             if (abilityResult == nullptr) {
@@ -166,6 +167,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
         [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             if (*innerErrCode == static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)) {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+                return;
             }
             napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
             if (abilityResult == nullptr) {
