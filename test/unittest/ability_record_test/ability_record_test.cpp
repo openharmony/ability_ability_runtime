@@ -1869,8 +1869,9 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_AddCallerRecord_001, TestSize.Level1)
     std::shared_ptr<CallerRecord> caller = std::make_shared<CallerRecord>(0, callerAbilityRecord);
     abilityRecord->callerList_.push_back(caller);
     int requestCode = 0;
+    Want want;
     std::string srcAbilityId = "srcAbility_id";
-    abilityRecord->AddCallerRecord(callerToken, requestCode, srcAbilityId);
+    abilityRecord->AddCallerRecord(callerToken, requestCode, want, srcAbilityId);
 }
 
 /*

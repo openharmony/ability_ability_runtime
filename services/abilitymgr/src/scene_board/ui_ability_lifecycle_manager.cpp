@@ -200,7 +200,7 @@ void UIAbilityLifecycleManager::AddCallerRecord(AbilityRequest &abilityRequest, 
         srcAbilityId = srcDeviceId + "_" + std::to_string(missionId);
     }
     uiAbilityRecord->AddCallerRecord(sessionInfo->callerToken,
-        sessionInfo->requestCode, srcAbilityId, sessionInfo->callingTokenId);
+        sessionInfo->requestCode, abilityRequest.want, srcAbilityId, sessionInfo->callingTokenId);
 }
 
 void UIAbilityLifecycleManager::CheckSpecified(AbilityRequest &abilityRequest,
@@ -306,7 +306,7 @@ int UIAbilityLifecycleManager::AbilityTransactionDone(const sptr<IRemoteObject> 
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     auto abilityRecord = GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-
+    abilityRecord->RemoveSignatureInfo();
     std::string element = abilityRecord->GetElementName().GetURI();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
 
@@ -821,7 +821,7 @@ bool UIAbilityLifecycleManager::IsAbilityStarted(AbilityRequest &abilityRequest,
     }
     targetRecord = sessionAbilityMap_.at(persistentId);
     if (targetRecord) {
-        targetRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode);
+        targetRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
         targetRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
     }
     return true;
@@ -844,7 +844,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     } else {
         uiAbilityRecord = sessionAbilityMap_.at(persistentId);
     }
-    uiAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode);
+    uiAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
     uiAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
     NotifyAbilityToken(uiAbilityRecord->GetToken(), abilityRequest);
 

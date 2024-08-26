@@ -1991,16 +1991,19 @@ void AbilityRecord::RemoveCallerRequestCode(std::shared_ptr<AbilityRecord> calle
     }
 }
 
-void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, std::string srcAbilityId,
-    uint32_t callingTokenId)
+void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, const Want &want,
+    std::string srcAbilityId, uint32_t callingTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Add caller record, callingTokenId is %{public}u", callingTokenId);
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord == nullptr) {
+        RecordSaCallerInfo(want);
+    }
     if (!srcAbilityId.empty() && IsSystemAbilityCall(callerToken, callingTokenId)) {
         AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
         return;
     }
-    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER(abilityRecord);
 
     auto isExist = [&abilityRecord](const std::shared_ptr<CallerRecord> &callerRecord) {
@@ -2074,6 +2077,15 @@ void AbilityRecord::AddSystemAbilityCallerRecord(const sptr<IRemoteObject> &call
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Add system ability record end.");
 }
 
+void AbilityRecord::RecordSaCallerInfo(const Want &want)
+{
+    saCallerInfo_ = std::make_shared<CallerAbilityInfo>();
+    saCallerInfo_->callerTokenId = want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
+    saCallerInfo_->callerUid =  want.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0);
+    saCallerInfo_->callerPid =  want.GetIntParam(Want::PARAM_RESV_CALLER_PID, 0);
+    saCallerInfo_->callerNativeName = want.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+}
+
 std::list<std::shared_ptr<CallerRecord>> AbilityRecord::GetCallerRecordList() const
 {
     return callerList_;
@@ -2092,11 +2104,8 @@ std::shared_ptr<AbilityRecord> AbilityRecord::GetCallerRecord() const
 
 std::shared_ptr<CallerAbilityInfo> AbilityRecord::GetCallerInfo() const
 {
-    if (callerList_.empty()) {
-        return nullptr;
-    }
-    if (callerList_.back() == nullptr) {
-        return nullptr;
+    if (callerList_.empty() || callerList_.back() == nullptr) {
+        return saCallerInfo_;
     }
     return callerList_.back()->GetCallerInfo();
 }
@@ -2600,6 +2609,13 @@ Want AbilityRecord::GetWant() const
 {
     std::lock_guard guard(wantLock_);
     return want_;
+}
+
+void AbilityRecord::RemoveSignatureInfo()
+{
+    std::lock_guard guard(wantLock_);
+    want_.RemoveParam(Want::PARAM_RESV_CALLER_APP_ID);
+    want_.RemoveParam(Want::PARAM_RESV_CALLER_APP_IDENTIFIER);
 }
 
 AppExecFwk::ElementName AbilityRecord::GetElementName() const
