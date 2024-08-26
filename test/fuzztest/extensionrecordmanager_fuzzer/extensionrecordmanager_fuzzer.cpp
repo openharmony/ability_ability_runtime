@@ -73,7 +73,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     AppExecFwk::AbilityInfo abilityInfo;
     extensionRecordManager->IsBelongToManager(abilityInfo);
     auto focusToken = GetFuzzAbilityToken();
-    extensionRecordManager->IsFocused(int32Param, focusToken);
+    extensionRecordManager->IsFocused(int32Param, focusToken, focusToken);
     std::vector<std::string> extensionList;
     extensionRecordManager->GetActiveUIExtensionList(int32Param, extensionList);
     std::string strParam(data, size);
