@@ -243,7 +243,7 @@ enum class AbilityManagerInterfaceCode {
 
     // Set resident process enable status.
     SET_RESIDENT_PROCESS_ENABLE = 80,
-    
+
     // Back to caller.
     BACK_TO_CALLER_UIABILITY = 82,
 

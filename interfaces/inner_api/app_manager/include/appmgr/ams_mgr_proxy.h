@@ -119,8 +119,7 @@ public:
      * @param accountId, account ID.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillProcessWithAccount(
-        const std::string &bundleName, const int accountId) override;
+    virtual int32_t KillProcessWithAccount(const std::string &bundleName, const int accountId) override;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
