@@ -17,6 +17,7 @@
 
 #include "ability_record.h"
 #include "ability_util.h"
+#include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
@@ -43,7 +44,7 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
     AppExecFwk::DisposedRule disposedRule;
-    if (CheckControl(param.want, param.userId, disposedRule)) {
+    if (CheckControl(param.want, param.userId, disposedRule, param.appIndex)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "The target ability is intercpted, disposedType is %{public}d, controlType is %{public}d, "
             "componentType is %{public}d.", disposedRule.disposedType, disposedRule.controlType,
@@ -84,7 +85,7 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 }
 
 bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
-    AppExecFwk::DisposedRule &disposedRule)
+    AppExecFwk::DisposedRule &disposedRule, int32_t appIndex)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // get bms
@@ -104,8 +105,14 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
     std::vector<AppExecFwk::DisposedRule> disposedRuleList;
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "GetAbilityRunningControlRule");
-        auto ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
-            userId, disposedRuleList));
+        int32_t ret = ERR_OK;
+        if (appIndex > 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+            ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
+                userId, disposedRuleList, appIndex));
+        } else {
+            ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
+                userId, disposedRuleList, 0));
+        }
         if (ret != ERR_OK || disposedRuleList.empty()) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Get No DisposedRule");
             return false;
