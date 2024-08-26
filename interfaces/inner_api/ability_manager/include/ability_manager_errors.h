@@ -536,11 +536,6 @@ enum {
     EXTENSION_BLOCKED_BY_SERVICE_LIST = 2097255,
 
     /*
-     * Result(2097256) for non-app-provision mode
-     */
-    ERR_NOT_IN_APP_PROVISION_MODE = 2097256,
-    
-    /*
      * Result(2097257) for share file uri non-implicitly
      */
     ERR_SHARE_FILE_URI_NON_IMPLICITLY = 2097257,
