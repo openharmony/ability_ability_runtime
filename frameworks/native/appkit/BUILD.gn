@@ -473,7 +473,10 @@ ohos_shared_library("appkit_delegator") {
 }
 
 config("application_context_manager_config") {
-  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context" ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "${ability_runtime_services_path}/common/include",
+  ]
 }
 
 ohos_shared_library("appkit_manager_helper") {
@@ -530,6 +533,7 @@ ohos_shared_library("application_context_manager") {
 
   external_deps = [
     "ets_runtime:libark_jsruntime",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
 

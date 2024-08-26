@@ -1781,6 +1781,29 @@ int32_t AppMgrServiceInner::GetAllRenderProcesses(std::vector<RenderProcessInfo>
     return ERR_OK;
 }
 
+int AppMgrServiceInner::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
+{
+    auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+    // check permission
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        if (isPerm) {
+            GetChildrenProcesses(appRecord, info);
+        } else {
+            auto applicationInfo = appRecord->GetApplicationInfo();
+            if (!applicationInfo) {
+                continue;
+            }
+            auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+            auto tokenId = applicationInfo->accessTokenId;
+            if (callingTokenId == tokenId) {
+                GetChildrenProcesses(appRecord, info);
+            }
+        }
+    }
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
@@ -1913,6 +1936,30 @@ void AppMgrServiceInner::GetRenderProcesses(const std::shared_ptr<AppRunningReco
             renderProcessInfo.hostPid_ = renderRecord->GetHostPid();
             renderProcessInfo.state_ = renderRecord->GetState();
             info.emplace_back(renderProcessInfo);
+        }
+    }
+}
+
+void AppMgrServiceInner::GetChildrenProcesses(const std::shared_ptr<AppRunningRecord> &appRecord,
+    std::vector<ChildProcessInfo> &info)
+{
+    auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
+    if (childProcessRecordMap.empty()) {
+        return;
+    }
+    int32_t retCode = ERR_OK;
+    for (auto iter : childProcessRecordMap) {
+        auto childProcessRecord = iter.second;
+        if (childProcessRecord != nullptr) {
+            ChildProcessInfo childProcessInfo;
+            retCode = GetChildProcessInfo(childProcessRecord, appRecord, childProcessInfo, true);
+            if (retCode != ERR_OK) {
+                TAG_LOGW(
+                    AAFwkTag::APPMGR, "GetChildProcessInfo failed. host pid=%{public}d, child pid=%{public}d",
+                    appRecord->GetPriorityObject()->GetPid(), childProcessRecord->GetPid());
+                continue;
+            }
+            info.emplace_back(childProcessInfo);
         }
     }
 }
@@ -6532,7 +6579,7 @@ int32_t AppMgrServiceInner::GetChildProcessInfoForSelf(ChildProcessInfo &info)
 }
 
 int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-    const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info)
+    const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info, bool isCallFromGetChildrenProcesses)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!childProcessRecord) {
@@ -6543,23 +6590,38 @@ int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProce
         TAG_LOGE(AAFwkTag::APPMGR, "No such appRecord.");
         return ERR_NAME_NOT_FOUND;
     }
+    auto osAccountMgr = DelayedSingleton<OsAccountManagerWrapper>::GetInstance();
+    if (osAccountMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "osAccountMgr is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t userId = -1;
+    int errCode = osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), userId);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid failed,errcode=%{public}d", errCode);
+        return errCode;
+    }
+    info.userId = userId;
     info.pid = childProcessRecord->GetPid();
     info.hostPid = childProcessRecord->GetHostPid();
     info.uid = childProcessRecord->GetUid();
-    info.childProcessType = childProcessRecord->GetChildProcessType();
+    info.hostUid = appRecord->GetUid();
     info.bundleName = appRecord->GetBundleName();
     info.processName = childProcessRecord->GetProcessName();
-    info.srcEntry = childProcessRecord->GetSrcEntry();
-    info.entryFunc = childProcessRecord->GetEntryFunc();
-    info.entryParams = childProcessRecord->GetEntryParams();
-    info.jitEnabled = appRecord->IsJITEnabled();
-    info.isStartWithDebug = childProcessRecord->isStartWithDebug();
-    auto applicationInfo = appRecord->GetApplicationInfo();
-    if (applicationInfo) {
-        TAG_LOGD(AAFwkTag::APPMGR, "applicationInfo is exist, debug:%{public}d", applicationInfo->debug);
-        info.isDebugApp = applicationInfo->debug;
+    if (!isCallFromGetChildrenProcesses) {
+        info.childProcessType = childProcessRecord->GetChildProcessType();
+        info.srcEntry = childProcessRecord->GetSrcEntry();
+        info.entryFunc = childProcessRecord->GetEntryFunc();
+        info.entryParams = childProcessRecord->GetEntryParams();
+        info.jitEnabled = appRecord->IsJITEnabled();
+        info.isStartWithDebug = childProcessRecord->isStartWithDebug();
+        auto applicationInfo = appRecord->GetApplicationInfo();
+        if (applicationInfo) {
+            TAG_LOGD(AAFwkTag::APPMGR, "applicationInfo is exist, debug:%{public}d", applicationInfo->debug);
+            info.isDebugApp = applicationInfo->debug;
+        }
+        info.isStartWithNative = appRecord->isNativeStart();
     }
-    info.isStartWithNative = appRecord->isNativeStart();
     return ERR_OK;
 }
 

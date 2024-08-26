@@ -176,7 +176,7 @@ public:
      * @param config Indicates the new Configuration object.
      */
     virtual void OnConfigurationUpdated(Configuration config);
-    
+
     /**
      *
      * @brief Will be Called when the application font of the device changes.
@@ -255,7 +255,7 @@ public:
      * @param abilityInfo
      */
     void CleanAbilityStage(const sptr<IRemoteObject> &token, const std::shared_ptr<AbilityInfo> &abilityInfo,
-        bool isCacheProcess = false);
+        bool isCacheProcess);
 
     /**
      * @brief return the application context
@@ -318,7 +318,6 @@ public:
     void CleanEmptyAbilityStage();
 
 private:
-    void DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo);
     void UpdateAppContextResMgr(const Configuration &config);
     bool isUpdateColor(Configuration &config, std::string colorMode, std::string globalColorMode,
         std::string globalColorModeIsSetBySa, std::string colorModeIsSetByApp, std::string colorModeIsSetBySa);

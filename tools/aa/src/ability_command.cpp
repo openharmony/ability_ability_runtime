@@ -170,9 +170,6 @@ ErrCode AbilityManagerShellCommand::CreateCommandMap()
         {"appdebug", [this]() { return this->RunAsAppDebugDebugCommand(); }},
 #ifdef ABILITY_COMMAND_FOR_TEST
         {"force-timeout", [this]() { return this->RunForceTimeoutForTest(); }},
-        {"block-ability", [this]() { return this->RunAsBlockAbilityCommand(); }},
-        {"block-ams-service", [this]() { return this->RunAsBlockAmsServiceCommand(); }},
-        {"block-app-service", [this]() { return this->RunAsBlockAppServiceCommand(); }},
 #endif
 #ifdef ABILITY_FAULT_AND_EXIT_TEST
         {"forceexitapp", [this]() { return this->RunAsForceExitAppCommand(); }},
@@ -2165,59 +2162,6 @@ ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithOption(int32_t 
             result = OHOS::ERR_INVALID_VALUE;
             break;
         }
-    }
-    return result;
-}
-
-ErrCode AbilityManagerShellCommand::RunAsBlockAbilityCommand()
-{
-    TAG_LOGI(AAFwkTag::AA_TOOL, "called");
-    ErrCode result = OHOS::ERR_OK;
-    if (argList_.size() > 0) {
-        result = AbilityManagerClient::GetInstance()->BlockAbility(atoi(argList_[0].c_str()));
-    } else {
-        result = OHOS::ERR_INVALID_VALUE;
-    }
-
-    if (result == OHOS::ERR_OK) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_BLOCK_ABILITY_OK.c_str());
-        resultReceiver_ = STRING_BLOCK_ABILITY_OK + "\n";
-    } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_BLOCK_ABILITY_NG.c_str(), result);
-        resultReceiver_ = STRING_BLOCK_ABILITY_NG + "\n";
-        resultReceiver_.append(GetMessageFromCode(result));
-    }
-    return result;
-}
-
-ErrCode AbilityManagerShellCommand::RunAsBlockAmsServiceCommand()
-{
-    TAG_LOGI(AAFwkTag::AA_TOOL, "called");
-    ErrCode result = OHOS::ERR_OK;
-    result = AbilityManagerClient::GetInstance()->BlockAmsService();
-    if (result == OHOS::ERR_OK) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_BLOCK_AMS_SERVICE_OK.c_str());
-        resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";
-    } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
-        resultReceiver_ = STRING_BLOCK_AMS_SERVICE_NG + "\n";
-        resultReceiver_.append(GetMessageFromCode(result));
-    }
-    return result;
-}
-
-ErrCode AbilityManagerShellCommand::RunAsBlockAppServiceCommand()
-{
-    TAG_LOGI(AAFwkTag::AA_TOOL, "called");
-    ErrCode result = OHOS::ERR_OK;
-    result = AbilityManagerClient::GetInstance()->BlockAppService();
-    if (result == OHOS::ERR_OK) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_BLOCK_APP_SERVICE_OK.c_str());
-        resultReceiver_ = STRING_BLOCK_APP_SERVICE_OK + "\n";
-    } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_BLOCK_APP_SERVICE_NG.c_str(), result);
-        resultReceiver_ = STRING_BLOCK_APP_SERVICE_NG + "\n";
-        resultReceiver_.append(GetMessageFromCode(result));
     }
     return result;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,11 +24,15 @@
 #include "native_engine/native_engine.h"
 #include "ohos_application.h"
 #include "session_info.h"
-#include "ui_extension_base.h"
+#include "ui_extension_base_impl.h"
 #include "ui_extension_context.h"
 #include "ui_extension_window_command.h"
 #include "want.h"
 #include "window.h"
+#ifdef SUPPORT_GRAPHICS
+#include "display_manager.h"
+#include "window_manager.h"
+#endif // SUPPORT_GRAPHICS
 
 class NativeReference;
 
@@ -66,8 +70,10 @@ public:
      *
      * @param Want Indicates the {@link Want} structure containing startup information about the ui extension.
      * @param launchParam The launch param.
+     * @param sessionInfo The session info of the ability.
      */
-    void OnStart(const AAFwk::Want &want, AAFwk::LaunchParam &launchParam) override;
+    void OnStart(
+        const AAFwk::Want &want, AAFwk::LaunchParam &launchParam, sptr<AAFwk::SessionInfo> sessionInfo) override;
 
     /**
      * @brief Called back when ui extension is started.
@@ -95,6 +101,11 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnStop() override;
+    virtual void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback);
+    /**
+     * @brief The callback of OnStop.
+     */
+    virtual void OnStopCallBack();
 
     /**
      * @brief Called when the system configuration is updated.
@@ -152,8 +163,17 @@ public:
     void SetContext(const std::shared_ptr<UIExtensionContext> &context) override;
 
     void BindContext() override;
+
+    /**
+     * @brief Called when configuration changed, including system configuration and window configuration.
+     */
+    void ConfigurationUpdated();
+
 protected:
-    napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0);
+    napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
+        bool withResult = false);
+    bool CheckPromise(napi_value result);
+    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
     void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
     void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
@@ -171,7 +191,7 @@ protected:
 protected:
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
-    std::unique_ptr<NativeReference> jsObj_;
+    std::shared_ptr<NativeReference> jsObj_;
     std::shared_ptr<UIExtensionContext> context_;
     std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
     std::set<uint64_t> foregroundWindows_;
@@ -179,6 +199,37 @@ protected:
     std::shared_ptr<AbilityResultListeners> abilityResultListeners_ = nullptr;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_;
     sptr<IRemoteObject> token_ = nullptr;
+    std::shared_ptr<AbilityHandler> handler_ = nullptr;
+
+#ifdef SUPPORT_GRAPHICS
+private:
+    class JsUIExtensionBaseDisplayListener : public OHOS::Rosen::IDisplayInfoChangedListener {
+    public:
+        explicit JsUIExtensionBaseDisplayListener(const std::weak_ptr<JsUIExtensionBase> &jsUiExtensionBase)
+        {
+            jsUiExtensionBase_ = jsUiExtensionBase;
+        }
+
+        void OnDisplayInfoChange(const sptr<IRemoteObject> &token, Rosen::DisplayId displayId, float density,
+            Rosen::DisplayOrientation orientation) override
+        {
+            auto sptr = jsUiExtensionBase_.lock();
+            if (sptr != nullptr) {
+                sptr->OnDisplayInfoChange(token, displayId, density, orientation);
+            }
+        }
+
+    private:
+        std::weak_ptr<JsUIExtensionBase> jsUiExtensionBase_;
+    };
+
+    void RegisterDisplayInfoChangedListener();
+    void UnregisterDisplayInfoChangedListener();
+    void OnDisplayInfoChange(const sptr<IRemoteObject> &token, Rosen::DisplayId displayId, float density,
+        Rosen::DisplayOrientation orientation);
+
+    sptr<JsUIExtensionBaseDisplayListener> jsUIExtensionBaseDisplayListener_ = nullptr;
+#endif
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

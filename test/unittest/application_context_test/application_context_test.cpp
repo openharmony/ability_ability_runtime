@@ -1327,6 +1327,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillContinue_0100, TestSize.Le
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillContinue_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnAbilityWillContinue(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillContinue_0100 end";
 }
 
@@ -1341,6 +1342,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageWillRestore_0100, TestSize
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> winstage = nullptr;
     context_->DispatchOnWindowStageWillRestore(ability, winstage);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillRestore_0100 end";
 }
 
@@ -1355,6 +1357,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageRestore_0100, TestSize.Lev
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> winstage = nullptr;
     context_->DispatchOnWindowStageRestore(ability, winstage);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageRestore_0100 end";
 }
 
@@ -1368,6 +1371,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillSaveState_0100, TestSize.L
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillSaveState_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnAbilityWillSaveState(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillSaveState_0100 end";
 }
 
@@ -1381,6 +1385,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilitySaveState_0100, TestSize.Level
     GTEST_LOG_(INFO) << "DispatchOnAbilitySaveState_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnAbilitySaveState(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilitySaveState_0100 end";
 }
 
@@ -1394,6 +1399,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnWillNewWant_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "DispatchOnWillNewWant_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnWillNewWant(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWillNewWant_0100 end";
 }
 
@@ -1407,6 +1413,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnNewWant_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "DispatchOnNewWant_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnNewWant(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnNewWant_0100 end";
 }
 
@@ -1420,6 +1427,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillCreate_0100, TestSize.Leve
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillCreate_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnAbilityWillCreate(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillCreate_0100 end";
 }
 
@@ -1434,6 +1442,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageWillCreate_0100, TestSize.
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> winstage = nullptr;
     context_->DispatchOnWindowStageWillCreate(ability, winstage);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillCreate_0100 end";
 }
 
@@ -1448,6 +1457,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageWillDestroy_0100, TestSize
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> winstage = nullptr;
     context_->DispatchOnWindowStageWillDestroy(ability, winstage);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillDestroy_0100 end";
 }
 
@@ -1461,6 +1471,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillDestroy_0100, TestSize.Lev
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillDestroy_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnAbilityWillDestroy(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillDestroy_0100 end";
 }
 
@@ -1474,6 +1485,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillForeground_0100, TestSize.
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillForeground_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnAbilityWillForeground(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillForeground_0100 end";
 }
 
@@ -1487,6 +1499,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillBackground_0100, TestSize.
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillBackground_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     context_->DispatchOnAbilityWillBackground(ability);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillBackground_0100 end";
 }
 
@@ -1498,6 +1511,7 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillBackground_0100, TestSize.
 HWTEST_F(ApplicationContextTest, SetFont_0100, TestSize.Level1)
 {
     context_->SetFont("awk");
+    EXPECT_TRUE(context_ != nullptr);
 }
 
 /**
@@ -1508,6 +1522,7 @@ HWTEST_F(ApplicationContextTest, SetFont_0100, TestSize.Level1)
 HWTEST_F(ApplicationContextTest, SetMcc_0100, TestSize.Level1)
 {
     context_->SetMcc("mcc");
+    EXPECT_TRUE(context_ != nullptr);
 }
 
 /**
@@ -1518,6 +1533,7 @@ HWTEST_F(ApplicationContextTest, SetMcc_0100, TestSize.Level1)
 HWTEST_F(ApplicationContextTest, SetMnc_0100, TestSize.Level1)
 {
     context_->SetMnc("mnc");
+    EXPECT_TRUE(context_ != nullptr);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,7 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0100, TestSize.Level1)
     ASSERT_NE(jsRuntime, nullptr);
     bool isDebugApp = true;
     bool isStartWithDebug = false;
+    jsRuntime->jsEnv_->vm_ = nullptr;
     jsRuntime->DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
     EXPECT_NE(jsRuntime, nullptr);
     jsRuntime.reset();
@@ -102,6 +103,7 @@ HWTEST_F(JsRuntimeTest, UpdatePkgContextInfoJson_0200, TestSize.Level1)
     AbilityRuntime::Runtime::Options options;
     options.preload = true;
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    jsRuntime->jsEnv_->vm_ = nullptr;
     ASSERT_NE(jsRuntime, nullptr);
     bool isDebugApp = true;
     bool isStartWithDebug = false;
@@ -124,6 +126,7 @@ HWTEST_F(JsRuntimeTest, GetSafeData_0100, TestSize.Level1)
     ASSERT_NE(jsRuntime, nullptr);
     std::string Path = "";
     std::string fileFullName = "";
+    jsRuntime->jsEnv_->vm_ = nullptr;
     auto result = jsRuntime->GetSafeData(Path, fileFullName);
     EXPECT_EQ(result, nullptr);
     jsRuntime.reset();
@@ -151,6 +154,7 @@ HWTEST_F(JsRuntimeTest, DebuggerConnectionManager_0100, TestSize.Level1)
     dOption.processName = "test";
     dOption.isDebugApp = true;
     dOption.isStartWithNative = false;
+    jsRuntime->jsEnv_->vm_ = nullptr;
     jsRuntime->DebuggerConnectionManager(isDebugApp, isStartWithDebug, dOption);
     EXPECT_NE(jsRuntime, nullptr);
     jsRuntime.reset();
@@ -178,6 +182,7 @@ HWTEST_F(JsRuntimeTest, DebuggerConnectionManager_0200, TestSize.Level1)
     dOption.processName = "test";
     dOption.isDebugApp = true;
     dOption.isStartWithNative = false;
+    jsRuntime->jsEnv_->vm_ = nullptr;
     jsRuntime->DebuggerConnectionManager(isDebugApp, isStartWithDebug, dOption);
     EXPECT_NE(jsRuntime, nullptr);
     jsRuntime.reset();

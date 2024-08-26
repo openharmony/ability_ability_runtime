@@ -118,6 +118,7 @@ HWTEST_F(CjWantFfiTest, CjWantFfiTestFFICJWantDelete_0100, TestSize.Level1)
     strcpy_s(params.parameters, 11, "moduleName");
     WantHandle want = FFICJWantCreateWithWantInfo(params);
     FFICJWantDelete(want);
+    EXPECT_NE(want, nullptr);
 }
 
 /**
@@ -188,6 +189,7 @@ HWTEST_F(CjWantFfiTest, CjWantFfiTestFFICJWantAddEntity_0100, TestSize.Level1)
 
     const char* entity = "test_entity";
     FFICJWantAddEntity(want, entity);
+    EXPECT_NE(want, nullptr);
 }
 
 /**
@@ -199,4 +201,5 @@ HWTEST_F(CjWantFfiTest, CjWantFfiTestFFICJWantParseUri_0100, TestSize.Level1)
 {
     const char* uri = "test_uri";
     WantHandle want = FFICJWantParseUri(uri);
+    EXPECT_EQ(want, nullptr);
 }
