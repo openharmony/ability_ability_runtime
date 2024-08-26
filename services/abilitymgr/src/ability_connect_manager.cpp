@@ -1588,19 +1588,21 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Timeout ability record is not exist in service map.");
         return;
     }
-    MoveToTerminatingMap(abilityRecord);
     TAG_LOGW(AAFwkTag::ABILITYMGR, "Load timeout:%{public}s,user:%{public}d.",
         abilityRecord->GetURI().c_str(), userId_);
-    RemoveServiceAbility(abilityRecord);
     if (abilityRecord->IsSceneBoard()) {
         auto isAttached = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(
             abilityRecord->GetToken()));
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
         if (!isAttached) {
+            MoveToTerminatingMap(abilityRecord);
+            RemoveServiceAbility(abilityRecord);
             RestartAbility(abilityRecord, userId_);
         }
         return;
     }
+    MoveToTerminatingMap(abilityRecord);
+    RemoveServiceAbility(abilityRecord);
     DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
     if (IsAbilityNeedKeepAlive(abilityRecord)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Load time out, try to restart");
