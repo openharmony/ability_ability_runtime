@@ -243,7 +243,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     CHECK_POINTER_AND_RETURN(targetService, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Start ability: %{public}s", targetService->GetURI().c_str());
 
-    targetService->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode);
+    targetService->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
 
     targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_EXTENSION);
 
@@ -691,6 +691,7 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
         return;
     }
     if (targetService->GetConnectRecordList().size() > 1) {
+        targetService->RemoveSignatureInfo();
         if (taskHandler_ != nullptr && targetService->GetConnRemoteObject()) {
             auto task = [connectRecord]() { connectRecord->CompleteConnect(ERR_OK); };
             taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
@@ -927,8 +928,6 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
         }
     } else if (targetState == AbilityState::INITIAL) {
         abilityRecord = GetExtensionByTokenFromTerminatingMap(token);
-    } else {
-        abilityRecord = nullptr;
     }
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
@@ -957,6 +956,7 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
             return DispatchInactive(abilityRecord, state);
         }
         case AbilityState::FOREGROUND: {
+            abilityRecord->RemoveSignatureInfo();
             return DispatchForeground(abilityRecord);
         }
         case AbilityState::BACKGROUND: {
@@ -1011,6 +1011,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
         return INVALID_CONNECTION_STATE;
     }
     abilityRecord->RemoveConnectWant();
+    abilityRecord->RemoveSignatureInfo();
 
     if (abilityRecord->GetAbilityInfo().type == AbilityType::SERVICE) {
         DelayedSingleton<AppScheduler>::GetInstance()->UpdateAbilityState(
@@ -1156,6 +1157,7 @@ int AbilityConnectManager::ScheduleCommandAbilityDoneLocked(const sptr<IRemoteOb
     }
     EventInfo eventInfo = BuildEventInfo(abilityRecord);
     EventReport::SendStartServiceEvent(EventName::START_SERVICE, eventInfo);
+    abilityRecord->RemoveSignatureInfo();
     // complete command and pop waiting start ability from queue.
     CompleteCommandAbility(abilityRecord);
 
