@@ -73,11 +73,6 @@ public:
     MOCK_METHOD2(AcquireShareData, int32_t(const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData));
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
-#ifdef ABILITY_COMMAND_FOR_TEST
-    MOCK_METHOD0(BlockAppService, int());
-    MOCK_METHOD0(BlockAmsService, int());
-    MOCK_METHOD1(BlockAbility, int(int32_t abilityRecordId));
-#endif
 
     int InvokeSendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {
@@ -220,7 +215,7 @@ public:
         return 0;
     }
 
-    virtual int KillProcess(const std::string& bundleName, const bool clearpagestack = false)
+    virtual int KillProcess(const std::string& bundleName, const bool clearPageStack = true)
     {
         return 0;
     }

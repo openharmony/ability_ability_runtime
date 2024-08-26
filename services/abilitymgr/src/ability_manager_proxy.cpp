@@ -3913,62 +3913,6 @@ int32_t AbilityManagerProxy::GetMissionIdByToken(const sptr<IRemoteObject> &toke
     return reply.ReadInt32();
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AbilityManagerProxy::BlockAmsService()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
-    }
-
-    auto error = SendRequest(AbilityManagerInterfaceCode::BLOCK_AMS_SERVICE, data, reply, option);
-    if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "BlockAmsService error: %d", error);
-        return error;
-    }
-    return reply.ReadInt32();
-}
-
-int AbilityManagerProxy::BlockAbility(int32_t abilityRecordId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
-    }
-    if (!data.WriteInt32(abilityRecordId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "pid WriteInt32 fail.");
-        return ERR_INVALID_VALUE;
-    }
-
-    auto error = SendRequest(AbilityManagerInterfaceCode::BLOCK_ABILITY, data, reply, option);
-    if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "BlockAbility error: %d", error);
-        return error;
-    }
-    return reply.ReadInt32();
-}
-
-int AbilityManagerProxy::BlockAppService()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
-    }
-
-    auto error = SendRequest(AbilityManagerInterfaceCode::BLOCK_APP_SERVICE, data, reply, option);
-    if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "BlockAmsService error: %d", error);
-        return error;
-    }
-    return reply.ReadInt32();
-}
-#endif
 int AbilityManagerProxy::FreeInstallAbilityFromRemote(const Want &want, const sptr<IRemoteObject> &callback,
     int32_t userId, int requestCode)
 {

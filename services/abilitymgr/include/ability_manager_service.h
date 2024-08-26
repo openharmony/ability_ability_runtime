@@ -839,7 +839,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearpagestack = false) override;
+    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = true) override;
 
     /**
      * Uninstall app
@@ -1288,26 +1288,6 @@ public:
     bool IsAbilityControllerStartById(int32_t missionId);
 
     #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block ability manager service.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAmsService() override;
-
-    /**
-     * Block ability.
-     *
-     * @param abilityRecordId The Ability Record Id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAbility(int32_t abilityRecordId) override;
-
-    /**
-     * Block app manager service.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService() override;
-
     /**
      * force timeout ability.
      *
@@ -1799,6 +1779,11 @@ public:
 
     int32_t TerminateMission(int32_t missionId) override;
 
+    int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        uint32_t sceneFlag, bool isColdStart);
+
+    int32_t NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1909,6 +1894,7 @@ private:
     void UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken);
     bool UpdateAsCallerInfoFromDialog(Want& want);
     void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
+    void UpdateSignatureInfo(std::string bundleName, Want& want);
     void UpdateCallerInfoFromToken(Want& want, const sptr<IRemoteObject> &token);
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
     int StartAbilityPrechainInterceptor(StartAbilityParams &params);
@@ -2233,7 +2219,6 @@ private:
     void InitInterceptorForScreenUnlock();
     void InitPushTask();
     void InitDeepLinkReserve();
-    void InitDefaultRecoveryList();
 
     bool CheckSenderWantInfo(int32_t callerUid, const WantSenderInfo &wantSenderInfo);
 
@@ -2265,6 +2250,8 @@ private:
         AppExecFwk::ExtensionAbilityType extensionType);
 
     bool CheckUIExtensionCallerIsForeground(const AbilityRequest &abilityRequest);
+    bool CheckUIExtensionCallerIsUIAbility(const AbilityRequest &abilityRequest);
+    std::shared_ptr<AbilityRecord> GetUIExtensionRootCaller(const sptr<IRemoteObject> token, int32_t userId);
 
     bool CheckUIExtensionCallerPidByHostWindowId(const AbilityRequest &abilityRequest);
 
@@ -2369,8 +2356,7 @@ private:
 
     bool GetJsonFromFile(const char *filePath, Json::Value &root);
 
-    bool ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath,
-        const std::string &WHITE_LIST);
+    bool ParseJsonFromBoot(const std::string &relativePath);
 
     void CloseAssertDialog(const std::string &assertSessionId);
 

@@ -342,16 +342,6 @@ public:
 
     void EnableRecoverAbility(int32_t missionId) override;
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block ability.
-     *
-     * @param abilityRecordId The Ability Record Id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int BlockAbility(int abilityRecordId) override;
-#endif
-
     void UninstallApp(const std::string &bundleName, int32_t uid) override;
 
     bool IsStarted() override;

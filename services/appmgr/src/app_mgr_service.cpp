@@ -54,9 +54,6 @@ constexpr const int BASE_TEN = 10;
 constexpr const char SIGN_TERMINAL = '\0';
 namespace {
 using namespace std::chrono_literals;
-#ifdef ABILITY_COMMAND_FOR_TEST
-static const int APP_MS_BLOCK = 65;
-#endif
 constexpr const char* TASK_INIT_APPMGRSERVICEINNER = "InitAppMgrServiceInnerTask";
 constexpr const char* TASK_ATTACH_APPLICATION = "AttachApplicationTask";
 constexpr const char* TASK_APPLICATION_FOREGROUNDED = "ApplicationForegroundedTask";
@@ -415,6 +412,14 @@ int32_t AppMgrService::GetAllRenderProcesses(std::vector<RenderProcessInfo> &inf
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->GetAllRenderProcesses(info);
+}
+
+int AppMgrService::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetAllChildrenProcesses(info);
 }
 
 int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
@@ -1033,24 +1038,6 @@ int32_t AppMgrService::UnregisterConfigurationObserver(const sptr<IConfiguration
     }
     return appMgrServiceInner_->UnregisterConfigurationObserver(observer);
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AppMgrService::BlockAppService()
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "begin");
-    if (!IsReady()) {
-        return ERR_INVALID_OPERATION;
-    }
-    auto task = [=]() {
-        while (1) {
-            TAG_LOGD(AAFwkTag::APPMGR, "begin block app service");
-            std::this_thread::sleep_for(APP_MS_BLOCK*1s);
-        }
-    };
-    taskHandler_->SubmitTask(task);
-    return ERR_OK;
-}
-#endif
 
 bool AppMgrService::GetAppRunningStateByBundleName(const std::string &bundleName)
 {

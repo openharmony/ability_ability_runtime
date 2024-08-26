@@ -51,6 +51,7 @@ public:
     int32_t GetUid() const;
     std::string GetProcessName() const;
     std::string GetSrcEntry() const;
+    std::string GetEntryFunc() const;
     std::shared_ptr<AppRunningRecord> GetHostRecord() const;
     void SetScheduler(const sptr<IChildScheduler> &scheduler);
     sptr<IChildScheduler> GetScheduler() const;
@@ -76,6 +77,7 @@ private:
     int32_t childProcessType_ = CHILD_PROCESS_TYPE_JS;
     std::string processName_;
     std::string srcEntry_;
+    std::string entryFunc_;
     std::weak_ptr<AppRunningRecord> hostRecord_;
     sptr<IChildScheduler> scheduler_ = nullptr;
     sptr<AppDeathRecipient> deathRecipient_ = nullptr;

@@ -54,6 +54,7 @@ ohos_fuzztest("AbilityAppMgrRenderStateDataFuzzTest") {
     "init:libbegetutil",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
     "window_manager:libwm",
   ]

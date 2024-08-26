@@ -61,6 +61,7 @@ constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_TITLE = "startAbilityWit
 constexpr const char* BROKER_DELEGATE_BUNDLE_NAME = "const.sys.abilityms.broker_delegate_bundle_name";
 constexpr const char* COLLABORATOR_BROKER_UID = "const.sys.abilityms.collaborator_broker_uid";
 constexpr const char* COLLABORATOR_BROKER_RESERVE_UID = "const.sys.abilityms.collaborator_broker_reserve_uid";
+constexpr const char* MAX_NATIVE_ARGS_CHILD_PROCESS = "const.max_native_child_process";
 }
 
 AppUtils::~AppUtils() {}
@@ -386,6 +387,17 @@ int32_t AppUtils::GetCollaboratorBrokerReserveUID()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "collaboratorBrokerReserveUid_ is %{public}d", collaboratorBrokerReserveUid_.value);
     return collaboratorBrokerReserveUid_.value;
+}
+
+int32_t AppUtils::MaxNativeArgsChildProcess()
+{
+    if (!maxNativeArgsChildProcess_.isLoaded) {
+        maxNativeArgsChildProcess_.value =
+            system::GetIntParameter<int32_t>(MAX_NATIVE_ARGS_CHILD_PROCESS, DEFAULT_MAX_NATIVE_ARGS_CHILD_PROCESS);
+        maxNativeArgsChildProcess_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "maxNativeArgsChildProcess: %{public}d", maxNativeArgsChildProcess_.value);
+    return maxNativeArgsChildProcess_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

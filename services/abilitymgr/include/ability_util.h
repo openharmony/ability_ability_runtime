@@ -76,6 +76,12 @@ constexpr const char* JUMP_INTERCEPTOR_DIALOG_CALLER_PKG = "interceptor_callerPk
         return;                                             \
     }
 
+#define CHECK_POINTER_TAG_LOG(object, tag, log)             \
+    if (!object) {                                          \
+        TAG_LOGE(tag, "%{public}s:", log);                  \
+        return;                                             \
+    }
+
 #define CHECK_POINTER_AND_RETURN(object, value)                \
     if (!object) {                                             \
         TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr"); \
