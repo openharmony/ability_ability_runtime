@@ -74,6 +74,8 @@ static int32_t ErrorCodeReturn(int32_t code)
             return CONTINUE_ALREADY_IN_PROGRESS;
         case MISSION_FOR_CONTINUING_IS_NOT_ALIVE:
             return MISSION_FOR_CONTINUING_IS_NOT_ALIVE;
+        case ERR_NOT_SYSTEM_APP:
+            return NOT_SYSTEM_APP;
         default:
             return SYSTEM_WORK_ABNORMALLY;
     };
@@ -106,6 +108,8 @@ static std::string ErrorMessageReturn(int32_t code)
         case MISSION_FOR_CONTINUING_IS_NOT_ALIVE:
             return std::string("the mission for continuing is not alive, "
                 "try again after restart this mission.");
+        case NOT_SYSTEM_APP:
+            return std::string("The app is not system-app.");
         default:
             return std::string("the system ability work abnormally.");
     };
@@ -965,11 +969,6 @@ napi_value NAPI_ContinueState(napi_env env)
     return continueState;
 }
 
-void NAPIMissionContinue::SetEnv(const napi_env &env)
-{
-    env_ = env;
-}
-
 NAPIRemoteMissionListener::~NAPIRemoteMissionListener()
 {
     if (env_ == nullptr) {
@@ -988,8 +987,6 @@ NAPIRemoteMissionListener::~NAPIRemoteMissionListener()
         notifyNetDisconnectRef_ = nullptr;
     }
 }
-
-NAPIRemoteOnListener::~NAPIRemoteOnListener() {}
 
 void NAPIRemoteMissionListener::SetEnv(const napi_env &env)
 {
@@ -2131,26 +2128,6 @@ void NAPIMissionContinue::OnContinueDone(int32_t result)
         delete work;
     }
     TAG_LOGI(AAFwkTag::MISSION, "end");
-}
-
-void NAPIMissionContinue::SetContinueAbilityEnv(const napi_env &env)
-{
-    env_ = env;
-}
-
-void NAPIMissionContinue::SetContinueAbilityCBRef(const napi_ref &ref)
-{
-    onContinueDoneRef_ = ref;
-}
-
-void NAPIMissionContinue::SetContinueAbilityHasBundleName(bool hasBundleName)
-{
-    onContinueDoneHasBundleName_ = hasBundleName;
-}
-
-void NAPIMissionContinue::SetContinueAbilityPromiseRef(const napi_deferred &promiseDeferred)
-{
-    promiseDeferred_ = promiseDeferred;
 }
 
 napi_value DistributedMissionManagerExport(napi_env env, napi_value exports)
