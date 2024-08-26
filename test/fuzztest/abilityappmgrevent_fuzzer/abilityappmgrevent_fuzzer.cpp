@@ -45,10 +45,10 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     AppMgrEventUtil::SendCreateAtomicServiceProcessEvent(callerAppRecord, appRecord,
         stringParam, stringParam);
     AAFwk::EventInfo eventInfo;
-    AppMgrEventUtil::SendProcessStartEvent(callerAppRecord, appRecord, eventInfo);    
+    AppMgrEventUtil::SendProcessStartEvent(callerAppRecord, appRecord, eventInfo);
     int32_t appUid = static_cast<int32_t>(GetU32Data(data));
     int64_t restartTime = static_cast<int64_t>(GetU32Data(data));
-    AppMgrEventUtil::SendReStartProcessEvent(eventInfo, appUid,  restartTime);
+    AppMgrEventUtil::SendReStartProcessEvent(eventInfo, appUid, restartTime);
     AppMgrEventUtil::GetCallerPid(callerAppRecord);
     std::shared_ptr<AbilityInfo> abilityInfo;
     int32_t abilityType = static_cast<int32_t>(GetU32Data(data));

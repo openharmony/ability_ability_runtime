@@ -27,7 +27,9 @@
 #include <iostream>
 #include "securec.h"
 #include "configuration.h"
+
 using namespace OHOS::AppExecFwk;
+
 namespace OHOS {
 namespace {
 constexpr int INPUT_ZERO = 0;
