@@ -687,5 +687,51 @@ HWTEST_F(AppRunningManagerTest, IsAppProcessesAllCached_0100, TestSize.Level1)
     appRunningManager->appRunningRecordMap_.insert(make_pair(recordId2, appRunningRecord2));
     EXPECT_EQ(appRunningManager->IsAppProcessesAllCached(appInfo->bundleName, appInfo->uid, cachedSet), false);
 }
+
+/**
+ * @tc.name: CheckAppCloneRunningRecordIsExistByBundleName_0100
+ * @tc.desc: MultiProcess application cache check test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, CheckAppCloneRunningRecordIsExistByBundleName_0100, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+    
+    std::string bundleName = "bundleName";
+    int32_t appCloneIndex = 1;
+    bool isRunning = true;
+    int32_t res = appRunningManager->
+        CheckAppCloneRunningRecordIsExistByBundleName(bundleName, appCloneIndex, isRunning);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: GetAllAppRunningRecordCountByBundleName_0100
+ * @tc.desc: MultiProcess application cache check test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, GetAllAppRunningRecordCountByBundleName_0100, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+    
+    std::string bundleName = "bundleName";
+    EXPECT_EQ(appRunningManager->GetAllAppRunningRecordCountByBundleName(bundleName), 0);
+}
+
+/**
+ * @tc.name: ProcessUpdateApplicationInfoInstalled_0100
+ * @tc.desc: MultiProcess application cache check test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, ProcessUpdateApplicationInfoInstalled_0100, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+    
+    ApplicationInfo appInfo;
+    EXPECT_EQ(appRunningManager->ProcessUpdateApplicationInfoInstalled(appInfo), 0);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
