@@ -103,7 +103,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, InitPushTask_001, TestSize.Level1)
         .WillRepeatedly(Return(TaskHandle()));
     abilityMs->taskHandler_ = taskHandler;
     abilityMs->InitPushTask();
-    EXPECT_TRUE(true);
+    EXPECT_NE(taskHandler, nullptr);
 }
 
 /*
@@ -173,6 +173,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ReportEventToRss_001, TestSize.Level1)
     abilityInfo3.type == AppExecFwk::AbilityType::EXTENSION;
     abilityInfo3.extensionAbilityType ==  AppExecFwk::ExtensionAbilityType::UI;
     abilityMs->ReportEventToRSS(abilityInfo3, callerToken);
+    EXPECT_NE(taskHandler, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ReportEventToRss_001 end");
 }
 
