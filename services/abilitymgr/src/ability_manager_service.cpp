@@ -37,6 +37,7 @@
 #include "hitrace_meter.h"
 #include "insight_intent_execute_manager.h"
 #include "interceptor/ability_jump_interceptor.h"
+#include "interceptor/block_all_app_start_interceptor.h"
 #include "interceptor/control_interceptor.h"
 #include "interceptor/crowd_test_interceptor.h"
 #include "interceptor/disposed_rule_interceptor.h"
@@ -358,6 +359,10 @@ void AbilityManagerService::InitInterceptor()
     if (isAppJumpEnabled) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "app jump enabled, add abilityJumpInterceptor");
         interceptorExecuter_->AddInterceptor("AbilityJump", std::make_shared<AbilityJumpInterceptor>());
+    }
+    if (AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "add BlockAllAppStartInterceptor");
+        interceptorExecuter_->AddInterceptor("BlockAllAppStart", std::make_shared<BlockAllAppStartInterceptor>());
     }
 }
 
@@ -792,8 +797,9 @@ int AbilityManagerService::StartAbilityPublicPrechainCheck(StartAbilityParams &p
 int AbilityManagerService::StartAbilityPrechainInterceptor(StartAbilityParams &params)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(params.want, params.requestCode,
-        GetUserId(), true, nullptr);
+        GetUserId(), true, nullptr, shouldBlockFunc);
     auto interceptorResult = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (interceptorResult != ERR_OK) {
@@ -1029,8 +1035,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
-        true, nullptr);
+        true, nullptr, shouldBlockFunc);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -1354,8 +1361,9 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
-        true, nullptr);
+        true, nullptr, shouldBlockFunc);
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -1647,8 +1655,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
-        true, nullptr);
+        true, nullptr, shouldBlockFunc);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -1921,8 +1930,9 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
 
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     int32_t validUserId = GetValidUserId(userId);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
-        true, nullptr);
+        true, nullptr, shouldBlockFunc);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -2098,8 +2108,9 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId, appIndex, sessionInfo->callerToken);
     if (sessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, true)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "interceptorExecuter_ called");
-        AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(sessionInfo->want, requestCode,
-            currentUserId, true, nullptr);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(sessionInfo->want, requestCode,
+            currentUserId, true, nullptr, shouldBlockFunc);
         auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
         if (result != ERR_OK) {
@@ -2764,7 +2775,9 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken, true);
-    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr,
+        shouldBlockFunc);
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -3031,8 +3044,9 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         return ERR_INVALID_CALLER;
     }
 
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(extensionSessionInfo->want, 0, GetUserId(),
-        true, nullptr);
+        true, nullptr, shouldBlockFunc);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -3814,7 +3828,9 @@ int AbilityManagerService::ConnectAbilityCommon(
     }
 #endif // WITH_DLP
 
-    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr,
+        shouldBlockFunc);
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -3926,7 +3942,9 @@ int AbilityManagerService::ConnectUIExtensionAbility(const Want &want, const spt
     }
 #endif // WITH_DLP
 
-    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr,
+        shouldBlockFunc);
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -7107,7 +7125,9 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(want, GetUserId(), appIndex, callerToken);
-    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), true, nullptr);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), true, nullptr,
+        shouldBlockFunc);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -10399,17 +10419,24 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
 
     int32_t appIndex = 0;
     appIndex = !AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex) ? 0 : appIndex;
-    if (!CheckCallingTokenId(element.GetBundleName(), userId, appIndex)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self application");
+    bool isStartupVisibilityHide = 
+        (startOptions.processOptions->startupVisibility == StartupVisibility::STARTUP_HIDE);
+    bool hasStartBackgroundAbilityPermission = PermissionVerification::GetInstance()->
+        VerifyStartUIAbilityToHiddenPermission();
+    bool canStartupHide = (isStartupVisibilityHide && hasStartBackgroundAbilityPermission);
+    if (!CheckCallingTokenId(element.GetBundleName(), userId, appIndex) &&
+        !canStartupHide) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self application and has no start background ability permission");
         return ERR_NOT_SELF_APPLICATION;
     }
 
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
 
-    if (ProcessOptions::IsAttachToStatusBarMode(startOptions.processOptions->processMode) &&
-        !uiAbilityManager->IsCallerInStatusBar()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not in status bar in attch status bar mode");
+    if ((ProcessOptions::IsAttachToStatusBarMode(startOptions.processOptions->processMode) &&
+        !uiAbilityManager->IsCallerInStatusBar()) && !canStartupHide) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not in status bar in attch status bar mode and "
+            "has no start background ability permission");
         return ERR_START_OPTIONS_CHECK_FAILED;
     }
 
@@ -11839,8 +11866,9 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
+    auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
-        true, nullptr);
+        true, nullptr, shouldBlockFunc);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -12142,6 +12170,27 @@ int32_t AbilityManagerService::TerminateMission(int32_t missionId)
     }
 
     return missionListManager->ClearMission(missionId);
+}
+
+int32_t AbilityManagerService::BlockAllAppStart(bool flag)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+
+    if (!PermissionVerification::GetInstance()->VerifyBlockAllAppStartPermission()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    std::unique_lock<ffrt::mutex> lock(shouldBlockAllAppStartMutex_);
+    shouldBlockAllAppStart_ = flag;
+    return ERR_OK;
+}
+
+bool AbilityManagerService::ShouldBlockAllAppStart()
+{
+    std::unique_lock<ffrt::mutex> lock(shouldBlockAllAppStartMutex_);
+    return shouldBlockAllAppStart_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
