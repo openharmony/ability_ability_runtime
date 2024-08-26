@@ -357,7 +357,7 @@ sptr<IRemoteObject> WantAgentClient::GetAbilityManager()
             return nullptr;
         }
         if (!remoteObj->AddDeathRecipient(deathRecipient_)) {
-            TAG_LOGI(AAFwkTag::WANTAGENT, "Add death recipient to failed");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Add death recipient to failed");
         }
         proxy_ = remoteObj;
     }
