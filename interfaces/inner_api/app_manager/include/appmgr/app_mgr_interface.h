@@ -374,7 +374,7 @@ public:
 
     virtual int32_t GetConfiguration(Configuration& config) = 0;
 
-    virtual int32_t UpdateConfiguration(const Configuration &config) = 0;
+    virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) = 0;
 
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) = 0;
 

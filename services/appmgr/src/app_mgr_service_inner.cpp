@@ -179,8 +179,6 @@ constexpr const char* RENDER_PROCESS_NAME = ":render";
 constexpr const char* RENDER_PROCESS_TYPE = "render";
 constexpr const char* GPU_PROCESS_NAME = ":gpu";
 constexpr const char* GPU_PROCESS_TYPE = "gpu";
-constexpr const char* FONT_WGHT_SCALE = "persist.sys.font_wght_scale_for_user0";
-constexpr const char* FONT_SCALE = "persist.sys.font_scale_for_user0";
 constexpr const char* KILL_REASON_USER_REQUEST = "User Request";
 const std::string TOKEN_ID = "TOKEN_ID";
 const int32_t SIGNAL_KILL = 9;
@@ -295,8 +293,11 @@ AppMgrServiceInner::AppMgrServiceInner()
       appDebugManager_(std::make_shared<AppDebugManager>()),
       appRunningStatusModule_(std::make_shared<AbilityRuntime::AppRunningStatusModule>()),
       securityModeManager_(std::make_shared<AdvancedSecurityModeManager>()),
-      appPreloader_(std::make_shared<AppPreloader>(remoteClientManager_))
-{}
+      appPreloader_(std::make_shared<AppPreloader>(remoteClientManager_)),
+      multiUserConfigurationMgr_(std::make_shared<MultiUserConfigurationMgr>())
+{
+    appRunningManager_->SetMultiUserConfigurationMgr(multiUserConfigurationMgr_);
+}
 
 void AppMgrServiceInner::Init()
 {
@@ -931,9 +932,9 @@ void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord>
     TAG_LOGI(AAFwkTag::APPMGR, "Attach failed name: %{public}s %{public}zu", appRecord->GetProcessName().c_str(),
         abilityTokens.size());
     std::lock_guard lock(appStateCallbacksLock_);
-    for (const auto &callback : appStateCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAppRemoteDied(abilityTokens);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->OnAppRemoteDied(abilityTokens);
         }
     }
 }
@@ -965,6 +966,13 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
         return;
     }
 
+    if (int32_t userId = appRecord->GetUid() / BASE_USER_RANGE; userId != 0) {
+        auto config = multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
+        std::vector<std::string> diffVe;
+        configuration_->CompareDifferent(diffVe, config);
+        configuration_->Merge(diffVe, config);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "LaunchApplication configuration:%{public}s", configuration_->GetName().c_str());
     appRecord->LaunchApplication(*configuration_);
     appRecord->SetState(ApplicationState::APP_STATE_READY);
     int restartResidentProcCount = MAX_RESTART_COUNT;
@@ -2299,16 +2307,17 @@ void AppMgrServiceInner::SetBundleManagerHelper(const std::shared_ptr<BundleMgrH
     remoteClientManager_->SetBundleManagerHelper(bundleMgrHelper);
 }
 
-void AppMgrServiceInner::RegisterAppStateCallback(const sptr<IAppStateCallback> &callback)
+void AppMgrServiceInner::RegisterAppStateCallback(const sptr<IAppStateCallback>& callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (callback != nullptr) {
         std::lock_guard lock(appStateCallbacksLock_);
-        appStateCallbacks_.push_back(callback);
+        appStateCallbacks_.push_back(
+            AppStateCallbackWithUserId { callback, GetUserIdByUid(IPCSkeleton::GetCallingUid()) });
         auto remoteObjedct = callback->AsObject();
         if (remoteObjedct) {
-            remoteObjedct->AddDeathRecipient(sptr<AppStateCallbackDeathRecipient>(
-                new AppStateCallbackDeathRecipient(weak_from_this())));
+            remoteObjedct->AddDeathRecipient(
+                sptr<AppStateCallbackDeathRecipient>(new AppStateCallbackDeathRecipient(weak_from_this())));
         }
     }
 }
@@ -2323,7 +2332,7 @@ void AppMgrServiceInner::RemoveDeadAppStateCallback(const wptr<IRemoteObject> &r
 
     std::lock_guard lock(appStateCallbacksLock_);
     for (auto it = appStateCallbacks_.begin(); it != appStateCallbacks_.end(); ++it) {
-        auto callback = *it;
+        auto callback = (*it).callback;
         if (callback && callback->AsObject() == remoteObject) {
             appStateCallbacks_.erase(it);
             break;
@@ -2588,9 +2597,9 @@ void AppMgrServiceInner::OnAppStateChanged(
         appRecord->GetBundleName().c_str(), static_cast<int32_t>(state));
     {
         std::lock_guard lock(appStateCallbacksLock_);
-        for (const auto &callback : appStateCallbacks_) {
-            if (callback != nullptr) {
-                callback->OnAppStateChanged(WrapAppProcessData(appRecord, state));
+        for (const auto &item : appStateCallbacks_) {
+            if (item.callback != nullptr) {
+                item.callback->OnAppStateChanged(WrapAppProcessData(appRecord, state));
             }
         }
     }
@@ -2673,9 +2682,9 @@ void AppMgrServiceInner::OnAbilityStateChanged(
         return;
     }
     std::lock_guard lock(appStateCallbacksLock_);
-    for (const auto &callback : appStateCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityRequestDone(ability->GetToken(), state);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->OnAbilityRequestDone(ability->GetToken(), state);
         }
     }
 }
@@ -3343,9 +3352,9 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     for (const auto &token : appRecord->GetAbilities()) {
         abilityTokens.emplace_back(token.first);
     }
-    for (const auto &callback : appStateCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAppRemoteDied(abilityTokens);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->OnAppRemoteDied(abilityTokens);
         }
     }
     ClearData(appRecord);
@@ -4223,8 +4232,11 @@ void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(const int64_t eventI
     appRecord->ResetNewProcessRequestId();
 }
 
-int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
+int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, const int32_t userId)
 {
+    if (userId != -1) {
+        multiUserConfigurationMgr_->Insert(userId, config);
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is null");
@@ -4251,19 +4263,20 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
         configuration_->Merge(changeKeyV, config);
     }
     // all app
-    int32_t result = appRunningManager_->UpdateConfiguration(config);
-    HandleConfigurationChange(config);
+    int32_t result = appRunningManager_->UpdateConfiguration(config, userId);
+    HandleConfigurationChange(config, userId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "update error, not notify");
         return result;
     }
     // notify
     std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
-    for (auto &observer : configurationObservers_) {
-        if (observer != nullptr) {
-            observer->OnConfigurationUpdated(config);
+    for (auto &item : configurationObservers_) {
+        if (item.observer != nullptr && (userId == -1 || item.userId == 0 || item.userId == userId)) {
+            item.observer->OnConfigurationUpdated(config);
         }
     }
+
     return result;
 }
 
@@ -4286,13 +4299,14 @@ int32_t AppMgrServiceInner::UpdateConfigurationByBundleName(const Configuration 
     return result;
 }
 
-void AppMgrServiceInner::HandleConfigurationChange(const Configuration &config)
+void AppMgrServiceInner::HandleConfigurationChange(const Configuration& config, const int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard lock(appStateCallbacksLock_);
-    for (const auto &callback : appStateCallbacks_) {
-        if (callback != nullptr) {
-            callback->NotifyConfigurationChange(config, currentUserId_);
+
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr && (userId == -1 || item.userId == 0 || item.userId == userId)) {
+            item.callback->NotifyConfigurationChange(config, currentUserId_);
         }
     }
 }
@@ -4311,14 +4325,15 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurat
     }
     std::lock_guard<ffrt::mutex> registerLock(configurationObserverLock_);
     auto it = std::find_if(configurationObservers_.begin(), configurationObservers_.end(),
-        [&observer](const sptr<IConfigurationObserver> &item) {
-            return (item && item->AsObject() == observer->AsObject());
+        [&observer](const ConfigurationObserverWithUserId& item) {
+            return (item.observer && item.observer->AsObject() == observer->AsObject());
         });
     if (it != configurationObservers_.end()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrServiceInner::Register error: observer exist");
         return ERR_INVALID_VALUE;
     }
-    configurationObservers_.push_back(observer);
+    configurationObservers_.push_back(
+        ConfigurationObserverWithUserId { observer, GetUserIdByUid(IPCSkeleton::GetCallingUid()) });
     return NO_ERROR;
 }
 
@@ -4335,8 +4350,8 @@ int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const sptr<IConfigur
     }
     std::lock_guard<ffrt::mutex> unregisterLock(configurationObserverLock_);
     auto it = std::find_if(configurationObservers_.begin(), configurationObservers_.end(),
-        [&observer](const sptr<IConfigurationObserver> &item) {
-            return (item && item->AsObject() == observer->AsObject());
+        [&observer](const ConfigurationObserverWithUserId &item) {
+            return (item.observer && item.observer->AsObject() == observer->AsObject());
         });
     if (it != configurationObservers_.end()) {
         configurationObservers_.erase(it);
@@ -4373,12 +4388,8 @@ void AppMgrServiceInner::InitGlobalConfiguration()
     auto deviceType = GetDeviceType();
     TAG_LOGI(AAFwkTag::APPMGR, "current deviceType is %{public}s", deviceType);
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE, deviceType);
-    auto fontSizeScale = OHOS::system::GetParameter(FONT_SCALE, "1.0");
-    auto fontWeightScale = OHOS::system::GetParameter(FONT_WGHT_SCALE, "1.0");
-    TAG_LOGI(AAFwkTag::APPMGR, "current fontSizeScale is: %{public}s, fontWeightScale is: %{public}s",
-        fontSizeScale.c_str(), fontWeightScale.c_str());
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, fontSizeScale);
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, fontWeightScale);
+    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, "1.0");
+    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, "1.0");
 }
 
 std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration()
@@ -5152,7 +5163,6 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
     OnAppStateChanged(appRecord, appRecord->GetState(), needNotifyApp, true);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
 }
-
 
 void AppMgrServiceInner::InitWindowVisibilityChangedListener()
 {
@@ -7178,9 +7188,9 @@ bool AppMgrServiceInner::IsMemorySizeSufficent()
 void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
 {
     std::lock_guard lock(appStateCallbacksLock_);
-    for (const auto &callback : appStateCallbacks_) {
-        if (callback != nullptr) {
-            callback->NotifyStartResidentProcess(bundleInfos);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->NotifyStartResidentProcess(bundleInfos);
         }
     }
 }

@@ -41,6 +41,7 @@ namespace Rosen {
 class WindowVisibilityInfo;
 }
 namespace AppExecFwk {
+
 class AppRunningManager {
 public:
     AppRunningManager();
@@ -183,7 +184,7 @@ public:
     * @param config System environment change parameters.
     * @return Returns ERR_OK on success, others on failure.
     */
-    int32_t UpdateConfiguration(const Configuration &config);
+    int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
     /**
      *  Update config by sa.
@@ -347,7 +348,9 @@ public:
 
     bool HandleUserRequestClean(const sptr<IRemoteObject> &abilityToken, pid_t &pid, int32_t &uid);
 
-private:
+    void SetMultiUserConfigurationMgr(const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr);
+
+  private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
@@ -363,6 +366,7 @@ private:
     std::shared_ptr<Configuration> configuration_;
     std::mutex updateConfigurationDelayedLock_;
     std::map<const int32_t, bool> updateConfigurationDelayedMap_;
+    std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
