@@ -140,6 +140,8 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
+                } else if (*innerErrCode == 1) {
+                    task.Reject(env,CreateJsError(env, 1, "Context is released"));
                 } else {
                     task.Reject(env, CreateJsError(env, *innerErrCode, "update form failed."));
                 }
@@ -191,6 +193,9 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
+                } else if (*innerErrCode == ERR_APPEXECFWK_FORM_COMMON_CODE) {
+                    task.Reject(env,
+                        NapiFormUtil::CreateErrorByInternalErrorCode(env, ERR_APPEXECFWK_FORM_COMMON_CODE));
                 } else {
                     TAG_LOGE(AAFwkTag::FORM_EXT, "Start failed: %{public}d", *innerErrCode);
                     task.Reject(env, NapiFormUtil::CreateErrorByInternalErrorCode(env, *innerErrCode));
@@ -246,7 +251,7 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                     RemoveConnection(connectId);
                 } else {
                     task.Resolve(env, CreateJsUndefined(env));
@@ -301,9 +306,10 @@ private:
                 napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)
-                    || *innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+                } if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)) {
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }

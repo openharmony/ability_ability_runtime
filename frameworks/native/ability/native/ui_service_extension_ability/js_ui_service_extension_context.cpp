@@ -126,7 +126,7 @@ private:
             if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                task.Reject(env, CreateJsError(env, *innerErrCode));
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
             } else {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             }
@@ -215,7 +215,7 @@ private:
         std::shared_ptr<JsUIExtensionCallback> callback = std::make_shared<JsUIExtensionCallback>(env);
         callback->SetJsCallbackObject(info.argv[INDEX_TWO]);
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-        NapiAsyncTask::ExecuteCallback execute = [weak = context_, type, wantParam, callback, innerErrCode]() {
+        NapiAsyncTask::ExecuteCallback execute = [weak = context_, type, wantParam, callback, innerErrCode]() mutable {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::UISERVC_EXT, "OnStartAbilityByType context is released");
@@ -223,15 +223,14 @@ private:
                 return;
             }
             TAG_LOGD(AAFwkTag::UISERVC_EXT, "JSUIServiceExtensionContext OnStartAbilityByType");
-            auto mutableWantParam = wantParam;
-            *innerErrCode = context->StartAbilityByType(type, mutableWantParam, callback);
+            *innerErrCode = context->StartAbilityByType(type, wantParam, callback);
         };
         NapiAsyncTask::CompleteCallback complete =
-            [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+            [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                    task.Reject(env, CreateJsError(env, *innerErrCode));
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 }
@@ -402,12 +401,12 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::UISERVC_EXT, "context is released");
-                *innerErrCode = static_cast<int>(ERROR_CODE_ONE);
+                *innerErrCode = ERROR_CODE_ONE;
                 return;
             }
             if (!connection) {
                 TAG_LOGW(AAFwkTag::UISERVC_EXT, "connection null");
-                *innerErrCode = static_cast<int>(ERROR_CODE_TWO);
+                *innerErrCode = ERROR_CODE_TWO;
                 return;
             }
             TAG_LOGD(AAFwkTag::UISERVC_EXT, "context->DisconnectServiceExtensionAbility");
