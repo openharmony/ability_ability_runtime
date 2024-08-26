@@ -501,15 +501,16 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
     TAG_LOGD(AAFwkTag::APPKIT, "Get Group Dir");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     std::string path = "";
-    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, groupId, innerErrCode, &path]() {
-        auto context = applicationContext.lock();
-        if (!context) {
-            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-            *innerErrCode = static_cast<int32_t>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
-            return;
-        }
-        path = context->GetGroupDir(groupId);
-    };
+    NapiAsyncTask::ExecuteCallback execute =
+        [applicationContext = applicationContext_, groupId, innerErrCode, &path]() {
+            auto context = applicationContext.lock();
+            if (!context) {
+                TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+                *innerErrCode = static_cast<int32_t>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
+                return;
+            }
+            path = context->GetGroupDir(groupId);
+        };
     auto complete = [innerErrCode, &path](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == ERR_OK) {
             task.ResolveWithNoError(env, CreateJsValue(env, path));
@@ -611,15 +612,16 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
 
     TAG_LOGD(AAFwkTag::APPKIT, "kill self process");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, clearPageStack, innerErrCode]() {
-        auto context = applicationContext.lock();
-        if (!context) {
-            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-            *innerErrCode = static_cast<int32_t>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
-            return;
-        }
-        context->KillProcessBySelf(clearPageStack);
-    };
+    NapiAsyncTask::ExecuteCallback execute =
+        [applicationContext = applicationContext_, clearPageStack, innerErrCode]() {
+            auto context = applicationContext.lock();
+            if (!context) {
+                TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+                *innerErrCode = static_cast<int32_t>(ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
+                return;
+            }
+            context->KillProcessBySelf(clearPageStack);
+        };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrCode == ERR_OK) {

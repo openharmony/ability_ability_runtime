@@ -2352,7 +2352,7 @@ napi_value JsAbilityContext::SyncSetMissionContinueState(napi_env env, NapiCallb
     NapiAsyncTask::ExecuteCallback execute =
         [weak = context_, &state, innerErrCode]() {
             auto context = weak.lock();
-            if (!context){
+            if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "released context");
                 *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
@@ -2501,7 +2501,7 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
     callback->SetJsCallbackObject(info.argv[INDEX_TWO]);
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, type, wantParam, callback, innerErrCode]() {
+        [weak = context_, type, wantParam, callback, innerErrCode]() mutable {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
@@ -2514,8 +2514,8 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
 #endif
         };
     NapiAsyncTask::CompleteCallback complete =
-        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
-            if ( *innerErrCode == ERR_OK) {
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                 task.Reject(env, CreateJsError(env, *innerErrCode));
