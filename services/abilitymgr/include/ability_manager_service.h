@@ -1787,6 +1787,8 @@ public:
 
     int32_t TerminateMission(int32_t missionId) override;
 
+    int32_t BlockAllAppStart(bool flag) override;
+
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         uint32_t sceneFlag, bool &isColdStart);
 
@@ -2373,6 +2375,9 @@ private:
     void UpdateBackToCallerFlag(const sptr<IRemoteObject> &callerToken, Want &want, int32_t requestCode, bool backFlag);
 
     void SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType);
+
+    bool ShouldBlockAllAppStart();
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
@@ -2402,6 +2407,9 @@ private:
     ffrt::mutex abilityDebugDealLock_;
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
+
+    ffrt::mutex shouldBlockAllAppStartMutex_;
+    bool shouldBlockAllAppStart_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

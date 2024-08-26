@@ -606,6 +606,11 @@ enum {
      */
     ERR_INSIGHT_INTENT_GET_PROFILE_FAILED = 2097269,
 
+    /*
+     * Result (2097270) for all apps are blocked from starting due to resource shortage.
+     */
+    ERR_ALL_APP_START_BLOCKED = 2097270,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
