@@ -9143,7 +9143,73 @@ int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abil
             return CHECK_PERMISSION_FAILED;
         }
     }
+
+    if (!CheckUIExtensionCallerIsForeground(abilityRequest)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
     return ERR_OK;
+}
+
+bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequest &abilityRequest)
+{
+    if (!CheckUIExtensionCallerIsUIAbility(abilityRequest)) {
+        // Check only if the caller is uiability, if caller is not a uiability, don't check.
+        return true;
+    }
+
+    bool isBackgroundCall = true;
+    auto ret = IsCallFromBackground(abilityRequest, isBackgroundCall);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "start uea when background");
+        return false;
+    }
+
+    if (!isBackgroundCall) {
+        return true;
+    }
+
+    auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility != nullptr) {
+        if (UIExtensionUtils::IsUIExtension(callerAbility->GetAbilityInfo().extensionAbilityType)) {
+            auto tokenId = callerAbility->GetApplicationInfo().accessTokenId;
+            bool isFocused = false;
+            if (CheckUIExtensionIsFocused(tokenId, isFocused) == ERR_OK && isFocused) {
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "Root caller is foreground");
+                return true;
+            }
+        }
+
+        if (callerAbility->IsSceneBoard()) {
+            return true;
+        }
+    }
+
+    if (PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND)) {
+        return true;
+    }
+
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller app is not foreground, can't start %{public}s",
+        abilityRequest.want.GetElement().GetURI().c_str());
+    return false;
+}
+
+bool AbilityManagerService::CheckUIExtensionCallerIsUIAbility(const AbilityRequest &abilityRequest)
+{
+    auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE) {
+        return true;
+    }
+
+    if (UIExtensionUtils::IsUIExtension(callerAbility->GetAbilityInfo().extensionAbilityType)) {
+        auto callerability = GetUIExtensionRootCaller(abilityRequest.callerToken, abilityRequest.userId);
+        if (callerAbility->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityRequest &abilityRequest)
@@ -10616,11 +10682,25 @@ int32_t AbilityManagerService::GetUIExtensionRootHostInfo(const sptr<IRemoteObje
         return ERR_PERMISSION_DENIED;
     }
 
+    auto callerRecord = GetUIExtensionRootCaller(token, userId);
+    if (callerRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Get root host info failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    hostInfo.elementName_ = callerRecord->GetElementName();
+    TAG_LOGD(AAFwkTag::UI_EXT, "Root host uri: %{public}s.", hostInfo.elementName_.GetURI().c_str());
+    return ERR_OK;
+}
+
+std::shared_ptr<AbilityRecord> AbilityManagerService::GetUIExtensionRootCaller(const sptr<IRemoteObject> token,
+    int32_t userId)
+{
     auto validUserId = GetValidUserId(userId);
     auto connectManager = GetConnectManagerByUserId(validUserId);
     if (connectManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect manager is nullptr, userId: %{public}d.", validUserId);
-        return ERR_INVALID_VALUE;
+        return nullptr;
     }
 
     auto callerRecord = connectManager->GetUIExtensionRootHostInfo(token);
@@ -10628,18 +10708,12 @@ int32_t AbilityManagerService::GetUIExtensionRootHostInfo(const sptr<IRemoteObje
         connectManager = GetConnectManagerByUserId(U0_USER_ID);
         if (connectManager == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect manager is nullptr, userId: %{public}d.", U0_USER_ID);
-            return ERR_INVALID_VALUE;
+            return nullptr;
         }
         callerRecord = connectManager->GetUIExtensionRootHostInfo(token);
     }
-    if (callerRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get root host info failed.");
-        return ERR_INVALID_VALUE;
-    }
 
-    hostInfo.elementName_ = callerRecord->GetElementName();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Root host uri: %{public}s.", hostInfo.elementName_.GetURI().c_str());
-    return ERR_OK;
+    return callerRecord;
 }
 
 int32_t AbilityManagerService::GetUIExtensionSessionInfo(const sptr<IRemoteObject> token,
