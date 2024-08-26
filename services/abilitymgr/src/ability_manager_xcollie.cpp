@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "ability_manager_xcollie.h"
 namespace OHOS {
 namespace AbilityRuntime {
+const uint32_t AbilityManagerXCollie::TIME_OUT_SECONDS = 30;
 AbilityManagerXCollie::AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds,
     std::function<void(void *)> func, void* arg, uint32_t flag)
 {

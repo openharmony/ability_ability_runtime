@@ -297,6 +297,25 @@ void AppStateObserverManager::OnRenderProcessDied(const std::shared_ptr<RenderRe
     handler_->SubmitTask(task);
 }
 
+void AppStateObserverManager::OnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord)
+{
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnChildProcessDied failed.");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), childRecord]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnChildProcessDied failed.");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "OnChildProcessDied come.");
+        self->HandleOnChildProcessDied(childRecord);
+    };
+    handler_->SubmitTask(task);
+}
+
 void AppStateObserverManager::OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (handler_ == nullptr) {
@@ -372,21 +391,40 @@ void AppStateObserverManager::OnRenderProcessCreated(const std::shared_ptr<Rende
     handler_->SubmitTask(task);
 }
 
+void AppStateObserverManager::OnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord)
+{
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnChildProcessCreated failed.");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), childRecord]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnChildProcessCreated failed.");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "OnChildProcessCreated come.");
+        self->HandleOnChildProcessCreated(childRecord);
+    };
+    handler_->SubmitTask(task);
+}
+
 void AppStateObserverManager::StateChangedNotifyObserver(
     const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, StateChangedNotifyObserver failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler, failed");
         return;
     }
 
     auto task = [weak = weak_from_this(), abilityStateData, isAbility, isFromWindowFocusChanged]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, StateChangedNotifyObserver failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self, failed");
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "StateChangedNotifyObserver come.");
+        TAG_LOGD(AAFwkTag::APPMGR, "StateChangedNotifyObserver come");
         self->HandleStateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
     };
     handler_->SubmitTask(task);
@@ -580,6 +618,24 @@ void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr
     HandleOnProcessCreated(data);
 }
 
+void AppStateObserverManager::HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord)
+{
+    if (!childRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ChildProcessRecord record is nullptr.");
+        return;
+    }
+    ProcessData data;
+    if (WrapChildProcessData(data, childRecord) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WrapChildProcessData failed.");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR,
+        "ChildProcess Create, bundleName:%{public}s, pid:%{public}d, uid:%{public}d, "
+        "processType:%{public}d, processName:%{public}s",
+        data.bundleName.c_str(), data.pid, data.uid, data.processType, data.processName.c_str());
+    HandleOnProcessCreated(data);
+}
+
 void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data)
 {
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
@@ -643,6 +699,24 @@ void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<Re
     HandleOnProcessDied(data);
 }
 
+void AppStateObserverManager::HandleOnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord)
+{
+    if (!childRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "childRecord is nullptr.");
+        return;
+    }
+    ProcessData data;
+    if (WrapChildProcessData(data, childRecord) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WrapChildProcessData failed.");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR,
+        "ChildProcess died, bundleName:%{public}s, pid:%{public}d, uid:%{public}d, "
+        "processType:%{public}d, processName:%{public}s",
+        data.bundleName.c_str(), data.pid, data.uid, data.processType, data.processName.c_str());
+    HandleOnProcessDied(data);
+}
+
 void AppStateObserverManager::HandleOnProcessDied(const ProcessData &data)
 {
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
@@ -694,6 +768,28 @@ ProcessData AppStateObserverManager::WrapRenderProcessData(const std::shared_ptr
     processData.processType = renderRecord->GetProcessType();
     processData.hostPid = renderRecord->GetHostPid();
     return processData;
+}
+
+int32_t AppStateObserverManager::WrapChildProcessData(ProcessData &processData,
+    std::shared_ptr<ChildProcessRecord> childRecord)
+{
+    if (!childRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "childRecord is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    auto hostRecord = childRecord->GetHostRecord();
+    if (!hostRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "hostRecord is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    processData.bundleName = hostRecord->GetBundleName();
+    processData.uid = hostRecord->GetUid();
+    processData.hostPid = childRecord->GetHostPid();
+    processData.pid = childRecord->GetPid();
+    processData.childUid = childRecord->GetUid();
+    processData.processName = childRecord->GetProcessName();
+    processData.processType = childRecord->GetProcessType();
+    return ERR_OK;
 }
 
 bool AppStateObserverManager::ObserverExist(const sptr<IRemoteBroker> &observer)

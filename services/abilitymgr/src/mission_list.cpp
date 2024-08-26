@@ -401,25 +401,6 @@ void MissionList::DumpList(std::vector<std::string> &info, bool isClient)
     }
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-int MissionList::BlockAbilityByRecordId(int32_t abilityRecordId)
-{
-    int ret = -1;
-    for (const auto& mission : missions_) {
-        if (mission) {
-            auto abilityRecord = mission->GetAbilityRecord();
-            if (abilityRecord) {
-                if (abilityRecord->GetRecordId() == abilityRecordId) {
-                    TAG_LOGI(AAFwkTag::ABILITYMGR, "record begin to call BlockAbilityByRecordId %{public}s", __func__);
-                    return abilityRecord->BlockAbility();
-                }
-            }
-        }
-    }
-    return ret;
-}
-#endif
-
 int32_t MissionList::GetMissionCountByUid(int32_t targetUid) const
 {
     int32_t count = 0;

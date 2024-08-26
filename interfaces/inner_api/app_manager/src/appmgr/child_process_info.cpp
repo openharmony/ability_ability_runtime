@@ -36,11 +36,20 @@ bool ChildProcessInfo::ReadFromParcel(Parcel &parcel)
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, uidData);
     uid = static_cast<int32_t>(uidData);
 
+    int32_t hostUidData;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, hostUidData);
+    hostUid = static_cast<int32_t>(hostUidData);
+
+    int32_t userIdData;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, userIdData);
+    userId = static_cast<int32_t>(userIdData);
+
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, childProcessType);
 
     bundleName = Str16ToStr8(parcel.ReadString16());
     processName = Str16ToStr8(parcel.ReadString16());
     srcEntry = Str16ToStr8(parcel.ReadString16());
+    entryFunc = Str16ToStr8(parcel.ReadString16());
     entryParams = Str16ToStr8(parcel.ReadString16());
     jitEnabled = parcel.ReadBool();
     isDebugApp = parcel.ReadBool();
@@ -66,10 +75,13 @@ bool ChildProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(pid));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(hostPid));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(uid));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(hostUid));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(userId));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(childProcessType));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(bundleName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(processName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(srcEntry));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(entryFunc));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(entryParams));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, jitEnabled);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isDebugApp);

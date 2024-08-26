@@ -178,6 +178,15 @@ public:
     virtual int GetAllRenderProcesses(std::vector<RenderProcessInfo> &info) = 0;
 
     /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) = 0;
+
+    /**
      * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.
      * Obtains information about application processes that are running on the device.
      *
@@ -324,14 +333,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens) = 0;
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     *  Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService() = 0;
-    #endif
 
     /**
      * Prestart nwebspawn process.

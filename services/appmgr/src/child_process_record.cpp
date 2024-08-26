@@ -24,8 +24,16 @@ namespace AppExecFwk {
 ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const ChildProcessRequest &request,
     const std::shared_ptr<AppRunningRecord> hostRecord)
     : hostPid_(hostPid), childProcessCount_(request.childProcessCount), childProcessType_(request.childProcessType),
-    srcEntry_(request.srcEntry), hostRecord_(hostRecord), isStartWithDebug_(request.isStartWithDebug)
+    hostRecord_(hostRecord), isStartWithDebug_(request.isStartWithDebug)
 {
+    srcEntry_ = request.srcEntry;
+    if (childProcessType_ == CHILD_PROCESS_TYPE_NATIVE_ARGS) {
+        auto pos = request.srcEntry.rfind(":");
+        if (pos != std::string::npos) {
+            srcEntry_ = request.srcEntry.substr(0, pos);
+            entryFunc_ = request.srcEntry.substr(pos + 1);
+        }
+    }
     MakeProcessName(hostRecord);
 }
 
@@ -107,6 +115,11 @@ ProcessType ChildProcessRecord::GetProcessType() const
     return processType_;
 }
 
+std::string ChildProcessRecord::GetEntryFunc() const
+{
+    return entryFunc_;
+}
+
 std::shared_ptr<AppRunningRecord> ChildProcessRecord::GetHostRecord() const
 {
     return hostRecord_.lock();
@@ -174,7 +187,7 @@ void ChildProcessRecord::MakeProcessName(const std::shared_ptr<AppRunningRecord>
     std::string filename = std::filesystem::path(srcEntry_).stem();
     if (!filename.empty()) {
         processName_.append(":");
-        if (childProcessType_ == CHILD_PROCESS_TYPE_NATIVE) {
+        if (childProcessType_ == CHILD_PROCESS_TYPE_NATIVE || childProcessType_ == CHILD_PROCESS_TYPE_NATIVE_ARGS) {
             processName_.append("Native_");
         }
         

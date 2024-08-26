@@ -106,7 +106,7 @@ int64_t StartupUtil::GenerateFullRequestCode(int32_t pid, bool backFlag, int32_t
         return 0;
     }
     uint64_t fullRequestCode = static_cast<uint64_t>(requestCode);
-    uint64_t tempNum = pid;
+    uint64_t tempNum = static_cast<uint64_t>(pid);
     fullRequestCode |= (tempNum << REQUEST_CODE_LENGTH);
     if (backFlag) {
         tempNum = 1;

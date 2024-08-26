@@ -37,3 +37,4 @@ const.abilityms.launch_embeded_ui_ability = foundation:foundation:0755
 const.sys.abilityms.limit_maximum_extensions_of_per_process = foundation:foundation:0755
 const.sys.abilityms.limit_maximum_extensions_of_per_device = foundation:foundation:0755
 const.sys.abilityms.cache_extension = foundation:foundation:0755
+const.max_native_child_process = foundation:foundation:0755
