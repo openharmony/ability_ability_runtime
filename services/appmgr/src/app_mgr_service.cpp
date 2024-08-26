@@ -1002,14 +1002,14 @@ int32_t AppMgrService::GetConfiguration(Configuration& config)
     return ERR_OK;
 }
 
-int32_t AppMgrService::UpdateConfiguration(const Configuration& config)
+int32_t AppMgrService::UpdateConfiguration(const Configuration& config, const int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "UpdateConfiguration failed, AppMgrService not ready.");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->UpdateConfiguration(config);
+    return appMgrServiceInner_->UpdateConfiguration(config, userId);
 }
 
 int32_t AppMgrService::UpdateConfigurationByBundleName(const Configuration& config, const std::string &name)
