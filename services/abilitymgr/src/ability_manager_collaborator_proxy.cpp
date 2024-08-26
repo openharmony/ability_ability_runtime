@@ -503,7 +503,7 @@ int32_t AbilityManagerCollaboratorProxy::CheckStaticCfgPermission(const Want &wa
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
         return ERR_INVALID_OPERATION;
