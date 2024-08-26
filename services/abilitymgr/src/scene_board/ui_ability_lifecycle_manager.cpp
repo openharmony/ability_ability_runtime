@@ -2177,27 +2177,6 @@ void UIAbilityLifecycleManager::GetAbilityRunningInfos(std::vector<AbilityRunnin
     }
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-int UIAbilityLifecycleManager::BlockAbility(int32_t abilityRecordId) const
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call.");
-    for (const auto& [first, second] : sessionAbilityMap_) {
-        if (second == nullptr) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "abilityRecord is nullptr.");
-            continue;
-        }
-        if (second->GetRecordId() == abilityRecordId) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Call BlockAbility.");
-            return second->BlockAbility();
-        }
-    }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "The abilityRecordId is invalid.");
-    return -1;
-}
-#endif
-
 void UIAbilityLifecycleManager::Dump(std::vector<std::string> &info)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Call begin.");

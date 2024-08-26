@@ -267,21 +267,6 @@ public:
 
 #ifdef ABILITY_COMMAND_FOR_TEST
     MOCK_METHOD2(ForceTimeoutForTest, int(const std::string& abilityName, const std::string& state));
-
-    virtual int BlockAmsService()
-    {
-        return 0;
-    }
-
-    virtual int BlockAppService()
-    {
-        return 0;
-    }
-
-    virtual int BlockAbility(int32_t abilityRecordId)
-    {
-        return 0;
-    }
 #endif
     MOCK_METHOD2(IsValidMissionIds, int32_t(const std::vector<int32_t>&, std::vector<MissionValidResult>&));
     MOCK_METHOD1(RegisterAppDebugListener, int32_t(sptr<AppExecFwk::IAppDebugListener> listener));

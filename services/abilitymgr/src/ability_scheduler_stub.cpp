@@ -158,10 +158,6 @@ int AbilitySchedulerStub::OnRemoteRequestInnerThird(
             return CreateModalUIExtensionInner(data, reply);
         case UPDATE_SESSION_TOKEN:
             return UpdateSessionTokenInner(data, reply);
-#ifdef ABILITY_COMMAND_FOR_TEST
-        case BLOCK_ABILITY_INNER:
-            return BlockAbilityInner(data, reply);
-#endif
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -745,20 +741,6 @@ int AbilitySchedulerStub::UpdateSessionTokenInner(MessageParcel &data, MessagePa
     UpdateSessionToken(sessionToken);
     return NO_ERROR;
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AbilitySchedulerStub::BlockAbilityInner(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilitySchedulerStub::BlockAbilityInner start");
-
-    auto result = BlockAbility();
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to WriteInt32 result");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-#endif
 
 void AbilitySchedulerRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {

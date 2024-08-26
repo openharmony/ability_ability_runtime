@@ -145,10 +145,6 @@ public:
     {}
     void DumpAbilityInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
     {}
-    int BlockAbility() override
-    {
-        return 0;
-    }
     void CallRequest() override
     {
         return;

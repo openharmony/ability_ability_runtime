@@ -184,13 +184,6 @@ class MockAppMgrStub : public AppMgrStub {
         return 0;
     }
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    int BlockAppService() override
-    {
-        return 0;
-    }
-    #endif
-
     int PreStartNWebSpawnProcess() override
     {
         return 0;

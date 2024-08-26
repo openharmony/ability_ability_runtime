@@ -214,11 +214,6 @@ private:
     int FreeInstallAbilityFromRemoteInner(MessageParcel &data, MessageParcel &reply);
     int AddFreeInstallObserverInner(MessageParcel &data, MessageParcel &reply);
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    int BlockAmsServiceInner(MessageParcel &data, MessageParcel &reply);
-    int BlockAbilityInner(MessageParcel &data, MessageParcel &reply);
-    int BlockAppServiceInner(MessageParcel &data, MessageParcel &reply);
-    #endif
     int EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
     int GetTopAbilityInner(MessageParcel &data, MessageParcel &reply);

@@ -297,16 +297,6 @@ public:
 
     void GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm) const;
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block ability.
-     *
-     * @param abilityRecordId The Ability Record Id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int BlockAbility(int abilityRecordId) const;
-    #endif
-
     /**
      * @brief dump all abilities
      *

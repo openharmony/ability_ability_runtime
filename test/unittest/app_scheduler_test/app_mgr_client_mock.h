@@ -53,7 +53,6 @@ public:
     MOCK_METHOD1(GetConfiguration, AppMgrResultCode(Configuration& config));
     MOCK_METHOD2(GetAbilityRecordsByProcessID, int(
         const int pid, std::vector<sptr<IRemoteObject>> &tokens));
-    MOCK_METHOD0(BlockAppService, AppMgrResultCode());
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
