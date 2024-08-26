@@ -66,8 +66,10 @@ public:
     void OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord);
+    void OnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
     void OnProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnRenderProcessDied(const std::shared_ptr<RenderRecord> &renderRecord);
+    void OnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord);
     void OnProcessReused(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnPageShow(const PageStateData pageStateData);
     void OnPageHide(const PageStateData pageStateData);
@@ -81,8 +83,10 @@ private:
         const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged);
     void HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord);
+    void HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
     void HandleOnAppProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnRenderProcessDied(const std::shared_ptr<RenderRecord> &RenderRecord);
+    void HandleOnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord);
     bool ObserverExist(const sptr<IRemoteBroker> &observer);
     bool IsAppForegroundObserverExist(const sptr<IRemoteBroker> &observer);
     bool IsAbilityForegroundObserverExist(const sptr<IRemoteBroker> &observer);
@@ -93,6 +97,7 @@ private:
     AbilityforegroundObserverSet GetAbilityforegroundObserverSetCopy();
     ProcessData WrapProcessData(const std::shared_ptr<AppRunningRecord> &appRecord);
     ProcessData WrapRenderProcessData(const std::shared_ptr<RenderRecord> &renderRecord);
+    int32_t WrapChildProcessData(ProcessData &processData, std::shared_ptr<ChildProcessRecord> childRecord);
     void OnObserverDied(const wptr<IRemoteObject> &remote, const ObserverType &type);
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
     const ApplicationState state);

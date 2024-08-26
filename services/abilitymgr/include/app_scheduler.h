@@ -231,7 +231,7 @@ public:
      *
      * @param bundleName.
      */
-    int KillApplication(const std::string &bundleName, const bool clearpagestack = false);
+    int KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -363,15 +363,6 @@ public:
      * @return
      */
     void SetCurrentUserId(int32_t userId);
-
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int BlockAppService();
-    #endif
 
     /**
      * Get bundleName by pid.

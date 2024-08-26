@@ -262,6 +262,7 @@ int DataAbilityManager::AbilityTransitionDone(const sptr<IRemoteObject> &token, 
     std::string abilityName = "";
     if (record != nullptr) {
         abilityName = record->GetAbilityInfo().name;
+        record->RemoveSignatureInfo();
     }
     for (it = dataAbilityRecordsLoading_.begin(); it != dataAbilityRecordsLoading_.end(); ++it) {
         if (it->second && it->second->GetToken() == token) {

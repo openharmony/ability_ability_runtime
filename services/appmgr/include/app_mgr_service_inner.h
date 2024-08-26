@@ -262,7 +262,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearpagestack = false);
+    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -292,7 +292,7 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
 
-    virtual int32_t KillApplicationSelf(const bool clearpagestack = false);
+    virtual int32_t KillApplicationSelf(const bool clearPageStack = true);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -304,7 +304,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const bool clearpagestack = false);
+        const bool clearPageStack = true);
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -387,6 +387,15 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t GetAllRenderProcesses(std::vector<RenderProcessInfo> &info);
+
+    /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info);
 
     /**
      * NotifyMemoryLevel, Notify applications background the current memory level.
@@ -1237,7 +1246,7 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearpagestack = false);
+        const bool clearPageStack = true);
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1305,6 +1314,8 @@ private:
 
     void GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<RenderProcessInfo> &info);
 
+    void GetChildrenProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<ChildProcessInfo> &info);
+
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
 
@@ -1330,13 +1341,17 @@ private:
     void ApplicationTerminatedSendProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    int32_t StartChildProcessPreCheck(const pid_t callingPid);
+    int32_t StartChildProcessPreCheckNative(const pid_t callingPid);
+
+    int32_t StartChildProcessPreCheck(pid_t callingPid, const ChildProcessRequest &request);
 
     int32_t StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args);
+        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args,
+        const ChildProcessOptions &options);
 
     int32_t GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
+        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info,
+        bool isCallFromGetChildrenProcesses = false);
 
     void OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
 
@@ -1365,7 +1380,7 @@ private:
     bool CheckGetRunningInfoPermission() const;
 
     int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearpagestack = false);
+        const std::string &bundleName, const bool clearPageStack = true);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 

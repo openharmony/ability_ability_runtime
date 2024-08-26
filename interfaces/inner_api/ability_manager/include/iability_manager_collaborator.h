@@ -177,6 +177,11 @@ public:
         return;
     }
 
+    virtual int32_t CheckStaticCfgPermission(const Want &want)
+    {
+        return 0;
+    }
+
     enum {
         NOTIFY_START_ABILITY = 1,
         NOTIFY_MISSION_CREATED,
@@ -195,6 +200,7 @@ public:
         UPDATE_CONFIGURATION,
         OPEN_FILE,
         NOTIFY_MISSION_BIND_PID,
+        CHECK_STATIC_CFG_PERMISSION,
     };
 };
 }  // namespace AAFwk

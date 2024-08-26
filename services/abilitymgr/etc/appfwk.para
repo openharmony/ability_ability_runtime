@@ -37,3 +37,4 @@ const.abilityms.launch_embeded_ui_ability = false
 const.sys.abilityms.limit_maximum_extensions_of_per_process = 10
 const.sys.abilityms.limit_maximum_extensions_of_per_device = 100
 const.sys.abilityms.cache_extension = 260
+const.max_native_child_process = 0

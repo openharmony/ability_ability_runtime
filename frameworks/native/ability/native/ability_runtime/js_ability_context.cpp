@@ -646,7 +646,7 @@ void JsAbilityContext::DoConnectUIServiceExtension(napi_env env,
         return;
     }
 
-    uint64_t connectId = connection->GetConnectionId();
+    int64_t connectId = connection->GetConnectionId();
     auto context = weakContext.lock();
     if (!context) {
         TAG_LOGE(AAFwkTag::CONTEXT, "connect ability failed, context is released.");

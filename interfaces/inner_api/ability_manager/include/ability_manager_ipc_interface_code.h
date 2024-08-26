@@ -310,12 +310,6 @@ enum class AbilityManagerInterfaceCode {
 
     START_ABILITY_FOR_OPTIONS = 1028,
 
-    BLOCK_AMS_SERVICE = 1029,
-
-    BLOCK_ABILITY = 1030,
-
-    BLOCK_APP_SERVICE = 1031,
-
     // ipc id for call ability
     START_CALL_ABILITY = 1032,
 

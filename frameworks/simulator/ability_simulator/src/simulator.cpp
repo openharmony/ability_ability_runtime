@@ -307,7 +307,7 @@ bool SimulatorImpl::ParseAbilityInfo(const std::string &abilitySrcPath, const st
         abilityInfo_ = AppExecFwk::BundleContainer::GetInstance().GetAbilityInfo(options_.moduleName, abilityName);
     } else {
         auto path = abilitySrcPath;
-        path.erase(path.rfind(""));
+        path.erase(path.rfind("."));
         auto abilityNameFromPath = path.substr(path.rfind('/') + 1, path.length());
         abilityInfo_ = AppExecFwk::BundleContainer::GetInstance().GetAbilityInfo(
             options_.moduleName, abilityNameFromPath);

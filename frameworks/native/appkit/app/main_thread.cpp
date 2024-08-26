@@ -74,6 +74,7 @@
 #ifdef CJ_FRONTEND
 #include "cj_runtime.h"
 #endif
+#include "native_lib_util.h"
 #include "nlohmann/json.hpp"
 #include "ohos_application.h"
 #include "overlay_module_info.h"
@@ -166,89 +167,6 @@ const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 
 extern "C" int DFX_SetAppRunningUniqueId(const char* appRunningId, size_t len) __attribute__((weak));
-
-std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp)
-{
-    std::string libPath = LOCAL_CODE_PATH;
-    if (isPreInstallApp) {
-        auto pos = hapPath.rfind("/");
-        libPath = hapPath.substr(0, pos);
-    }
-    return libPath;
-}
-
-void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
-{
-    if (hapInfo.nativeLibraryPath.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Lib path of %{public}s is empty, lib isn't isolated or compressed",
-            hapInfo.moduleName.c_str());
-        return;
-    }
-
-    std::string appLibPathKey = hapInfo.bundleName + "/" + hapInfo.moduleName;
-    std::string libPath = LOCAL_CODE_PATH;
-    if (!hapInfo.compressNativeLibs) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Lib of %{public}s will not be extracted from hap", hapInfo.moduleName.c_str());
-        libPath = GetLibPath(hapInfo.hapPath, isPreInstallApp);
-    }
-
-    libPath += (libPath.back() == '/') ? hapInfo.nativeLibraryPath : "/" + hapInfo.nativeLibraryPath;
-    TAG_LOGD(
-        AAFwkTag::APPKIT, "appLibPathKey: %{private}s, lib path: %{private}s", appLibPathKey.c_str(), libPath.c_str());
-    appLibPaths[appLibPathKey].emplace_back(libPath);
-}
-
-void GetHspNativeLibPath(const BaseSharedBundleInfo &hspInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
-{
-    if (hspInfo.nativeLibraryPath.empty()) {
-        return;
-    }
-
-    std::string appLibPathKey = hspInfo.bundleName + "/" + hspInfo.moduleName;
-    std::string libPath = LOCAL_CODE_PATH;
-    if (!hspInfo.compressNativeLibs) {
-        libPath = GetLibPath(hspInfo.hapPath, isPreInstallApp);
-        libPath = libPath.back() == '/' ? libPath : libPath + "/";
-        if (isPreInstallApp) {
-            libPath += hspInfo.nativeLibraryPath;
-        } else {
-            libPath += hspInfo.bundleName + "/" + hspInfo.moduleName + "/" + hspInfo.nativeLibraryPath;
-        }
-    } else {
-        libPath = libPath.back() == '/' ? libPath : libPath + "/";
-        libPath += hspInfo.bundleName + "/" + hspInfo.nativeLibraryPath;
-    }
-
-    TAG_LOGD(
-        AAFwkTag::APPKIT, "appLibPathKey: %{private}s, libPath: %{private}s", appLibPathKey.c_str(), libPath.c_str());
-    appLibPaths[appLibPathKey].emplace_back(libPath);
-}
-
-void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativeLibraryPath,
-    AppLibPathMap &appLibPaths)
-{
-    if (hapInfo.isLibIsolated) {
-        patchNativeLibraryPath = hapInfo.hqfInfo.nativeLibraryPath;
-    }
-
-    if (patchNativeLibraryPath.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Patch lib path of %{public}s is empty", hapInfo.moduleName.c_str());
-        return;
-    }
-
-    if (hapInfo.compressNativeLibs && !hapInfo.isLibIsolated) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Lib of %{public}s has compressed and isn't isolated, no need to set",
-            hapInfo.moduleName.c_str());
-        return;
-    }
-
-    std::string appLibPathKey = hapInfo.bundleName + "/" + hapInfo.moduleName;
-    std::string patchLibPath = LOCAL_CODE_PATH;
-    patchLibPath += (patchLibPath.back() == '/') ? patchNativeLibraryPath : "/" + patchNativeLibraryPath;
-    TAG_LOGD(AAFwkTag::APPKIT, "appLibPathKey: %{public}s, patch lib path: %{private}s", appLibPathKey.c_str(),
-        patchLibPath.c_str());
-    appLibPaths[appLibPathKey].emplace_back(patchLibPath);
-}
 } // namespace
 
 void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths)
@@ -1075,12 +993,13 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
 #if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::PreferredLanguage::GetAppPreferredLanguage(), status);
-    resConfig->SetLocaleInfo(locale);
-    const icu::Locale *localeInfo = resConfig->GetLocaleInfo();
-    if (localeInfo != nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Language: %{public}s, script: %{public}s, region: %{public}s",
-            localeInfo->getLanguage(), localeInfo->getScript(), localeInfo->getCountry());
+    icu::Locale systemLocale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    resConfig->SetLocaleInfo(systemLocale);
+
+    if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
+        icu::Locale preferredLocale =
+            icu::Locale::forLanguageTag(Global::I18n::PreferredLanguage::GetAppPreferredLanguage(), status);
+        resConfig->SetPreferredLocaleInfo(preferredLocale);
     }
 #endif
     std::string colormode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
@@ -2175,17 +2094,10 @@ void MainThread::HandleCleanAbilityLocal(const sptr<IRemoteObject> &token)
     }
 
     std::shared_ptr<AbilityLocalRecord> record = abilityRecordMgr_->GetAbilityItem(token);
-    if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord not found");
-        return;
-    }
+    CHECK_POINTER_TAG_LOG(record, AAFwkTag::APPKIT, "abilityRecord not found");
     std::shared_ptr<AbilityInfo> abilityInfo = record->GetAbilityInfo();
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "record->GetAbilityInfo() failed");
-        return;
-    }
+    CHECK_POINTER_TAG_LOG(abilityInfo, AAFwkTag::APPKIT, "record->GetAbilityInfo() failed");
     TAG_LOGD(AAFwkTag::APPKIT, "ability name: %{public}s", abilityInfo->name.c_str());
-
     abilityRecordMgr_->RemoveAbilityRecord(token);
     application_->CleanAbilityStage(token, abilityInfo, false);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
@@ -2201,6 +2113,7 @@ void MainThread::HandleCleanAbilityLocal(const sptr<IRemoteObject> &token)
         TAG_LOGW(AAFwkTag::APPKIT, "runner not found");
     }
 #endif
+    AfterCleanAbilityGC();
 }
 
 /**
@@ -2223,29 +2136,16 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
         TAG_LOGE(AAFwkTag::APPKIT, "should launch application first");
         return;
     }
-
-    if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is null");
-        return;
-    }
-
+    CHECK_POINTER_TAG_LOG(token, AAFwkTag::APPKIT, "token is null");
     std::shared_ptr<AbilityLocalRecord> record = abilityRecordMgr_->GetAbilityItem(token);
-    if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord not found");
-        return;
-    }
+    CHECK_POINTER_TAG_LOG(record, AAFwkTag::APPKIT, "abilityRecord not found");
     std::shared_ptr<AbilityInfo> abilityInfo = record->GetAbilityInfo();
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "record->GetAbilityInfo() failed");
-        return;
-    }
-
+    CHECK_POINTER_TAG_LOG(abilityInfo, AAFwkTag::APPKIT, "record->GetAbilityInfo() failed");
 #ifdef SUPPORT_GRAPHICS
     if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
         AppRecovery::GetInstance().RemoveAbility(token);
     }
 #endif
-
     abilityRecordMgr_->RemoveAbilityRecord(token);
     application_->CleanAbilityStage(token, abilityInfo, isCacheProcess);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
@@ -2262,8 +2162,18 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
     }
 #endif
     appMgr_->AbilityCleaned(token);
+    AfterCleanAbilityGC();
     TAG_LOGD(AAFwkTag::APPKIT, "end. app: %{public}s, ability: %{public}s.",
         applicationInfo_->name.c_str(), abilityInfo->name.c_str());
+}
+
+void MainThread::AfterCleanAbilityGC()
+{
+    bool appBackground = applicationImpl_ ?
+        applicationImpl_->GetState() != ApplicationImpl::APP_STATE_FOREGROUND : false;
+    if (appBackground) {
+        ForceFullGC();
+    }
 }
 
 /**
