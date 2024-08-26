@@ -21,7 +21,6 @@
 #include "want_params_wrapper.h"
 #include "pending_want.h"
 #include "want_agent_client.h"
-#include "want_agent_log_wrapper.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
 
