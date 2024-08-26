@@ -2385,6 +2385,7 @@ void MainThread::HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, v
         case SignalType::SIGNAL_JSHEAP_OLD: {
             auto heapFunc = []() { return MainThread::HandleDumpHeap(false); };
             mainHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP_OLD");
+            break;
         }
         case SignalType::SIGNAL_JSHEAP: {
             auto heapFunc = []() { return MainThread::HandleDumpHeap(false); };
