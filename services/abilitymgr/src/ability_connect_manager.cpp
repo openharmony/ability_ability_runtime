@@ -689,10 +689,12 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
             int connectRecordId = connectRecord->GetRecordId();
             ConnectUIServiceExtAbility(targetService, connectRecordId, want);
         }
+        targetService->RemoveSignatureInfo();
         return;
     }
 
     if (targetService->GetConnectRecordList().size() > 1) {
+        targetService->RemoveSignatureInfo();
         if (taskHandler_ != nullptr && targetService->GetConnRemoteObject()) {
             auto task = [connectRecord]() { connectRecord->CompleteConnect(ERR_OK); };
             taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
@@ -941,7 +943,6 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     }
 
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    abilityRecord->RemoveSignatureInfo();
     std::string element = abilityRecord->GetURI();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability:%{public}s, state:%{public}s", element.c_str(), abilityState.c_str());
 
@@ -968,6 +969,7 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
             return DispatchInactive(abilityRecord, state);
         }
         case AbilityState::FOREGROUND: {
+            abilityRecord->RemoveSignatureInfo();
             return DispatchForeground(abilityRecord);
         }
         case AbilityState::BACKGROUND: {
@@ -1032,6 +1034,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
         return INVALID_CONNECTION_STATE;
     }
     abilityRecord->RemoveConnectWant();
+    abilityRecord->RemoveSignatureInfo();
 
     if (abilityRecord->GetAbilityInfo().type == AbilityType::SERVICE) {
         DelayedSingleton<AppScheduler>::GetInstance()->UpdateAbilityState(
@@ -1177,6 +1180,7 @@ int AbilityConnectManager::ScheduleCommandAbilityDoneLocked(const sptr<IRemoteOb
     }
     EventInfo eventInfo = BuildEventInfo(abilityRecord);
     EventReport::SendStartServiceEvent(EventName::START_SERVICE, eventInfo);
+    abilityRecord->RemoveSignatureInfo();
     // complete command and pop waiting start ability from queue.
     CompleteCommandAbility(abilityRecord);
 
@@ -1584,19 +1588,21 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Timeout ability record is not exist in service map.");
         return;
     }
-    MoveToTerminatingMap(abilityRecord);
     TAG_LOGW(AAFwkTag::ABILITYMGR, "Load timeout:%{public}s,user:%{public}d.",
         abilityRecord->GetURI().c_str(), userId_);
-    RemoveServiceAbility(abilityRecord);
     if (abilityRecord->IsSceneBoard()) {
         auto isAttached = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(
             abilityRecord->GetToken()));
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
         if (!isAttached) {
+            MoveToTerminatingMap(abilityRecord);
+            RemoveServiceAbility(abilityRecord);
             RestartAbility(abilityRecord, userId_);
         }
         return;
     }
+    MoveToTerminatingMap(abilityRecord);
+    RemoveServiceAbility(abilityRecord);
     DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
     if (IsAbilityNeedKeepAlive(abilityRecord)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Load time out, try to restart");
@@ -1607,7 +1613,7 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
 void AbilityConnectManager::HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
-    if (AppUtils::GetInstance().IsLauncherAbility(abilityRecord->GetAbilityInfo().name)) {
+    if (abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle root launcher command timeout.");
         // terminate the timeout root launcher.
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
@@ -2119,7 +2125,7 @@ void AbilityConnectManager::HandleInactiveTimeout(const std::shared_ptr<AbilityR
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleInactiveTimeout start");
     CHECK_POINTER(ability);
-    if (AppUtils::GetInstance().IsLauncherAbility(ability->GetAbilityInfo().name)) {
+    if (ability->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle root launcher inactive timeout.");
         // terminate the timeout root launcher.
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(ability->GetToken());

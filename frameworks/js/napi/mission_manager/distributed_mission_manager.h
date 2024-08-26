@@ -227,6 +227,10 @@ enum ErrorCode {
      */
     PERMISSION_DENIED = 201,
     /**
+     * Result(202) for non-system-app use system-api.
+     */
+    NOT_SYSTEM_APP = 202,
+    /**
      * Result(401) for parameter check failed.
      */
     PARAMETER_CHECK_FAILED = 401,

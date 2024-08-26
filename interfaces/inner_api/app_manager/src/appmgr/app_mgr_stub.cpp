@@ -37,6 +37,22 @@
 namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
+namespace {
+#ifdef __aarch64__
+constexpr uint32_t OBJECT_MASK = 0xffffffff;
+#else
+constexpr uint32_t OBJECT_MASK = 0xffffff;
+#endif
+
+uint32_t ConvertAddr(const void *ptr)
+{
+    if (ptr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ptr is null");
+        return 0;
+    }
+    return static_cast<uint32_t>((reinterpret_cast<uintptr_t>(ptr)) & OBJECT_MASK);
+}
+}
 
 AppMgrStub::AppMgrStub() {}
 
@@ -179,10 +195,6 @@ int32_t AppMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
     MessageParcel &reply, MessageOption &option)
 {
     switch (static_cast<uint32_t>(code)) {
-    #ifdef ABILITY_COMMAND_FOR_TEST
-        case AppMgrInterfaceCode::BLOCK_APP_SERVICE:
-            return HandleBlockAppServiceDone(data, reply);
-    #endif
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_RUNNING_STATE):
             return HandleGetAppRunningStateByBundleName(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_LOAD_REPAIR_PATCH):
@@ -337,6 +349,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleRestartResidentProcessDependedOnWeb(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS):
             return HandleGetSupportedProcessCachePids(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_CHILDREN_PROCESSES):
+            return HandleGetAllChildrenProcesses(data, reply);
     }
     return INVALID_FD;
 }
@@ -347,6 +361,12 @@ int32_t AppMgrStub::HandleAttachApplication(MessageParcel &data, MessageParcel &
     sptr<IRemoteObject> client = data.ReadRemoteObject();
     if (client == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "remote object null");
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "remote: %{public}u", ConvertAddr(client.GetRefPtr()));
+    IPCObjectProxy *proxy = reinterpret_cast<IPCObjectProxy *>(client.GetRefPtr());
+    if (proxy != nullptr) {
+        int32_t pid = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
+        TAG_LOGI(AAFwkTag::APPMGR, "handle:%{public}u, callingPid:%{public}d", proxy->GetHandle(), pid);
     }
     AttachApplication(client);
     return NO_ERROR;
@@ -516,6 +536,25 @@ int32_t AppMgrStub::HandleGetAllRenderProcesses(MessageParcel &data, MessageParc
         }
     }
     if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAllChildrenProcesses(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::vector<ChildProcessInfo> info;
+    auto result = GetAllChildrenProcesses(info);
+    reply.WriteInt32(info.size());
+    for (auto &it : info) {
+        if (!reply.WriteParcelable(&it)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write ChildProcessInfo faild, child pid=%{public}d", it.pid);
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result faild");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -933,16 +972,6 @@ int32_t AppMgrStub::HandleUnregisterConfigurationObserver(MessageParcel &data, M
     reply.WriteInt32(result);
     return NO_ERROR;
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int32_t AppMgrStub::HandleBlockAppServiceDone(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s", __func__);
-    int32_t result = BlockAppService();
-    reply.WriteInt32(result);
-    return result;
-}
-#endif
 
 int32_t AppMgrStub::HandleGetAppRunningStateByBundleName(MessageParcel &data, MessageParcel &reply)
 {

@@ -26,8 +26,6 @@
 #include "js_ui_extension_content_session.h"
 #include "napi_common_want.h"
 #include "session_info.h"
-
-
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace testing::ext;

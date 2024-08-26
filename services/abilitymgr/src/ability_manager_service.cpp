@@ -204,9 +204,6 @@ constexpr int32_t NON_ANONYMIZE_LENGTH = 6;
 constexpr uint32_t SCENE_FLAG_NORMAL = 0;
 constexpr int32_t MAX_NUMBER_OF_DISTRIBUTED_MISSIONS = 20;
 constexpr int32_t SWITCH_ACCOUNT_TRY = 3;
-#ifdef ABILITY_COMMAND_FOR_TEST
-constexpr int32_t BLOCK_AMS_SERVICE_TIME = 65;
-#endif
 constexpr int32_t CONVERT_CALLBACK_TIMEOUT_SECONDS = 2; // 2s
 constexpr const char* EMPTY_DEVICE_ID = "";
 constexpr int32_t APP_MEMORY_SIZE = 512;
@@ -1032,6 +1029,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return result;
     }
 
+    if ((want.GetFlags() & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION &&
+        IPCSkeleton::GetCallingUid() != DMS_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The flag only support for DMS, flag is %{public}d", want.GetFlags());
+        return ERR_INVALID_CONTINUATION_FLAG;
+    }
+
     if (callerToken != nullptr && CheckIfOperateRemote(want)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "try to StartRemoteAbility");
         return StartRemoteAbility(want, requestCode, validUserId, callerToken);
@@ -1312,6 +1315,14 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
         return CHECK_PERMISSION_FAILED;
     }
 #endif // WITH_DLP
+
+    if ((want.GetFlags() & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION &&
+        IPCSkeleton::GetCallingUid() != DMS_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The flag only support for DMS, flag is %{public}d", want.GetFlags());
+        eventInfo.errCode = ERR_INVALID_VALUE;
+        SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        return ERR_INVALID_CONTINUATION_FLAG;
+    }
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
         eventInfo.errCode = ERR_INVALID_VALUE;
@@ -1596,6 +1607,14 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return CHECK_PERMISSION_FAILED;
     }
 #endif // WITH_DLP
+
+    if ((want.GetFlags() & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION &&
+        IPCSkeleton::GetCallingUid() != DMS_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The flag only support for DMS, flag is %{public}d", want.GetFlags());
+        eventInfo.errCode = ERR_INVALID_VALUE;
+        SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        return ERR_INVALID_CONTINUATION_FLAG;
+    }
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
         eventInfo.errCode = ERR_INVALID_VALUE;
@@ -4102,6 +4121,7 @@ int AbilityManagerService::DisconnectRemoteAbility(const sptr<IRemoteObject> &co
 int AbilityManagerService::ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
     int32_t missionId, const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ContinueMission missionId: %{public}d", missionId);
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
@@ -4115,6 +4135,7 @@ int AbilityManagerService::ContinueMission(const std::string &srcDeviceId, const
 int AbilityManagerService::ContinueMission(AAFwk::ContinueMissionInfo continueMissionInfo,
     const sptr<IRemoteObject> &callback)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     AAFWK::ContinueRadar::GetInstance().ClickIconContinue("ContinueMission");
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
@@ -4246,6 +4267,7 @@ int AbilityManagerService::NotifyContinuationResult(int32_t missionId, int32_t r
 
 int AbilityManagerService::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
         return CHECK_PERMISSION_FAILED;
@@ -4256,6 +4278,7 @@ int AbilityManagerService::StartSyncRemoteMissions(const std::string& devId, boo
 
 int AbilityManagerService::StopSyncRemoteMissions(const std::string& devId)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
         return CHECK_PERMISSION_FAILED;
@@ -8441,6 +8464,21 @@ int AbilityManagerService::CheckStaticCfgPermission(const AppExecFwk::AbilityReq
 {
     auto abilityInfo = abilityRequest.abilityInfo;
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (AppUtils::GetInstance().IsSupportAncoApp() &&
+        StartAbilityUtils::IsCallFromAncoShellOrBroker(abilityRequest.callerToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR,
+            "Check static permission, name is %{public}s.", abilityInfo.name.c_str());
+        auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
+        if (collaborator == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Collaborator is nullptr.");
+            return AppExecFwk::Constants::PERMISSION_NOT_GRANTED;
+        }
+        int result = collaborator->CheckStaticCfgPermission(abilityRequest.want);
+        if (result != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Check permission failed from broker.");
+            return AppExecFwk::Constants::PERMISSION_NOT_GRANTED;
+        }
+    }
     if (!isData) {
         isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     }
@@ -8598,56 +8636,6 @@ int AbilityManagerService::VerifyAccountPermission(int32_t userId)
     }
     return AAFwk::PermissionVerification::GetInstance()->VerifyAccountPermission();
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AbilityManagerService::BlockAmsService()
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
-    if (AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not shell call");
-        return ERR_PERMISSION_DENIED;
-    }
-    if (taskHandler_) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s begin post block ability manager service task", __func__);
-        auto BlockAmsServiceTask = [aams = shared_from_this()]() {
-            while (1) {
-                TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s begin waiting", __func__);
-                std::this_thread::sleep_for(BLOCK_AMS_SERVICE_TIME*1s);
-            }
-        };
-        taskHandler_->SubmitTask(BlockAmsServiceTask, "blockamsservice");
-        return ERR_OK;
-    }
-    return ERR_NO_INIT;
-}
-
-int AbilityManagerService::BlockAbility(int32_t abilityRecordId)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
-    if (AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not shell call");
-        return ERR_PERMISSION_DENIED;
-    }
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
-        CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        return uiAbilityManager->BlockAbility(abilityRecordId);
-    }
-    auto missionListManager = GetCurrentMissionListManager();
-    CHECK_POINTER_AND_RETURN(missionListManager, ERR_NO_INIT);
-    return missionListManager->BlockAbility(abilityRecordId);
-}
-
-int AbilityManagerService::BlockAppService()
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
-    if (AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not shell call");
-        return ERR_PERMISSION_DENIED;
-    }
-    return DelayedSingleton<AppScheduler>::GetInstance()->BlockAppService();
-}
-#endif
 
 int AbilityManagerService::FreeInstallAbilityFromRemote(const Want &want, const sptr<IRemoteObject> &callback,
     int32_t userId, int requestCode)
@@ -9427,15 +9415,19 @@ bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequ
         return true;
     }
 
-    // Check caller ability firstly.
+    bool isBackgroundCall = true;
+    auto ret = IsCallFromBackground(abilityRequest, isBackgroundCall);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "start uea when background");
+        return false;
+    }
+
+    if (!isBackgroundCall) {
+        return true;
+    }
+
     auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (callerAbility != nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Caller ability is %{public}s, state: %{public}d",
-            callerAbility->GetURI().c_str(), callerAbility->GetAbilityState());
-        if (callerAbility->IsForeground() || callerAbility->GetAbilityForegroundingFlag()) {
-            return true;
-        }
-
         if (UIExtensionUtils::IsUIExtension(callerAbility->GetAbilityInfo().extensionAbilityType)) {
             auto tokenId = callerAbility->GetApplicationInfo().accessTokenId;
             bool isFocused = false;
@@ -9450,23 +9442,13 @@ bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequ
         }
     }
 
-    // Check caller app.
-    auto callerPid = IPCSkeleton::GetCallingPid();
-    AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
-    if (processInfo.isFocused || processInfo.isAbilityForegrounding ||
-        processInfo.state_ == AppExecFwk::AppProcessState::APP_STATE_FOREGROUND) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Caller app %{public}s is foreground", processInfo.processName_.c_str());
-        return true;
-    }
-
     if (PermissionVerification::GetInstance()->VerifyCallingPermission(
         PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND)) {
         return true;
     }
 
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller app %{public}s is not foreground, can't start %{public}s",
-        processInfo.processName_.c_str(), abilityRequest.want.GetElement().GetURI().c_str());
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller app is not foreground, can't start %{public}s",
+        abilityRequest.want.GetElement().GetURI().c_str());
     return false;
 }
 

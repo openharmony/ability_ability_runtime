@@ -33,6 +33,8 @@ struct ChildProcessInfo : public Parcelable {
     int32_t pid = 0;
     int32_t hostPid = 0;
     int32_t uid = -1;
+    int32_t hostUid = -1;
+    int32_t userId = -1;
     int32_t childProcessType = CHILD_PROCESS_TYPE_JS;
     std::string bundleName;
     std::string processName;

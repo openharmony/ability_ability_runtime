@@ -760,62 +760,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetDataAbilityUri_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetDataAbilityUri_001 end");
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-/*
- * Feature: AbilityManagerService
- * Function: BlockAmsService
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService BlockAmsService
- */
-HWTEST_F(AbilityManagerServiceThirdTest, BlockAmsService_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest BlockAmsService_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    auto temp = abilityMs_->taskHandler_;
-    abilityMs_->taskHandler_ = nullptr;
-    EXPECT_EQ(abilityMs_->BlockAmsService(), ERR_NO_INIT);
-
-    abilityMs_->taskHandler_ = temp;
-    EXPECT_EQ(abilityMs_->BlockAmsService(), ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest BlockAmsService_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: BlockAbility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService BlockAbility
- */
-HWTEST_F(AbilityManagerServiceThirdTest, BlockAbility_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest BlockAbility_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
-    auto temp = abilityMs_->subManagersHelper_->currentMissionListManager_;
-    abilityMs_->subManagersHelper_->currentMissionListManager_ = nullptr;
-    EXPECT_EQ(abilityMs_->BlockAbility(1), ERR_OK);
-
-    abilityMs_->subManagersHelper_->currentMissionListManager_ = temp;
-    EXPECT_EQ(abilityMs_->BlockAbility(1), ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest BlockAbility_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService BlockAppService
- */
-HWTEST_F(AbilityManagerServiceThirdTest, BlockAppService_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest BlockAppService_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->BlockAppService(1), ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest BlockAppService_001 end");
-}
-#endif
-
 /*
  * Feature: AbilityManagerService
  * Function: CreateVerificationInfo

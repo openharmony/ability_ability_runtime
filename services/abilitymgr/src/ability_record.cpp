@@ -504,13 +504,13 @@ void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
     switch (messageId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG: {
             uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-                LOAD_TIMEOUT_MULTIPLE;
+                static_cast<uint32_t>(LOAD_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             break;
         }
         case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
             uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-                FOREGROUND_TIMEOUT_MULTIPLE;
+                static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             break;
         }
@@ -3461,18 +3461,6 @@ AbilityState AbilityRecord::GetPendingState() const
 {
     return pendingState_.load();
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int AbilityRecord::BlockAbility()
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "BlockAbility.");
-    if (scheduler_) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "scheduler_ begin to call BlockAbility %{public}s", __func__);
-        return scheduler_->BlockAbility();
-    }
-    return ERR_NO_INIT;
-}
-#endif
 
 bool AbilityRecord::IsNeedBackToOtherMissionStack()
 {

@@ -52,12 +52,12 @@ public:
         }
     }
 
-    void OnStart(const AAFwk::Want &want) override
+    void OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo) override
     {
         Extension::OnStart(want);
         if (impl_ != nullptr) {
             auto launchParam = Extension::GetLaunchParam();
-            impl_->OnStart(want, launchParam);
+            impl_->OnStart(want, launchParam, sessionInfo);
         }
     }
 

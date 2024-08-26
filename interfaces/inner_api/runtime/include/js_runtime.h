@@ -127,7 +127,6 @@ public:
     void DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug, const DebugOption dOption);
 
     void ReloadFormComponent(); // Reload ArkTS-Card component
-    void DoCleanWorkAfterStageCleaned() override;
     void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const override;
 
     static std::unique_ptr<NativeReference> LoadSystemModuleByEngine(napi_env env,

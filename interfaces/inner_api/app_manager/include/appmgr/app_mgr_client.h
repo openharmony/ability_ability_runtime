@@ -161,7 +161,7 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearpagestack = false);
+    virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
@@ -197,7 +197,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillApplicationSelf(const bool clearpagestack = false);
+    virtual AppMgrResultCode KillApplicationSelf(const bool clearPageStack = true);
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
@@ -256,6 +256,15 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual AppMgrResultCode GetAllRenderProcesses(std::vector<RenderProcessInfo> &info);
+
+    /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual AppMgrResultCode GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info);
 
     /**
      * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
@@ -377,15 +386,6 @@ public:
      * @return Returns RESULT_OK on success, others on failure.
      */
     virtual AppMgrResultCode UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer);
-
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService();
-    #endif
 
     /**
      * Start a user test
