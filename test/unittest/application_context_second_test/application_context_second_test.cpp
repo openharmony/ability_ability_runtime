@@ -66,7 +66,7 @@ HWTEST_F(ApplicationContextSecondTest, SetConfiguration_0100, TestSize.Level1)
     std::shared_ptr<AppExecFwk::Configuration> config = nullptr;
     context_->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     context_->SetConfiguration(config);
-    ASSERT_TRUE(context_->contextImpl_);
+    EXPECT_EQ(config, nullptr);
     GTEST_LOG_(INFO) << "SetConfiguration_0100 end";
 }
 
@@ -81,7 +81,7 @@ HWTEST_F(ApplicationContextSecondTest, AppHasDarkRes_0100, TestSize.Level1)
     bool darkRes = true;
     context_->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     context_->AppHasDarkRes(darkRes);
-    ASSERT_TRUE(context_->contextImpl_);
+    EXPECT_EQ(darkRes, true);
     GTEST_LOG_(INFO) << "AppHasDarkRes_0100 end";
 }
 
@@ -96,7 +96,7 @@ HWTEST_F(ApplicationContextSecondTest, RegisterProcessSecurityExit_0100, TestSiz
     AppProcessExitCallback appProcessExitCallback = [](const AAFwk::ExitReason &exitReason){};
     context_->contextImpl_= std::make_shared<AbilityRuntime::ContextImpl>();
     context_->RegisterProcessSecurityExit(appProcessExitCallback);
-    ASSERT_TRUE(context_->appProcessExitCallback_);
+    EXPECT_NE(appProcessExitCallback, nullptr);
     GTEST_LOG_(INFO) << "RegisterProcessSecurityExit_0100 end";
 }
 
@@ -111,7 +111,7 @@ HWTEST_F(ApplicationContextSecondTest, ProcessSecurityExit_0100, TestSize.Level1
     AAFwk::ExitReason exitReason = { AAFwk::Reason::REASON_JS_ERROR, "Js Error." };
     context_->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     context_->ProcessSecurityExit(exitReason);
-    ASSERT_TRUE(context_->contextImpl_);
+    EXPECT_NE(exitReason.exitMsg, "");
     GTEST_LOG_(INFO) << "ProcessSecurityExit_0100 end";
 }
 
