@@ -1309,7 +1309,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
         !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return CHECK_PERMISSION_FAILED;
@@ -1601,7 +1601,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
         !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return CHECK_PERMISSION_FAILED;
@@ -4133,7 +4133,7 @@ int AbilityManagerService::ContinueMission(const std::string &srcDeviceId, const
     CHECK_CALLER_IS_SYSTEM_APP;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ContinueMission missionId: %{public}d", missionId);
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -4148,7 +4148,7 @@ int AbilityManagerService::ContinueMission(AAFwk::ContinueMissionInfo continueMi
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     AAFWK::ContinueRadar::GetInstance().ClickIconContinue("ContinueMission");
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -4278,7 +4278,7 @@ int AbilityManagerService::StartSyncRemoteMissions(const std::string& devId, boo
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
@@ -4289,7 +4289,7 @@ int AbilityManagerService::StopSyncRemoteMissions(const std::string& devId)
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
@@ -4349,7 +4349,7 @@ int AbilityManagerService::RegisterMissionListener(const std::string &deviceId,
     }
     CHECK_POINTER_AND_RETURN(listener, ERR_INVALID_VALUE);
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
@@ -4362,7 +4362,7 @@ int AbilityManagerService::RegisterOnListener(const std::string &type,
     CHECK_CALLER_IS_SYSTEM_APP;
     CHECK_POINTER_AND_RETURN(listener, ERR_INVALID_VALUE);
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
@@ -4375,7 +4375,7 @@ int AbilityManagerService::RegisterOffListener(const std::string &type,
     CHECK_CALLER_IS_SYSTEM_APP;
     CHECK_POINTER_AND_RETURN(listener, ERR_INVALID_VALUE);
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
@@ -4393,7 +4393,7 @@ int AbilityManagerService::UnRegisterMissionListener(const std::string &deviceId
     }
     CHECK_POINTER_AND_RETURN(listener, ERR_INVALID_VALUE);
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
@@ -4606,7 +4606,7 @@ int AbilityManagerService::LockMissionForCleanup(int32_t missionId)
     CHECK_CALLER_IS_SYSTEM_APP;
 
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     return missionListManager->SetMissionLockedState(missionId, true);
@@ -4621,7 +4621,7 @@ int AbilityManagerService::UnlockMissionForCleanup(int32_t missionId)
     CHECK_CALLER_IS_SYSTEM_APP;
 
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     return missionListManager->SetMissionLockedState(missionId, false);
@@ -4652,7 +4652,7 @@ int AbilityManagerService::RegisterMissionListener(const sptr<IMissionListener> 
     CHECK_CALLER_IS_SYSTEM_APP;
 
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     return missionListManager->RegisterMissionListener(listener);
@@ -4666,7 +4666,7 @@ int AbilityManagerService::UnRegisterMissionListener(const sptr<IMissionListener
     CHECK_CALLER_IS_SYSTEM_APP;
 
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     return missionListManager->UnRegisterMissionListener(listener);
@@ -4682,7 +4682,7 @@ int AbilityManagerService::GetMissionInfos(const std::string& deviceId, int32_t 
     CHECK_CALLER_IS_SYSTEM_APP;
 
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -4716,7 +4716,7 @@ int AbilityManagerService::GetMissionInfo(const std::string& deviceId, int32_t m
     CHECK_CALLER_IS_SYSTEM_APP;
 
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -4756,7 +4756,7 @@ int AbilityManagerService::CleanMission(int32_t missionId)
     CHECK_CALLER_IS_SYSTEM_APP;
 
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -4772,7 +4772,7 @@ int AbilityManagerService::CleanAllMissions()
     CHECK_CALLER_IS_SYSTEM_APP;
 
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -4792,7 +4792,7 @@ int AbilityManagerService::MoveMissionToFront(int32_t missionId)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "request MoveMissionToFront, missionId:%{public}d", missionId);
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -4818,7 +4818,7 @@ int AbilityManagerService::MoveMissionToFront(int32_t missionId, const StartOpti
     TAG_LOGI(AAFwkTag::ABILITYMGR, "request MoveMissionToFront, missionId:%{public}d", missionId);
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -4843,7 +4843,7 @@ int AbilityManagerService::MoveMissionsToForeground(const std::vector<int32_t>& 
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 #ifdef SUPPORT_SCREEN
@@ -4865,7 +4865,7 @@ int AbilityManagerService::MoveMissionsToBackground(const std::vector<int32_t>& 
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 #ifdef SUPPORT_SCREEN
@@ -7392,7 +7392,7 @@ int AbilityManagerService::RegisterSnapshotHandler(const sptr<ISnapshotHandler>&
 {
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     if (!isSaCall) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return 0;
     }
 
@@ -7409,7 +7409,7 @@ int32_t AbilityManagerService::GetMissionSnapshot(const std::string& deviceId, i
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!PermissionVerification::GetInstance()->VerifyMissionPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -7901,7 +7901,7 @@ int AbilityManagerService::SetAbilityController(const sptr<IAbilityController> &
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s, imAStabilityTest: %{public}d", __func__, imAStabilityTest);
     auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyControllerPerm();
     if (!isPerm) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -8972,7 +8972,7 @@ int AbilityManagerService::RegisterWindowManagerServiceHandler(const sptr<IWindo
 {
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     if (!isSaCall) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         return CHECK_PERMISSION_FAILED;
     }
     wmsHandler_ = handler;
@@ -9804,7 +9804,7 @@ int AbilityManagerService::CheckDlpForExtension(
     if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
         !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verify failed");
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         EventReport::SendExtensionEvent(eventName, HiSysEventType::FAULT, eventInfo);
         return CHECK_PERMISSION_FAILED;
@@ -10293,11 +10293,11 @@ bool AbilityManagerService::CheckUserIdActive(int32_t userId)
     auto ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
         QueryActiveOsAccountIds(osActiveAccountIds);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "QueryActiveOsAccountIds failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "QueryActiveOsAccountIds failed");
         return false;
     }
     if (osActiveAccountIds.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s, QueryActiveOsAccountIds is empty, no accounts.", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "QueryActiveOsAccountIds empty");
         return false;
     }
     auto iter = std::find(osActiveAccountIds.begin(), osActiveAccountIds.end(), userId);
