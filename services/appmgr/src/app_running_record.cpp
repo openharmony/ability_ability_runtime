@@ -452,11 +452,11 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     if (!appLifeCycleDeal_->GetApplicationClient()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appThread null");
         return;
     }
     AppLaunchData launchData;
@@ -493,7 +493,7 @@ void AppRunningRecord::UpdateApplicationInfoInstalled(const ApplicationInfo &app
     }
 
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     appLifeCycleDeal_->UpdateApplicationInfoInstalled(appInfo);
@@ -511,7 +511,7 @@ void AppRunningRecord::AddAbilityStage()
         TAG_LOGI(AAFwkTag::APPMGR, "Current Informed module : [%{public}s] | bundle : [%{public}s]",
             abilityStage.moduleName.c_str(), mainBundleName_.c_str());
         if (appLifeCycleDeal_ == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+            TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
             return;
         }
         appLifeCycleDeal_->AddAbilityStage(abilityStage);
@@ -521,7 +521,7 @@ void AppRunningRecord::AddAbilityStage()
 void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
 {
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
         return;
     }
 
@@ -529,12 +529,12 @@ void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
     if (GetTheModuleInfoNeedToUpdated(bundleName, hapModuleInfo)) {
         if (startProcessSpecifiedAbilityEventId_ == 0) {
             TAG_LOGI(
-                AAFwkTag::APPMGR, "%{public}s START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG is not exist.", __func__);
+                AAFwkTag::APPMGR, "START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG not exist");
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG,
                 AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT);
         }
         if (appLifeCycleDeal_ == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+            TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
             return;
         }
         appLifeCycleDeal_->AddAbilityStage(hapModuleInfo);
@@ -545,7 +545,7 @@ void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bund
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call.");
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
         return;
     }
 
@@ -554,7 +554,7 @@ void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bund
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG,
             AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT);
         if (appLifeCycleDeal_ == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+            TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
             return;
         }
         appLifeCycleDeal_->AddAbilityStage(hapModuleInfo);
@@ -567,7 +567,7 @@ void AppRunningRecord::AddAbilityStageDone()
         static_cast<int>(eventId_));
 
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
         return;
     }
 
@@ -601,17 +601,17 @@ void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     if (!ability || !ability->GetToken()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord or abilityToken is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord or abilityToken null");
         return;
     }
 
     auto moduleRecord = GetModuleRunningRecordByToken(ability->GetToken());
     if (!moduleRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "moduleRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "moduleRecord null");
         return;
     }
 
@@ -622,7 +622,7 @@ void AppRunningRecord::ScheduleTerminate()
 {
     SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT);
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     bool isLastProcess = false;
@@ -753,7 +753,7 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 
     if (!appInfo) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appInfo is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appInfo null");
         return;
     }
 
@@ -787,7 +787,7 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
     }
 
     if (!abilityInfo || !token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo or token is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo or token null");
         return;
     }
     moduleRecord->AddAbility(token, abilityInfo, want, abilityRecordId);
@@ -878,7 +878,7 @@ std::shared_ptr<ModuleRunningRecord> AppRunningRecord::GetModuleRunningRecordByT
     const sptr<IRemoteObject> &token) const
 {
     if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "token is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "token null");
         return nullptr;
     }
 
@@ -965,7 +965,7 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ability is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "ability null");
         return;
     }
     AbilityState curAbilityState = ability->GetState();
@@ -983,7 +983,7 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         // Just change ability to foreground if current application state is foreground or focus.
         auto moduleRecord = GetModuleRunningRecordByToken(ability->GetToken());
         if (moduleRecord == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "moduleRecord is nullptr");
+            TAG_LOGE(AAFwkTag::APPMGR, "moduleRecord null");
             return;
         }
         moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
@@ -1017,7 +1017,7 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ability is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "ability null");
         return;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "ability is %{public}s", mainBundleName_.c_str());
@@ -1030,7 +1030,7 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
     // First change ability to background.
     auto moduleRecord = GetModuleRunningRecordByToken(ability->GetToken());
     if (moduleRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "moduleRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "moduleRecord null");
         return;
     }
     moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_BACKGROUND);
@@ -1066,7 +1066,7 @@ bool AppRunningRecord::AbilityFocused(const std::shared_ptr<AbilityRunningRecord
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ability is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "ability null");
         return false;
     }
     ability->UpdateFocusState(true);
@@ -1093,7 +1093,7 @@ bool AppRunningRecord::AbilityUnfocused(const std::shared_ptr<AbilityRunningReco
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ability is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "ability null");
         return false;
     }
     ability->UpdateFocusState(false);
@@ -1226,11 +1226,11 @@ std::list<std::shared_ptr<ModuleRunningRecord>> AppRunningRecord::GetAllModuleRe
 void AppRunningRecord::RemoveAppDeathRecipient() const
 {
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     if (!appLifeCycleDeal_->GetApplicationClient()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "appThread null");
         return;
     }
     auto object = appLifeCycleDeal_->GetApplicationClient()->AsObject();
@@ -1275,13 +1275,13 @@ void AppRunningRecord::SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunn
     const AppStartType startType)
 {
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AbilityRunningRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "AbilityRunningRecord null");
         return;
     }
     AAFwk::EventInfo eventInfo;
     auto applicationInfo = GetApplicationInfo();
     if (!applicationInfo) {
-        TAG_LOGE(AAFwkTag::APPMGR, "applicationInfo is nullptr, can not get app information");
+        TAG_LOGE(AAFwkTag::APPMGR, "applicationInfo null, can not get app information");
     } else {
         eventInfo.bundleName = applicationInfo->name;
         eventInfo.versionName = applicationInfo->versionName;
@@ -1290,12 +1290,12 @@ void AppRunningRecord::SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunn
 
     auto abilityInfo = ability->GetAbilityInfo();
     if (!abilityInfo) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo is nullptr, can not get ability information");
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo null, can not get ability information");
     } else {
         eventInfo.abilityName = abilityInfo->name;
     }
     if (GetPriorityObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord's priorityObject is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord's priorityObject null");
     } else {
         eventInfo.pid = GetPriorityObject()->GetPid();
     }
@@ -1306,7 +1306,7 @@ void AppRunningRecord::SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunn
 void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
 {
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
         return;
     }
 
@@ -1332,7 +1332,7 @@ void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
 void AppRunningRecord::SendClearTask(uint32_t msg, int64_t timeOut)
 {
     if (!taskHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ null");
         return;
     }
     int64_t* eventId = nullptr;
@@ -1355,7 +1355,7 @@ void AppRunningRecord::SendClearTask(uint32_t msg, int64_t timeOut)
 void AppRunningRecord::PostTask(std::string msg, int64_t timeOut, const Closure &task)
 {
     if (!taskHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ null");
         return;
     }
     taskHandler_->SubmitTask(task, msg, timeOut);
@@ -1554,7 +1554,7 @@ std::shared_ptr<UserTestRecord> AppRunningRecord::GetUserTestInfo()
 void AppRunningRecord::SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo)
 {
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo null");
         return;
     }
     extensionType_ = abilityInfo->extensionAbilityType;
@@ -1631,7 +1631,7 @@ void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
     SendEvent(
         AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG, AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT);
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     appLifeCycleDeal_->ScheduleAcceptWant(GetSpecifiedWant(), moduleName);
@@ -1643,7 +1643,7 @@ void AppRunningRecord::ScheduleAcceptWantDone()
         mainBundleName_.c_str(), static_cast<int>(eventId_));
 
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
         return;
     }
 
@@ -1655,7 +1655,7 @@ void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const 
     SendEvent(
         AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG, AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT);
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     appLifeCycleDeal_->ScheduleNewProcessRequest(want, moduleName);
@@ -1667,7 +1667,7 @@ void AppRunningRecord::ScheduleNewProcessRequestDone()
         mainBundleName_.c_str(), static_cast<int>(eventId_));
 
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
         return;
     }
 
@@ -1680,7 +1680,7 @@ void AppRunningRecord::ApplicationTerminated()
         mainBundleName_.c_str(), static_cast<int>(eventId_));
 
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
         return;
     }
 
@@ -1716,7 +1716,7 @@ int32_t AppRunningRecord::UpdateConfiguration(const Configuration &config)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
-        TAG_LOGI(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGI(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return ERR_INVALID_VALUE;
     }
     return appLifeCycleDeal_->UpdateConfiguration(config);
@@ -1725,7 +1725,7 @@ int32_t AppRunningRecord::UpdateConfiguration(const Configuration &config)
 void AppRunningRecord::AddRenderRecord(const std::shared_ptr<RenderRecord> &record)
 {
     if (!record) {
-        TAG_LOGD(AAFwkTag::APPMGR, "AddRenderRecord: record is null");
+        TAG_LOGD(AAFwkTag::APPMGR, "AddRenderRecord: record null");
         return;
     }
     {
@@ -1739,7 +1739,7 @@ void AppRunningRecord::AddRenderRecord(const std::shared_ptr<RenderRecord> &reco
 void AppRunningRecord::RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record)
 {
     if (!record) {
-        TAG_LOGD(AAFwkTag::APPMGR, "RemoveRenderRecord: record is null");
+        TAG_LOGD(AAFwkTag::APPMGR, "RemoveRenderRecord: record null");
         return;
     }
     std::lock_guard renderRecordMapLock(renderRecordMapLock_);
@@ -1912,7 +1912,7 @@ int32_t AppRunningRecord::NotifyLoadRepairPatch(const std::string &bundleName, c
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return ERR_INVALID_VALUE;
     }
     return appLifeCycleDeal_->NotifyLoadRepairPatch(bundleName, callback, recordId);
@@ -1923,7 +1923,7 @@ int32_t AppRunningRecord::NotifyHotReloadPage(const sptr<IQuickFixCallback> &cal
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return ERR_INVALID_VALUE;
     }
     return appLifeCycleDeal_->NotifyHotReloadPage(callback, recordId);
@@ -1935,7 +1935,7 @@ int32_t AppRunningRecord::NotifyUnLoadRepairPatch(const std::string &bundleName,
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return ERR_INVALID_VALUE;
     }
     return appLifeCycleDeal_->NotifyUnLoadRepairPatch(bundleName, callback, recordId);
@@ -1945,7 +1945,7 @@ int32_t AppRunningRecord::NotifyAppFault(const FaultData &faultData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return ERR_INVALID_VALUE;
     }
     return appLifeCycleDeal_->NotifyAppFault(faultData);
@@ -1957,7 +1957,7 @@ bool AppRunningRecord::IsAbilitytiesBackground()
     for (const auto &iter : hapModules_) {
         for (const auto &moduleRecord : iter.second) {
             if (moduleRecord == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "Module record is nullptr.");
+                TAG_LOGE(AAFwkTag::APPMGR, "Module record null");
                 continue;
             }
             if (!moduleRecord->IsAbilitiesBackgrounded()) {
@@ -1980,7 +1980,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
 
     for (const auto &info : windowVisibilityInfos) {
         if (info == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Window visibility info is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "Window visibility info null");
             continue;
         }
         if (info->pid_ != GetPriorityObject()->GetPid()) {
@@ -2104,7 +2104,7 @@ int32_t AppRunningRecord::ChangeAppGcState(const int32_t state)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return ERR_INVALID_VALUE;
     }
     return appLifeCycleDeal_->ChangeAppGcState(state);
@@ -2116,7 +2116,7 @@ void AppRunningRecord::SetAttachDebug(const bool &isAttachDebug)
     isAttachDebug_ = isAttachDebug;
 
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     isAttachDebug_ ? appLifeCycleDeal_->AttachAppDebug() : appLifeCycleDeal_->DetachAppDebug();
@@ -2150,7 +2150,7 @@ ApplicationScheduleState AppRunningRecord::GetApplicationScheduleState() const
 void AppRunningRecord::AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record)
 {
     if (!record) {
-        TAG_LOGE(AAFwkTag::APPMGR, "record is null.");
+        TAG_LOGE(AAFwkTag::APPMGR, "record null.");
         return;
     }
     if (pid <= 0) {
@@ -2165,7 +2165,7 @@ void AppRunningRecord::RemoveChildProcessRecord(const std::shared_ptr<ChildProce
 {
     TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}d", record->GetPid());
     if (!record) {
-        TAG_LOGE(AAFwkTag::APPMGR, "record is null.");
+        TAG_LOGE(AAFwkTag::APPMGR, "record null.");
         return;
     }
     auto pid = record->GetPid();
@@ -2290,7 +2290,7 @@ int AppRunningRecord::DumpIpcStart(std::string& result)
         result.append(MSG_DUMP_IPC_START_STAT, strlen(MSG_DUMP_IPC_START_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appLifeCycleDeal_->DumpIpcStart(result);
@@ -2303,7 +2303,7 @@ int AppRunningRecord::DumpIpcStop(std::string& result)
         result.append(MSG_DUMP_IPC_STOP_STAT, strlen(MSG_DUMP_IPC_STOP_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appLifeCycleDeal_->DumpIpcStop(result);
@@ -2316,7 +2316,7 @@ int AppRunningRecord::DumpIpcStat(std::string& result)
         result.append(MSG_DUMP_IPC_STAT, strlen(MSG_DUMP_IPC_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appLifeCycleDeal_->DumpIpcStat(result);
@@ -2328,7 +2328,7 @@ int AppRunningRecord::DumpFfrt(std::string& result)
     if (appLifeCycleDeal_ == nullptr) {
         result.append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appLifeCycleDeal_->DumpFfrt(result);
@@ -2349,7 +2349,7 @@ SupportProcessCacheState AppRunningRecord::GetSupportProcessCacheState()
 void AppRunningRecord::ScheduleCacheProcess()
 {
     if (appLifeCycleDeal_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
         return;
     }
     appLifeCycleDeal_->ScheduleCacheProcess();
@@ -2358,7 +2358,7 @@ void AppRunningRecord::ScheduleCacheProcess()
 bool AppRunningRecord::CancelTask(std::string msg)
 {
     if (!taskHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ null");
         return false;
     }
     return taskHandler_->CancelTask(msg);
@@ -2422,7 +2422,7 @@ bool AppRunningRecord::IsAllAbilityReadyToCleanedByUserRequest()
     for (const auto &iter : hapModules_) {
         for (const auto &moduleRecord : iter.second) {
             if (moduleRecord == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "Module record is nullptr.");
+                TAG_LOGE(AAFwkTag::APPMGR, "Module record null");
                 continue;
             }
             if (!moduleRecord->IsAllAbilityReadyToCleanedByUserRequest()) {
