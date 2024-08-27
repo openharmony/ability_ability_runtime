@@ -141,6 +141,7 @@ constexpr int PHONE_MAX_RENDER_PROCESS_NUM = 40;
 constexpr int PROCESS_RESTART_MARGIN_MICRO_SECONDS = 2000;
 constexpr const int32_t API10 = 10;
 constexpr const int32_t API_VERSION_MOD = 100;
+constexpr const int32_t U0_USER_ID = 0;
 constexpr const char* CLASS_NAME = "ohos.app.MainThread";
 constexpr const char* FUNC_NAME = "main";
 constexpr const char* RENDER_PARAM = "invalidparam";
@@ -1518,6 +1519,9 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
     int32_t newUserId = userId;
     if (userId == DEFAULT_INVAL_VALUE) {
         newUserId = GetUserIdByUid(callerUid);
+        if (newUserId == U0_USER_ID) {
+            newUserId = currentUserId_;
+        }
     }
     TAG_LOGI(AAFwkTag::APPMGR, "userId:%{public}d, appIndex:%{public}d", newUserId, appCloneIndex);
     return ClearUpApplicationDataByUserId(bundleName, callerUid, callerPid, appCloneIndex, newUserId);
@@ -1535,6 +1539,9 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataBySelf(int32_t callerUid, pid_
     int32_t newUserId = userId;
     if (userId == DEFAULT_INVAL_VALUE) {
         newUserId = GetUserIdByUid(callerUid);
+        if (newUserId == U0_USER_ID) {
+            newUserId = currentUserId_;
+        }
     }
     return ClearUpApplicationDataByUserId(callerBundleName, callerUid, callerPid, 0, newUserId, true);
 }
