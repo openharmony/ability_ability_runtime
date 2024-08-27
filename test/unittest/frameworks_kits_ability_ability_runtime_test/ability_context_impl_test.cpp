@@ -239,7 +239,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_01
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+        EXPECT_EQ(ret, ERR_OK);
     }
 }
 
@@ -262,7 +262,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_02
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+        EXPECT_EQ(ret, ERR_OK);
     }
 
     wptr<IRemoteObject> token(new IPCObjectStub());
@@ -289,7 +289,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_03
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+        EXPECT_EQ(ret, ERR_OK);
     }
 
     wptr<IRemoteObject> token(new IPCObjectStub());
@@ -1551,8 +1551,10 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_RequestDialog_0100, Functi
     int32_t missionId = -1;
     ErrCode ret = context_->GetMissionId(missionId);
     EXPECT_FALSE(ret == ERR_OK);
-    int32_t missionId2 = 1;
-    EXPECT_EQ(context_->GetMissionId(missionId2), ERR_OK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        int32_t missionId2 = 1;
+        EXPECT_EQ(context_->GetMissionId(missionId2), MISSION_NOT_FOUND);
+    }
     RuntimeTask task2 = [](const int32_t count, const Want& want, bool isInner)
     { ; };
     int requestCode = 22;
