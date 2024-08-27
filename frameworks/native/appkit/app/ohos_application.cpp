@@ -635,6 +635,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
+        
         auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
         if (autoStartupCallback != nullptr) {
             abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
@@ -669,7 +670,7 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
     const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback)
 {
     const std::shared_ptr<AbilityInfo> &abilityInfo = abilityRecord->GetAbilityInfo();
-    if (!IsBackupExtension(abilityInfo)) {
+    if (!IsMainProcess(abilityInfo->bundleName, abilityInfo->applicationInfo.process)) {
         return nullptr;
     }
     std::string moduleName = abilityInfo->moduleName;
@@ -1067,6 +1068,26 @@ bool OHOSApplication::IsBackupExtension(const std::shared_ptr<AbilityInfo> &abil
         return false;
     }
     return true;
+}
+
+bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::string &process)
+{
+    auto processInfo = GetProcessInfo();
+    if (processInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo");
+        return false;
+    }
+    ProcessType processType = processInfo->GetProcessType();
+    if (processType == ProcessType::NORMAL) {
+        return true;
+    }
+    
+    std::string processName = processInfo->GetProcessName();
+    if (processName == bundleName || processName == process) {
+        return true;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "not main process");
+    return false;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
