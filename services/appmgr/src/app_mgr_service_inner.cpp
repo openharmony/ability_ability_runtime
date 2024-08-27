@@ -2005,19 +2005,18 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
         eventInfo.versionCode = applicationInfo->versionCode;
     }
     if (ret >= 0) {
+        std::lock_guard lock(killpedProcessMapLock_);
         int64_t killTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
             system_clock::now().time_since_epoch()).count();
-        killedPorcessMap_.emplace(killTime, appRecord->GetProcessName());
+        killedProcessMap_.emplace(killTime, appRecord->GetProcessName());
     }
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
     int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PID, std::to_string(eventInfo.pid),
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_MESSAGE, killReason);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PID, std::to_string(eventInfo.pid),
+        EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, killReason);
     TAG_LOGI(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
         "%{public}d, processName=%{public}s, msg=%{public}s", result, pid, eventInfo.processName.c_str(),
         killReason.c_str());
@@ -3259,22 +3258,22 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
 void AppMgrServiceInner::SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::lock_guard<ffrt::mutex> lock(killpedProcessMapLock_);
+    std::lock_guard lock(killpedProcessMapLock_);
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
-    for (auto iter = killedPorcessMap_.begin(); iter != killedPorcessMap_.end();) {
+    for (auto iter = killedProcessMap_.begin(); iter != killedProcessMap_.end();) {
         int64_t killTime = iter->first;
         if (restartTime - killTime > PROCESS_RESTART_MARGIN_MICRO_SECONDS) {
-            killedPorcessMap_.erase(iter++);
+            iter = killedProcessMap_.erase(iter);
             continue;
         }
         if (eventInfo.bundleName == eventInfo.callerBundleName &&
             eventInfo.processName != eventInfo.callerProcessName) {
             AppMgrEventUtil::SendReStartProcessEvent(eventInfo, appUid, restartTime);
-            killedPorcessMap_.erase(iter++);
+            iter = killedProcessMap_.erase(iter);
             continue;
         }
-        iter++;
+        ++iter;
     }
 }
 

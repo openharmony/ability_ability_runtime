@@ -1561,7 +1561,7 @@ private:
     sptr<IAbilityDebugResponse> abilityDebugResponse_;
     std::shared_ptr<AppDebugManager> appDebugManager_;
     ffrt::mutex killpedProcessMapLock_;
-    mutable std::map<int64_t, std::string> killedPorcessMap_;
+    mutable std::map<int64_t, std::string> killedProcessMap_;
     ffrt::mutex startChildProcessLock_;
     std::vector<std::string> serviceExtensionWhiteList_;
     std::shared_ptr<AbilityRuntime::AppRunningStatusModule> appRunningStatusModule_;

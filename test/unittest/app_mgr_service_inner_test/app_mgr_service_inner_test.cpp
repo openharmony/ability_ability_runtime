@@ -3767,7 +3767,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_002, TestSize.Level1)
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     int64_t killedTime = restartTime - 3000;
-    appMgrServiceInner->killedPorcessMap_.emplace(killedTime, processName);
+    appMgrServiceInner->killedProcessMap_.emplace(killedTime, processName);
     appMgrServiceInner->SendReStartProcessEvent(eventInfo, record->GetUid());
     TAG_LOGI(AAFwkTag::TEST, "SendReStartProcessEvent_002 end");
 }
@@ -3792,7 +3792,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_003, TestSize.Level1)
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     int64_t killedTime = restartTime - 1000;
-    appMgrServiceInner->killedPorcessMap_.emplace(killedTime, processName);
+    appMgrServiceInner->killedProcessMap_.emplace(killedTime, processName);
     appMgrServiceInner->SendReStartProcessEvent(eventInfo, record->GetUid());
     TAG_LOGI(AAFwkTag::TEST, "SendReStartProcessEvent_003 end");
 }
@@ -3818,7 +3818,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_004, TestSize.Level1)
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     int64_t killedTime = restartTime - 1000;
-    appMgrServiceInner->killedPorcessMap_.emplace(killedTime, processName);
+    appMgrServiceInner->killedProcessMap_.emplace(killedTime, processName);
     appMgrServiceInner->SendReStartProcessEvent(eventInfo, record->GetUid());
     TAG_LOGI(AAFwkTag::TEST, "SendReStartProcessEvent_004 end");
 }
@@ -3844,7 +3844,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_005, TestSize.Level1)
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     int64_t killedTime = restartTime - 1000;
-    appMgrServiceInner->killedPorcessMap_.emplace(killedTime, processName);
+    appMgrServiceInner->killedProcessMap_.emplace(killedTime, processName);
     appMgrServiceInner->SendReStartProcessEvent(eventInfo, record->GetUid());
     TAG_LOGI(AAFwkTag::TEST, "SendReStartProcessEvent_005 end");
 }
