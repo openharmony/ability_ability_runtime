@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_URI_PERMISSION_MANAGER_PROXY_H
 #define OHOS_ABILITY_RUNTIME_URI_PERMISSION_MANAGER_PROXY_H
 
-#include<vector>
+#include <vector>
 #include "iremote_proxy.h"
 #include "uri_permission_manager_interface.h"
 

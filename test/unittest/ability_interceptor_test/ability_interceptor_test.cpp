@@ -28,7 +28,7 @@
 #include "interceptor/control_interceptor.h"
 #include "interceptor/crowd_test_interceptor.h"
 #include "permission_constants.h"
-#include"start_ability_utils.h"
+#include "start_ability_utils.h"
 
 using namespace testing;
 using namespace testing::ext;

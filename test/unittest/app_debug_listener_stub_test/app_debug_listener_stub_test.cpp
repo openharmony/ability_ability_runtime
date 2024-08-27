@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include<gtest/gtest.h>
+#include <gtest/gtest.h>
 #include "mock_app_debug_listener_stub.h"
 #include "parcel.h"
 using namespace testing;
