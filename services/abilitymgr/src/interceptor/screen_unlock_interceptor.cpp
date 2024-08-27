@@ -58,9 +58,7 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
         }
     }
 
-    // temp add isSystemApp pass, remove after systemapp adjust
-    if (targetAbilityInfo.applicationInfo.isSystemApp ||
-        targetAbilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked) {
+    if (targetAbilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked) {
         return ERR_OK;
     }
 #ifdef SUPPORT_SCREEN
