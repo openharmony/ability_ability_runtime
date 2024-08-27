@@ -1301,7 +1301,7 @@ bool AppRunningManager::IsNativeArgsChildProcessReachLimit(pid_t callingPid)
         TAG_LOGE(AAFwkTag::APPMGR, "hostRecord nullptr.");
         return false;
     }
-    int32_t nativeArgsChildCount = 0;
+    // int32_t nativeArgsChildCount = 0;
     auto childRecordMap = hostRecord->GetChildProcessRecordMap();
     auto count = std::count_if(childRecordMap.begin(), childRecordMap.end(), [](auto &pair) {
         auto childRecord = pair.second;

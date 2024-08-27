@@ -169,6 +169,7 @@ ohos_shared_library("abilityms") {
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
+    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libmodal_system_ui_extension_client",

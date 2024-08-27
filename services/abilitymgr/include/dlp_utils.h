@@ -127,6 +127,7 @@ static bool CheckCallerIsDlpManager(const std::shared_ptr<AppExecFwk::BundleMgrH
     }
     return true;
 }
+
 }  // namespace DlpUtils
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -48,7 +48,10 @@ template("ohos_ability_napi") {
       ":ability_js",
     ]
 
-    external_deps = [ "napi:ace_napi" ]
+    external_deps = [
+      "napi:ace_napi",
+      "ets_runtime:libark_jsruntime",
+    ]
 
     subsystem_name = "ability"
     part_name = "ability_runtime"
