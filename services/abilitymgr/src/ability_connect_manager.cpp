@@ -2372,6 +2372,7 @@ void AbilityConnectManager::HandleUIExtensionDied(const std::shared_ptr<AbilityR
                 TAG_LOGD(AAFwkTag::ABILITYMGR, "start NotifyExtensionDied");
                 sessionProxy->NotifyExtensionDied();
             }
+            TAG_LOGW(AAFwkTag::UI_EXT, "uiExtAbility died");
             RemoveUIExtWindowDeathRecipient(it->first);
             it = uiExtensionMap_.erase(it);
             continue;
@@ -2898,6 +2899,7 @@ void AbilityConnectManager::HandleUIExtWindowDiedTask(const sptr<IRemoteObject> 
         if (it != uiExtensionMap_.end()) {
             abilityRecord = it->second.first.lock();
             sessionInfo = it->second.second;
+            TAG_LOGW(AAFwkTag::UI_EXT, "uiExtAbility caller died");
             uiExtensionMap_.erase(it);
         } else {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "Died object can't find from map.");
