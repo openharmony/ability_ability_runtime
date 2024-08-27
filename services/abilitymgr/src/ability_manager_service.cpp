@@ -8570,8 +8570,8 @@ int AbilityManagerService::CheckPermissionForUIService(AppExecFwk::ExtensionAbil
         TAG_LOGE(AAFwkTag::ABILITYMGR, "interface not support connect UI_SERVICE");
         return ERR_WRONG_INTERFACE_CALL;
     }
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "!IsSceneBoardEnabled");
+    if (!system::GetBoolParameter(ABILITYMS_ENABLE_UISERVICE, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ABILITYMS_ENABLE_UISERVICE false");
         return ERR_CAPABILITY_NOT_SUPPORT;
     }
 
