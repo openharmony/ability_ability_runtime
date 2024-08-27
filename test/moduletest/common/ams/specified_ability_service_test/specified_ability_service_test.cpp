@@ -111,6 +111,7 @@ HWTEST_F(SpecifiedAbilityServiceTest, OnAcceptWantResponse_001, TestSize.Level1)
     abilityRecord->SetAbilityState(OHOS::AAFwk::AbilityState::FOREGROUND);
 
     abilityMgrServ_->subManagersHelper_->InitSubManagers(11, true);
+    abilityMgrServ_->subManagersHelper_->currentMissionListManager_ = nullptr;
     Want want;
     want.SetElementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     abilityMgrServ_->OnAcceptWantResponse(want, "flag");
