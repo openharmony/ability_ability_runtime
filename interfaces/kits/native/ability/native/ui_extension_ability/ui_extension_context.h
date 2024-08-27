@@ -72,6 +72,9 @@ public:
     virtual ErrCode ConnectAbility(
         const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const;
 
+    virtual ErrCode ConnectUIServiceExtensionAbility(
+        const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const;
+
     /**
      * @brief Disconnects the current ability from an ability.
      *

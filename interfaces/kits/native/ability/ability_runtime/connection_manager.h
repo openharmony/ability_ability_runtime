@@ -124,6 +124,17 @@ public:
         const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback);
 
     /**
+     * @brief connect uiService ability connection.
+     *
+     * @param connectCaller The connection caller.
+     * @param connectReceiver The connection receiver.
+     * @param connectCallback The connection callback.
+     * @return Returns the result of connecting uiService ability connection.
+     */
+    ErrCode ConnectUIServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
+        const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback);
+
+    /**
      * @brief disconnect ability connection.
      *
      * @param connectCaller The connection caller.
@@ -183,9 +194,10 @@ private:
     std::recursive_mutex connectionsLock_;
     std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>> abilityConnections_;
     ErrCode ConnectAbilityInner(const sptr<IRemoteObject> &connectCaller,
-        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback);
+        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback,
+        bool isUIService = false);
     ErrCode CreateConnection(const sptr<IRemoteObject> &connectCaller,
-        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback);
+        const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback, bool isUIService);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
