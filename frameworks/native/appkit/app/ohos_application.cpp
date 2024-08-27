@@ -673,20 +673,14 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
-
-        auto autoStartupCallback = [weak, abilityStage, abilityRecord, moduleName, callback]() {
-            auto ohosApplication = weak.lock();
-            if (ohosApplication == nullptr) {
-                TAG_LOGE(AAFwkTag::APPKIT, "ohosApplication is nullptr");
-                return;
+        
+        auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
+        if (autoStartupCallback != nullptr) {
+            abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
+            if (isAsyncCallback) {
+                TAG_LOGI(AAFwkTag::APPKIT, "waiting for startup");
+                return nullptr;
             }
-            ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
-            callback(abilityStage->GetContext());
-        };
-        abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
-        if (isAsyncCallback) {
-            TAG_LOGI(AAFwkTag::APPKIT, "waiting for startup");
-            return nullptr;
         }
 
         Want want;
@@ -706,6 +700,36 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     }
     abilityStage->AddAbility(token, abilityRecord);
     return abilityStage->GetContext();
+}
+
+const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
+    const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+    const std::shared_ptr<AbilityLocalRecord> abilityRecord,
+    const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback)
+{
+    const std::shared_ptr<AbilityInfo> &abilityInfo = abilityRecord->GetAbilityInfo();
+    if (!IsMainProcess(abilityInfo->bundleName, abilityInfo->applicationInfo.process)) {
+        return nullptr;
+    }
+    std::string moduleName = abilityInfo->moduleName;
+    auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
+    std::weak_ptr<OHOSApplication> weak = application;
+
+    auto autoStartupCallback = [weak, abilityStage, abilityRecord, moduleName, callback]() {
+        auto ohosApplication = weak.lock();
+        if (ohosApplication == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null ohosApplication");
+            return;
+        }
+        ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
+        if (callback == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null callback");
+            return;
+        }
+        callback(abilityStage->GetContext());
+    };
+
+    return autoStartupCallback;
 }
 
 void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
@@ -1035,6 +1059,26 @@ bool OHOSApplication::isUpdateLanguage(Configuration &config, const std::string 
         AbilityRuntime::SetLevel::Application : AbilityRuntime::SetLevel::System;
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(currentSetLevel);
     return true;
+}
+
+bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::string &process)
+{
+    auto processInfo = GetProcessInfo();
+    if (processInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo");
+        return false;
+    }
+    ProcessType processType = processInfo->GetProcessType();
+    if (processType == ProcessType::NORMAL) {
+        return true;
+    }
+    
+    std::string processName = processInfo->GetProcessName();
+    if (processName == bundleName || processName == process) {
+        return true;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "not main process");
+    return false;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
