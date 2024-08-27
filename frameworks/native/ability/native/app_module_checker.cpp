@@ -18,6 +18,7 @@
 #include "hilog_tag_wrapper.h"
 #include "module_checker_delegate.h"
 #include "utils/log.h"
+#include <string>
 
 bool AppModuleChecker::CheckModuleLoadable(const char *moduleName,
                                            std::unique_ptr<ApiAllowListChecker> &apiAllowListChecker)

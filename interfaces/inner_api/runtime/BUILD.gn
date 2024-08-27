@@ -101,7 +101,6 @@ ohos_shared_library("runtime") {
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "ets_runtime:libark_jsruntime",
-    "ets_utils:console",
     "ets_utils:timer",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
@@ -113,6 +112,7 @@ ohos_shared_library("runtime") {
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "runtime_core:libarkbase_static",
     "samgr:samgr_proxy",
     "zlib:shared_libz",
   ]
@@ -120,6 +120,7 @@ ohos_shared_library("runtime") {
   public_external_deps = [
     "ability_base:session_info",
     "ability_base:want",
+    "ets_utils:console",
   ]
 
   defines = []

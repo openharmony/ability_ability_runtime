@@ -60,21 +60,21 @@ bool AmsMgrProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 namespace {
-bool WriteTokenObject(MessageParcel &data, sptr<IRemoteObject> token)
-{
-    if (token) {
-        if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag or token");
-            return false;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag");
-            return false;
-        }
-    }
-    return true;
-}
+// bool WriteTokenObject(MessageParcel &data, sptr<IRemoteObject> token)
+// {
+//     if (token) {
+//         if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
+//             TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag or token");
+//             return false;
+//         }
+//     } else {
+//         if (!data.WriteBool(false)) {
+//             TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag");
+//             return false;
+//         }
+//     }
+//     return true;
+// }
 }
 
 void AmsMgrProxy::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,

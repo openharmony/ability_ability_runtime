@@ -53,6 +53,7 @@ ohos_shared_library("startup_util") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "ipc:ipc_single",
+    "ipc:ipc_core",
   ]
 
   innerapi_tags = [ "platformsdk" ]

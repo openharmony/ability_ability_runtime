@@ -148,14 +148,14 @@ static std::string DumpAppEnvToJson(const std::map<std::string, std::string> &ap
     return appEnvJson.dump();
 }
 
-static std::string DumpExtensionSandboxDirsToJson(const std::map<std::string, std::string> &extensionSandboxDirs)
-{
-    nlohmann::json extensionSandboxDirsJson;
-    for (auto &[userId, sandboxDir] : extensionSandboxDirs) {
-        extensionSandboxDirsJson[userId] = sandboxDir;
-    }
-    return extensionSandboxDirsJson.dump();
-}
+// static std::string DumpExtensionSandboxDirsToJson(const std::map<std::string, std::string> &extensionSandboxDirs)
+// {
+//     nlohmann::json extensionSandboxDirsJson;
+//     for (auto &[userId, sandboxDir] : extensionSandboxDirs) {
+//         extensionSandboxDirsJson[userId] = sandboxDir;
+//     }
+//     return extensionSandboxDirsJson.dump();
+// }
 
 int32_t AppSpawnClient::SetDacInfo(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle)
 {
