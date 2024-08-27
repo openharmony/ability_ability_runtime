@@ -85,11 +85,11 @@ private:
         auto me = shared_from_this();
         deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new AppMgrDeathRecipient(me));
         if (deathRecipient_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s :Failed to create AppMgrDeathRecipient!", __func__);
+            TAG_LOGE(AAFwkTag::APPMGR, "create AppMgrDeathRecipient failed");
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
         if ((remote_->IsProxyObject()) && (!remote_->AddDeathRecipient(deathRecipient_))) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s :Add death recipient to AppMgrService failed.", __func__);
+            TAG_LOGE(AAFwkTag::APPMGR, "AddDeathRecipient to AppMs failed");
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
 
