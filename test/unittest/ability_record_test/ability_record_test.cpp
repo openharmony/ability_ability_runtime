@@ -962,7 +962,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_001, TestSi
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     uint32_t sceneFlag = 0;
-    abilityRecord->isReady_ = true;
+    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
     abilityRecord->currentState_ = AbilityState::FOREGROUND;
     abilityRecord->ProcessForegroundAbility(sceneFlag);
 }
@@ -979,7 +979,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_002, TestSi
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     uint32_t sceneFlag = 0;
-    abilityRecord->isReady_ = true;
+    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
     abilityRecord->currentState_ = AbilityState::BACKGROUND;
     abilityRecord->ProcessForegroundAbility(sceneFlag);
 }
@@ -996,7 +996,6 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_003, TestSi
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     uint32_t sceneFlag = 0;
-    abilityRecord->isReady_ = false;
     abilityRecord->ProcessForegroundAbility(sceneFlag);
 }
 
@@ -1051,7 +1050,6 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_008, TestSi
     std::shared_ptr<StartOptions> startOptions = nullptr ;
     std::shared_ptr<AbilityRecord> callerAbility;
     uint32_t sceneFlag = 1;
-    abilityRecord->isReady_ = false;
     abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
 }
 
@@ -2147,9 +2145,8 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_DumpClientInfo_001, TestSize.Level1)
     abilityRecord->scheduler_ = nullptr;
     abilityRecord->DumpClientInfo(info, params, isClient, dumpConfig);
     abilityRecord->scheduler_ = new AbilityScheduler();
-    abilityRecord->isReady_ = false;
     abilityRecord->DumpClientInfo(info, params, isClient, dumpConfig);
-    abilityRecord->isReady_ = true;
+    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
     abilityRecord->DumpClientInfo(info, params, isClient, dumpConfig);
     dumpConfig = true;
     abilityRecord->DumpClientInfo(info, params, isClient, dumpConfig);
