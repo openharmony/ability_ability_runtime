@@ -36,7 +36,7 @@ public:
 private:
     int32_t id_ = -1;
     std::string tag_;
-    bool isCanceled_ = true;
+    bool isCanceled_ = false;
 };
 }
 }
