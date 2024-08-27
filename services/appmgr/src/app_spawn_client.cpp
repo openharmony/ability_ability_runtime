@@ -504,7 +504,7 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
         pid = result.pid;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "pid = [%{public}d]", pid);
-    return ret;
+    return result.result;
 }
 
 int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg &startMsg, int &status)
@@ -539,7 +539,7 @@ int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg
     }
     TAG_LOGI(AAFwkTag::APPMGR, "status = [%{public}d]", status);
 
-    return ret;
+    return status;
 }
 
 int32_t AppSpawnClient::SetChildProcessTypeStartFlag(const AppSpawnReqMsgHandle &reqHandle,
