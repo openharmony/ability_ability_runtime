@@ -31,23 +31,23 @@ namespace OHOS {
 namespace AAFwk {
 void FileMonitor::SetDeleteMonitorFlag(const char *filePath)
 {
-    TAG_LOGD(AAFwkTag::FILE_MONITOR, "called.");
+    TAG_LOGD(AAFwkTag::DEFAULT, "called.");
     int32_t fd = open(filePath, O_RDONLY);
     if (fd < 0) {
-        TAG_LOGE(AAFwkTag::FILE_MONITOR, "open file %{private}s failed", filePath);
+        TAG_LOGE(AAFwkTag::DEFAULT, "open file %{private}s failed", filePath);
         return;
     }
     unsigned int flags = 0;
     int ret = ioctl(fd, HMFS_IOCTL_HW_GET_FLAGS, &flags);
     if (ret < 0) {
-        TAG_LOGE(AAFwkTag::FILE_MONITOR, "Get flags failed, errno: %{public}d, filePath:%{private}s",
+        TAG_LOGE(AAFwkTag::DEFAULT, "Get flags failed, errno: %{public}d, filePath:%{private}s",
             errno, filePath);
         close(fd);
         return;
     }
 
     if (flags & HMFS_MONITOR_FL) {
-        TAG_LOGD(AAFwkTag::FILE_MONITOR, "flag is already set: %{private}s", filePath);
+        TAG_LOGD(AAFwkTag::DEFAULT, "flag is already set: %{private}s", filePath);
         close(fd);
         return;
     }
@@ -55,19 +55,19 @@ void FileMonitor::SetDeleteMonitorFlag(const char *filePath)
     flags |= HMFS_MONITOR_FL;
     ret = ioctl(fd, HMFS_IOCTL_HW_SET_FLAGS, &flags);
     if (ret < 0) {
-        TAG_LOGE(AAFwkTag::FILE_MONITOR, "Set flags failed, errno: %{public}d, filePath:%{private}s",
+        TAG_LOGE(AAFwkTag::DEFAULT, "Set flags failed, errno: %{public}d, filePath:%{private}s",
             errno, filePath);
         close(fd);
         return;
     }
 
-    TAG_LOGI(AAFwkTag::FILE_MONITOR, "Set flag success, filePath:%{private}s", filePath);
+    TAG_LOGI(AAFwkTag::DEFAULT, "Set flag success, filePath:%{private}s", filePath);
     close(fd);
 }
 
 void FileMonitor::SetDBDeleteMonitorFlag(const char *dbFolder)
 {
-    TAG_LOGD(AAFwkTag::FILE_MONITOR, "called, folder: %{public}s", dbFolder);
+    TAG_LOGD(AAFwkTag::DEFAULT, "called, folder: %{public}s", dbFolder);
     std::filesystem::path dirPath = dbFolder;
     for (const auto& entry : std::filesystem::recursive_directory_iterator(dirPath)) {
         if (entry.is_directory()) {
