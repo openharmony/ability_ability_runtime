@@ -147,7 +147,7 @@ bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
     if (!reply.contains("ShouldForceKillProcess") || !reply["ShouldForceKillProcess"].is_number_integer()) {
         return true;
     }
-    return reply["ShouldForceKillProcess"].get<int3_t>() == 1;
+    return reply["ShouldForceKillProcess"].get<int32_t>() == 1;
 #else
     return true;
 #endif    
