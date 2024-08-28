@@ -7265,7 +7265,7 @@ int32_t AppMgrServiceInner::SetSupportedProcessCache(int32_t pid, bool isSupport
 
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, callerPid:%{public}d", callerPid);
+        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, pid:%{public}d", pid);
         return ERR_INVALID_VALUE;
     }
 
