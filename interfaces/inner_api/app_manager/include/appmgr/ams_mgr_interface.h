@@ -379,6 +379,11 @@ public:
         return false;
     }
 
+    virtual bool IsAppKilling(sptr<IRemoteObject> token)
+    {
+        return false;
+    }
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -431,6 +436,7 @@ public:
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
         IS_PROCESS_ATTACHED,
+        IS_APP_KILLING,
     };
 };
 }  // namespace AppExecFwk

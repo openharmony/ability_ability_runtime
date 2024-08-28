@@ -954,7 +954,7 @@ private:
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
-    bool isKilling_ = false;
+    std::atomic<bool> isKilling_ = false;
     bool isContinuousTask_ = false;    // Only continuesTask processes can be set to true, please choose carefully
     std::atomic_bool isSpawned_ = false;
 
