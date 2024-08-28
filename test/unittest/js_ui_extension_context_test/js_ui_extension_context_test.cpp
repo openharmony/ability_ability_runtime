@@ -21,11 +21,16 @@
 #include "ability_business_error.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
+#define private public
+#define protected public
 #include "js_ui_extension_context.h"
+#undef private
+#undef protected
 #include "js_runtime_utils.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/impl/ark/ark_native_deferred.h"
 #include "native_engine/native_engine.h"
+#include "native_runtime_impl.h"
 #include "napi_common_want.h"
 
 using namespace testing;
@@ -366,6 +371,24 @@ HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0105, TestSiz
         engine->lastException_.Empty();
     }
     GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0105 end";
+}
+
+HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0106, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0106 start";
+
+    OHOS::AbilityRuntime::Runtime::Options options;
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    EXPECT_EQ(err, napi_status::napi_ok);
+    napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+
+    NapiCallbackInfo info{1};
+    jsUIExtensionContext_->OnStartUIServiceExtension(env, info);
+
+    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+
+    GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0106 end";
 }
 
 }  // namespace AAFwk
