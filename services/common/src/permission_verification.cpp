@@ -427,6 +427,11 @@ bool PermissionVerification::IsSystemAppCall() const
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken);
 }
 
+bool PermissionVerification::VerifyBackgroundCallPermission(const bool isBackgroundCall) const
+{
+    return JudgeStartAbilityFromBackground(isBackgroundCall);
+}
+
 bool PermissionVerification::VerifyPrepareTerminatePermission() const
 {
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_PREPARE_TERMINATE)) {
