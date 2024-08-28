@@ -844,7 +844,7 @@ private:
             ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
             return CreateJsUndefined(env);
         }
-        bool clearPageStack = false;
+        bool clearPageStack = true;
         bool hasClearPageStack = false;
         if (argc > ARGC_ONE && ConvertFromJsValue(env, argv[INDEX_ONE], clearPageStack)) {
             hasClearPageStack = true;
@@ -974,7 +974,7 @@ private:
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
-        
+
         int32_t missionId = 0;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], missionId)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get missionId wrong");
@@ -1073,7 +1073,7 @@ private:
             ThrowInvalidParamError(env, "Parse param accountId failed, must be a number.");
             return CreateJsUndefined(env);
         }
-        bool clearPageStack = false;
+        bool clearPageStack = true;
         bool hasClearPageStack = false;
         if (argc > ARGC_TWO && ConvertFromJsValue(env, argv[INDEX_TWO], clearPageStack)) {
             hasClearPageStack = true;

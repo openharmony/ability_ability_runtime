@@ -341,7 +341,7 @@ public:
      *
      * @return error code
      */
-    void KillProcessBySelf(const bool clearPageStack = true);
+    void KillProcessBySelf(const bool clearPageStack = false);
 
     /**
      * @brief Get running informationfor cuirrent process
