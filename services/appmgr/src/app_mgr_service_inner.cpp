@@ -7246,7 +7246,7 @@ int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
         return ERR_INVALID_VALUE;
     }
 
-    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCacheFromKits()) {
         TAG_LOGE(AAFwkTag::APPMGR, "process cache feature is disabled.");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
@@ -7269,7 +7269,7 @@ int32_t AppMgrServiceInner::SetSupportedProcessCache(int32_t pid, bool isSupport
         return ERR_INVALID_VALUE;
     }
 
-    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCacheFromKits()) {
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
         TAG_LOGE(AAFwkTag::APPMGR, "process cache feature is disabled.");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
