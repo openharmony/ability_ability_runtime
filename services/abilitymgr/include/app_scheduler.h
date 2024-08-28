@@ -346,7 +346,6 @@ public:
      */
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
 
-
     /**
      *  Set the process cache status by process ID.
      *
