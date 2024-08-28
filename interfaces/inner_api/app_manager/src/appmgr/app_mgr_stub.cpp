@@ -1539,7 +1539,7 @@ int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, Mess
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     bool isSupport = data.ReadBool();
