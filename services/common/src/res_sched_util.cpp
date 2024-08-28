@@ -150,7 +150,7 @@ bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
     return reply["ShouldForceKillProcess"].get<int32_t>() == 1;
 #else
     return true;
-#endif    
+#endif
 }
 } // namespace AAFwk
 } // namespace OHOS
