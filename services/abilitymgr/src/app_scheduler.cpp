@@ -659,9 +659,9 @@ void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
 {
 	if (!appMgrClient_) {
 		TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
-		return false;
+		return;
        	}
-	return appMgrClient_->SetSupportedProcessCache(token);    
+    appMgrClient_->SetSupportedProcessCache(token);    
 }
 } // namespace AAFwk
 }  // namespace OHOS
