@@ -1589,7 +1589,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
                 AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObj.name };
                 AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-                appThread->ScheduleProcessSecurityExit();
+                exit(-1);
             };
             (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 #ifdef CJ_FRONTEND
