@@ -551,7 +551,6 @@ group("unittest") {
       "user_event_handler_test:unittest",
       "want_agent_helper_test:unittest",
       "want_agent_info_test:unittest",
-      "want_agent_log_wrapper_test:unittest",
       "want_agent_test:unittest",
       "want_receiver_proxy_test:unittest",
       "want_receiver_stub_test:unittest",
