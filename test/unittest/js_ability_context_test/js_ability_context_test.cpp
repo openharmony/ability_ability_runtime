@@ -98,7 +98,7 @@ public:
 
 class MockAbilityContextImpl : public AbilityContextImpl {
 public:
-    virtual ErrCode ConnectAbility(const AAFwk::Want &want,
+    virtual ErrCode ConnectUIServiceExtensionAbility(const AAFwk::Want &want,
         const sptr<AbilityConnectCallback> &connectCallback) override
     {
         callback_ = connectCallback;
