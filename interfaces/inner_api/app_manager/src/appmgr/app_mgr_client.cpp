@@ -1343,5 +1343,18 @@ bool AppMgrClient::IsProcessAttached(sptr<IRemoteObject> token) const
     }
     return amsService->IsProcessAttached(token);
 }
+
+bool AppMgrClient::IsAppKilling(sptr<IRemoteObject> token) const
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return false;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        return false;
+    }
+    return amsService->IsAppKilling(token);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

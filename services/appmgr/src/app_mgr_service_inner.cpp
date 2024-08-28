@@ -7632,6 +7632,21 @@ bool AppMgrServiceInner::IsProcessAttached(sptr<IRemoteObject> token) const
     return appRecord->IsProcessAttached();
 }
 
+bool AppMgrServiceInner::IsAppKilling(sptr<IRemoteObject> token) const
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return false;
+    }
+    auto appRecord = GetAppRunningRecordByAbilityToken(token);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr");
+        return false;
+    }
+    return appRecord->IsKilling();
+}
+
 int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bundleName,
     std::vector<int32_t> &pidList)
 {
