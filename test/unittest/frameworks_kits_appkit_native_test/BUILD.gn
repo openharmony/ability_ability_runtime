@@ -667,6 +667,34 @@ ohos_unittest("dump_ipc_helper_test") {
   ]
 }
 
+ohos_unittest("dump_runtime_helper_test") {
+  include_dirs = []
+  module_out_path = module_output_path
+  sources = [
+    "${ability_runtime_native_path}/appkit/app/dump_runtime_helper.cpp",
+    "dump_runtime_helper_test.cpp",
+  ]
+
+  configs = [ ":module_context_config" ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+    "//third_party/googletest:gtest_main",
+    "//third_party/jsoncpp",
+  ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "faultloggerd:libfaultloggerd",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+}
+
 config("appkit_exception_config") {
   cflags_cc = [ "-fexceptions" ]
 }
@@ -742,6 +770,7 @@ group("unittest") {
     ":context_deal_test",
     ":context_impl_test",
     ":dump_ipc_helper_test",
+    ":dump_runtime_helper_test",
     ":extension_plugin_info_test",
     ":form_extension_context_test",
     ":idle_time_test",
