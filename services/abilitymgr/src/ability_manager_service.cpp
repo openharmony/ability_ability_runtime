@@ -11987,6 +11987,11 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "user request ot clean session: %{public}d.", sessionInfo->persistentId);
+    bool forceKillProcess = ResSchedUtil::GetInstance().ChechShouldForceKillProcess(abilityRecord->GetPid());
+    if (!forceKillProcess) {
+        IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->SetProcessCacheStatus(
+            abilityRecord->GetPid(), true));
+    }
     auto abilityRecord = uiAbilityManager->GetUIAbilityRecordBySessionInfo(sessionInfo);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
