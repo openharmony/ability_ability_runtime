@@ -377,17 +377,6 @@ HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0106, TestSiz
 {
     GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0106 start";
 
-    napi_env env{nullptr};
-    napi_callback_info info{0};
-    jsUIExtensionContext_->StartUIServiceExtension(env, info);
-
-    GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0106 end";
-}
-
-HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0107, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0107 start";
-
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
     auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
@@ -399,7 +388,7 @@ HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0107, TestSiz
 
     NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 
-    GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0107 end";
+    GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0106 end";
 }
 
 }  // namespace AAFwk
