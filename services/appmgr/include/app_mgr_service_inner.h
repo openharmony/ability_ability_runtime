@@ -1115,7 +1115,7 @@ public:
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
     
-    int32_t SetSupportedProcessCacheSelf(int32_t pid, bool isSupport);
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
 
