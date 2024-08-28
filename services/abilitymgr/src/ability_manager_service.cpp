@@ -6501,21 +6501,24 @@ int32_t AbilityManagerService::GetShareDataPairAndReturnData(std::shared_ptr<Abi
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "resultCode:%{public}d, uniqueId:%{public}d, wantParam size:%{public}d.",
         resultCode, uniqueId, wantParam.Size());
-    auto it = iAcquireShareDataMap_.find(uniqueId);
-    if (it != iAcquireShareDataMap_.end()) {
-        auto shareDataPair = it->second;
-        if (abilityRecord && shareDataPair.first != abilityRecord->GetAbilityRecordId()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord is not the abilityRecord from request.");
-            return ERR_INVALID_VALUE;
+    {
+        std::lock_guard<ffrt::mutex> guard(iAcquireShareDataMapLock_);
+        auto it = iAcquireShareDataMap_.find(uniqueId);
+        if (it != iAcquireShareDataMap_.end()) {
+            auto shareDataPair = it->second;
+            if (abilityRecord && shareDataPair.first != abilityRecord->GetAbilityRecordId()) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord is not the abilityRecord from request.");
+                return ERR_INVALID_VALUE;
+            }
+            auto callback = shareDataPair.second;
+            if (!callback) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "callback object is nullptr.");
+                return ERR_INVALID_VALUE;
+            }
+            auto ret = callback->AcquireShareDataDone(resultCode, wantParam);
+            iAcquireShareDataMap_.erase(it);
+            return ret;
         }
-        auto callback = shareDataPair.second;
-        if (!callback) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "callback object is nullptr.");
-            return ERR_INVALID_VALUE;
-        }
-        auto ret = callback->AcquireShareDataDone(resultCode, wantParam);
-        iAcquireShareDataMap_.erase(it);
-        return ret;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "iAcquireShareData is null.");
     return ERR_INVALID_VALUE;
@@ -9987,6 +9990,7 @@ int32_t AbilityManagerService::AcquireShareData(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord is null.");
         return ERR_INVALID_VALUE;
     }
+    std::lock_guard<ffrt::mutex> guard(iAcquireShareDataMapLock_);
     uniqueId_ = (uniqueId_ == INT_MAX) ? 0 : (uniqueId_ + 1);
     std::pair<int64_t, const sptr<IAcquireShareDataCallback>> shareDataPair =
         std::make_pair(abilityRecord->GetAbilityRecordId(), shareData);
