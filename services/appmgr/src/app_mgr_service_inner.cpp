@@ -7230,7 +7230,7 @@ void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, 
     }
 }
 
-int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
+int32_t AppMgrServiceInner::SetSupportedProcessCache(bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "called");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
