@@ -262,7 +262,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = true);
+    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = false);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -292,7 +292,7 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
 
-    virtual int32_t KillApplicationSelf(const bool clearPageStack = true);
+    virtual int32_t KillApplicationSelf(const bool clearPageStack = false);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -304,7 +304,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const bool clearPageStack = true);
+        const bool clearPageStack = false);
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -1246,7 +1246,7 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearPageStack = true);
+        const bool clearPageStack = false);
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1380,7 +1380,7 @@ private:
     bool CheckGetRunningInfoPermission() const;
 
     int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearPageStack = true);
+        const std::string &bundleName, const bool clearPageStack = false);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
