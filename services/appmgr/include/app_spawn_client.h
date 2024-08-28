@@ -94,6 +94,7 @@ struct StartFlags {
     static const int GWP_ENABLED_NORMAL = 11;
     static const int TSANENABLED = 12;
     static const int EXTENSION_CONTROLLED = 13;
+    static const int TEMP_JIT_ALLOW = 28;
 };
 
 union AppSpawnPidMsg {
