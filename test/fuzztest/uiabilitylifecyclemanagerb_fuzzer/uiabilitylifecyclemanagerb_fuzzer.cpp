@@ -121,7 +121,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     uIAbilityLifecycleManager->UpdateSessionInfoBySCB(sessionInfos, sessionIds);
     uIAbilityLifecycleManager->IsCallerInStatusBar();
     std::vector<int32_t> pids;
-    uIAbilityLifecycleManager->KillProcessWithPrepareTerminate(pids);
+    uIAbilityLifecycleManager->TryPrepareTerminateByPids(pids);
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
     uIAbilityLifecycleManager->ChangeAbilityVisibility(token, boolParam);
     sptr<SessionInfo> sessionInfo;

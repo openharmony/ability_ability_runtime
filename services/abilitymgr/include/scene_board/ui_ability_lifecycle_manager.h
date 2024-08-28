@@ -346,7 +346,7 @@ public:
     int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
     bool IsCallerInStatusBar();
 
-    int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids);
+    int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
 
     int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
 
