@@ -18,7 +18,6 @@
 #include <unistd.h>
 
 #include "errors.h"
-#include "file_monitor.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -72,7 +71,6 @@ bool AppConfigDataManager::CheckKvStore()
     while (tryTimes > 0) {
         DistributedKv::Status status = GetKvStore();
         if (status == DistributedKv::Status::SUCCESS && kvStorePtr_ != nullptr) {
-            OHOS::AAFwk::FileMonitor::SetDBDeleteMonitorFlag(APP_CONFIG_STORAGE_DIR);
             return true;
         }
         usleep(CHECK_INTERVAL);
