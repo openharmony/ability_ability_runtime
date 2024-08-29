@@ -962,6 +962,47 @@ int AbilityManagerService::CheckCallPermission(const Want& want, const AppExecFw
     return ERR_OK;
 }
 
+bool AbilityManagerService::IsImplicitCallFromBackground(const AbilityRequest &abilityRequest)
+{
+    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility) {
+        if (callerAbility->IsForeground() || callerAbility->GetAbilityForegroundingFlag()) {
+            return false;
+        }
+    } else {
+        AppExecFwk::RunningProcessInfo processInfo;
+        auto callerPid = IPCSkeleton::GetCallingPid();
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
+        if (IsDelegatorCall(processInfo, abilityRequest)) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "The call is from AbilityDelegator, allow background-call.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int AbilityManagerService::CheckImplicitCallPermission(const AbilityRequest& abilityRequest)
+{
+    auto accessTokenId = IPCSkeleton::GetCallingTokenID();
+    auto type = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(accessTokenId);
+    if (type != Security::AccessToken::TypeATokenTypeEnum::TOKEN_HAP) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "caller not hap");
+        return ERR_OK;
+    }
+    bool isBackgroundCall = IsImplicitCallFromBackground(abilityRequest);
+    if (!isBackgroundCall) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "hap not background");
+        return ERR_OK;
+    }
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyBackgroundCallPermission(isBackgroundCall);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckImplicitCallPermission failed");
+        return CHECK_PERMISSION_FAILED;
+    }
+    return ERR_OK;
+}
+
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyTokenId,
     bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
@@ -1066,6 +1107,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
         CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
         SetReserveInfo(want.GetUriString(), abilityRequest);
+
+        result = CheckImplicitCallPermission(abilityRequest);
+        if (ERR_OK != result) {
+            return result;
+        }
+
         return implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId);
     }
     if (want.GetAction().compare(ACTION_CHOOSE) == 0) {

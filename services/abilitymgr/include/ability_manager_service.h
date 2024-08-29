@@ -2127,6 +2127,8 @@ private:
      */
     int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall, bool isData = false);
 
+    bool IsImplicitCallFromBackground(const AbilityRequest &abilityRequest);
+
     bool IsTargetPermission(const Want &want) const;
 
     bool IsDelegatorCall(const AppExecFwk::RunningProcessInfo &processInfo, const AbilityRequest &abilityRequest) const;
@@ -2271,6 +2273,8 @@ private:
         const AbilityRequest& abilityRequest, bool isForegroundToRestartApp,
         bool isSendDialogResult, uint32_t specifyTokenId,
         const std::string& callerBundleName);
+
+    int CheckImplicitCallPermission(const AbilityRequest& abilityRequest);
 
     int StartAbilityByConnectManager(const Want& want, const AbilityRequest& abilityRequest,
         const AppExecFwk::AbilityInfo& abilityInfo, int validUserId, sptr<IRemoteObject> callerToken);
