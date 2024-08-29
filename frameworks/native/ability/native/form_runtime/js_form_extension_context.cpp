@@ -141,7 +141,7 @@ private:
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else if (*innerErrCode == 1) {
-                    task.Reject(env,CreateJsError(env, 1, "Context is released"));
+                    task.Reject(env, CreateJsError(env, 1, "Context is released"));
                 } else {
                     task.Reject(env, CreateJsError(env, *innerErrCode, "update form failed."));
                 }
