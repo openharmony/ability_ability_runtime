@@ -41,6 +41,7 @@
 #include "uri_permission_manager_client.h"
 #include "permission_constants.h"
 #include "process_options.h"
+#include "uri_utils.h"
 #include "utils/state_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
@@ -3172,19 +3173,29 @@ void AbilityRecord::DumpAbilityInfoDone(std::vector<std::string> &infos)
 
 bool AbilityRecord::GetUriListFromWant(Want &want, std::vector<std::string> &uriVec)
 {
-    std::string uriStr = want.GetUri().ToString();
+    auto uriStr = want.GetUri().ToString();
     uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+    if (uriVec.empty() && uriStr.empty()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "uriVec empty.");
+        return false;
+    }
+    // process param stream
+    auto paramStreamUriCount = uriVec.size();
+    if (uriStr.empty() && paramStreamUriCount > MAX_URI_COUNT) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "uri empty, paream stream counts: %{public}zu", paramStreamUriCount);
+        uriVec.resize(MAX_URI_COUNT);
+        want.RemoveParam(AbilityConfig::PARAMS_STREAM);
+        want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+    }
+    if (!uriStr.empty() && paramStreamUriCount > MAX_URI_COUNT - 1) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "paream stream counts: %{public}zu", paramStreamUriCount);
+        uriVec.resize(MAX_URI_COUNT - 1);
+        want.RemoveParam(AbilityConfig::PARAMS_STREAM);
+        want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+    }
+    // process uri
     if (!uriStr.empty()) {
-        uriVec.emplace_back(uriStr);
-    }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "uriVec size: %{public}zu", uriVec.size());
-    if (uriVec.size() == 0) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "size of uri list is zero.");
-        return false;
-    }
-    if (uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "size of uri list is more than %{public}i", MAX_URI_COUNT);
-        return false;
+        uriVec.insert(uriVec.begin(), uriStr);
     }
     return true;
 }
@@ -3273,22 +3284,15 @@ void AbilityRecord::GrantUriPermissionInner(Want &want, std::vector<std::string>
         return;
     }
     uint32_t flag = want.GetFlags();
-    std::vector<Uri> validUriList = {};
-    for (auto &&uriStr : uriVec) {
-        Uri uri(uriStr);
-        auto &&scheme = uri.GetScheme();
-        if (scheme != "file") {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "uri is invalid: %{private}s", uriStr.c_str());
-            continue;
-        }
-        validUriList.emplace_back(uri);
-    }
-    if (validUriList.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "valid uriVec is empty.");
+    auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
+        uriVec, flag, callerTokenId));
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    if (permissionUris.size() == 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uris not permissioned.");
         return;
     }
-    auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermission(validUriList, flag,
-        targetBundleName, appIndex_, callerTokenId, recordId_));
+    auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermissionPrivileged(permissionUris,
+        flag, targetBundleName, appIndex_, callerTokenId, recordId_));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "grant uri permission failed, Error Code is %{public}d", ret);
         return;

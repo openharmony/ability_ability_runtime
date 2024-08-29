@@ -45,6 +45,7 @@ constexpr uint32_t FLAG_READ_WRITE_URI = Want::FLAG_AUTH_READ_URI_PERMISSION | W
 constexpr uint32_t FLAG_WRITE_URI = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_READ_URI = Want::FLAG_AUTH_READ_URI_PERMISSION;
 constexpr const char* CLOUND_DOCS_URI_MARK = "?networkid=";
+constexpr uint32_t INVALID_ABILITYID = -1;
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId)
@@ -158,7 +159,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<Uri> &uri
 }
 
 int32_t UriPermissionManagerStubImpl::GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
-    const std::string &targetBundleName, int32_t appIndex)
+    const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t abilityId)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d, uriVec size:%{public}zu",
         targetBundleName.c_str(), appIndex, uriVec.size());
@@ -189,7 +190,12 @@ int32_t UriPermissionManagerStubImpl::GrantUriPermissionPrivileged(const std::ve
     if (AppUtils::GetInstance().IsGrantPersistUriPermission()) {
         return GrantBatchUriPermissionFor2In1Privileged(uriVec, flag, callerTokenId, targetTokenId);
     }
-    return GrantBatchUriPermissionPrivileged(uriVec, flag, callerTokenId, targetTokenId);
+    if (UPMSUtils::IsFoundationCall()) {
+        callerTokenId = initiatorTokenId;
+    } else {
+        abilityId = INVALID_ABILITYID;
+    }
+    return GrantBatchUriPermissionPrivileged(uriVec, flag, callerTokenId, targetTokenId, abilityId);
 }
 
 int UriPermissionManagerStubImpl::GrantUriPermissionInner(const std::vector<Uri> &uriVec, unsigned int flag,
