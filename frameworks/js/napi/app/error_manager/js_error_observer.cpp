@@ -33,17 +33,10 @@ void JsErrorObserver::OnUnhandledException(const std::string errMsg)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called");
     std::weak_ptr<JsErrorObserver> thisWeakPtr(shared_from_this());
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([thisWeakPtr, errMsg](napi_env env, NapiAsyncTask &task, int32_t status) {
-            std::shared_ptr<JsErrorObserver> jsObserver = thisWeakPtr.lock();
-            if (jsObserver) {
-                jsObserver->HandleOnUnhandledException(errMsg);
-            }
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsErrorObserver::OnUnhandledException",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    std::shared_ptr<JsErrorObserver> jsObserver = thisWeakPtr.lock();
+    if (jsObserver) {
+        jsObserver->HandleOnUnhandledException(errMsg);
+    }
 }
 
 void JsErrorObserver::HandleOnUnhandledException(const std::string &errMsg)
@@ -115,17 +108,10 @@ void JsErrorObserver::OnExceptionObject(const AppExecFwk::ErrorObject &errorObj)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called");
     std::weak_ptr<JsErrorObserver> thisWeakPtr(shared_from_this());
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([thisWeakPtr, errorObj](napi_env env, NapiAsyncTask &task, int32_t status) {
-            std::shared_ptr<JsErrorObserver> jsObserver = thisWeakPtr.lock();
-            if (jsObserver) {
-                jsObserver->HandleException(errorObj);
-            }
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsErrorObserver::OnExceptionObject",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    std::shared_ptr<JsErrorObserver> jsObserver = thisWeakPtr.lock();
+    if (jsObserver) {
+        jsObserver->HandleException(errorObj);
+    }
 }
 
 void JsErrorObserver::HandleException(const AppExecFwk::ErrorObject &errorObj)

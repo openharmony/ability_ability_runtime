@@ -230,7 +230,7 @@ HWTEST_F(FormHostClientTest, AaFwk_FormHostClient_OnUninstall_0100, Function | M
 
     std::vector<int64_t> formIds;
     instance_->OnUninstall(formIds);
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(instance_ != nullptr);
     GTEST_LOG_(INFO) << "AaFwk_FormHostClient_OnUninstall_0100 end";
 }
 
@@ -246,7 +246,7 @@ HWTEST_F(FormHostClientTest, AaFwk_FormHostClient_OnShareFormResponse_0100, Func
     int64_t requestCode = 0;
     int32_t result = 0;
     instance_->OnShareFormResponse(requestCode, result);
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(instance_ != nullptr);
     GTEST_LOG_(INFO) << "AaFwk_FormHostClient_OnShareFormResponse_0100 end";
 }
 }  // namespace AppExecFwk

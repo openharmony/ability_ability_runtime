@@ -80,7 +80,7 @@ HWTEST_F(AbilityExtensionBaseTest, Init_0100, TestSize.Level1)
 
     ExtensionBase<ExtensionContext> extensionBase;
     extensionBase.Init(record, application, handler, token);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extensionBase.extensionCommon_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Init end");
 }
@@ -112,7 +112,6 @@ HWTEST_F(AbilityExtensionBaseTest, CreateAndInitContext_0100, TestSize.Level1)
     extensionBase.Init(record, application, handler, token);
     std::shared_ptr<ExtensionContext> context = extensionBase.CreateAndInitContext(record, application, handler, token);
     EXPECT_STREQ(context->GetAbilityInfo()->name.c_str(), "ExtensionBaseTest");
-    EXPECT_TRUE(true);
 
     TAG_LOGI(AAFwkTag::TEST, "CreateAndInitContext end");
 }
@@ -144,7 +143,6 @@ HWTEST_F(AbilityExtensionBaseTest, GetContext_0100, TestSize.Level1)
     extensionBase.Init(record, application, handler, token);
     std::shared_ptr<ExtensionContext> context = extensionBase.GetContext();
     EXPECT_STREQ(context->GetAbilityInfo()->name.c_str(), "ExtensionBaseTest");
-    EXPECT_TRUE(true);
 
     TAG_LOGI(AAFwkTag::TEST, "GetContext end");
 }
@@ -177,7 +175,7 @@ HWTEST_F(AbilityExtensionBaseTest, OnConfigurationUpdated_0100, TestSize.Level1)
     ExtensionBase<ExtensionContext> extensionBase;
     extensionBase.Init(record, application, handler, token);
     extensionBase.OnConfigurationUpdated(configuration);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extensionBase.extensionCommon_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated end");
 }
@@ -209,7 +207,7 @@ HWTEST_F(AbilityExtensionBaseTest, OnMemoryLevel_0100, TestSize.Level1)
 
     int level = 0;
     extensionBase.OnMemoryLevel(level);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extensionBase.extensionCommon_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnMemoryLevel end");
 }
@@ -245,7 +243,6 @@ HWTEST_F(AbilityExtensionBaseTest, SetExtensionCommon_0100, TestSize.Level1)
     extensionBase.SetExtensionCommon(JsExtensionCommon::Create(
         static_cast<JsRuntime&>(*jsRuntime), static_cast<NativeReference&>(*jsObj), nullptr));
     EXPECT_NE(extensionBase.extensionCommon_, nullptr);
-    EXPECT_TRUE(true);
 
     TAG_LOGI(AAFwkTag::TEST, "SetExtensionCommon end");
 }

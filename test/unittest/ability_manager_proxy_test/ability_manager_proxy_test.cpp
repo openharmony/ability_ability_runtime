@@ -2139,7 +2139,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_CallRequestDone_001, TestS
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> callStub = nullptr;
     proxy_->CallRequestDone(token, callStub);
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*
@@ -2450,9 +2450,9 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RegisterSessionHandler_002
 HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSpecifiedAbilityBySCB_001, TestSize.Level1)
 {
     proxy_ = std::make_shared<AbilityManagerProxy>(nullptr);
-    EXPECT_TRUE(proxy_ != nullptr);
     Want want;
     proxy_->StartSpecifiedAbilityBySCB(want);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*
