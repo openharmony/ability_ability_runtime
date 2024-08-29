@@ -661,7 +661,7 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(ERROR_CODE_ONE);
                 return;
             }
             *innerErrCode = context->TerminateAbility();
@@ -761,18 +761,18 @@ private:
             }
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "connection:%{public}d", static_cast<int32_t>(connectId));
             *innerErrCode = context->ConnectAbilityWithAccount(want, accountId, connection);
-            int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
-            if (errcode) {
-                connection->CallJsFailed(errcode);
-                RemoveConnection(connectId);
-            }
         };
         NapiAsyncTask::CompleteCallback complete =
-            [connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            [connection, connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERROR_CODE_ONE) {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode, "Context is released"));
                     RemoveConnection(connectId);
                 } else {
+                    int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
+                    if (errcode) {
+                        connection->CallJsFailed(errcode);
+                        RemoveConnection(connectId);
+                    }
                     task.Resolve(env, CreateJsUndefined(env));
                 }
             };

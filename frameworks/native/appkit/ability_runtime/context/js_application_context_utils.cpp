@@ -500,20 +500,20 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
 
     TAG_LOGD(AAFwkTag::APPKIT, "Get Group Dir");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    std::string path = "";
+    auto path = std::make_shared<std::string>("");
     NapiAsyncTask::ExecuteCallback execute =
-        [applicationContext = applicationContext_, groupId, innerErrCode, &path]() {
+        [applicationContext = applicationContext_, groupId, innerErrCode, path]() {
             auto context = applicationContext.lock();
             if (!context) {
                 TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
                 *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
                 return;
             }
-            path = context->GetGroupDir(groupId);
+            *path = context->GetGroupDir(groupId);
         };
-    auto complete = [innerErrCode, &path](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [innerErrCode, path](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == ERR_OK) {
-            task.ResolveWithNoError(env, CreateJsValue(env, path));
+            task.ResolveWithNoError(env, CreateJsValue(env, *path));
         } else {
             task.Reject(env, CreateJsError(env, *innerErrCode,
                 "applicationContext if already released"));
@@ -828,17 +828,17 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
     }
     TAG_LOGD(AAFwkTag::APPKIT, "Get Process Info");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    AppExecFwk::RunningProcessInfo processInfo;
-    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, innerErrCode, &processInfo]() {
+    auto processInfo = std::make_shared<AppExecFwk::RunningProcessInfo>();
+    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, innerErrCode, processInfo]() {
         auto context = applicationContext.lock();
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
             *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
             return;
         }
-        *innerErrCode = context->GetProcessRunningInformation(processInfo);
+        *innerErrCode = context->GetProcessRunningInformation(*processInfo);
     };
-    auto complete = [innerErrCode, &processInfo](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto complete = [innerErrCode, processInfo](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST) {
             task.Reject(env, CreateJsError(env, *innerErrCode,
                 "applicationContext if already released."));
@@ -847,14 +847,14 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
         if (*innerErrCode == ERR_OK) {
             napi_value object = nullptr;
             napi_create_object(env, &object);
-            napi_set_named_property(env, object, "processName", CreateJsValue(env, processInfo.processName_));
-            napi_set_named_property(env, object, "pid", CreateJsValue(env, processInfo.pid_));
-            napi_set_named_property(env, object, "uid", CreateJsValue(env, processInfo.uid_));
-            napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, processInfo.bundleNames));
+            napi_set_named_property(env, object, "processName", CreateJsValue(env, processInfo->processName_));
+            napi_set_named_property(env, object, "pid", CreateJsValue(env, processInfo->pid_));
+            napi_set_named_property(env, object, "uid", CreateJsValue(env, processInfo->uid_));
+            napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, processInfo->bundleNames));
             napi_set_named_property(env, object,
-                "state", CreateJsValue(env, ConvertToJsAppProcessState(processInfo.state_, processInfo.isFocused)));
-            if (processInfo.appCloneIndex != -1) {
-                napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, processInfo.appCloneIndex));
+                "state", CreateJsValue(env, ConvertToJsAppProcessState(processInfo->state_, processInfo->isFocused)));
+            if (processInfo->appCloneIndex != -1) {
+                napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, processInfo->appCloneIndex));
             }
             napi_value array = nullptr;
             napi_create_array_with_length(env, 1, &array);

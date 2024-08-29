@@ -575,18 +575,18 @@ napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo
         }
         TAG_LOGD(AAFwkTag::UI_EXT, "ConnectAbility connection:%{public}d", static_cast<int32_t>(connectId));
         *innerErrCode = context->ConnectAbility(want, connection);
-        int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
-        if (errcode) {
-            connection->CallJsFailed(errcode);
-            RemoveConnection(connectId);
-        }
     };
     NapiAsyncTask::CompleteCallback complete =
-        [connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [connection, connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 RemoveConnection(connectId);
             } else {
+                int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
+                if (errcode) {
+                    connection->CallJsFailed(errcode);
+                    RemoveConnection(connectId);
+                }
                 task.Resolve(env, CreateJsUndefined(env));
             }
         };
