@@ -3337,6 +3337,12 @@ int AbilityManagerService::TerminateAbility(const sptr<IRemoteObject> &token, in
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord is Null.");
         return ERR_INVALID_VALUE;
     }
+    auto elementName = abilityRecord->GetWant().GetElement();
+    if (AppUtils::GetInstance().IsLauncher(elementName.GetBundleName()) &&
+        AppUtils::GetInstance().IsLauncherAbility(elementName.GetAbilityName())) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "cannot terminate launcher ability");
+        return ERR_OK;
+    }
     return TerminateAbilityWithFlag(token, resultCode, resultWant, true);
 }
 
