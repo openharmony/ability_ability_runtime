@@ -227,6 +227,7 @@ constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
 
 constexpr const char* PROC_SELF_TASK_PATH = "/proc/self/task/";
+constexpr const char* APP_PROVISION_TYPE_DEBUG = "debug";
 
 constexpr int32_t ROOT_UID = 0;
 constexpr int32_t FOUNDATION_UID = 5523;
@@ -759,6 +760,10 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
         appInfo->uid, bundleInfo, appInfo->bundleName, bundleIndex, appExistFlag, isPreload, abilityInfo->moduleName,
         abilityInfo->name, strictMode, maxChildProcess, token, want, abilityInfo->extensionAbilityType);
     if (isShellCall) {
+        if (appInfo->appProvisionType != APP_PROVISION_TYPE_DEBUG) {
+            TAG_LOGW(AAFwkTag::APPMGR, "Application not debug provision type!");
+            return;
+        }
         std::string perfCmd = (want == nullptr) ? "" : want->GetStringParam(PERF_CMD);
         bool isSandboxApp = (want == nullptr) ? false : want->GetBoolParam(ENTER_SANDBOX, false);
         (void)StartPerfProcess(appRecord, perfCmd, "", isSandboxApp);
@@ -5776,6 +5781,10 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
     AbilityInfo abilityInfo;
     if (!CreateAbilityInfo(want, abilityInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "CreateAbilityInfo failed!");
+        return ERR_INVALID_OPERATION;
+    }
+    if (abilityInfo.applicationInfo.appProvisionType != APP_PROVISION_TYPE_DEBUG) {
+        TAG_LOGW(AAFwkTag::APPMGR, "Application not debug provision type!");
         return ERR_INVALID_OPERATION;
     }
 
