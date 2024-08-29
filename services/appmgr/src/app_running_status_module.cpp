@@ -27,7 +27,7 @@ int32_t AppRunningStatusModule::RegisterListener(const sptr<AppRunningStatusList
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (listener == nullptr || listener->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Listener is null.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null listener");
         return ERR_INVALID_OPERATION;
     }
 
@@ -45,7 +45,7 @@ int32_t AppRunningStatusModule::RegisterListener(const sptr<AppRunningStatusList
 
     sptr<ClientDeathRecipient> deathRecipient = new (std::nothrow) ClientDeathRecipient(shared_from_this());
     if (deathRecipient == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Death recipient is null.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null deathRecipient");
         return ERR_NO_MEMORY;
     }
 
@@ -58,7 +58,7 @@ int32_t AppRunningStatusModule::UnregisterListener(const sptr<AppRunningStatusLi
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (listener == nullptr || listener->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Input param invalid.");
+        TAG_LOGE(AAFwkTag::APPMGR, "input param invalid");
         return ERR_INVALID_VALUE;
     }
 
@@ -72,7 +72,7 @@ void AppRunningStatusModule::NotifyAppRunningStatusEvent(
     std::lock_guard<std::mutex> lock(listenerMutex_);
     for (const auto &item : listeners_) {
         if (item.first == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "Invalid listener.");
+            TAG_LOGW(AAFwkTag::APPMGR, "invalid listener");
             continue;
         }
 
@@ -90,7 +90,7 @@ void AppRunningStatusModule::ClientDeathRecipient::OnRemoteDied(const wptr<IRemo
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appRunningStatus = weakPtr_.lock();
     if (appRunningStatus == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningStatus is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRunningStatus");
         return;
     }
     appRunningStatus->RemoveListenerAndDeathRecipient(remote);
@@ -101,7 +101,7 @@ int32_t AppRunningStatusModule::RemoveListenerAndDeathRecipient(const wptr<IRemo
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto listener = remote.promote();
     if (listener == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null listener");
         return ERR_INVALID_VALUE;
     }
 
@@ -113,7 +113,7 @@ int32_t AppRunningStatusModule::RemoveListenerAndDeathRecipient(const wptr<IRemo
         };
     auto itemFind = std::find_if(listeners_.begin(), listeners_.end(), findTask);
     if (itemFind == listeners_.end()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Listener is not exist.");
+        TAG_LOGE(AAFwkTag::APPMGR, "listener is not exist");
         return ERR_INVALID_OPERATION;
     }
     auto storedListener = itemFind->first;
@@ -121,7 +121,7 @@ int32_t AppRunningStatusModule::RemoveListenerAndDeathRecipient(const wptr<IRemo
     listeners_.erase(itemFind);
 
     if (storedListener == nullptr || storedListener->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Invalid listener.");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid listener");
         return ERR_INVALID_OPERATION;
     }
 

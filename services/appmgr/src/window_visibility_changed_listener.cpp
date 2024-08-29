@@ -32,19 +32,19 @@ void WindowVisibilityChangedListener::OnWindowVisibilityChanged(
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (windowVisibilityInfos.empty()) {
-        TAG_LOGW(AAFwkTag::APPMGR, "Window visibility info is empty.");
+        TAG_LOGW(AAFwkTag::APPMGR, "WindowVisibilityInfo is empty");
         return;
     }
 
     if (taskHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Task handler is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null taskHandler");
         return;
     }
 
     auto task = [inner = appServiceInner_, windowVisibilityInfos] {
         auto serviceInner = inner.lock();
         if (serviceInner == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Failed to get app mgr service inner.");
+            TAG_LOGE(AAFwkTag::APPMGR, "get app mgr service inner fail");
             return;
         }
         serviceInner->HandleWindowVisibilityChanged(windowVisibilityInfos);

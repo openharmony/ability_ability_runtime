@@ -97,22 +97,22 @@ void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<std::str
     AppExecFwk::BundleInfo bundleInfo;
     std::shared_ptr<RemoteClientManager> remoteClientManager = std::make_shared<RemoteClientManager>();
     if (remoteClientManager == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The remoteClientManager is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null remoteClientManager");
         return;
     }
     auto bundleMgrHelper = remoteClientManager->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null bundleMgrHelper");
         return;
     }
     for (const std::string& bundleName:exitBundleNames) {
         if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(bundleName,
             AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, U0_USER_ID))) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get bundle info from %{public}s.", bundleName.c_str());
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundle info fail from %{public}s", bundleName.c_str());
             continue;
         }
         if (!bundleInfo.isKeepAlive) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Not a resident application.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "not a resident application");
             continue;
         }
         exitBundleInfos.emplace_back(bundleInfo);
