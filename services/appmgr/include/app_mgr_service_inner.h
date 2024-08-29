@@ -86,6 +86,15 @@ constexpr int32_t BASE_USER_RANGE = 200000;
 
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
 public:
+    struct ConfigurationObserverWithUserId {
+        sptr<IConfigurationObserver> observer;
+        int32_t userId = -1;
+    };
+    struct AppStateCallbackWithUserId {
+        sptr<IAppStateCallback> callback;
+        int32_t userId = -1;
+    };
+
     AppMgrServiceInner();
     virtual ~AppMgrServiceInner();
 
@@ -262,7 +271,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = true);
+    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = false);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -292,7 +301,7 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
 
-    virtual int32_t KillApplicationSelf(const bool clearPageStack = true);
+    virtual int32_t KillApplicationSelf(const bool clearPageStack = false);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -304,7 +313,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const bool clearPageStack = true);
+        const bool clearPageStack = false);
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -628,7 +637,7 @@ public:
      * @param config, System environment change parameters.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UpdateConfiguration(const Configuration &config);
+    int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
     int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
 
@@ -1105,6 +1114,8 @@ public:
     virtual int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
+    
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
 
@@ -1151,6 +1162,8 @@ public:
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
+    bool IsAppKilling(sptr<IRemoteObject> token) const;
 
     /**
      * Get pids of processes which belong to specific bundle name and support process cache feature.
@@ -1246,7 +1259,7 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearPageStack = true);
+        const bool clearPageStack = false);
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1380,7 +1393,7 @@ private:
     bool CheckGetRunningInfoPermission() const;
 
     int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearPageStack = true);
+        const std::string &bundleName, const bool clearPageStack = false);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -1504,7 +1517,7 @@ private:
     void SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void InitAppWaitingDebugList();
-    void HandleConfigurationChange(const Configuration &config);
+    void HandleConfigurationChange(const Configuration &config, const int32_t userId = -1);
     bool CheckIsThreadInFoundation(pid_t pid);
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
     int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
@@ -1520,7 +1533,7 @@ private:
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
-    std::vector<sptr<IAppStateCallback>> appStateCallbacks_;
+    std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
     std::shared_ptr<AppRunningManager> appRunningManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
@@ -1533,7 +1546,8 @@ private:
     ffrt::mutex browserHostLock_;
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     ffrt::mutex configurationObserverLock_;
-    std::vector<sptr<IConfigurationObserver>> configurationObservers_;
+    std::vector<ConfigurationObserverWithUserId> configurationObservers_;
+
 #ifdef SUPPORT_SCREEN
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
@@ -1551,7 +1565,7 @@ private:
     sptr<IAbilityDebugResponse> abilityDebugResponse_;
     std::shared_ptr<AppDebugManager> appDebugManager_;
     ffrt::mutex killpedProcessMapLock_;
-    mutable std::map<int64_t, std::string> killedPorcessMap_;
+    mutable std::map<int64_t, std::string> killedProcessMap_;
     ffrt::mutex startChildProcessLock_;
     std::vector<std::string> serviceExtensionWhiteList_;
     std::shared_ptr<AbilityRuntime::AppRunningStatusModule> appRunningStatusModule_;
@@ -1563,6 +1577,8 @@ private:
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
+    
+    std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
