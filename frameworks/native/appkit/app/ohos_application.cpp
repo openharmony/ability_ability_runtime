@@ -820,6 +820,10 @@ void OHOSApplication::SetConfiguration(const Configuration &config)
     auto colorMode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().
         SetColorModeSetLevel(AbilityRuntime::SetLevel::System, colorMode);
+
+    if (abilityRuntimeContext_ && configuration_) {
+        abilityRuntimeContext_->SetConfiguration(configuration_);
+    }
 }
 
 void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName, std::string &flag)
@@ -996,7 +1000,13 @@ bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime:
 bool OHOSApplication::isUpdateFontSize(Configuration &config)
 {
     std::string fontSizeScal = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    std::string appFontScale = config.GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     std::string globalFontFollowSysteme = configuration_->GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    if (!appFontScale.empty()) {
+        return true;
+    }
+
+    // configuration_ APP_FONT_SIZE_SCALE will be a number str
     if (!globalFontFollowSysteme.empty()
         && globalFontFollowSysteme.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
         return true;

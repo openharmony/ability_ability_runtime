@@ -685,6 +685,40 @@ napi_value JsApplicationContextUtils::OnSetLanguage(napi_env env, NapiCallbackIn
     return CreateJsUndefined(env);
 }
 
+napi_value JsApplicationContextUtils::SetFontSizeScale(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnSetFontSizeScale, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnSetFontSizeScale(napi_env env, NapiCallbackInfo& info)
+{
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
+        return CreateJsUndefined(env);
+    }
+
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext released");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    double fontSizeScale = 1;
+    if (!ConvertFromJsNumber(env, info.argv[INDEX_ZERO], fontSizeScale)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse fontSizeScale failed");
+        ThrowInvalidParamError(env, "Parse fontSizeScale failed, fontSizeScale must be number.");
+        return CreateJsUndefined(env);
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "fontSizeScale: %{public}f", fontSizeScale);
+    // TODO 范围限制?
+
+    applicationContext->SetFontSizeScale(fontSizeScale);
+    return CreateJsUndefined(env);
+}
+
 napi_value JsApplicationContextUtils::SetFont(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnSetFont, APPLICATION_CONTEXT_NAME);
@@ -1561,6 +1595,8 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
     BindNativeFunction(env, object, "restartApp", MD_NAME, JsApplicationContextUtils::RestartApp);
     BindNativeFunction(env, object, "setSupportedProcessCache", MD_NAME,
         JsApplicationContextUtils::SetSupportedProcessCacheSelf);
+    BindNativeFunction(env, object, "setFontSizeScale", MD_NAME,
+        JsApplicationContextUtils::SetFontSizeScale);
 }
 
 JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(
