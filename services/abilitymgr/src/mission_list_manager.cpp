@@ -1010,7 +1010,7 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
 
     auto eventHandler = AbilityManagerService::GetPubInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
-    eventHandler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    abilityRecord->RemoveLoadTimeoutTask();
     abilityRecord->SetLoading(false);
     FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
     FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
@@ -1253,7 +1253,7 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
     }
     auto eventHandler = AbilityManagerService::GetPubInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
-    eventHandler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    abilityRecord->RemoveForegroundTimeoutTask();
     g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::FOREGROUND);
     auto self(weak_from_this());
     auto taskHandler = AbilityManagerService::GetPubInstance()->GetTaskHandler();
@@ -2593,11 +2593,11 @@ void MissionListManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRec
     auto handler = AbilityManagerService::GetPubInstance()->GetEventHandler();
     CHECK_POINTER_LOG(handler, "Get AbilityEventHandler failed.");
     if (abilityRecord->GetAbilityState() == AbilityState::INITIAL) {
-        handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+        abilityRecord->RemoveLoadTimeoutTask();
         abilityRecord->SetLoading(false);
     }
     if (abilityRecord->GetAbilityState() == AbilityState::FOREGROUNDING) {
-        handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+        abilityRecord->RemoveForegroundTimeoutTask();
     }
     auto taskHandler = AbilityManagerService::GetPubInstance()->GetTaskHandler();
     CHECK_POINTER_LOG(taskHandler, "Fail to get AbilityTaskHandler.");

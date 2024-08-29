@@ -420,6 +420,10 @@ public:
      */
     void PostForegroundTimeoutTask();
 
+    void RemoveForegroundTimeoutTask();
+
+    void RemoveLoadTimeoutTask();
+
     void PostUIExtensionAbilityTimeoutTask(uint32_t messageId);
 
     /**
