@@ -324,6 +324,11 @@ private:
     bool isUpdateFontSize(Configuration &config);
     bool isUpdateLanguage(Configuration &config, const std::string language,
         const std::string languageIsSetByApp, const std::string globalLanguageIsSetByApp);
+    const std::function<void()> CreateAutoStartupCallback(
+        const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        const std::shared_ptr<AbilityLocalRecord> abilityRecord,
+        const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback);
+    bool IsMainProcess(const std::string &bundleName, const std::string &process);
 
 private:
     std::list<std::shared_ptr<AbilityLifecycleCallbacks>> abilityLifecycleCallbacks_;

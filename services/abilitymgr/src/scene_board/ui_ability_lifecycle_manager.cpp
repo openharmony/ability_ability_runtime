@@ -397,7 +397,7 @@ int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const Ab
     sessionInfo->persistentId = GetPersistentIdByAbilityRequest(abilityRequest, sessionInfo->reuse);
     sessionInfo->userId = userId_;
     sessionInfo->isAtomicService = (abilityInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE);
-    sessionInfo->isSkipErms = false;
+    sessionInfo->want.SetParam("ohos.ability.params.isSkipErmsFromSCB", true);
     TAG_LOGI(
         AAFwkTag::ABILITYMGR, "Reused sessionId: %{public}d, userId: %{public}d.", sessionInfo->persistentId, userId_);
     int ret = NotifySCBPendingActivation(sessionInfo, abilityRequest);
@@ -2639,20 +2639,22 @@ int32_t UIAbilityLifecycleManager::GetAbilityStateByPersistentId(int32_t persist
     return ERR_INVALID_VALUE;
 }
 
-int32_t UIAbilityLifecycleManager::CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+int32_t UIAbilityLifecycleManager::CleanUIAbility(
+    const std::shared_ptr<AbilityRecord> &abilityRecord, bool forceKillProcess)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard guard(sessionLock_);
-    std::string element = abilityRecord->GetElementName().GetURI();
-    if (DelayedSingleton<AppScheduler>::GetInstance()->CleanAbilityByUserRequest(abilityRecord->GetToken())) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s success", element.c_str());
-        return ERR_OK;
+    if (forceKillProcess) {
+        std::lock_guard guard(sessionLock_);
+        std::string element = abilityRecord->GetElementName().GetURI();
+        if (DelayedSingleton<AppScheduler>::GetInstance()->CleanAbilityByUserRequest(abilityRecord->GetToken())) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s success", element.c_str());
+            return ERR_OK;
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "can not force kill when user request clean ability, schedule lifecycle:%{public}s", element.c_str());
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "can not force kill when user request clean ability, schedule lifecycle:%{public}s", element.c_str());
-
     return CloseUIAbilityInner(abilityRecord, -1, nullptr, true);
 }
 
@@ -2662,15 +2664,12 @@ void UIAbilityLifecycleManager::CheckCallerFromBackground(
     CHECK_POINTER(callerAbility);
     CHECK_POINTER(sessionInfo);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    bool hasContinousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->
-        IsBackgroundTaskUid(callerAbility->GetUid());
-
     auto permission = AAFwk::PermissionVerification::GetInstance();
     bool hasPermission =
         permission->VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND) ||
         permission->VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILIIES_FROM_BACKGROUND);
 
-    sessionInfo->canStartAbilityFromBackground = hasContinousTask || hasPermission;
+    sessionInfo->canStartAbilityFromBackground = hasPermission;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckCallerFromBackground: %{public}d", sessionInfo->canStartAbilityFromBackground);
 }
 }  // namespace AAFwk

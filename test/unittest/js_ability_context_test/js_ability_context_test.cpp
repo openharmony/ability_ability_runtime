@@ -21,11 +21,16 @@
 #include "ability_business_error.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
+#define private public
+#define protected public
 #include "js_ability_context.h"
+#undef private
+#undef protected
 #include "js_runtime_utils.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/impl/ark/ark_native_deferred.h"
 #include "native_engine/native_engine.h"
+#include "native_runtime_impl.h"
 #include "napi_common_want.h"
 
 #include "mock_parse_requestcode.h"
@@ -98,7 +103,7 @@ public:
 
 class MockAbilityContextImpl : public AbilityContextImpl {
 public:
-    virtual ErrCode ConnectAbility(const AAFwk::Want &want,
+    virtual ErrCode ConnectUIServiceExtensionAbility(const AAFwk::Want &want,
         const sptr<AbilityConnectCallback> &connectCallback) override
     {
         callback_ = connectCallback;
@@ -406,6 +411,30 @@ HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_RequestCodeFromString
     std::string requestCodeStr9 = "1";
     requestCode = RequestCodeFromStringToInt64(requestCodeStr9);
     EXPECT_EQ(requestCode, 1);
+}
+
+HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_StartUIServiceExtension_0100, TestSize.Level1)
+{
+    napi_env env{nullptr};
+    napi_callback_info info{nullptr};
+    jsAbilityContext_->StartUIServiceExtension(env, info);
+    EXPECT_EQ(info, nullptr);
+}
+
+HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_OnStartUIServiceExtension_0100, TestSize.Level1)
+{
+    OHOS::AbilityRuntime::Runtime::Options options;
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    EXPECT_EQ(err, napi_status::napi_ok);
+    napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+
+    NapiCallbackInfo info{1};
+    AAFwk::Want want;
+    info.argv[0] = OHOS::AppExecFwk::WrapWant(env, want);
+    jsAbilityContext_->OnStartUIServiceExtension(env, info);
+
+    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 }
 
 }  // namespace AAFwk

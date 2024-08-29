@@ -231,7 +231,7 @@ public:
      *
      * @param bundleName.
      */
-    int KillApplication(const std::string &bundleName, const bool clearPageStack = true);
+    int KillApplication(const std::string &bundleName, const bool clearPageStack = false);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -345,6 +345,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
+
+    /**
+     *  Set the process cache status by process ID.
+     *
+     * @param pid The process id.
+     * @param isSupport The process is support cache.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    void SetProcessCacheStatus(int32_t pid, bool isSupport);
 
     /**
      * Record process exit reason to appRunningRecord
@@ -463,6 +472,8 @@ public:
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
+    bool IsAppKilling(sptr<IRemoteObject> token) const;
 
 protected:
     /**

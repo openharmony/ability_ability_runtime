@@ -54,6 +54,17 @@ class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
 
+class MultiUserConfigurationMgr {
+public:
+    void Insert(const int32_t userId, const Configuration& config);
+
+    Configuration GetConfigurationByUserId(const int32_t userId);
+
+private:
+    std::map<int32_t, Configuration> multiUserConfiguration_;
+    std::mutex multiUserConfigurationMutex_;
+};
+
 /**
  * @class RenderRecord
  * Record nweb render process info.
@@ -943,7 +954,7 @@ private:
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
-    bool isKilling_ = false;
+    std::atomic<bool> isKilling_ = false;
     bool isContinuousTask_ = false;    // Only continuesTask processes can be set to true, please choose carefully
     std::atomic_bool isSpawned_ = false;
 

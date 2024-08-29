@@ -213,6 +213,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleKillProcessesByAccessTokenId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_ATTACHED):
             return HandleIsProcessAttached(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_APP_KILLING):
+            return HandleIsAppKilling(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -843,6 +845,18 @@ int32_t AmsMgrStub::HandleIsProcessAttached(MessageParcel &data, MessageParcel &
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     auto isAttached = IsProcessAttached(token);
     if (!reply.WriteBool(isAttached)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsAppKilling(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto isAppKilling = IsAppKilling(token);
+    if (!reply.WriteBool(isAppKilling)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
     }

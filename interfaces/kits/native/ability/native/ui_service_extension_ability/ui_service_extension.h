@@ -85,9 +85,8 @@ public:
      * @brief get the window option.
      * @return Returns a window option object pointer.
      */
-    sptr<Rosen::WindowOption> GetWindowOption(const AAFwk::Want &want,
-        const std::shared_ptr< Rosen::ExtensionWindowConfig>& extensionWindowConfig,
-            const int32_t hostWindowId);
+    sptr<Rosen::WindowOption> GetWindowOption(
+        const std::shared_ptr< Rosen::ExtensionWindowConfig>& extensionWindowConfig, const int32_t hostWindowId);
 #endif
 };
 }  // namespace AbilityRuntime
