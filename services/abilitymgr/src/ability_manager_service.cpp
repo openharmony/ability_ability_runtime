@@ -8492,7 +8492,7 @@ int AbilityManagerService::CheckStaticCfgPermission(const AppExecFwk::AbilityReq
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Collaborator is nullptr.");
             return AppExecFwk::Constants::PERMISSION_NOT_GRANTED;
         }
-        int result = collaborator->CheckStaticCfgPermission(abilityRequest.want);
+        int result = collaborator->CheckStaticCfgPermission(abilityRequest.want, isImplicit);
         if (result != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Check permission failed from broker.");
             return AppExecFwk::Constants::PERMISSION_NOT_GRANTED;

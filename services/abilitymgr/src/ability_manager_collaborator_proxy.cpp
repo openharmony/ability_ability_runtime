@@ -499,7 +499,7 @@ void AbilityManagerCollaboratorProxy::NotifyMissionBindPid(int32_t missionId, in
     }
 }
 
-int32_t AbilityManagerCollaboratorProxy::CheckStaticCfgPermission(const Want &want)
+int32_t AbilityManagerCollaboratorProxy::CheckStaticCfgPermission(const Want &want, bool isImplicit)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -510,6 +510,10 @@ int32_t AbilityManagerCollaboratorProxy::CheckStaticCfgPermission(const Want &wa
     }
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want write failed.");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteBool(isImplicit)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "isImplicit write failed.");
         return ERR_INVALID_OPERATION;
     }
     int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::CHECK_STATIC_CFG_PERMISSION,
