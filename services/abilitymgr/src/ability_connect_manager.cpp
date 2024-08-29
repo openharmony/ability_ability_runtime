@@ -848,7 +848,7 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
         taskHandler_->CancelTask(taskName);
     }
     if (eventHandler_) {
-        eventHandler_->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+        abilityRecord->RemoveLoadTimeoutTask();
     }
     if (abilityRecord->IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Attach Ability: %{public}s", element.c_str());
@@ -1730,9 +1730,7 @@ int AbilityConnectManager::DispatchForeground(const std::shared_ptr<AbilityRecor
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(taskHandler_, ERR_INVALID_VALUE);
     // remove foreground timeout task.
-    if (eventHandler_) {
-        eventHandler_->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
-    }
+    abilityRecord->RemoveForegroundTimeoutTask();
     auto self(shared_from_this());
     auto task = [self, abilityRecord]() { self->CompleteForeground(abilityRecord); };
     taskHandler_->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
@@ -2076,10 +2074,10 @@ void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &
         return;
     }
     if (eventHandler_ && abilityRecord->GetAbilityState() == AbilityState::INITIAL) {
-        eventHandler_->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+        abilityRecord->RemoveLoadTimeoutTask();
     }
     if (eventHandler_ && abilityRecord->GetAbilityState() == AbilityState::FOREGROUNDING) {
-        eventHandler_->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+        abilityRecord->RemoveForegroundTimeoutTask();
     }
     if (taskHandler_ && abilityRecord->GetAbilityState() == AbilityState::BACKGROUNDING) {
         taskHandler_->CancelTask("background_" + std::to_string(abilityRecord->GetAbilityRecordId()));
