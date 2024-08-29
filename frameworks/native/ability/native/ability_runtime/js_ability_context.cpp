@@ -840,7 +840,7 @@ napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& wa
         auto context = weak.lock();
         if (!context) {
             TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
-            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
         *innerErrCode = context->OpenLink(want, requestCode);
@@ -1466,7 +1466,7 @@ napi_value JsAbilityContext::OnTerminateSelfWithResult(napi_env env, NapiCallbac
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
         [weak = context_, want, resultCode, innerErrCode]() {
-            TAG_LOGI(AAFwkTag::CONTEXT, "async terminateSelfWithResult ");
+            TAG_LOGD(AAFwkTag::CONTEXT, "async terminateSelfWithResult ");
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "released context");
@@ -1577,18 +1577,18 @@ napi_value JsAbilityContext::OnConnectAbility(napi_env env, NapiCallbackInfo& in
             }
             TAG_LOGD(AAFwkTag::CONTEXT, "connectAbility: %{public}d", static_cast<int32_t>(connectId));
             *innerErrCode = context->ConnectAbility(want, connection);
-            int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
-            if (errcode) {
-                connection->CallJsFailed(errcode);
-                RemoveConnection(connectId);
-            }
     };
     NapiAsyncTask::CompleteCallback complete =
-        [connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        [connection, connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 RemoveConnection(connectId);
             } else {
+                int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
+                if (errcode) {
+                    connection->CallJsFailed(errcode);
+                    RemoveConnection(connectId);
+                }
                 task.Resolve(env, CreateJsUndefined(env));
             }
         };
@@ -1642,18 +1642,19 @@ napi_value JsAbilityContext::OnConnectAbilityWithAccount(napi_env env, NapiCallb
             TAG_LOGI(AAFwkTag::CONTEXT, "context->ConnectAbilityWithAccount connection:%{public}d",
                 static_cast<int32_t>(connectId));
             *innerErrCode = context->ConnectAbilityWithAccount(want, accountId, connection);
-            int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
-            if (errcode) {
-                connection->CallJsFailed(errcode);
-                RemoveConnection(connectId);
-            }
+
     };
     NapiAsyncTask::CompleteCallback complete =
-        [innerErrCode](
+        [connection, innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 } else {
+                    int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
+                    if (errcode) {
+                        connection->CallJsFailed(errcode);
+                        RemoveConnection(connectId);
+                    }
                     task.Resolve(env, CreateJsUndefined(env));
                 }
         };

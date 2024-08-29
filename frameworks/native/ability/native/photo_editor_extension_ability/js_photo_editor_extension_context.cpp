@@ -23,6 +23,7 @@
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include "pixel_map_napi.h"
+#include <memory>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -96,8 +97,8 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
         return CreateJsUndefined(env);
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    AAFwk::Want newWant;
-    NapiAsyncTask::ExecuteCallback execute = [weak = context_, uri, &newWant, innerErrCode]() {
+    auto newWant = std::make_shared<AAFwk::Want>();
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, uri, newWant, innerErrCode]() {
         TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithUri begin");
         auto context = weak.lock();
         if (!context) {
@@ -105,15 +106,15 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
             *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        *innerErrCode = static_cast<int32_t>(context->SaveEditedContent(uri, newWant));
+        *innerErrCode = static_cast<int32_t>(context->SaveEditedContent(uri, *newWant));
     };
     NapiAsyncTask::CompleteCallback complete =
-        [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+        [newWant, innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             if (*innerErrCode == static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)) {
                 task.Reject(env, CreateJsError(env, *innerErrCode));
                 return;
             }
-            napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
+            napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), *newWant);
             if (abilityResult == nullptr) {
                 TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
                 task.Reject(env, CreateJsError(env,
@@ -151,9 +152,9 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
         return CreateJsUndefined(env);
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    AAFwk::Want newWant;
+    auto newWant = std::make_shared<AAFwk::Want>();
     NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, image, packOption = std::move(packOption), &newWant, innerErrCode]() {
+        [weak = context_, image, packOption = std::move(packOption), newWant, innerErrCode]() {
             TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage begin");
             auto context = weak.lock();
             if (!context) {
@@ -161,15 +162,15 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
                 *innerErrCode = static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR);
                 return;
             }
-            *innerErrCode = static_cast<int32_t>(context->SaveEditedContent(image, packOption, newWant));
+            *innerErrCode = static_cast<int32_t>(context->SaveEditedContent(image, packOption, *newWant));
         };
     NapiAsyncTask::CompleteCallback complete =
-        [&newWant, innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
+        [newWant, innerErrCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             if (*innerErrCode == static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)) {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
                 return;
             }
-            napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), newWant);
+            napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(*innerErrCode), *newWant);
             if (abilityResult == nullptr) {
                 TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
                 task.Reject(env, CreateJsError(env,
