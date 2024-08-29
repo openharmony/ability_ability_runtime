@@ -377,7 +377,7 @@ public:
 
     virtual int32_t GetConfiguration(Configuration& config) override;
 
-    virtual int32_t UpdateConfiguration(const Configuration &config) override;
+    virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override;
 
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) override;
 
@@ -615,6 +615,8 @@ public:
     void SetAppAssertionPauseState(bool flag) override;
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
+
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) override;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
 

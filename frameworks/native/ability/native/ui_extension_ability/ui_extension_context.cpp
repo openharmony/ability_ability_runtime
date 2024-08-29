@@ -93,6 +93,17 @@ ErrCode UIExtensionContext::ConnectAbility(
     return ret;
 }
 
+ErrCode UIExtensionContext::ConnectUIServiceExtensionAbility(
+    const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin, ability:%{public}s",
+        want.GetElement().GetAbilityName().c_str());
+    ErrCode ret =
+        ConnectionManager::GetInstance().ConnectUIServiceExtensionAbility(token_, want, connectCallback);
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtensionContext::ConnectUIServiceExtensionAbility ErrorCode = %{public}d", ret);
+    return ret;
+}
+
 ErrCode UIExtensionContext::DisconnectAbility(
     const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
 {

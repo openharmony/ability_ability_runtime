@@ -256,10 +256,10 @@ HWTEST_F(ChildProcessManagerTest, LoadJsFile_0200, TestSize.Level0)
  */
 HWTEST_F(ChildProcessManagerTest, SetForkProcessDebugOption_0100, TestSize.Level0)
 {
-TAG_LOGD(AAFwkTag::TEST, "SetForkProcessDebugOption called.");
-AbilityRuntime::Runtime::DebugOption debugOption;
-ChildProcessManager::GetInstance().SetForkProcessDebugOption("test", false, false, false);
-EXPECT_TRUE(true);
+    TAG_LOGD(AAFwkTag::TEST, "SetForkProcessDebugOption called.");
+    AbilityRuntime::Runtime::DebugOption debugOption;
+    ChildProcessManager::GetInstance().SetForkProcessDebugOption("test", false, false, false);
+    EXPECT_EQ(ChildProcessManager::GetInstance().isChildProcessBySelfFork_, true);
 }
 
 /**

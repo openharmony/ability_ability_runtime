@@ -2257,7 +2257,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_DoAbilityForeground_001, Tes
     sptr<IRemoteObject> token = nullptr;
     uint32_t flag = 0;
     auto res = stub_->DoAbilityForeground(token, flag);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, NO_ERROR);
 }
 
 /*
@@ -2273,7 +2273,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_DoAbilityBackground_001, Tes
     sptr<IRemoteObject> token = nullptr;
     uint32_t flag = 0;
     auto res = stub_->DoAbilityBackground(token, flag);
-    EXPECT_EQ(res, 0);
+    EXPECT_EQ(res, NO_ERROR);
 }
 
 /*
@@ -2820,7 +2820,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_CallRequestDone_001, TestSiz
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> callStub = nullptr;
     stub_->CallRequestDone(token, callStub);
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(stub_ != nullptr);
 }
 
 /*

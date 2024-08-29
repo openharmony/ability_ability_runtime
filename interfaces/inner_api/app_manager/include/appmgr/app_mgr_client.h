@@ -161,7 +161,7 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearPageStack = true);
+    virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearPageStack = false);
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
@@ -197,7 +197,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillApplicationSelf(const bool clearPageStack = true);
+    virtual AppMgrResultCode KillApplicationSelf(const bool clearPageStack = false);
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
@@ -360,7 +360,7 @@ public:
      * @param config System environment change parameters.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode UpdateConfiguration(const Configuration &config);
+    virtual AppMgrResultCode UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
     /**
      *  Update config by bundle name.
@@ -768,6 +768,8 @@ public:
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
+
     void SaveBrowserChannel(sptr<IRemoteObject> browser);
 
     /**
@@ -820,6 +822,8 @@ public:
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
+    bool IsAppKilling(sptr<IRemoteObject> token) const;
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

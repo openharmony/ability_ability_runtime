@@ -604,7 +604,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
         return CreateJsUndefined(env);
     }
 
-    bool clearPageStack = false;
+    bool clearPageStack = true;
     bool hasClearPageStack = false;
     if (info.argc > ARGC_ZERO && ConvertFromJsValue(env, info.argv[0], clearPageStack)) {
         hasClearPageStack = true;

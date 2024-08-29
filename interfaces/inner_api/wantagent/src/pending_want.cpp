@@ -19,7 +19,6 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "want_agent_client.h"
-#include "want_agent_log_wrapper.h"
 #include "want_sender_info.h"
 
 using namespace OHOS::AppExecFwk;

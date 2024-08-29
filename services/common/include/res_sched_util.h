@@ -38,6 +38,7 @@ public:
     void ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
         const int32_t callerPid = -1);
     void GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPids);
+    bool CheckShouldForceKillProcess(int32_t pid);
 private:
     ResSchedUtil() = default;
     ~ResSchedUtil() = default;
