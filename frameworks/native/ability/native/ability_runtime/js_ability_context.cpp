@@ -1636,19 +1636,18 @@ napi_value JsAbilityContext::OnConnectAbilityWithAccount(napi_env env, NapiCallb
             if (!context) {
                 TAG_LOGE(AAFwkTag::CONTEXT, "context is released");
                 *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-                RemoveConnection(connectId);
                 return;
             }
             TAG_LOGI(AAFwkTag::CONTEXT, "context->ConnectAbilityWithAccount connection:%{public}d",
                 static_cast<int32_t>(connectId));
             *innerErrCode = context->ConnectAbilityWithAccount(want, accountId, connection);
-
     };
     NapiAsyncTask::CompleteCallback complete =
-        [connection, innerErrCode](
+        [connectId, connection, innerErrCode](
             napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+                    RemoveConnection(connectId);
                 } else {
                     int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrCode));
                     if (errcode) {
