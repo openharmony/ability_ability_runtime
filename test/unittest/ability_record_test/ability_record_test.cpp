@@ -36,6 +36,7 @@
 #include "system_ability_definition.h"
 #include "ui_extension_utils.h"
 #include "int_wrapper.h"
+#include "uri_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #define private public
 #define protected public
@@ -3325,5 +3326,228 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveCallerRequestCode_003, TestSize.
     abilityRecord->RemoveCallerRequestCode(callerAbilityRecord, requestCode);
     EXPECT_EQ(abilityRecord->callerList_.size(), 0);
 }
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetUriListFromWant
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    want.SetUri("file://com.example.test/test.txt");
+    std::vector<std::string> uriVec;
+    abilityRecord->GetUriListFromWant(want, uriVec);
+    EXPECT_EQ(uriVec.size(), 1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetUriListFromWant
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    std::vector<std::string> oriUriVec = { "file://com.example.test/test.txt" };
+    want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
+    std::vector<std::string> uriVec;
+    abilityRecord->GetUriListFromWant(want, uriVec);
+    EXPECT_EQ(uriVec.size(), 1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetUriListFromWant
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_003, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    want.SetUri("file://com.example.test/test.txt");
+    std::vector<std::string> oriUriVec = { "file://com.example.test/test.txt" };
+    want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
+    std::vector<std::string> uriVec;
+    abilityRecord->GetUriListFromWant(want, uriVec);
+    EXPECT_EQ(uriVec.size(), 2);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetUriListFromWant
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_004, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    want.SetUri("file://com.example.test/test.txt");
+    std::vector<std::string> oriUriVec(500, "file://com.example.test/test.txt");
+    want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
+    std::vector<std::string> uriVec;
+    abilityRecord->GetUriListFromWant(want, uriVec);
+    EXPECT_EQ(uriVec.size(), 500);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetUriListFromWant
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_005, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    std::vector<std::string> oriUriVec(501, "file://com.example.test/test.txt");
+    want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
+    std::vector<std::string> uriVec;
+    abilityRecord->GetUriListFromWant(want, uriVec);
+    EXPECT_EQ(uriVec.size(), 500);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetPermissionedUriList
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_001, TestSize.Level1)
+{
+    std::string uri = "file://com.example.test/test.txt";
+    Want want;
+    want.SetUri(uri);
+    std::vector<std::string> uriVec = { uri };
+    std::vector<bool> checkResults = {};
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    EXPECT_EQ(permissionUris.size(), 0);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetPermissionedUriList
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_002, TestSize.Level1)
+{
+    std::string uri = "file://com.example.test/test.txt";
+    Want want;
+    want.SetUri(uri);
+    std::vector<std::string> uriVec = { uri };
+    std::vector<bool> checkResults = { false };
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    EXPECT_EQ(permissionUris.size(), 0);
+    EXPECT_EQ(want.GetUriString(), "");
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetPermissionedUriList
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_003, TestSize.Level1)
+{
+    std::string uri = "invalid://com.example.test/test.txt";
+    Want want;
+    want.SetUri(uri);
+    std::vector<std::string> uriVec = { uri };
+    std::vector<bool> checkResults = { false };
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    EXPECT_EQ(permissionUris.size(), 0);
+    EXPECT_EQ(want.GetUriString(), uri);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetPermissionedUriList
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_004, TestSize.Level1)
+{
+    std::string uri = "file://com.example.test/test.txt";
+    Want want;
+    want.SetUri(uri);
+    std::vector<std::string> uriVec = { uri };
+    std::vector<bool> checkResults = { true };
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    EXPECT_EQ(permissionUris.size(), 1);
+    EXPECT_EQ(want.GetUriString(), uri);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetPermissionedUriList
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_005, TestSize.Level1)
+{
+    std::string uri = "file://com.example.test/test.txt";
+    Want want;
+    std::vector<std::string> oriUriVec(1, uri);
+    want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
+    std::vector<std::string> uriVec = { uri };
+    std::vector<bool> checkResults = { true };
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    EXPECT_EQ(permissionUris.size(), 1);
+    auto paramStramUris = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+    EXPECT_EQ(paramStramUris.size(), 1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetUriListFromWant
+ * SubFunction: GetUriListFromWant
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetPermissionedUriList
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_006, TestSize.Level1)
+{
+    std::string uri1 = "file://com.example.test/test1.txt";
+    std::string uri2 = "file://com.example.test/test2.txt";
+    Want want;
+    want.SetUri(uri1);
+    std::vector<std::string> oriUriVec = { uri2 };
+    want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
+    std::vector<std::string> uriVec = { uri1, uri2 };
+    std::vector<bool> checkResults = { true, true };
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    EXPECT_EQ(permissionUris.size(), 2);
+    EXPECT_EQ(want.GetUriString(), uri1);
+    auto paramStramUris = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+    EXPECT_EQ(paramStramUris.size(), 1);
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS

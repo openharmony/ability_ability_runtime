@@ -124,7 +124,7 @@ int UriPermissionManagerProxy::GrantUriPermission(const std::vector<Uri> &uriVec
 }
 
 int32_t UriPermissionManagerProxy::GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
-    const std::string &targetBundleName, int32_t appIndex)
+    const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t abilityId)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
@@ -156,6 +156,14 @@ int32_t UriPermissionManagerProxy::GrantUriPermissionPrivileged(const std::vecto
     }
     if (!data.WriteInt32(appIndex)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Write appIndex failed");
+        return INNER_ERR;
+    }
+    if (!data.WriteUint32(initiatorTokenId)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write initiatorTokenId failed");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(abilityId)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write abilityId failed");
         return INNER_ERR;
     }
     MessageParcel reply;
