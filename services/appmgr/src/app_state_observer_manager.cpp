@@ -55,19 +55,19 @@ int32_t AppStateObserverManager::RegisterApplicationStateObserver(
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (bundleNameList.size() > BUNDLE_NAME_LIST_MAX_SIZE) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the bundleNameList passed in is too long");
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleNameList passed in is too long");
         return ERR_INVALID_VALUE;
     }
     if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
     if (ObserverExist(observer)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Observer exist.");
+        TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<ffrt::mutex> lockRegister(observerLock_);
@@ -82,12 +82,12 @@ int32_t AppStateObserverManager::UnregisterApplicationStateObserver(const sptr<I
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
     std::lock_guard<ffrt::mutex> lockUnregister(observerLock_);
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Observer nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
     std::map<sptr<IApplicationStateObserver>, std::vector<std::string>>::iterator it;
@@ -99,7 +99,7 @@ int32_t AppStateObserverManager::UnregisterApplicationStateObserver(const sptr<I
             return ERR_OK;
         }
     }
-    TAG_LOGE(AAFwkTag::APPMGR, "Observer not exist.");
+    TAG_LOGE(AAFwkTag::APPMGR, "observer not exist");
     return ERR_INVALID_VALUE;
 }
 
@@ -107,15 +107,15 @@ int32_t AppStateObserverManager::RegisterAppForegroundStateObserver(const sptr<I
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
     if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
     if (IsAppForegroundObserverExist(observer)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Observer exist.");
+        TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
         return ERR_INVALID_VALUE;
     }
 
@@ -130,11 +130,11 @@ int32_t AppStateObserverManager::UnregisterAppForegroundStateObserver(const sptr
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Observer nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
     if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
     std::lock_guard<ffrt::mutex> lockUnregister(appForegroundObserverLock_);
@@ -154,11 +154,11 @@ int32_t AppStateObserverManager::RegisterAbilityForegroundStateObserver(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
     if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
     if (IsAbilityForegroundObserverExist(observer)) {
@@ -178,11 +178,11 @@ int32_t AppStateObserverManager::UnregisterAbilityForegroundStateObserver(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Observer nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
     if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
     std::lock_guard<ffrt::mutex> lockUnregister(abilityforegroundObserverLock_);
@@ -199,14 +199,14 @@ int32_t AppStateObserverManager::UnregisterAbilityForegroundStateObserver(
 void AppStateObserverManager::OnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnAppStarted failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), appRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnAppStarted failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnAppStarted come.");
@@ -218,14 +218,14 @@ void AppStateObserverManager::OnAppStarted(const std::shared_ptr<AppRunningRecor
 void AppStateObserverManager::OnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnAppStopped failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), appRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnAppStopped failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnAppStopped come.");
@@ -242,14 +242,14 @@ void AppStateObserverManager::OnAppStateChanged(
     bool isFromWindowFocusChanged)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnAppStateChanged failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), appRecord, state, needNotifyApp, isFromWindowFocusChanged]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnAppStateChanged failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnAppStateChanged come.");
@@ -262,14 +262,14 @@ void AppStateObserverManager::OnAppStateChanged(
 void AppStateObserverManager::OnProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnProcessDied failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), appRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnProcessDied failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnProcessDied come.");
@@ -281,14 +281,14 @@ void AppStateObserverManager::OnProcessDied(const std::shared_ptr<AppRunningReco
 void AppStateObserverManager::OnRenderProcessDied(const std::shared_ptr<RenderRecord> &renderRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnRenderProcessDied failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), renderRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnRenderProcessDied failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnRenderProcessDied come.");
@@ -300,14 +300,14 @@ void AppStateObserverManager::OnRenderProcessDied(const std::shared_ptr<RenderRe
 void AppStateObserverManager::OnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnChildProcessDied failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), childRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnChildProcessDied failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnChildProcessDied come.");
@@ -319,14 +319,14 @@ void AppStateObserverManager::OnChildProcessDied(std::shared_ptr<ChildProcessRec
 void AppStateObserverManager::OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnProcessStateChanged failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), appRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnProcessStateChanged failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnProcessStateChanged come.");
@@ -338,14 +338,14 @@ void AppStateObserverManager::OnProcessStateChanged(const std::shared_ptr<AppRun
 void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnProcessCreated failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), appRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnProcessCreated failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         self->HandleOnAppProcessCreated(appRecord);
@@ -356,14 +356,14 @@ void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningR
 void AppStateObserverManager::OnProcessReused(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnProcessReused failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), appRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnProcessReused failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnProcessReused come.");
@@ -375,14 +375,14 @@ void AppStateObserverManager::OnProcessReused(const std::shared_ptr<AppRunningRe
 void AppStateObserverManager::OnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnRenderProcessCreated failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), renderRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnRenderProcessCreated failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnRenderProcessCreated come.");
@@ -394,14 +394,14 @@ void AppStateObserverManager::OnRenderProcessCreated(const std::shared_ptr<Rende
 void AppStateObserverManager::OnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnChildProcessCreated failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), childRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnChildProcessCreated failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnChildProcessCreated come.");
@@ -414,17 +414,17 @@ void AppStateObserverManager::StateChangedNotifyObserver(
     const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null handler, failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), abilityStateData, isAbility, isFromWindowFocusChanged]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "null self, failed");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "StateChangedNotifyObserver come");
+        TAG_LOGD(AAFwkTag::APPMGR, "StateChangedNotifyObserver come.");
         self->HandleStateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
     };
     handler_->SubmitTask(task);
@@ -433,7 +433,7 @@ void AppStateObserverManager::StateChangedNotifyObserver(
 void AppStateObserverManager::HandleOnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
 
@@ -454,7 +454,7 @@ void AppStateObserverManager::HandleOnAppStarted(const std::shared_ptr<AppRunnin
 void AppStateObserverManager::HandleOnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
 
@@ -568,12 +568,12 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
 void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
     if (data.bundleName == XIAOYI_BUNDLE_NAME) {
-        TAG_LOGI(AAFwkTag::APPMGR, "bundleName is com.huawei.chmos.vassistant, change processType to NORMAL");
+        TAG_LOGI(AAFwkTag::APPMGR, "change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
     }
     TAG_LOGI(AAFwkTag::APPMGR,
@@ -587,7 +587,7 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
 void AppStateObserverManager::HandleOnProcessResued(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
@@ -607,7 +607,7 @@ void AppStateObserverManager::HandleOnProcessResued(const std::shared_ptr<AppRun
 void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord)
 {
     if (!renderRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "render record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null renderRecord");
         return;
     }
     ProcessData data = WrapRenderProcessData(renderRecord);
@@ -621,12 +621,12 @@ void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr
 void AppStateObserverManager::HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (!childRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ChildProcessRecord record is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null childRecord");
         return;
     }
     ProcessData data;
     if (WrapChildProcessData(data, childRecord) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WrapChildProcessData failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "WrapChildProcessData failed");
         return;
     }
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -651,12 +651,12 @@ void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data)
 void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
     if (data.bundleName == XIAOYI_BUNDLE_NAME) {
-        TAG_LOGI(AAFwkTag::APPMGR, "bundleName is com.huawei.chmos.vassistant, change processType to NORMAL");
+        TAG_LOGI(AAFwkTag::APPMGR, "change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
     }
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -676,7 +676,7 @@ void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<
 void AppStateObserverManager::HandleOnAppProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
@@ -689,7 +689,7 @@ void AppStateObserverManager::HandleOnAppProcessDied(const std::shared_ptr<AppRu
 void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<RenderRecord> &renderRecord)
 {
     if (!renderRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "render record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null renderRecord");
         return;
     }
     ProcessData data = WrapRenderProcessData(renderRecord);
@@ -702,12 +702,12 @@ void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<Re
 void AppStateObserverManager::HandleOnChildProcessDied(std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (!childRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "childRecord is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null childRecord");
         return;
     }
     ProcessData data;
     if (WrapChildProcessData(data, childRecord) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WrapChildProcessData failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "WrapChildProcessData failed");
         return;
     }
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -774,12 +774,12 @@ int32_t AppStateObserverManager::WrapChildProcessData(ProcessData &processData,
     std::shared_ptr<ChildProcessRecord> childRecord)
 {
     if (!childRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "childRecord is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null childRecord");
         return ERR_INVALID_VALUE;
     }
     auto hostRecord = childRecord->GetHostRecord();
     if (!hostRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "hostRecord is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null hostRecord");
         return ERR_INVALID_VALUE;
     }
     processData.bundleName = hostRecord->GetBundleName();
@@ -795,7 +795,7 @@ int32_t AppStateObserverManager::WrapChildProcessData(ProcessData &processData,
 bool AppStateObserverManager::ObserverExist(const sptr<IRemoteBroker> &observer)
 {
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return false;
     }
     std::lock_guard<ffrt::mutex> lockRegister(observerLock_);
@@ -810,7 +810,7 @@ bool AppStateObserverManager::ObserverExist(const sptr<IRemoteBroker> &observer)
 bool AppStateObserverManager::IsAbilityForegroundObserverExist(const sptr<IRemoteBroker> &observer)
 {
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return false;
     }
     std::lock_guard<ffrt::mutex> lockRegister(abilityforegroundObserverLock_);
@@ -825,7 +825,7 @@ bool AppStateObserverManager::IsAbilityForegroundObserverExist(const sptr<IRemot
 bool AppStateObserverManager::IsAppForegroundObserverExist(const sptr<IRemoteBroker> &observer)
 {
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return false;
     }
     std::lock_guard<ffrt::mutex> lockRegister(appForegroundObserverLock_);
@@ -842,12 +842,12 @@ void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "Add observer death recipient begin.");
     if (observer == nullptr || observer->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return;
     }
     auto it = recipientMap_.find(observer->AsObject());
     if (it != recipientMap_.end()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "This death recipient has been added.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Death recipient added");
         return;
     } else {
         std::weak_ptr<AppStateObserverManager> thisWeakPtr(shared_from_this());
@@ -865,15 +865,15 @@ void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker
         } else if (type == ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER) {
             deathRecipient = new (std::nothrow) AbilityForegroundStateObserverRecipient(deathRecipientFunc);
         } else {
-            TAG_LOGW(AAFwkTag::APPMGR, "ObserverType is not exists");
+            TAG_LOGW(AAFwkTag::APPMGR, "ObserverType is not exist");
             return;
         }
         if (deathRecipient == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "deathRecipient is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null deathRecipient");
             return;
         }
         if (!observer->AsObject()->AddDeathRecipient(deathRecipient)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "AddDeathRecipient failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "AddDeathRecipient failed");
         }
         recipientMap_.emplace(observer->AsObject(), deathRecipient);
     }
@@ -884,7 +884,7 @@ void AppStateObserverManager::RemoveObserverDeathRecipient(const sptr<IRemoteBro
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "Remove observer death recipient begin.");
     if (observer == nullptr || observer->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return;
     }
     auto it = recipientMap_.find(observer->AsObject());
@@ -919,7 +919,7 @@ void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, 
     TAG_LOGD(AAFwkTag::APPMGR, "OnObserverDied");
     auto object = remote.promote();
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "observer nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return;
     }
 
@@ -933,7 +933,7 @@ void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, 
         sptr<IAppForegroundStateObserver> observer = iface_cast<IAppForegroundStateObserver>(object);
         UnregisterAppForegroundStateObserver(observer);
     } else {
-        TAG_LOGW(AAFwkTag::APPMGR, "ObserverType is not exists");
+        TAG_LOGW(AAFwkTag::APPMGR, "ObserverType is not exist");
         return;
     }
 }
@@ -981,14 +981,14 @@ void AppStateObserverManager::OnPageShow(const PageStateData pageStateData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnProcessCreated failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), pageStateData]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnProcessCreated failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnProcessCreated come.");
@@ -1001,14 +1001,14 @@ void AppStateObserverManager::OnPageHide(const PageStateData pageStateData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnProcessCreated failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), pageStateData]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnProcessCreated failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnProcessCreated come.");
@@ -1045,14 +1045,14 @@ void AppStateObserverManager::OnAppCacheStateChanged(const std::shared_ptr<AppRu
     ApplicationState state)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnAppCacheStateChanged failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
     auto task = [weak = weak_from_this(), appRecord, state]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnAppCacheStateChanged failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnAppCacheStateChanged come.");
@@ -1065,7 +1065,7 @@ void AppStateObserverManager::HandleOnAppCacheStateChanged(const std::shared_ptr
     ApplicationState state)
 {
     if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
 

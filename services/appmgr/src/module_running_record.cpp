@@ -56,7 +56,7 @@ std::shared_ptr<AbilityRunningRecord> ModuleRunningRecord::GetAbilityRunningReco
     const sptr<IRemoteObject> &token) const
 {
     if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "token is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null token");
         return nullptr;
     }
     std::lock_guard<ffrt::mutex> lock(abilitiesMutex_);
@@ -72,11 +72,11 @@ std::shared_ptr<AbilityRunningRecord> ModuleRunningRecord::AddAbility(sptr<IRemo
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Add ability.");
     if (!token || !abilityInfo) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Param abilityInfo or token is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null abilityInfo or token");
         return nullptr;
     }
     if (GetAbilityRunningRecordByToken(token)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AbilityRecord already exists and no need to add");
+        TAG_LOGE(AAFwkTag::APPMGR, "AbilityRecord no need to add");
         return nullptr;
     }
     auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
@@ -95,7 +95,7 @@ std::shared_ptr<AbilityRunningRecord> ModuleRunningRecord::AddAbility(sptr<IRemo
 bool ModuleRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
 {
     if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "token is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null token");
         return false;
     }
     std::lock_guard<ffrt::mutex> lock(abilitiesMutex_);
@@ -141,7 +141,7 @@ std::shared_ptr<AbilityRunningRecord> ModuleRunningRecord::GetAbilityByTerminate
     const sptr<IRemoteObject> &token) const
 {
     if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetAbilityByTerminateLists error, token is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null token");
         return nullptr;
     }
     std::lock_guard<ffrt::mutex> lock(abilitiesMutex_);
@@ -176,7 +176,7 @@ void ModuleRunningRecord::OnAbilityStateChanged(
     const std::shared_ptr<AbilityRunningRecord> &ability, const AbilityState state)
 {
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ability is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null ability");
         return;
     }
     AbilityState oldState = ability->GetState();
@@ -205,7 +205,7 @@ void ModuleRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningReco
         appLifeCycleDeal_->LaunchAbility(ability);
         ability->SetState(AbilityState::ABILITY_STATE_READY);
     } else {
-        TAG_LOGE(AAFwkTag::APPMGR, "Can not find ability or get appThread.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Can not find ability or get appThread");
     }
 }
 
@@ -236,7 +236,7 @@ void ModuleRunningRecord::TerminateAbility(const std::shared_ptr<AppRunningRecor
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
     if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null abilityRecord");
         return;
     }
 
@@ -264,7 +264,7 @@ void ModuleRunningRecord::TerminateAbility(const std::shared_ptr<AppRunningRecor
         bool isCachedProcess = DelayedSingleton<CacheProcessManager>::GetInstance()->IsAppShouldCache(appRecord);
         appLifeCycleDeal_->ScheduleCleanAbility(token, isCachedProcess);
     } else {
-        TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         auto serviceInner = appMgrServiceInner_.lock();
         if (serviceInner) {
             serviceInner->TerminateApplication(appRecord);
@@ -279,7 +279,7 @@ void ModuleRunningRecord::SendEvent(
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Send event");
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
         return;
     }
 
@@ -292,7 +292,7 @@ void ModuleRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "token is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null token");
         return;
     }
 
@@ -306,11 +306,11 @@ bool ModuleRunningRecord::RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteOb
 {
     auto abilityRecord = GetAbilityByTerminateLists(token);
     if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ModuleRunningRecord::AbilityTerminated can not find ability record");
+        TAG_LOGE(AAFwkTag::APPMGR, "null abilityRecord");
         return false;
     }
     if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
         return false;
     }
     eventHandler_->RemoveEvent(AMSEventHandler::TERMINATE_ABILITY_TIMEOUT_MSG, abilityRecord->GetEventId());
@@ -324,7 +324,7 @@ bool ModuleRunningRecord::IsAbilitiesBackgrounded()
     for (const auto &iter : abilities_) {
         const auto &ability = iter.second;
         if (ability == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Ability is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null ability");
             continue;
         }
         const auto &abilityInfo = ability->GetAbilityInfo();
@@ -381,7 +381,7 @@ bool ModuleRunningRecord::IsAllAbilityReadyToCleanedByUserRequest()
     for (const auto &iter : abilities_) {
         const auto &ability = iter.second;
         if (ability == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "ability is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null ability");
             continue;
         }
         const auto &abilityInfo = ability->GetAbilityInfo();

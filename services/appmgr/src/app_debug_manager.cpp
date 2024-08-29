@@ -24,7 +24,7 @@ int32_t AppDebugManager::RegisterAppDebugListener(const sptr<IAppDebugListener> 
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (listener == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Listener is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null listener");
         return ERR_INVALID_DATA;
     }
 
@@ -50,7 +50,7 @@ int32_t AppDebugManager::UnregisterAppDebugListener(const sptr<IAppDebugListener
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (listener == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Listener is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null listener");
         return ERR_INVALID_DATA;
     }
 
