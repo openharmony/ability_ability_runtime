@@ -232,7 +232,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
 
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(handler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
-    handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    abilityRecord->RemoveLoadTimeoutTask();
     abilityRecord->SetLoading(false);
     FreezeUtil::LifecycleFlow flow = {token, FreezeUtil::TimeoutState::LOAD};
     FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
@@ -277,7 +277,7 @@ void UIAbilityLifecycleManager::OnAbilityRequestDone(const sptr<IRemoteObject> &
             TAG_LOGI(AAFwkTag::ABILITYMGR, "ability is on terminating");
             auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
             CHECK_POINTER(handler);
-            handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+            abilityRecord->RemoveForegroundTimeoutTask();
             return;
         }
         std::string element = abilityRecord->GetElementName().GetURI();
@@ -459,7 +459,7 @@ int UIAbilityLifecycleManager::DispatchForeground(const std::shared_ptr<AbilityR
     }
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ForegroundLifecycle: end.");
-    handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    abilityRecord->RemoveForegroundTimeoutTask();
     g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::FOREGROUND);
     auto self(weak_from_this());
     if (success) {
@@ -1297,7 +1297,7 @@ int UIAbilityLifecycleManager::CloseUIAbilityInner(std::shared_ptr<AbilityRecord
         if (abilityRecord->GetScheduler() == nullptr) {
             auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
             CHECK_POINTER_AND_RETURN_LOG(handler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
-            handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+            abilityRecord->RemoveLoadTimeoutTask();
         }
         return abilityRecord->TerminateAbility();
     }
@@ -1600,11 +1600,11 @@ void UIAbilityLifecycleManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abi
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_LOG(handler, "Fail to get AbilityEventHandler.");
     if (abilityRecord->GetAbilityState() == AbilityState::INITIAL) {
-        handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+        abilityRecord->RemoveLoadTimeoutTask();
         abilityRecord->SetLoading(false);
     }
     if (abilityRecord->GetAbilityState() == AbilityState::FOREGROUNDING) {
-        handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+        abilityRecord->RemoveForegroundTimeoutTask();
     }
     auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER_LOG(taskHandler, "Get AbilityTaskHandler failed.");
