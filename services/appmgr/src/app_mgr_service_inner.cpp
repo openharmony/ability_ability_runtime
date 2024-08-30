@@ -3694,7 +3694,13 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
 
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
-    appRecord->AddModules(appInfo, info.hapModuleInfos);
+    std::vector<HapModuleInfo> hapModuleInfos;
+    for (auto &iter : info.hapModuleInfos) {
+        if (IsMainProcess(appInfo, iter)) {
+            hapModuleInfos.emplace_back(iter);
+        }
+    }
+    appRecord->AddModules(appInfo, hapModuleInfos);
     TAG_LOGI(AAFwkTag::APPMGR, "StartEmptyResidentProcess of pid : [%{public}d], ",
         appRecord->GetPriorityObject()->GetPid());
 }
