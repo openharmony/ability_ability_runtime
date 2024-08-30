@@ -582,7 +582,10 @@ int32_t ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bu
         if (accountId == 0) {
             accountId = GetCurrentActiveAccountId();
         }
-        bundleMgr_->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, accountId);
+        bundleMgr_->GetBundleInfoV9(bundleName,
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE),
+            bundleInfo, accountId);
     }
 
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
@@ -618,7 +621,10 @@ void ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bundl
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo);
     } else {
-        bundleMgr_->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, accountId);
+        bundleMgr_->GetBundleInfoV9(bundleName,
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE),
+            bundleInfo, accountId);
     }
 }
 
