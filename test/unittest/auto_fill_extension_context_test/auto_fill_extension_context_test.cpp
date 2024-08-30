@@ -24,6 +24,9 @@
 #include "hilog_tag_wrapper.h"
 #include "mock_window.h"
 
+#include "js_auto_fill_extension.h"
+#include "js_auto_fill_extension_util.h"
+
 using namespace testing::ext;
 using namespace OHOS::Rosen;
 
@@ -35,6 +38,18 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+};
+
+class MockIAutoFillExtensionCallback : public IAutoFillExtensionCallback {
+public:
+    MockIAutoFillExtensionCallback()
+    {}
+    virtual ~MockIAutoFillExtensionCallback()
+    {}
+    int32_t OnReloadInModal(const sptr<AAFwk::SessionInfo> &sessionInfo, const CustomData &customData) override
+    {
+        return 0;
+    }
 };
 
 void AutoFillExtensionContextTest::SetUpTestCase(void)
@@ -139,6 +154,64 @@ HWTEST_F(AutoFillExtensionContextTest, ConvertTo_0200, TestSize.Level1)
     auto autoFillExtensionContext = Context::ConvertTo<AutoFillExtensionContext>(context);
     EXPECT_EQ(autoFillExtensionContext, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "ConvertTo_0200 end");
+}
+
+/**
+ * @tc.number: SetAutoFillExtensionCallback_0100
+ * @tc.name: SetAutoFillExtensionCallback
+ * @tc.desc: SetAutoFillExtensionCallback.
+ */
+HWTEST_F(AutoFillExtensionContextTest, SetAutoFillExtensionCallback_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAutoFillExtensionCallback_0100 start");
+    std::shared_ptr<AutoFillExtensionContext> context = std::make_shared<AutoFillExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    auto autoFillExtension = std::make_shared<MockIAutoFillExtensionCallback>();
+    context->SetAutoFillExtensionCallback(autoFillExtension);
+    ASSERT_NE(context->autoFillExtensionCallback_.lock(), nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "SetAutoFillExtensionCallback_0100 end");
+}
+
+/**
+ * @tc.number: SetSessionInfo_0100
+ * @tc.name: SetSessionInfo
+ * @tc.desc: SetSessionInfo.
+ */
+HWTEST_F(AutoFillExtensionContextTest, SetSessionInfo_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetSessionInfo_0100 start");
+    sptr<AAFwk::SessionInfo> sessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    ASSERT_NE(sessionInfo, nullptr);
+    std::shared_ptr<AutoFillExtensionContext> context = std::make_shared<AutoFillExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    context->SetSessionInfo(sessionInfo);
+    ASSERT_NE(context->sessionInfo_, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "SetSessionInfo_0100 end");
+}
+
+/**
+ * @tc.number: ReloadInModal_0100
+ * @tc.name: ReloadInModal
+ * @tc.desc: ReloadInModal.
+ */
+HWTEST_F(AutoFillExtensionContextTest, ReloadInModal_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ReloadInModal_0100 start");
+    sptr<AAFwk::SessionInfo> sessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    ASSERT_NE(sessionInfo, nullptr);
+    std::shared_ptr<AutoFillExtensionContext> context = std::make_shared<AutoFillExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    context->SetSessionInfo(sessionInfo);
+    ASSERT_NE(context->sessionInfo_, nullptr);
+
+    auto autoFillExtension = std::make_shared<MockIAutoFillExtensionCallback>();
+    context->SetAutoFillExtensionCallback(autoFillExtension);
+    ASSERT_NE(context->autoFillExtensionCallback_.lock(), nullptr);
+
+    struct OHOS::AbilityRuntime::CustomData data;
+    auto ret = context->ReloadInModal(data);
+    EXPECT_EQ(ret, 0);
+    TAG_LOGI(AAFwkTag::TEST, "ReloadInModal_0100 end");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
