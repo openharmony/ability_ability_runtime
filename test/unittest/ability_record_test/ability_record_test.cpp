@@ -572,6 +572,23 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_Want, TestSize.Level1)
     abilityRecord_->SetWant(want);
     EXPECT_EQ(want.GetFlags(), abilityRecord_->GetWant().GetFlags());
     EXPECT_EQ(want.GetBoolParam("multiThread", false), abilityRecord_->GetWant().GetBoolParam("multiThread", false));
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want debugWant;
+    debugWant.SetParam(DEBUG_APP, true);
+    Want noDebugWant;
+    noDebugWant.SetParam(DEBUG_APP, false);
+
+    AbilityRecord debugAbilityRecord(debugWant, abilityInfo, applicationInfo, 0);
+    EXPECT_TRUE(debugAbilityRecord.GetWant().GetBoolParam(DEBUG_APP, false));
+    debugAbilityRecord.SetWant(noDebugWant);
+    EXPECT_TRUE(debugAbilityRecord.GetWant().GetBoolParam(DEBUG_APP, false));
+
+    AbilityRecord noDebugAbilityRecord(noDebugWant, abilityInfo, applicationInfo, 0);
+    EXPECT_FALSE(noDebugAbilityRecord.GetWant().GetBoolParam(DEBUG_APP, false));
+    debugAbilityRecord.SetWant(debugWant);
+    EXPECT_FALSE(noDebugAbilityRecord.GetWant().GetBoolParam(DEBUG_APP, false));
 }
 
 /*
@@ -1452,18 +1469,20 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_SetPendingState_001, TestSize.Level1)
  */
 HWTEST_F(AbilityRecordTest, AbilityRecord_PostCancelStartingWindowHotTask_001, TestSize.Level1)
 {
-    Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
-    AbilityRecord abilityRecord(want, abilityInfo, applicationInfo, 0);
-    want.SetParam("debugApp", true);
-    abilityRecord.SetWant(want);
-    abilityRecord.PostCancelStartingWindowHotTask();
-    EXPECT_TRUE(want.GetBoolParam("debugApp", false));
 
-    want.SetParam("debugApp", false);
-    abilityRecord.PostCancelStartingWindowHotTask();
-    EXPECT_FALSE(want.GetBoolParam("debugApp", false));
+    Want debugWant;
+    debugWant.SetParam(DEBUG_APP, true);
+    AbilityRecord debugAbilityRecord(debugWant, abilityInfo, applicationInfo, 0);
+    debugAbilityRecord.PostCancelStartingWindowHotTask();
+    EXPECT_TRUE(debugAbilityRecord.GetWant().GetBoolParam(DEBUG_APP, false));
+
+    Want noDebugWant;
+    noDebugWant.SetParam(DEBUG_APP, false);
+    AbilityRecord noDebugAbilityRecord(noDebugWant, abilityInfo, applicationInfo, 0);
+    noDebugAbilityRecord.PostCancelStartingWindowHotTask();
+    EXPECT_FALSE(noDebugAbilityRecord.GetWant().GetBoolParam(DEBUG_APP, false));
 }
 
 /*
@@ -1476,18 +1495,20 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_PostCancelStartingWindowHotTask_001, T
  */
 HWTEST_F(AbilityRecordTest, AbilityRecord_PostCancelStartingWindowColdTask_001, TestSize.Level1)
 {
-    Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;
-    AbilityRecord abilityRecord(want, abilityInfo, applicationInfo, 0);
-    want.SetParam("debugApp", true);
-    abilityRecord.SetWant(want);
-    abilityRecord.PostCancelStartingWindowColdTask();
-    EXPECT_TRUE(want.GetBoolParam("debugApp", false));
 
-    want.SetParam("debugApp", false);
-    abilityRecord.PostCancelStartingWindowColdTask();
-    EXPECT_FALSE(want.GetBoolParam("debugApp", false));
+    Want debugWant;
+    debugWant.SetParam(DEBUG_APP, true);
+    AbilityRecord debugAbilityRecord(debugWant, abilityInfo, applicationInfo, 0);
+    debugAbilityRecord.PostCancelStartingWindowColdTask();
+    EXPECT_TRUE(debugAbilityRecord.GetWant().GetBoolParam(DEBUG_APP, false));
+
+    Want noDebugWant;
+    noDebugWant.SetParam(DEBUG_APP, false);
+    AbilityRecord noDebugAbilityRecord(noDebugWant, abilityInfo, applicationInfo, 0);
+    noDebugAbilityRecord.PostCancelStartingWindowColdTask();
+    EXPECT_FALSE(noDebugAbilityRecord.GetWant().GetBoolParam(DEBUG_APP, false));
 }
 
 /*
