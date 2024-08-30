@@ -1049,6 +1049,9 @@ int UIAbilityLifecycleManager::ResolveAbility(
         TAG_LOGD(AAFwkTag::ABILITYMGR, "targetAbility is ready, directly scheduler call request.");
         targetAbility->CallRequest();
         return ResolveResultType::OK_HAS_REMOTE_OBJ;
+    } else if (targetAbility->GetLoadState() == AbilityLoadState::LOADING) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "targetAbility is loading.");
+        return ResolveResultType::OK_HAS_REMOTE_OBJ;
     }
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "targetAbility need to call request after lifecycle.");
@@ -1562,6 +1565,7 @@ void UIAbilityLifecycleManager::HandleLoadTimeout(const std::shared_ptr<AbilityR
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ability record is nullptr");
         return;
     }
+    abilityRecord->SetLoadState(AbilityLoadState::FAILED);
     NotifySCBToHandleException(abilityRecord,
         static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT), "handleLoadTimeout");
     DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());

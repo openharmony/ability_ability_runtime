@@ -2331,6 +2331,7 @@ void MissionListManager::HandleLoadTimeout(const std::shared_ptr<AbilityRecord> 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "MissionListManager on time out event: ability record is nullptr.");
         return;
     }
+    ability->SetLoadState(AbilityLoadState::FAILED);
     // root launcher load timeout, notify appMs force terminate the ability and restart immediately.
     if (ability->IsLauncherAbility() && ability->IsLauncherRoot()) {
         ability->SetRestarting(true);
@@ -3413,6 +3414,9 @@ int MissionListManager::ResolveAbility(
     if (targetAbility->IsReady()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "targetAbility is ready, directly scheduler call request.");
         targetAbility->CallRequest();
+        return ResolveResultType::OK_HAS_REMOTE_OBJ;
+    } else if (targetAbility->GetLoadState() == AbilityLoadState::LOADING) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "targetAbility is loading.");
         return ResolveResultType::OK_HAS_REMOTE_OBJ;
     }
 
