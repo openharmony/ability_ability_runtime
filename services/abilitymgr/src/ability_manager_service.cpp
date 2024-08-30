@@ -174,6 +174,8 @@ constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestC
 
 constexpr char ASSERT_FAULT_DETAIL[] = "assertFaultDialogDetail";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
+constexpr const char* ABILITYMS_ENABLE_UISERVICE = "const.abilityms.enable_uiservice";
+
 const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
 };
@@ -2620,6 +2622,12 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        if (!system::GetBoolParameter(ABILITYMS_ENABLE_UISERVICE, false)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "uiServiceExtensionAbility disable");
+            return ERR_CAPABILITY_NOT_SUPPORT;
+        }
+    }
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     if (extensionType == AppExecFwk::ExtensionAbilityType::VPN ||
         extensionType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
@@ -8625,8 +8633,8 @@ int AbilityManagerService::CheckPermissionForUIService(AppExecFwk::ExtensionAbil
         TAG_LOGE(AAFwkTag::ABILITYMGR, "interface not support connect UI_SERVICE");
         return ERR_WRONG_INTERFACE_CALL;
     }
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "!IsSceneBoardEnabled");
+    if (!system::GetBoolParameter(ABILITYMS_ENABLE_UISERVICE, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ABILITYMS_ENABLE_UISERVICE false");
         return ERR_CAPABILITY_NOT_SUPPORT;
     }
 
