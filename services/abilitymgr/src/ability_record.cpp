@@ -343,6 +343,7 @@ int AbilityRecord::LoadAbility()
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         token_, callerToken_, abilityInfo_, applicationInfo_, want_, recordId_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
+    SetLoadState(AbilityLoadState::LOADING);
 
     auto isAttachDebug = DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName);
     if (isAttachDebug) {
@@ -461,7 +462,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
         GrantUriPermission(want_, applicationInfo_.bundleName, false, tokenId);
     }
 
-    if (isReady_) {
+    if (IsReady()) {
         PostForegroundTimeoutTask();
         if (IsAbilityState(AbilityState::FOREGROUND)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
@@ -695,7 +696,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
         GrantUriPermission(want_, applicationInfo_.bundleName, false, 0);
     }
 
-    if (isReady_ && !GetRestartAppFlag()) {
+    if (IsReady() && !GetRestartAppFlag()) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (!handler) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to get AbilityEventHandler.");
@@ -1444,7 +1445,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
                     }
                 });
         }
-        isReady_ = true;
+        SetLoadState(AbilityLoadState::LOADED);
         scheduler_ = scheduler;
         lifecycleDeal_->SetScheduler(scheduler);
         auto schedulerObject = scheduler_->AsObject();
@@ -1462,7 +1463,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
 #endif // WITH_DLP
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduler is nullptr");
-        isReady_ = false;
+        SetLoadState(AbilityLoadState::FAILED);
         isWindowAttached_ = false;
         SetIsNewWant(false);
         if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
@@ -1504,7 +1505,17 @@ std::shared_ptr<AbilityRecord> AbilityRecord::GetNextAbilityRecord() const
 
 bool AbilityRecord::IsReady() const
 {
-    return isReady_;
+    return loadState_.load() == AbilityLoadState::LOADED;
+}
+
+void AbilityRecord::SetLoadState(AbilityLoadState loadState)
+{
+    loadState_.store(loadState);
+}
+
+AbilityLoadState AbilityRecord::GetLoadState() const
+{
+    return loadState_.load();
 }
 
 #ifdef SUPPORT_SCREEN
@@ -2293,7 +2304,7 @@ void AbilityRecord::Dump(std::vector<std::string> &info)
     info.push_back(dumpInfo);
     dumpInfo = "        app state #" + AbilityRecord::ConvertAppState(appState_);
     info.push_back(dumpInfo);
-    dumpInfo = "        ready #" + std::to_string(isReady_) + "  window attached #" +
+    dumpInfo = "        ready #" + std::to_string(IsReady()) + "  window attached #" +
                std::to_string(isWindowAttached_) + "  launcher #" + std::to_string(isLauncherAbility_);
     info.push_back(dumpInfo);
 
@@ -2352,7 +2363,7 @@ void AbilityRecord::DumpAbilityState(
     info.push_back(dumpInfo);
     dumpInfo = "        app state #" + AbilityRecord::ConvertAppState(appState_);
     info.push_back(dumpInfo);
-    dumpInfo = "        ready #" + std::to_string(isReady_) + "  window attached #" +
+    dumpInfo = "        ready #" + std::to_string(IsReady()) + "  window attached #" +
                std::to_string(isWindowAttached_) + "  launcher #" + std::to_string(isLauncherAbility_);
     info.push_back(dumpInfo);
     dumpInfo = "        callee connections: ";
@@ -2536,6 +2547,7 @@ void AbilityRecord::OnProcessDied()
         return;
     }
     isWindowAttached_ = false;
+    SetLoadState(AbilityLoadState::FAILED);
 
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER(handler);
@@ -3120,7 +3132,7 @@ int32_t AbilityRecord::GetOwnerMissionUserId()
 void AbilityRecord::DumpClientInfo(std::vector<std::string> &info, const std::vector<std::string> &params,
     bool isClient, bool dumpConfig) const
 {
-    if (!scheduler_ || !isReady_) {
+    if (!scheduler_ || !IsReady()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "something nullptr.");
         return;
     }
