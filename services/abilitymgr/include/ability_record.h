@@ -349,6 +349,18 @@ enum class AbilityVisibilityState {
     UNSPECIFIED,
 };
 
+struct LaunchDebugInfo {
+public:
+    void Update(const Want &want);
+
+    bool isDebugAppSet = false;
+    bool isNativeDebugSet = false;
+    bool isPerfCmdSet = false;
+    bool debugApp = false;
+    bool nativeDebug = false;
+    std::string perfCmd;
+};
+
 /**
  * @class AbilityRecord
  * AbilityRecord records ability info and states and used to schedule ability life.
@@ -1261,6 +1273,8 @@ private:
     std::shared_ptr<Want> connectWant_ = nullptr;
     std::shared_ptr<CallerAbilityInfo> saCallerInfo_ = nullptr;
     ffrt::mutex connectWantLock_;
+    bool isLaunching_ = true;
+    LaunchDebugInfo launchDebugInfo_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
