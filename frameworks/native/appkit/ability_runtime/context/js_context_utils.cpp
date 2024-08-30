@@ -458,19 +458,19 @@ napi_value JsBaseContext::OnGetGroupDir(napi_env env, NapiCallbackInfo& info)
         return CreateJsUndefined(env);
     }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    std::string path = "";
-    NapiAsyncTask::ExecuteCallback execute = [context = context_, groupId, &path, innerErrCode]() {
+    auto path = std::make_shared<std::string>();
+    NapiAsyncTask::ExecuteCallback execute = [context = context_, groupId, path, innerErrCode]() {
         auto completeContext = context.lock();
         if (!completeContext) {
             *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
             return;
         }
-        path = completeContext->GetGroupDir(groupId);
+        *path = completeContext->GetGroupDir(groupId);
     };
-    auto complete = [innerErrCode, &path]
+    auto complete = [innerErrCode, path]
         (napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == ERR_OK) {
-            task.ResolveWithNoError(env, CreateJsValue(env, path));
+            task.ResolveWithNoError(env, CreateJsValue(env, *path));
         } else {
             task.Reject(env, CreateJsError(env, *innerErrCode, "completeContext if already released."));
         }
