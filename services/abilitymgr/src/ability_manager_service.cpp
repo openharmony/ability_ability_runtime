@@ -4002,17 +4002,27 @@ EventInfo AbilityManagerService::BuildEventInfo(const Want &want, int32_t userId
 int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Disconnect ability begin.");
-    EventInfo eventInfo;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Disconnect ability begin.");
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
-    CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
-
-    if (ERR_OK != DisconnectLocalAbility(connect) &&
-        ERR_OK != DisconnectRemoteAbility(connect->AsObject())) {
-        eventInfo.errCode = INNER_ERR;
-        EventReport::SendExtensionEvent(EventName::DISCONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+    int err = DisconnectLocalAbility(connect);
+    if (err == ERR_OK) {
+        return ERR_OK;
     }
-    return ERR_OK;
+    CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
+    int remoteErr = DisconnectRemoteAbility(connect->AsObject());
+    if (remoteErr == ERR_OK) {
+        return ERR_OK;
+    }
+    if (remoteErr != INVALID_PARAMETERS_ERR &&
+        remoteErr != CONNECTION_NOT_EXIST &&
+        err == CONNECTION_NOT_EXIST) {
+        err = remoteErr;
+    }
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "Disconnect ability error %{public}d", err);
+    EventInfo eventInfo;
+    eventInfo.errCode = err;
+    EventReport::SendExtensionEvent(EventName::DISCONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
+    return err;
 }
 
 int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,
