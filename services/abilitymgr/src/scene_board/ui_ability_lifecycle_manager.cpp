@@ -1645,7 +1645,15 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
         bool reuse = false;
         auto persistentId = GetReusedSpecifiedPersistentId(abilityRequest, reuse);
         if (persistentId != 0) {
-            auto abilityRecord = GetReusedSpecifiedAbility(want, flag);
+            std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
+            auto iter = sessionAbilityMap_.find(persistentId);
+            if (iter != sessionAbilityMap_.end()) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "find specified ability");
+                abilityRecord = iter->second;
+            } else {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "OnAcceptWantResponse Unexpected Error");
+                return;
+            }
             if (!abilityRecord) {
                 return;
             }
