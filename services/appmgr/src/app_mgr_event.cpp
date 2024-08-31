@@ -25,12 +25,12 @@ namespace AppExecFwk {
 int32_t AppMgrEventUtil::GetCallerPid(const std::shared_ptr<AppRunningRecord> &callerAppRecord)
 {
     if (!callerAppRecord) {
-        TAG_LOGW(AAFwkTag::APPMGR, "callerAppRecord is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null callerAppRecord");
         return IPCSkeleton::GetCallingPid();
     }
 
     if (!callerAppRecord->GetPriorityObject()) {
-        TAG_LOGW(AAFwkTag::APPMGR, "callerAppRecord's priorityObject is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null priorityObject");
         return IPCSkeleton::GetCallingPid();
     }
     
@@ -85,7 +85,7 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
     const std::shared_ptr<AppRunningRecord> &appRecord, AAFwk::EventInfo &eventInfo)
 {
     if (!appRecord) {
-        TAG_LOGW(AAFwkTag::APPMGR, "appRecord is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
     time_t currentTime = time(nullptr);
@@ -95,7 +95,7 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
         auto abilityinfo = appRecord->GetAbilities().begin()->second->GetAbilityInfo();
         UpdateStartupType(abilityinfo, eventInfo.abilityType, eventInfo.extensionType);
     } else {
-        TAG_LOGI(AAFwkTag::APPMGR, "Abilities nullptr!");
+        TAG_LOGI(AAFwkTag::APPMGR, "abilities failed");
     }
     if (!callerAppRecord) {
         Security::AccessToken::NativeTokenInfo nativeTokenInfo = {};
@@ -119,7 +119,7 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
     }
     eventInfo.processName = appRecord->GetProcessName();
     if (!appRecord->GetPriorityObject()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord's priorityObject is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
     } else {
         eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     }
@@ -131,7 +131,7 @@ bool AppMgrEventUtil::SendProcessStartFailedEvent(std::shared_ptr<AppRunningReco
     std::shared_ptr<AppRunningRecord> appRecord, AAFwk::EventInfo &eventInfo)
 {
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
     time_t currentTime = time(nullptr);
@@ -145,7 +145,7 @@ bool AppMgrEventUtil::SendProcessStartFailedEvent(std::shared_ptr<AppRunningReco
         auto abilityinfo = appRecord->GetAbilities().begin()->second->GetAbilityInfo();
         UpdateStartupType(abilityinfo, eventInfo.abilityType, eventInfo.extensionType);
     } else {
-        TAG_LOGI(AAFwkTag::APPMGR, "Abilities nullptr!");
+        TAG_LOGI(AAFwkTag::APPMGR, "abilities failed");
     }
     if (!callerAppRecord) {
         Security::AccessToken::NativeTokenInfo nativeTokenInfo = {};
@@ -170,7 +170,7 @@ bool AppMgrEventUtil::SendProcessStartFailedEvent(std::shared_ptr<AppRunningReco
     eventInfo.processName = appRecord->GetProcessName();
     eventInfo.processType = static_cast<int32_t>(appRecord->GetProcessType());
     if (!appRecord->GetPriorityObject()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord's priorityObject is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
     } else {
         eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     }
@@ -182,12 +182,12 @@ bool AppMgrEventUtil::SendChildProcessStartFailedEvent(std::shared_ptr<ChildProc
     ProcessStartFailedReason reason, int32_t subReason)
 {
     if (!childRecord) {
-        TAG_LOGW(AAFwkTag::APPMGR, "appRecord is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
     auto hostRecord = childRecord->GetHostRecord();
     if (!hostRecord) {
-        TAG_LOGW(AAFwkTag::APPMGR, "hostRecord is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null hostRecord");
         return false;
     }
     AAFwk::EventInfo eventInfo;
@@ -214,12 +214,12 @@ bool AppMgrEventUtil::SendRenderProcessStartFailedEvent(std::shared_ptr<RenderRe
     ProcessStartFailedReason reason, int32_t subReason)
 {
     if (!renderRecord) {
-        TAG_LOGW(AAFwkTag::APPMGR, "appRecord is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
     auto hostRecord = renderRecord->GetHostRecord();
     if (!hostRecord) {
-        TAG_LOGW(AAFwkTag::APPMGR, "hostRecord is null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null hostRecord");
         return false;
     }
     AAFwk::EventInfo eventInfo;
