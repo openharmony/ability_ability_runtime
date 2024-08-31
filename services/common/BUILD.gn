@@ -172,25 +172,3 @@ ohos_shared_library("res_sched_util") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
-
-ohos_shared_library("file_monitor") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  branch_protector_ret = "pac_ret"
-
-  public_configs = [ ":common_config" ]
-  include_dirs = [ "include" ]
-
-  sources = [ "src/file_monitor.cpp" ]
-
-  external_deps = [ "hilog:libhilog" ]
-
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
