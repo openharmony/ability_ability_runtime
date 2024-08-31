@@ -71,18 +71,18 @@ bool ParserUtil::FilterInfoFromJson(
     nlohmann::json &jsonBuf, std::vector<std::tuple<std::string, std::string, std::string>> &list)
 {
     if (jsonBuf.is_discarded()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Profile format error");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "format error");
         return false;
     }
 
     if (jsonBuf.find(INSTALL_LIST) == jsonBuf.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "InstallList not exist");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "installList absent");
         return false;
     }
 
     auto arrays = jsonBuf.at(INSTALL_LIST);
     if (!arrays.is_array() || arrays.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Array not found");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not found");
         return false;
     }
 
@@ -147,31 +147,31 @@ void ParserUtil::GetPreInstallRootDirList(std::vector<std::string> &rootDirList)
 bool ParserUtil::ReadFileIntoJson(const std::string &filePath, nlohmann::json &jsonBuf)
 {
     if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "File path is not exist.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "path not exist");
         return false;
     }
 
     if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "File path empty.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty path");
         return false;
     }
 
     char path[PATH_MAX] = {0};
     if (realpath(filePath.c_str(), path) == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "realpath error, errno is %{public}d.", errno);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "realpath error:%{public}d", errno);
         return false;
     }
 
     std::ifstream fin(path);
     if (!fin.is_open()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "File path exception.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "path exception");
         return false;
     }
 
     fin.seekg(0, std::ios::end);
     int64_t size = fin.tellg();
     if (size <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The file is an empty file!");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty file");
         fin.close();
         return false;
     }
@@ -180,7 +180,7 @@ bool ParserUtil::ReadFileIntoJson(const std::string &filePath, nlohmann::json &j
     jsonBuf = nlohmann::json::parse(fin, nullptr, false);
     fin.close();
     if (jsonBuf.is_discarded()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Bad profile file");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "bad profile");
         return false;
     }
     return true;

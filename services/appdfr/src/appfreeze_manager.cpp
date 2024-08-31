@@ -156,7 +156,7 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
         || faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK
         || faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S) {
         if (AppExecFwk::AppfreezeManager::GetInstance()->IsNeedIgnoreFreezeEvent(appInfo.pid)) {
-            TAG_LOGE(AAFwkTag::APPDFR, "AppFreeze happend");
+            TAG_LOGE(AAFwkTag::APPDFR, "appFreeze happend");
             return 0;
         }
     }
@@ -199,14 +199,14 @@ std::string AppfreezeManager::WriteToFile(const std::string& fileName, std::stri
     }
     std::string realPath;
     if (!OHOS::PathToRealPath(dir_path, realPath)) {
-        TAG_LOGE(AAFwkTag::APPDFR, "PathToRealPath Failed:%{public}s", dir_path.c_str());
+        TAG_LOGE(AAFwkTag::APPDFR, "pathToRealPath failed:%{public}s", dir_path.c_str());
         return "";
     }
     std::string stackPath = realPath + "/" + fileName;
     constexpr mode_t defaultLogFileMode = 0644;
     auto fd = open(stackPath.c_str(), O_CREAT | O_WRONLY | O_TRUNC, defaultLogFileMode);
     if (fd < 0) {
-        TAG_LOGI(AAFwkTag::APPDFR, "Failed to create stackPath");
+        TAG_LOGI(AAFwkTag::APPDFR, "stackPath create failed");
         return "";
     } else {
         TAG_LOGI(AAFwkTag::APPDFR, "stackPath: %{public}s", stackPath.c_str());
