@@ -1780,7 +1780,7 @@ public:
     int32_t TerminateMission(int32_t missionId) override;
 
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-        uint32_t sceneFlag, bool isColdStart);
+        uint32_t sceneFlag, bool &isColdStart);
 
     int32_t NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest);
 
@@ -1792,6 +1792,8 @@ public:
     static constexpr uint32_t FOREGROUND_TIMEOUT_MSG = 5;
     static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
     static constexpr uint32_t SHAREDATA_TIMEOUT_MSG = 7;
+    static constexpr uint32_t LOAD_HALF_TIMEOUT_MSG = 8;
+    static constexpr uint32_t FOREGROUND_HALF_TIMEOUT_MSG = 9;
 
 #ifdef SUPPORT_ASAN
     static constexpr uint32_t LOAD_TIMEOUT = 150000;            // ms

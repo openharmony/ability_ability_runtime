@@ -84,13 +84,13 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
     std::unique_lock<std::mutex> lockAssertResult(appFreezeResultMutex_);
     auto callback = GetConnection();
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateModalUIExtension Callback is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callback");
         return false;
     }
     callback->SetReqeustAppFreezeDialogWant(want);
     auto abilityManagerClient = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityManagerClient == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateModalUIExtension ConnectSystemUi AbilityManagerClient is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityManagerClient");
         return false;
     }
     AAFwk::Want systemUIWant;
@@ -103,12 +103,12 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
     auto result = IN_PROCESS_CALL(abilityManagerClient->ConnectAbility(systemUIWant, callback, INVALID_USERID));
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR,
-            "CreateModalUIExtension ConnectSystemUi ConnectAbility dialog failed, result = %{public}d", result);
+            "fail, result = %{public}d", result);
         return false;
     }
     lastFreezePid = pid;
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "CreateModalUIExtension ConnectSystemUi ConnectAbility dialog success, result = %{public}d", result);
+        "success, result = %{public}d", result);
     return true;
 }
 
@@ -132,7 +132,7 @@ void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityConnec
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Input remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote");
         return;
     }
 
@@ -154,10 +154,10 @@ void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityConnec
     uint32_t code = !Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ?
         COMMAND_START_DIALOG :
         AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AppFreezeDialogConnection::OnAbilityConnectDone Show dialog");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "show dialog");
     auto ret = remote->SendRequest(code, data, reply, option);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Show dialog is failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "show dialog fail");
         return;
     }
 }
@@ -165,7 +165,7 @@ void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityConnec
 void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityDisconnectDone(
     const AppExecFwk::ElementName &element, int resultCode)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

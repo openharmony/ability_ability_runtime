@@ -23,7 +23,7 @@ namespace AAFwk {
 bool AbilityConnectionProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(AbilityConnectionProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "WriteInterfaceToken fail");
         return false;
     }
     return true;
@@ -39,22 +39,22 @@ void AbilityConnectionProxy::OnAbilityConnectDone(
     MessageOption option(MessageOption::TF_ASYNC);
 
     if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "WriteInterfaceToken fail");
         return;
     }
 
     if (!data.WriteParcelable(&element)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect done element error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "element error");
         return;
     }
 
     if (!data.WriteRemoteObject(remoteObject)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect done remote object error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remoteObject error");
         return;
     }
 
     if (!data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect done result code error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "resultCode error");
         return;
     }
 
@@ -74,11 +74,11 @@ void AbilityConnectionProxy::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
     MessageOption option(MessageOption::TF_ASYNC);
 
     if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "WriteInterfaceToken fail");
         return;
     }
     if (!data.WriteParcelable(&element) || !data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disconnect done data write error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "data write error");
         return;
     }
 
@@ -94,13 +94,13 @@ int32_t AbilityConnectionProxy::SendTransactCmd(uint32_t code, MessageParcel &da
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote");
         return ERR_NULL_OBJECT;
     }
 
     int32_t ret = remote->SendRequest(code, data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "SendRequest failed. code is %{public}d, ret is %{public}d.", code, ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail. code: %{public}d, ret: %{public}d", code, ret);
         return ret;
     }
     return NO_ERROR;
@@ -119,13 +119,13 @@ int AbilityConnectionStub::OnRemoteRequest(
     std::u16string descriptor = AbilityConnectionStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Local descriptor is not equal to remote");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "descriptor not equal to remote");
         return ERR_INVALID_STATE;
     }
 
     std::unique_ptr<AppExecFwk::ElementName> element(data.ReadParcelable<AppExecFwk::ElementName>());
     if (element == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "callback stub receive element is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null element");
         return ERR_INVALID_VALUE;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call callback");
@@ -133,7 +133,7 @@ int AbilityConnectionStub::OnRemoteRequest(
         case IAbilityConnection::ON_ABILITY_CONNECT_DONE: {
             auto remoteObject = data.ReadRemoteObject();
             if (remoteObject == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "callback stub receive remoteObject is nullptr");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "null remoteObject");
                 return ERR_INVALID_VALUE;
             }
             auto resultCode = data.ReadInt32();

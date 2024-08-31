@@ -24,7 +24,7 @@ AcquireShareDataCallbackStub::AcquireShareDataCallbackStub() {}
 
 AcquireShareDataCallbackStub::~AcquireShareDataCallbackStub()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "~AcquireShareDataCallbackStub.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
 }
 
 int32_t AcquireShareDataCallbackStub::OnRemoteRequest(
@@ -33,7 +33,7 @@ int32_t AcquireShareDataCallbackStub::OnRemoteRequest(
     std::u16string descriptor = AcquireShareDataCallbackStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "local descriptor is not equal to remote.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "descriptor not equal to remote");
         return ERR_INVALID_STATE;
     }
 
@@ -50,7 +50,7 @@ int32_t AcquireShareDataCallbackStub::AcquireShareDataDoneInner(MessageParcel &d
     int32_t resultCode = data.ReadInt32();
     std::shared_ptr<WantParams> wantParam(data.ReadParcelable<WantParams>());
     if (wantParam == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantParam is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null wantParam");
         return ERR_INVALID_VALUE;
     }
     return AcquireShareDataDone(resultCode, *wantParam);
@@ -60,20 +60,20 @@ int32_t AcquireShareDataCallbackStub::AcquireShareDataDone(int32_t resultCode, W
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "resultCode:%{public}d, wantParam size:%{public}d", resultCode, wantParam.Size());
     if (resultCode || wantParam.IsEmpty()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "invaild param.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "invaild param");
     }
     auto task = [resultCode, wantParam, shareRuntimeTask = shareRuntimeTask_]() {
         if (shareRuntimeTask) {
             shareRuntimeTask(resultCode, wantParam);
         }
     };
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AcquireShareDataDone shareRuntimeTask start.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "acquireShareDataDone shareRuntimeTask start");
     if (!handler_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "handler_ object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null handler_ object");
         return OBJECT_NULL;
     }
     handler_->PostTask(task, "AcquieShareDataDone.");
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AcquireShareDataDone shareRuntimeTask end.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "acquireShareDataDone shareRuntimeTask end");
     return NO_ERROR;
 }
 

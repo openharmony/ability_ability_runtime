@@ -33,7 +33,7 @@ int32_t SystemAbilityTokenCallbackStub::OnRemoteRequest(uint32_t code,
         case SEND_RESULT: {
             std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
             if (want == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "SEND_RESULT want readParcelable failed!");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "SEND_RESULT want readParcelable failed");
                 return ERR_NULL_OBJECT;
             }
             int32_t callerUid = data.ReadInt32();

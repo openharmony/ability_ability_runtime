@@ -23,7 +23,7 @@ namespace AAFwk {
 bool AcquireShareDataCallbackProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(AcquireShareDataCallbackProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface tokern failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface tokern failed");
         return false;
     }
     return true;
@@ -31,7 +31,7 @@ bool AcquireShareDataCallbackProxy::WriteInterfaceToken(MessageParcel &data)
 
 int32_t AcquireShareDataCallbackProxy::AcquireShareDataDone(int32_t resultCode, WantParams &wantParam)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AcquireShareDataDone start.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -41,23 +41,23 @@ int32_t AcquireShareDataCallbackProxy::AcquireShareDataDone(int32_t resultCode, 
     }
 
     if (!data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "resultCode write failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "resultCode write failed");
         return INNER_ERR;
     }
     if (!data.WriteParcelable(&wantParam)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantParam write failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantParam write failed");
         return INNER_ERR;
     }
     auto remote = Remote();
     if (!remote) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object null");
         return INNER_ERR;
     }
     int32_t ret = remote->SendRequest(IAcquireShareDataCallback::ACQUIRE_SHARE_DATA_DONE, data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AcquireShareDataDone fail to Send request, err: %{public}d.", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, err: %{public}d", ret);
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AcquireShareDataDone end.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "end");
     return ret;
 }
 }

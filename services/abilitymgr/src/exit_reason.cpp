@@ -41,11 +41,11 @@ ExitReason *ExitReason::Unmarshalling(Parcel &parcel)
 {
     ExitReason *data = new (std::nothrow) ExitReason();
     if (!data) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "data is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null data");
         return nullptr;
     }
     if (!data->ReadFromParcel(parcel)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "read from parcel failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read failed");
         delete data;
         data = nullptr;
     }

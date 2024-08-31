@@ -75,12 +75,14 @@ struct LoadParam;
 }
 namespace Rosen {
 class WindowVisibilityInfo;
+class WindowPidVisibilityInfo;
 class FocusChangeInfo;
 }
 namespace AppExecFwk {
 using OHOS::AAFwk::Want;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
+class WindowPidVisibilityChangedListener;
 using LoadAbilityTaskFunc = std::function<void()>;
 constexpr int32_t BASE_USER_RANGE = 200000;
 
@@ -789,6 +791,11 @@ public:
      */
     void HandleWindowVisibilityChanged(
             const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
+
+    /**
+     * Handle window pid visibility changed.
+     */
+    void HandleWindowPidVisibilityChanged(const sptr<OHOS::Rosen::WindowPidVisibilityInfo>& windowPidVisibilityInfo);
 #endif //SUPPORT_SCREEN
     /**
      * Set the current userId, only used by abilityMgr.
@@ -880,6 +887,16 @@ public:
      * Free window visibility changed listener.
      */
     void FreeWindowVisibilityChangedListener();
+
+    /**
+     * Init window pid visibility changed listener.
+     */
+    void InitWindowPidVisibilityChangedListener();
+
+    /**
+     * Free window pid visibility changed listener.
+     */
+    void FreeWindowPidVisibilityChangedListener();
 
     /*
      * @brief Notify NativeEngine GC of status change.
@@ -1532,6 +1549,7 @@ private:
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
+    void DealMultiUserConfig(const Configuration &config, const int32_t userId);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
@@ -1551,6 +1569,7 @@ private:
 #ifdef SUPPORT_SCREEN
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
+    sptr<WindowPidVisibilityChangedListener> windowPidVisibilityChangedListener_;
 #endif //SUPPORT_SCREEN
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
