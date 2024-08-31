@@ -109,7 +109,7 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
         return false;
     }
     if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, " precheck failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "precheck failed");
         return false;
     }
     if (!IsCachedProcess(appRecord)) {
@@ -223,7 +223,7 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
     }
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "precheck failed");
-        return;
+        return false;
     }
     auto appInfo = appRecord->GetApplicationInfo();
     if (!IsCachedProcess(appRecord)) {
@@ -239,7 +239,7 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
     auto appMgrSptr = appMgr_.lock();
     if (appMgrSptr == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
-        return;
+        return true;
     }
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     TAG_LOGI(AAFwkTag::APPMGR, "app none cached state is notified: %{public}s, uid: %{public}d, %{public}s",
