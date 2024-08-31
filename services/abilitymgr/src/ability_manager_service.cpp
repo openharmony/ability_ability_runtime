@@ -1231,9 +1231,17 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     }
 
-    if (abilityInfo.type == AppExecFwk::AbilityType::SERVICE ||
-        abilityInfo.type == AppExecFwk::AbilityType::EXTENSION) {
+    if (abilityInfo.type == AppExecFwk::AbilityType::SERVICE) {
         return StartAbilityByConnectManager(want, abilityRequest, abilityInfo, validUserId, callerToken);
+    }
+
+    if (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION) {
+        if (AAFwk::PermissionVerification::GetInstance()->IsShellCall() ||
+            abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+            return StartAbilityByConnectManager(want, abilityRequest, abilityInfo, validUserId, callerToken);
+        }
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "targte not service extension: %{public}d.", abilityInfo.extensionAbilityType);
+        return TARGET_ABILITY_NOT_SERVICE;
     }
 
     if (!IsAbilityControllerStart(want, abilityInfo.bundleName)) {
