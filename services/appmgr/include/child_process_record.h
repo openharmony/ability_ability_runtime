@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include "app_death_recipient.h"
+#include "app_mgr_constants.h"
 #include "child_scheduler_interface.h"
 #include "child_process_info.h"
 #include "child_process_request.h"
@@ -63,6 +64,7 @@ public:
     void ClearMainProcessCallback();
     void SetEntryParams(const std::string &entryParams);
     std::string GetEntryParams() const;
+    ProcessType GetProcessType() const;
 
 private:
     void MakeProcessName(const std::shared_ptr<AppRunningRecord> hostRecord);
@@ -80,6 +82,7 @@ private:
     sptr<IRemoteObject> mainProcessCb_ = nullptr;
     bool isStartWithDebug_;
     std::string entryParams_;
+    ProcessType processType_ = ProcessType::CHILD;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
