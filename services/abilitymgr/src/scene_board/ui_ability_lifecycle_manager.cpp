@@ -346,6 +346,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
     }
     auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
+        CancelSameAbilityTimeoutTask(abilityInfo);
         PreCreateProcessName(const_cast<AbilityRequest &>(abilityRequest));
         specifiedRequestMap_.emplace(specifiedRequestId_, abilityRequest);
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(
@@ -363,6 +364,20 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
     int ret = NotifySCBPendingActivation(sessionInfo, abilityRequest);
     sessionInfo->want.CloseAllFd();
     return ret;
+}
+
+void UIAbilityLifecycleManager::CancelSameAbilityTimeoutTask(const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
+    CHECK_POINTER_LOG(handler, "handler null");
+    for (const auto &[sessionId, abilityRecord]: sessionAbilityMap_) {
+        if (abilityRecord && abilityRecord->GetAbilityInfo().name == abilityInfo.name &&
+            abilityRecord->GetAbilityInfo().bundleName == abilityInfo.bundleName && !abilityRecord->IsReady()) {
+            handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "ability: %{public}s-%{public}s", abilityInfo.bundleName.c_str(),
+                abilityInfo.name.c_str());
+        }
+    }
 }
 
 int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest)
