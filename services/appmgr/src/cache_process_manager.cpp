@@ -96,7 +96,7 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
         AddToApplicationSet(appRecord);
     }
     ShrinkAndKillCache();
-    TAG_LOGI(AAFwkTag::APPMGR, "success, %{public}s", appRecord->GetName().c_str(),
+    TAG_LOGI(AAFwkTag::APPMGR, "Pending %{public}s success, %{public}s", appRecord->GetName().c_str(),
         PrintCacheQueue().c_str());
     return true;
 }
