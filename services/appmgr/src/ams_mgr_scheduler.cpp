@@ -60,7 +60,7 @@ AmsMgrScheduler::AmsMgrScheduler(
 
 AmsMgrScheduler::~AmsMgrScheduler()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "AmsMgrScheduler is destroyed");
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
 }
 
 void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
@@ -294,7 +294,7 @@ int32_t AmsMgrScheduler::KillProcessWithAccount(
 
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "AmsMgrScheduler AttachTimeOut begin");
+    TAG_LOGI(AAFwkTag::APPMGR, "AttachTimeOut begin");
     if (!IsReady()) {
         return;
     }
@@ -608,7 +608,7 @@ void AmsMgrScheduler::ClearProcessByToken(sptr<IRemoteObject> token)
     Security::AccessToken::NativeTokenInfo nativeInfo;
     Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
     if (nativeInfo.processName != "foundation") {
-        TAG_LOGE(AAFwkTag::APPMGR, "caller is not foundation");
+        TAG_LOGE(AAFwkTag::APPMGR, "not foundation");
         return;
     }
 
@@ -641,7 +641,7 @@ void AmsMgrScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
     Security::AccessToken::NativeTokenInfo nativeInfo;
     Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
     if (nativeInfo.processName != "foundation") {
-        TAG_LOGE(AAFwkTag::APPMGR, "caller is not foundation");
+        TAG_LOGE(AAFwkTag::APPMGR, "not foundation");
         return;
     }
     std::function<void()> attachedToStatusBarFunc =

@@ -644,7 +644,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         }
         auto result = inner->KillProcessByPid(pid, "TerminateAbility");
         if (result < 0) {
-            TAG_LOGW(AAFwkTag::APPMGR, "kill application failed, pid: %{public}d", pid);
+            TAG_LOGW(AAFwkTag::APPMGR, "failed, pid: %{public}d", pid);
         }
         inner->NotifyAppStatus(appRecord->GetBundleName(), CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
         };
@@ -668,7 +668,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
-            TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s is not terminate app",
+            TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
                 appRecord->GetBundleName().c_str());
             return;
         }
@@ -914,7 +914,7 @@ int32_t AppRunningManager::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::M
             return priorityObject && priorityObject->GetPid() == pid;
         });
         if (iter == appRunningRecordMap_.end()) {
-            TAG_LOGE(AAFwkTag::APPMGR, "No application found");
+            TAG_LOGE(AAFwkTag::APPMGR, "no application found");
             return ERR_INVALID_VALUE;
         }
         appRecord = iter->second;
@@ -1032,7 +1032,7 @@ int32_t AppRunningManager::NotifyLoadRepairPatch(const std::string &bundleName, 
     bool loadSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
     if (callbackByRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "create record fail");
+        TAG_LOGE(AAFwkTag::APPMGR, "null record");
         return ERR_INVALID_VALUE;
     }
 
@@ -1063,7 +1063,7 @@ int32_t AppRunningManager::NotifyHotReloadPage(const std::string &bundleName, co
     bool reloadPageSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
     if (callbackByRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "create record fail");
+        TAG_LOGE(AAFwkTag::APPMGR, "null record");
         return ERR_INVALID_VALUE;
     }
 
@@ -1095,7 +1095,7 @@ int32_t AppRunningManager::NotifyUnLoadRepairPatch(const std::string &bundleName
     bool unLoadSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
     if (callbackByRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "create record fail");
+        TAG_LOGE(AAFwkTag::APPMGR, "null record");
         return ERR_INVALID_VALUE;
     }
 
@@ -1370,7 +1370,7 @@ int32_t AppRunningManager::SignRestartAppFlag(const std::string &bundleName)
         appRecord->SetRestartAppFlag(true);
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::APPMGR, "Not find apprecord");
+    TAG_LOGE(AAFwkTag::APPMGR, "null apprecord");
     return ERR_INVALID_VALUE;
 }
 
@@ -1575,7 +1575,7 @@ int AppRunningManager::DumpFfrt(const std::vector<int32_t>& pids, std::string& r
         return DumpErrorCode::ERR_INVALID_PID_ERROR;
     }
     if (result.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "no ffrt usage is found");
+        TAG_LOGE(AAFwkTag::APPMGR, "ffrt is empty");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return DumpErrorCode::ERR_OK;

@@ -577,7 +577,7 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
         data.processType = ProcessType::NORMAL;
     }
     TAG_LOGI(AAFwkTag::APPMGR,
-        "Process Create, bundle:%{public}s, pid:%{public}d, uid:%{public}d, processType:%{public}d, "
+        "bundle:%{public}s, pid:%{public}d, uid:%{public}d, processType:%{public}d, "
         "extensionType:%{public}d, processName:%{public}s, renderUid:%{public}d, isTestMode:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.extensionType, data.processName.c_str(),
         data.renderUid, data.isTestMode);
@@ -865,7 +865,7 @@ void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker
         } else if (type == ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER) {
             deathRecipient = new (std::nothrow) AbilityForegroundStateObserverRecipient(deathRecipientFunc);
         } else {
-            TAG_LOGW(AAFwkTag::APPMGR, "ObserverType is not exist");
+            TAG_LOGW(AAFwkTag::APPMGR, "null ObserverType");
             return;
         }
         if (deathRecipient == nullptr) {
@@ -933,7 +933,7 @@ void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, 
         sptr<IAppForegroundStateObserver> observer = iface_cast<IAppForegroundStateObserver>(object);
         UnregisterAppForegroundStateObserver(observer);
     } else {
-        TAG_LOGW(AAFwkTag::APPMGR, "ObserverType is not exist");
+        TAG_LOGW(AAFwkTag::APPMGR, "null ObserverType");
         return;
     }
 }

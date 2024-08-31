@@ -42,7 +42,7 @@ void AdvancedSecurityModeManager::Init()
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t state = OHOS::system::GetIntParameter<int32_t>(PARAM_GLOBAL_ADVANCED_MODE_STATE, 0);
     isAdvSecModeEnabled_ = state > 0;
-    TAG_LOGI(AAFwkTag::APPMGR, "ASMM Init isAdvSecModeEnabled %{public}d", isAdvSecModeEnabled_);
+    TAG_LOGI(AAFwkTag::APPMGR, "isAdvSecModeEnabled %{public}d", isAdvSecModeEnabled_);
 }
 
 bool AdvancedSecurityModeManager::IsJITEnabled()

@@ -1139,7 +1139,7 @@ void AppRunningRecord::PopForegroundingAbilityTokens()
             StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND),
                 true, false);
         } else {
-            TAG_LOGW(AAFwkTag::APPMGR, "can not find module record");
+            TAG_LOGW(AAFwkTag::APPMGR, "null moduleRecord");
         }
         // The token should be removed even though the module record didn't exist.
         iter = foregroundingAbilityTokens_.erase(iter);
@@ -1152,7 +1152,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
 
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "can not find module record");
+        TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
         return;
     }
 
@@ -1167,7 +1167,7 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto moduleRecord = GetModuleRunningRecordByTerminateLists(token);
     if (!moduleRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "can not find module record");
+        TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
         return;
     }
 
@@ -1381,7 +1381,7 @@ bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
 {
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "can not find module record");
+        TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
         return false;
     }
 
@@ -1409,7 +1409,7 @@ bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
 {
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "can not find module record");
+        TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
         return false;
     }
 
@@ -1640,7 +1640,7 @@ void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 
 void AppRunningRecord::ScheduleAcceptWantDone()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "ScheduleAcceptWantDone. bundle %{public}s and eventId %{public}d",
+    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s and eventId %{public}d",
         mainBundleName_.c_str(), static_cast<int>(eventId_));
 
     if (!eventHandler_) {
@@ -1664,7 +1664,7 @@ void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const 
 
 void AppRunningRecord::ScheduleNewProcessRequestDone()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "ScheduleNewProcessRequestDone. bundle %{public}s and eventId %{public}d",
+    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s and eventId %{public}d",
         mainBundleName_.c_str(), static_cast<int>(eventId_));
 
     if (!eventHandler_) {
@@ -1901,7 +1901,7 @@ void AppRunningRecord::RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteObjec
 {
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "can not find module record");
+        TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
         return;
     }
     (void)moduleRecord->RemoveTerminateAbilityTimeoutTask(token);
@@ -1958,7 +1958,7 @@ bool AppRunningRecord::IsAbilitytiesBackground()
     for (const auto &iter : hapModules_) {
         for (const auto &moduleRecord : iter.second) {
             if (moduleRecord == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "null module record");
+                TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
                 continue;
             }
             if (!moduleRecord->IsAbilitiesBackgrounded()) {
@@ -2010,7 +2010,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
             ScheduleBackgroundRunning();
         }
     } else {
-        TAG_LOGI(AAFwkTag::APPMGR, "pending state is not READY");
+        TAG_LOGI(AAFwkTag::APPMGR, "not READY");
         if (!windowIds_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         }
@@ -2423,7 +2423,7 @@ bool AppRunningRecord::IsAllAbilityReadyToCleanedByUserRequest()
     for (const auto &iter : hapModules_) {
         for (const auto &moduleRecord : iter.second) {
             if (moduleRecord == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "null module record");
+                TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
                 continue;
             }
             if (!moduleRecord->IsAllAbilityReadyToCleanedByUserRequest()) {
