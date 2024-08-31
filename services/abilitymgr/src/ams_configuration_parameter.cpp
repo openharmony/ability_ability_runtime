@@ -48,7 +48,7 @@ void AmsConfigurationParameter::Parse()
         return;
     }
     std::string customConfig = filePath;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "The configuration file path is :%{private}s", customConfig.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "file path: %{private}s", customConfig.c_str());
     LoadUIExtensionPickerConfig(customConfig);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "load config ref : %{private}d", ref);
 }
@@ -119,12 +119,12 @@ void AmsConfigurationParameter::LoadUIExtensionPickerConfig(const std::string &f
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file is not existed due to empty file path.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty file path");
         return;
     }
 
     if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not access the file: %{private}s.", filePath.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not access the file: %{private}s", filePath.c_str());
         return;
     }
     std::ifstream inFile;
@@ -179,18 +179,18 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     int ret[2] = {0};
     if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file is not existed due to empty file path.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty file path");
         return READ_FAIL;
     }
 
     if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not access the file: %{private}s.", filePath.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not access the file: %{private}s", filePath.c_str());
         return READ_FAIL;
     }
     std::ifstream inFile;
     inFile.open(filePath, std::ios::in);
     if (!inFile.is_open()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Read ability manager service config error.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "error");
         nonConfigFile_ = true;
         return READ_FAIL;
     }
@@ -228,7 +228,7 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
         }
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Reading ability manager service config success.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "reading ability manager service config success");
     return READ_OK;
 }
 

@@ -56,7 +56,7 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
 
     startSpecifiedAbilityResponse_ = new (std::nothrow) StartSpecifiedAbilityResponse();
     if (startSpecifiedAbilityResponse_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "startSpecifiedAbilityResponse_ is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null startSpecifiedAbilityResponse_");
         return false;
     }
     appMgrClient_->RegisterStartSpecifiedAbilityResponse(startSpecifiedAbilityResponse_);
@@ -110,7 +110,7 @@ int AppScheduler::UpdateApplicationInfoInstalled(const std::string &bundleName, 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start to update the application info after new module installed.");
     int ret = (int)appMgrClient_->UpdateApplicationInfoInstalled(bundleName, uid);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to UpdateApplicationInfoInstalled.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to UpdateApplicationInfoInstalled");
         return INNER_ERR;
     }
 
@@ -160,28 +160,28 @@ void AppScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, con
 
 void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process by ability token.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "kill process");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->KillProcessByAbilityToken(token);
 }
 
 void AppScheduler::KillProcessesByUserId(int32_t userId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "User id: %{public}d.", userId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "user id: %{public}d", userId);
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->KillProcessesByUserId(userId);
 }
 
 void AppScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->KillProcessesByPids(pids);
 }
 
 void AppScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->AttachPidToParent(token, callerToken);
 }
@@ -243,7 +243,7 @@ int AppScheduler::KillApplication(const std::string &bundleName, const bool clea
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->KillApplication(bundleName, clearPageStack);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to kill application.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed kill app");
         return INNER_ERR;
     }
 
@@ -253,11 +253,11 @@ int AppScheduler::KillApplication(const std::string &bundleName, const bool clea
 int AppScheduler::ForceKillApplication(const std::string &bundleName,
     const int userId, const int appIndex)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->ForceKillApplication(bundleName, userId, appIndex);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to force kill application.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed force kill app");
         return INNER_ERR;
     }
 
@@ -266,11 +266,11 @@ int AppScheduler::ForceKillApplication(const std::string &bundleName,
 
 int AppScheduler::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->KillProcessesByAccessTokenId(accessTokenId);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to force kill application by accessTokenId.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed force kill app");
         return INNER_ERR;
     }
 
@@ -283,7 +283,7 @@ int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t ui
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->KillApplicationByUid(bundleName, uid);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to kill application by uid.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail kill app");
         return INNER_ERR;
     }
 
@@ -404,7 +404,7 @@ int AppScheduler::StartUserTest(
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = appMgrClient_->StartUserTestProcess(want, observer, bundleInfo, userId);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to start user test.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed start user test");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -415,7 +415,7 @@ int AppScheduler::FinishUserTest(const std::string &msg, const int64_t &resultCo
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = appMgrClient_->FinishUserTest(msg, resultCode, bundleName);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to start user test.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed start user test");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -426,7 +426,7 @@ int AppScheduler::UpdateConfiguration(const AppExecFwk::Configuration &config)
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int>(appMgrClient_->UpdateConfiguration(config));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "UpdateConfiguration failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "updateConfiguration failed");
         return INNER_ERR;
     }
 
@@ -438,7 +438,7 @@ int AppScheduler::GetConfiguration(AppExecFwk::Configuration &config)
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int>(appMgrClient_->GetConfiguration(config));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetConfiguration failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getConfiguration failed");
         return INNER_ERR;
     }
 
@@ -450,7 +450,7 @@ int AppScheduler::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<I
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int>(appMgrClient_->GetAbilityRecordsByProcessID(pid, tokens));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetAbilityRecordsByProcessID failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getAbilityRecordsByProcessID failed");
         return INNER_ERR;
     }
 
@@ -462,7 +462,7 @@ int AppScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Appli
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int>(appMgrClient_->GetApplicationInfoByProcessID(pid, application, debug));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetApplicationInfoByProcessID failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getApplicationInfoByProcessID failed");
         return ret;
     }
 
@@ -472,7 +472,7 @@ int AppScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Appli
 int32_t AppScheduler::NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg)
 {
     if (pid < 0) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "pid<=0");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "pid<0");
         return ERR_INVALID_VALUE;
     }
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
@@ -489,7 +489,7 @@ int32_t AppScheduler::GetBundleNameByPid(const int pid, std::string &bundleName,
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int32_t ret = static_cast<int32_t>(IN_PROCESS_CALL(appMgrClient_->GetBundleNameByPid(pid, bundleName, uid)));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get bundle name failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundle name failed");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -506,7 +506,7 @@ int32_t AppScheduler::NotifyFault(const AppExecFwk::FaultData &faultData)
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int>(appMgrClient_->NotifyAppFault(faultData));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyAppFault failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "notifyAppFault failed");
         return INNER_ERR;
     }
 
@@ -518,7 +518,7 @@ int32_t AppScheduler::RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugL
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int32_t>(appMgrClient_->RegisterAppDebugListener(listener));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Register app debug listener failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "register app debug listener failed");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -529,7 +529,7 @@ int32_t AppScheduler::UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebu
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int32_t>(appMgrClient_->UnregisterAppDebugListener(listener));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Unregister app debug listener failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unregister app debug listener failed");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -540,7 +540,7 @@ int32_t AppScheduler::AttachAppDebug(const std::string &bundleName)
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int32_t>(appMgrClient_->AttachAppDebug(bundleName));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Attach app debug failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "attach app debug failed");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -551,7 +551,7 @@ int32_t AppScheduler::DetachAppDebug(const std::string &bundleName)
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int32_t>(appMgrClient_->DetachAppDebug(bundleName));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Detach app debug failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "detach app debug failed");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -562,7 +562,7 @@ int32_t AppScheduler::RegisterAbilityDebugResponse(const sptr<AppExecFwk::IAbili
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int32_t>(appMgrClient_->RegisterAbilityDebugResponse(response));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Register ability debug response failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "register ability debug response failed");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -573,7 +573,7 @@ bool AppScheduler::IsAttachDebug(const std::string &bundleName)
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     auto ret = static_cast<int32_t>(appMgrClient_->IsAttachDebug(bundleName));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Call is attach debug failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "call attach debug failed");
         return INNER_ERR;
     }
     return ERR_OK;
@@ -589,7 +589,7 @@ void AppScheduler::ClearProcessByToken(sptr<IRemoteObject> token) const
 bool AppScheduler::IsMemorySizeSufficent() const
 {
     if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
         return true;
     }
     return appMgrClient_->IsMemorySizeSufficent();
@@ -597,14 +597,14 @@ bool AppScheduler::IsMemorySizeSufficent() const
 
 void AppScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->AttachedToStatusBar(token);
 }
 
 void AppScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->BlockProcessCacheByPids(pids);
 }
@@ -614,7 +614,7 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
         return false;
     }
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
@@ -623,7 +623,7 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
 bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
 {
     if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
         return false;
     }
     return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
@@ -631,7 +631,7 @@ bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
 bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
         return false;
     }
     return appMgrClient_->IsProcessContainsOnlyUIAbility(pid);
@@ -640,7 +640,7 @@ bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
 {
     if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
         return false;
     }
     return appMgrClient_->IsProcessAttached(token);

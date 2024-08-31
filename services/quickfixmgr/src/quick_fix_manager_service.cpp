@@ -42,13 +42,13 @@ bool QuickFixManagerService::Init()
     std::lock_guard<std::mutex> lock(eventMutex_);
     eventRunner_ = AppExecFwk::EventRunner::Create("QuickFixMgrSvrMain");
     if (eventRunner_ == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Create event runner failed");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null eventRunner_");
         return false;
     }
 
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventRunner_);
     if (eventHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Create event handler failed");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null eventHandler_");
         return false;
     }
 
@@ -60,7 +60,7 @@ int32_t QuickFixManagerService::ApplyQuickFix(const std::vector<std::string> &qu
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::QUICKFIX, "called");
     if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "The caller is not system-app, can not use system-api");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "caller not system-app,not use system-api");
         return QUICK_FIX_NOT_SYSTEM_APP;
     }
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyInstallBundlePermission()) {
@@ -69,13 +69,13 @@ int32_t QuickFixManagerService::ApplyQuickFix(const std::vector<std::string> &qu
 
     auto bundleQfMgr = QuickFixUtil::GetBundleQuickFixMgrProxy();
     if (bundleQfMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Bundle quick fix manager is nullptr");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null bundleQfMgr");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
     auto appMgr = QuickFixUtil::GetAppManagerProxy();
     if (appMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "App manager is nullptr");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null appMgr");
         return QUICK_FIX_CONNECT_FAILED;
     }
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr, appMgr, eventHandler_, this);
@@ -91,7 +91,7 @@ int32_t QuickFixManagerService::GetApplyedQuickFixInfo(const std::string &bundle
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::QUICKFIX, "called");
     if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "The caller is not system-app, can not use system-api");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "caller not system-app,not use system-api");
         return QUICK_FIX_NOT_SYSTEM_APP;
     }
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission()) {
@@ -100,14 +100,14 @@ int32_t QuickFixManagerService::GetApplyedQuickFixInfo(const std::string &bundle
 
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Failed to get bundle manager helper");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null bundleMgrHelper");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
     AppExecFwk::BundleInfo bundleInfo;
     if (!bundleMgrHelper->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
         AppExecFwk::Constants::ANY_USERID)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Get bundle info failed!");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "get bundleInfo failed");
         return QUICK_FIX_GET_BUNDLE_INFO_FAILED;
     }
 
@@ -123,7 +123,7 @@ int32_t QuickFixManagerService::RevokeQuickFix(const std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::QUICKFIX, "called");
     if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "The caller is not system-app, can not use system-api");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "caller not system-app, not use system-api");
         return QUICK_FIX_NOT_SYSTEM_APP;
     }
 
@@ -134,7 +134,7 @@ int32_t QuickFixManagerService::RevokeQuickFix(const std::string &bundleName)
     }
 
     if (CheckTaskRunningState(bundleName)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Has a apply quick fix task");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "apply quick fix task");
         return QUICK_FIX_DEPLOYING_TASK;
     }
 
@@ -142,25 +142,25 @@ int32_t QuickFixManagerService::RevokeQuickFix(const std::string &bundleName)
     auto isSoContained = false;
     auto ret = GetQuickFixInfo(bundleName, patchExists, isSoContained);
     if (ret != QUICK_FIX_OK || !patchExists) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Get bundle info failed or patch does not exist");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "get bundle info failed/patch not exist");
         return QUICK_FIX_GET_BUNDLE_INFO_FAILED;
     }
 
     auto appMgr = QuickFixUtil::GetAppManagerProxy();
     if (appMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "App manager is nullptr");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null appMgr");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
     auto bundleQfMgr = QuickFixUtil::GetBundleQuickFixMgrProxy();
     if (bundleQfMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Bundle quick fix manager is nullptr");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null bundleQfMgr");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr, appMgr, eventHandler_, this);
     if (applyTask == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Task connect failed");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null applyTask");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
@@ -205,7 +205,7 @@ int32_t QuickFixManagerService::GetQuickFixInfo(const std::string &bundleName, b
 {
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Failed to get bundle manager helper");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null bundleMgrHelper");
         return QUICK_FIX_CONNECT_FAILED;
     }
 

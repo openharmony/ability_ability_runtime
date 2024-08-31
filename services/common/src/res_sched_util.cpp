@@ -131,7 +131,7 @@ void ResSchedUtil::GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPi
         }
     }
     if (frozenPids.empty()) {
-        TAG_LOGW(AAFwkTag::DEFAULT, "Get frozen pids empty");
+        TAG_LOGW(AAFwkTag::DEFAULT, "empty frozen pids");
     }
 #endif
 }
