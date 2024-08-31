@@ -37,13 +37,13 @@
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "js_utils.h"
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 #include "js_window_stage.h"
-#include "scene_board_judgement.h"
 #endif
 #include "napi_common_configuration.h"
 #include "napi_common_want.h"
 #include "napi_remote_object.h"
+#include "scene_board_judgement.h"
 #include "string_wrapper.h"
 #include "system_ability_definition.h"
 #include "time_util.h"
@@ -57,9 +57,7 @@ const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.
 const std::string METHOD_NAME = "WindowScene::GoForeground";
 #endif
 // Numerical base (radix) that determines the valid characters and their interpretation.
-#ifdef SUPPORT_SCREEN
 const int32_t BASE_DISPLAY_ID_NUM (10);
-#endif
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
 
@@ -159,7 +157,7 @@ JsUIAbility::~JsUIAbility()
 
     jsRuntime_.FreeNativeReference(std::move(jsAbilityObj_));
     jsRuntime_.FreeNativeReference(std::move(shellContextRef_));
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     jsRuntime_.FreeNativeReference(std::move(jsWindowStageObj_));
 #endif
 }
@@ -464,7 +462,7 @@ void JsUIAbility::OnStopCallback()
     }
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 void JsUIAbility::OnSceneCreated()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1207,7 +1205,7 @@ void JsUIAbility::OnNewWant(const Want &want)
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     UIAbility::OnNewWant(want);
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (scene_) {
         scene_->OnNewWant(want);
     }
@@ -1555,7 +1553,7 @@ sptr<IRemoteObject> JsUIAbility::SetNewRuleFlagToCallee(napi_env env, napi_value
     }
     return remoteObj;
 }
-#ifdef SUPPORT_SCREEN
+
 void JsUIAbility::UpdateJsWindowStage(napi_value windowStage)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
@@ -1577,7 +1575,7 @@ void JsUIAbility::UpdateJsWindowStage(napi_value windowStage)
     TAG_LOGD(AAFwkTag::UIABILITY, "set context windowStage");
     napi_set_named_property(env, contextObj, "windowStage", windowStage);
 }
-#endif
+
 bool JsUIAbility::CheckSatisfyTargetAPIVersion(int32_t version)
 {
     auto applicationInfo = GetApplicationInfo();

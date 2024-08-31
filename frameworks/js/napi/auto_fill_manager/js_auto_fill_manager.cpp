@@ -95,7 +95,6 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
 void JsAutoFillManager::OnRequestAutoSaveInner(napi_env env, int32_t instanceId,
     const std::shared_ptr<JsAutoSaveRequestCallback> &saveRequestCallback)
 {
-#ifdef SUPPORT_GRAPHICS
     auto uiContent = Ace::UIContent::GetUIContent(instanceId);
     if (uiContent == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null uiContent");
@@ -116,7 +115,6 @@ void JsAutoFillManager::OnRequestAutoSaveInner(napi_env env, int32_t instanceId,
         std::lock_guard<std::mutex> lock(mutexLock_);
         saveRequestObject_.emplace(instanceId, saveRequestCallback);
     }
-#endif // SUPPORT_GRAPHICS
 }
 
 std::shared_ptr<JsAutoSaveRequestCallback> JsAutoFillManager::GetCallbackByInstanceId(int32_t instanceId)

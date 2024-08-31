@@ -20,7 +20,7 @@
 #include "hilog_tag_wrapper.h"
 #include "js_runtime_utils.h"
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 #include "pixel_map_napi.h"
 #endif
 
@@ -148,7 +148,7 @@ void JsMissionListener::CallJsFunction(
     napi_call_function(env_, obj, method, argc, argv, &callResult);
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 void JsMissionListener::OnMissionIconUpdated(int32_t missionId, const std::shared_ptr<Media::PixelMap> &icon)
 {
     TAG_LOGD(AAFwkTag::MISSION, "missionId: %{public}d", missionId);

@@ -67,7 +67,7 @@ int MissionListenerStub::OnMissionUnfocusedInner(MessageParcel &data, MessagePar
 
 int MissionListenerStub::OnMissionIconUpdatedInner(MessageParcel &data, MessageParcel &reply)
 {
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     auto missionId = data.ReadInt32();
     std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
     OnMissionIconUpdated(missionId, icon);

@@ -24,7 +24,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-#ifdef SUPPORT_GRAPHICS
 const std::string WANT_PARAMS_EXTENSION_TYPE = "autoFill/password";
 const std::string WANT_PARAMS_SMART_EXTENSION_TYPE = "autoFill/smart";
 const std::string AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
@@ -36,9 +35,7 @@ constexpr static char WANT_PARAMS_AUTO_FILL_TYPE_KEY[] = "ability.want.params.Au
 constexpr static char AUTO_FILL_MANAGER_THREAD[] = "AutoFillManager";
 constexpr static uint32_t AUTO_FILL_REQUEST_TIME_OUT_VALUE = 1000;
 constexpr static uint32_t AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID = 0;
-#endif //SUPPORT_GRAPHICS
 } // namespace
-#ifdef SUPPORT_GRAPHICS
 AutoFillManager &AutoFillManager::GetInstance()
 {
     static AutoFillManager instance;
@@ -348,6 +345,5 @@ bool AutoFillManager::IsPreviousRequestFinished(Ace::UIContent *uiContent)
     }
     return true;
 }
-#endif // SUPPORT_GRAPHICS
 } // namespace AbilityRuntime
 } // namespace OHOS

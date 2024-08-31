@@ -240,7 +240,6 @@ void JsUIExtension::OnStart(const AAFwk::Want &want)
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     Extension::OnStart(want);
     auto context = GetContext();
-#ifdef SUPPORT_GRAPHICS
     if (context != nullptr) {
         int32_t  displayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
         displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, displayId);
@@ -248,7 +247,6 @@ void JsUIExtension::OnStart(const AAFwk::Want &want)
         auto configUtils = std::make_shared<ConfigurationUtils>();
         configUtils->InitDisplayConfig(displayId, context->GetConfiguration(), context->GetResourceManager());
     }
-#endif // SUPPORT_GRAPHICS
 
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
@@ -686,11 +684,9 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
             CallObjectMethod("onSessionCreate", argv, ARGC_TWO);
         }
         uiWindowMap_[compId] = uiWindow;
-#ifdef SUPPORT_GRAPHICS
         if (context->GetWindow() == nullptr) {
             context->SetWindow(uiWindow);
         }
-#endif // SUPPORT_GRAPHICS
     }
     return true;
 }
@@ -796,7 +792,6 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
         uiWindow->Destroy();
     }
     uiWindowMap_.erase(componentId);
-#ifdef SUPPORT_GRAPHICS
     auto context = GetContext();
     if (context != nullptr && context->GetWindow() == uiWindow) {
         context->SetWindow(nullptr);
@@ -805,7 +800,6 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
             break;
         }
     }
-#endif // SUPPORT_GRAPHICS
     foregroundWindows_.erase(componentId);
     contentSessions_.erase(componentId);
     if (abilityResultListeners_) {

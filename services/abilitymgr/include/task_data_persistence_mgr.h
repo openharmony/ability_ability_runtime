@@ -77,7 +77,7 @@ public:
      */
     bool SaveMissionSnapshot(int missionId, const MissionSnapshot& snapshot);
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     /**
      * @brief Get the Snapshot object
      * @param missionId Indicates this mission id.

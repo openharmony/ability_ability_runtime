@@ -541,7 +541,7 @@ public:
 
     bool GetRecoveryInfo();
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     /**
      * check whether the ability 's window is attached.
      *
@@ -1113,7 +1113,7 @@ private:
 
     void SetDebugAppByWaitingDebugFlag();
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
     void SetShowWhenLocked(const AppExecFwk::AbilityInfo &abilityInfo, sptr<AbilityTransitionInfo> &info) const;
     void SetAbilityTransitionInfo(const AppExecFwk::AbilityInfo &abilityInfo,
@@ -1245,7 +1245,7 @@ private:
     mutable ffrt::mutex sessionLock_;
     std::map<uint64_t, AbilityWindowState> abilityWindowStateMap_;
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     bool isStartingWindow_ = false;
     uint32_t bgColor_ = 0;
     std::shared_ptr<Media::PixelMap> startingWindowBg_ = nullptr;

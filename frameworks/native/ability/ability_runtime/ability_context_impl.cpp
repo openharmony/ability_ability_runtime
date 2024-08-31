@@ -25,13 +25,11 @@
 #include "hilog_tag_wrapper.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
+#include "scene_board_judgement.h"
+#include "session/host/include/zidl/session_interface.h"
 #include "session_info.h"
 #include "string_wrapper.h"
-#ifdef SUPPORT_SCREEN
-#include "session/host/include/zidl/session_interface.h"
-#include "scene_board_judgement.h"
 #include "ui_content.h"
-#endif // SUPPORT_SCREEN
 #include "want_params_wrapper.h"
 
 namespace OHOS {
@@ -314,7 +312,6 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     isTerminating_.store(true);
-#ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sessionToken = GetSessionToken();
         if (sessionToken == nullptr) {
@@ -332,11 +329,6 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
         TAG_LOGI(AAFwkTag::CONTEXT, "ret=%{public}d", err);
         return err;
     }
-#else
-    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, resultCode, &want);
-    TAG_LOGI(AAFwkTag::CONTEXT, "ret=%{public}d", err);
-    return err;
-#endif
 }
 
 ErrCode AbilityContextImpl::BackToCallerAbilityWithResult(const AAFwk::Want& want, int resultCode, int64_t requestCode)
@@ -529,9 +521,7 @@ ErrCode AbilityContextImpl::OnBackPressedCallBack(bool &needMoveToBackground)
         TAG_LOGE(AAFwkTag::CONTEXT, "null abilityCallback");
         return ERR_INVALID_VALUE;
     }
-#ifdef SUPPORT_SCREEN
     needMoveToBackground = abilityCallback->OnBackPress();
-#endif
     return ERR_OK;
 }
 
@@ -563,7 +553,7 @@ ErrCode AbilityContextImpl::TerminateSelf()
     if (sessionToken == nullptr) {
         TAG_LOGW(AAFwkTag::CONTEXT, "null sessionToken");
     }
-#ifdef SUPPORT_SCREEN
+
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
         TAG_LOGI(AAFwkTag::CONTEXT, "terminateSelf SCB");
         AAFwk::Want resultWant;
@@ -581,14 +571,6 @@ ErrCode AbilityContextImpl::TerminateSelf()
         }
         return err;
     }
-#else
-    AAFwk::Want resultWant;
-    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, &resultWant);
-    if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "failed %{public}d", err);
-    }
-    return err;
-#endif
 }
 
 ErrCode AbilityContextImpl::CloseAbility()
@@ -660,7 +642,6 @@ void AbilityContextImpl::RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbil
 ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want, RequestDialogResultTask &&task)
 {
     want.SetParam(RequestConstants::REQUEST_TOKEN_KEY, token_);
-#ifdef SUPPORT_SCREEN
     int32_t left;
     int32_t top;
     int32_t width;
@@ -670,7 +651,6 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_TOP_KEY, top);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_WIDTH_KEY, width);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_HEIGHT_KEY, height);
-#endif // SUPPORT_SCREEN
     auto resultTask =
         [env, outTask = std::move(task)](int32_t resultCode, const AAFwk::Want &resultWant) {
         auto retData = new RequestResult();
@@ -803,7 +783,6 @@ void AbilityContextImpl::RemoveResultCallbackTask(int requestCode)
     resultCallbacks_.erase(requestCode);
 }
 
-#ifdef SUPPORT_SCREEN
 void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "call");
@@ -812,7 +791,7 @@ void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &wid
         abilityCallback->GetWindowRect(left, top, width, height);
     }
 }
-#endif // SUPPORT_SCREEN
+
 void AbilityContextImpl::RegisterAbilityLifecycleObserver(
     const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer)
 {
@@ -837,7 +816,7 @@ void AbilityContextImpl::UnregisterAbilityLifecycleObserver(
     abilityCallback->UnregisterAbilityLifecycleObserver(observer);
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 ErrCode AbilityContextImpl::SetMissionLabel(const std::string& label)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "label:%{public}s", label.c_str());

@@ -22,9 +22,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ohos_application.h"
-#ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
-#endif // SUPPORT_SCREEN
 #include "time_util.h"
 #include "values_bucket.h"
 
@@ -55,7 +53,7 @@ void AbilityImpl::Init(const std::shared_ptr<OHOSApplication> &application,
     handler_ = handler;
     auto info = record->GetAbilityInfo();
     isStageBasedModel_ = info && info->isStageBasedModel;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (info && info->type == AbilityType::PAGE) {
         ability_->SetSceneListener(sptr<WindowLifeCycleImpl>(new WindowLifeCycleImpl(token_, shared_from_this())));
     }
@@ -74,7 +72,7 @@ void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
         TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
         return;
     }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if ((ability_->GetAbilityInfo()->type == AbilityType::PAGE) &&
         (!ability_->GetAbilityInfo()->isStageBasedModel)) {
         ability_->HandleCreateAsContinuation(want);
@@ -87,7 +85,7 @@ void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 #endif
     TAG_LOGD(AAFwkTag::ABILITY, "called");
     ability_->OnStart(want, sessionInfo);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if ((ability_->GetAbilityInfo()->type == AppExecFwk::AbilityType::PAGE) &&
         (ability_->GetAbilityInfo()->isStageBasedModel)) {
         lifecycleState_ = AAFwk::ABILITY_STATE_STARTED_NEW;
@@ -98,7 +96,7 @@ void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
         } else {
             lifecycleState_ = AAFwk::ABILITY_STATE_INACTIVE;
         }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     }
 #endif
 
@@ -159,14 +157,14 @@ void AbilityImpl::StopCallback()
         TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
         return;
     }
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if ((ability_->GetAbilityInfo()->type == AppExecFwk::AbilityType::PAGE) &&
         (ability_->GetAbilityInfo()->isStageBasedModel)) {
         lifecycleState_ = AAFwk::ABILITY_STATE_STOPED_NEW;
     } else {
 #endif
         lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     }
 #endif
     ability_->DestroyInstance(); // Release window and ability.
@@ -181,7 +179,7 @@ void AbilityImpl::Active()
     }
 
     ability_->OnActive();
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if ((lifecycleState_ == AAFwk::ABILITY_STATE_INACTIVE) && (ability_->GetAbilityInfo()->type == AbilityType::PAGE)) {
         ability_->OnTopActiveAbilityChanged(true);
         ability_->OnWindowFocusChanged(true);
@@ -200,7 +198,7 @@ void AbilityImpl::Inactive()
     }
 
     ability_->OnInactive();
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if ((lifecycleState_ == AAFwk::ABILITY_STATE_ACTIVE) && (ability_->GetAbilityInfo()->type == AbilityType::PAGE)) {
         ability_->OnTopActiveAbilityChanged(false);
         ability_->OnWindowFocusChanged(false);
@@ -294,7 +292,7 @@ void AbilityImpl::CommandAbility(const Want &want, bool restart, int startId)
     ability_->OnCommand(want, restart, startId);
     lifecycleState_ = AAFwk::ABILITY_STATE_ACTIVE;
 }
-#ifdef SUPPORT_SCREEN
+
 bool AbilityImpl::PrepareTerminateAbility()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "call");
@@ -306,7 +304,7 @@ bool AbilityImpl::PrepareTerminateAbility()
     TAG_LOGD(AAFwkTag::ABILITY, "end, ret = %{public}d", ret);
     return ret;
 }
-#endif
+
 int AbilityImpl::GetCurrentState()
 {
     return lifecycleState_;
@@ -334,7 +332,7 @@ void AbilityImpl::NewWant(const Want &want)
     }
     ability_->SetWant(want);
     ability_->OnNewWant(want);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     ability_->ContinuationRestore(want);
 #endif
     TAG_LOGD(AAFwkTag::ABILITY, "end");
@@ -549,7 +547,7 @@ void AbilityImpl::NotifyMemoryLevel(int32_t level)
     ability_->OnMemoryLevel(level);
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 void AbilityImpl::AfterUnFocused()
 {
     AfterFocusedCommon(false);

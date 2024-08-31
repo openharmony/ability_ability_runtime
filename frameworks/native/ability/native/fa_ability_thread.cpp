@@ -200,7 +200,7 @@ void FAAbilityThread::CreateExtensionAbilityNameSupportGraphics(
     if (abilityInfo->formEnabled || abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FORM) {
         abilityName = FORM_EXTENSION;
     }
-
+#endif
     if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
         if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SHARE) {
             abilityName = SHARE_EXTENSION;
@@ -220,7 +220,6 @@ void FAAbilityThread::CreateExtensionAbilityNameSupportGraphics(
         abilityInfo->type == AppExecFwk::AbilityType::EXTENSION) {
         abilityName = abilityInfo->extensionTypeName + CUSTOM_EXTENSION;
     }
-#endif
 }
 
 std::shared_ptr<AppExecFwk::ContextDeal> FAAbilityThread::CreateAndInitContextDeal(
@@ -1367,7 +1366,7 @@ void FAAbilityThread::DumpAbilityInfo(const std::vector<std::string> &params, st
     abilityHandler_->PostTask(task, "FAAbilityThread:DumpAbilityInfo");
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 void FAAbilityThread::DumpAbilityInfoInner(const std::vector<std::string> &params, std::vector<std::string> &info)
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
@@ -1484,7 +1483,7 @@ void FAAbilityThread::HandlePrepareTermianteAbility()
     isPrepareTerminateAbilityDone_.store(true);
     cv_.notify_all();
 }
-#ifdef SUPPORT_SCREEN
+
 int FAAbilityThread::CreateModalUIExtension(const Want &want)
 {
     TAG_LOGD(AAFwkTag::FA, "Call");
@@ -1494,16 +1493,14 @@ int FAAbilityThread::CreateModalUIExtension(const Want &want)
     }
     return currentAbility_->CreateModalUIExtension(want);
 }
-#endif //SUPPORT_SCREEN
+
 void FAAbilityThread::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
 {
     if (currentAbility_ == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "current ability is nullptr");
         return;
     }
-#ifdef SUPPORT_SCREEN
     currentAbility_->UpdateSessionToken(sessionToken);
-#endif //SUPPORT_SCREEN
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

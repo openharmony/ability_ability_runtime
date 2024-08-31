@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-#ifdef SUPPORT_GRAPHICS
 constexpr const char* WANT_PARAMS_VIEW_DATA_KEY = "ohos.ability.params.viewData";
 constexpr const char* WANT_PARAMS_AUTO_FILL_CMD_KEY = "ohos.ability.params.autoFillCmd";
 constexpr const char* WANT_PARAMS_FILL_CONTENT = "ohos.ability.params.fillContent";
@@ -39,10 +38,8 @@ constexpr const char* WANT_PARAMS_EXTENSION_TYPE = "autoFill/password";
 constexpr const char* WANT_PARAMS_SMART_EXTENSION_TYPE = "autoFill/smart";
 constexpr const char* WANT_PARAMS_AUTO_FILL_TYPE_KEY = "ability.want.params.AutoFillType";
 constexpr const char* WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY = "ohos.ability.params.popupWindow";
-#endif // SUPPORT_GRAPHICS
 } // namespace
 
-#ifdef SUPPORT_GRAPHICS
 AutoFillExtensionCallback::AutoFillExtensionCallback()
 {
     callbackId_ = GenerateCallbackId();
@@ -385,6 +382,5 @@ void AutoFillExtensionCallback::CloseUIExtension()
     }
     SetModalUIExtensionProxy(nullptr);
 }
-#endif // SUPPORT_GRAPHICS
 } // namespace AbilityRuntime
 } // namespace OHOS

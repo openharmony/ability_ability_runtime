@@ -512,11 +512,9 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
             return false;
         }
         uiWindowMap_[componentId] = uiWindow;
-#ifdef SUPPORT_GRAPHICS
         if (context_->GetWindow() == nullptr) {
             context_->SetWindow(uiWindow);
         }
-#endif // SUPPORT_GRAPHICS
     }
     return true;
 }
