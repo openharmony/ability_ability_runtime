@@ -4272,11 +4272,30 @@ void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(const int64_t eventI
     appRecord->ResetNewProcessRequestId();
 }
 
-int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, const int32_t userId)
+void AppMgrServiceInner::DealMultiUserConfig(const Configuration &config, const int32_t userId)
 {
     if (userId != -1) {
         multiUserConfigurationMgr_->Insert(userId, config);
+    } else if (GetUserIdByUid(IPCSkeleton::GetCallingUid()) > 0) {
+        Configuration configTmp;
+        if (!config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE).empty()) {
+            configTmp.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+                config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
+        }
+        if (!config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE).empty()) {
+            configTmp.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE,
+                config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE));
+        }
+        if (!config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE).empty()) {
+            configTmp.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE,
+                config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE));
+        }
+        multiUserConfigurationMgr_->Insert(GetUserIdByUid(IPCSkeleton::GetCallingUid()), configTmp);
     }
+}
+
+int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, const int32_t userId)
+{
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is null");
@@ -4287,7 +4306,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     if (ret != ERR_OK) {
         return ret;
     }
-
+    DealMultiUserConfig(config, userId);
     std::vector<std::string> changeKeyV;
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "configuration_->CompareDifferent");
