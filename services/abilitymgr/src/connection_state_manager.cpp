@@ -399,7 +399,7 @@ std::shared_ptr<ConnectionStateItem> ConnectionStateManager::RemoveDiedCaller(in
     std::lock_guard<ffrt::mutex> guard(stateLock_);
     auto it = connectionStates_.find(callerPid);
     if (it == connectionStates_.end()) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "callerPid:%{public}d.", callerPid);
+        TAG_LOGW(AAFwkTag::CONNECTION, "callerPid:%{public}d", callerPid);
         return nullptr;
     }
     auto stateItem = it->second;
@@ -542,7 +542,7 @@ void ConnectionStateManager::InitAppStateObserver()
     });
     int32_t err = appManager->RegisterApplicationStateObserver(appStateObserver_);
     if (err != 0) {
-        TAG_LOGE(AAFwkTag::CONNECTION, "register to appmanager err:%{public}d", err);
+        TAG_LOGE(AAFwkTag::CONNECTION, "register to appmgr err:%{public}d", err);
         appStateObserver_ = nullptr;
         return;
     }
