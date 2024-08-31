@@ -68,7 +68,7 @@ void RenderStateObserverManager::HandleRegisterRenderStateObserver(const sptr<IR
                 }
             });
         if (deathRecipient_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "New RenderStateObserverManager failed");
+            TAG_LOGE(AAFwkTag::APPMGR, "RenderStateObserverManager failed");
         }
     }
 
@@ -170,7 +170,7 @@ RenderStateData RenderStateObserverManager::WrapRenderStateData(const std::share
 
 void RenderStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "OnObserverDied begin");
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
     auto remoteObj = remote.promote();
     if (remoteObj == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
@@ -190,7 +190,7 @@ RenderStateObserverRecipient::~RenderStateObserverRecipient()
 
 void RenderStateObserverRecipient::OnRemoteDied(const wptr<IRemoteObject> &__attribute__((unused)) remote)
 {
-    TAG_LOGE(AAFwkTag::APPMGR, "RenderStateObserverRecipient died");
+    TAG_LOGE(AAFwkTag::APPMGR, "call");
     if (handler_) {
         handler_(remote);
     }

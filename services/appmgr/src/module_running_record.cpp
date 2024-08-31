@@ -182,7 +182,7 @@ void ModuleRunningRecord::OnAbilityStateChanged(
     AbilityState oldState = ability->GetState();
     ability->SetState(state);
     TAG_LOGI(AAFwkTag::APPMGR,
-        "Ability state change from %{public}d to %{public}d. bundle: %{public}s, ability: %{public}s.", oldState, state,
+        "change from %{public}d to %{public}d. bundle: %{public}s, ability: %{public}s.", oldState, state,
         ability->GetAbilityInfo()->bundleName.c_str(), ability->GetName().c_str());
     auto serviceInner = appMgrServiceInner_.lock();
     if (serviceInner) {
@@ -205,7 +205,7 @@ void ModuleRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningReco
         appLifeCycleDeal_->LaunchAbility(ability);
         ability->SetState(AbilityState::ABILITY_STATE_READY);
     } else {
-        TAG_LOGE(AAFwkTag::APPMGR, "Can not find ability or get appThread");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread or ability");
     }
 }
 

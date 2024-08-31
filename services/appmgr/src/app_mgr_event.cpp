@@ -30,7 +30,7 @@ int32_t AppMgrEventUtil::GetCallerPid(const std::shared_ptr<AppRunningRecord> &c
     }
 
     if (!callerAppRecord->GetPriorityObject()) {
-        TAG_LOGW(AAFwkTag::APPMGR, "null callerAppRecord's priorityObject");
+        TAG_LOGW(AAFwkTag::APPMGR, "null priorityObject");
         return IPCSkeleton::GetCallingPid();
     }
     
@@ -95,7 +95,7 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
         auto abilityinfo = appRecord->GetAbilities().begin()->second->GetAbilityInfo();
         UpdateStartupType(abilityinfo, eventInfo.abilityType, eventInfo.extensionType);
     } else {
-        TAG_LOGI(AAFwkTag::APPMGR, "Abilities null");
+        TAG_LOGI(AAFwkTag::APPMGR, "abilities failed");
     }
     if (!callerAppRecord) {
         Security::AccessToken::NativeTokenInfo nativeTokenInfo = {};
@@ -119,7 +119,7 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
     }
     eventInfo.processName = appRecord->GetProcessName();
     if (!appRecord->GetPriorityObject()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord's priorityObject");
+        TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
     } else {
         eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     }
@@ -145,7 +145,7 @@ bool AppMgrEventUtil::SendProcessStartFailedEvent(std::shared_ptr<AppRunningReco
         auto abilityinfo = appRecord->GetAbilities().begin()->second->GetAbilityInfo();
         UpdateStartupType(abilityinfo, eventInfo.abilityType, eventInfo.extensionType);
     } else {
-        TAG_LOGI(AAFwkTag::APPMGR, "Abilities nullptr");
+        TAG_LOGI(AAFwkTag::APPMGR, "abilities failed");
     }
     if (!callerAppRecord) {
         Security::AccessToken::NativeTokenInfo nativeTokenInfo = {};
@@ -170,7 +170,7 @@ bool AppMgrEventUtil::SendProcessStartFailedEvent(std::shared_ptr<AppRunningReco
     eventInfo.processName = appRecord->GetProcessName();
     eventInfo.processType = static_cast<int32_t>(appRecord->GetProcessType());
     if (!appRecord->GetPriorityObject()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord's priorityObject");
+        TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
     } else {
         eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     }

@@ -58,7 +58,7 @@ int32_t AppRunningStatusModule::UnregisterListener(const sptr<AppRunningStatusLi
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (listener == nullptr || listener->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "input param invalid");
+        TAG_LOGE(AAFwkTag::APPMGR, "input invalid");
         return ERR_INVALID_VALUE;
     }
 

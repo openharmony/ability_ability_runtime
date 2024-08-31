@@ -32,7 +32,7 @@ void WindowVisibilityChangedListener::OnWindowVisibilityChanged(
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (windowVisibilityInfos.empty()) {
-        TAG_LOGW(AAFwkTag::APPMGR, "WindowVisibilityInfo is empty");
+        TAG_LOGW(AAFwkTag::APPMGR, "windowVisibilityInfo is empty");
         return;
     }
 
@@ -44,7 +44,7 @@ void WindowVisibilityChangedListener::OnWindowVisibilityChanged(
     auto task = [inner = appServiceInner_, windowVisibilityInfos] {
         auto serviceInner = inner.lock();
         if (serviceInner == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "get app mgr service inner fail");
+            TAG_LOGE(AAFwkTag::APPMGR, "get fail");
             return;
         }
         serviceInner->HandleWindowVisibilityChanged(windowVisibilityInfos);

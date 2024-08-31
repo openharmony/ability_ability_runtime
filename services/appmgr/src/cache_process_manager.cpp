@@ -96,7 +96,7 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
         AddToApplicationSet(appRecord);
     }
     ShrinkAndKillCache();
-    TAG_LOGI(AAFwkTag::APPMGR, "Pending %{public}s success, %{public}s", appRecord->GetName().c_str(),
+    TAG_LOGI(AAFwkTag::APPMGR, "success, %{public}s", appRecord->GetName().c_str(),
         PrintCacheQueue().c_str());
     return true;
 }
@@ -162,13 +162,13 @@ bool CacheProcessManager::CheckAndNotifyCachedState(const std::shared_ptr<AppRun
             return false;
         }
         if (!appMgrSptr->IsAppProcessesAllCached(bundleName, uid, sameAppSet[bundleName][uid])) {
-            TAG_LOGI(AAFwkTag::APPMGR, "Not all processes is cached");
+            TAG_LOGI(AAFwkTag::APPMGR, "Not cache process");
             return false;
         }
         notifyRecord = *(sameAppSet[bundleName][uid].begin());
     }
     appMgrSptr->OnAppCacheStateChanged(notifyRecord, ApplicationState::APP_STATE_CACHED);
-    TAG_LOGI(AAFwkTag::APPMGR, "app cached state is notified: %{public}s, uid:%{public}d", bundleName.c_str(), uid);
+    TAG_LOGI(AAFwkTag::APPMGR, "notified: %{public}s, uid:%{public}d", bundleName.c_str(), uid);
     return true;
 }
 
