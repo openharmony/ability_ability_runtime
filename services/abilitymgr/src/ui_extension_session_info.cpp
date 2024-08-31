@@ -23,7 +23,7 @@ UIExtensionSessionInfo *UIExtensionSessionInfo::Unmarshalling(Parcel &parcel)
 {
     UIExtensionSessionInfo *info = new (std::nothrow) UIExtensionSessionInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Create ui extension session info failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "create info failed");
         return nullptr;
     }
     info->persistentId = parcel.ReadInt32();
@@ -35,17 +35,17 @@ UIExtensionSessionInfo *UIExtensionSessionInfo::Unmarshalling(Parcel &parcel)
 bool UIExtensionSessionInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteInt32(persistentId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write persistent id failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write persistentId failed");
         return false;
     }
 
     if (!parcel.WriteUint32(hostWindowId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write host window id failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write hostWindowId failed");
         return false;
     }
 
     if (!parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write uiExtensionUsage failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uiExtensionUsage failed");
         return false;
     }
 

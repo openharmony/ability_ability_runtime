@@ -29,7 +29,7 @@ UIExtensionAbilityConnectInfo *UIExtensionAbilityConnectInfo::Unmarshalling(Parc
 {
     UIExtensionAbilityConnectInfo *connectInfo = new (std::nothrow) UIExtensionAbilityConnectInfo();
     if (connectInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "New connect Info failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "new connect Info failed");
         return nullptr;
     }
 
@@ -43,12 +43,12 @@ UIExtensionAbilityConnectInfo *UIExtensionAbilityConnectInfo::Unmarshalling(Parc
 bool UIExtensionAbilityConnectInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(hostBundleName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write hostBundleName failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write hostBundleName failed");
         return false;
     }
 
     if (!parcel.WriteInt32(uiExtensionAbilityId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write uiExtensionAbilityId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uiExtensionAbilityId failed");
         return false;
     }
 

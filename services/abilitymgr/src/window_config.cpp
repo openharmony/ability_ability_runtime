@@ -25,7 +25,7 @@ WindowConfig *WindowConfig::Unmarshalling(Parcel &parcel)
 {
     WindowConfig *data = new (std::nothrow) WindowConfig();
     if (!data) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "data is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null data");
         return nullptr;
     }
     data->windowType = parcel.ReadInt32();
