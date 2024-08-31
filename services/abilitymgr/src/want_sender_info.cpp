@@ -36,7 +36,7 @@ bool WantSenderInfo::ReadFromParcel(Parcel &parcel)
     for (int32_t i = 0; i < wantsInfoSize; i++) {
         std::unique_ptr<WantsInfo> wantsInfo(parcel.ReadParcelable<WantsInfo>());
         if (!wantsInfo) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "wantsInfo is nullptr");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "null wantsInfo");
             return false;
         }
         allWants.emplace_back(*wantsInfo);
