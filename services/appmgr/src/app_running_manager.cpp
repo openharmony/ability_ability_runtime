@@ -421,7 +421,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
                 return false;
             });
         if (iter == appRunningRecordMap_.end()) {
-            TAG_LOGE(AAFwkTag::APPMGR, "remote is not exist");
+            TAG_LOGE(AAFwkTag::APPMGR, "remote not in map");
             return nullptr;
         }
         appRecord = iter->second;
@@ -434,7 +434,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
         }
         appRecord->RemoveAppDeathRecipient();
         appRecord->SetApplicationClient(nullptr);
-        TAG_LOGI(AAFwkTag::APPMGR, "processName: %{public}s", appRecord->GetProcessName().c_str());
+        TAG_LOGI(AAFwkTag::APPMGR, "pname: %{public}s", appRecord->GetProcessName().c_str());
         auto priorityObject = appRecord->GetPriorityObject();
         if (priorityObject != nullptr) {
             TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}d", priorityObject->GetPid());
@@ -705,7 +705,7 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
+        TAG_LOGE(AAFwkTag::APPMGR, "null");
         return ERR_INVALID_OPERATION;
     }
 
@@ -852,12 +852,12 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
         if (!appRecord) {
-            TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
+            TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
             continue;
         }
         auto priorityObject = appRecord->GetPriorityObject();
         if (!priorityObject) {
-            TAG_LOGW(AAFwkTag::APPMGR, "null priorityObject");
+            TAG_LOGW(AAFwkTag::APPMGR, "priorityObject null");
             continue;
         }
         auto pid = priorityObject->GetPid();
@@ -879,12 +879,12 @@ int32_t AppRunningManager::NotifyProcMemoryLevel(const std::map<pid_t, MemoryLev
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
         if (!appRecord) {
-            TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
+            TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
             continue;
         }
         auto priorityObject = appRecord->GetPriorityObject();
         if (!priorityObject) {
-            TAG_LOGW(AAFwkTag::APPMGR, "null priorityObject");
+            TAG_LOGW(AAFwkTag::APPMGR, "priorityObject null");
             continue;
         }
         auto pid = priorityObject->GetPid();

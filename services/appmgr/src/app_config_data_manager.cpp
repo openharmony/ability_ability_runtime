@@ -55,7 +55,7 @@ DistributedKv::Status AppConfigDataManager::GetKvStore()
 
     DistributedKv::Status status = dataManager_.GetSingleKvStore(options, APP_ID, STORE_ID, kvStorePtr_);
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPMGR, "return error is %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "error is %{public}d", status);
         return status;
     }
 
@@ -106,7 +106,7 @@ int32_t AppConfigDataManager::SetAppWaitingDebugInfo(const std::string &bundleNa
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPMGR, "insert error is %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "error is %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
@@ -131,7 +131,7 @@ int32_t AppConfigDataManager::ClearAppWaitingDebugInfo()
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPMGR, "delete error is %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "error is %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
@@ -156,7 +156,7 @@ int32_t AppConfigDataManager::GetAppWaitingDebugList(std::vector<std::string> &b
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPMGR, "get error is %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "error is %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
 

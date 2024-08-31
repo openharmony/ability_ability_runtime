@@ -185,7 +185,7 @@ void AppMgrService::AttachApplication(const sptr<IRemoteObject> &app)
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto appScheduler = iface_cast<IAppScheduler>(app);
     if (appScheduler == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null appScheduler");
+        TAG_LOGE(AAFwkTag::APPMGR, "appScheduler null");
     }
     std::function<void()> attachApplicationFunc = [appMgrServiceInner = appMgrServiceInner_, pid, appScheduler]() {
         appMgrServiceInner->AttachApplication(pid, appScheduler);
@@ -425,7 +425,7 @@ int AppMgrService::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
 int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     bool isCallingPermission =
@@ -618,7 +618,7 @@ int AppMgrService::FinishUserTest(const std::string &msg, const int64_t &resultC
             return ERR_INVALID_OPERATION;
         }
     } else {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetBundleName failed: %{public}d", result);
+        TAG_LOGE(AAFwkTag::APPMGR, "fail: %{public}d", result);
         return ERR_INVALID_OPERATION;
     }
     pid_t callingPid = IPCSkeleton::GetCallingPid();
@@ -935,7 +935,7 @@ int32_t AppMgrService::PreStartNWebSpawnProcess()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "PreStartNWebSpawnProcess");
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService not ready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
 
@@ -946,7 +946,7 @@ int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_
     int32_t sharedFd, int32_t crashFd, pid_t &renderPid, bool isGPU)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService not ready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
 
@@ -1457,7 +1457,7 @@ int32_t AppMgrService::SignRestartAppFlag(const std::string &bundleName)
     bool isCallingPermission =
         AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
     if (!isCallingPermission) {
-        TAG_LOGE(AAFwkTag::APPMGR, "verificationAllToken failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
     return appMgrServiceInner_->SignRestartAppFlag(bundleName);
