@@ -1015,16 +1015,6 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     }
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
     CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
-    if (sessionInfo->persistentId == 0) {
-        const auto &abilityInfo = abilityRequest.abilityInfo;
-        auto isStandard = abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD && !abilityRequest.startRecent;
-        if (!isStandard) {
-            (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->GetAbilitySessionId(
-                abilityInfo.applicationInfo.accessTokenId, abilityInfo.moduleName, abilityInfo.name,
-                sessionInfo->persistentId);
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "session id:%{public}d", sessionInfo->persistentId);
-        }
-    }
     sessionInfo->canStartAbilityFromBackground = true;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by rootSceneSession");
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
