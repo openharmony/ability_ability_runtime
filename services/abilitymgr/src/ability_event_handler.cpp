@@ -24,7 +24,7 @@ AbilityEventHandler::AbilityEventHandler(
     const std::shared_ptr<TaskHandlerWrap> &taskHandler, const std::weak_ptr<AbilityManagerService> &server)
     : EventHandlerWrap(taskHandler), server_(server)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Constructors.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "constructors");
 }
 
 void AbilityEventHandler::ProcessEvent(const EventWrap &event)
@@ -63,7 +63,7 @@ void AbilityEventHandler::ProcessEvent(const EventWrap &event)
             break;
         }
         default: {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "Unsupported timeout message.");
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "unsupported timeout message");
             break;
         }
     }
@@ -105,7 +105,7 @@ void AbilityEventHandler::ProcessInactiveTimeOut(int64_t abilityRecordId)
 
 void AbilityEventHandler::ProcessForegroundTimeOut(const EventWrap &event)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Foreground timeout.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "foreground timeout");
     auto server = server_.lock();
     CHECK_POINTER(server);
     if (event.GetRunCount() == 0) {
@@ -124,7 +124,7 @@ void AbilityEventHandler::ProcessForegroundTimeOut(const EventWrap &event)
 
 void AbilityEventHandler::ProcessShareDataTimeOut(int64_t uniqueId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ShareData timeout.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "shareData timeout");
     auto server = server_.lock();
     CHECK_POINTER(server);
     server->HandleShareDataTimeOut(uniqueId);

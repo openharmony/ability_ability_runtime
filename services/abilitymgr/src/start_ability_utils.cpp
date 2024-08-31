@@ -69,7 +69,7 @@ bool StartAbilityUtils::GetApplicationInfo(const std::string &bundleName, int32_
                 userId, appInfo)
         );
         if (!result) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "Get app info from bms failed: %{public}s", bundleName.c_str());
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "failed: %{public}s", bundleName.c_str());
             return false;
         }
     }
@@ -107,12 +107,12 @@ int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userI
     }
     CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);
     if (abilityInfo->status != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "unexpected abilityInfo status=%{public}d", abilityInfo->status);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unexpected abilityInfo status: %{public}d", abilityInfo->status);
         return abilityInfo->status;
     }
     if ((abilityInfo->abilityInfo).applicationInfo.appProvisionType !=
         AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "window options are not supported in non-app-provision mode.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "window options invalid");
         return ERR_NOT_IN_APP_PROVISION_MODE;
     }
     return ERR_OK;
@@ -131,7 +131,7 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
     const sptr<IRemoteObject> &callerToken, bool isExtension)
 {
     if (StartAbilityUtils::startAbilityInfo != nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "startAbilityInfo has been created");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "startAbilityInfo created");
     }
     // This is for special goal and could be removed later.
     auto element = want.GetElement();
@@ -165,7 +165,7 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
     }
 
     if (StartAbilityUtils::callerAbilityInfo != nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerAbilityInfo has been created");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "callerAbilityInfo created");
     }
     StartAbilityUtils::callerAbilityInfo = StartAbilityInfo::CreateCallerAbilityInfo(callerToken);
 
@@ -222,7 +222,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
                 abilityInfoFlag, userId, extensionInfos));
         }
         if (extensionInfos.size() <= 0) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Get extensionInfo failed");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionInfo empty");
             request->status = RESOLVE_ABILITY_ERR;
             return request;
         }
@@ -262,14 +262,14 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
             abilityInfoFlag, userId, extensionInfos));
     }
     if (extensionInfos.size() <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateStartExtensionInfo error. Get extension info failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionInfo empty");
         abilityInfo->status = RESOLVE_ABILITY_ERR;
         return abilityInfo;
     }
 
     AppExecFwk::ExtensionAbilityInfo extensionInfo = extensionInfos.front();
     if (extensionInfo.bundleName.empty() || extensionInfo.name.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionInfo empty.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionInfo empty");
         abilityInfo->status = RESOLVE_ABILITY_ERR;
         return abilityInfo;
     }
@@ -291,7 +291,7 @@ void StartAbilityInfo::FindExtensionInfo(const Want &want, int32_t flags, int32_
     IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
         flags, appIndex, extensionInfo, userId));
     if (extensionInfo.bundleName.empty() || extensionInfo.name.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionInfo empty.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "extensionInfo empty");
         abilityInfo->status = RESOLVE_ABILITY_ERR;
         return;
     }
@@ -313,7 +313,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateCallerAbilityInfo(cons
     }
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not find abilityRecord");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord empty");
         return nullptr;
     }
     auto request = std::make_shared<StartAbilityInfo>();

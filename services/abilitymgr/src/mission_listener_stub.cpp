@@ -71,7 +71,7 @@ int MissionListenerStub::OnMissionIconUpdatedInner(MessageParcel &data, MessageP
     OnMissionIconUpdated(missionId, icon);
     return NO_ERROR;
 #else
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "do not support OnMissionIconUpdated");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "not support OnMissionIconUpdated");
     return ERR_INVALID_STATE;
 #endif
 }
@@ -94,7 +94,7 @@ int MissionListenerStub::OnRemoteRequest(
     std::u16string descriptor = MissionListenerStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Local descriptor is not equal to remote");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "local descriptor not equal to remote");
         return ERR_INVALID_STATE;
     }
     if (code < IMissionListener::MISSION_LINSTENER_CMD_MAX && code >= 0) {
