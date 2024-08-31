@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "window_visibility_changed_listener.h"
+#include "window_pid_visibility_changed_listener.h"
 
 #include "app_mgr_service_inner.h"
 #include "hilog_tag_wrapper.h"
@@ -22,32 +22,33 @@ namespace OHOS {
 namespace AppExecFwk {
 #ifdef SUPPORT_SCREEN
 using namespace OHOS::Rosen;
-WindowVisibilityChangedListener::WindowVisibilityChangedListener(
+WindowPidVisibilityChangedListener::WindowPidVisibilityChangedListener(
     const std::weak_ptr<AppMgrServiceInner> &appInner, const std::shared_ptr<AAFwk::TaskHandlerWrap> &handler)
     : appServiceInner_(appInner), taskHandler_(handler)
 {}
 
-void WindowVisibilityChangedListener::OnWindowVisibilityChanged(
-    const std::vector<sptr<WindowVisibilityInfo>> &windowVisibilityInfos)
+void WindowPidVisibilityChangedListener::NotifyWindowPidVisibilityChanged(
+    const sptr<WindowPidVisibilityInfo>& windowPidVisibilityInfo)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    if (windowVisibilityInfos.empty()) {
-        TAG_LOGW(AAFwkTag::APPMGR, "windowVisibilityInfo is empty");
+    TAG_LOGI(AAFwkTag::APPMGR, "NotifyWindowPidVisibilityChanged called, pid:%{public}d, visibilityState:%{public}d.",
+        windowPidVisibilityInfo->pid_, static_cast<uint32_t>(windowPidVisibilityInfo->visibilityState_));
+    if (!windowPidVisibilityInfo) {
+        TAG_LOGW(AAFwkTag::APPMGR, "Window pid visibility info is empty.");
         return;
     }
 
     if (taskHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null taskHandler");
+        TAG_LOGE(AAFwkTag::APPMGR, "Task handler is nullptr.");
         return;
     }
 
-    auto task = [inner = appServiceInner_, windowVisibilityInfos] {
+    auto task = [inner = appServiceInner_, windowPidVisibilityInfo] {
         auto serviceInner = inner.lock();
         if (serviceInner == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "get fail");
+            TAG_LOGE(AAFwkTag::APPMGR, "Failed to get app mgr service inner.");
             return;
         }
-        serviceInner->HandleWindowVisibilityChanged(windowVisibilityInfos);
+        serviceInner->HandleWindowPidVisibilityChanged(windowPidVisibilityInfo);
     };
     taskHandler_->SubmitTask(task);
 }

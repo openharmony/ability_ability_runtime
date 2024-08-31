@@ -53,7 +53,7 @@ void MissionListenerProxy::OnMissionUnfocused(int32_t missionId)
 void MissionListenerProxy::OnMissionIconUpdated(int32_t missionId, const std::shared_ptr<Media::PixelMap> &icon)
 {
     if (!icon) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid mission icon.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid mission icon");
         return;
     }
 
@@ -63,23 +63,23 @@ void MissionListenerProxy::OnMissionIconUpdated(int32_t missionId, const std::sh
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "mission_listener_proxy, OnMissionIconUpdated,missionId:%{public}d", missionId);
     if (!data.WriteInterfaceToken(IMissionListener::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed when proxy call OnMissionIconUpdated.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token fail");
         return;
     }
 
     if (!data.WriteInt32(missionId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write missionId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write missionId fail");
         return;
     }
 
     if (!data.WriteParcelable(icon.get())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write icon failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write icon fail");
         return;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote null");
         return;
     }
     int error = remote->SendRequest(IMissionListener::ON_MISSION_ICON_UPDATED, data, reply, option);
@@ -109,18 +109,18 @@ void MissionListenerProxy::SendRequestCommon(int32_t missionId, IMissionListener
     TAG_LOGD(AAFwkTag::ABILITYMGR, "mission_listener_proxy, sendrequest, cmd:%{public}d, missionId:%{public}d", cmd,
         missionId);
     if (!data.WriteInterfaceToken(IMissionListener::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token fail");
         return;
     }
 
     if (!data.WriteInt32(missionId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write missionId error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write missionId error");
         return;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote null");
         return;
     }
     int error = remote->SendRequest(cmd, data, reply, option);

@@ -73,7 +73,7 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
 
     auto pendingWantManager = pendingWantManager_.lock();
     if (pendingWantManager == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "pendingWantManager is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null pendingWantManager");
         return ERR_INVALID_VALUE;
     }
 

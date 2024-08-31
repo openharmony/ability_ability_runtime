@@ -209,7 +209,7 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
     }
     std::shared_ptr<DialogCallerInfo> dialogCallerInfo = GetDialogCallerInfo(dialogSessionId);
     if (dialogCallerInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "dialog caller info is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "dialogCallerInfo null");
         ClearDialogContext(dialogSessionId);
         return ERR_INVALID_VALUE;
     }
@@ -227,7 +227,7 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
     sptr<IRemoteObject> callerToken = dialogCallerInfo->callerToken;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!abilityMgr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr null");
         return INNER_ERR;
     }
     int ret = abilityMgr->StartAbilityAsCaller(targetWant, callerToken, callerToken, dialogCallerInfo->userId,
@@ -293,7 +293,7 @@ int DialogSessionManager::CreateJumpModalDialog(AbilityRequest &abilityRequest, 
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, parameters,
         dialogAppInfos, false);
     if (dialogSessionId == "") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate dialog session record failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "generation failed");
         return ERR_INVALID_VALUE;
     }
 
@@ -320,7 +320,7 @@ int DialogSessionManager::CreateImplicitSelectorModalDialog(AbilityRequest &abil
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, sessionWant.GetParams(),
         dialogAppInfos, true);
     if (dialogSessionId == "") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate dialog session record failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "generation failed");
         return ERR_INVALID_VALUE;
     }
 
@@ -344,7 +344,7 @@ int DialogSessionManager::CreateCloneSelectorModalDialog(AbilityRequest &ability
     std::string dialogSessionId = GenerateDialogSessionRecordCommon(abilityRequest, userId, parameters,
         dialogAppInfos, true);
     if (dialogSessionId == "") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate dialog session record failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "generation failed");
         return ERR_INVALID_VALUE;
     }
 
@@ -365,14 +365,14 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
     }
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!callerRecord) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerRecord is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerRecord null");
         return ERR_INVALID_VALUE;
     }
 
     sptr<IRemoteObject> token;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!abilityMgr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr null");
         return INNER_ERR;
     }
     int ret = IN_PROCESS_CALL(abilityMgr->GetTopAbility(token));
@@ -404,7 +404,7 @@ int DialogSessionManager::HandleErmsResult(AbilityRequest &abilityRequest, int32
     }
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!abilityMgr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr null");
         return INNER_ERR;
     }
     (const_cast<Want &>(replaceWant)).RemoveParam("ecological_experience_original_target");
@@ -430,13 +430,13 @@ int32_t DialogSessionManager::HandleErmsResultBySCB(AbilityRequest &abilityReque
 bool DialogSessionManager::IsCreateCloneSelectorDialog(const std::string &bundleName, int32_t userId)
 {
     if (StartAbilityUtils::isWantWithAppCloneIndex) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "want with app clone index.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "want with app clone index");
         StartAbilityUtils::isWantWithAppCloneIndex = false;
         return false;
     }
     auto appIndexes = StartAbilityUtils::GetCloneAppIndexes(bundleName, userId);
     if (appIndexes.empty()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "The application do not create clone index.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "application not create clone index");
         return false;
     }
     return true;

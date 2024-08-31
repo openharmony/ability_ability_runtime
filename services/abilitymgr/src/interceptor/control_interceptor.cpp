@@ -34,10 +34,10 @@ ErrCode ControlInterceptor::DoProcess(AbilityInterceptorParam param)
     AppExecFwk::AppRunningControlRuleResult controlRule;
     if (CheckControl(param.want, param.userId, controlRule)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "The target application is intercpted. %{public}s", controlRule.controlMessage.c_str());
+            "app is intercepted %{public}s", controlRule.controlMessage.c_str());
 #ifdef SUPPORT_GRAPHICS
         if (!param.isWithUI || controlRule.controlWant == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start control want");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no control want");
             return AbilityUtil::EdmErrorType(controlRule.isEdm);
         }
         if (controlRule.controlWant->GetBoolParam(IS_FROM_PARENTCONTROL, false)) {
@@ -56,7 +56,7 @@ ErrCode ControlInterceptor::DoProcess(AbilityInterceptorParam param)
         int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*controlRule.controlWant,
             param.requestCode, param.userId));
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Control implicit start appgallery failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "start failed");
             return ret;
         }
 #endif
@@ -72,7 +72,7 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
     // get bms
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleMgrHelper");
         return false;
     }
 
@@ -80,14 +80,14 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
     std::string bundleName = want.GetBundle();
     auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
     if (appControlMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The appControlMgr is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appControlMgr");
         return false;
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "GetAppRunningControlRule");
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     if (identity == "") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get identity failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getId fail");
     }
     auto ret = appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule);
     if (ret == ERR_BUNDLE_MANAGER_PERMISSION_DENIED) {

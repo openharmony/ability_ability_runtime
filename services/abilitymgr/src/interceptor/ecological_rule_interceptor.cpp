@@ -70,7 +70,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     
     std::string supportErms = OHOS::system::GetParameter(ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE, "true");
     if (supportErms == "false") {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "erms between apps not supported");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "not support erms");
         return ERR_OK;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -91,7 +91,7 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     }
     std::string supportErms = OHOS::system::GetParameter(ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE, "true");
     if (supportErms == "false") {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "Erms between apps not supported");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "not support erms");
         return true;
     }
 
@@ -175,7 +175,7 @@ void EcologicalRuleInterceptor::GetEcologicalCallerInfo(const Want &want, ErmsCa
         std::string callerBundleName;
         ErrCode err = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callerInfo.uid, callerBundleName));
         if (err != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "Get callerBundleName failed,uid: %{public}d", callerInfo.uid);
+            TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "failed,uid: %{public}d", callerInfo.uid);
             return;
         }
         bool getCallerResult = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(callerBundleName,
