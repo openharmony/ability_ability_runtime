@@ -250,7 +250,7 @@ int32_t DataObsManagerProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
 
     int32_t ret = remote->SendRequest(code, data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest errorcode:%{public}d, ret:%{public}d.", code, ret);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest errorCode:%{public}d, ret:%{public}d", code, ret);
         return ret;
     }
     return NO_ERROR;

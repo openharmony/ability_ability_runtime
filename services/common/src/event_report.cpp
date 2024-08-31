@@ -338,7 +338,7 @@ void EventReport::SendKeyEvent(const EventName &eventName, HiSysEventType type, 
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    TAG_LOGI(AAFwkTag::DEFAULT, "name is %{public}s", name.c_str());
+    TAG_LOGI(AAFwkTag::DEFAULT, "name: %{public}s", name.c_str());
     switch (eventName) {
         case EventName::FA_SHOW_ON_LOCK:
         case EventName::START_PRIVATE_ABILITY:
@@ -409,7 +409,7 @@ void EventReport::SendAppForegroundEvent(const EventName &eventName, const Event
         EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
         EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
     if (ret != 0) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Write event fail: %{public}s, ret %{public}d", name.c_str(), ret);
+        TAG_LOGE(AAFwkTag::DEFAULT, "fail: %{public}s, ret %{public}d", name.c_str(), ret);
     }
 }
 
@@ -432,7 +432,7 @@ void EventReport::SendAppBackgroundEvent(const EventName &eventName, const Event
         EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
         EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
     if (ret != 0) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Write event fail: %{public}s, ret %{public}d", name.c_str(), ret);
+        TAG_LOGE(AAFwkTag::DEFAULT, "fail: %{public}s, ret %{public}d", name.c_str(), ret);
     }
 }
 

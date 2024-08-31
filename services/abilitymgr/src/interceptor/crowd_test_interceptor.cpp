@@ -30,13 +30,13 @@ ErrCode CrowdTestInterceptor::DoProcess(AbilityInterceptorParam param)
         return ERR_OK;
     }
     if (CheckCrowdtest(param.want, param.userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Crowdtest expired.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "expired");
 #ifdef SUPPORT_GRAPHICS
         if (param.isWithUI) {
             int ret = IN_PROCESS_CALL(AbilityUtil::StartAppgallery(param.want.GetBundle(), param.requestCode,
                 param.userId, ACTION_MARKET_CROWDTEST));
             if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "Crowdtest implicit start appgallery failed.");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "start appGallery failed");
                 return ret;
             }
         }
@@ -59,7 +59,7 @@ bool CrowdTestInterceptor::CheckCrowdtest(const Want &want, int32_t userId)
     int64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     if (appCrowdtestDeadline > 0 && appCrowdtestDeadline < now) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "The application is expired, expired time is %{public}s",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "expired time: %{public}s",
             std::to_string(appCrowdtestDeadline).c_str());
         return true;
     }
