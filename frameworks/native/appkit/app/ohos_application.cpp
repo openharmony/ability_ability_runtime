@@ -635,7 +635,6 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
-        
         auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
         if (autoStartupCallback != nullptr) {
             abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
@@ -1054,19 +1053,6 @@ bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRunti
         return false;
     }
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(level);
-    return true;
-}
-
-bool OHOSApplication::IsBackupExtension(const std::shared_ptr<AbilityInfo> &abilityInfo)
-{
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
-        return false;
-    }
-    if (abilityInfo->extensionAbilityType == ExtensionAbilityType::BACKUP) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Is backup extension");
-        return false;
-    }
     return true;
 }
 

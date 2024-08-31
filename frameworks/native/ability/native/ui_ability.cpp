@@ -201,7 +201,7 @@ void UIAbility::OnStop()
     (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(token_, abilityDisplayListener_);
     auto &&window = GetWindow();
     if (window != nullptr) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "UnregisterDisplayMoveListener"); 
+        TAG_LOGD(AAFwkTag::UIABILITY, "UnregisterDisplayMoveListener");
         window->UnregisterDisplayMoveListener(abilityDisplayMoveListener_);
     }
     // Call JS Func(onWindowStageDestroy) and Release the scene.
