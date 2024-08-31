@@ -83,9 +83,7 @@ static void SetShowOnLockScreenAsyncCompleteCB(napi_env env, napi_status status,
         TAG_LOGE(AAFwkTag::JSNAPI, "input param is nullptr");
         showOnLockScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
     } else {
-#ifdef SUPPORT_SCREEN
         showOnLockScreenCB->cbBase.ability->SetShowOnLockScreen(showOnLockScreenCB->isShow);
-#endif
     }
 
     napi_value callback = nullptr, undefined = nullptr, callResult = nullptr;
@@ -167,9 +165,7 @@ napi_value SetShowOnLockScreenPromise(napi_env env, ShowOnLockScreenCB *cbData)
                 TAG_LOGE(AAFwkTag::JSNAPI, "input param is nullptr");
                 showOnLockScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
             } else {
-#ifdef SUPPORT_SCREEN
                 showOnLockScreenCB->cbBase.ability->SetShowOnLockScreen(showOnLockScreenCB->isShow);
-#endif
             }
 
             napi_value result = GetCallbackErrorValue(env, showOnLockScreenCB->cbBase.errCode);
@@ -237,10 +233,8 @@ void SetDisplayOrientationExecuteCallbackWork(napi_env env, void *data)
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
-#ifdef SUPPORT_SCREEN
     int orientation = asyncCallbackInfo->param.paramArgs.GetIntValue("orientation");
     asyncCallbackInfo->ability->SetDisplayOrientation(orientation);
-#endif
     asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
 }
 
@@ -293,9 +287,7 @@ static void SetWakeUpScreenAsyncCompleteCB(napi_env env, napi_status status, voi
             setWakeUpScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
             break;
         }
-#ifdef SUPPORT_SCREEN
         setWakeUpScreenCB->cbBase.ability->SetWakeUpScreen(setWakeUpScreenCB->wakeUp);
-#endif
     } while (false);
 
     napi_value callback = nullptr;
@@ -383,9 +375,7 @@ napi_value SetWakeUpScreenPromise(napi_env env, SetWakeUpScreenCB *cbData)
                 TAG_LOGE(AAFwkTag::JSNAPI, "null ability");
                 setWakeUpScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
             } else {
-#ifdef SUPPORT_SCREEN
                 setWakeUpScreenCB->cbBase.ability->SetWakeUpScreen(setWakeUpScreenCB->wakeUp);
-#endif
             }
             napi_value result = GetCallbackErrorValue(env, setWakeUpScreenCB->cbBase.errCode);
             if (setWakeUpScreenCB->cbBase.errCode == NO_ERROR) {
@@ -3647,9 +3637,7 @@ napi_value NapiJsContext::OnSetShowOnLockScreen(napi_env env, napi_callback_info
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(NAPI_ERR_ACE_ABILITY), "get ability error"));
             return;
         }
-#ifdef SUPPORT_SCREEN
         obj->ability_->SetShowOnLockScreen(isShow);
-#endif
         task.Resolve(env, CreateJsUndefined(env));
     };
 
@@ -3683,9 +3671,7 @@ napi_value NapiJsContext::OnSetWakeUpScreen(napi_env env, napi_callback_info inf
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(NAPI_ERR_ACE_ABILITY), "get ability error"));
             return;
         }
-#ifdef SUPPORT_SCREEN
         obj->ability_->SetWakeUpScreen(wakeUp);
-#endif
         task.Resolve(env, CreateJsUndefined(env));
     };
 
@@ -3725,9 +3711,7 @@ napi_value NapiJsContext::OnSetDisplayOrientation(napi_env env, napi_callback_in
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(NAPI_ERR_ACE_ABILITY), "get ability error"));
             return;
         }
-#ifdef SUPPORT_SCREEN
         obj->ability_->SetDisplayOrientation(orientationData);
-#endif
         task.Resolve(env, CreateJsUndefined(env));
     };
 

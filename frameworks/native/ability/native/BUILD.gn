@@ -61,10 +61,7 @@ config("ability_config") {
   }
 
   if (ability_runtime_graphics) {
-    defines += [
-      "SUPPORT_GRAPHICS",
-      "SUPPORT_SCREEN",
-    ]
+    defines += [ "SUPPORT_GRAPHICS" ]
   }
 }
 
@@ -460,7 +457,6 @@ ohos_shared_library("insight_intent_executor") {
   ]
 
   external_deps = [
-    "ability_base:session_info",
     "ability_base:want",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
@@ -496,10 +492,7 @@ config("uiability_config") {
       "${windowmanager_path}/interfaces/innerkits/wm",
       "${windowmanager_path}/utils/include",
     ]
-    defines = [
-      "SUPPORT_GRAPHICS",
-      "SUPPORT_SCREEN",
-    ]
+    defines = [ "SUPPORT_GRAPHICS" ]
   }
 }
 
@@ -644,7 +637,6 @@ ohos_shared_library("ability_thread") {
   ]
 
   if (ability_runtime_graphics) {
-    defines = [ "SUPPORT_SCREEN" ]
     external_deps += [ "window_manager:libwm" ]
   }
 
@@ -1014,12 +1006,7 @@ ohos_shared_library("dialog_request_callback") {
     "hilog:libhilog",
     "ipc:ipc_core",
   ]
-  if (ability_runtime_graphics) {
-    defines = [
-      "SUPPORT_SCREEN",
-      "SUPPORT_GRAPHICS",
-    ]
-  }
+
   innerapi_tags = [ "platformsdk_indirect" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
@@ -1107,7 +1094,6 @@ ohos_shared_library("ui_extension") {
   ]
 
   if (ability_runtime_graphics) {
-    defines = [ "SUPPORT_SCREEN" ]
     external_deps += [
       "ace_engine:ace_uicontent",
       "window_manager:libdm",

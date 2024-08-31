@@ -18,10 +18,7 @@
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
 #include "parameters.h"
-#ifdef SUPPORT_GRAPHICS
 #include "scene_board_judgement.h"
-#endif // SUPPORT_GRAPHICS
-
 
 namespace OHOS {
 namespace AAFwk {
@@ -64,11 +61,9 @@ AppUtils::~AppUtils() {}
 
 AppUtils::AppUtils()
 {
-    #ifdef SUPPORT_GRAPHICS
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         isSceneBoard_ = true;
     }
-    #endif // SUPPORT_GRAPHICS
 }
 
 AppUtils &AppUtils::GetInstance()

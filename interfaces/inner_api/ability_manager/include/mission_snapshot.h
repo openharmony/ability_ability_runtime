@@ -18,17 +18,17 @@
 
 #include "parcel.h"
 #include "element_name.h"
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 #include "pixel_map.h"
-#endif //SUPPORT_SCREEN
+#endif
 
 namespace OHOS {
 namespace AAFwk {
 struct MissionSnapshot : public Parcelable {
     AppExecFwk::ElementName topAbility;
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     std::shared_ptr<OHOS::Media::PixelMap> snapshot;
-#endif //SUPPORT_SCREEN
+#endif
     // If is private, ability is secure, the snapshot is a blank picture.
     bool isPrivate = false;
     bool ReadFromParcel(Parcel &parcel);

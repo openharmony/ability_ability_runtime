@@ -204,7 +204,7 @@ int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams)
     return OnContinueAndGetContent(wantParams);
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 bool ContinuationManagerStage::GetContentInfo(WantParams &wantParams)
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");

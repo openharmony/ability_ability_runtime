@@ -38,7 +38,6 @@ ohos_shared_library("autostartupcallback") {
   ]
 
   external_deps = [
-    "ability_base:session_info",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -46,10 +45,7 @@ ohos_shared_library("autostartupcallback") {
   ]
 
   if (ability_runtime_graphics) {
-    defines = [
-      "SUPPORT_GRAPHICS",
-      "SUPPORT_SCREEN",
-    ]
+    defines = [ "SUPPORT_GRAPHICS" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

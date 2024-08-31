@@ -151,10 +151,7 @@ ohos_shared_library("runtime") {
       "ace_engine:ace_forward_compatibility",
       "ace_engine:ace_uicontent",
     ]
-    defines += [
-      "SUPPORT_GRAPHICS",
-      "SUPPORT_SCREEN",
-    ]
+    defines += [ "SUPPORT_GRAPHICS" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

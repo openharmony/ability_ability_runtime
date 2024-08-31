@@ -196,7 +196,7 @@ int32_t ContinuationManager::OnContinue(WantParams &wantParams)
     }
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 bool ContinuationManager::GetContentInfo(WantParams &wantParams)
 {
     std::shared_ptr<Ability> ability = nullptr;

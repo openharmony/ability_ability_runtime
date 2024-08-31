@@ -228,7 +228,7 @@ private:
     bool needSaveDate_ = false;
     AppExecFwk::PacMap restoreData_;
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 private:
     void HandleForegroundNewState(const AAFwk::Want &want, bool &bFlag);
     void HandleExecuteInsightIntentForeground(const AAFwk::Want &want, bool &bflag);

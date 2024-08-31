@@ -58,7 +58,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "resource_config_helper.h"
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 #include "locale_config.h"
 #include "ace_forward_compatibility.h"
 #include "form_constants.h"
@@ -1405,7 +1405,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         isStageBased = entryHapModuleInfo.isStageBasedModel;
     }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     std::vector<OHOS::AppExecFwk::Metadata> metaData = entryHapModuleInfo.metadata;
     bool isFullUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto &metaDataItem) {
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
@@ -1422,7 +1422,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         ChangeToLocalPath(bundleName, appInfo.moduleSourceDirs, localPaths);
         LoadAbilityLibrary(localPaths);
         LoadNativeLiabrary(bundleInfo, appInfo.nativeLibraryPath);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     } else if (Ace::AceForwardCompatibility::PipelineChanged()) {
         std::vector<std::string> localPaths;
         ChangeToLocalPath(bundleName, appInfo.moduleSourceDirs, localPaths);
@@ -1461,7 +1461,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
     application_->SetApplicationContext(applicationContext);
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     OHOS::EglSetCacheDir(applicationContext->GetCacheDir());
 #endif
 
@@ -2696,7 +2696,7 @@ void MainThread::LoadAbilityLibrary(const std::vector<std::string> &libraryPaths
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
 #ifdef ABILITY_LIBRARY_LOADER
     TAG_LOGD(AAFwkTag::APPKIT, "start");
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     LoadAceAbilityLibrary();
 #endif
     size_t size = libraryPaths.size();

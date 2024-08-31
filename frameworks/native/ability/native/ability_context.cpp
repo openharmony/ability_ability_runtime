@@ -25,16 +25,13 @@
 #include "os_account_manager_wrapper.h"
 #include "remote_object_wrapper.h"
 #include "resource_manager.h"
+#include "scene_board_judgement.h"
 #include "session_info.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "string_wrapper.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 #include "want_params_wrapper.h"
-
-#ifdef SUPPORT_SCREEN
-#include "scene_board_judgement.h"
-#endif // SUPPORT_SCREEN
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -88,7 +85,6 @@ ErrCode AbilityContext::TerminateAbility()
     switch (info->type) {
         case AppExecFwk::AbilityType::PAGE:
             TAG_LOGD(AAFwkTag::CONTEXT, "page type, ability: %{public}s", info->name.c_str());
-#ifdef SUPPORT_SCREEN
             if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
                 auto sessionToken = GetSessionToken();
                 if (sessionToken == nullptr) {
@@ -106,7 +102,6 @@ ErrCode AbilityContext::TerminateAbility()
             } else {
                 err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, resultCode_, &resultWant_);
             }
-#endif // SUPPORT_SCREEN
             break;
         case AppExecFwk::AbilityType::SERVICE:
             TAG_LOGD(AAFwkTag::CONTEXT, "service type, ability: %{public}s", info->name.c_str());

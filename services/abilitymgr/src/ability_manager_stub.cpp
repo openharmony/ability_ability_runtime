@@ -2726,14 +2726,13 @@ int AbilityManagerStub::UpdateMissionSnapShotFromWMSInner(MessageParcel &data, M
         TAG_LOGE(AAFwkTag::ABILITYMGR, "read ability token failed.");
         return ERR_NULL_OBJECT;
     }
-#ifdef SUPPORT_SCREEN
+
     std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
     if (pixelMap == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "read pixelMap failed.");
         return ERR_NULL_OBJECT;
     }
     UpdateMissionSnapShot(token, pixelMap);
-#endif // SUPPORT_SCREEN
     return NO_ERROR;
 }
 
@@ -2944,7 +2943,7 @@ int AbilityManagerStub::SetMissionContinueStateInner(MessageParcel &data, Messag
     return NO_ERROR;
 }
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 int AbilityManagerStub::SetMissionLabelInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();

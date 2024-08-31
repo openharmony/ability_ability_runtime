@@ -1006,7 +1006,7 @@ public:
     ErrCode SetMissionContinueState(sptr<IRemoteObject> token, const AAFwk::ContinueState &state,
         sptr<IRemoteObject> sessionToken);
 
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     /**
      * Set mission label of this ability.
      *

@@ -28,7 +28,7 @@
 #include "napi_common_util.h"
 #include "native_engine/native_value.h"
 #include "permission_constants.h"
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
 #include "pixel_map_napi.h"
 #endif
 #include "start_options.h"
@@ -438,7 +438,7 @@ private:
                 napi_set_named_property(env, abilityObj, "abilityName",
                     CreateJsValue(env, snapshotWrap->missionSnapshot.topAbility.GetAbilityName()));
                 napi_set_named_property(env, object, "ability", abilityObj);
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
                 auto snapshotValue = Media::PixelMapNapi::CreatePixelMap(
                     env, snapshotWrap->missionSnapshot.snapshot);
                 napi_set_named_property(env, object, "snapshot", snapshotValue);
