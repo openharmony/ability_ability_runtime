@@ -335,6 +335,44 @@ void AppStateObserverManager::OnProcessStateChanged(const std::shared_ptr<AppRun
     handler_->SubmitTask(task);
 }
 
+void AppStateObserverManager::OnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnWindowShow failed.");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), appRecord]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnWindowShow failed.");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "OnWindowShow come.");
+        self->HandleOnWindowShow(appRecord);
+    };
+    handler_->SubmitTask(task);
+}
+
+void AppStateObserverManager::OnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnWindowHidden failed.");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), appRecord]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnWindowHidden failed.");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "OnWindowHidden come.");
+        self->HandleOnWindowHidden(appRecord);
+    };
+    handler_->SubmitTask(task);
+}
+
 void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (handler_ == nullptr) {
@@ -669,6 +707,48 @@ void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<
             it->second.end(), data.bundleName);
         if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
             it->first->OnProcessStateChanged(data);
+        }
+    }
+}
+
+void AppStateObserverManager::HandleOnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        return;
+    }
+    ProcessData data = WrapProcessData(appRecord);
+    TAG_LOGD(AAFwkTag::APPMGR,
+        "bundle:%{public}s, pid:%{public}d, uid:%{public}d, state:%{public}d, "
+        "isContinuousTask:%{public}d, gpuPid:%{public}d",
+        data.bundleName.c_str(), data.pid, data.uid, data.state, data.isContinuousTask, data.gpuPid);
+    auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
+    for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
+        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
+            it->second.end(), data.bundleName);
+        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+            it->first->OnWindowShow(data);
+        }
+    }
+}
+
+void AppStateObserverManager::HandleOnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
+        return;
+    }
+    ProcessData data = WrapProcessData(appRecord);
+    TAG_LOGD(AAFwkTag::APPMGR,
+        "bundle:%{public}s, pid:%{public}d, uid:%{public}d, state:%{public}d, "
+        "isContinuousTask:%{public}d, gpuPid:%{public}d",
+        data.bundleName.c_str(), data.pid, data.uid, data.state, data.isContinuousTask, data.gpuPid);
+    auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
+    for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
+        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
+            it->second.end(), data.bundleName);
+        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+            it->first->OnWindowHidden(data);
         }
     }
 }

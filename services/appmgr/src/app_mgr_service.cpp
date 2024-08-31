@@ -1230,6 +1230,7 @@ void AppMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::strin
     appMgrServiceInner_->InitFocusListener();
 #ifdef SUPPORT_SCREEN
     appMgrServiceInner_->InitWindowVisibilityChangedListener();
+    appMgrServiceInner_->InitWindowPidVisibilityChangedListener();
 #endif
 }
 
@@ -1248,6 +1249,7 @@ void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::st
     appMgrServiceInner_->FreeFocusListener();
 #ifdef SUPPORT_SCREEN
     appMgrServiceInner_->FreeWindowVisibilityChangedListener();
+    appMgrServiceInner_->FreeWindowPidVisibilityChangedListener();
 #endif
 }
 
