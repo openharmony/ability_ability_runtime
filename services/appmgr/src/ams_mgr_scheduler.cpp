@@ -207,7 +207,7 @@ void AmsMgrScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token
     }
 
     if (amsMgrServiceInner_->VerifyKillProcessPermission(token) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: verification failed", __func__);
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return;
     }
 
@@ -233,7 +233,7 @@ void AmsMgrScheduler::KillProcessesByUserId(int32_t userId)
     auto permission = AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES;
     if (!isCallingFromFoundation &&
         amsMgrServiceInner_->VerifyAccountPermission(permission, userId) == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: verification failed", __func__);
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return;
     }
 
@@ -294,7 +294,7 @@ int32_t AmsMgrScheduler::KillProcessWithAccount(
 
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "AttachTimeOut begin");
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
     if (!IsReady()) {
         return;
     }
@@ -493,7 +493,7 @@ int32_t AmsMgrScheduler::GetBundleNameByPid(const int pid, std::string &bundleNa
 int32_t AmsMgrScheduler::RegisterAppDebugListener(const sptr<IAppDebugListener> &listener)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->RegisterAppDebugListener(listener);
@@ -502,7 +502,7 @@ int32_t AmsMgrScheduler::RegisterAppDebugListener(const sptr<IAppDebugListener> 
 int32_t AmsMgrScheduler::UnregisterAppDebugListener(const sptr<IAppDebugListener> &listener)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->UnregisterAppDebugListener(listener);
@@ -511,7 +511,7 @@ int32_t AmsMgrScheduler::UnregisterAppDebugListener(const sptr<IAppDebugListener
 int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->AttachAppDebug(bundleName);
@@ -520,7 +520,7 @@ int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName)
 int32_t AmsMgrScheduler::DetachAppDebug(const std::string &bundleName)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->DetachAppDebug(bundleName);
@@ -529,7 +529,7 @@ int32_t AmsMgrScheduler::DetachAppDebug(const std::string &bundleName)
 int32_t AmsMgrScheduler::SetAppWaitingDebug(const std::string &bundleName, bool isPersist)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->SetAppWaitingDebug(bundleName, isPersist);
@@ -538,7 +538,7 @@ int32_t AmsMgrScheduler::SetAppWaitingDebug(const std::string &bundleName, bool 
 int32_t AmsMgrScheduler::CancelAppWaitingDebug()
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->CancelAppWaitingDebug();
@@ -547,7 +547,7 @@ int32_t AmsMgrScheduler::CancelAppWaitingDebug()
 int32_t AmsMgrScheduler::GetWaitingDebugApp(std::vector<std::string> &debugInfoList)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->GetWaitingDebugApp(debugInfoList);
@@ -556,7 +556,7 @@ int32_t AmsMgrScheduler::GetWaitingDebugApp(std::vector<std::string> &debugInfoL
 bool AmsMgrScheduler::IsWaitingDebugApp(const std::string &bundleName)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return false;
     }
     return amsMgrServiceInner_->IsWaitingDebugApp(bundleName);
@@ -565,7 +565,7 @@ bool AmsMgrScheduler::IsWaitingDebugApp(const std::string &bundleName)
 void AmsMgrScheduler::ClearNonPersistWaitingDebugFlag()
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return;
     }
     amsMgrServiceInner_->ClearNonPersistWaitingDebugFlag();
@@ -574,7 +574,7 @@ void AmsMgrScheduler::ClearNonPersistWaitingDebugFlag()
 int32_t AmsMgrScheduler::RegisterAbilityDebugResponse(const sptr<IAbilityDebugResponse> &response)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->RegisterAbilityDebugResponse(response);
@@ -583,7 +583,7 @@ int32_t AmsMgrScheduler::RegisterAbilityDebugResponse(const sptr<IAbilityDebugRe
 bool AmsMgrScheduler::IsAttachDebug(const std::string &bundleName)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return false;
     }
     return amsMgrServiceInner_->IsAttachDebug(bundleName);
@@ -592,7 +592,7 @@ bool AmsMgrScheduler::IsAttachDebug(const std::string &bundleName)
 void AmsMgrScheduler::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return;
     }
     amsMgrServiceInner_->SetKeepAliveEnableState(bundleName, enable);
@@ -621,7 +621,7 @@ void AmsMgrScheduler::ClearProcessByToken(sptr<IRemoteObject> token)
 bool AmsMgrScheduler::IsMemorySizeSufficent()
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return true;
     }
     if (amsMgrServiceInner_->VerifyRequestPermission() != ERR_OK) {
@@ -634,7 +634,7 @@ bool AmsMgrScheduler::IsMemorySizeSufficent()
 void AmsMgrScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return;
     }
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
@@ -658,7 +658,7 @@ void AmsMgrScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
     pid_t callingPid = IPCSkeleton::GetCallingPid();
     pid_t pid = getprocpid();
     if (callingPid != pid) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call");
+        TAG_LOGE(AAFwkTag::APPMGR, "not allow other process to call");
         return;
     }
 
@@ -671,12 +671,12 @@ void AmsMgrScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
 bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return false;
     }
 
     if (IPCSkeleton::GetCallingPid() != getprocpid()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call");
+        TAG_LOGE(AAFwkTag::APPMGR, "not allow other process to call");
         return false;
     }
     return amsMgrServiceInner_->CleanAbilityByUserRequest(token);
@@ -685,7 +685,7 @@ bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token
 bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return false;
     }
     return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
@@ -693,13 +693,13 @@ bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
 bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return false;
     }
     pid_t callingPid = IPCSkeleton::GetCallingPid();
     pid_t procPid = getprocpid();
     if (callingPid != procPid) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call");
+        TAG_LOGE(AAFwkTag::APPMGR, "not allow other process to call");
         return false;
     }
     return amsMgrServiceInner_->IsProcessContainsOnlyUIAbility(pid);
@@ -708,7 +708,7 @@ bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 bool AmsMgrScheduler::IsProcessAttached(sptr<IRemoteObject> token)
 {
     if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is unready");
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return false;
     }
     return amsMgrServiceInner_->IsProcessAttached(token);

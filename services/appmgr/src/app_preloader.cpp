@@ -100,7 +100,7 @@ bool AppPreloader::GetLaunchWant(const std::string &bundleName, int32_t userId, 
 
     auto errCode = IN_PROCESS_CALL(bundleMgrHelper->GetLaunchWantForBundle(bundleName, launchWant, userId));
     if (errCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetLaunchWantForBundle failed, errCode: %{public}d", errCode);
+        TAG_LOGE(AAFwkTag::APPMGR, "errCode: %{public}d", errCode);
         return false;
     }
     return true;

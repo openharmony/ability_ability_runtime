@@ -849,7 +849,7 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
     }
     if (isAbility && abilityInfo->type == AbilityType::EXTENSION &&
         abilityInfo->extensionAbilityType != ExtensionAbilityType::UI) {
-        TAG_LOGD(AAFwkTag::APPMGR, "extensionType:%{public}d, not notify any more.", abilityInfo->extensionAbilityType);
+        TAG_LOGD(AAFwkTag::APPMGR, "extensionType:%{public}d, not notify", abilityInfo->extensionAbilityType);
         return;
     }
     auto serviceInner = appMgrServiceInner_.lock();
@@ -1740,7 +1740,7 @@ void AppRunningRecord::AddRenderRecord(const std::shared_ptr<RenderRecord> &reco
 void AppRunningRecord::RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record)
 {
     if (!record) {
-        TAG_LOGD(AAFwkTag::APPMGR, "RemoveRenderRecord: record is null");
+        TAG_LOGD(AAFwkTag::APPMGR, "RemoveRenderRecord: record null");
         return;
     }
     std::lock_guard renderRecordMapLock(renderRecordMapLock_);
@@ -1973,7 +1973,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (windowVisibilityInfos.empty()) {
         TAG_LOGW(AAFwkTag::APPMGR, "empty info");
         return;

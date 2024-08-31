@@ -379,8 +379,8 @@ void CacheProcessManager::RemoveCacheRecord(const std::shared_ptr<AppRunningReco
 void CacheProcessManager::ShrinkAndKillCache()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called");
-    if (maxProcCacheNum_ <= 0) {
-        TAG_LOGI(AAFwkTag::APPMGR, "Cache disabled");
+    if (maxProcCacheNum_ <= 0 && !resourceCacheProcessEnable_) {
+        TAG_LOGI(AAFwkTag::APPMGR, "Cache disabled.");
         return;
     }
     std::vector<std::shared_ptr<AppRunningRecord>> cleanList;
