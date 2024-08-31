@@ -30,7 +30,7 @@ int32_t PrepareTerminateCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != IPrepareTerminateCallback::GetDescriptor()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "InterfaceToken not equal IPrepareTerminateCallback's descriptor.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "InterfaceToken invalid");
         return ERR_INVALID_STATE;
     }
 
@@ -38,7 +38,7 @@ int32_t PrepareTerminateCallbackStub::OnRemoteRequest(
         return DoPrepareTerminateInner(data, reply);
     }
 
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "default case, needs to be checked.");
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "default case, check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 

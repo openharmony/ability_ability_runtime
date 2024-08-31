@@ -31,33 +31,33 @@ void RemoteOnListenerProxy::OnCallback(const uint32_t continueState, const std::
         return;
     }
     if (!data.WriteUint32(continueState)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write ContinueState failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write ContinueState failed");
         return;
     }
     if (!data.WriteString(srcDeviceId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write srcDeviceId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write srcDeviceId failed");
         return;
     }
     if (!data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write bundleName failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write bundleName failed");
         return;
     }
     if (!data.WriteString(continueType)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write continueType failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write continueType failed");
         return;
     }
     if (!data.WriteString(srcBundleName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write srcBundleName failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyOnsChanged Write srcBundleName failed");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote object");
         return;
     }
     int result = remote->SendRequest(IRemoteOnListener::ON_CALLBACK, data, reply, option);
     if (result != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyMissionsChanged SendRequest fail, error: %{public}d", result);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, error: %{public}d", result);
         return;
     }
 }

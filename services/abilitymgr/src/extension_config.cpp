@@ -52,7 +52,7 @@ void ExtensionConfig::LoadExtensionConfiguration()
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     nlohmann::json jsonBuf;
     if (!ReadFileInfoJson(GetExtensionConfigPath().c_str(), jsonBuf)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Parse file failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "parse file failed");
         return;
     }
 
@@ -100,7 +100,7 @@ bool ExtensionConfig::IsExtensionStartServiceEnable(std::string extensionTypeNam
 void ExtensionConfig::LoadExtensionConfig(const nlohmann::json &object)
 {
     if (!object.contains(EXTENSION_CONFIG_NAME) || !object.at(EXTENSION_CONFIG_NAME).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Extension config not existed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "extension config null");
         return;
     }
 
@@ -120,7 +120,7 @@ void ExtensionConfig::LoadExtensionAutoDisconnectTime(const nlohmann::json &obje
 {
     if (!object.contains(EXTENSION_AUTO_DISCONNECT_TIME) ||
         !object.at(EXTENSION_AUTO_DISCONNECT_TIME).is_number()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Auto disconnect time config not existed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "auto disconnect time config null");
         return;
     }
     int32_t extensionAutoDisconnectTime = object.at(EXTENSION_AUTO_DISCONNECT_TIME).get<int32_t>();
@@ -133,7 +133,7 @@ void ExtensionConfig::LoadExtensionThirdPartyAppBlockedList(const nlohmann::json
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
     if (!object.contains(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME) ||
         !object.at(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME).is_boolean()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Third party config not existed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "third Party config null");
         return;
     }
     thirdPartyAppEnableFlags_[extensionTypeName] = object.at(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME).get<bool>();
@@ -146,7 +146,7 @@ void ExtensionConfig::LoadExtensionServiceBlockedList(const nlohmann::json &obje
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
     if (!object.contains(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG) ||
         !object.at(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG).is_boolean()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Service enable config not existed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "service enable config null");
         return;
     }
     bool serviceEnableFlag = object.at(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG).get<bool>();
@@ -157,7 +157,7 @@ void ExtensionConfig::LoadExtensionServiceBlockedList(const nlohmann::json &obje
     }
     if (!object.contains(EXTENSION_SERVICE_BLOCKED_LIST_NAME) ||
         !object.at(EXTENSION_SERVICE_BLOCKED_LIST_NAME).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Service config not existed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "service config null");
         return;
     }
     std::unordered_set<std::string> serviceBlockedList;
@@ -189,14 +189,14 @@ bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::js
     in.open(filePath, std::ios_base::in);
     if (!in.is_open()) {
         strerror_r(errno, errBuf, sizeof(errBuf));
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file cannot be open due to  %{public}s", errBuf);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed due to  %{public}s", errBuf);
         return false;
     }
 
     in.seekg(0, std::ios::end);
     int64_t size = in.tellg();
     if (size <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file is an empty file");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty file");
         in.close();
         return false;
     }
@@ -216,7 +216,7 @@ bool ExtensionConfig::CheckServiceExtensionUriValid(const std::string &uri)
 {
     const size_t memberNum = 4;
     if (std::count(uri.begin(), uri.end(), '/') != memberNum - 1) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid uri: %{public}s.", uri.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid uri: %{public}s", uri.c_str());
         return false;
     }
     // correct uri: "/bundleName/moduleName/abilityName"
@@ -225,7 +225,7 @@ bool ExtensionConfig::CheckServiceExtensionUriValid(const std::string &uri)
     std::string::size_type pos3 = uri.find('/', pos2 + 1);
     std::string::size_type pos4 = uri.find('/', pos3 + 1);
     if ((pos3 == pos2 + 1) || (pos4 == pos3 + 1) || (pos4 == uri.size() - 1)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid uri: %{public}s.", uri.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid uri: %{public}s", uri.c_str());
         return false;
     }
     return true;

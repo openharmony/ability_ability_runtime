@@ -46,7 +46,7 @@ sptr<IAbilityScheduler> DataAbilityManager::Acquire(
     TAG_LOGD(AAFwkTag::DATA_ABILITY, "Call");
 
     if (abilityRequest.abilityInfo.type != AppExecFwk::AbilityType::DATA) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "not a data ability");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "not dataability");
         return nullptr;
     }
 
@@ -64,10 +64,10 @@ sptr<IAbilityScheduler> DataAbilityManager::Acquire(
             TAG_LOGE(AAFwkTag::DATA_ABILITY, "invalid client token");
             return nullptr;
         }
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Ability '%{public}s' acquiring data ability '%{public}s'...",
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "ability '%{public}s' acquiring data ability '%{public}s'...",
             clientAbilityRecord->GetAbilityInfo().name.c_str(), dataAbilityName.c_str());
     } else {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "Loading data ability '%{public}s'...", dataAbilityName.c_str());
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "loading dataability '%{public}s'...", dataAbilityName.c_str());
     }
 
     std::lock_guard<ffrt::mutex> locker(mutex_);
@@ -88,14 +88,14 @@ sptr<IAbilityScheduler> DataAbilityManager::Acquire(
     }
 
     if (!dataAbilityRecord) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Failed to load '%{public}s'", dataAbilityName.c_str());
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "'%{public}s' failed", dataAbilityName.c_str());
         return nullptr;
     }
 
     auto scheduler = dataAbilityRecord->GetScheduler();
     if (!scheduler) {
         if (DEBUG_ENABLED) {
-            TAG_LOGE(AAFwkTag::DATA_ABILITY, "'%{public}s' not loaded, removing",
+            TAG_LOGE(AAFwkTag::DATA_ABILITY, "'%{public}s' removing",
                 dataAbilityName.c_str());
         }
         auto it = dataAbilityRecordsLoaded_.find(dataAbilityName);
@@ -144,7 +144,7 @@ int DataAbilityManager::Release(
     }
 
     if (!dataAbilityRecord) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "data ability not exist");
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "null ability");
         return ERR_UNKNOWN_OBJECT;
     }
 
@@ -204,7 +204,7 @@ int DataAbilityManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
         DumpLocked(__func__, __LINE__);
     }
 
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Attaching data ability");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "attaching dataability");
 
     auto record = Token::GetAbilityRecordByToken(token);
     std::string abilityName = "";
@@ -222,17 +222,17 @@ int DataAbilityManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
     }
 
     if (!dataAbilityRecord) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Attaching '%{public}s' not in loading state",
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "attaching '%{public}s' not loaded",
             abilityName.c_str());
         return ERR_UNKNOWN_OBJECT;
     }
 
     if (DEBUG_ENABLED && dataAbilityRecord->GetClientCount() > 0) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Attachingy '%{public}s' has clients", abilityName.c_str());
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "attachingy '%{public}s' has clients", abilityName.c_str());
     }
 
     if (DEBUG_ENABLED && dataAbilityRecord->GetScheduler()) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Attaching '%{public}s' has ready", abilityName.c_str());
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "attaching '%{public}s' has ready", abilityName.c_str());
     }
 
     if (DEBUG_ENABLED && dataAbilityRecordsLoaded_.count(it->first) != 0) {
@@ -271,7 +271,7 @@ int DataAbilityManager::AbilityTransitionDone(const sptr<IRemoteObject> &token, 
         }
     }
     if (!dataAbilityRecord) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "'%{public}s' not exist", abilityName.c_str());
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "'%{public}s' null", abilityName.c_str());
         return ERR_UNKNOWN_OBJECT;
     }
 
@@ -291,7 +291,7 @@ void DataAbilityManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, 
 
 void DataAbilityManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Call");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "call");
     CHECK_POINTER(abilityRecord);
 
     {
@@ -454,37 +454,37 @@ DataAbilityManager::DataAbilityRecordPtr DataAbilityManager::LoadLocked(
 
     auto it = dataAbilityRecordsLoading_.find(name);
     if (it == dataAbilityRecordsLoading_.end()) {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "data ability not in loading");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "load failed");
 
         dataAbilityRecord = std::make_shared<DataAbilityRecord>(req);
         // Start data ability loading process asynchronously.
         int startResult = dataAbilityRecord->StartLoading();
         if (startResult != ERR_OK) {
-            TAG_LOGE(AAFwkTag::DATA_ABILITY, "Failed to load data ability %{public}d", startResult);
+            TAG_LOGE(AAFwkTag::DATA_ABILITY, "dataability '%{public}d' load failed", startResult);
             return nullptr;
         }
 
         auto insertResult = dataAbilityRecordsLoading_.insert({name, dataAbilityRecord});
         if (!insertResult.second) {
-            TAG_LOGE(AAFwkTag::DATA_ABILITY, " insert data ability failed");
+            TAG_LOGE(AAFwkTag::DATA_ABILITY, " insert failed");
             return nullptr;
         }
     } else {
-        TAG_LOGI(AAFwkTag::DATA_ABILITY, "data ability loading");
+        TAG_LOGI(AAFwkTag::DATA_ABILITY, "dataability loading");
         dataAbilityRecord = it->second;
     }
 
     if (!dataAbilityRecord) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Failed to load '%{public}s'", name.c_str());
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "'%{public}s' load failed", name.c_str());
         return nullptr;
     }
 
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Waiting for data ability loaded...");
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "wait to load");
 
     // Waiting for data ability loaded.
     int ret = dataAbilityRecord->WaitForLoaded(mutex_, DATA_ABILITY_LOAD_TIMEOUT);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "Wait failed %{public}d", ret);
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "wait failed %{public}d", ret);
         it = dataAbilityRecordsLoading_.find(name);
         if (it != dataAbilityRecordsLoading_.end()) {
             dataAbilityRecordsLoading_.erase(it);
@@ -504,7 +504,7 @@ void DataAbilityManager::DumpLocked(const char *func, int line)
         TAG_LOGI(AAFwkTag::DATA_ABILITY, "dump");
     }
 
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Available count: %{public}zu", dataAbilityRecordsLoaded_.size());
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "available count: %{public}zu", dataAbilityRecordsLoaded_.size());
 
     for (auto it = dataAbilityRecordsLoaded_.begin(); it != dataAbilityRecordsLoaded_.end(); ++it) {
         TAG_LOGI(AAFwkTag::DATA_ABILITY, "'%{public}s':", it->first.c_str());
@@ -513,7 +513,7 @@ void DataAbilityManager::DumpLocked(const char *func, int line)
         }
     }
 
-    TAG_LOGI(AAFwkTag::DATA_ABILITY, "Loading count: %{public}zu", dataAbilityRecordsLoading_.size());
+    TAG_LOGI(AAFwkTag::DATA_ABILITY, "loading count: %{public}zu", dataAbilityRecordsLoading_.size());
 
     for (auto it = dataAbilityRecordsLoading_.begin(); it != dataAbilityRecordsLoading_.end(); ++it) {
         TAG_LOGI(AAFwkTag::DATA_ABILITY, "'%{public}s':", it->first.c_str());
@@ -663,7 +663,7 @@ void DataAbilityManager::RestartDataAbility(const std::shared_ptr<AbilityRecord>
             bool getDataAbilityUri = OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->GetDataAbilityUri(
                 hapModuleInfo.abilityInfos, mainElement, uriStr);
             if (getDataAbilityUri) {
-                TAG_LOGI(AAFwkTag::DATA_ABILITY, "restart data ability: %{public}s, uri: %{public}s",
+                TAG_LOGI(AAFwkTag::DATA_ABILITY, "restart dataability: %{public}s, uri: %{public}s",
                     abilityRecord->GetAbilityInfo().name.c_str(), uriStr.c_str());
                 Uri uri(uriStr);
                 OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->AcquireDataAbility(uri, true, nullptr);

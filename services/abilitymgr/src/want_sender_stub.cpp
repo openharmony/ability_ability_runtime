@@ -30,7 +30,7 @@ int WantSenderStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageP
     std::u16string descriptor = WantSenderStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "local descriptor is not equal to remote");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "local descriptor invalid");
         return ERR_INVALID_STATE;
     }
 
@@ -45,7 +45,7 @@ int WantSenderStub::SendInner(MessageParcel &data, MessageParcel &reply)
 {
     SenderInfo *senderInfo = data.ReadParcelable<SenderInfo>();
     if (senderInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "senderInfo is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null senderInfo");
         return ERR_INVALID_VALUE;
     }
     Send(*senderInfo);
