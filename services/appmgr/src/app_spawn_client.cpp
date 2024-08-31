@@ -201,7 +201,7 @@ int32_t AppSpawnClient::SetStartFlags(const AppSpawnStartMsg &startMsg, AppSpawn
         if (startFlagTmp & START_FLAG_TEST_NUM) {
             ret = AppSpawnReqMsgSetAppFlag(reqHandle, static_cast<AppFlagsIndex>(flagIndex));
             if (ret != 0) {
-                TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", flagIndex, ret);
+                TAG_LOGE(AAFwkTag::APPMGR, "SetFlagIdx %{public}d failed, ret: %{public}d", flagIndex, ret);
                 return ret;
             }
         }
