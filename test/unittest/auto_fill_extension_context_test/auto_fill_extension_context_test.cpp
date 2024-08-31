@@ -20,12 +20,9 @@
 #include "auto_fill_extension_context.h"
 #undef private
 #undef protected
-
 #include "hilog_tag_wrapper.h"
-#include "mock_window.h"
-
-#include "js_auto_fill_extension.h"
 #include "js_auto_fill_extension_util.h"
+#include "mock_window.h"
 
 using namespace testing::ext;
 using namespace OHOS::Rosen;
