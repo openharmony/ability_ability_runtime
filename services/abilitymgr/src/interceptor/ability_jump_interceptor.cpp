@@ -34,18 +34,18 @@ constexpr const char* JUMP_DIALOG_TARGET_LABEL_ID = "interceptor_targetLabelId";
 ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     if (!param.isWithUI) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "This startup is not foreground, keep going.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "startup not foreground");
         return ERR_OK;
     }
     bool isStartIncludeAtomicService = AbilityUtil::IsStartIncludeAtomicService(param.want, param.userId);
     if (isStartIncludeAtomicService) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "This startup contain atomic service, keep going.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "startup atomic service");
         return ERR_OK;
     }
     // get bms
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleMgrHelper");
         return ERR_OK;
     }
     AppExecFwk::AbilityInfo targetAbilityInfo;
@@ -59,13 +59,13 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
     }
     if (targetAbilityInfo.type != AppExecFwk::AbilityType::PAGE) {
         TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "Target is not page Ability, keep going, abilityType:%{public}d.", targetAbilityInfo.type);
+            "no page Ability,type:%{public}d", targetAbilityInfo.type);
         return ERR_OK;
     }
     AppExecFwk::AppJumpControlRule controlRule;
     if (CheckControl(bundleMgrHelper, param.want, param.userId, controlRule)) {
 #ifdef SUPPORT_GRAPHICS
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "app jump need to be intercepted, caller:%{public}s, target:%{public}s",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "intercept app jump,caller:%{public}s, target:%{public}s",
             controlRule.callerPkg.c_str(), controlRule.targetPkg.c_str());
         auto sysDialogScheduler = DelayedSingleton<SystemDialogScheduler>::GetInstance();
         Want targetWant = param.want;
@@ -95,31 +95,31 @@ bool AbilityJumpInterceptor::CheckControl(std::shared_ptr<AppExecFwk::BundleMgrH
     controlRule.callerPkg = callerBundleName;
     controlRule.targetPkg = targetBundleName;
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleName from bms fail.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getBundleName failed");
         return false;
     }
     if (controlRule.callerPkg.empty() || controlRule.targetPkg.empty()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "This startup is not explicitly, keep going.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "explicit startup");
         return false;
     }
     if (controlRule.callerPkg == controlRule.targetPkg) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Jump within the same app.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "jump within the same app");
         return false;
     }
     if (CheckIfJumpExempt(controlRule, userId)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Jump from or to system or exempt apps.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "jump to system/exempt apps");
         return false;
     }
     // get disposed status
     auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
     if (appControlMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get appControlMgr failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appControlMgr");
         return false;
     }
 
     if (IN_PROCESS_CALL(appControlMgr->GetAppJumpControlRule(callerBundleName, targetBundleName,
         userId, controlRule)) != ERR_OK) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "No jump control rule found.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "no jump rule");
         return true;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Get appJumpControlRule, jumpMode:%d.", controlRule.jumpMode);
@@ -130,15 +130,15 @@ bool AbilityJumpInterceptor::CheckIfJumpExempt(AppExecFwk::AppJumpControlRule &c
 {
     if (CheckIfExemptByBundleName(controlRule.callerPkg,
         PermissionConstants::PERMISSION_EXEMPT_AS_CALLER, userId)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Jump from exempt caller app, No need to intercept.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "jump from exempt caller app");
         return true;
     }
     if (CheckIfExemptByBundleName(controlRule.targetPkg,
         PermissionConstants::PERMISSION_EXEMPT_AS_TARGET, userId)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Jump to exempt target app, No need to intercept.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "jump to exempt app");
         return true;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Third-party apps jump to third-party apps.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "third-party apps to third-party apps");
     return false;
 }
 
@@ -148,12 +148,12 @@ bool AbilityJumpInterceptor::CheckIfExemptByBundleName(const std::string &bundle
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     AppExecFwk::ApplicationInfo appInfo;
     if (!StartAbilityUtils::GetApplicationInfo(bundleName, userId, appInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get application info.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getAppInfo failed");
         return false;
     }
 
     if (appInfo.isSystemApp) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Bundle:%{public}s is system app.", bundleName.c_str());
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "system app, bundle:%{public}s", bundleName.c_str());
         return true;
     }
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(appInfo.accessTokenId, permission, false);
@@ -162,7 +162,7 @@ bool AbilityJumpInterceptor::CheckIfExemptByBundleName(const std::string &bundle
         return false;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "Bundle:%{public}s verify permission:%{public}s successed.", bundleName.c_str(), permission.c_str());
+        "bundle:%{public}s verify permission:%{public}s succeed", bundleName.c_str(), permission.c_str());
     return true;
 }
 
