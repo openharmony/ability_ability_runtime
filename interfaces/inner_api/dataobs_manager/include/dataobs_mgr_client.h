@@ -135,7 +135,6 @@ private:
 
     static constexpr int RESUB_INTERVAL = 2;
     static std::mutex mutex_;
-    static std::shared_ptr<DataObsMgrClient> instance_;
     sptr<IDataObsMgr> dataObsManger_;
     ConcurrentMap<sptr<IDataAbilityObserver>, std::list<Uri>> observers_;
 
