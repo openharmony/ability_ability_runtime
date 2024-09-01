@@ -1293,21 +1293,20 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByChildP
     return nullptr;
 }
 
-bool AppRunningManager::IsNativeArgsChildProcessReachLimit(pid_t callingPid)
+bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called.");
-    auto hostRecord = GetAppRunningRecordByPid(callingPid);
-    if (!hostRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null hostRecord");
-        return false;
+    int32_t childCount = 0;
+    std::lock_guard guard(runningRecordMapMutex_);
+    for (auto &pair : appRunningRecordMap_) {
+        auto appRecord = pair.second;
+        if (!appRecord || !appRecord->GetApplicationInfo() ||
+            accessTokenId != appRecord->GetApplicationInfo()->accessTokenId) {
+            continue;
+        }
+        childCount += appRecord->GetChildProcessCount();
     }
-    int32_t nativeArgsChildCount = 0;
-    auto childRecordMap = hostRecord->GetChildProcessRecordMap();
-    auto count = std::count_if(childRecordMap.begin(), childRecordMap.end(), [](auto &pair) {
-        auto childRecord = pair.second;
-        return childRecord && childRecord->GetChildProcessType() == CHILD_PROCESS_TYPE_NATIVE_ARGS;
-    });
-    return count >= AAFwk::AppUtils::GetInstance().MaxNativeArgsChildProcess();
+    return childCount >= AAFwk::AppUtils::GetInstance().MaxChildProcess();
 }
 
 std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote)

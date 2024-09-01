@@ -34,6 +34,7 @@
  * @brief Declares the APIs used to create a native child process and establish an IPC channel between the parent and
  * child processes.
  *
+ * @kit AbilityKit
  * @library libchild_process.so
  * @syscap SystemCapability.Ability.AbilityRuntime.Core
  * @since 12
@@ -52,11 +53,6 @@ typedef enum Ability_NativeChildProcess_ErrCode {
      * @error Operation successful.
      */
     NCP_NO_ERROR = 0,
-
-    /**
-     * @error Operation not permitted.
-     */
-    NCP_ERR_NO_PERMISSION = 201,
 
     /**
      * @error Invalid parameter.
@@ -179,7 +175,7 @@ int OH_Ability_CreateNativeChildProcess(const char* libName,
 
 /**
  * @brief The info of the file descriptors passed to child process.
- * @since 12
+ * @since 13
  */
 typedef struct NativeChildProcess_Fd {
     /** the key of the file descriptor. */
@@ -194,7 +190,7 @@ typedef struct NativeChildProcess_Fd {
 
 /**
  * @brief The list of the info of the file descriptors passed to child process.
- * @since 12
+ * @since 13
  */
 typedef struct NativeChildProcess_FdList {
     /** the head of the list.
@@ -205,7 +201,7 @@ typedef struct NativeChildProcess_FdList {
 
 /**
  * @brief Enumerates the isolation modes used by the native child process module.
- * @since 12
+ * @since 13
  */
 typedef enum NativeChildProcess_IsolationMode {
     /**
@@ -221,7 +217,7 @@ typedef enum NativeChildProcess_IsolationMode {
 
 /**
  * @brief The options used by the child process.
- * @since 12
+ * @since 13
  */
 typedef struct NativeChildProcess_Options {
     /** the isolation mode used by the child process.
@@ -235,7 +231,7 @@ typedef struct NativeChildProcess_Options {
 
 /**
  * @brief The arguments passed to the child process.
- * @since 12
+ * @since 13
  */
 typedef struct NativeChildProcess_Args {
     /** the entry parameter. */
@@ -250,28 +246,39 @@ typedef struct NativeChildProcess_Args {
 /**
  * @brief Starts a child process, loads the specified dynamic library file.
  *
- * @permission {@code ohos.permission.START_NATIVE_CHILD_PROCESS}
- * @param entry Name of the entry of the dynamic library file loaded in the child process. The value cannot be nullptr.
+ * The dynamic library specified must implement a function with NativeChildProcess_Args as a
+ * pamameter(function name can be customized), and export the function, such as:\n
+ *   1. void Main(NativeChildProcess_Args args);
+ *
+ * The processing logic sequence is shown in the following pseudocode: \n
+ *   Main process: \n
+ *     1. OH_Ability_StartNativeChildProcess(entryPoint, args, options)\n
+ *   Child process: \n
+ *     2. dlopen(libName)\n
+ *     3. dlsym("Main")\n
+ *     4. Main(args)\n
+ *     5. The child process exits after the Main(args) function is returned \n
+ *
+ * @param entry Dynamic library and entry function loaded in child process, such as "libEntry.so:Main".
+ * The value cannot be nullptr.
  * @param args The arguments passed to the child process.
  * For details, see {@link NativeChildProcess_Args}.
  * @param options The child process options.
  * For details, see {@link NativeChildProcess_Options}.
  * @param pid The started child process id.
  * @return Returns {@link NCP_NO_ERROR} if the call is successful.\n
- * Returns {@link NCP_ERR_NO_PERMISSION} if the operation is not permitted.
- * The permission {@code ohos.permission.START_NATIVE_CHILD_PROCESS} is needed.\n
  * Returns {@link NCP_ERR_INVALID_PARAM} if the dynamic library name or callback function pointer is invalid.\n
  * Returns {@link NCP_ERR_NOT_SUPPORTED} if the device does not support the creation of native child processes.\n
  * Returns {@link NCP_ERR_ALREADY_IN_CHILD} if it is not allowed to create another child process in the child process.\n
  * Returns {@link NCP_ERR_MAX_CHILD_PROCESSES_REACHED} if the maximum number of native child processes is reached.\n
  * For details, see {@link Ability_NativeChildProcess_ErrCode}.
  * @see OH_Ability_OnNativeChildProcessStarted
- * @since 12
+ * @since 13
  */
 Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(
     const char* entry, NativeChildProcess_Args args,
     NativeChildProcess_Options options, int32_t *pid);
- 
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
