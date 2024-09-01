@@ -81,19 +81,18 @@ bool IsSpecialAbility(const AppExecFwk::AbilityInfo &abilityInfo)
     }
     return false;
 }
+}
 
-std::mutex g_keepAliveAbilitiesMutex;
-std::vector<std::pair<std::string, std::string>> g_keepAliveAbilities;
-void GetKeepAliveAbilities()
+void AbilityConnectManager::GetKeepAliveAbilities()
 {
-    if (!g_keepAliveAbilities.empty()) {
+    if (!keepAliveAbilities_.empty()) {
         return;
     }
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER(bundleMgrHelper);
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     bool getBundleInfos = bundleMgrHelper->GetBundleInfos(
-        OHOS::AppExecFwk::GET_BUNDLE_DEFAULT, bundleInfos, USER_ID_NO_HEAD);
+        OHOS::AppExecFwk::GET_BUNDLE_DEFAULT, bundleInfos, userId_);
     if (!getBundleInfos) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "getBundleInfos fail");
         return;
@@ -130,17 +129,17 @@ void GetKeepAliveAbilities()
         for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
             std::string mainElement;
             if (checkIsAbilityNeedKeepAlive(hapModuleInfo, processName, mainElement) && !mainElement.empty()) {
-                g_keepAliveAbilities.emplace_back(bundleName, mainElement);
+                keepAliveAbilities_.emplace_back(bundleName, mainElement);
             }
         }
     }
 }
 
-bool IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo)
+bool AbilityConnectManager::IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo)
 {
-    std::lock_guard guard(g_keepAliveAbilitiesMutex);
+    std::lock_guard guard(keepAliveAbilitiesMutex_);
     GetKeepAliveAbilities();
-    for (const auto &pair : g_keepAliveAbilities) {
+    for (const auto &pair : keepAliveAbilities_) {
         if (abilityInfo.bundleName == pair.first && abilityInfo.name == pair.second) {
             // Fault tolerance processing, originally returning true here
             bool keepAliveEnable = true;
@@ -151,7 +150,6 @@ bool IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo)
         }
     }
     return false;
-}
 }
 
 AbilityConnectManager::AbilityConnectManager(int userId) : userId_(userId)
@@ -2198,6 +2196,11 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         }
     }
 
+    if (abilityRecord->GetKeepAlive() && userId_ != USER_ID_NO_HEAD && userId_ != currentUserId) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Not current user's ability");
+        return;
+    }
+
     if (abilityRecord->IsSceneBoard() && AmsConfigurationParameter::GetInstance().IsSupportSCBCrashReboot()) {
         static int sceneBoardCrashCount = 0;
         static int64_t tickCount = GetTickCount();
@@ -2619,7 +2622,8 @@ void AbilityConnectManager::PauseExtensions()
         for (auto it = serviceMap_.begin(); it != serviceMap_.end();) {
             auto targetExtension = it->second;
             if (targetExtension != nullptr && targetExtension->GetAbilityInfo().type == AbilityType::EXTENSION &&
-                (IsLauncher(targetExtension) || targetExtension->IsSceneBoard())) {
+                (IsLauncher(targetExtension) || targetExtension->IsSceneBoard() ||
+                (targetExtension->GetKeepAlive() && userId_ != USER_ID_NO_HEAD))) {
                 terminatingExtensionList_.push_back(it->second);
                 it = serviceMap_.erase(it);
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "terminate ability:%{public}s",
