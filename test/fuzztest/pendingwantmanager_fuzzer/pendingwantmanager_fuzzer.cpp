@@ -137,7 +137,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     auto residentProcessManager = std::make_shared<ResidentProcessManager>();
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     residentProcessManager->StartResidentProcess(bundleInfos);
-    residentProcessManager->StartResidentProcessWithMainElement(bundleInfos);
+    residentProcessManager->StartResidentProcessWithMainElement(bundleInfos, 0);
     AppExecFwk::HapModuleInfo hapModuleInfo;
     std::set<uint32_t> needEraseIndexSet;
     residentProcessManager->CheckMainElement(hapModuleInfo, stringParam, stringParam, needEraseIndexSet, sizeParam);
