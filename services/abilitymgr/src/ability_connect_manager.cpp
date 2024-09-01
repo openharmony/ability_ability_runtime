@@ -93,77 +93,6 @@ bool IsSpecialAbility(const AppExecFwk::AbilityInfo &abilityInfo)
     }
     return false;
 }
-
-std::mutex g_keepAliveAbilitiesMutex;
-std::vector<std::pair<std::string, std::string>> g_keepAliveAbilities;
-void GetKeepAliveAbilities()
-{
-    if (!g_keepAliveAbilities.empty()) {
-        return;
-    }
-    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-    CHECK_POINTER(bundleMgrHelper);
-    std::vector<AppExecFwk::BundleInfo> bundleInfos;
-    bool getBundleInfos = bundleMgrHelper->GetBundleInfos(
-        OHOS::AppExecFwk::GET_BUNDLE_DEFAULT, bundleInfos, USER_ID_NO_HEAD);
-    if (!getBundleInfos) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Handle ability died task, get bundle infos failed.");
-        return;
-    }
-
-    auto checkIsAbilityNeedKeepAlive = [](const AppExecFwk::HapModuleInfo &hapModuleInfo,
-        const std::string &processName, std::string &mainElement) {
-        if (hapModuleInfo.isModuleJson) {
-            // new application model
-            if (hapModuleInfo.process == processName) {
-                mainElement = hapModuleInfo.mainElementName;
-                return true;
-            }
-            return false;
-        }
-
-        // old application model
-        mainElement = hapModuleInfo.mainAbility;
-        for (auto abilityInfo : hapModuleInfo.abilityInfos) {
-            if (abilityInfo.process == processName && abilityInfo.name == mainElement) {
-                return true;
-            }
-        }
-
-        return false;
-    };
-
-    for (const auto &bundleInfo : bundleInfos) {
-        std::string processName = bundleInfo.applicationInfo.process;
-        if (!bundleInfo.isKeepAlive || processName.empty()) {
-            continue;
-        }
-        std::string bundleName = bundleInfo.name;
-        for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
-            std::string mainElement;
-            if (checkIsAbilityNeedKeepAlive(hapModuleInfo, processName, mainElement) && !mainElement.empty()) {
-                g_keepAliveAbilities.emplace_back(bundleName, mainElement);
-            }
-        }
-    }
-}
-
-bool IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo)
-{
-    std::lock_guard guard(g_keepAliveAbilitiesMutex);
-    GetKeepAliveAbilities();
-    for (const auto &pair : g_keepAliveAbilities) {
-        if (abilityInfo.bundleName == pair.first && abilityInfo.name == pair.second) {
-            // Fault tolerance processing, originally returning true here
-            bool keepAliveEnable = true;
-            AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(abilityInfo.bundleName, keepAliveEnable);
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s get keep alive enable: %{public}d",
-                abilityInfo.bundleName.c_str(), static_cast<int32_t>(keepAliveEnable));
-            return keepAliveEnable;
-        }
-    }
-    return false;
-}
 }
 
 AbilityConnectManager::AbilityConnectManager(int userId) : userId_(userId)
@@ -507,14 +436,12 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
     isLoadedAbility = true;
     if (noReuse || targetService == nullptr) {
         targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
-        if (targetService) {
-            targetService->SetOwnerMissionUserId(userId_);
-        }
-
-        if (isCreatedByConnect && targetService != nullptr) {
+        CHECK_POINTER(targetService);
+        targetService->SetOwnerMissionUserId(userId_);
+        if (isCreatedByConnect) {
             targetService->SetCreateByConnectMode();
         }
-        if (targetService && abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
+        if (abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
             targetService->SetLauncherRoot();
             targetService->SetRestartTime(abilityRequest.restartTime);
             targetService->SetRestartCount(abilityRequest.restartCount);
@@ -2098,10 +2025,7 @@ bool AbilityConnectManager::IsAbilityNeedKeepAlive(const std::shared_ptr<Ability
         return true;
     }
 
-    if (IsInKeepAliveList(abilityInfo)) {
-        return true;
-    }
-    return false;
+    return abilityRecord->IsKeepAliveBundle();
 }
 
 void AbilityConnectManager::ClearPreloadUIExtensionRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -2136,6 +2060,11 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
             KillProcessesByUserId();
             return;
         }
+    }
+
+    if (abilityRecord->GetKeepAlive() && userId_ != USER_ID_NO_HEAD && userId_ != currentUserId) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Not current user's ability");
+        return;
     }
 
     if (abilityRecord->IsSceneBoard()) {
@@ -2332,6 +2261,11 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
     requestInfo.restart = true;
     requestInfo.uid = abilityRecord->GetUid();
     abilityRecord->SetRestarting(true);
+    ResidentAbilityInfoGuard residentAbilityInfoGuard;
+    if (abilityRecord->IsKeepAliveBundle()) {
+        residentAbilityInfoGuard.SetResidentAbilityInfo(requestInfo.abilityInfo.bundleName,
+            requestInfo.abilityInfo.name, userId_);
+    }
 
     if (AppUtils::GetInstance().IsLauncherAbility(abilityRecord->GetAbilityInfo().name)) {
         if (currentUserId != userId_) {
@@ -2560,7 +2494,8 @@ void AbilityConnectManager::PauseExtensions()
         for (auto it = serviceMap_.begin(); it != serviceMap_.end();) {
             auto targetExtension = it->second;
             if (targetExtension != nullptr && targetExtension->GetAbilityInfo().type == AbilityType::EXTENSION &&
-                (IsLauncher(targetExtension) || targetExtension->IsSceneBoard())) {
+                (IsLauncher(targetExtension) || targetExtension->IsSceneBoard() ||
+                (targetExtension->GetKeepAlive() && userId_ != USER_ID_NO_HEAD))) {
                 terminatingExtensionList_.push_back(it->second);
                 it = serviceMap_.erase(it);
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "terminate ability:%{public}s.",

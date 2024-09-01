@@ -22,8 +22,9 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-const int LOAD_CONFIGURATION_FAILED = -1;
-const int LOAD_CONFIGURATION_SUCCESS = 0;
+constexpr int32_t LOAD_CONFIGURATION_FAILED = -1;
+constexpr int32_t LOAD_CONFIGURATION_SUCCESS = 0;
+constexpr int32_t MAX_RESIDENT_WHITE_LIST_SIZE = 100;
 }
 
 AmsConfigurationParameter::AmsConfigurationParameter() {}
@@ -217,6 +218,7 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
     LoadSystemConfiguration(amsJson);
     LoadBackToCallerConfig(amsJson);
     SetPickerJsonObject(amsJson);
+    LoadResidentWhiteListConfig(amsJson);
     amsJson.clear();
     inFile.close();
 
@@ -330,6 +332,43 @@ void AmsConfigurationParameter::UpdateStartUpServiceConfigString(nlohmann::json&
 int AmsConfigurationParameter::MultiUserType() const
 {
     return multiUserType_;
+}
+
+void AmsConfigurationParameter::LoadResidentWhiteListConfig(nlohmann::json& Object)
+{
+    if (!Object.contains(AmsConfig::RESIDENT_WHITE_LIST)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "no normal_resident_apps");
+        return;
+    }
+    const auto &whiteListJson = Object.at(AmsConfig::RESIDENT_WHITE_LIST);
+    if (!whiteListJson.is_array()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "normal_resident_apps type error");
+        return;
+    }
+    auto size = whiteListJson.size();
+    if (size > MAX_RESIDENT_WHITE_LIST_SIZE) {
+        size = MAX_RESIDENT_WHITE_LIST_SIZE;
+    }
+    for (decltype(size) i = 0; i < size; i++) {
+        const auto &item = whiteListJson.at(i);
+        if (item.is_string()) {
+            residentWhiteList_.push_back(item.get<std::string>());
+        }
+    }
+}
+
+bool AmsConfigurationParameter::InResidentWhiteList(const std::string &bundleName) const
+{
+    if (residentWhiteList_.empty()) {
+        return true;
+    }
+
+    for (const auto &item: residentWhiteList_) {
+        if (bundleName == item) {
+            return true;
+        }
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
