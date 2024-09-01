@@ -99,6 +99,43 @@ bool StartAbilityUtils::GetCallerAbilityInfo(const sptr<IRemoteObject> &callerTo
     return true;
 }
 
+int32_t StartAbilityUtils::CheckAppProvisionMode(const std::string& bundleName, int32_t userId)
+{
+    AppExecFwk::ApplicationInfo appInfo;
+    if (!GetApplicationInfo(bundleName, userId, appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get application info failed: %{public}s", bundleName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (appInfo.appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+        return ERR_NOT_IN_APP_PROVISION_MODE;
+    }
+    return ERR_OK;
+}
+
+int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userId)
+{
+    auto abilityInfo = StartAbilityUtils::startAbilityInfo;
+    if (!abilityInfo || abilityInfo->GetAppBundleName() != want.GetElement().GetBundleName()) {
+        int32_t appIndex = 0;
+        if (!AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid app clone index");
+            return ERR_APP_CLONE_INDEX_INVALID;
+        }
+        abilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want, userId, appIndex);
+    }
+    CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);
+    if (abilityInfo->status != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unexpected abilityInfo status: %{public}d", abilityInfo->status);
+        return abilityInfo->status;
+    }
+    if ((abilityInfo->abilityInfo).applicationInfo.appProvisionType !=
+        AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "window options invalid");
+        return ERR_NOT_IN_APP_PROVISION_MODE;
+    }
+    return ERR_OK;
+}
+
 std::vector<int32_t> StartAbilityUtils::GetCloneAppIndexes(const std::string &bundleName, int32_t userId)
 {
     std::vector<int32_t> appIndexes;
