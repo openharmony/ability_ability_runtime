@@ -2348,14 +2348,12 @@ int32_t UIAbilityLifecycleManager::DoProcessAttachment(std::shared_ptr<AbilityRe
     return statusBarDelegateManager->DoProcessAttachment(abilityRecord);
 }
 
-int32_t UIAbilityLifecycleManager::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids)
+int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<int32_t>& pids)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "do prepare terminate.");
-    std::vector<int32_t> pidsToKill;
     IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->BlockProcessCacheByPids(pids));
     for (const auto& pid: pids) {
-        bool needKillProcess = true;
         std::unordered_set<std::shared_ptr<AbilityRecord>> abilitysToTerminate;
         std::vector<sptr<IRemoteObject>> tokens;
         IN_PROCESS_CALL_WITHOUT_RET(
@@ -2364,22 +2362,13 @@ int32_t UIAbilityLifecycleManager::KillProcessWithPrepareTerminate(const std::ve
             auto abilityRecord = Token::GetAbilityRecordByToken(token);
             if (PrepareTerminateAbility(abilityRecord)) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "Terminate is blocked.");
-                needKillProcess = false;
                 continue;
             }
             abilitysToTerminate.emplace(abilityRecord);
         }
-        if (needKillProcess) {
-            pidsToKill.push_back(pid);
-            continue;
-        }
         for (const auto& abilityRecord: abilitysToTerminate) {
             TerminateSession(abilityRecord);
         }
-    }
-    if (!pidsToKill.empty()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "kill process.");
-        IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByPids(pidsToKill));
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "end.");
     return ERR_OK;

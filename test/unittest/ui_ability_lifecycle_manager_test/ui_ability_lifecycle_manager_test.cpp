@@ -3305,16 +3305,16 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MoveMissionToFront_004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_KillProcessWithPrepareTerminate_0100
- * @tc.desc: KillProcessWithPrepareTerminate
+ * @tc.name: UIAbilityLifecycleManager_TryPrepareTerminateByPids_0100
+ * @tc.desc: TryPrepareTerminateByPids
  * @tc.type: FUNC
  */
-HWTEST_F(UIAbilityLifecycleManagerTest, KillProcessWithPrepareTerminate_001, TestSize.Level1)
+HWTEST_F(UIAbilityLifecycleManagerTest, TryPrepareTerminateByPids_001, TestSize.Level1)
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::vector<int32_t> pids;
-    EXPECT_EQ(uiAbilityLifecycleManager->KillProcessWithPrepareTerminate(pids), ERR_OK);
+    EXPECT_EQ(uiAbilityLifecycleManager->TryPrepareTerminateByPids(pids), ERR_OK);
 }
 
 /**
