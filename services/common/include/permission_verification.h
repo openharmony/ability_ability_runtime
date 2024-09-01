@@ -103,8 +103,6 @@ struct VerificationInfo {
 
     bool VerifyKillProcessDependedOnWebPermission() const;
 
-    bool VerifyStartNativeChildProcessPermission() const;
-
     bool VerifyBackgroundCallPermission(const bool isBackgroundCall) const;
 
 private:

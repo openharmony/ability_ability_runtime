@@ -732,6 +732,7 @@ public:
     void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
+    int32_t GetChildProcessCount();
 
     void SetPreloadState(PreloadState state);
 
