@@ -46,11 +46,11 @@ public:
      */
     int32_t SetResidentProcessEnabled(const std::string &bundleName, const std::string &callerName, bool updateEnable);
     void StartResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos);
-    void StartResidentProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos);
+    void StartResidentProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
     void OnAppStateChanged(const AppInfo &info);
 private:
     bool CheckMainElement(const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &processName,
-        std::string &mainElement, std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex);
+        std::string &mainElement, std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex, int32_t userId = 0);
     void UpdateResidentProcessesStatus(const std::string &bundleName, bool localEnable, bool updateEnable);
 };
 }  // namespace AAFwk

@@ -2130,8 +2130,6 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     }
 
     appRecord->SetProcessAndExtensionType(abilityInfo);
-    bool isKeepAlive = bundleInfo.isKeepAlive && bundleInfo.singleton;
-    appRecord->SetKeepAliveEnableState(isKeepAlive);
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
@@ -6438,7 +6436,8 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
             return;
         }
         if (!AAFwk::AppUtils::GetInstance().IsAllowResidentInExtremeMemory(appRecord->GetBundleName()) &&
-            ExitResidentProcessManager::GetInstance().RecordExitResidentBundleName(appRecord->GetBundleName())) {
+            ExitResidentProcessManager::GetInstance().RecordExitResidentBundleName(appRecord->GetBundleName(),
+                appRecord->GetUid())) {
             TAG_LOGI(AAFwkTag::APPMGR, "memory size insufficent");
             return;
         }
@@ -7248,20 +7247,20 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
         }
         return ret;
     }
-    std::vector<std::string> exitBundleNames;
-    auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficent(exitBundleNames);
+    std::vector<ExitResidentProcessInfo> exitProcessInfos;
+    auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficient(exitProcessInfos);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handleMemorySizeSufficent fail, ret: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::APPMGR, "HandleMemorySizeSufficient fail, ret: %{public}d", ret);
         return ret;
     }
-    auto StartExitKeepAliveProcessTask = [exitBundleNames, innerServicerWeak = weak_from_this()]() {
+    auto StartExitKeepAliveProcessTask = [exitProcessInfos, innerServicerWeak = weak_from_this()]() {
         auto innerServicer = innerServicerWeak.lock();
         if (!innerServicer) {
             TAG_LOGE(AAFwkTag::APPMGR, "get appMgrServiceInner fail");
             return;
         }
         std::vector<AppExecFwk::BundleInfo> exitBundleInfos;
-        ExitResidentProcessManager::GetInstance().QueryExitBundleInfos(exitBundleNames, exitBundleInfos);
+        ExitResidentProcessManager::GetInstance().QueryExitBundleInfos(exitProcessInfos, exitBundleInfos);
 
         innerServicer->NotifyStartResidentProcess(exitBundleInfos);
     };
@@ -7541,7 +7540,8 @@ void AppMgrServiceInner::KillProcessDependedOnWeb()
         std::string bundleName = appRecord->GetBundleName();
         pid_t pid = appRecord->GetPriorityObject()->GetPid();
         if (appRecord->IsKeepAliveApp()) {
-            ExitResidentProcessManager::GetInstance().RecordExitResidentBundleDependedOnWeb(bundleName);
+            ExitResidentProcessManager::GetInstance().RecordExitResidentBundleDependedOnWeb(bundleName,
+                appRecord->GetUid());
         }
         KillProcessByPid(pid, "KillProcessDependedOnWeb");
     }
@@ -7550,7 +7550,7 @@ void AppMgrServiceInner::KillProcessDependedOnWeb()
 void AppMgrServiceInner::RestartResidentProcessDependedOnWeb()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
-    std::vector<std::string> bundleNames;
+    std::vector<ExitResidentProcessInfo> bundleNames;
     ExitResidentProcessManager::GetInstance().HandleExitResidentBundleDependedOnWeb(bundleNames);
     if (bundleNames.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "exit resident bundle names empty");
