@@ -1013,7 +1013,7 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
     }
 #ifdef SUPPORT_SCREEN
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLocale(), status);
     resConfig->SetLocaleInfo(locale);
     if (resConfig->GetLocaleInfo() != nullptr) {
         TAG_LOGD(AAFwkTag::APPKIT,
