@@ -10490,8 +10490,15 @@ int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName)
         return CHECK_PERMISSION_FAILED;
     }
 
+    int32_t err = ERR_OK;
+    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    if ((err = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAppProvisionMode returns errcode=%{public}d", err);
+        return err;
+    }
+
     ConnectInitAbilityDebugDeal();
-    return DelayedSingleton<AppScheduler>::GetInstance()->AttachAppDebug(bundleName);
+    return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->AttachAppDebug(bundleName));
 }
 
 int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName)
@@ -10503,7 +10510,14 @@ int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName)
         return CHECK_PERMISSION_FAILED;
     }
 
-    return DelayedSingleton<AppScheduler>::GetInstance()->DetachAppDebug(bundleName);
+    int32_t err = ERR_OK;
+    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    if ((err = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAppProvisionMode returns errcode=%{public}d", err);
+        return err;
+    }
+
+    return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->DetachAppDebug(bundleName));
 }
 
 int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,

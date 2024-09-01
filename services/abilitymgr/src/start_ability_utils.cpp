@@ -94,6 +94,19 @@ bool StartAbilityUtils::GetCallerAbilityInfo(const sptr<IRemoteObject> &callerTo
     return true;
 }
 
+int32_t StartAbilityUtils::CheckAppProvisionMode(const std::string& bundleName, int32_t userId)
+{
+    AppExecFwk::ApplicationInfo appInfo;
+    if (!GetApplicationInfo(bundleName, userId, appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get application info failed: %{public}s", bundleName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (appInfo.appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+        return ERR_NOT_IN_APP_PROVISION_MODE;
+    }
+    return ERR_OK;
+}
+
 int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userId)
 {
     auto abilityInfo = StartAbilityUtils::startAbilityInfo;
