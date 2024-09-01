@@ -33,12 +33,11 @@ enum class ChildProcessManagerErrorCode {
     ERR_GET_APP_MGR_FAILED = 6,
     ERR_APP_MGR_FAILED_INNER = 7,
     ERR_UNSUPPORT_NATIVE_CHILD_PROCESS = 8,
-    ERR_MAX_NATIVE_CHILD_PROCESSES = 9,
+    ERR_MAX_CHILD_PROCESSES = 9,
     ERR_LIB_LOADING_FAILED = 10,
     ERR_CONNECTION_FAILED = 11,
     ERR_UNSUPPORTED_START_MODE = 12,
     ERR_MULTI_PROCESS_MODEL_DISABLED_NEW = 13,
-    ERR_PERMISSION_DENIED = 14,
 };
 
 const std::map<ChildProcessManagerErrorCode, AbilityErrorCode> INTERNAL_ERR_CODE_MAP = {
@@ -55,16 +54,14 @@ const std::map<ChildProcessManagerErrorCode, AbilityErrorCode> INTERNAL_ERR_CODE
     { ChildProcessManagerErrorCode::ERR_UNSUPPORTED_START_MODE, AbilityErrorCode::ERROR_CODE_INVALID_PARAM },
     { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW,
         AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT },
-    { ChildProcessManagerErrorCode::ERR_MAX_NATIVE_CHILD_PROCESSES,
+    { ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES,
         AbilityErrorCode::ERROR_CODE_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND },
-    { ChildProcessManagerErrorCode::ERR_PERMISSION_DENIED, AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED },
 };
 
 const std::map<int32_t, ChildProcessManagerErrorCode> ABILITY_MANAGER_ERR_CODE_MAP = {
-    { ERR_PERMISSION_DENIED, ChildProcessManagerErrorCode::ERR_PERMISSION_DENIED },
     { AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS, ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW },
     { AAFwk::ERR_ALREADY_IN_CHILD_PROCESS, ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS },
-    { AAFwk::ERR_NATIVE_ARGS_CHILD_PROCESS_REACH_LIMIT, ChildProcessManagerErrorCode::ERR_MAX_NATIVE_CHILD_PROCESSES },
+    { AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT, ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES },
 };
 
 class ChildProcessManagerErrorUtil {

@@ -2159,6 +2159,12 @@ std::map<int32_t, std::shared_ptr<ChildProcessRecord>> AppRunningRecord::GetChil
     return childProcessRecordMap_;
 }
 
+int32_t AppRunningRecord::GetChildProcessCount()
+{
+    std::lock_guard lock(childProcessRecordMapLock_);
+    return childProcessRecordMap_.size();
+}
+
 void AppRunningRecord::SetJITEnabled(const bool jitEnabled)
 {
     jitEnabled_ = jitEnabled;

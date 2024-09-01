@@ -103,8 +103,6 @@ struct VerificationInfo {
 
     bool VerifyKillProcessDependedOnWebPermission() const;
 
-    bool VerifyStartNativeChildProcessPermission() const;
-
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
 
