@@ -112,9 +112,9 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessWithArgs(
     const AppExecFwk::ChildProcessOptions &options)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "StartChildProcessWithArgs, childProcessType:%{public}d, startWitDebug: %{public}d,"
-        " processName:%{public}s, native:%{public}d, entryParams:%{private}s, fdsSize:%{public}zu,"
+        " processName:%{public}s, native:%{public}d, entryParams size:%{public}zu, fdsSize:%{public}zu,"
         " options.isolationMode:%{public}d", childProcessType, g_debugOption.isStartWithDebug,
-        g_debugOption.processName.c_str(), g_debugOption.isStartWithNative, args.entryParams.c_str(), args.fds.size(),
+        g_debugOption.processName.c_str(), g_debugOption.isStartWithNative, args.entryParams.length(), args.fds.size(),
         options.isolationMode);
     ChildProcessManagerErrorCode errorCode = PreCheck(childProcessType);
     if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
@@ -166,7 +166,7 @@ ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSp
         TAG_LOGE(AAFwkTag::PROCESSMGR, "StartNativeChildProcess error:%{public}d", ret);
         if (ret == ERR_OVERFLOW) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "Max native child processes readched");
-            return ChildProcessManagerErrorCode::ERR_MAX_NATIVE_CHILD_PROCESSES;
+            return ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES;
         }
         return ChildProcessManagerErrorCode::ERR_APP_MGR_FAILED_INNER;
     }

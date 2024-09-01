@@ -33,13 +33,12 @@ constexpr size_t MAX_FD_SIZE = 16;
 
 const std::map<ChildProcessManagerErrorCode, Ability_NativeChildProcess_ErrCode> CPM_ERRCODE_MAP = {
     { ChildProcessManagerErrorCode::ERR_OK, NCP_NO_ERROR },
-    { ChildProcessManagerErrorCode::ERR_PERMISSION_DENIED, NCP_ERR_NO_PERMISSION },
     { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED, NCP_ERR_MULTI_PROCESS_DISABLED },
     { ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS, NCP_ERR_ALREADY_IN_CHILD },
     { ChildProcessManagerErrorCode::ERR_GET_APP_MGR_FAILED, NCP_ERR_SERVICE_ERROR },
     { ChildProcessManagerErrorCode::ERR_APP_MGR_FAILED_INNER, NCP_ERR_SERVICE_ERROR },
     { ChildProcessManagerErrorCode::ERR_UNSUPPORT_NATIVE_CHILD_PROCESS, NCP_ERR_NOT_SUPPORTED },
-    { ChildProcessManagerErrorCode::ERR_MAX_NATIVE_CHILD_PROCESSES, NCP_ERR_MAX_CHILD_PROCESSES_REACHED },
+    { ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES, NCP_ERR_MAX_CHILD_PROCESSES_REACHED },
     { ChildProcessManagerErrorCode::ERR_LIB_LOADING_FAILED, NCP_ERR_LIB_LOADING_FAILED },
     { ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED, NCP_ERR_CONNECTION_FAILED },
     { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW, NCP_ERR_NOT_SUPPORTED },
