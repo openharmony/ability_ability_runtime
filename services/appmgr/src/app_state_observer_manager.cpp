@@ -534,7 +534,7 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
-    if (data.bundleName == XIAOYI_BUNDLE_NAME) {
+    if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "bundleName is com.huawei.chmos.vassistant, change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
     }
@@ -599,7 +599,7 @@ void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
-    if (data.bundleName == XIAOYI_BUNDLE_NAME) {
+    if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "bundleName is com.huawei.chmos.vassistant, change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
     }
