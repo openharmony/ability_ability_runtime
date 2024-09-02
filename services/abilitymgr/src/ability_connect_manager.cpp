@@ -272,13 +272,6 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         EnqueueStartServiceReq(abilityRequest);
         return ERR_OK;
     }
-
-    sptr<Token> token = targetService->GetToken();
-    sptr<Token> preToken = nullptr;
-    if (targetService->GetPreAbilityRecord()) {
-        preToken = targetService->GetPreAbilityRecord()->GetToken();
-    }
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(token, preToken, 0, 1, 1);
     return ERR_OK;
 }
 
@@ -665,10 +658,6 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
         TAG_LOGD(AAFwkTag::ABILITYMGR, "TargetService active");
         targetService->SaveConnectWant(abilityRequest.want);
     }
-
-    auto token = targetService->GetToken();
-    auto preToken = iface_cast<Token>(connectRecord->GetToken());
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(token, preToken, 0, 1, 1);
     return ret;
 }
 

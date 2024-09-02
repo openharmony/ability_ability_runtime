@@ -301,8 +301,6 @@ int DataAbilityRecord::RemoveClients(const std::shared_ptr<AbilityRecord> &clien
                     continue;
                 }
                 if (clientAbilityRecord == client) {
-                    appScheduler->AbilityBehaviorAnalysis(
-                        ability_->GetToken(), clientAbilityRecord->GetToken(), 0, 0, 0);
                     it = clients_.erase(it);
                     TAG_LOGI(AAFwkTag::DATA_ABILITY,
                         "Ability '%{public}s|%{public}s' --X-> Data ability '%{public}s|%{public}s'",
@@ -328,7 +326,6 @@ int DataAbilityRecord::RemoveClients(const std::shared_ptr<AbilityRecord> &clien
                     it = clients_.erase(it);
                     continue;
                 }
-                appScheduler->AbilityBehaviorAnalysis(ability_->GetToken(), clientAbilityRecord->GetToken(), 0, 0, 0);
                 it = clients_.erase(it);
             } else {
                 ++it;
