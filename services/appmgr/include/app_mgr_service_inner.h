@@ -75,12 +75,14 @@ struct LoadParam;
 }
 namespace Rosen {
 class WindowVisibilityInfo;
+class WindowPidVisibilityInfo;
 class FocusChangeInfo;
 }
 namespace AppExecFwk {
 using OHOS::AAFwk::Want;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
+class WindowPidVisibilityChangedListener;
 using LoadAbilityTaskFunc = std::function<void()>;
 constexpr int32_t BASE_USER_RANGE = 200000;
 
@@ -271,7 +273,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = true);
+    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = false);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -301,7 +303,7 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
 
-    virtual int32_t KillApplicationSelf(const bool clearPageStack = true);
+    virtual int32_t KillApplicationSelf(const bool clearPageStack = false);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -313,7 +315,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const bool clearPageStack = true);
+        const bool clearPageStack = false);
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -789,6 +791,11 @@ public:
      */
     void HandleWindowVisibilityChanged(
             const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
+
+    /**
+     * Handle window pid visibility changed.
+     */
+    void HandleWindowPidVisibilityChanged(const sptr<OHOS::Rosen::WindowPidVisibilityInfo>& windowPidVisibilityInfo);
 #endif //SUPPORT_SCREEN
     /**
      * Set the current userId, only used by abilityMgr.
@@ -880,6 +887,16 @@ public:
      * Free window visibility changed listener.
      */
     void FreeWindowVisibilityChangedListener();
+
+    /**
+     * Init window pid visibility changed listener.
+     */
+    void InitWindowPidVisibilityChangedListener();
+
+    /**
+     * Free window pid visibility changed listener.
+     */
+    void FreeWindowPidVisibilityChangedListener();
 
     /*
      * @brief Notify NativeEngine GC of status change.
@@ -1014,12 +1031,12 @@ public:
     /**
      * Start child process, called by ChildProcessManager.
      *
-     * @param hostPid Host process pid.
+     * @param callingPid Calling process pid.
      * @param childPid Created child process pid.
      * @param request Child process start request params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartChildProcess(const pid_t hostPid, pid_t &childPid, const ChildProcessRequest &request);
+    virtual int32_t StartChildProcess(const pid_t callingPid, pid_t &childPid, const ChildProcessRequest &request);
 
     /**
      * Get child process record for self.
@@ -1114,6 +1131,8 @@ public:
     virtual int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
+    
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
 
@@ -1160,6 +1179,8 @@ public:
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
+    bool IsAppKilling(sptr<IRemoteObject> token) const;
 
     /**
      * Get pids of processes which belong to specific bundle name and support process cache feature.
@@ -1255,7 +1276,7 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearPageStack = true);
+        const bool clearPageStack = false);
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1350,9 +1371,7 @@ private:
     void ApplicationTerminatedSendProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    int32_t StartChildProcessPreCheckNative(const pid_t callingPid);
-
-    int32_t StartChildProcessPreCheck(pid_t callingPid, const ChildProcessRequest &request);
+    int32_t StartChildProcessPreCheck(pid_t callingPid, int32_t childProcessType);
 
     int32_t StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args,
@@ -1389,7 +1408,7 @@ private:
     bool CheckGetRunningInfoPermission() const;
 
     int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearPageStack = true);
+        const std::string &bundleName, const bool clearPageStack = false);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -1528,6 +1547,7 @@ private:
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
+    void DealMultiUserConfig(const Configuration &config, const int32_t userId);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
@@ -1547,6 +1567,7 @@ private:
 #ifdef SUPPORT_SCREEN
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
+    sptr<WindowPidVisibilityChangedListener> windowPidVisibilityChangedListener_;
 #endif //SUPPORT_SCREEN
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;

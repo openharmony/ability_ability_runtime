@@ -61,5 +61,15 @@ bool ProcessInfo::Marshalling(Parcel &parcel) const
 {
     return (parcel.WriteString16(Str8ToStr16(processName_)) && parcel.WriteInt32(pid_));
 }
+
+void ProcessInfo::SetProcessType(const ProcessType &processType)
+{
+    processType_ = processType;
+}
+
+ProcessType ProcessInfo::GetProcessType() const
+{
+    return processType_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

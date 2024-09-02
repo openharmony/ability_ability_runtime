@@ -27,6 +27,7 @@ template("delegator") {
       "${ability_runtime_path}/interfaces/kits/native/appkit/ability_delegator/",
       "${ability_runtime_path}/interfaces/kits/native/ability/native",
       "${ability_runtime_path}/tools/aa/include",
+      # "${simulator_path}/common/include",
     ]
 
     sources = [
@@ -52,6 +53,8 @@ template("delegator") {
       "ability_base:want",
       "c_utils:utils",
       "common_event_service:cesfwk_innerkits",
+      "ets_runtime:libark_jsruntime",
+      # "eventhandler:libeventhandler",
       "hilog:libhilog",
       "hitrace:hitrace_meter",
       "napi:ace_napi",

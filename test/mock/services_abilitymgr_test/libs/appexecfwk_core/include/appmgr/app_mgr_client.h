@@ -123,7 +123,7 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplication(const std::string& bundleName, const bool clearPageStack = true);
+    virtual AppMgrResultCode KillApplication(const std::string& bundleName, const bool clearPageStack = false);
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,

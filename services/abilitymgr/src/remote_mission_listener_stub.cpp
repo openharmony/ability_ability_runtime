@@ -32,7 +32,7 @@ int RemoteMissionListenerStub::OnRemoteRequest(
     std::u16string descriptor = RemoteMissionListenerStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "RemoteMissionListenerStub Local descriptor is not equal to remote");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "descriptor invalid");
         return ERR_INVALID_STATE;
     }
 

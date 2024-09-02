@@ -85,11 +85,11 @@ private:
         auto me = shared_from_this();
         deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new AppMgrDeathRecipient(me));
         if (deathRecipient_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s :Failed to create AppMgrDeathRecipient!", __func__);
+            TAG_LOGE(AAFwkTag::APPMGR, "create AppMgrDeathRecipient failed");
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
         if ((remote_->IsProxyObject()) && (!remote_->AddDeathRecipient(deathRecipient_))) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s :Add death recipient to AppMgrService failed.", __func__);
+            TAG_LOGE(AAFwkTag::APPMGR, "AddDeathRecipient to AppMs failed");
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
 
@@ -1231,6 +1231,17 @@ int32_t AppMgrClient::SetSupportedProcessCacheSelf(bool isSupport)
     return service->SetSupportedProcessCacheSelf(isSupport);
 }
 
+int32_t AppMgrClient::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->SetSupportedProcessCache(pid, isSupport);
+}
+
 void AppMgrClient::SaveBrowserChannel(sptr<IRemoteObject> browser)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1342,6 +1353,19 @@ bool AppMgrClient::IsProcessAttached(sptr<IRemoteObject> token) const
         return false;
     }
     return amsService->IsProcessAttached(token);
+}
+
+bool AppMgrClient::IsAppKilling(sptr<IRemoteObject> token) const
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return false;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        return false;
+    }
+    return amsService->IsAppKilling(token);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

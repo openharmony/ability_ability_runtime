@@ -26,7 +26,7 @@ bool SenderInfo::ReadFromParcel(Parcel &parcel)
     code = parcel.ReadInt32();
     std::unique_ptr<Want> wantResquest(parcel.ReadParcelable<Want>());
     if (wantResquest == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "wantResquest is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null wantResquest");
         return false;
     }
     want = *wantResquest;
@@ -35,12 +35,12 @@ bool SenderInfo::ReadFromParcel(Parcel &parcel)
     if (parcel.ReadBool()) {
         sptr<IRemoteObject> finishedReceiverResquest = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
         if (finishedReceiverResquest == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object is nullptr.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote object");
             return false;
         }
         finishedReceiver = iface_cast<IWantReceiver>(finishedReceiverResquest);
         if (!finishedReceiver) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "receiver is nullptr.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null receiver");
             return false;
         }
     }
@@ -57,12 +57,12 @@ SenderInfo *SenderInfo::Unmarshalling(Parcel &parcel)
 
     SenderInfo *info = new (std::nothrow) SenderInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "senderInfo is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null senderInfo");
         return nullptr;
     }
 
     if (!info->ReadFromParcel(parcel)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReadFromParcel failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReadFromParcel failed");
         delete info;
         info = nullptr;
     }
@@ -74,42 +74,42 @@ bool SenderInfo::Marshalling(Parcel &parcel) const
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
 
     if (!parcel.WriteInt32(code)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write code");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write code failed");
         return false;
     }
     if (!parcel.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write want");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want failed");
         return false;
     }
     if (!parcel.WriteString16(Str8ToStr16(resolvedType))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write resolvedType");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resolvedType failed");
         return false;
     }
     if (!parcel.WriteBool(finishedReceiver != nullptr)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write the flag which indicate whether receiver is null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag failed");
         return false;
     }
     if (finishedReceiver) {
         if (finishedReceiver->AsObject() == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "finishedReceiver->AsObject is null");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null object");
             return false;
         }
         if (!(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(finishedReceiver->AsObject())) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write receiver");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write receiver failed");
             return false;
         }
     }
     if (!parcel.WriteString16(Str8ToStr16(requiredPermission))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write requiredPermission");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write requiredPermission failed");
         return false;
     }
     if (!parcel.WriteBool(startOptions != nullptr)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write the flag which indicate whether startOptions is null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag failed");
         return false;
     }
     if (startOptions) {
         if (!parcel.WriteParcelable(startOptions)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write startOptions");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write startOptions failed");
             return false;
         }
     }

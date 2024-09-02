@@ -547,6 +547,7 @@ public:
     void SetEmptyKeepAliveAppState(bool isEmptyKeepAliveApp);
 
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
+    void SetKeepAliveBundle(bool isKeepAliveBundle);
 
     void SetMainProcess(bool isMainProcess);
 
@@ -732,6 +733,7 @@ public:
     void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
+    int32_t GetChildProcessCount();
 
     void SetPreloadState(PreloadState state);
 
@@ -891,7 +893,8 @@ private:
         }
     };
 
-    bool isKeepAliveApp_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
@@ -954,7 +957,7 @@ private:
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
-    bool isKilling_ = false;
+    std::atomic<bool> isKilling_ = false;
     bool isContinuousTask_ = false;    // Only continuesTask processes can be set to true, please choose carefully
     std::atomic_bool isSpawned_ = false;
 

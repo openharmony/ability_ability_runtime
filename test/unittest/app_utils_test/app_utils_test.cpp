@@ -283,5 +283,33 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1200, TestSize.Level0)
         EXPECT_TRUE(enableMoveUIAbilityToBackgroundApi == false);
     }
 }
+
+/**
+ * @tc.number: AppUtilsTest_1300
+ * @tc.desc: Test MaxChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_1300, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1300 called.");
+    auto maxChildProcess = AAFwk::AppUtils::GetInstance().MaxChildProcess();
+    std::string deviceType = OHOS::system::GetDeviceType();
+    TAG_LOGI(AAFwkTag::TEST, "current deviceType is %{public}s", deviceType.c_str());
+    if (deviceType == "phone" || deviceType == "2in1") {
+        EXPECT_TRUE(maxChildProcess != 0);
+    }
+}
+
+/**
+ * @tc.number: AppUtilsTest_1400
+ * @tc.desc: Test IsAllowNativeChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_1400, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1400 called.");
+    auto allow = AAFwk::AppUtils::GetInstance().IsAllowNativeChildProcess("com.test.demo");
+    EXPECT_FALSE(allow);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

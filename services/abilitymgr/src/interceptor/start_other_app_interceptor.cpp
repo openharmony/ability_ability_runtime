@@ -69,14 +69,14 @@ ErrCode StartOtherAppInterceptor::DoProcess(AbilityInterceptorParam param)
         if (IsDelegatorCall(param.want)) {
             return ERR_OK;
         }
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not find caller info");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not find callerInfo");
         return ERR_INVALID_CALLER;
     }
 
     if (CheckCallerApiBelow12(callerApplicationInfo)) {
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start other app when api version is above 11");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "not call others api above 11");
     return ERR_START_OTHER_APP_FAILED;
 }
 
