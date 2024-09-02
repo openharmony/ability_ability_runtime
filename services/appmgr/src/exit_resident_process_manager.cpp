@@ -24,7 +24,8 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr int32_t U0_USER_ID = 0;
+// constexpr int32_t U0_USER_ID = 0;
+constexpr int32_t BASE_USER_RANGE = 200000;
 }
 ExitResidentProcessManager::~ExitResidentProcessManager() {}
 
@@ -39,80 +40,79 @@ ExitResidentProcessManager &ExitResidentProcessManager::GetInstance()
 bool ExitResidentProcessManager::IsMemorySizeSufficent() const
 {
     std::lock_guard<ffrt::mutex> lock(mutexLock_);
-    return currentMemorySizeState_ == MemorySizeState::MEMORY_SIZE_SUFFICENT;
+    return currentMemorySizeState_ == MemorySizeState::MEMORY_SIZE_SUFFICIENT;
 }
 
-bool ExitResidentProcessManager::RecordExitResidentBundleName(const std::string &bundleName)
+bool ExitResidentProcessManager::RecordExitResidentBundleName(const std::string &bundleName, int32_t uid)
 {
     std::lock_guard<ffrt::mutex> lock(mutexLock_);
-    if (currentMemorySizeState_ == MemorySizeState::MEMORY_SIZE_SUFFICENT) {
+    if (currentMemorySizeState_ == MemorySizeState::MEMORY_SIZE_SUFFICIENT) {
         return false;
     }
-    exitResidentBundleNames_.emplace_back(bundleName);
+    exitResidentInfos_.emplace_back(bundleName, uid);
     return true;
 }
 
-void ExitResidentProcessManager::RecordExitResidentBundleDependedOnWeb(const std::string &bundleName)
+void ExitResidentProcessManager::RecordExitResidentBundleDependedOnWeb(const std::string &bundleName, int32_t uid)
 {
     std::lock_guard<ffrt::mutex> lock(webMutexLock_);
     TAG_LOGE(AAFwkTag::APPMGR, "call");
-    exitResidentBundlesDependedOnWeb_.emplace_back(bundleName);
+    exitResidentBundlesDependedOnWeb_.emplace_back(bundleName, uid);
 }
 
 int32_t ExitResidentProcessManager::HandleMemorySizeInSufficent()
 {
     std::lock_guard<ffrt::mutex> lock(mutexLock_);
-    if (currentMemorySizeState_ != MemorySizeState::MEMORY_SIZE_SUFFICENT) {
-        TAG_LOGE(AAFwkTag::APPMGR, "memory size is insufficent");
+    if (currentMemorySizeState_ != MemorySizeState::MEMORY_SIZE_SUFFICIENT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "memory size is insufficient");
         return AAFwk::ERR_NATIVE_MEMORY_SIZE_STATE_UNCHANGED;
     }
-    currentMemorySizeState_ = MemorySizeState::MEMORY_SIZE_INSUFFICENT;
+    currentMemorySizeState_ = MemorySizeState::MEMORY_SIZE_INSUFFICIENT;
     return ERR_OK;
 }
 
-int32_t ExitResidentProcessManager::HandleMemorySizeSufficent(std::vector<std::string>& bundleNames)
+int32_t ExitResidentProcessManager::HandleMemorySizeSufficient(std::vector<ExitResidentProcessInfo>& processInfos)
 {
     std::lock_guard<ffrt::mutex> lock(mutexLock_);
-    if (currentMemorySizeState_ == MemorySizeState::MEMORY_SIZE_SUFFICENT) {
-        TAG_LOGE(AAFwkTag::APPMGR, "memory size is sufficent");
+    if (currentMemorySizeState_ == MemorySizeState::MEMORY_SIZE_SUFFICIENT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "memory size is sufficient");
         return AAFwk::ERR_NATIVE_MEMORY_SIZE_STATE_UNCHANGED;
     }
-    currentMemorySizeState_ = MemorySizeState::MEMORY_SIZE_SUFFICENT;
-    bundleNames = exitResidentBundleNames_;
-    exitResidentBundleNames_.clear();
+    currentMemorySizeState_ = MemorySizeState::MEMORY_SIZE_SUFFICIENT;
+    processInfos = std::move(exitResidentInfos_);
     return ERR_OK;
 }
 
-void ExitResidentProcessManager::HandleExitResidentBundleDependedOnWeb(std::vector<std::string>& bundleNames)
+void ExitResidentProcessManager::HandleExitResidentBundleDependedOnWeb(
+    std::vector<ExitResidentProcessInfo> &bundleNames)
 {
     std::lock_guard<ffrt::mutex> lock(webMutexLock_);
     TAG_LOGE(AAFwkTag::APPMGR, "call");
-    bundleNames = exitResidentBundlesDependedOnWeb_;
-    exitResidentBundlesDependedOnWeb_.clear();
+    bundleNames = std::move(exitResidentBundlesDependedOnWeb_);
 }
 
-void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<std::string>& exitBundleNames,
+void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<ExitResidentProcessInfo> &exitProcessInfos,
     std::vector<AppExecFwk::BundleInfo>& exitBundleInfos)
 {
     AppExecFwk::BundleInfo bundleInfo;
     std::shared_ptr<RemoteClientManager> remoteClientManager = std::make_shared<RemoteClientManager>();
     if (remoteClientManager == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The remoteClientManager is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null remoteClientManager");
         return;
     }
     auto bundleMgrHelper = remoteClientManager->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null bundleMgrHelper");
         return;
     }
-    for (const std::string& bundleName:exitBundleNames) {
-        if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(bundleName,
-            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, U0_USER_ID))) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get bundle info from %{public}s.", bundleName.c_str());
+    for (const auto &item: exitProcessInfos) {
+        if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(item.bundleName,
+            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, item.uid / BASE_USER_RANGE))) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail from %{public}s", item.bundleName.c_str());
             continue;
         }
         if (!bundleInfo.isKeepAlive) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Not a resident application.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "not a resident application");
             continue;
         }
         exitBundleInfos.emplace_back(bundleInfo);
@@ -122,13 +122,13 @@ void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<std::str
 bool ExitResidentProcessManager::IsKilledForUpgradeWeb(const std::string &bundleName) const
 {
     TAG_LOGE(AAFwkTag::APPMGR, "call");
-    std::vector<std::string> bundleNames;
+    std::vector<ExitResidentProcessInfo> bundleNames;
     {
         std::lock_guard<ffrt::mutex> lock(webMutexLock_);
         bundleNames = exitResidentBundlesDependedOnWeb_;
     }
     for (const auto &innerBundleName : bundleNames) {
-        if (innerBundleName == bundleName) {
+        if (innerBundleName.bundleName == bundleName) {
             TAG_LOGD(AAFwkTag::APPMGR, "Is killed for upgrade web.");
             return true;
         }

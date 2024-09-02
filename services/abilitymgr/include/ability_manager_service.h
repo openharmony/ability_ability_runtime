@@ -839,7 +839,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = true) override;
+    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = false) override;
 
     /**
      * Uninstall app
@@ -1780,7 +1780,7 @@ public:
     int32_t TerminateMission(int32_t missionId) override;
 
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-        uint32_t sceneFlag, bool isColdStart);
+        uint32_t sceneFlag, bool &isColdStart);
 
     int32_t NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest);
 
@@ -1792,6 +1792,8 @@ public:
     static constexpr uint32_t FOREGROUND_TIMEOUT_MSG = 5;
     static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
     static constexpr uint32_t SHAREDATA_TIMEOUT_MSG = 7;
+    static constexpr uint32_t LOAD_HALF_TIMEOUT_MSG = 8;
+    static constexpr uint32_t FOREGROUND_HALF_TIMEOUT_MSG = 9;
 
 #ifdef SUPPORT_ASAN
     static constexpr uint32_t LOAD_TIMEOUT = 150000;            // ms
@@ -1993,7 +1995,7 @@ private:
 
     bool IsNeedTimeoutForTest(const std::string &abilityName, const std::string &state) const;
 
-    void StartResidentApps();
+    void StartResidentApps(int32_t userId);
 
     void StartAutoStartupApps();
     void RetryStartAutoStartupApps(const std::vector<AutoStartupInfo> &infoList, int32_t retryCount);
@@ -2126,6 +2128,8 @@ private:
      * @return Returns ERR_OK on check success, others on check failure.
      */
     int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall, bool isData = false);
+
+    bool IsImplicitCallFromBackground(const AbilityRequest &abilityRequest);
 
     bool IsTargetPermission(const Want &want) const;
 
@@ -2272,6 +2276,8 @@ private:
         bool isSendDialogResult, uint32_t specifyTokenId,
         const std::string& callerBundleName);
 
+    int CheckImplicitCallPermission(const AbilityRequest& abilityRequest);
+
     int StartAbilityByConnectManager(const Want& want, const AbilityRequest& abilityRequest,
         const AppExecFwk::AbilityInfo& abilityInfo, int validUserId, sptr<IRemoteObject> callerToken);
 
@@ -2308,6 +2314,7 @@ private:
 
     static sptr<AbilityManagerService> instance_;
     int32_t uniqueId_ = 0;
+    ffrt::mutex iAcquireShareDataMapLock_;
     std::map<int32_t, std::pair<int64_t, const sptr<IAcquireShareDataCallback>>> iAcquireShareDataMap_;
     // first is callstub, second is ability token
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> callStubTokenMap_;

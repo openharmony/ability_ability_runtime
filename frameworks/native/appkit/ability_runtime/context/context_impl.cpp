@@ -84,6 +84,11 @@ const int AREA2 = 2;
 const int AREA3 = 3;
 const int AREA4 = 4;
 
+ContextImpl::~ContextImpl()
+{
+    UnsubscribeToOverlayEvents();
+}
+
 std::string ContextImpl::GetBundleName() const
 {
     if (parentContext_ != nullptr) {
@@ -577,7 +582,10 @@ int32_t ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bu
         if (accountId == 0) {
             accountId = GetCurrentActiveAccountId();
         }
-        bundleMgr_->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, accountId);
+        bundleMgr_->GetBundleInfoV9(bundleName,
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE),
+            bundleInfo, accountId);
     }
 
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
@@ -613,7 +621,10 @@ void ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bundl
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo);
     } else {
-        bundleMgr_->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, accountId);
+        bundleMgr_->GetBundleInfoV9(bundleName,
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE),
+            bundleInfo, accountId);
     }
 }
 
@@ -950,6 +961,9 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
     const std::string &name, const std::string &hapModuleName, std::string &loadPath,
     std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos)
 {
+    if (overlaySubscriber_ != nullptr) {
+        return;
+    }
     // add listen overlay change
     overlayModuleInfos_ = overlayModuleInfos;
     EventFwk::MatchingSkills matchingSkills;
@@ -961,9 +975,17 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
         TAG_LOGI(AAFwkTag::APPKIT, "On overlay changed.");
         this->OnOverlayChanged(data, resourceManager, bundleName, moduleName, loadPath);
     };
-    auto subscriber = std::make_shared<AppExecFwk::OverlayEventSubscriber>(subscribeInfo, callback);
-    bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
+    overlaySubscriber_ = std::make_shared<AppExecFwk::OverlayEventSubscriber>(subscribeInfo, callback);
+    bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(overlaySubscriber_);
     TAG_LOGI(AAFwkTag::APPKIT, "Overlay event subscriber register result is %{public}d", subResult);
+}
+
+void ContextImpl::UnsubscribeToOverlayEvents()
+{
+    if (overlaySubscriber_ != nullptr) {
+        EventFwk::CommonEventManager::UnSubscribeCommonEvent(overlaySubscriber_);
+        overlaySubscriber_ = nullptr;
+    }
 }
 
 void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager)
@@ -991,7 +1013,7 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
     }
 #ifdef SUPPORT_SCREEN
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLocale(), status);
     resConfig->SetLocaleInfo(locale);
     if (resConfig->GetLocaleInfo() != nullptr) {
         TAG_LOGD(AAFwkTag::APPKIT,

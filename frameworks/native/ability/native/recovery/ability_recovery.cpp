@@ -39,7 +39,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr size_t DEFAULT_RECOVERY_MAX_RESTORE_SIZE = 10 * 1024;
+constexpr size_t DEFAULT_RECOVERY_MAX_RESTORE_SIZE = 400 * 1024;
 
 static std::string GetSaveAppCachePath(int32_t savedStateId)
 {

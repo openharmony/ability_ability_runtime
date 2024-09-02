@@ -53,7 +53,10 @@ ohos_shared_library("asynctaskcallback_napi") {
     ":async_task_callback_js",
   ]
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "napi:ace_napi",
+    "ets_runtime:libark_jsruntime",
+    ]
 
   relative_install_dir = "module/app/appstartup"
   subsystem_name = "ability"

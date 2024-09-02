@@ -586,9 +586,9 @@ enum {
     ERR_ALREADY_IN_CHILD_PROCESS = 2097265,
 
     /*
-     * Result (2097266) for native args child process reach limit.
+     * Result (2097266) for child process reach limit.
      */
-    ERR_NATIVE_ARGS_CHILD_PROCESS_REACH_LIMIT = 2097266,
+    ERR_CHILD_PROCESS_REACH_LIMIT = 2097266,
 
     /**
      * Native error(3000000) for target bundle not exist.

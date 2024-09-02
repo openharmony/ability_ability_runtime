@@ -42,7 +42,10 @@ ohos_shared_library("abilitystage") {
     ":ability_stage_js",
   ]
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "napi:ace_napi",
+    "ets_runtime:libark_jsruntime",
+    ]
 
   defines = [ "ENABLE_ERRCODE" ]
 

@@ -42,7 +42,10 @@ ohos_shared_library("insightintentexecutor_napi") {
     ":insight_intent_executor_js",
   ]
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "napi:ace_napi",
+    "ets_runtime:libark_jsruntime",
+    ]
 
   relative_install_dir = "module/app/ability"
   subsystem_name = "ability"

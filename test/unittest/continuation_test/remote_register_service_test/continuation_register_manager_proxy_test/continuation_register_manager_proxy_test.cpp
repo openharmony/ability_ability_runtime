@@ -563,7 +563,7 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRegisterManagerProxy_
     continuationRegisterManagerProxy->continuatinConnector_ = nullptr;
 
     continuationRegisterManagerProxy->Disconnect();
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(continuationRegisterManagerProxy != nullptr);
 }
 
 /*

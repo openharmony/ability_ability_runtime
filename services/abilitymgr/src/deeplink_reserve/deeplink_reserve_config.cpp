@@ -64,7 +64,7 @@ bool DeepLinkReserveConfig::LoadConfiguration()
         return false;
     }
     if (!LoadReservedUriList(jsonBuf)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "LoadConfiguration failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "load fail");
         return false;
     }
 
@@ -77,7 +77,7 @@ bool DeepLinkReserveConfig::isLinkReserved(const std::string &linkString, std::s
     for (auto it = deepLinkReserveUris_.begin(); it != deepLinkReserveUris_.end(); ++it) {
         for (auto &itemUri : it->second) {
             if (isUriMatched(itemUri, linkString)) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "link is: %{public}s, linkReserved is: %{public}s, matched!",
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "link:%{public}s, linkReserved:%{public}s, matched",
                     linkString.c_str(), itemUri.scheme.c_str());
                 bundleName = it->first;
                 return true;
@@ -180,42 +180,42 @@ void DeepLinkReserveConfig::LoadReservedUrilItem(const nlohmann::json &jsonUriOb
     if (jsonUriObject.contains(SCHEME_NAME) && jsonUriObject.at(SCHEME_NAME).is_string()) {
         std::string schemeName = jsonUriObject.at(SCHEME_NAME).get<std::string>();
         reserveUri.scheme = schemeName;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "scheme is: %{public}s", reserveUri.scheme.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "scheme:%{public}s", reserveUri.scheme.c_str());
     }
     if (jsonUriObject.contains(HOST_NAME) && jsonUriObject.at(HOST_NAME).is_string()) {
         std::string hostName = jsonUriObject.at(HOST_NAME).get<std::string>();
         reserveUri.host = hostName;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "host is: %{public}s", reserveUri.host.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "host:%{public}s", reserveUri.host.c_str());
     }
     if (jsonUriObject.contains(PORT_NAME) && jsonUriObject.at(PORT_NAME).is_string()) {
         std::string portName = jsonUriObject.at(PORT_NAME).get<std::string>();
         reserveUri.port = portName;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "port is: %{public}s", reserveUri.port.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "port:%{public}s", reserveUri.port.c_str());
     }
     if (jsonUriObject.contains(PATH_NAME) && jsonUriObject.at(PATH_NAME).is_string()) {
         std::string pathName = jsonUriObject.at(PATH_NAME).get<std::string>();
         reserveUri.path = PATH_NAME;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "path is: %{public}s", reserveUri.path.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "path:%{public}s", reserveUri.path.c_str());
     }
     if (jsonUriObject.contains(PATH_START_WITH_NAME) && jsonUriObject.at(PATH_START_WITH_NAME).is_string()) {
         std::string pathStartWithName = jsonUriObject.at(PATH_START_WITH_NAME).get<std::string>();
         reserveUri.pathStartWith = pathStartWithName;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "pathStartWith is: %{public}s", reserveUri.pathStartWith.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "pathStartWith:%{public}s", reserveUri.pathStartWith.c_str());
     }
     if (jsonUriObject.contains(PATH_REGEX_NAME) && jsonUriObject.at(PATH_REGEX_NAME).is_string()) {
         std::string pathRegexName = jsonUriObject.at(PATH_REGEX_NAME).get<std::string>();
         reserveUri.pathRegex = pathRegexName;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "pathRegex is: %{public}s", reserveUri.pathRegex.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "pathRegex:%{public}s", reserveUri.pathRegex.c_str());
     }
     if (jsonUriObject.contains(TYPE_NAME) && jsonUriObject.at(TYPE_NAME).is_string()) {
         std::string typeName = jsonUriObject.at(TYPE_NAME).get<std::string>();
         reserveUri.type = typeName;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "type is: %{public}s", reserveUri.type.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "type:%{public}s", reserveUri.type.c_str());
     }
     if (jsonUriObject.contains(UTD_NAME) && jsonUriObject.at(UTD_NAME).is_string()) {
         std::string utdName = jsonUriObject.at(UTD_NAME).get<std::string>();
         reserveUri.utd = utdName;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "utd is: %{public}s", reserveUri.utd.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "utd:%{public}s", reserveUri.utd.c_str());
     }
 
     uriList.emplace_back(reserveUri);
@@ -224,18 +224,18 @@ void DeepLinkReserveConfig::LoadReservedUrilItem(const nlohmann::json &jsonUriOb
 bool DeepLinkReserveConfig::LoadReservedUriList(const nlohmann::json &object)
 {
     if (!object.contains(DEEPLINK_RESERVED_URI_NAME)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Deeplink reserved uri config not existed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uri config absent");
         return false;
     }
 
     for (auto &item : object.at(DEEPLINK_RESERVED_URI_NAME).items()) {
         const nlohmann::json& jsonObject = item.value();
         if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Wrong deeplink reserve bundleName.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "reserve bundleName fail");
             return false;
         }
         if (!jsonObject.contains(URIS_NAME) || !jsonObject.at(URIS_NAME).is_array()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Wrong deeplink reserve uris.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "reserve uris fail");
             return false;
         }
         std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
@@ -252,18 +252,18 @@ bool DeepLinkReserveConfig::LoadReservedUriList(const nlohmann::json &object)
 bool DeepLinkReserveConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)
 {
     if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Deeplink reserve config not exist.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reserve config absent");
         return false;
     }
 
     if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "File path is empty.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "file path empty");
         return false;
     }
 
     char path[PATH_MAX] = {0};
     if (realpath(filePath.c_str(), path) == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "realpath error, errno is %{public}d.", errno);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "realpath error:%{public}d", errno);
         return false;
     }
 
@@ -273,14 +273,14 @@ bool DeepLinkReserveConfig::ReadFileInfoJson(const std::string &filePath, nlohma
     in.open(path, std::ios_base::in);
     if (!in.is_open()) {
         strerror_r(errno, errBuf, sizeof(errBuf));
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file cannot be open due to  %{public}s", errBuf);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "open error:%{public}s", errBuf);
         return false;
     }
 
     in.seekg(0, std::ios::end);
     int64_t size = in.tellg();
     if (size <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file is an empty file");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "file empty");
         in.close();
         return false;
     }

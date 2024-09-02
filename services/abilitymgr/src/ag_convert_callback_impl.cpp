@@ -21,7 +21,7 @@ namespace OHOS {
 namespace AAFwk {
 void ConvertCallbackImpl::OnConvert(int resultCode, AAFwk::Want& want)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     std::unique_lock<ffrt::mutex> lock(taskMutex_);
     if (task_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "resultCode:%{public}d", resultCode);
@@ -31,7 +31,7 @@ void ConvertCallbackImpl::OnConvert(int resultCode, AAFwk::Want& want)
 
 void ConvertCallbackImpl::Cancel()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     std::unique_lock<ffrt::mutex> lock(taskMutex_);
     task_ = nullptr;
 }

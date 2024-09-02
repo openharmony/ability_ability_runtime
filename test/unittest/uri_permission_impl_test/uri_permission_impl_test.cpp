@@ -781,7 +781,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_001, TestSize.Level
     std::string targetBundleName = "com.example.app1002";
     uint32_t flag = 1;
     const std::vector<Uri> uris = { uri1 };
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
     EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
 }
 
@@ -804,7 +804,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_002, TestSize.Level
     std::string targetBundleName = "com.example.app1002";
     uint32_t flag = 0;
     const std::vector<Uri> uris = { uri1 };
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(ret, ERR_CODE_INVALID_URI_FLAG);
 }
@@ -828,7 +828,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_003, TestSize.Level
     std::string targetBundleName = "com.example.invalid";
     uint32_t flag = 1;
     const std::vector<Uri> uris = { uri1 };
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(ret, GET_BUNDLE_INFO_FAILED);
 }
@@ -852,7 +852,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_004, TestSize.Level
     std::string targetBundleName = "com.example.app1002";
     uint32_t flag = 1;
     const std::vector<Uri> uris = { uri1 };
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(ret, ERR_CODE_INVALID_URI_TYPE);
 }
@@ -878,7 +878,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_005, TestSize.Level
     const std::vector<Uri> uris = { uri1 };
     upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
     StorageManager::StorageManagerServiceMock::isZero = false;
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(ret, INNER_ERR);
 }
@@ -904,7 +904,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_006, TestSize.Level
     const std::vector<Uri> uris = { uri1 };
     upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
     StorageManager::StorageManagerServiceMock::isZero = true;
-    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0);
+    auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
     MyFlag::permissionPrivileged_ = false;
     EXPECT_EQ(ret, ERR_OK);
 }

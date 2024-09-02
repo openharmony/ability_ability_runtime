@@ -67,6 +67,13 @@ enum UserStatus {
     ASSERT_CONTINUE,
     ASSERT_RETRY,
 };
+
+enum class AbilityLoadState: uint8_t {
+    INIT,
+    LOADING,
+    LOADED,
+    FAILED
+};
 }  // namespace AAFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ABILITY_STATE_H

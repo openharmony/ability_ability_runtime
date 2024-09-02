@@ -53,7 +53,10 @@ ohos_shared_library("uiserviceextensioncontext_napi") {
     ":ui_service_extension_context_js",
   ]
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "napi:ace_napi",
+    "ets_runtime:libark_jsruntime",
+    ]
 
   relative_install_dir = "module/application"
   subsystem_name = "ability"
