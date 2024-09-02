@@ -150,6 +150,7 @@ napi_value CanIUse(napi_env env, napi_callback_info info)
 
 void InitSyscapModule(napi_env env, napi_value globalObject)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     const char *moduleName = "JsRuntime";
     BindNativeFunction(env, globalObject, "canIUse", moduleName, CanIUse);
 }
@@ -247,6 +248,7 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
 
 void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode is false.");
         return;
@@ -318,6 +320,7 @@ void JsRuntime::StopDebugMode()
 
 void JsRuntime::InitConsoleModule()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitConsoleModule();
 }
@@ -389,6 +392,7 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
 
 void JsRuntime::StartProfiler(const DebugOption dOption)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode is false.");
         return;
@@ -664,6 +668,7 @@ void JsRuntime::FinishPreload()
 
 void JsRuntime::PostPreload(const Options& options)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     auto env = GetNapiEnv();
@@ -695,6 +700,7 @@ void JsRuntime::PostPreload(const Options& options)
 
 void JsRuntime::LoadAotFile(const Options& options)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     if (options.hapPath.empty()) {
@@ -915,6 +921,7 @@ void JsRuntime::ReloadFormComponent()
 
 bool JsRuntime::InitLoop(bool isStage)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
     return jsEnv_->InitLoop(isStage);
 }
@@ -941,6 +948,7 @@ void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSy
 
 void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorObj)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitSourceMap(operatorObj);
     JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
@@ -1378,12 +1386,14 @@ void JsRuntime::UpdateModuleNameAndAssetPath(const std::string& moduleName)
 
 void JsRuntime::RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo& uncaughtExceptionInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     jsEnv_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 
 void JsRuntime::RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     for (auto it = moduleAndPath.begin(); it != moduleAndPath.end(); it++) {
@@ -1492,12 +1502,14 @@ void JsRuntime::FreeNativeReference(std::unique_ptr<NativeReference> uniqueNativ
 
 void JsRuntime::InitTimerModule()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitTimerModule();
 }
 
 void JsRuntime::InitWorkerModule(const Options& options)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
     workerInfo->codePath = options.codePath;
@@ -1517,18 +1529,21 @@ void JsRuntime::InitWorkerModule(const Options& options)
 
 void JsRuntime::ReInitJsEnvImpl(const Options& options)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     jsEnv_->ReInitJsEnvImpl(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
 }
 
 void JsRuntime::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     jsEnv_->SetModuleLoadChecker(moduleCheckerDelegate);
 }
 
 void JsRuntime::SetRequestAotCallback()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_POINTER(jsEnv_);
     auto callback = [](const std::string& bundleName, const std::string& moduleName, int32_t triggerMode) -> int32_t {
         auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();

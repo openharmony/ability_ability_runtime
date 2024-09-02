@@ -823,6 +823,7 @@ void JsUIAbility::DoOnForeground(const Want &want)
 
     TAG_LOGD(AAFwkTag::UIABILITY, "move scene to foreground, sceneFlag_: %{public}d", UIAbility::sceneFlag_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "scene_->GoForeground");
     scene_->GoForeground(UIAbility::sceneFlag_);
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -847,6 +848,7 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
     Rosen::WMError ret = Rosen::WMError::WM_OK;
     auto sessionToken = GetSessionToken();
     auto identityToken = GetIdentityToken();
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "scene_->Init");
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken != nullptr) {
         abilityContext_->SetWeakSessionToken(sessionToken);
         ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken);
