@@ -437,6 +437,8 @@ public:
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
         IS_PROCESS_ATTACHED,
         IS_APP_KILLING,
+        // Add enumeration values above
+        END
     };
 };
 }  // namespace AppExecFwk
