@@ -2303,16 +2303,15 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
     auto bms = GetBundleManager();
     CHECK_POINTER(bms);
     auto userId = uid / BASE_USER_RANGE;
+    if (userId != U0_USER_ID || userId != GetUserId()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not current user");
+        return;
+    }
 
     AppExecFwk::BundleInfo bundleInfo;
     if (!IN_PROCESS_CALL(
         bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed get bundle info");
-        return;
-    }
-
-    if (userId != U0_USER_ID) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "non U0 users application upgrade");
         return;
     }
 
@@ -2324,7 +2323,7 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
     }
 
     std::vector<AppExecFwk::BundleInfo> bundleInfos = { bundleInfo };
-    DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(bundleInfos);
+    DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(bundleInfos, userId);
 
     if (!bundleInfos.empty()) {
         DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfos);
@@ -2534,7 +2533,7 @@ void AbilityManagerService::SubscribeBundleEventCallback()
     TAG_LOGI(AAFwkTag::ABILITYMGR, "subscribeBundleEventCallback begin");
     if (taskHandler_) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "submit startResidentApps task");
-        auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(); };
+        auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(U0_USER_ID); };
         taskHandler_->SubmitTask(startResidentAppsTask, "StartResidentApps");
     }
 
@@ -6785,25 +6784,27 @@ std::shared_ptr<UIAbilityLifecycleManager> AbilityManagerService::GetUIAbilityMa
     return subManagersHelper_->GetUIAbilityManagerByUid(uid);
 }
 
-void AbilityManagerService::StartResidentApps()
+void AbilityManagerService::StartResidentApps(int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartResidentApps %{public}d", userId);
     ConnectBmsService();
     auto bms = GetBundleManager();
     CHECK_POINTER_IS_NULLPTR(bms);
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     if (!IN_PROCESS_CALL(
-        bms->GetBundleInfos(OHOS::AppExecFwk::GET_BUNDLE_DEFAULT, bundleInfos, U0_USER_ID))) {
+        bms->GetBundleInfos(OHOS::AppExecFwk::GET_BUNDLE_DEFAULT, bundleInfos, userId))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get resident bundleinfos failed");
         return;
     }
     DelayedSingleton<ResidentProcessManager>::GetInstance()->Init();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "startResidentApps getBundleInfos size:%{public}zu", bundleInfos.size());
 
-    DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(bundleInfos);
+    DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(bundleInfos, userId);
     if (!bundleInfos.empty()) {
 #ifdef SUPPORT_GRAPHICS
-        WaitBootAnimationStart();
+        if (userId == U0_USER_ID) {
+            WaitBootAnimationStart();
+        }
 #endif
         DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfos);
     }
@@ -7903,6 +7904,12 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
     callback->OnStartUserDone(userId, ERR_OK);
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
     StartHighestPriorityAbility(userId, isBoot);
+     if (taskHandler_) {
+        taskHandler_->SubmitTask([abilityMs = shared_from_this(), userId]() {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "StartResidentApps userId:%{public}d", userId);
+            abilityMs->StartResidentApps(userId);
+            });
+    }
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
         AmsConfigurationParameter::GetInstance().MultiUserType() != 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "no need terminate old scb");
@@ -10769,9 +10776,32 @@ void AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configur
 
 void AbilityManagerService::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
 {
-    DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(bundleInfos);
-    if (!bundleInfos.empty()) {
-        DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfos);
+    if (userController_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "userController_ null");
+        return;
+    }
+    auto currentUser = userController_->GetCurrentUserId();
+    std::vector<AppExecFwk::BundleInfo> bundleInfosForU0;
+    std::vector<AppExecFwk::BundleInfo> bundleInfosForCurrentUser;
+    for (const auto &item: bundleInfos) {
+        auto user = item.uid / BASE_USER_RANGE;
+        if (user == U0_USER_ID) {
+            bundleInfosForU0.push_back(item);
+        } else if (user == currentUser) {
+            bundleInfosForCurrentUser.push_back(item);
+        }
+    }
+
+    DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(
+        bundleInfosForU0, U0_USER_ID);
+    if (!bundleInfosForU0.empty()) {
+        DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfosForU0);
+    }
+
+    DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(
+        bundleInfosForCurrentUser, currentUser);
+    if (!bundleInfosForCurrentUser.empty()) {
+        DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfosForCurrentUser);
     }
 }
 

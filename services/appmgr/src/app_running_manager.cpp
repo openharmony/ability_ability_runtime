@@ -92,6 +92,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 
     appRecord->SetStageModelState(isStageBasedModel);
     appRecord->SetSingleton(bundleInfo.singleton);
+    appRecord->SetKeepAliveBundle(bundleInfo.isKeepAlive);
     appRecord->SetSignCode(signCode);
     appRecord->SetJointUserId(bundleInfo.jointUserId);
     {
