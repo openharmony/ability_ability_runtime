@@ -1284,7 +1284,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return ERR_INVALID_VALUE;
     }
 
-    ReportAbilitStartInfoToRSS(abilityInfo);
+    ReportAbilityStartInfoToRSS(abilityInfo);
     ReportEventToRSS(abilityInfo, callerToken);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start ability, name is %{public}s.", abilityInfo.name.c_str());
     return missionListManager->StartAbility(abilityRequest);
@@ -2230,8 +2230,8 @@ int32_t AbilityManagerService::StartUIAbilityBySCBDefaultCommon(AbilityRequest &
         }
     }
 
-    ReportAbilitStartInfoToRSS(abilityInfo);
-    ReportAbilitAssociatedStartInfoToRSS(abilityInfo, RES_TYPE_SCB_START_ABILITY, sessionInfo->callerToken);
+    ReportAbilityStartInfoToRSS(abilityInfo);
+    ReportAbilityAssociatedStartInfoToRSS(abilityInfo, RES_TYPE_SCB_START_ABILITY, sessionInfo->callerToken);
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
     // here we don't need want param "IS_CALL_BY_SCB" any more, remove it.
@@ -2565,7 +2565,7 @@ void AbilityManagerService::UnsubscribeBundleEventCallback()
     TAG_LOGD(AAFwkTag::ABILITYMGR, "UnsubscribeBundleEventCallback success.");
 }
 
-void AbilityManagerService::ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
+void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
@@ -2583,11 +2583,11 @@ void AbilityManagerService::ReportAbilitStartInfoToRSS(const AppExecFwk::Ability
                 break;
             }
         }
-        ResSchedUtil::GetInstance().ReportAbilitStartInfoToRSS(abilityInfo, pid, isColdStart);
+        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
     }
 }
 
-void AbilityManagerService::ReportAbilitAssociatedStartInfoToRSS(
+void AbilityManagerService::ReportAbilityAssociatedStartInfoToRSS(
     const AppExecFwk::AbilityInfo &abilityInfo, int64_t type, const sptr<IRemoteObject> &callerToken)
 {
     CHECK_POINTER_LOG(callerToken, "null callerToken");
@@ -2595,7 +2595,7 @@ void AbilityManagerService::ReportAbilitAssociatedStartInfoToRSS(
     CHECK_POINTER_LOG(callerAbility, "null callerAbility");
     int32_t callerUid = callerAbility->GetUid();
     int32_t callerPid = callerAbility->GetPid();
-    ResSchedUtil::GetInstance().ReportAbilitAssociatedStartInfoToRSS(abilityInfo, type, callerUid, callerPid);
+    ResSchedUtil::GetInstance().ReportAbilityAssociatedStartInfoToRSS(abilityInfo, type, callerUid, callerPid);
 }
 
 void AbilityManagerService::ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
@@ -2897,7 +2897,7 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
     if (eventInfo.errCode != ERR_OK) {
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
     }
-    ReportAbilitAssociatedStartInfoToRSS(abilityRequest.abilityInfo, RES_TYPE_EXTENSION_START_ABILITY, callerToken);
+    ReportAbilityAssociatedStartInfoToRSS(abilityRequest.abilityInfo, RES_TYPE_EXTENSION_START_ABILITY, callerToken);
     return eventInfo.errCode;
 }
 
