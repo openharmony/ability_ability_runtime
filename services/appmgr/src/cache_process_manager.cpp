@@ -26,7 +26,7 @@
 
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
-const std::string RESOURCE_CACHE_PROCESS_ENABLE = "persist.sys.resource.warmStartProcessEnable";
+const std::string RESOURCE_WARM_START_PROCESS_ENABLE = "persist.resourceschedule.enable_warm_start_process";
 const std::string PROCESS_CACHE_API_CHECK_CONFIG = "persist.sys.abilityms.processCacheApiCheck";
 const std::string PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG = "persist.sys.abilityms.processCacheSetSupportCheck";
 constexpr int32_t API12 = 12;
@@ -45,7 +45,7 @@ CacheProcessManager::CacheProcessManager()
     maxProcCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_PROC_CACHE_NUM, 0);
     shouldCheckApi = OHOS::system::GetBoolParameter(PROCESS_CACHE_API_CHECK_CONFIG, true);
     shouldCheckSupport = OHOS::system::GetBoolParameter(PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG, true);
-    resourceCacheProcessEnable_ = OHOS::system::GetBoolParameter(RESOURCE_CACHE_PROCESS_ENABLE, true);
+    warmStartProcesEnable_ = OHOS::system::GetBoolParameter(RESOURCE_WARM_START_PROCESS_ENABLE, true);
     TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum %{public}d", maxProcCacheNum_);
 }
 
@@ -67,7 +67,7 @@ void CacheProcessManager::RefreshCacheNum()
 
 bool CacheProcessManager::QueryEnableProcessCache()
 {
-    return maxProcCacheNum_ > 0 || resourceCacheProcessEnable_;
+    return maxProcCacheNum_ > 0 || warmStartProcesEnable_;
 }
 
 bool CacheProcessManager::QueryEnableProcessCacheFromKits()
@@ -247,6 +247,21 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
     return true;
 }
 
+bool CacheProcessManager::IsAppSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    auto actualVer = appInfo->apiTargetVersion % API_VERSION_MOD;
+    if (shouldCheckApi && actualVer < API12) {
+        TAG_LOGD(AAFwkTag::APPMGR, "App %{public}s 's apiTargetVersion has %{public}d, smaller than 12",
+            appRecord->GetName().c_str(), actualVer);
+        return false;
+    }
+    if (IsAppContainsSrvExt(appRecord)) {
+        TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s is service, not support cache",
+            appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
+        return false;
+    }
+}
+
 bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (appRecord == nullptr) {
@@ -258,15 +273,7 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
         TAG_LOGD(AAFwkTag::APPMGR, "appinfo nullptr");
         return false;
     }
-    auto actualVer = appInfo->apiTargetVersion % API_VERSION_MOD;
-    if (shouldCheckApi && actualVer < API12) {
-        TAG_LOGD(AAFwkTag::APPMGR, "App %{public}s 's apiTargetVersion has %{public}d, smaller than 12",
-            appRecord->GetName().c_str(), actualVer);
-        return false;
-    }
-    if (IsAppContainsSrvExt(appRecord)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s is service, not support cache",
-            appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
+    if (maxProcCacheNum_ > 0 && !IsAppSupportHotStart()) {
         return false;
     }
     if (appRecord->IsAttachedToStatusBar()) {
@@ -379,14 +386,14 @@ void CacheProcessManager::RemoveCacheRecord(const std::shared_ptr<AppRunningReco
 void CacheProcessManager::ShrinkAndKillCache()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called");
-    if (maxProcCacheNum_ <= 0 && !resourceCacheProcessEnable_) {
+    if (maxProcCacheNum_ <= 0 && !warmStartProcesEnable_) {
         TAG_LOGI(AAFwkTag::APPMGR, "Cache disabled.");
         return;
     }
     std::vector<std::shared_ptr<AppRunningRecord>> cleanList;
     {
         std::lock_guard<ffrt::recursive_mutex> queueLock(cacheQueueMtx);
-        while (GetCurrentCachedProcNum() > maxProcCacheNum_ && !resourceCacheProcessEnable_) {
+        while (GetCurrentCachedProcNum() > maxProcCacheNum_ && !warmStartProcesEnable_) {
             const auto& tmpAppRecord = cachedAppRecordQueue_.front();
             cachedAppRecordQueue_.pop_front();
             RemoveFromApplicationSet(tmpAppRecord);
