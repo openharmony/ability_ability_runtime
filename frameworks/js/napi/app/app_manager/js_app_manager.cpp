@@ -373,18 +373,18 @@ private:
         }
 
         NapiAsyncTask::CompleteCallback complete =
-            [bundleName, appManager = appManager_, errCode](napi_env env, NapiAsyncTask& task,
+            [bundleName, abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task,
                 int32_t status) {
             if (errCode != 0) {
                 task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                 return;
             }
-            if (appManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "null appManager");
-                task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "appManager nullptr"));
+            if (abilityManager == nullptr) {
+                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
                 return;
             }
-            auto ret = appManager->ClearUpApplicationData(bundleName, 0);
+            auto ret = abilityManager->ClearUpApplicationData(bundleName);
             if (ret == 0) {
                 task.Resolve(env, CreateJsValue(env, ret));
             } else {

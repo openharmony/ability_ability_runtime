@@ -413,9 +413,8 @@ int32_t AppMgrStub::HandleClearUpApplicationData(MessageParcel &data, MessagePar
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
-    int32_t appCloneIndex = data.ReadInt32();
     int32_t userId = data.ReadInt32();
-    int32_t result = ClearUpApplicationData(bundleName, appCloneIndex, userId);
+    int32_t result = ClearUpApplicationData(bundleName, userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
