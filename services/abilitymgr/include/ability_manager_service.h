@@ -1795,16 +1795,6 @@ public:
     static constexpr uint32_t LOAD_HALF_TIMEOUT_MSG = 8;
     static constexpr uint32_t FOREGROUND_HALF_TIMEOUT_MSG = 9;
 
-#ifdef SUPPORT_ASAN
-    static constexpr uint32_t LOAD_TIMEOUT = 150000;            // ms
-    static constexpr uint32_t ACTIVE_TIMEOUT = 75000;          // ms
-    static constexpr uint32_t INACTIVE_TIMEOUT = 7500;         // ms
-#else
-    static constexpr uint32_t LOAD_TIMEOUT = 10000;            // ms
-    static constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
-    static constexpr uint32_t INACTIVE_TIMEOUT = 500;         // ms
-#endif
-
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
     static constexpr uint32_t MAX_WAIT_SETTINGS_DATA_NUM = 300;
@@ -2034,9 +2024,9 @@ private:
 
     void UnsubscribeBundleEventCallback();
 
-    void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
+    void ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
-    void ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type,
+    void ReportAbilityAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type,
         const sptr<IRemoteObject> &callerToken);
 
     void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo, sptr<IRemoteObject> callerToken);

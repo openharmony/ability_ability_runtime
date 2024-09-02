@@ -194,7 +194,7 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
     }
     NotifyStartAbilityResult(abilityRequest, ret);
     if (callerAbility != nullptr) {
-        ResSchedUtil::GetInstance().ReportAbilitAssociatedStartInfoToRSS(abilityRequest.abilityInfo,
+        ResSchedUtil::GetInstance().ReportAbilityAssociatedStartInfoToRSS(abilityRequest.abilityInfo,
             RES_TYPE_MISSION_LIST_START_ABILITY, callerAbility->GetUid(), callerAbility->GetPid());
     }
     return ret;
