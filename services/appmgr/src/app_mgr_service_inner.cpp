@@ -2157,13 +2157,6 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
         appRecord->SetNativeStart(want->GetBoolParam("native", false));
     }
 
-    if (preToken) {
-        auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
-        if (abilityRecord) {
-            abilityRecord->SetPreToken(preToken);
-        }
-    }
-
     return appRecord;
 }
 
@@ -2357,34 +2350,6 @@ void AppMgrServiceInner::RemoveDeadAppStateCallback(const wptr<IRemoteObject> &r
     }
 }
 
-void AppMgrServiceInner::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-    const int32_t visibility,       // 0:false,1:true
-    const int32_t perceptibility,   // 0:false,1:true
-    const int32_t connectionState)  // 0:false,1:true
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "token null");
-        return;
-    }
-    auto appRecord = GetAppRunningRecordByAbilityToken(token);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord unexist");
-        return;
-    }
-    auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
-    if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "record unexist");
-        return;
-    }
-    if (preToken) {
-        abilityRecord->SetPreToken(preToken);
-    }
-    abilityRecord->SetVisibility(visibility);
-    abilityRecord->SetPerceptibility(perceptibility);
-    abilityRecord->SetConnectionState(connectionState);
-}
-
 void AppMgrServiceInner::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -2517,7 +2482,6 @@ void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObj
 
     if (ability && preToken) {
         TAG_LOGE(AAFwkTag::APPMGR, "ability already start");
-        ability->SetPreToken(preToken);
         return;
     }
 
@@ -2533,10 +2497,6 @@ void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObj
     if (!ability) {
         TAG_LOGE(AAFwkTag::APPMGR, "add ability fail");
         return;
-    }
-
-    if (preToken != nullptr) {
-        ability->SetPreToken(preToken);
     }
 
     ApplicationState appState = appRecord->GetState();
