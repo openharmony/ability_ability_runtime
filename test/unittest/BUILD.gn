@@ -419,6 +419,7 @@ group("unittest") {
       "bundle_mgr_helper_test:unittest",
       "cache_process_manager_test:unittest",
       "call_record_test:unittest",
+      "capi_ability_runtime_application_context_test:unittest",
       "child_process_capi_test:unittest",
       "child_process_manager_test:unittest",
       "cj_ability_connect_callback_object_test:unittest",
