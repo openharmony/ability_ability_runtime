@@ -109,6 +109,8 @@ private:
 
     bool IsActionImplicitStart(const Want &want, bool findDeafultApp);
 
+    int CheckImplicitCallPermission(const AbilityRequest& abilityRequest);
+
 private:
     bool IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type);
     std::shared_ptr<AppExecFwk::BundleMgrHelper> iBundleManagerHelper_;
