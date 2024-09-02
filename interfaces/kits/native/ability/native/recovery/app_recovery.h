@@ -52,7 +52,6 @@ public:
     uint16_t GetRestartFlag() const;
     uint16_t GetSaveOccasionFlag() const;
     uint16_t GetSaveModeFlag() const;
-    void DeleteInValidMissionFiles();
 
 private:
     AppRecovery();
@@ -62,6 +61,7 @@ private:
 
     void DoRecoverApp(StateReason reason);
     void DoSaveAppState(StateReason reason, uintptr_t ability = 0);
+    void DeleteInValidMissionFiles();
     void DeleteInValidMissionFileById(std::string path, int32_t missionId);
     bool GetMissionIds(std::string path, std::vector<int32_t> &missionIds);
 
