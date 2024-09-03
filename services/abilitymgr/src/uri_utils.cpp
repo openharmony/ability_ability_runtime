@@ -129,5 +129,48 @@ bool UriUtils::CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest
     TAG_LOGE(AAFwkTag::ABILITYMGR, "No permission to share file uri non-implicitly.");
     return false;
 }
+
+std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string> &uriVec,
+    const std::vector<bool> &checkResults, Want &want)
+{
+    std::vector<Uri> permissionedUris;
+    if (uriVec.size() != checkResults.size()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid param: %{public}zu : %{public}zu",
+            uriVec.size(), checkResults.size());
+        return permissionedUris;
+    }
+    // process uri
+    size_t startIndex = 0;
+    if (!want.GetUriString().empty()) {
+        if (checkResults[startIndex]) {
+            permissionedUris.emplace_back(want.GetUri());
+        } else if (want.GetUri().GetScheme() == "file") {
+            // erase uri param
+            want.SetUri("");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "erase uri param.");
+        }
+        startIndex = 1;
+    }
+    // process param stream
+    std::vector<std::string> paramStreamUris;
+    for (size_t index = startIndex; index < checkResults.size(); index++) {
+        auto uri = Uri(uriVec[index]);
+        if (checkResults[index]) {
+            permissionedUris.emplace_back(uri);
+            paramStreamUris.emplace_back(uriVec[index]);
+        } else if (uri.GetScheme() != "file") {
+            paramStreamUris.emplace_back(uriVec[index]);
+        }
+    }
+    if (paramStreamUris.size() != (checkResults.size() - startIndex)) {
+        // erase old param stream and set new param stream
+        want.RemoveParam(AbilityConfig::PARAMS_STREAM);
+        want.SetParam(AbilityConfig::PARAMS_STREAM, paramStreamUris);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "startIndex: %{public}zu, uriVec: %{public}zu, paramStreamUris: %{public}zu",
+            startIndex, uriVec.size(), paramStreamUris.size());
+    }
+    return permissionedUris;
+}
+
 } // AAFwk
 } // OHOS
