@@ -1254,6 +1254,8 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
     SetAbilityStateInner(AbilityState::BACKGROUNDING);
 #endif // SUPPORT_SCREEN
     lifecycleDeal_->BackgroundNew(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
+    std::lock_guard guard(wantLock_);
+    isLaunching_ = false;
 }
 
 bool AbilityRecord::PrepareTerminateAbility()
