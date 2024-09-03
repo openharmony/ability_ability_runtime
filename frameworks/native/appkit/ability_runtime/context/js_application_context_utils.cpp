@@ -596,21 +596,28 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
     }
 
     TAG_LOGD(AAFwkTag::APPKIT, "kill self process");
-    NapiAsyncTask::CompleteCallback complete =
-        [applicationContext = applicationContext_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto context = applicationContext.lock();
-            if (!context) {
-                task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
-                    "applicationContext if already released."));
-                return;
-            }
-            context->KillProcessBySelf();
-            task.ResolveWithNoError(env, CreateJsUndefined(env));
-        };
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute =
+        [applicationContext = applicationContext_, innerErrCode]() {
+        auto context = applicationContext.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+            *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+            return;
+        }
+        context->KillProcessBySelf();
+    };
+    NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrCode != ERR_OK) {
+            task.Reject(env, CreateJsError(env, *innerErrCode, "applicationContext is already released."));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
     napi_value lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplicationContextUtils::OnkillProcessBySelf",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
