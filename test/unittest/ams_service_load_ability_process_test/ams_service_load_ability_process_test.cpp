@@ -541,7 +541,6 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_008, TestSize.Level1)
     EXPECT_NE(abilityRecord2, nullptr);
     CHECK_POINTER_IS_NULLPTR(abilityRecord2);
     EXPECT_EQ(abilityRecord2->GetState(), AbilityState::ABILITY_STATE_CREATE);
-    EXPECT_EQ(abilityRecord2->GetPreToken(), token);
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest LoadAbility_008 end");
 }
 
