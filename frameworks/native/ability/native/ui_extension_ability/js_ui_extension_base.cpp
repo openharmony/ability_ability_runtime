@@ -653,7 +653,11 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         option->SetParentId(sessionInfo->hostWindowId);
         option->SetRealParentId(sessionInfo->realHostWindowId);
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
-        auto uiWindow = Rosen::Window::Create(option, context_, sessionInfo->sessionToken);
+        sptr<Rosen::Window> uiWindow;
+        {
+            HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
+            uiWindow = Rosen::Window::Create(option, context_, sessionInfo->sessionToken);
+        }
         if (uiWindow == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "create ui window error");
             return false;
@@ -682,6 +686,7 @@ void JsUIExtensionBase::ForegroundWindow(const AAFwk::Want &want, const sptr<AAF
     auto componentId = sessionInfo->uiExtensionComponentId;
     auto &uiWindow = uiWindowMap_[componentId];
     if (uiWindow) {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::show");
         uiWindow->Show();
         foregroundWindows_.emplace(componentId);
     }
@@ -766,6 +771,7 @@ napi_value JsUIExtensionBase::CallObjectMethod(const char *name, napi_value cons
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "CallFunction(%{public}s), success", name);
     napi_value result = nullptr;
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     napi_call_function(env, obj, method, argc, argv, &result);
     return result;
 }
