@@ -338,7 +338,7 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0200, TestSize.Level1)
     extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SUB_WINDOW;
     extensionWindowConfig->subWindowOptions.isModal = false;
     extensionWindowConfig->subWindowOptions.isTopmost = true;
-    int32_t hostWindowId{0};
+    int32_t hostWindowId{100};
 
     Runtime::Options options;
     auto runtime = Runtime::Create(options);
@@ -363,7 +363,7 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0300, TestSize.Level1)
     extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SUB_WINDOW;
     extensionWindowConfig->subWindowOptions.isModal = true;
     extensionWindowConfig->subWindowOptions.isTopmost = false;
-    int32_t hostWindowId{0};
+    int32_t hostWindowId{100};
 
     Runtime::Options options;
     auto runtime = Runtime::Create(options);
