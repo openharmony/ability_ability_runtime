@@ -15,7 +15,7 @@
 
 #include "ability_record_mgr.h"
 #include "hilog_tag_wrapper.h"
-
+#include <mutex>
 namespace OHOS {
 namespace AppExecFwk {
 /**
@@ -87,7 +87,7 @@ void AbilityRecordMgr::AddAbilityRecord(
         TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord is nullptr");
         return;
     }
-
+    set::lock_guard<std::mutex> lock(mutex_);
     abilityRecords_[token] = abilityRecord;
 }
 
