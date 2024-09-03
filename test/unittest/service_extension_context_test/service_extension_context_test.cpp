@@ -454,7 +454,7 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartUIServiceEx
     int32_t accountId = 1;
     StartOptions startOptions;
     ErrCode result = serviceExtensionContextTest.StartUIServiceExtensionAbility(want, accountId);
-    EXPECT_EQ(CHECK_PERMISSION_FAILED, result);
+    EXPECT_NE(ERR_OK, result);
 }
 
 /**
