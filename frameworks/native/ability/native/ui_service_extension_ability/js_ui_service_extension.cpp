@@ -382,7 +382,11 @@ void JsUIServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int 
         auto extensionWindowConfig = std::make_shared<Rosen::ExtensionWindowConfig>();
         OnSceneWillCreated(extensionWindowConfig);
         auto option = GetWindowOption(want, extensionWindowConfig, hostWindowId);
-        sptr<Rosen::Window> extensionWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
+        sptr<Rosen::Window> extensionWindow;
+        {
+            HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
+            extensionWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
+        }
         if (extensionWindow != nullptr) {
             OnSceneDidCreated(extensionWindow);
             context->SetWindow(extensionWindow);

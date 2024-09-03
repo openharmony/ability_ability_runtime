@@ -668,7 +668,6 @@ void JsRuntime::FinishPreload()
 
 void JsRuntime::PostPreload(const Options& options)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     auto env = GetNapiEnv();
@@ -691,7 +690,10 @@ void JsRuntime::PostPreload(const Options& options)
     postOption.SetEnableProfile(profileEnabled);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ASMM JIT Verify PostFork, jitEnabled: %{public}d", options.jitEnabled);
     postOption.SetEnableJIT(options.jitEnabled);
-    panda::JSNApi::PostFork(vm, postOption);
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "panda::JSNApi::PostFork");
+        panda::JSNApi::PostFork(vm, postOption);
+    }
     reinterpret_cast<NativeEngine*>(env)->ReinitUVLoop();
     uv_loop_s* loop = nullptr;
     napi_get_uv_event_loop(env, &loop);
