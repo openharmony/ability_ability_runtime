@@ -18,6 +18,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "ipc_object_proxy.h"
 #include "time_util.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
@@ -39,6 +40,12 @@ void AppLifeCycleDeal::LaunchApplication(const AppLaunchData &launchData, const 
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
     if (appThread) {
+        auto remoteObject = appThread->AsObject();
+        IPCObjectProxy *proxy = reinterpret_cast<IPCObjectProxy *>(remoteObject.GetRefPtr());
+        if (proxy != nullptr) {
+            int32_t pid = static_cast<int32_t>(launchData.GetProcessInfo().GetPid());
+            TAG_LOGI(AAFwkTag::APPMGR, "handle:%{public}u, pid:%{public}d", proxy->GetHandle(), pid);
+        }
         appThread->ScheduleLaunchApplication(launchData, config);
     }
 }
@@ -47,7 +54,7 @@ void AppLifeCycleDeal::UpdateApplicationInfoInstalled(const ApplicationInfo &app
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -58,7 +65,7 @@ void AppLifeCycleDeal::AddAbilityStage(const HapModuleInfo &abilityStage)
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -71,7 +78,7 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
     if (appThread && ability) {
         auto abilityInfo = ability->GetAbilityInfo();
         if (abilityInfo == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "abilityInfo null.");
+            TAG_LOGW(AAFwkTag::APPMGR, "null abilityInfo");
             return;
         }
         if (abilityInfo->type == AbilityType::PAGE) {
@@ -80,11 +87,11 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
                 "; AppLifeCycleDeal::LaunchAbility; the LoadAbility lifecycle.";
             FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "Launch ability.");
+        TAG_LOGD(AAFwkTag::APPMGR, "Launch");
         appThread->ScheduleLaunchAbility(*abilityInfo, ability->GetToken(),
             ability->GetWant(), ability->GetAbilityRecordId());
     } else {
-        TAG_LOGW(AAFwkTag::APPMGR, "LoadLifecycle.");
+        TAG_LOGW(AAFwkTag::APPMGR, "null appThread or ability");
     }
 }
 
@@ -92,7 +99,7 @@ void AppLifeCycleDeal::ScheduleTerminate(bool isLastProcess)
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -103,7 +110,7 @@ void AppLifeCycleDeal::ScheduleForegroundRunning()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -115,7 +122,7 @@ void AppLifeCycleDeal::ScheduleBackgroundRunning()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -126,7 +133,7 @@ void AppLifeCycleDeal::ScheduleTrimMemory(int32_t timeLevel)
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -137,7 +144,7 @@ void AppLifeCycleDeal::ScheduleMemoryLevel(int32_t Level)
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -148,7 +155,7 @@ void AppLifeCycleDeal::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::M
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -159,7 +166,7 @@ void AppLifeCycleDeal::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &in
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -170,7 +177,7 @@ void AppLifeCycleDeal::LowMemoryWarning()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -181,7 +188,7 @@ void AppLifeCycleDeal::ScheduleCleanAbility(const sptr<IRemoteObject> &token, bo
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
     appThread->ScheduleCleanAbility(token, isCacheProcess);
@@ -191,7 +198,7 @@ void AppLifeCycleDeal::ScheduleProcessSecurityExit()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -202,7 +209,7 @@ void AppLifeCycleDeal::ScheduleClearPageStack()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -225,7 +232,7 @@ void AppLifeCycleDeal::ScheduleAcceptWant(const AAFwk::Want &want, const std::st
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -236,7 +243,7 @@ void AppLifeCycleDeal::ScheduleNewProcessRequest(const AAFwk::Want &want, const 
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -249,7 +256,7 @@ int32_t AppLifeCycleDeal::UpdateConfiguration(const Configuration &config)
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
     appThread->ScheduleConfigurationUpdated(config);
@@ -263,7 +270,7 @@ int32_t AppLifeCycleDeal::NotifyLoadRepairPatch(const std::string &bundleName, c
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     auto appThread = GetApplicationClient();
     if (appThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
     return appThread->ScheduleNotifyLoadRepairPatch(bundleName, callback, recordId);
@@ -275,7 +282,7 @@ int32_t AppLifeCycleDeal::NotifyHotReloadPage(const sptr<IQuickFixCallback> &cal
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     auto appThread = GetApplicationClient();
     if (appThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
     return appThread->ScheduleNotifyHotReloadPage(callback, recordId);
@@ -288,7 +295,7 @@ int32_t AppLifeCycleDeal::NotifyUnLoadRepairPatch(const std::string &bundleName,
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
     if (appThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
     return appThread->ScheduleNotifyUnLoadRepairPatch(bundleName, callback, recordId);
@@ -299,7 +306,7 @@ int32_t AppLifeCycleDeal::NotifyAppFault(const FaultData &faultData)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
     if (appThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
     return appThread->ScheduleNotifyAppFault(faultData);
@@ -310,7 +317,7 @@ int32_t AppLifeCycleDeal::ChangeAppGcState(int32_t state)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
     if (appThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
     return appThread->ScheduleChangeAppGcState(state);
@@ -321,7 +328,7 @@ int32_t AppLifeCycleDeal::AttachAppDebug()
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
     if (appThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
     appThread->AttachAppDebug();
@@ -333,7 +340,7 @@ int32_t AppLifeCycleDeal::DetachAppDebug()
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
     if (appThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return ERR_INVALID_VALUE;
     }
     appThread->DetachAppDebug();
@@ -348,7 +355,7 @@ int AppLifeCycleDeal::DumpIpcStart(std::string& result)
         result.append(MSG_DUMP_IPC_START_STAT, strlen(MSG_DUMP_IPC_START_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appThread->ScheduleDumpIpcStart(result);
@@ -362,7 +369,7 @@ int AppLifeCycleDeal::DumpIpcStop(std::string& result)
         result.append(MSG_DUMP_IPC_STOP_STAT, strlen(MSG_DUMP_IPC_STOP_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appThread->ScheduleDumpIpcStop(result);
@@ -376,7 +383,7 @@ int AppLifeCycleDeal::DumpIpcStat(std::string& result)
         result.append(MSG_DUMP_IPC_STAT, strlen(MSG_DUMP_IPC_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appThread->ScheduleDumpIpcStat(result);
@@ -386,7 +393,7 @@ void AppLifeCycleDeal::ScheduleCacheProcess()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return;
     }
 
@@ -400,7 +407,7 @@ int AppLifeCycleDeal::DumpFfrt(std::string& result)
     if (appThread == nullptr) {
         result.append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
-        TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
         return DumpErrorCode::ERR_INTERNAL_ERROR;
     }
     return appThread->ScheduleDumpFfrt(result);

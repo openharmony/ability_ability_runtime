@@ -483,9 +483,9 @@ napi_value JsEmbeddableUIAbilityContext::OnRequestModalUIExtension(napi_env env,
 napi_value JsEmbeddableUIAbilityContext::OnOpenAtomicService(napi_env env, NapiCallbackInfo& info)
 {
     if (screenMode_ == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "OnOpenAtomicService in half screen mode.");
-        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
-        return CreateJsUndefined(env);
+        TAG_LOGI(AAFwkTag::UI_EXT, "OpenAtomicService in embedded screen mode.");
+        CHECK_POINTER_RETURN(env, jsUIExtensionContext_);
+        return jsUIExtensionContext_->OnOpenAtomicService(env, info);
     }
     CHECK_POINTER_RETURN(env, jsAbilityContext_);
     return jsAbilityContext_->OnOpenAtomicService(env, info);

@@ -48,13 +48,13 @@ void AmsMgrStub::CreateMemberFuncMap() {}
 int AmsMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (code != static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "AmsMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code,
+        TAG_LOGI(AAFwkTag::APPMGR, "OnReceived, code: %{public}u, flags: %{public}d", code,
             option.GetFlags());
     }
     std::u16string descriptor = AmsMgrStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::APPMGR, "local descriptor is unequal to remote");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid descriptor");
         return ERR_INVALID_STATE;
     }
     return OnRemoteRequestInner(code, data, reply, option);
@@ -213,6 +213,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleKillProcessesByAccessTokenId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_ATTACHED):
             return HandleIsProcessAttached(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_APP_KILLING):
+            return HandleIsAppKilling(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -324,7 +326,7 @@ ErrCode AmsMgrStub::HandleKillProcessesByPids(MessageParcel &data, MessageParcel
     HITRACE_METER(HITRACE_TAG_APP);
     auto size = data.ReadUint32();
     if (size == 0 || size > MAX_KILL_PROCESS_PID_COUNT) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size");
         return ERR_INVALID_VALUE;
     }
     std::vector<int32_t> pids;
@@ -843,6 +845,18 @@ int32_t AmsMgrStub::HandleIsProcessAttached(MessageParcel &data, MessageParcel &
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     auto isAttached = IsProcessAttached(token);
     if (!reply.WriteBool(isAttached)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsAppKilling(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto isAppKilling = IsAppKilling(token);
+    if (!reply.WriteBool(isAppKilling)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
     }

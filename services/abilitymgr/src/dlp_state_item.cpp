@@ -54,12 +54,12 @@ bool DlpStateItem::HandleDlpConnectionState(const std::shared_ptr<AbilityRecord>
     AbilityRuntime::DlpStateData &data)
 {
     if (!record || record->GetAppIndex() <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid dlp ability.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid dlp ability");
         return false;
     }
 
     if (dlpUid_ == 0 || dlpPid_ == 0) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid dlp manager state.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid dlp manager state");
         return false;
     }
 
@@ -69,7 +69,7 @@ bool DlpStateItem::HandleDlpConnectionState(const std::shared_ptr<AbilityRecord>
     }
 
     if (!tokenObj) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid ability, no ability token.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid ability");
         return false;
     }
 
@@ -79,13 +79,13 @@ bool DlpStateItem::HandleDlpConnectionState(const std::shared_ptr<AbilityRecord>
 
     if (isAdd) {
         if (it != dlpAbilities_.end()) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "dlp ability already reported.");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "dlp ability already reported");
             return false;
         }
         dlpAbilities_.emplace_back(tokenObj);
     } else {
         if (it == dlpAbilities_.end()) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "find target dlp ability failed, not report closed.");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "find failed");
             return false;
         }
         dlpAbilities_.erase(it);

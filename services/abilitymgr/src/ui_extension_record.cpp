@@ -34,7 +34,7 @@ bool UIExtensionRecord::ContinueToGetCallerToken()
 void UIExtensionRecord::Update(const AAFwk::AbilityRequest &abilityRequest)
 {
     if (abilityRecord_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord_ is null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityRecord_");
         return;
     }
     abilityRecord_->SetSessionInfo(abilityRequest.sessionInfo);

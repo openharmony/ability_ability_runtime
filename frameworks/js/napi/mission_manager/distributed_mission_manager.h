@@ -46,12 +46,31 @@ napi_value CreateInt32(napi_env &env, int32_t num, const std::string &paramName)
 class NAPIMissionContinue : public MissionContinueStub {
 public:
     void OnContinueDone(int32_t result) override;
-    void SetContinueEnv(const napi_env &env);
-    void SetEnv(const napi_env &env);
-    void SetContinueAbilityEnv(const napi_env &env);
-    void SetContinueAbilityCBRef(const napi_ref &ref);
-    void SetContinueAbilityHasBundleName(bool hasBundleName);
-    void SetContinueAbilityPromiseRef(const napi_deferred &promiseDeferred);
+
+    void SetEnv(const napi_env &env)
+    {
+        env_ = env;
+    }
+
+    void SetContinueAbilityEnv(const napi_env &env)
+    {
+        env_ = env;
+    }
+
+    void SetContinueAbilityCBRef(const napi_ref &ref)
+    {
+        onContinueDoneRef_ = ref;
+    }
+
+    void SetContinueAbilityHasBundleName(bool hasBundleName)
+    {
+        onContinueDoneHasBundleName_ = hasBundleName;
+    }
+
+    void SetContinueAbilityPromiseRef(const napi_deferred &promiseDeferred)
+    {
+        promiseDeferred_ = promiseDeferred;
+    }
 
 private:
     bool onContinueDoneHasBundleName_ = false;
@@ -81,7 +100,7 @@ private:
 
 class NAPIRemoteOnListener : public AAFwk::RemoteOnListenerStub {
 public:
-    virtual ~NAPIRemoteOnListener();
+    virtual ~NAPIRemoteOnListener() {};
 
     void OnCallback(const uint32_t continueState, const std::string &srcDeviceId,
         const std::string &bundleName, const std::string &continueType = "",
@@ -208,6 +227,10 @@ enum ErrorCode {
      */
     PERMISSION_DENIED = 201,
     /**
+     * Result(202) for non-system-app use system-api.
+     */
+    NOT_SYSTEM_APP = 202,
+    /**
      * Result(401) for parameter check failed.
      */
     PARAMETER_CHECK_FAILED = 401,
@@ -229,6 +252,24 @@ enum ErrorCode {
      * supported, try again with freeInstall flag.
      */
     CONTINUE_WITHOUT_FREEINSTALL_FLAG = 16300504,
+    /**
+     * Result(16300506) throw to js for the local continuation task is already in progress.
+     */
+    ERR_CONTINUE_ALREADY_IN_PROGRESS = 16300506,
+    /**
+     * Result(16300507) throw to js for Failed to get the missionInfo of the specified bundle name.
+     */
+    ERR_GET_MISSION_INFO_OF_BUNDLE_NAME = 16300507,
+    /**
+     * Result(16300508) throw to js for bind error due to the remote device hotspot enable, try again after disable
+     * the remote device hotspot.
+     */
+    ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE = 16300508,
+    /**
+     * Result(16300509) throw to js for the remote device has been linked with other devices, try again when
+     * the remote device is idle.
+     */
+    ERR_BIND_REMOTE_IN_BUSY_LINK = 16300509,
     /**
      * Result(29360222) for the operation device must be the device where the application to be continued
      * is located or the target device to be continued.

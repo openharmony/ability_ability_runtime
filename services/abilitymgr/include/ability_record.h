@@ -161,6 +161,7 @@ public:
     int32_t callerTokenId = 0;
     int32_t callerUid = 0;
     int32_t callerPid = 0;
+    std::string callerNativeName;
 };
 
 /**
@@ -349,6 +350,18 @@ enum class AbilityVisibilityState {
     UNSPECIFIED,
 };
 
+struct LaunchDebugInfo {
+public:
+    void Update(const Want &want);
+
+    bool isDebugAppSet = false;
+    bool isNativeDebugSet = false;
+    bool isPerfCmdSet = false;
+    bool debugApp = false;
+    bool nativeDebug = false;
+    std::string perfCmd;
+};
+
 /**
  * @class AbilityRecord
  * AbilityRecord records ability info and states and used to schedule ability life.
@@ -406,6 +419,10 @@ public:
      *
      */
     void PostForegroundTimeoutTask();
+
+    void RemoveForegroundTimeoutTask();
+
+    void RemoveLoadTimeoutTask();
 
     void PostUIExtensionAbilityTimeoutTask(uint32_t messageId);
 
@@ -531,6 +548,8 @@ public:
      * @return true : ready ,false: not ready
      */
     bool IsReady() const;
+    void SetLoadState(AbilityLoadState loadState);
+    AbilityLoadState GetLoadState() const;
 
     void UpdateRecoveryInfo(bool hasRecoverInfo);
 
@@ -708,6 +727,12 @@ public:
     Want GetWant() const;
 
     /**
+     * remove signature info of want.
+     *
+     */
+    void RemoveSignatureInfo();
+
+    /**
      * remove specified wantParam for start ability.
      *
      */
@@ -811,8 +836,8 @@ public:
      * add caller record
      *
      */
-    void AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, std::string srcAbilityId = "",
-        uint32_t callingTokenId = 0);
+    void AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, const Want &want,
+        std::string srcAbilityId = "", uint32_t callingTokenId = 0);
 
     /**
      * get caller record to list.
@@ -983,9 +1008,6 @@ public:
     void SetWindowMode(int32_t windowMode);
     void RemoveWindowMode();
     LifeCycleStateInfo lifeCycleStateInfo_;                // target life state info
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    int BlockAbility();
-    #endif
 
     bool CanRestartRootLauncher();
 
@@ -1092,6 +1114,8 @@ private:
 
     bool IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken, uint32_t callingTokenId = 0);
 
+    void RecordSaCallerInfo(const Want &want);
+
 #ifdef WITH_DLP
     void HandleDlpAttached();
     void HandleDlpClosed();
@@ -1175,7 +1199,7 @@ private:
     std::weak_ptr<AbilityRecord> nextAbilityRecord_ = {};  // ability that started by this ability
     int64_t startTime_ = 0;                           // records first time of ability start
     int64_t restartTime_ = 0;                         // the time of last trying restart
-    bool isReady_ = false;                            // is ability thread attached?
+    std::atomic<AbilityLoadState> loadState_ = AbilityLoadState::INIT;  // ability thread attach state
     bool isWindowStarted_ = false;                     // is window hotstart or coldstart?
     bool isWindowAttached_ = false;                   // Is window of this ability attached?
     bool isLauncherAbility_ = false;                  // is launcher?
@@ -1283,7 +1307,10 @@ private:
     uint32_t specifyTokenId_ = 0;
 
     std::shared_ptr<Want> connectWant_ = nullptr;
+    std::shared_ptr<CallerAbilityInfo> saCallerInfo_ = nullptr;
     ffrt::mutex connectWantLock_;
+    bool isLaunching_ = true;
+    LaunchDebugInfo launchDebugInfo_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

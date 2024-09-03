@@ -132,4 +132,5 @@ HWTEST_F(CjTestRunnerTest, CjTestRunnerTestCreate_Failed_RuntimeNull_001, TestSi
         runtime,
         abilityArgs,
         true);
+    EXPECT_TRUE(runtime == nullptr);
 }

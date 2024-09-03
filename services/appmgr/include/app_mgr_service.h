@@ -181,6 +181,15 @@ public:
     virtual int32_t GetAllRenderProcesses(std::vector<RenderProcessInfo> &info) override;
 
     /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) override;
+
+    /**
      * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.
      * Obtains information about application processes that are running on the device.
      *
@@ -330,22 +339,13 @@ public:
 
     virtual int32_t GetConfiguration(Configuration& config) override;
 
-    virtual int32_t UpdateConfiguration(const Configuration &config) override;
+    virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override;
 
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) override;
 
     virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
-
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService() override;
-    #endif
 
     bool GetAppRunningStateByBundleName(const std::string &bundleName) override;
 
@@ -534,6 +534,8 @@ public:
     void SetAppAssertionPauseState(bool flag) override;
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
+    
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) override;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
 

@@ -184,13 +184,6 @@ class MockAppMgrStub : public AppMgrStub {
         return 0;
     }
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    int BlockAppService() override
-    {
-        return 0;
-    }
-    #endif
-
     int PreStartNWebSpawnProcess() override
     {
         return 0;
@@ -215,7 +208,7 @@ class MockAppMgrStub : public AppMgrStub {
         return 0;
     }
 
-    int32_t UpdateConfiguration(const Configuration &config) override
+    int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override
     {
         return 0;
     }

@@ -113,13 +113,53 @@ void ConfigurationUtils::UpdateDisplayConfig(Rosen::DisplayId displayId, std::sh
     Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
 }
 
+void ConfigurationUtils::InitDisplayConfig(std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<ResourceManager> resourceManager, Rosen::DisplayId displayId, float density, int32_t orientation)
+{
+    TAG_LOGD(AAFwkTag::ABILITY, "Init display config");
+    if (configuration == nullptr || resourceManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "Input invalid");
+        return;
+    }
+    auto direction = GetDirectionStr(orientation);
+    configuration->AddItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI, GetDensityStr(density));
+    configuration->AddItem(displayId, ConfigurationInner::APPLICATION_DIRECTION, direction);
+    configuration->AddItem(ConfigurationInner::APPLICATION_DISPLAYID, std::to_string(displayId));
+    UpdateDisplayResConfig(resourceManager, density, direction);
+}
+
+bool ConfigurationUtils::UpdateDisplayConfig(std::shared_ptr<Configuration> configuration,
+    std::shared_ptr<ResourceManager> resourceManager, Rosen::DisplayId displayId, float density,
+    Rosen::DisplayOrientation orientation)
+{
+    TAG_LOGD(AAFwkTag::ABILITY, "Update display config");
+    if (configuration == nullptr || resourceManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "Input invalid");
+        return false;
+    }
+    auto direction = GetDirectionStr(static_cast<int32_t>(orientation));
+    Configuration newConfig;
+    newConfig.AddItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI, GetDensityStr(density));
+    newConfig.AddItem(displayId, ConfigurationInner::APPLICATION_DIRECTION, direction);
+
+    std::vector<std::string> changeKeyV;
+    configuration->CompareDifferent(changeKeyV, newConfig);
+    if (changeKeyV.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITY, "There's no changed config");
+        return false;
+    }
+    configuration->Merge(changeKeyV, newConfig);
+    UpdateDisplayResConfig(resourceManager, density, direction);
+    return true;
+}
+
 bool ConfigurationUtils::GetDisplayConfig(Rosen::DisplayId displayId, float &density,
     std::string &directionStr)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "get display by id %{public}" PRIu64"", displayId);
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "get display %{public}" PRIu64" failed", displayId);
+        TAG_LOGE(AAFwkTag::ABILITY, "display %{public}" PRIu64" failed", displayId);
         return false;
     }
 

@@ -772,7 +772,7 @@ void JsUIExtensionContext::DoConnectUIServiceExtension(napi_env env,
         return;
     }
 
-    uint64_t connectId = connection->GetConnectionId();
+    int64_t connectId = connection->GetConnectionId();
     auto context = weakContext.lock();
     if (!context) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "connect ability failed, context is released");
@@ -781,7 +781,7 @@ void JsUIExtensionContext::DoConnectUIServiceExtension(napi_env env,
         return;
     }
 
-    auto innerErrorCode = context->ConnectAbility(want, connection);
+    auto innerErrorCode = context->ConnectUIServiceExtensionAbility(want, connection);
     AbilityErrorCode errcode = AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode);
     if (errcode != AbilityErrorCode::ERROR_OK) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "ConnectAbility failed, errcode is %{public}d.", errcode);

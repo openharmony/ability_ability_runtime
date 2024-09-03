@@ -2212,7 +2212,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckPermissionForUIService_0001, TestS
     Want want {};
     AbilityRequest abilityRequest;
 
-    int ret = abilityMs->CheckPermissionForUIService(want, abilityRequest);
+    int ret = abilityMs->CheckPermissionForUIService(AppExecFwk::ExtensionAbilityType::SERVICE, want, abilityRequest);
     EXPECT_EQ(ret, ERR_OK);
 }
 

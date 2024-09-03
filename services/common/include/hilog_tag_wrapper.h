@@ -22,7 +22,7 @@
 #include "hilog/log.h"
 
 #ifndef AAFWK_FUNC_FMT
-#define AAFWK_FUNC_FMT "[%{public}s(%{public}s:%{public}d)]"
+#define AAFWK_FUNC_FMT "[%{public}s:%{public}d]"
 #endif
 
 #ifndef AAFWK_FILE_NAME
@@ -30,7 +30,7 @@
 #endif
 
 #ifndef AAFWK_FUNC_INFO
-#define AAFWK_FUNC_INFO AAFWK_FILE_NAME, __FUNCTION__, __LINE__
+#define AAFWK_FUNC_INFO AAFWK_FILE_NAME, __LINE__
 #endif
 
 
@@ -91,7 +91,6 @@ enum class AAFwkLogTag : uint32_t {
     FREE_INSTALL,
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
-    FILE_MONITOR,
 
     END = 256,               // N.B. never use it
 };
@@ -168,7 +167,7 @@ inline const char* GetDomainName5(AAFwkLogTag tag)
 
 inline const char* GetDomainName6(AAFwkLogTag tag)
 {
-    const char* tagNames[] = { "LocalCall", "FileMonitor" };
+    const char* tagNames[] = { "LocalCall" };
     uint32_t offset = GetOffset(tag, AAFwkLogTag::LOCAL_CALL);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";

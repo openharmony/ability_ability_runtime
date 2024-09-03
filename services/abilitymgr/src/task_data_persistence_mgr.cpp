@@ -23,12 +23,12 @@ namespace OHOS {
 namespace AAFwk {
 TaskDataPersistenceMgr::TaskDataPersistenceMgr()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "TaskDataPersistenceMgr instance is created");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "TaskDataPersistenceMgr instance created");
 }
 
 TaskDataPersistenceMgr::~TaskDataPersistenceMgr()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "TaskDataPersistenceMgr instance is destroyed");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "TaskDataPersistenceMgr instance destroyed");
 }
 
 bool TaskDataPersistenceMgr::Init(int userId)
@@ -48,7 +48,7 @@ bool TaskDataPersistenceMgr::Init(int userId)
     currentUserId_ = userId;
 
     CHECK_POINTER_RETURN_BOOL(currentMissionDataStorage_);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Init success.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "init success");
     return true;
 }
 
@@ -56,7 +56,7 @@ bool TaskDataPersistenceMgr::LoadAllMissionInfo(std::list<InnerMissionInfo> &mis
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!currentMissionDataStorage_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "currentMissionDataStorage_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null currentMissionDataStorage_");
         return false;
     }
 
@@ -67,7 +67,7 @@ bool TaskDataPersistenceMgr::SaveMissionInfo(const InnerMissionInfo &missionInfo
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!handler_ || !currentMissionDataStorage_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "handler_ or currentMissionDataStorage_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "handler_ or currentMissionDataStorage_ null");
         return false;
     }
 
@@ -86,7 +86,7 @@ bool TaskDataPersistenceMgr::DeleteMissionInfo(int missionId)
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!handler_ || !currentMissionDataStorage_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "handler_ or currentMissionDataStorage_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "handler_ or currentMissionDataStorage_ null");
         return false;
     }
 
@@ -105,13 +105,13 @@ bool TaskDataPersistenceMgr::RemoveUserDir(int32_t userId)
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (currentUserId_ == userId) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not removed current user dir");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "removeUserDir fail");
         return false;
     }
     std::string userDir = std::string(TASK_DATA_FILE_BASE_PATH) + "/" + std::to_string(userId);
     bool ret = OHOS::ForceRemoveDirectory(userDir);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remove user dir %{public}s failed.", userDir.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remove user dir %{public}s failed", userDir.c_str());
         return false;
     }
     return true;
@@ -121,7 +121,7 @@ bool TaskDataPersistenceMgr::SaveMissionSnapshot(int missionId, const MissionSna
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!handler_ || !currentMissionDataStorage_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: handler_ or currentMissionDataStorage_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: handler_ or currentMissionDataStorage_ null");
         return false;
     }
 
@@ -140,7 +140,7 @@ bool TaskDataPersistenceMgr::SaveMissionSnapshot(int missionId, const MissionSna
 std::shared_ptr<Media::PixelMap> TaskDataPersistenceMgr::GetSnapshot(int missionId) const
 {
     if (!currentMissionDataStorage_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: currentMissionDataStorage_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: currentMissionDataStorage_ null");
         return nullptr;
     }
     return currentMissionDataStorage_->GetSnapshot(missionId);
@@ -152,7 +152,7 @@ bool TaskDataPersistenceMgr::GetMissionSnapshot(int missionId, MissionSnapshot& 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!currentMissionDataStorage_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: currentMissionDataStorage_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: currentMissionDataStorage_ null");
         return false;
     }
     return currentMissionDataStorage_->GetMissionSnapshot(missionId, snapshot, isLowResolution);

@@ -129,7 +129,6 @@ ohos_shared_library("abilityms") {
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
-    "${ability_runtime_services_path}/common:file_monitor",
     "${ability_runtime_services_path}/common:perm_verification",
     "${ability_runtime_services_path}/common:res_sched_util",
     "${ability_runtime_services_path}/common:task_handler_wrap",
@@ -305,12 +304,6 @@ ohos_prebuilt_etc("ams_extension_config.json") {
   part_name = "ability_runtime"
 }
 
-ohos_prebuilt_etc("default_recovery_config.json") {
-  source = "resource/default_recovery_config.json"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
 ohos_prebuilt_etc("start_ability_without_caller_token.json") {
   source = "resource/start_ability_without_caller_token.json"
   subsystem_name = "ability"
@@ -462,7 +455,6 @@ group("ams_service_config") {
   deps = [
     ":ams_service_config.json",
     ":deeplink_reserve_config.json",
-    ":default_recovery_config.json",
     ":start_ability_without_caller_token.json",
     ":uiextension_picker_config.json",
   ]

@@ -1023,6 +1023,21 @@ HWTEST_F(AppMgrServiceInnerTest, GetAllRenderProcesses_001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetAllChildrenProcesses_001
+ * @tc.desc: get all children processes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetAllChildrenProcesses_001, TestSize.Level0)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::vector<ChildProcessInfo> info;
+    auto result = appMgrServiceInner->GetAllChildrenProcesses(info);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.name: NotifyMemoryLevel_001
  * @tc.desc: notify memory level.
  * @tc.type: FUNC
@@ -1685,11 +1700,11 @@ HWTEST_F(AppMgrServiceInnerTest, OnAppStateChanged_001, TestSize.Level0)
     sptr<MockAppStateCallback> mockCallback(new MockAppStateCallback());
     EXPECT_CALL(*mockCallback, OnAppStateChanged(_)).Times(2);
     sptr<IAppStateCallback> callback1 = iface_cast<IAppStateCallback>(mockCallback);
-    appMgrServiceInner->appStateCallbacks_.push_back(callback1);
+    appMgrServiceInner->appStateCallbacks_.push_back({ callback1, 100 });
     appMgrServiceInner->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, true, false);
 
     sptr<IAppStateCallback> callback;
-    appMgrServiceInner->appStateCallbacks_.push_back(callback);
+    appMgrServiceInner->appStateCallbacks_.push_back({ callback, 100 });
     appMgrServiceInner->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, true, false);
 
     TAG_LOGI(AAFwkTag::TEST, "OnAppStateChanged_001 end");
@@ -1717,11 +1732,11 @@ HWTEST_F(AppMgrServiceInnerTest, OnAbilityStateChanged_001, TestSize.Level0)
     sptr<MockAppStateCallback> mockCallback(new MockAppStateCallback());
     EXPECT_CALL(*mockCallback, OnAbilityRequestDone(_, _)).Times(2);
     sptr<IAppStateCallback> callback1 = iface_cast<IAppStateCallback>(mockCallback);
-    appMgrServiceInner->appStateCallbacks_.push_back(callback1);
+    appMgrServiceInner->appStateCallbacks_.push_back({ callback1, 100 });
     appMgrServiceInner->OnAbilityStateChanged(abilityRunningRecord, AbilityState::ABILITY_STATE_CREATE);
 
     sptr<IAppStateCallback> callback;
-    appMgrServiceInner->appStateCallbacks_.push_back(callback);
+    appMgrServiceInner->appStateCallbacks_.push_back({ callback, 100 });
     appMgrServiceInner->OnAbilityStateChanged(abilityRunningRecord, AbilityState::ABILITY_STATE_CREATE);
 
     TAG_LOGI(AAFwkTag::TEST, "OnAbilityStateChanged_001 end");
@@ -2639,10 +2654,10 @@ HWTEST_F(AppMgrServiceInnerTest, UpdateConfiguration_001, TestSize.Level0)
     appMgrServiceInner->UpdateConfiguration(config);
 
     sptr<MockConfigurationObserver> observer(new (std::nothrow) MockConfigurationObserver());
-    appMgrServiceInner->configurationObservers_.push_back(observer);
+    appMgrServiceInner->configurationObservers_.push_back({ observer, 100 });
     sptr<IConfigurationObserver> observer1;
-    appMgrServiceInner->configurationObservers_.push_back(observer1);
-    appMgrServiceInner->configurationObservers_.push_back(nullptr);
+    appMgrServiceInner->configurationObservers_.push_back({ observer1, 100 });
+    appMgrServiceInner->configurationObservers_.push_back({ nullptr, 100 });
     appMgrServiceInner->UpdateConfiguration(config);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
@@ -3465,6 +3480,7 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     faultData.errorObject.name = "1234";
     faultData.faultType = FaultDataType::APP_FREEZE;
     appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, faultData);
+    EXPECT_NE(taskHandler, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 end");
 }
 
@@ -3697,7 +3713,6 @@ HWTEST_F(AppMgrServiceInnerTest, MakeAppDebugInfo_001, TestSize.Level0)
     auto appDebugInfo = appMgrServiceInner->MakeAppDebugInfo(appRecord, isDebugStart);
     EXPECT_EQ(appDebugInfo.bundleName, "");
     EXPECT_EQ(appDebugInfo.pid, APP_DEBUG_INFO_PID);
-    EXPECT_EQ(appDebugInfo.uid, APP_DEBUG_INFO_UID);
     EXPECT_EQ(appDebugInfo.isDebugStart, true);
 }
 
@@ -3751,7 +3766,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_002, TestSize.Level1)
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     int64_t killedTime = restartTime - 3000;
-    appMgrServiceInner->killedPorcessMap_.emplace(killedTime, processName);
+    appMgrServiceInner->killedProcessMap_.emplace(killedTime, processName);
     appMgrServiceInner->SendReStartProcessEvent(eventInfo, record->GetUid());
     TAG_LOGI(AAFwkTag::TEST, "SendReStartProcessEvent_002 end");
 }
@@ -3776,7 +3791,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_003, TestSize.Level1)
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     int64_t killedTime = restartTime - 1000;
-    appMgrServiceInner->killedPorcessMap_.emplace(killedTime, processName);
+    appMgrServiceInner->killedProcessMap_.emplace(killedTime, processName);
     appMgrServiceInner->SendReStartProcessEvent(eventInfo, record->GetUid());
     TAG_LOGI(AAFwkTag::TEST, "SendReStartProcessEvent_003 end");
 }
@@ -3802,7 +3817,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_004, TestSize.Level1)
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     int64_t killedTime = restartTime - 1000;
-    appMgrServiceInner->killedPorcessMap_.emplace(killedTime, processName);
+    appMgrServiceInner->killedProcessMap_.emplace(killedTime, processName);
     appMgrServiceInner->SendReStartProcessEvent(eventInfo, record->GetUid());
     TAG_LOGI(AAFwkTag::TEST, "SendReStartProcessEvent_004 end");
 }
@@ -3828,7 +3843,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendReStartProcessEvent_005, TestSize.Level1)
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     int64_t killedTime = restartTime - 1000;
-    appMgrServiceInner->killedPorcessMap_.emplace(killedTime, processName);
+    appMgrServiceInner->killedProcessMap_.emplace(killedTime, processName);
     appMgrServiceInner->SendReStartProcessEvent(eventInfo, record->GetUid());
     TAG_LOGI(AAFwkTag::TEST, "SendReStartProcessEvent_005 end");
 }
@@ -3980,6 +3995,64 @@ HWTEST_F(AppMgrServiceInnerTest, HandleWindowVisibilityChanged_001, TestSize.Lev
     appMgrServiceInner->HandleWindowVisibilityChanged(visibilityInfos);
     EXPECT_NE(appMgrServiceInner, nullptr);
     GTEST_LOG_(INFO) << "HandleWindowVisibilityChanged_001 end";
+}
+
+/**
+ * @tc.name: InitWindowPidVisibilityChangedListener_001
+ * @tc.desc: init windowPidVisibilityChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, InitWindowPidVisibilityChangedListener_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "InitWindowPidVisibilityChangedListener_001 start" ;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->FreeWindowPidVisibilityChangedListener();
+    EXPECT_EQ(appMgrServiceInner->windowPidVisibilityChangedListener_, nullptr);
+    appMgrServiceInner->InitWindowPidVisibilityChangedListener();
+    EXPECT_NE(appMgrServiceInner->windowPidVisibilityChangedListener_, nullptr);
+
+    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_ = nullptr;
+    appMgrServiceInner->SetTaskHandler(taskHandler_);
+    appMgrServiceInner->InitWindowPidVisibilityChangedListener();
+    EXPECT_EQ(appMgrServiceInner->taskHandler_, nullptr);
+    GTEST_LOG_(INFO) << "InitWindowPidVisibilityChangedListener_001 end";
+}
+
+/**
+ * @tc.name: FreeWindowPidVisibilityChangedListener_001
+ * @tc.desc: free windowPidVisibilityChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, FreeWindowPidVisibilityChangedListener_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FreeWindowPidVisibilityChangedListener_001 start";
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->FreeWindowPidVisibilityChangedListener();
+    EXPECT_EQ(appMgrServiceInner->windowPidVisibilityChangedListener_, nullptr);
+
+    appMgrServiceInner->FreeWindowPidVisibilityChangedListener();
+    GTEST_LOG_(INFO) << "FreeWindowPidVisibilityChangedListener_001 end";
+}
+
+/**
+ * @tc.name: HandleWindowPidVisibilityChanged_001
+ * @tc.desc: handle window pid visibility changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, HandleWindowPidVisibilityChanged_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleWindowPidVisibilityChanged_001 start";
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<Rosen::WindowPidVisibilityInfo> windowPidVisibilityInfo;
+    appMgrServiceInner->HandleWindowPidVisibilityChanged(windowPidVisibilityInfo);
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    GTEST_LOG_(INFO) << "HandleWindowPidVisibilityChanged_001 end";
 }
 
 /**

@@ -181,6 +181,8 @@ private:
 
     bool CheckCallerPermission();
 
+    bool CheckWindowState(int32_t pid);
+
 private:
     std::map<std::shared_ptr<PendingWantKey>, sptr<PendingWantRecord>> wantRecords_;
     ffrt::mutex mutex_;

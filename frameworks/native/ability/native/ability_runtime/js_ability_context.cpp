@@ -640,7 +640,7 @@ void JsAbilityContext::DoConnectUIServiceExtension(napi_env env,
         return;
     }
 
-    uint64_t connectId = connection->GetConnectionId();
+    int64_t connectId = connection->GetConnectionId();
     auto context = weakContext.lock();
     if (!context) {
         TAG_LOGE(AAFwkTag::CONTEXT, "connect ability failed, context is released.");
@@ -649,7 +649,7 @@ void JsAbilityContext::DoConnectUIServiceExtension(napi_env env,
         return;
     }
 
-    auto innerErrorCode = context->ConnectAbility(want, connection);
+    auto innerErrorCode = context->ConnectUIServiceExtensionAbility(want, connection);
     AbilityErrorCode errcode = AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode);
     if (errcode != AbilityErrorCode::ERROR_OK) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed, errcode is %{public}d.", errcode);
@@ -1425,7 +1425,7 @@ napi_value JsAbilityContext::OnTerminateSelfWithResult(napi_env env, NapiCallbac
 
     NapiAsyncTask::CompleteCallback complete =
         [weak = context_, want, resultCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            TAG_LOGI(AAFwkTag::CONTEXT, "async terminateSelfWithResult ");
+            TAG_LOGD(AAFwkTag::CONTEXT, "terminateSelfWithResult");
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "released context");

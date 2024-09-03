@@ -30,7 +30,8 @@ bool ProcessData::Marshalling(Parcel &parcel) const
         parcel.WriteInt32(processChangeReason) && parcel.WriteString(processName) &&
         parcel.WriteInt32(static_cast<int32_t>(processType)) && parcel.WriteInt32(static_cast<int32_t>(extensionType))
         && parcel.WriteInt32(renderUid) && parcel.WriteUint32(accessTokenId) &&
-        parcel.WriteBool(isTestMode) && parcel.WriteInt32(exitReason) && parcel.WriteString16(Str8ToStr16(exitMsg)));
+        parcel.WriteBool(isTestMode) && parcel.WriteInt32(exitReason) && parcel.WriteString16(Str8ToStr16(exitMsg)) &&
+        parcel.WriteInt32(childUid));
 }
 
 bool ProcessData::ReadFromParcel(Parcel &parcel)
@@ -54,6 +55,7 @@ bool ProcessData::ReadFromParcel(Parcel &parcel)
     isTestMode = parcel.ReadBool();
     exitReason = parcel.ReadInt32();
     exitMsg = Str16ToStr8(parcel.ReadString16());
+    childUid = parcel.ReadInt32();
     return true;
 }
 

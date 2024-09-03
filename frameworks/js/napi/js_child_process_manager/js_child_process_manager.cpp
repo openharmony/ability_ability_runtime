@@ -35,6 +35,12 @@ enum {
     MODE_SELF_FORK = 0,
     MODE_APP_SPAWN_FORK = 1,
 };
+struct ChildProcessNApiParam {
+    std::string srcEntry;
+    AppExecFwk::ChildProcessArgs args;
+    AppExecFwk::ChildProcessOptions options;
+    int32_t childProcessType;
+};
 }
 
 class JsChildProcessManager {
@@ -56,6 +62,11 @@ public:
     static napi_value StartArkChildProcess(napi_env env, napi_callback_info info)
     {
         GET_CB_INFO_AND_CALL(env, info, JsChildProcessManager, OnStartArkChildProcess);
+    }
+
+    static napi_value StartNativeChildProcess(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsChildProcessManager, OnStartNativeChildProcess);
     }
 
 private:
@@ -153,7 +164,7 @@ private:
     napi_value OnStartArkChildProcess(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGI(AAFwkTag::PROCESSMGR, "called");
-        if (ChildProcessManager::GetInstance().IsChildProcess()) {
+        if (ChildProcessManager::GetInstance().IsChildProcessBySelfFork()) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "Already in child process");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED);
             return CreateJsUndefined(env);
@@ -176,37 +187,100 @@ private:
             ThrowInvalidParamError(env, "Param srcEntry cannot be empty.");
             return CreateJsUndefined(env);
         }
+        if (!ParseArgsAndOptions(env, argv, argc, args, options)) {
+            return CreateJsUndefined(env);
+        }
+        ChildProcessNApiParam param;
+        param.srcEntry = srcEntry;
+        param.args = args;
+        param.options = options;
+        param.childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_ARK;
+        napi_value result = nullptr;
+        StartChildProcessWithArgsTask(env, result, param);
+        return result;
+    }
+
+    napi_value OnStartNativeChildProcess(napi_env env, size_t argc, napi_value* argv)
+    {
+        TAG_LOGI(AAFwkTag::PROCESSMGR, "called.");
+        if (ChildProcessManager::GetInstance().IsChildProcessBySelfFork()) {
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "Already in child process");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED);
+            return CreateJsUndefined(env);
+        }
+        if (argc < ARGC_TWO) {
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "Not enough params.");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::string entryPoint;
+        AppExecFwk::ChildProcessArgs args;
+        AppExecFwk::ChildProcessOptions options;
+        if (!ConvertFromJsValue(env, argv[PARAM0], entryPoint)) {
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "Parse param entryPoint failed, must be a valid string.");
+            ThrowInvalidParamError(env, "Parse param entryPoint failed, must be a valid string.");
+            return CreateJsUndefined(env);
+        }
+        if (entryPoint.empty()) {
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "entryPoint empty.");
+            ThrowInvalidParamError(env, "Param entryPoint cannot be empty.");
+            return CreateJsUndefined(env);
+        }
+        if (entryPoint.find(":") == std::string::npos) {
+            TAG_LOGE(AAFwkTag::PROCESSMGR,
+                "Param entryPoint must contains a colon to separate library name and entry function.");
+            ThrowInvalidParamError(env,
+                "Param entryPoint must contains a colon to separate library name and entry function.");
+            return CreateJsUndefined(env);
+        }
+        if (!ParseArgsAndOptions(env, argv, argc, args, options)) {
+            return CreateJsUndefined(env);
+        }
+        ChildProcessNApiParam param;
+        param.srcEntry = entryPoint;
+        param.args = args;
+        param.options = options;
+        param.childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS;
+        napi_value result = nullptr;
+        StartChildProcessWithArgsTask(env, result, param);
+        return result;
+    }
+
+    bool ParseArgsAndOptions(const napi_env &env, napi_value* argv, size_t argc, AppExecFwk::ChildProcessArgs &args,
+        AppExecFwk::ChildProcessOptions &options)
+    {
         std::string errorMsg;
         if (!UnwrapChildProcessArgs(env, argv[PARAM1], args, errorMsg)) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "Parse param args failed.");
             ThrowInvalidParamError(env, errorMsg);
-            return CreateJsUndefined(env);
+            return false;
         }
         if (argc > ARGS_TWO && !UnwrapChildProcessOptions(env, argv[PARAM2], options, errorMsg)) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "Parse param options failed.");
             ThrowInvalidParamError(env, errorMsg);
-            return CreateJsUndefined(env);
+            return false;
         }
-        napi_value result = nullptr;
-        StartArkChildProcessTask(env, result, srcEntry, args, options);
-        return result;
+        return true;
     }
 
-    void StartArkChildProcessTask(const napi_env &env, napi_value &result, const std::string &srcEntry,
-        const AppExecFwk::ChildProcessArgs &args, const AppExecFwk::ChildProcessOptions &options)
+    void StartChildProcessWithArgsTask(const napi_env &env, napi_value &result, const ChildProcessNApiParam &param)
     {
-        TAG_LOGD(AAFwkTag::PROCESSMGR, "OnStartArkChildProcess, srcEntry:%{private}s, args.entryParams:%{private}s,"
-            " args.fds size:%{public}zu, options.isolationMode:%{public}d", srcEntry.c_str(),
-            args.entryParams.c_str(), args.fds.size(), options.isolationMode);
+        auto &srcEntry = param.srcEntry;
+        auto &args = param.args;
+        auto &options = param.options;
+        auto childProcessType = param.childProcessType;
+        TAG_LOGD(AAFwkTag::PROCESSMGR, "StartChildProcessWithArgs, childProcessType:%{public}d, srcEntry:%{private}s, "
+            "args.entryParams size:%{public}zu, args.fds size:%{public}zu, options.isolationMode:%{public}d",
+            childProcessType, srcEntry.c_str(), args.entryParams.length(), args.fds.size(), options.isolationMode);
         auto innerErrorCode = std::make_shared<ChildProcessManagerErrorCode>(ChildProcessManagerErrorCode::ERR_OK);
         auto pid = std::make_shared<pid_t>(0);
-        NapiAsyncTask::ExecuteCallback execute = [srcEntry, args, options, pid, innerErrorCode]() {
+        NapiAsyncTask::ExecuteCallback execute = [srcEntry, args, options, childProcessType, pid, innerErrorCode]() {
             if (!pid || !innerErrorCode) {
                 TAG_LOGE(AAFwkTag::PROCESSMGR, "innerErrorCode or pid is nullptr");
                 return;
             }
-            *innerErrorCode = ChildProcessManager::GetInstance().StartArkChildProcess(srcEntry, *pid,
-                AppExecFwk::CHILD_PROCESS_TYPE_ARK, args, options);
+            *innerErrorCode = ChildProcessManager::GetInstance().StartChildProcessWithArgs(srcEntry, *pid,
+                childProcessType, args, options);
         };
         NapiAsyncTask::CompleteCallback complete =
             [pid, innerErrorCode](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -222,7 +296,7 @@ private:
                     ChildProcessManagerErrorUtil::GetAbilityErrorCode(*innerErrorCode)));
             }
         };
-        NapiAsyncTask::ScheduleHighQos("JsChildProcessManager::OnStartArkChildProcess",
+        NapiAsyncTask::ScheduleHighQos("JsChildProcessManager::StartChildProcessWithArgsTask",
             env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     }
 };
@@ -241,6 +315,8 @@ napi_value JsChildProcessManagerInit(napi_env env, napi_value exportObj)
     const char *moduleName = PROCESS_MANAGER_NAME;
     BindNativeFunction(env, exportObj, "startChildProcess", moduleName, JsChildProcessManager::StartChildProcess);
     BindNativeFunction(env, exportObj, "startArkChildProcess", moduleName, JsChildProcessManager::StartArkChildProcess);
+    BindNativeFunction(env, exportObj, "startNativeChildProcess", moduleName,
+        JsChildProcessManager::StartNativeChildProcess);
     return CreateJsUndefined(env);
 }
 }  // namespace AbilityRuntime
