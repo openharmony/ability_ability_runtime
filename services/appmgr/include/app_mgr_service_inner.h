@@ -167,19 +167,6 @@ public:
     void RemoveDeadAppStateCallback(const wptr<IRemoteObject> &remote);
 
     /**
-     * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return
-     */
-    virtual void AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState);
-
-    /**
      * KillProcessByAbilityToken, kill the process by ability token.
      *
      * @param token, the unique identification to the ability.
