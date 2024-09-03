@@ -35,6 +35,7 @@ ohos_unittest("ability_record_test") {
 
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_deal.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "ability_record_test.cpp",  # add mock file
     "mock/src/mock_my_flag.cpp",
