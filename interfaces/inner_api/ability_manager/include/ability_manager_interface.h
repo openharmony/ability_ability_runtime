@@ -472,6 +472,17 @@ public:
     };
 
     /**
+     * TerminateUIServiceExtensionAbility, terminate the UIServiceExtensionAbility.
+     *
+     * @param token, the token of the ability to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token)
+    {
+        return 0;
+    }
+
+    /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
      *
      * @param extensionSessionInfo the extension session info of the ability to terminate.
