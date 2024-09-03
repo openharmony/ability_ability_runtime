@@ -391,6 +391,14 @@ ErrCode AbilityManagerClient::BackToCallerAbilityWithResult(const sptr<IRemoteOb
     return abms->BackToCallerAbilityWithResult(token, resultCode, resultWant, callerRequestCode);
 }
 
+ErrCode AbilityManagerClient::TerminateUIServiceExtensionAbility(sptr<IRemoteObject> token)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    return abms->TerminateUIServiceExtensionAbility(token);
+}
+
 ErrCode AbilityManagerClient::TerminateUIExtensionAbility(sptr<SessionInfo> extensionSessionInfo,
     int resultCode, const Want *resultWant)
 {
