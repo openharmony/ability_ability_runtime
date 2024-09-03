@@ -80,6 +80,7 @@ HWTEST_F(EventReportTest, ConvertEventName_0100, TestSize.Level0)
     EXPECT_EQ(EventReport::ConvertEventName(EventName::PROCESS_EXIT), "PROCESS_EXIT");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::DRAWN_COMPLETED), "DRAWN_COMPLETED");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::APP_STARTUP_TYPE), "APP_STARTUP_TYPE");
+    EXPECT_EQ(EventReport::ConvertEventName(EventName::PROCESS_START_FAILED), "PROCESS_START_FAILED");
     // key behavior event
     EXPECT_EQ(EventReport::ConvertEventName(EventName::GRANT_URI_PERMISSION), "GRANT_URI_PERMISSION");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::FA_SHOW_ON_LOCK), "FA_SHOW_ON_LOCK");
@@ -572,6 +573,25 @@ HWTEST_F(EventReportTest, SendProcessStartEvent_0100, TestSize.Level0)
     EventReport::SendProcessStartEvent(eventName, eventInfo);
     eventInfo.extensionType = 0;
     EventReport::SendProcessStartEvent(eventName, eventInfo);
+}
+
+/**
+ * @tc.name: SendProcessStartFailedEvent_0100
+ * @tc.desc: Check SendProcessStartFailedEvent Test
+ * @tc.type: FUNC
+ * @tc.require: issueI99FZY
+ */
+HWTEST_F(EventReportTest, SendProcessStartFailedEvent_0100, TestSize.Level0)
+{
+    EventName eventName = static_cast<EventName>(-1);
+    EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
+    EventInfo eventInfo;
+    EventReport::SendProcessStartFailedEvent(eventName, eventInfo);
+    eventName = EventName::PROCESS_START_FAILED;
+    EventReport::SendProcessStartFailedEvent(eventName, eventInfo);
+    eventInfo.extensionType = 0;
+    EventReport::SendProcessStartFailedEvent(eventName, eventInfo);
+    EXPECT_EQ(EventReport::ConvertEventName(eventName), "PROCESS_START_FAILED");
 }
 
 /**
