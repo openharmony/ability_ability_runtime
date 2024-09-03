@@ -1964,67 +1964,6 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetMissionIdByToken_001, T
     EXPECT_EQ(res, NO_ERROR);
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-/*
- * Feature: AbilityManagerService
- * Function: BlockAmsService
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService BlockAmsService
- * EnvConditions: NA
- * CaseDescription: Verify the normal process of BlockAmsService
- */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_BlockAmsService_001, TestSize.Level1)
-{
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    auto res = proxy_->BlockAmsService();
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::BLOCK_AMS_SERVICE), mock_->code_);
-    EXPECT_EQ(res, NO_ERROR);
-}
-#endif
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-/*
- * Feature: AbilityManagerService
- * Function: BlockAbility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService BlockAbility
- * EnvConditions: NA
- * CaseDescription: Verify the normal process of BlockAbility
- */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_BlockAbility_001, TestSize.Level1)
-{
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    int32_t abilityRecordId = 0;
-    auto res = proxy_->BlockAbility(abilityRecordId);
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::BLOCK_ABILITY), mock_->code_);
-    EXPECT_EQ(res, NO_ERROR);
-}
-#endif
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-/*
- * Feature: AbilityManagerService
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify the normal process of BlockAppService
- */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_BlockAppService_001, TestSize.Level1)
-{
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    auto res = proxy_->BlockAppService();
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::BLOCK_APP_SERVICE), mock_->code_);
-    EXPECT_EQ(res, NO_ERROR);
-}
-#endif
-
 /*
  * Feature: AbilityManagerService
  * Function: FreeInstallAbilityFromRemote
@@ -2200,7 +2139,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_CallRequestDone_001, TestS
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> callStub = nullptr;
     proxy_->CallRequestDone(token, callStub);
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*
@@ -2511,9 +2450,9 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RegisterSessionHandler_002
 HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSpecifiedAbilityBySCB_001, TestSize.Level1)
 {
     proxy_ = std::make_shared<AbilityManagerProxy>(nullptr);
-    EXPECT_TRUE(proxy_ != nullptr);
     Want want;
     proxy_->StartSpecifiedAbilityBySCB(want);
+    EXPECT_TRUE(proxy_ != nullptr);
 }
 
 /*

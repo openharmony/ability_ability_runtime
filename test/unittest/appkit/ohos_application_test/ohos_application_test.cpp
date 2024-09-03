@@ -1087,7 +1087,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_CleanAbilityStage_0
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_CleanAbilityStage_0100 start.";
     std::shared_ptr<AbilityInfo> abilityInfo = nullptr;
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
-    ohosApplication_->CleanAbilityStage(token, abilityInfo);
+    ohosApplication_->CleanAbilityStage(token, abilityInfo, false);
     EXPECT_TRUE(abilityInfo == nullptr);
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_CleanAbilityStage_0100 end.";
 }
@@ -1102,7 +1102,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_CleanAbilityStage_0
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_CleanAbilityStage_0200 start.";
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<Notification::MockIRemoteObject> token = nullptr;
-    ohosApplication_->CleanAbilityStage(token, abilityInfo);
+    ohosApplication_->CleanAbilityStage(token, abilityInfo, false);
     EXPECT_TRUE(token == nullptr);
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_CleanAbilityStage_0200 end.";
 }
@@ -1122,7 +1122,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_CleanAbilityStage_0
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     ohosApplication_->abilityStages_.emplace(abilityInfo->moduleName, abilityStage);
     EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
-    ohosApplication_->CleanAbilityStage(token, abilityInfo);
+    ohosApplication_->CleanAbilityStage(token, abilityInfo, false);
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_CleanAbilityStage_0300 end.";
 }

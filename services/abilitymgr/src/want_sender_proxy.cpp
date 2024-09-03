@@ -37,12 +37,12 @@ void WantSenderProxy::Send(SenderInfo &senderInfo)
         return;
     }
     if (!data.WriteParcelable(&senderInfo)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "fail to WriteParcelable value");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "WriteParcelable value empty");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "remote is NULL");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null remote");
         return;
     }
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(IWantSender::WANT_SENDER_SEND), data, reply, option);

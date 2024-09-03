@@ -25,11 +25,11 @@ void RemoteMissionListenerProxy::NotifyMissionsChanged(const std::string& device
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(RemoteMissionListenerProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyMissionsChanged Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyMissionsChanged Write interface token failed");
         return;
     }
     if (!data.WriteString(deviceId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyMissionsChanged Write deviceId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyMissionsChanged Write deviceId failed");
         return;
     }
     int32_t result = SendTransactCmd(IRemoteMissionListener::NOTIFY_MISSION_CHANGED, data, reply, option);
@@ -45,15 +45,15 @@ void RemoteMissionListenerProxy::NotifySnapshot(const std::string& deviceId, int
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(RemoteMissionListenerProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifySnapshot Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifySnapshot Write interface token failed");
         return;
     }
     if (!data.WriteString(deviceId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifySnapshot Write deviceId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifySnapshot Write deviceId failed");
         return;
     }
     if (!data.WriteInt32(missionId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifySnapshot Write missionId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifySnapshot Write missionId failed");
         return;
     }
     int32_t result = SendTransactCmd(IRemoteMissionListener::NOTIFY_SNAPSHOT, data, reply, option);
@@ -69,15 +69,15 @@ void RemoteMissionListenerProxy::NotifyNetDisconnect(const std::string& deviceId
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(RemoteMissionListenerProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyNetDisconnect Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyNetDisconnect Write interface token failed");
         return;
     }
     if (!data.WriteString(deviceId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyNetDisconnect Write deviceId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyNetDisconnect Write deviceId failed");
         return;
     }
     if (!data.WriteInt32(state)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyNetDisconnect Write missionId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "NotifyNetDisconnect Write missionId failed");
         return;
     }
     int32_t result = SendTransactCmd(IRemoteMissionListener::NOTIFY_NET_DISCONNECT, data, reply, option);
@@ -92,13 +92,13 @@ int32_t RemoteMissionListenerProxy::SendTransactCmd(uint32_t code, MessageParcel
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote object");
         return ERR_NULL_OBJECT;
     }
 
     int32_t ret = remote->SendRequest(code, data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "SendRequest failed. code is %{public}d, ret is %{public}d.", code, ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail. code: %{public}d, ret: %{public}d", code, ret);
         return ret;
     }
     return NO_ERROR;

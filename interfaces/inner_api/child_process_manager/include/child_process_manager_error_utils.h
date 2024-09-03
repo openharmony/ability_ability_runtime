@@ -19,6 +19,7 @@
 #include <map>
 
 #include "ability_business_error.h"
+#include "ability_manager_errors.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -30,9 +31,9 @@ enum class ChildProcessManagerErrorCode {
     ERR_FORK_FAILED = 4,
     ERR_GET_BUNDLE_INFO_FAILED = 5,
     ERR_GET_APP_MGR_FAILED = 6,
-    ERR_GET_APP_MGR_START_PROCESS_FAILED = 7,
+    ERR_APP_MGR_FAILED_INNER = 7,
     ERR_UNSUPPORT_NATIVE_CHILD_PROCESS = 8,
-    ERR_MAX_NATIVE_CHILD_PROCESSES = 9,
+    ERR_MAX_CHILD_PROCESSES = 9,
     ERR_LIB_LOADING_FAILED = 10,
     ERR_CONNECTION_FAILED = 11,
     ERR_UNSUPPORTED_START_MODE = 12,
@@ -49,15 +50,24 @@ const std::map<ChildProcessManagerErrorCode, AbilityErrorCode> INTERNAL_ERR_CODE
     { ChildProcessManagerErrorCode::ERR_FORK_FAILED, AbilityErrorCode::ERROR_CODE_INNER },
     { ChildProcessManagerErrorCode::ERR_GET_BUNDLE_INFO_FAILED, AbilityErrorCode::ERROR_CODE_INNER },
     { ChildProcessManagerErrorCode::ERR_GET_APP_MGR_FAILED, AbilityErrorCode::ERROR_CODE_INNER },
-    { ChildProcessManagerErrorCode::ERR_GET_APP_MGR_START_PROCESS_FAILED, AbilityErrorCode::ERROR_CODE_INNER },
+    { ChildProcessManagerErrorCode::ERR_APP_MGR_FAILED_INNER, AbilityErrorCode::ERROR_CODE_INNER },
     { ChildProcessManagerErrorCode::ERR_UNSUPPORTED_START_MODE, AbilityErrorCode::ERROR_CODE_INVALID_PARAM },
     { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW,
         AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT },
+    { ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES,
+        AbilityErrorCode::ERROR_CODE_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND },
+};
+
+const std::map<int32_t, ChildProcessManagerErrorCode> ABILITY_MANAGER_ERR_CODE_MAP = {
+    { AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS, ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW },
+    { AAFwk::ERR_ALREADY_IN_CHILD_PROCESS, ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS },
+    { AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT, ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES },
 };
 
 class ChildProcessManagerErrorUtil {
 public:
     static AbilityErrorCode GetAbilityErrorCode(const ChildProcessManagerErrorCode &internalErrCode);
+    static ChildProcessManagerErrorCode GetChildProcessManagerErrorCode(int32_t abilityManagerErrorCode);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

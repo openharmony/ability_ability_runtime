@@ -79,7 +79,6 @@ constexpr size_t PARAM_TWO = 2;
 constexpr uint8_t SYSCAP_MAX_SIZE = 100;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 constexpr int32_t DEFAULT_INTER_VAL = 500;
-constexpr int32_t TRIGGER_GC_AFTER_CLEAR_STAGE_MS = 3000;
 constexpr int32_t API8 = 8;
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
@@ -474,14 +473,14 @@ bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFull
 
     std::string fileName = fileNames.front();
     fileFullName = filePath + "/" + fileName;
-    std::ostringstream outStream;
-    if (!extractor.ExtractByName(fileName, outStream)) {
+    std::unique_ptr<uint8_t[]> data;
+    size_t dataLen = 0;
+    if (!extractor.ExtractToBufByName(fileName, data, dataLen)) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Extract %{public}s failed", fileFullName.c_str());
         return false;
     }
 
-    const auto &outStr = outStream.str();
-    buffer.assign(outStr.begin(), outStr.end());
+    buffer.assign(data.get(), data.get() + dataLen);
     return true;
 }
 
@@ -914,18 +913,6 @@ void JsRuntime::ReloadFormComponent()
 #endif
 }
 
-void JsRuntime::DoCleanWorkAfterStageCleaned()
-{
-    // Force gc. If the jsRuntime is destroyed, this task should not be executed.
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
-    RemoveTask("ability_destruct_gc");
-    auto gcTask = [this]() {
-        panda::JSNApi::TriggerGC(GetEcmaVm(), panda::ecmascript::GCReason::TRIGGER_BY_ABILITY,
-            panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
-    };
-    PostTask(gcTask, "ability_destruct_gc", TRIGGER_GC_AFTER_CLEAR_STAGE_MS);
-}
-
 bool JsRuntime::InitLoop(bool isStage)
 {
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
@@ -1176,14 +1163,14 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
             }
             return LoadScript(abcPath, safeData->GetDataPtr(), safeData->GetDataLen(), isBundle_);
         } else {
-            std::ostringstream outStream;
-            if (!extractor->GetFileBuffer(modulePath, outStream)) {
+            std::unique_ptr<uint8_t[]> data;
+            size_t dataLen = 0;
+            if (!extractor->ExtractToBufByName(modulePath, data, dataLen)) {
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "Get File  Buffer abc file failed");
                 return false;
             }
-            const auto& outStr = outStream.str();
             std::vector<uint8_t> buffer;
-            buffer.assign(outStr.begin(), outStr.end());
+            buffer.assign(data.get(), data.get() + dataLen);
 
             return LoadScript(abcPath, &buffer, isBundle_);
         }
@@ -1268,7 +1255,7 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
     dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
     dumpOption.isVmMode = true;
     dumpOption.isPrivate = false;
-    dumpOption.captureNumericValue = false;
+    dumpOption.captureNumericValue = true;
     dumpOption.isFullGC = isFullGC;
     dumpOption.isSync = false;
     DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
@@ -1658,12 +1645,13 @@ void JsRuntime::GetPkgContextInfoListMap(const std::map<std::string, std::string
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s load hapPath failed", it->first.c_str());
             continue;
         }
-        std::ostringstream outStream;
-        if (!extractor->ExtractByName("pkgContextInfo.json", outStream)) {
+        std::unique_ptr<uint8_t[]> data;
+        size_t dataLen = 0;
+        if (!extractor->ExtractToBufByName("pkgContextInfo.json", data, dataLen)) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
             continue;
         }
-        auto jsonObject = nlohmann::json::parse(outStream.str(), nullptr, false);
+        auto jsonObject = nlohmann::json::parse(data.get(), data.get() + dataLen, nullptr, false);
         if (jsonObject.is_discarded()) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());
             continue;

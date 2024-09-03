@@ -22,6 +22,7 @@ ohos_unittest("lifecycle_test") {
   include_dirs = [
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/include",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
+    "${ability_runtime_utils_path}/global/constant",
   ]
 
   sources = [ "lifecycle_test.cpp" ]

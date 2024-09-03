@@ -130,7 +130,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int KillProcessWithAccount(
-        const std::string &bundleName, const int accountId, const bool clearpagestack = false) = 0;
+        const std::string &bundleName, const int accountId, const bool clearPageStack = false) = 0;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
@@ -148,7 +148,7 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplication(const std::string &bundleName, const bool clearpagestack = false) = 0;
+    virtual int KillApplication(const std::string &bundleName, const bool clearPageStack = false) = 0;
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
@@ -183,7 +183,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillApplicationSelf(const bool clearpagestack = false)
+    virtual int KillApplicationSelf(const bool clearPageStack = false)
     {
         return ERR_OK;
     }
@@ -379,6 +379,11 @@ public:
         return false;
     }
 
+    virtual bool IsAppKilling(sptr<IRemoteObject> token)
+    {
+        return false;
+    }
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -431,6 +436,9 @@ public:
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
         IS_PROCESS_ATTACHED,
+        IS_APP_KILLING,
+        // Add enumeration values above
+        END
     };
 };
 }  // namespace AppExecFwk

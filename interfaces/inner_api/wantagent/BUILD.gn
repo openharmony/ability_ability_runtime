@@ -57,7 +57,6 @@ ohos_shared_library("wantagent_innerkits") {
     "src/want_agent_client.cpp",
     "src/want_agent_helper.cpp",
     "src/want_agent_info.cpp",
-    "src/want_agent_log_wrapper.cpp",
   ]
 
   public_configs = [ ":wantagent_innerkits_public_config" ]
@@ -74,6 +73,7 @@ ohos_shared_library("wantagent_innerkits") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]

@@ -178,6 +178,15 @@ public:
     virtual int GetAllRenderProcesses(std::vector<RenderProcessInfo> &info) = 0;
 
     /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) = 0;
+
+    /**
      * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.
      * Obtains information about application processes that are running on the device.
      *
@@ -324,14 +333,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens) = 0;
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     *  Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService() = 0;
-    #endif
 
     /**
      * Prestart nwebspawn process.
@@ -373,7 +374,7 @@ public:
 
     virtual int32_t GetConfiguration(Configuration& config) = 0;
 
-    virtual int32_t UpdateConfiguration(const Configuration &config) = 0;
+    virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) = 0;
 
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) = 0;
 
@@ -697,6 +698,8 @@ public:
     }
 
     virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
+    
+    virtual int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) = 0;
 
     /**
      * Set application assertion pause state.

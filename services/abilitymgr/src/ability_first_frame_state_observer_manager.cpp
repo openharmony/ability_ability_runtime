@@ -29,14 +29,14 @@ int32_t AbilityFirstFrameStateObserverSet::AddAbilityFirstFrameStateObserver(
     const sptr<IAbilityFirstFrameStateObserver> &observer, const std::string &targetBundleName)
 {
     if (observer == nullptr || observer->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The param observer or observer->AsObject is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer or observer->AsObject is null");
         return ERR_INVALID_VALUE;
     }
     {
         std::lock_guard<ffrt::mutex> lockRegister(observerLock_);
         for (auto it : observerMap_) {
             if (it.first->AsObject() == observer->AsObject()) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "Observer exist.");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "Observer exist");
                 return ERR_OK;
             }
         }
@@ -51,18 +51,18 @@ void AbilityFirstFrameStateObserverSet::AddObserverDeathRecipient(const sptr<IRe
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (observer == nullptr || observer->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The param observer or observer->AsObject is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer or observer->AsObject is null");
         return;
     }
     auto it = recipientMap_.find(observer->AsObject());
     if (it != recipientMap_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "This death recipient has been added.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "death recipient added");
         return;
     }
     auto deathRecipientFunc = [](const wptr<IRemoteObject> &remote) {
         auto object = remote.promote();
         if (object == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "object is nullptr.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "object null");
             return;
         }
         sptr<IAbilityFirstFrameStateObserver> observer = iface_cast<IAbilityFirstFrameStateObserver>(object);
@@ -71,11 +71,11 @@ void AbilityFirstFrameStateObserverSet::AddObserverDeathRecipient(const sptr<IRe
     sptr<IRemoteObject::DeathRecipient> deathRecipient =
         new (std::nothrow) AbilityFirstFrameStateObserverRecipient(deathRecipientFunc);
     if (deathRecipient == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "deathRecipient is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "deathRecipient null");
         return;
     }
     if (!observer->AsObject()->AddDeathRecipient(deathRecipient)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient fail");
     }
     recipientMap_.emplace(observer->AsObject(), deathRecipient);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "observerMap_ size:%{public}zu", recipientMap_.size());
@@ -100,7 +100,7 @@ int32_t AbilityFirstFrameStateObserverSet::RemoveAbilityFirstFrameStateObserver(
 void AbilityFirstFrameStateObserverSet::RemoveObserverDeathRecipient(const sptr<IRemoteBroker> &observer)
 {
     if (observer == nullptr || observer->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The param observer is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer null");
         return;
     }
     auto it = recipientMap_.find(observer->AsObject());
@@ -114,7 +114,7 @@ void AbilityFirstFrameStateObserverSet::RemoveObserverDeathRecipient(const sptr<
 void AbilityFirstFrameStateObserverSet::OnAbilityFirstFrameState(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The param abilityRecord is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
         return;
     }
     const AppExecFwk::AbilityInfo abilityInfo = abilityRecord->GetAbilityInfo();
@@ -157,12 +157,12 @@ int32_t AbilityFirstFrameStateObserverManager::RegisterAbilityFirstFrameStateObs
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "verify system app failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "verify system app fail");
         return ERR_NOT_SYSTEM_APP;
     }
     // verify permissions.
     if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verification failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verification fail");
         return ERR_PERMISSION_DENIED;
     }
     if (targetBundleName.empty()) {
@@ -177,12 +177,12 @@ int32_t AbilityFirstFrameStateObserverManager::UnregisterAbilityFirstFrameStateO
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "verify system app failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "verify system app fail");
         return ERR_NOT_SYSTEM_APP;
     }
     // verify permissions.
     if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verification failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verification fail");
         return ERR_PERMISSION_DENIED;
     }
     if (stateObserverSetForBundleName_->RemoveAbilityFirstFrameStateObserver(observer) == ERR_OK) {

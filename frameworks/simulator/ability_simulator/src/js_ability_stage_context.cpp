@@ -42,7 +42,7 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     if (!jsContext || !config) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null jsContext or config");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null jsContext/config");
         return;
     }
 

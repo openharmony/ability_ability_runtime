@@ -38,7 +38,7 @@ int32_t ChildSchedulerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
     switch (code) {
         case static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_LOAD_JS):
-            return HandleScheduleLoadJs(data, reply);
+            return HandleScheduleLoadChild(data, reply);
         case static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_EXIT_PROCESS_SAFELY):
             return HandleScheduleExitProcessSafely(data, reply);
         case static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_RUN_NATIVE_PROC):
@@ -48,9 +48,9 @@ int32_t ChildSchedulerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t ChildSchedulerStub::HandleScheduleLoadJs(MessageParcel &data, MessageParcel &reply)
+int32_t ChildSchedulerStub::HandleScheduleLoadChild(MessageParcel &data, MessageParcel &reply)
 {
-    ScheduleLoadJs();
+    ScheduleLoadChild();
     return ERR_NONE;
 }
 

@@ -29,7 +29,7 @@ int WantReceiverStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
     std::u16string descriptor = WantReceiverStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "local descriptor is not equal to remote");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "local descriptor invalid");
         return ERR_INVALID_STATE;
     }
 
@@ -54,7 +54,7 @@ int WantReceiverStub::PerformReceiveInner(MessageParcel &data, MessageParcel &re
 {
     Want *want = data.ReadParcelable<Want>();
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "want is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null want");
         return ERR_INVALID_VALUE;
     }
 
@@ -63,7 +63,7 @@ int WantReceiverStub::PerformReceiveInner(MessageParcel &data, MessageParcel &re
 
     WantParams *wantParams = data.ReadParcelable<WantParams>();
     if (wantParams == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "wantParams is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null wantParams");
         delete want;
         return ERR_INVALID_VALUE;
     }

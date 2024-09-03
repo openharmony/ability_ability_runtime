@@ -157,9 +157,6 @@ public:
     int DoAbilityBackground(const sptr<IRemoteObject>& token, uint32_t flag);
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token);
     void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token);
-    int BlockAmsService();
-    int BlockAbility(int32_t abilityRecordId);
-    int BlockAppService();
     int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
     {
         return 0;
@@ -344,9 +341,6 @@ public:
     int DoAbilityBackground(const sptr<IRemoteObject>& token, uint32_t flag);
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token);
     void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token);
-    int BlockAmsService();
-    int BlockAbility(int32_t abilityRecordId);
-    int BlockAppService();
     int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
     {
         return 0;

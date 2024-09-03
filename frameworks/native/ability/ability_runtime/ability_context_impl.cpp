@@ -37,9 +37,10 @@
 namespace OHOS {
 namespace AbilityRuntime {
 const size_t AbilityContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("AbilityContext"));
-const std::string START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
-const std::string UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
-const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
+constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
+constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
+constexpr const char* FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
+constexpr const char* DISPOSED_PROHIBIT_BACK = "APPGALLERY_APP_DISPOSED_PROHIBIT_BACK";
 
 struct RequestResult {
     int32_t resultCode {0};
@@ -413,6 +414,19 @@ ErrCode AbilityContextImpl::ConnectAbilityWithAccount(const AAFwk::Want& want, i
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     ErrCode ret =
         ConnectionManager::GetInstance().ConnectAbilityWithAccount(token_, want, accountId, connectCallback);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
+ErrCode AbilityContextImpl::ConnectUIServiceExtensionAbility(const AAFwk::Want& want,
+    const sptr<AbilityConnectCallback>& connectCallback)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::CONTEXT,
+        "called, name:%{public}s", abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str());
+    ErrCode ret = ConnectionManager::GetInstance().ConnectUIServiceExtensionAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed, ret:%{public}d", ret);
     }
@@ -980,6 +994,9 @@ ErrCode AbilityContextImpl::CreateModalUIExtensionWithApp(const AAFwk::Want &wan
     };
     Ace::ModalUIExtensionConfig config;
     config.prohibitedRemoveByRouter = true;
+    if (want.GetBoolParam(DISPOSED_PROHIBIT_BACK, false)) {
+        config.isProhibitBack = true;
+    }
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed");

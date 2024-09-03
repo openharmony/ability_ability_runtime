@@ -27,7 +27,7 @@ public:
     explicit ChildSchedulerProxy(const sptr<IRemoteObject> &impl);
     virtual ~ChildSchedulerProxy() = default;
 
-    bool ScheduleLoadJs() override;
+    bool ScheduleLoadChild() override;
     bool ScheduleExitProcessSafely() override;
     bool ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb) override;
 

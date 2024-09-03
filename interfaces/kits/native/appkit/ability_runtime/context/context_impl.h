@@ -18,13 +18,14 @@
 
 #include "context.h"
 
-#include "configuration.h"
 #include "bundle_mgr_interface.h"
+#include "configuration.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 struct RunningProcessInfo;
 class BundleMgrHelper;
+class OverlayEventSubscriber;
 }
 namespace AAFwk {
 class Want;
@@ -33,7 +34,7 @@ namespace AbilityRuntime {
 class ContextImpl : public Context {
 public:
     ContextImpl() = default;
-    virtual ~ContextImpl() = default;
+    virtual ~ContextImpl();
 
     /**
      * @brief Obtains the bundle name of the current ability.
@@ -341,7 +342,7 @@ public:
      *
      * @return error code
      */
-    void KillProcessBySelf(const bool clearpagestack = false);
+    void KillProcessBySelf(const bool clearPageStack = false);
 
     /**
      * @brief Get running informationfor cuirrent process
@@ -465,6 +466,7 @@ private:
     void GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, const int &accountId,
         std::shared_ptr<Context> inputContext = nullptr);
     ErrCode GetOverlayMgrProxy();
+    void UnsubscribeToOverlayEvents();
 
     static Global::Resource::DeviceType deviceType_;
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo_ = nullptr;
@@ -485,6 +487,8 @@ private:
     // True: need to get a new fms remote object,
     // False: no need to get a new fms remote object.
     volatile bool resetFlag_ = false;
+
+    std::shared_ptr<AppExecFwk::OverlayEventSubscriber> overlaySubscriber_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

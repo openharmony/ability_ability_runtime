@@ -22,9 +22,6 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-
-static const uint32_t TIME_OUT_SECONDS = 30;
-
 class AbilityManagerXCollie {
 public:
     AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds = TIME_OUT_SECONDS,
@@ -34,10 +31,12 @@ public:
     ~AbilityManagerXCollie();
 
     void CancelAbilityManagerXCollie();
+
+    static const uint32_t TIME_OUT_SECONDS;
 private:
     int32_t id_ = -1;
     std::string tag_;
-    bool isCanceled_ = true;
+    bool isCanceled_ = false;
 };
 }
 }

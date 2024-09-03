@@ -60,7 +60,7 @@ HWTEST_F(HdcRegisterTest, HdcRegisterTest_0100, TestSize.Level0)
 
     pHdcRegister.StartHdcRegister(bundleName, processName, debugApp, nullptr);
 
-    EXPECT_TRUE(true);
+    EXPECT_NE(pHdcRegister.registerHandler_, nullptr);
 }
 
 /**
@@ -74,7 +74,7 @@ HWTEST_F(HdcRegisterTest, HdcRegisterTest_0200, TestSize.Level0)
     pHdcRegister.registerHandler_ = nullptr;
     pHdcRegister.StopHdcRegister();
     
-    EXPECT_TRUE(true);
+    EXPECT_EQ(pHdcRegister.registerHandler_, nullptr);
 }
 
 /**
@@ -91,7 +91,7 @@ HWTEST_F(HdcRegisterTest, HdcRegisterTest_0300, TestSize.Level0)
     pHdcRegister.StartHdcRegister(bundleName, processName, debugApp, nullptr);
     pHdcRegister.StopHdcRegister();
 
-    EXPECT_TRUE(true);
+    EXPECT_EQ(pHdcRegister.registerHandler_, nullptr);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

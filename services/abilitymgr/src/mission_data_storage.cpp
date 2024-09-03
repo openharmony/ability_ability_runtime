@@ -56,20 +56,20 @@ bool MissionDataStorage::LoadAllMissionInfo(std::list<InnerMissionInfo> &mission
 
     for (auto fileName : fileNameVec) {
         if (!CheckFileNameValid(fileName)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "load mission info: file name %{public}s invalid.", fileName.c_str());
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "file name %{public}s invalid", fileName.c_str());
             continue;
         }
 
         std::string content;
         bool loadFile = OHOS::LoadStringFromFile(fileName, content);
         if (!loadFile) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "load string from file %{public}s failed.", fileName.c_str());
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load %{public}s fail", fileName.c_str());
             continue;
         }
 
         InnerMissionInfo misssionInfo;
         if (!misssionInfo.FromJsonStr(content)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "parse mission info failed. file: %{public}s", fileName.c_str());
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail. file: %{public}s", fileName.c_str());
             continue;
         }
         if (misssionInfo.isTemporary) {
@@ -92,7 +92,7 @@ void MissionDataStorage::SaveMissionInfo(const InnerMissionInfo &missionInfo)
     if (!OHOS::FileExists(dirPath)) {
         bool createDir = OHOS::ForceCreateDirectory(dirPath);
         if (!createDir) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "create dir %{public}s failed.", dirPath.c_str());
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "create dir %{public}s fail", dirPath.c_str());
             return;
         }
 #ifdef SUPPORT_GRAPHICS
@@ -103,7 +103,7 @@ void MissionDataStorage::SaveMissionInfo(const InnerMissionInfo &missionInfo)
     std::string jsonStr = missionInfo.ToJsonStr();
     bool saveMissionFile = OHOS::SaveStringToFile(filePath, jsonStr, true);
     if (!saveMissionFile) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "save mission file %{public}s failed.", filePath.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "save %{public}s fail", filePath.c_str());
     }
 }
 
@@ -112,7 +112,7 @@ void MissionDataStorage::DeleteMissionInfo(int missionId)
     std::string filePath = GetMissionDataFilePath(missionId);
     bool removeMissionFile = OHOS::RemoveFile(filePath);
     if (!removeMissionFile) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remove mission file %{public}s failed.", filePath.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remove %{public}s fail", filePath.c_str());
         return;
     }
     DeleteMissionSnapshot(missionId);
@@ -121,10 +121,10 @@ void MissionDataStorage::DeleteMissionInfo(int missionId)
 void MissionDataStorage::SaveMissionSnapshot(int32_t missionId, const MissionSnapshot& missionSnapshot)
 {
 #ifdef SUPPORT_SCREEN
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "snapshot: save snapshot from cache, missionId = %{public}d", missionId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "save snapshot from cache, missionId = %{public}d", missionId);
     SaveCachedSnapshot(missionId, missionSnapshot);
     SaveSnapshotFile(missionId, missionSnapshot);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "snapshot: delete snapshot from cache, missionId = %{public}d", missionId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "delete snapshot from cache, missionId = %{public}d", missionId);
     DeleteCachedSnapshot(missionId);
 #endif
 }
@@ -145,13 +145,13 @@ bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& 
         if (isLowResolution) {
             missionSnapshot.snapshot = GetReducedPixelMap(missionSnapshot.snapshot);
         }
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "snapshot: GetMissionSnapshot from cache, missionId = %{public}d", missionId);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "GetMissionSnapshot from cache, missionId = %{public}d", missionId);
         return true;
     }
 
     auto pixelMap = GetPixelMap(missionId, isLowResolution);
     if (!pixelMap) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: GetPixelMap failed.", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: GetPixelMap fail", __func__);
         return false;
     }
     missionSnapshot.snapshot = std::move(pixelMap);
@@ -229,7 +229,7 @@ void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const std::shared_p
     if (!OHOS::FileExists(dirPath)) {
         bool createDir = OHOS::ForceCreateDirectory(dirPath);
         if (!createDir) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: create dir %{public}s failed.", dirPath.c_str());
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "create dir %{public}s fail", dirPath.c_str());
             return;
         }
         chmod(dirPath.c_str(), MODE);
@@ -240,7 +240,7 @@ void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const std::shared_p
         ssize_t dataLength = snapshot->GetWidth() * snapshot->GetHeight() * RGB888_PIXEL_BYTES;
         uint8_t* data = (uint8_t*) malloc(dataLength);
         if (data == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "malloc failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "malloc fail");
             return;
         }
         if (memset_s(data, dataLength, 0xff, dataLength) == EOK) {
@@ -285,7 +285,7 @@ bool MissionDataStorage::SaveCachedSnapshot(int32_t missionId, const MissionSnap
     std::lock_guard<ffrt::mutex> lock(cachedPixelMapMutex_);
     auto result = cachedPixelMap_.insert_or_assign(missionId, missionSnapshot.snapshot);
     if (!result.second) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: save snapshot cache failed, missionId = %{public}d", missionId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "save fail, missionId = %{public}d", missionId);
         return false;
     }
     return true;
@@ -296,7 +296,7 @@ bool MissionDataStorage::DeleteCachedSnapshot(int32_t missionId)
     std::lock_guard<ffrt::mutex> lock(cachedPixelMapMutex_);
     auto result = cachedPixelMap_.erase(missionId);
     if (result != 1) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: delete snapshot cache failed, missionId = %{public}d", missionId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "delete fail, missionId = %{public}d", missionId);
         return false;
     }
     return true;
@@ -306,13 +306,13 @@ void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId, bool isLowReso
 {
     std::string filePath = GetMissionSnapshotPath(missionId, isLowResolution);
     if (!OHOS::FileExists(filePath)) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "snapshot: remove snapshot file %{public}s failed, file not exists",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "fail, file: %{public}s",
             filePath.c_str());
         return;
     }
     bool removeResult = OHOS::RemoveFile(filePath);
     if (!removeResult) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: remove snapshot file %{public}s failed.", filePath.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remove %{public}s fail", filePath.c_str());
     }
 }
 
@@ -320,7 +320,7 @@ std::shared_ptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId, 
 {
     auto pixelMapPtr = GetPixelMap(missionId, isLowResolution);
     if (!pixelMapPtr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: GetPixelMap failed.", __func__);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: GetPixelMap fail", __func__);
         return nullptr;
     }
     return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
@@ -331,26 +331,26 @@ std::unique_ptr<uint8_t[]> MissionDataStorage::ReadFileToBuffer(const std::strin
     struct stat statbuf;
     int ret = stat(filePath.c_str(), &statbuf);
     if (ret != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetPixelMap: get the file size failed, ret:%{public}d.", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, ret:%{public}d", ret);
         return nullptr;
     }
     bufferSize = static_cast<size_t>(statbuf.st_size);
     std::string realPath;
     if (!OHOS::PathToRealPath(filePath, realPath)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReadFileToBuffer:file path to real path failed, file path=%{public}s.",
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "PathToRealPath fail, file path=%{public}s",
             filePath.c_str());
         return nullptr;
     }
 
     std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(bufferSize);
     if (buffer == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReadFileToBuffer:buffer is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "buffer null");
         return nullptr;
     }
 
     FILE *fp = fopen(realPath.c_str(), "rb");
     if (fp == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReadFileToBuffer:open file failed, real path=%{public}s.", realPath.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, real path=%{public}s", realPath.c_str());
         return nullptr;
     }
     fseek(fp, 0, SEEK_END);
@@ -358,14 +358,14 @@ std::unique_ptr<uint8_t[]> MissionDataStorage::ReadFileToBuffer(const std::strin
     fseek(fp, 0, SEEK_SET);
     if (bufferSize < fileSize) {
         TAG_LOGE(AAFwkTag::ABILITYMGR,
-            "ReadFileToBuffer:buffer size:(%{public}zu) is smaller than file size:(%{public}zu).", bufferSize,
+            "buffer size:(%{public}zu) is smaller than file size:(%{public}zu)", bufferSize,
             fileSize);
         fclose(fp);
         return nullptr;
     }
     size_t retSize = std::fread(buffer.get(), 1, fileSize, fp);
     if (retSize != fileSize) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ReadFileToBuffer:read file result size = %{public}zu, size = %{public}zu.",
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read file result size = %{public}zu, size = %{public}zu",
             retSize, fileSize);
         fclose(fp);
         return nullptr;
@@ -378,7 +378,7 @@ std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId, 
 {
     std::string filePath = GetMissionSnapshotPath(missionId, isLowResolution);
     if (!OHOS::FileExists(filePath)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "snapshot: storage snapshot not exists, missionId = %{public}d", missionId);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "storage snapshot not exists, missionId = %{public}d", missionId);
         return nullptr;
     }
     uint32_t errCode = 0;
@@ -387,20 +387,20 @@ std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId, 
     const std::string fileName = filePath;
     std::unique_ptr<uint8_t[]> buffer = MissionDataStorage::ReadFileToBuffer(fileName, bufferSize);
     if (buffer == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetPixelMap: get buffer error buffer == nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "buffer null");
         return nullptr;
     }
     Media::SourceOptions sourceOptions;
     auto imageSource = Media::ImageSource::CreateImageSource(buffer.get(), bufferSize, sourceOptions, errCode);
     if (errCode != OHOS::Media::SUCCESS || imageSource == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: CreateImageSource failed, nullptr or errCode = %{public}d", errCode);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, null or errCode = %{public}d", errCode);
         return nullptr;
     }
     Media::DecodeOptions decodeOptions;
     decodeOptions.allocatorType = Media::AllocatorType::SHARE_MEM_ALLOC;
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOptions, errCode);
     if (errCode != OHOS::Media::SUCCESS) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: CreatePixelMap failed, errCode = %{public}d", errCode);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, errCode = %{public}d", errCode);
         return nullptr;
     }
     return pixelMapPtr;
@@ -416,12 +416,12 @@ void MissionDataStorage::WriteToJpeg(const std::string &filePath, T &snapshot) c
     Media::ImagePacker imagePacker;
     uint32_t err = imagePacker.StartPacking(filePath, option);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to StartPacking %{public}d.", err);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail. %{public}d", err);
         return;
     }
     err = imagePacker.AddImage(snapshot);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to AddImage %{public}d.", err);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail. %{public}d", err);
         return;
     }
     int64_t packedSize = 0;

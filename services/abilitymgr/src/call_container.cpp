@@ -93,13 +93,13 @@ bool CallContainer::RemoveCallRecord(const sptr<IAbilityConnection> & connect)
         TAG_LOGD(AAFwkTag::ABILITYMGR, "this ability has no callrecord.");
     }
 
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "remove call record is not exist.");
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "remove call record not exist");
     return false;
 }
 
 void CallContainer::OnConnectionDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "Call back is died.");
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "call back died");
     auto object = remote.promote();
     CHECK_POINTER(object);
 
@@ -141,7 +141,7 @@ bool CallContainer::CallRequestDone(const sptr<IRemoteObject> &callStub)
 
 void CallContainer::Dump(std::vector<std::string> &info) const
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Dump call records.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "dump call records");
     for (const auto &iter : callRecordMap_) {
         auto callRecord = iter.second;
         if (callRecord) {
@@ -167,7 +167,7 @@ void CallContainer::AddConnectDeathRecipient(const sptr<IAbilityConnection> &con
     CHECK_POINTER(connect->AsObject());
     auto it = deathRecipientMap_.find(connect->AsObject());
     if (it != deathRecipientMap_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "This death recipient has been added.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "death recipient been added");
         return;
     } else {
         std::weak_ptr<CallContainer> thisWeakPtr(shared_from_this());
@@ -179,7 +179,7 @@ void CallContainer::AddConnectDeathRecipient(const sptr<IAbilityConnection> &con
                 }
             });
         if (!connect->AsObject()->AddDeathRecipient(deathRecipient)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "addDeathRecipient failed");
         }
         deathRecipientMap_.emplace(connect->AsObject(), deathRecipient);
     }

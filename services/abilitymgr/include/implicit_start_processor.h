@@ -44,6 +44,7 @@ struct AddInfoParam {
     bool withDefault = false;
     std::string typeName;
     std::vector<std::string> infoNames;
+    bool isExistDefaultApp = false;
 };
 using namespace OHOS::EcologicalRuleMgrService;
 using ErmsCallerInfo = OHOS::EcologicalRuleMgrService::AbilityCallerInfo;
@@ -107,6 +108,8 @@ private:
         std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos, const AbilityRequest &request);
 
     bool IsActionImplicitStart(const Want &want, bool findDeafultApp);
+
+    int CheckImplicitCallPermission(const AbilityRequest& abilityRequest);
 
 private:
     bool IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type);

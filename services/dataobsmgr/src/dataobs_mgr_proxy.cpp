@@ -66,7 +66,7 @@ int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, sptr<IDataAbilityO
 
     auto error = SendTransactCmd(IDataObsMgr::REGISTER_OBSERVER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error: %{public}d, uri: %{public}s", error,
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error:%{public}d, uri:%{public}s", error,
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return error;
     }
@@ -91,7 +91,7 @@ int32_t DataObsManagerProxy::UnregisterObserver(const Uri &uri, sptr<IDataAbilit
 
     auto error = SendTransactCmd(IDataObsMgr::UNREGISTER_OBSERVER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error: %{public}d, uri: %{public}s", error,
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error:%{public}d, uri:%{public}s", error,
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return error;
     }
@@ -109,13 +109,13 @@ int32_t DataObsManagerProxy::NotifyChange(const Uri &uri)
         return IPC_PARCEL_ERROR;
     }
     if (!data.WriteString(uri.ToString())) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "write uri error, uri: %{public}s",
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write uri error, uri:%{public}s",
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return INVALID_PARAM;
     }
     auto error = SendTransactCmd(IDataObsMgr::NOTIFY_CHANGE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error: %{public}d, uri: %{public}s", error,
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error:%{public}d, uri:%{public}s", error,
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return IPC_ERROR;
     }
@@ -140,7 +140,7 @@ Status DataObsManagerProxy::RegisterObserverExt(const Uri &uri, sptr<IDataAbilit
     }
 
     if (!data.WriteBool(isDescendants)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "isDescendants error, uri: %{public}s, isDescendants: %{public}d",
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "isDescendants error, uri:%{public}s,isDescendants:%{public}d",
             CommonUtils::Anonymous(uri.ToString()).c_str(), isDescendants);
         return INVALID_PARAM;
     }
@@ -148,7 +148,7 @@ Status DataObsManagerProxy::RegisterObserverExt(const Uri &uri, sptr<IDataAbilit
     auto error = SendTransactCmd(IDataObsMgr::REGISTER_OBSERVER_EXT, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::DBOBSMGR,
-            "sendRequest error: %{public}d, uri: %{public}s, isDescendants: %{public}d", error,
+            "sendRequest error: %{public}d, uri:%{public}s, isDescendants:%{public}d", error,
             CommonUtils::Anonymous(uri.ToString()).c_str(), isDescendants);
         return IPC_ERROR;
     }
@@ -172,7 +172,7 @@ Status DataObsManagerProxy::UnregisterObserverExt(const Uri &uri, sptr<IDataAbil
 
     auto error = SendTransactCmd(IDataObsMgr::UNREGISTER_OBSERVER_EXT, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error: %{public}d, uri: %{public}s", error,
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error:%{public}d, uri:%{public}s", error,
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return IPC_ERROR;
     }
@@ -202,7 +202,7 @@ Status DataObsManagerProxy::UnregisterObserverExt(sptr<IDataAbilityObserver> dat
 
     auto error = SendTransactCmd(IDataObsMgr::UNREGISTER_OBSERVER_ALL_EXT, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error: %{public}d", error);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error:%{public}d", error);
         return IPC_ERROR;
     }
     int32_t res = IPC_ERROR;
@@ -250,7 +250,7 @@ int32_t DataObsManagerProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
 
     int32_t ret = remote->SendRequest(code, data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest failed. code:%{public}d, ret:%{public}d.", code, ret);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest errorCode:%{public}d, ret:%{public}d", code, ret);
         return ret;
     }
     return NO_ERROR;

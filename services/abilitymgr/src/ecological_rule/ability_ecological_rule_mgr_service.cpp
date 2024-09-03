@@ -69,13 +69,13 @@ sptr<IAbilityEcologicalRuleMgrService> AbilityEcologicalRuleMgrServiceClient::Co
 {
     sptr<ISystemAbilityManager> samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "GetSystemAbilityManager error");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "null samgr");
         return nullptr;
     }
 
     auto systemAbility = samgr->CheckSystemAbility(ECOLOGICALRULEMANAGERSERVICE_ID);
     if (systemAbility == nullptr) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "CheckSystemAbility error");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "null systemAbility");
         return nullptr;
     }
 
@@ -204,7 +204,7 @@ int32_t AbilityEcologicalRuleMgrServiceProxy::EvaluateResolveInfos(const Want &w
 
     auto remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "get remote failed");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "null remote");
         return ERR_FAILED;
     }
 
@@ -233,7 +233,7 @@ bool AbilityEcologicalRuleMgrServiceProxy::ReadParcelableVector(std::vector<T> &
     for (int32_t i = 0; i < infoSize; i++) {
         sptr<T> info = reply.ReadParcelable<T>();
         if (info == nullptr) {
-            TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "read info failed");
+            TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "null info");
             return false;
         }
         parcelableVector.emplace_back(*info);
@@ -267,7 +267,7 @@ int32_t AbilityEcologicalRuleMgrServiceProxy::QueryStartExperience(const Want &w
 
     auto remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "get Remote failed");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "null remote");
         return ERR_FAILED;
     }
 
@@ -279,7 +279,7 @@ int32_t AbilityEcologicalRuleMgrServiceProxy::QueryStartExperience(const Want &w
 
     sptr<AbilityExperienceRule> sptrRule = reply.ReadParcelable<AbilityExperienceRule>();
     if (sptrRule == nullptr) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "ReadParcelable sptrRule error");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "null sptrRule");
         return ERR_FAILED;
     }
 

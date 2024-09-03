@@ -37,17 +37,17 @@ int32_t RenderStateObserverManager::RegisterRenderStateObserver(const sptr<IRend
 {
     TAG_LOGD(AAFwkTag::APPMGR, "begin.");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return ERR_INVALID_VALUE;
     }
     auto task = [weak = weak_from_this(), observer]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         self->HandleRegisterRenderStateObserver(observer);
@@ -68,13 +68,13 @@ void RenderStateObserverManager::HandleRegisterRenderStateObserver(const sptr<IR
                 }
             });
         if (deathRecipient_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "New RenderStateObserverManager failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "RenderStateObserverManager failed");
         }
     }
 
     auto observerObj = observer->AsObject();
     if (!observerObj || !observerObj->AddDeathRecipient(deathRecipient_)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AddDeathRecipient failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "AddDeathRecipient failed");
     }
 
     observerList_.emplace_back(observer);
@@ -85,17 +85,17 @@ int32_t RenderStateObserverManager::UnregisterRenderStateObserver(const sptr<IRe
 {
     TAG_LOGD(AAFwkTag::APPMGR, "begin.");
     if (observer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return ERR_INVALID_VALUE;
     }
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return ERR_INVALID_VALUE;
     }
     auto task = [weak = weak_from_this(), observer]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         self->HandleUnregisterRenderStateObserver(observer);
@@ -115,20 +115,20 @@ void RenderStateObserverManager::HandleUnregisterRenderStateObserver(const sptr<
         TAG_LOGI(AAFwkTag::APPMGR, "observerList_ size:%{public}zu", observerList_.size());
         return;
     }
-    TAG_LOGE(AAFwkTag::APPMGR, "Observer not exist or has been removed.");
+    TAG_LOGE(AAFwkTag::APPMGR, "Observer not exist or has been removed");
 }
 
 int32_t RenderStateObserverManager::OnRenderStateChanged(const std::shared_ptr<RenderRecord> &renderRecord,
     int32_t state)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return ERR_INVALID_VALUE;
     }
     auto task = [weak = weak_from_this(), renderRecord, state]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         self->HandleOnRenderStateChanged(renderRecord, state);
@@ -141,7 +141,7 @@ void RenderStateObserverManager::HandleOnRenderStateChanged(const std::shared_pt
     int32_t state)
 {
     if (renderRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "renderRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null renderRecord");
         return;
     }
     RenderStateData data = WrapRenderStateData(renderRecord, state);
@@ -170,10 +170,10 @@ RenderStateData RenderStateObserverManager::WrapRenderStateData(const std::share
 
 void RenderStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "OnObserverDied begin.");
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
     auto remoteObj = remote.promote();
     if (remoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "observer is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return;
     }
     remoteObj->RemoveDeathRecipient(deathRecipient_);
@@ -190,7 +190,7 @@ RenderStateObserverRecipient::~RenderStateObserverRecipient()
 
 void RenderStateObserverRecipient::OnRemoteDied(const wptr<IRemoteObject> &__attribute__((unused)) remote)
 {
-    TAG_LOGE(AAFwkTag::APPMGR, "RenderStateObserverRecipient On remote died.");
+    TAG_LOGE(AAFwkTag::APPMGR, "call");
     if (handler_) {
         handler_(remote);
     }
