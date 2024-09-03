@@ -591,6 +591,11 @@ enum {
     ERR_CHILD_PROCESS_REACH_LIMIT = 2097266,
 
     /**
+     * Result(2097267) for check is debug app.
+     */
+    ERR_NOT_DEBUG_APP = 2097267,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,
