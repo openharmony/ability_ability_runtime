@@ -1601,7 +1601,9 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         if (!isAttached) {
             MoveToTerminatingMap(abilityRecord);
             RemoveServiceAbility(abilityRecord);
-            RestartAbility(abilityRecord, userId_);
+            if (DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId() == userId_) {
+                RestartAbility(abilityRecord, userId_);
+            }
         }
         return;
     }
