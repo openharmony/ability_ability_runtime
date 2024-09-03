@@ -464,45 +464,6 @@ int32_t AppExitReasonDataManager::GetAbilityRecoverInfo(
     return ERR_OK;
 }
 
-int32_t AppExitReasonDataManager::GetAbilitySessionId(uint32_t accessTokenId,
-    const std::string &moduleName, const std::string &abilityName, int &sessionId)
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "GetAbilityRecoverInfo tokenId %{private}u bundle %{public}s bundle %{public}s  ",
-        accessTokenId, moduleName.c_str(), abilityName.c_str());
-    sessionId = 0;
-    {
-        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-        if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStore");
-            return ERR_NO_INIT;
-        }
-    }
-
-    DistributedKv::Key key = GetAbilityRecoverInfoKey(accessTokenId);
-    DistributedKv::Value value;
-    DistributedKv::Status status = kvStorePtr_->Get(key, value);
-    if (status != DistributedKv::Status::SUCCESS) {
-        if (status == DistributedKv::Status::KEY_NOT_FOUND) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "GetAbilityRecoverInfo KEY_NOT_FOUND");
-        } else {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "GetAbilityRecoverInfo error: %{public}d", status);
-        }
-        return ERR_INVALID_VALUE;
-    }
-
-    std::vector<std::string> recoverInfoList;
-    std::vector<int> sessionIdList;
-    std::string recoverInfo = moduleName + abilityName;
-    ConvertAbilityRecoverInfoFromValue(value, recoverInfoList, sessionIdList);
-    auto pos = std::find(recoverInfoList.begin(), recoverInfoList.end(), recoverInfo);
-    if (pos != recoverInfoList.end()) {
-        int index = std::distance(recoverInfoList.begin(), pos);
-        sessionId = sessionIdList[index];
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "GetAbilityRecoverInfo sessionId found info %{public}d ", sessionId);
-    }
-    return ERR_OK;
-}
-
 int32_t AppExitReasonDataManager::SetUIExtensionAbilityExitReason(
     const std::string &bundleName, const std::vector<std::string> &extensionList, const AAFwk::ExitReason &exitReason)
 {
