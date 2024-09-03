@@ -45,7 +45,10 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "GetNameAndIndexForUid failed, ret:%{public}d", ret);
         return ret;
     }
-    int32_t resultCode = RecordProcessExtensionExitReason(NO_PID, bundleName, exitReason);
+    // There is a possibility that the PID cannot be obtained when the CPP
+    // process exits. The exit cause is recorded by application.
+    int32_t pid = (exitReason.reason == Reason::REASON_CPP_CRASH) ? NO_PID : IPCSkeleton::GetCallingPid();
+    int32_t resultCode = RecordProcessExtensionExitReason(pid, bundleName, exitReason);
     if (resultCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Record Process Extension Exit Reason failed.code: %{public}d", resultCode);
     }
