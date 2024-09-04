@@ -3180,6 +3180,7 @@ bool AbilityRecord::GetUriListFromWant(Want &want, std::vector<std::string> &uri
         uriVec.resize(MAX_URI_COUNT);
         want.RemoveParam(AbilityConfig::PARAMS_STREAM);
         want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+        return true;
     }
     if (!uriStr.empty() && paramStreamUriCount > MAX_URI_COUNT - 1) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "paream stream counts: %{public}zu", paramStreamUriCount);
@@ -3280,8 +3281,8 @@ void AbilityRecord::GrantUriPermissionInner(Want &want, std::vector<std::string>
     uint32_t flag = want.GetFlags();
     auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
         uriVec, flag, callerTokenId));
-    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
-    if (permissionUris.size() == 0) {
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
+    if (permissionUris.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uris not permissioned.");
         return;
     }
