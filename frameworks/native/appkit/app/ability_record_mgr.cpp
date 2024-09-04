@@ -87,7 +87,7 @@ void AbilityRecordMgr::AddAbilityRecord(
         TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord is nullptr");
         return;
     }
-    set::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     abilityRecords_[token] = abilityRecord;
 }
 
