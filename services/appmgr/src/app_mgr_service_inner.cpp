@@ -4247,8 +4247,8 @@ void AppMgrServiceInner::InitGlobalConfiguration()
 
 #ifdef SUPPORT_GRAPHICS
     // Currently only this interface is known
-    auto language = OHOS::Global::I18n::LocaleConfig::GetSystemLanguage();
-    TAG_LOGI(AAFwkTag::APPMGR, "current global language is : %{public}s", language.c_str());
+    auto language = OHOS::Global::I18n::LocaleConfig::GetSystemLocale();
+    TAG_LOGI(AAFwkTag::APPMGR, "current global language : %{public}s", language.c_str());
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
 #endif
 
