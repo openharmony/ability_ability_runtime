@@ -843,14 +843,18 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
         TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
         return;
     }
-    if (abilityStage == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+    if (abilityStages_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityStages_ is nullptr");
         return;
     }
     std::string moduleName = abilityInfo->moduleName;
     auto iterator = abilityStages_.find(moduleName);
     if (iterator != abilityStages_.end()) {
         auto abilityStage = iterator->second;
+        if (abilityStage == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+            return;
+        }
         abilityStage->RemoveAbility(token);
         if (!abilityStage->ContainsAbility() && !isCacheProcess) {
             abilityStage->OnDestroy();
