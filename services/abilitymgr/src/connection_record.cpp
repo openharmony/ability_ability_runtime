@@ -103,7 +103,7 @@ int ConnectionRecord::DisconnectAbility()
         /* post timeout task to taskhandler */
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (handler == nullptr) {
-            TAG_LOGE(AAFwkTag::CONNECTION, "fail to get TaskHandler");
+            TAG_LOGE(AAFwkTag::CONNECTION, "null handler");
         } else {
             std::string taskName("DisconnectTimeout_");
             taskName += std::to_string(recordId_);
@@ -146,7 +146,7 @@ void ConnectionRecord::CompleteConnect(int resultCode)
     auto callback = GetAbilityConnectCallback();
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     if (remoteObject == nullptr) {
-        TAG_LOGW(AAFwkTag::CONNECTION, "extension returned null: %{public}s", element.GetURI().c_str());
+        TAG_LOGW(AAFwkTag::CONNECTION, "null remoteObject: %{public}s", element.GetURI().c_str());
         if (handler) {
             SetConnectState(ConnectionState::DISCONNECTING);
             handler->SubmitTask([service = targetService_]() {

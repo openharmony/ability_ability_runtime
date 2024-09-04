@@ -227,6 +227,22 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAppRunningRecordByChildProc
 }
 
 /**
+ * @tc.name: AppRunningManager_IsChildProcessReachLimit_0100
+ * @tc.desc: Test IsChildProcessReachLimit works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_IsChildProcessReachLimit_0100, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "AppRunningManager_IsChildProcessReachLimit_0100 called.");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    appRunningManager->IsChildProcessReachLimit(1);
+    auto record = appRunningManager->GetAppRunningRecordByChildProcessPid(123);
+    EXPECT_EQ(record, nullptr);
+}
+
+/**
  * @tc.name: AppRunningManager_UpdateConfiguration_0100
  * @tc.desc: Test UpdateConfiguration works
  * @tc.type: FUNC

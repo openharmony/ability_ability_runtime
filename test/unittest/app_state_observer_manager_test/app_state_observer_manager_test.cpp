@@ -312,6 +312,114 @@ HWTEST_F(AppSpawnSocketTest, OnProcessCreated_001, TestSize.Level0)
 
 /*
  * Feature: AppStateObserverManager
+ * Function: OnWindowShow
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnWindowShow
+ * EnvConditions: NA
+ * CaseDescription: Verify OnWindowShow
+ */
+HWTEST_F(AppSpawnSocketTest, OnWindowShow_001, TestSize.Level0)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord;
+    manager->OnWindowShow(appRecord);
+    manager->Init();
+    manager->OnWindowShow(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnWindowHidden
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnWindowHidden
+ * EnvConditions: NA
+ * CaseDescription: Verify OnWindowHidden
+ */
+HWTEST_F(AppSpawnSocketTest, OnWindowHidden_001, TestSize.Level0)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord;
+    manager->OnWindowHidden(appRecord);
+    manager->Init();
+    manager->OnWindowHidden(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnWindowShow
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnWindowShow
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnWindowShow
+ */
+HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_001, TestSize.Level0)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->HandleOnWindowShow(nullptr);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnWindowShow
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnWindowShow
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnWindowShow
+ */
+HWTEST_F(AppSpawnSocketTest, HandleOnWindowShow_002, TestSize.Level0)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    std::vector<std::string> bundleNameList;
+    std::string bundleName = "com.ohos.unittest";
+    appRecord->mainBundleName_ = bundleName;
+    bundleNameList.push_back(bundleName);
+    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->HandleOnWindowShow(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnWindowHidden
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnWindowHidden
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnWindowHidden
+ */
+HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_001, TestSize.Level0)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->HandleOnWindowHidden(nullptr);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnWindowHidden
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnWindowHidden
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnWindowHidden
+ */
+HWTEST_F(AppSpawnSocketTest, HandleOnWindowHidden_002, TestSize.Level0)
+{
+    auto manager = std::make_shared<AppStateObserverManager>();
+    ASSERT_NE(manager, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    std::vector<std::string> bundleNameList;
+    std::string bundleName = "com.ohos.unittest";
+    appRecord->mainBundleName_ = bundleName;
+    bundleNameList.push_back(bundleName);
+    manager->appStateObserverMap_.emplace(observer_, bundleNameList);
+    manager->HandleOnWindowHidden(appRecord);
+}
+
+/*
+ * Feature: AppStateObserverManager
  * Function: OnRenderProcessCreated
  * SubFunction: NA
  * FunctionPoints: AppStateObserverManager OnRenderProcessCreated

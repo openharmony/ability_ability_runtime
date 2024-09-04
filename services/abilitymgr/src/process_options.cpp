@@ -45,15 +45,15 @@ ProcessOptions *ProcessOptions::Unmarshalling(Parcel &parcel)
 bool ProcessOptions::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteInt32(static_cast<int32_t>(processMode))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write processMode");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ProcessMode write failed");
         return false;
     }
     if (!parcel.WriteInt32(static_cast<int32_t>(startupVisibility))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write startupVisibility");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartupVisibility write failed");
         return false;
     }
     if (!parcel.WriteString(processName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write processName");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ProcessName write failed");
         return false;
     }
     return true;

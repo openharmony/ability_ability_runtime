@@ -163,6 +163,7 @@ public:
     void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
 
     int NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest);
+    void CancelSameAbilityTimeoutTask(const AppExecFwk::AbilityInfo &abilityInfo);
 
     int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
         sptr<SessionInfo> &sessionInfo);
@@ -346,7 +347,7 @@ public:
     int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
     bool IsCallerInStatusBar();
 
-    int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids);
+    int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
 
     int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
 

@@ -1481,38 +1481,6 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterAppStateCallback_001, TestSize.Level0)
 }
 
 /**
- * @tc.name: AbilityBehaviorAnalysis_001
- * @tc.desc: ability behavior analysis.
- * @tc.type: FUNC
- * @tc.require: issueI5W4S7
- */
-HWTEST_F(AppMgrServiceInnerTest, AbilityBehaviorAnalysis_001, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityBehaviorAnalysis_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-
-    appMgrServiceInner->AbilityBehaviorAnalysis(nullptr, nullptr, 0, 0, 0);
-
-    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    appMgrServiceInner->AbilityBehaviorAnalysis(token, nullptr, 0, 0, 0);
-
-    BundleInfo bundleInfo;
-    HapModuleInfo hapModuleInfo;
-    std::shared_ptr<AAFwk::Want> want;
-    std::string processName = "test_processName";
-    std::shared_ptr<AppRunningRecord> appRecord = appMgrServiceInner->CreateAppRunningRecord(token, nullptr,
-        applicationInfo_, abilityInfo_, processName, bundleInfo, hapModuleInfo, want, 0);
-    EXPECT_NE(appRecord, nullptr);
-    appMgrServiceInner->AbilityBehaviorAnalysis(token, nullptr, 0, 0, 0);
-
-    OHOS::sptr<IRemoteObject> preToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    appMgrServiceInner->AbilityBehaviorAnalysis(token, preToken, 0, 0, 0);
-
-    TAG_LOGI(AAFwkTag::TEST, "AbilityBehaviorAnalysis_001 end");
-}
-
-/**
  * @tc.name: KillProcessByAbilityToken_001
  * @tc.desc: kill process by ability token.
  * @tc.type: FUNC
@@ -3995,6 +3963,64 @@ HWTEST_F(AppMgrServiceInnerTest, HandleWindowVisibilityChanged_001, TestSize.Lev
     appMgrServiceInner->HandleWindowVisibilityChanged(visibilityInfos);
     EXPECT_NE(appMgrServiceInner, nullptr);
     GTEST_LOG_(INFO) << "HandleWindowVisibilityChanged_001 end";
+}
+
+/**
+ * @tc.name: InitWindowPidVisibilityChangedListener_001
+ * @tc.desc: init windowPidVisibilityChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, InitWindowPidVisibilityChangedListener_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "InitWindowPidVisibilityChangedListener_001 start" ;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->FreeWindowPidVisibilityChangedListener();
+    EXPECT_EQ(appMgrServiceInner->windowPidVisibilityChangedListener_, nullptr);
+    appMgrServiceInner->InitWindowPidVisibilityChangedListener();
+    EXPECT_NE(appMgrServiceInner->windowPidVisibilityChangedListener_, nullptr);
+
+    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_ = nullptr;
+    appMgrServiceInner->SetTaskHandler(taskHandler_);
+    appMgrServiceInner->InitWindowPidVisibilityChangedListener();
+    EXPECT_EQ(appMgrServiceInner->taskHandler_, nullptr);
+    GTEST_LOG_(INFO) << "InitWindowPidVisibilityChangedListener_001 end";
+}
+
+/**
+ * @tc.name: FreeWindowPidVisibilityChangedListener_001
+ * @tc.desc: free windowPidVisibilityChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, FreeWindowPidVisibilityChangedListener_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FreeWindowPidVisibilityChangedListener_001 start";
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->FreeWindowPidVisibilityChangedListener();
+    EXPECT_EQ(appMgrServiceInner->windowPidVisibilityChangedListener_, nullptr);
+
+    appMgrServiceInner->FreeWindowPidVisibilityChangedListener();
+    GTEST_LOG_(INFO) << "FreeWindowPidVisibilityChangedListener_001 end";
+}
+
+/**
+ * @tc.name: HandleWindowPidVisibilityChanged_001
+ * @tc.desc: handle window pid visibility changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, HandleWindowPidVisibilityChanged_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HandleWindowPidVisibilityChanged_001 start";
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<Rosen::WindowPidVisibilityInfo> windowPidVisibilityInfo;
+    appMgrServiceInner->HandleWindowPidVisibilityChanged(windowPidVisibilityInfo);
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    GTEST_LOG_(INFO) << "HandleWindowPidVisibilityChanged_001 end";
 }
 
 /**

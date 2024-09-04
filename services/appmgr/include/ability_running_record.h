@@ -102,78 +102,6 @@ public:
     AbilityState GetState() const;
 
     /**
-     * @brief Judge whether the ability status is the same.
-     *
-     * @param state, the ability state.
-     *
-     * @return Returns If true is returned, the ID will be the same, otherwise it fails.
-     */
-    bool IsSameState(const AbilityState state) const;
-
-    /**
-     * @brief Obtains the last launch time of the ability record.
-     *
-     * @return Returns the last launch time.
-     */
-    int32_t GetLastLaunchTime() const;
-
-    /**
-     * @brief Setting the unique identification to call the ability.
-     *
-     * @param preToken, the unique identification to call the ability.
-     */
-    void SetPreToken(const sptr<IRemoteObject> &preToken);
-
-    /**
-     * @brief Obtains the unique identification to call the ability.
-     *
-     * @return Returns the unique identification to call the ability.
-     */
-    const sptr<IRemoteObject> GetPreToken() const;
-
-    /**
-     * @brief Setting the visibility to ability.
-     *
-     * @param preToken, the visibility to ability.
-     */
-    void SetVisibility(const int32_t visibility);
-
-    /**
-     * @brief Obtains the visibility to ability.
-     *
-     * @return Returns the visibility to ability.
-     */
-    int32_t GetVisibility() const;
-
-    /**
-     * @brief Setting the perceptibility to ability.
-     *
-     * @param preToken, the perceptibility to ability.
-     */
-    void SetPerceptibility(const int32_t perceptibility);
-
-    /**
-     * @brief Obtains the perceptibility to ability.
-     *
-     * @return Returns the perceptibility to ability.
-     */
-    int32_t GetPerceptibility() const;
-
-    /**
-     * @brief Setting the connection state to service ability.
-     *
-     * @param preToken, the connection state to service ability.
-     */
-    void SetConnectionState(const int32_t connectionState);
-
-    /**
-     * @brief Obtains the connection state to service ability.
-     *
-     * @return Returns the connection state to service ability.
-     */
-    int32_t GetConnectionState() const;
-
-    /**
      * @brief Set the Terminating object.
      */
     void SetTerminating();
@@ -201,10 +129,6 @@ public:
     bool IsSceneBoard() const;
 
 private:
-    int32_t lastLaunchTime_ = 0;
-    int32_t visibility_ = 0;
-    int32_t perceptibility_ = 0;
-    int32_t connectionState_ = 0;
     int64_t eventId_ = 0;
     bool isTerminating_ = false;
     AbilityState state_ = AbilityState::ABILITY_STATE_CREATE;

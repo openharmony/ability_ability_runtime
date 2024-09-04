@@ -36,7 +36,7 @@ std::string DialogAbilityInfo::GetURI() const
 bool DialogAbilityInfo::ParseURI(const std::string &uri)
 {
     if (std::count(uri.begin(), uri.end(), '/') != MEMBER_NUM - 1) {
-        TAG_LOGE(AAFwkTag::DIALOG, "Invalid uri: %{public}s", uri.c_str());
+        TAG_LOGE(AAFwkTag::DIALOG, "invalid uri: %{public}s", uri.c_str());
         return false;
     }
 

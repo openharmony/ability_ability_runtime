@@ -1780,9 +1780,20 @@ public:
     int32_t TerminateMission(int32_t missionId) override;
 
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-        uint32_t sceneFlag, bool isColdStart);
+        uint32_t sceneFlag, bool &isColdStart);
 
     int32_t NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest);
+
+    /**
+     * Judge if Caller-Application is in background state.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @param isBackgroundCall, Indicates the Caller-Application state.
+     *                          TRUE: The Caller-Application is not in focus and not in foreground state.
+     *                          FALSE: The Caller-Application is in focus or in foreground state.
+     * @return Returns ERR_OK on check success, others on check failure.
+     */
+    int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall, bool isData = false);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1792,16 +1803,8 @@ public:
     static constexpr uint32_t FOREGROUND_TIMEOUT_MSG = 5;
     static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
     static constexpr uint32_t SHAREDATA_TIMEOUT_MSG = 7;
-
-#ifdef SUPPORT_ASAN
-    static constexpr uint32_t LOAD_TIMEOUT = 150000;            // ms
-    static constexpr uint32_t ACTIVE_TIMEOUT = 75000;          // ms
-    static constexpr uint32_t INACTIVE_TIMEOUT = 7500;         // ms
-#else
-    static constexpr uint32_t LOAD_TIMEOUT = 10000;            // ms
-    static constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
-    static constexpr uint32_t INACTIVE_TIMEOUT = 500;         // ms
-#endif
+    static constexpr uint32_t LOAD_HALF_TIMEOUT_MSG = 8;
+    static constexpr uint32_t FOREGROUND_HALF_TIMEOUT_MSG = 9;
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
@@ -1993,7 +1996,7 @@ private:
 
     bool IsNeedTimeoutForTest(const std::string &abilityName, const std::string &state) const;
 
-    void StartResidentApps();
+    void StartResidentApps(int32_t userId);
 
     void StartAutoStartupApps();
     void RetryStartAutoStartupApps(const std::vector<AutoStartupInfo> &infoList, int32_t retryCount);
@@ -2032,9 +2035,9 @@ private:
 
     void UnsubscribeBundleEventCallback();
 
-    void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
+    void ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
-    void ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type,
+    void ReportAbilityAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type,
         const sptr<IRemoteObject> &callerToken);
 
     void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo, sptr<IRemoteObject> callerToken);
@@ -2115,17 +2118,6 @@ private:
      * @return Returns ERR_OK when allowed, others when check failed.
      */
     int CheckUIExtensionPermission(const AbilityRequest &abilityRequest);
-
-    /**
-     * Judge if Caller-Application is in background state.
-     *
-     * @param abilityRequest, abilityRequest.
-     * @param isBackgroundCall, Indicates the Caller-Application state.
-     *                          TRUE: The Caller-Application is not in focus and not in foreground state.
-     *                          FALSE: The Caller-Application is in focus or in foreground state.
-     * @return Returns ERR_OK on check success, others on check failure.
-     */
-    int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall, bool isData = false);
 
     bool IsTargetPermission(const Want &want) const;
 

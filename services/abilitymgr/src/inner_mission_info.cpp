@@ -68,7 +68,7 @@ bool InnerMissionInfo::FromJsonStr(const std::string &jsonStr)
     }
     nlohmann::json value = nlohmann::json::parse(jsonStr, nullptr, false);
     if (value.is_discarded()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to parse json sting: %{private}s.", jsonStr.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "json failed: %{private}s", jsonStr.c_str());
         return false;
     }
 
@@ -168,7 +168,7 @@ void InnerMissionInfo::Dump(std::vector<std::string> &info) const
 bool InnerMissionInfo::CheckJsonNode(nlohmann::json &value, const std::string &node, JsonType jsonType)
 {
     if (value.find(node) == value.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "node %{private}s not exists.", node.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "node %{private}s null", node.c_str());
         return false;
     }
 

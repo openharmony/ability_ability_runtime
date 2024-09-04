@@ -614,23 +614,21 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
         [applicationContext = applicationContext_, clearPageStack, innerErrCode]() {
-            auto context = applicationContext.lock();
-            if (!context) {
-                TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-                *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
-                return;
-            }
-            context->KillProcessBySelf(clearPageStack);
-        };
-    NapiAsyncTask::CompleteCallback complete =
-        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrCode == ERR_OK) {
-                task.ResolveWithNoError(env, CreateJsUndefined(env));
-            } else {
-                task.Reject(env, CreateJsError(env, *innerErrCode,
-                    "applicationContext if already released."));
-            }
-        };
+        auto context = applicationContext.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+            *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+            return;
+        }
+        context->KillProcessBySelf(clearPageStack);
+    };
+    NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrCode != ERR_OK) {
+            task.Reject(env, CreateJsError(env, *innerErrCode, "applicationContext is already released."));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
     napi_value lastParam = (info.argc == ARGC_ONE && !hasClearPageStack) ? info.argv[INDEX_ZERO] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplicationContextUtils::OnkillProcessBySelf",

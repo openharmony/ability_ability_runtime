@@ -48,6 +48,7 @@ constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
+constexpr int32_t INVALID_PARAM = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
 
 static std::mutex g_connectsMutex;
 static std::map<ConnectionKey, sptr<JSUIServiceExtensionConnection>, key_compare> g_connects;
@@ -201,14 +202,14 @@ private:
         std::string type;
         if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], type)) {
             TAG_LOGE(AAFwkTag::UISERVC_EXT, "OnStartAbilityByType, parse type failed.");
-            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            ThrowError(env, INVALID_PARAM, "Incorrect parameter types, param type must be a string");
             return CreateJsUndefined(env);
         }
 
         AAFwk::WantParams wantParam;
         if (!AppExecFwk::UnwrapWantParams(env, info.argv[INDEX_ONE], wantParam)) {
             TAG_LOGE(AAFwkTag::UISERVC_EXT, "OnStartAbilityByType, parse wantParam failed.");
-            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            ThrowError(env, INVALID_PARAM, "Parameter error. The type of \"WantParams\" must be array");
             return CreateJsUndefined(env);
         }
 

@@ -63,7 +63,7 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
         return ERR_OK;
     }
 #endif
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not startup when device first locked.");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "no startup when device first locked");
     return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
 }
 } // namespace AAFwk

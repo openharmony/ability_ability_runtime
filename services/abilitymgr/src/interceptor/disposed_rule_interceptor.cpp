@@ -41,17 +41,17 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     AppExecFwk::DisposedRule disposedRule;
     if (CheckControl(param.want, param.userId, disposedRule, param.appIndex)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "The target ability is intercpted, disposedType is %{public}d, controlType is %{public}d, "
-            "componentType is %{public}d.", disposedRule.disposedType, disposedRule.controlType,
+            "disposedType: %{public}d, controlType: %{public}d, "
+            "componentType: %{public}d", disposedRule.disposedType, disposedRule.controlType,
             disposedRule.componentType);
 #ifdef SUPPORT_GRAPHICS
         if (!param.isWithUI || disposedRule.want == nullptr
             || disposedRule.disposedType == AppExecFwk::DisposedType::NON_BLOCK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed want");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no dispose want");
             return AbilityUtil::EdmErrorType(disposedRule.isEdm);
         }
         if (disposedRule.want->GetBundle() == param.want.GetBundle()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed want with same bundleName");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no dispose want, with same bundleName");
             return AbilityUtil::EdmErrorType(disposedRule.isEdm);
         }
         SetInterceptInfo(param.want, disposedRule);
@@ -59,14 +59,14 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
             int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*disposedRule.want,
                 param.requestCode, param.userId));
             if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "DisposedRuleInterceptor start ability failed.");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "disposedRuleInterceptor failed");
                 return ret;
             }
         }
         if (disposedRule.componentType == AppExecFwk::ComponentType::UI_EXTENSION) {
             int ret = CreateModalUIExtension(*disposedRule.want, param.callerToken);
             if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start disposed UIExtension");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "dispose UIExtension failed");
                 return ret;
             }
         }
@@ -86,7 +86,7 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
     // get bms
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleMgrHelper");
         return false;
     }
 
@@ -94,7 +94,7 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
     std::string bundleName = want.GetBundle();
     auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
     if (appControlMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The appControlMgr is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appControlMgr");
         return false;
     }
     std::vector<AppExecFwk::DisposedRule> disposedRuleList;
@@ -160,11 +160,11 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "not block");
     if (disposedRule.want == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed app, want is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
         return ERR_OK;
     }
     if (disposedRule.want->GetBundle() == want.GetBundle()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed app with same bundleName");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "no dispose app with same bundleName");
         return ERR_OK;
     }
     SetInterceptInfo(want, disposedRule);
@@ -184,7 +184,7 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
     bundleNameList.push_back(bundleName);
     int32_t ret = IN_PROCESS_CALL(appManager->RegisterApplicationStateObserver(disposedObserver, bundleNameList));
     if (ret != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "register to appmanager failed. err:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "register failed, err:%{public}d", ret);
         disposedObserver = nullptr;
         return ret;
     }
@@ -196,7 +196,7 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
         std::lock_guard<ffrt::mutex> guard{interceptor->observerLock_};
         auto iter = interceptor->disposedObserverMap_.find(bundleName);
         if (iter != interceptor->disposedObserverMap_.end()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "start disposed app time out, need to unregister observer");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "time out, unregister observer");
             IN_PROCESS_CALL(appManager->UnregisterApplicationStateObserver(iter->second));
             interceptor->disposedObserverMap_.erase(iter);
         }
@@ -233,7 +233,7 @@ void DisposedRuleInterceptor::UnregisterObserver(const std::string &bundleName)
         std::lock_guard<ffrt::mutex> guard{interceptor->observerLock_};
         auto iter = interceptor->disposedObserverMap_.find(bundleName);
         if (iter == interceptor->disposedObserverMap_.end()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not find observer");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no find observer");
         } else {
             auto disposedObserver = iter->second;
             CHECK_POINTER(disposedObserver);
@@ -262,7 +262,7 @@ ErrCode DisposedRuleInterceptor::CreateModalUIExtension(const Want &want, const 
 void DisposedRuleInterceptor::SetInterceptInfo(const Want &want, AppExecFwk::DisposedRule &disposedRule)
 {
     if (disposedRule.want == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "disposedWant is nullptr");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null disposedWant");
         return;
     }
     if (disposedRule.want->GetBoolParam(IS_FROM_PARENTCONTROL, false)) {

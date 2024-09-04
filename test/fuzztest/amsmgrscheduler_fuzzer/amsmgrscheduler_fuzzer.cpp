@@ -98,10 +98,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     amsMgrScheduler->TerminateAbility(token, clearMissionFlag);
     sptr<IAppStateCallback> callback;
     amsMgrScheduler->RegisterAppStateCallback(callback);
-    int32_t visibility = static_cast<int32_t>(GetU32Data(data));
-    int32_t perceptibility = static_cast<int32_t>(GetU32Data(data));
-    int32_t connectionState = static_cast<int32_t>(GetU32Data(data));
-    amsMgrScheduler->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState);
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     amsMgrScheduler->KillProcessesByUserId(userId);
     std::string bundleName(data, size);

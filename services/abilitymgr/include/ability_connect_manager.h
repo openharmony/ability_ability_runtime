@@ -330,7 +330,6 @@ public:
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
     // MSG 0 - 20 represents timeout message
-    static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t CONNECT_TIMEOUT_MSG = 1;
 
 private:
@@ -622,13 +621,14 @@ private:
 
     void AddConnectObjectToMap(sptr<IRemoteObject> connectObject, const ConnectListType &connectRecordList,
         bool updateOnly);
-
+    void GetKeepAliveAbilities();
+    bool IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo);
     void KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
     void ProcessEliminateAbilityRecord(std::shared_ptr<AbilityRecord> eliminateRecord);
     std::string GetServiceKey(const std::shared_ptr<AbilityRecord> &service);
 
     int32_t ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo);
-    int32_t ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
+    int32_t ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
@@ -665,6 +665,9 @@ private:
 
     std::unique_ptr<UIExtensionAbilityConnectManager> uiExtensionAbilityRecordMgr_ = nullptr;
     uint32_t sceneBoardTokenId_ = 0;
+
+    std::mutex keepAliveAbilitiesMutex_;
+    std::vector<std::pair<std::string, std::string>> keepAliveAbilities_;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };
