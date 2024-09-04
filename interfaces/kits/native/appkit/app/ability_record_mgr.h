@@ -94,6 +94,7 @@ public:
 private:
     std::map<sptr<IRemoteObject>, std::shared_ptr<AbilityLocalRecord>> abilityRecords_;
     sptr<IRemoteObject> tokens_;  // we use ThreadLocal
+    std::mutex mutex_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
