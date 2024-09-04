@@ -363,11 +363,6 @@ bool PermissionVerification::JudgeStartAbilityFromBackground(
         return true;
     }
 
-    if (withContinuousTask) {
-        TAG_LOGD(AAFwkTag::DEFAULT, "continuousTask: true");
-        return true;
-    }
-
     // Temporarily supports permissions with two different spellings
     // PERMISSION_START_ABILIIES_FROM_BACKGROUND will be removed later due to misspelling
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND) ||
