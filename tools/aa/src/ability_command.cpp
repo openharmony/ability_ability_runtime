@@ -204,6 +204,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[ERR_NOT_DEVELOPER_MODE] = "error: not developer mode.";
     messageMap_[KILL_PROCESS_KEEP_ALIVE] = "error: keep alive process can not be killed.";
     messageMap_[ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE] = "error: unlock screen failed in developer mode.";
+    messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = "error: not supported in non-app-provision mode.";
     return OHOS::ERR_OK;
 }
 

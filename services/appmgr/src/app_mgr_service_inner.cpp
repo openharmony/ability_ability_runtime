@@ -122,6 +122,12 @@ namespace {
         return;                                        \
     }
 
+#define CHECK_POINTER_AND_RETURN_VALUE(object, value) \
+    if (!object) {                              \
+        TAG_LOGE(AAFwkTag::APPMGR, "nullptr");  \
+        return value;                           \
+    }
+
 // NANOSECONDS mean 10^9 nano second
 constexpr int64_t NANOSECONDS = 1000000000;
 // MICROSECONDS mean 10^6 milli second
@@ -5949,6 +5955,11 @@ int32_t AppMgrServiceInner::SetAppWaitingDebug(const std::string &bundleName, bo
         return ERR_INVALID_VALUE;
     }
 
+    if (!CheckIsDebugApp(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "is not debug app");
+        return AAFwk::ERR_NOT_IN_APP_PROVISION_MODE;
+    }
+
     InitAppWaitingDebugList();
 
     bool isClear = false;
@@ -6044,6 +6055,25 @@ void AppMgrServiceInner::InitAppWaitingDebugList()
             waitingDebugBundleList_.try_emplace(item, true);
         }
     }
+}
+
+bool AppMgrServiceInner::CheckIsDebugApp(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    CHECK_POINTER_AND_RETURN_VALUE(remoteClientManager_, false);
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN_VALUE(bundleMgrHelper, false);
+
+    BundleInfo bundleInfo;
+    auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION), bundleInfo, currentUserId_));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
+        return false;
+    }
+
+    return bundleInfo.applicationInfo.debug &&
+           (bundleInfo.applicationInfo.appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG);
 }
 
 bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
