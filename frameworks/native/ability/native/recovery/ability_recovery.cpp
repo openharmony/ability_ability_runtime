@@ -111,7 +111,7 @@ bool AbilityRecovery::SaveAbilityState()
     AAFwk::WantParams wantParams;
     int32_t status = ability->OnSaveState(AppExecFwk::StateType::APP_RECOVERY, wantParams);
     if (!(status == AppExecFwk::OnSaveResult::ALL_AGREE || status == AppExecFwk::OnSaveResult::RECOVERY_AGREE)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "Failed save params");
+        TAG_LOGE(AAFwkTag::RECOVERY, "Failed to save user params");
         return false;
     }
 
@@ -155,12 +155,10 @@ bool AbilityRecovery::SerializeDataToFile(int32_t savedStateId, WantParams& para
         close(fd);
         return false;
     }
-
     ssize_t nwrite = write(fd, reinterpret_cast<uint8_t*>(buf), sz);
     if (nwrite <= 0) {
         TAG_LOGE(AAFwkTag::RECOVERY, "failed to persist parcel data %{public}d", errno);
     }
-
     close(fd);
     return true;
 }
@@ -175,7 +173,7 @@ bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams
 
     char path[PATH_MAX] = {0};
     if (realpath(file.c_str(), path) == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "errno is %{public}d", errno);
+        TAG_LOGE(AAFwkTag::RECOVERY, "errno is %{public}d.", errno);
         return false;
     }
 

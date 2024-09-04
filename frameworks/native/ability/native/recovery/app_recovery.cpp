@@ -115,18 +115,13 @@ bool AppRecovery::InitApplicationInfo(const std::shared_ptr<EventHandler>& mainH
 bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     const std::shared_ptr<AbilityInfo>& abilityInfo, const sptr<IRemoteObject>& token)
 {
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AbilityInfo invalid");
-        return false;
-    }
-
     if (!isEnable_) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "not enabled.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "not enabled");
         return false;
     }
 
     if (!abilityRecoverys_.empty() && !abilityInfo->recoverable) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "ability recoverable is false.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "ability recoverable is false");
         return false;
     }
     ability_ = ability;
@@ -150,7 +145,7 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
 bool AppRecovery::RemoveAbility(const sptr<IRemoteObject>& tokenId)
 {
     if (!isEnable_) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery not enabled. not removeAbility");
+        TAG_LOGE(AAFwkTag::RECOVERY, "not enabled");
         return false;
     }
 
@@ -173,7 +168,7 @@ bool AppRecovery::ScheduleSaveAppState(StateReason reason, uintptr_t ability)
 {
     TAG_LOGD(AAFwkTag::RECOVERY, "begin");
     if (!isEnable_) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "not enabled");
+        TAG_LOGE(AAFwkTag::RECOVERY, "is not enabled");
         return false;
     }
 
@@ -420,7 +415,7 @@ void AppRecovery::DeleteInValidMissionFiles()
     }
 
     std::string fileDir = context->GetFilesDir();
-    TAG_LOGI(AAFwkTag::RECOVERY, "fileDir: %{public}s", fileDir.c_str());
+    TAG_LOGD(AAFwkTag::RECOVERY, "fileDir: %{public}s", fileDir.c_str());
     if (fileDir.empty() || !OHOS::FileExists(fileDir)) {
         TAG_LOGD(AAFwkTag::RECOVERY, "empty fileDir or fileDir not exist");
         return;
@@ -433,21 +428,21 @@ void AppRecovery::DeleteInValidMissionFiles()
         return;
     }
     if (missionIds.empty()) {
-        TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery no mission file, no need delete it.");
+        TAG_LOGD(AAFwkTag::RECOVERY, "missionIds empty");
         return;
     }
     std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery DeleteInValidMissionFiles. abilityMgr client is not exist.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "abilityMgr client is not exist");
         return;
     }
     abilityMgr->IsValidMissionIds(missionIds, results);
     if (results.empty()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery DeleteInValidMissionFiles. results is empty.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "results is empty");
         return;
     }
     for (auto& item : results) {
-        TAG_LOGI(AAFwkTag::RECOVERY, "AppRecovery missionResult: missionId: %{public}d, isValid: %{public}d",
+        TAG_LOGI(AAFwkTag::RECOVERY, "missionId: %{public}d, isValid: %{public}d",
             item.missionId, item.isValid);
         if (!item.isValid) {
             DeleteInValidMissionFileById(fileDir, item.missionId);
