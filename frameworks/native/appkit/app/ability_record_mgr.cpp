@@ -78,6 +78,7 @@ void AbilityRecordMgr::SetEventRunner(const std::shared_ptr<EventRunner> &eventR
 void AbilityRecordMgr::AddAbilityRecord(
     const sptr<IRemoteObject> &token, const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
         return;
@@ -87,7 +88,6 @@ void AbilityRecordMgr::AddAbilityRecord(
         TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord is nullptr");
         return;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
     abilityRecords_[token] = abilityRecord;
 }
 
