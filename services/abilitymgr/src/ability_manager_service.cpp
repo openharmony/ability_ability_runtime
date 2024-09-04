@@ -1186,17 +1186,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     }
 
-    if (abilityInfo.type == AppExecFwk::AbilityType::SERVICE) {
+    if (abilityInfo.type == AppExecFwk::AbilityType::SERVICE ||
+        abilityInfo.type == AppExecFwk::AbilityType::EXTENSION) {
+        SendStartAbilityOtherExtensionEvent(abilityInfo, abilityRequest.want, specifyTokenId);
         return StartAbilityByConnectManager(want, abilityRequest, abilityInfo, validUserId, callerToken);
-    }
-
-    if (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION) {
-        if (AAFwk::PermissionVerification::GetInstance()->IsShellCall() ||
-            abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-            return StartAbilityByConnectManager(want, abilityRequest, abilityInfo, validUserId, callerToken);
-        }
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "targte not service extension: %{public}d.", abilityInfo.extensionAbilityType);
-        return TARGET_ABILITY_NOT_SERVICE;
     }
 
     if (!IsAbilityControllerStart(want, abilityInfo.bundleName)) {
@@ -12095,6 +12088,35 @@ void AbilityManagerService::ReportCleanSession(const sptr<SessionInfo> &sessionI
     SendAbilityEvent(EventName::CLOSE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     if (eventInfo.errCode != ERR_OK) {
         SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+    }
+}
+
+void AbilityManagerService::SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
+    const Want& want, uint32_t specifyTokenId)
+{
+    if (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
+        abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
+        EventInfo eventInfo;
+        eventInfo.bundleName = abilityInfo.bundleName;
+        eventInfo.moduleName = abilityInfo.moduleName;
+        eventInfo.abilityName = abilityInfo.name;
+        eventInfo.extensionType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
+        if (specifyTokenId > 0) {
+            // come from want agent or form
+            Security::AccessToken::HapTokenInfo hapInfo;
+            if (Security::AccessToken::AccessTokenKit::GetHapTokenInfo(specifyTokenId, hapInfo) == ERR_OK) {
+                eventInfo.callerBundleName = hapInfo.bundleName;
+            }
+        } else {
+            eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+            if (eventInfo.callerBundleName.empty()) {
+                eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+            }
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "SendStartAbilityOtherExtensionEvent, bundleName:%{public}s, extensionAbilityType:%{public}d",
+            eventInfo.bundleName.c_str(), eventInfo.extensionType);
+        EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
     }
 }
 
