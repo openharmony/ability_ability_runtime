@@ -178,9 +178,9 @@ bool AbilityJumpInterceptor::LoadAppLabelInfo(Want &want,
     StartAbilityUtils::GetApplicationInfo(controlRule.targetPkg, userId, callerAppInfo);
     want.SetParam(JUMP_DIALOG_CALLER_BUNDLE_NAME, controlRule.callerPkg);
     want.SetParam(JUMP_DIALOG_CALLER_MODULE_NAME, callerAppInfo.labelResource.moduleName);
-    want.SetParam(JUMP_DIALOG_CALLER_LABEL_ID, callerAppInfo.labelId);
+    want.SetParam(JUMP_DIALOG_CALLER_LABEL_ID, static_cast<long long>(callerAppInfo.labelId));
     want.SetParam(JUMP_DIALOG_TARGET_MODULE_NAME, targetAppInfo.labelResource.moduleName);
-    want.SetParam(JUMP_DIALOG_TARGET_LABEL_ID, targetAppInfo.labelId);
+    want.SetParam(JUMP_DIALOG_TARGET_LABEL_ID, static_cast<long long>(targetAppInfo.labelId));
     return true;
 }
 } // namespace AAFwk
