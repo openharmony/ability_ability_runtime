@@ -62,13 +62,7 @@ OHOSApplication::OHOSApplication()
 OHOSApplication::~OHOSApplication()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto& callback : abilityLifecycleCallbacks_) {
-        callback->release();
-    }
     abilityLifecycleCallbacks_.clear();
-    for (auto& callback : elementsCallbacks_) {
-        callback->release();
-    }
     elementsCallbacks_.clear();
 }
 
