@@ -7591,6 +7591,7 @@ void AppMgrServiceInner::BlockProcessCacheByPids(const std::vector<int32_t>& pid
             continue;
         }
         appRecord->SetProcessCacheBlocked(true);
+        DelayedSingleton<CacheProcessManager>::GetInstance()->OnAppProcessCacheBlocked(appRecord);
     }
 }
 

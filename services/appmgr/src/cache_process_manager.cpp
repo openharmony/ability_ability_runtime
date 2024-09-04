@@ -545,5 +545,20 @@ bool CacheProcessManager::IsAppContainsSrvExt(const std::shared_ptr<AppRunningRe
     srvExtCheckedFlag.insert(appRecord);
     return srvExtRecords.find(appRecord) != srvExtRecords.end() ? true : false;
 }
+
+void CacheProcessManager::OnAppProcessCacheBlocked(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!QueryEnableProcessCache()) {
+        return;
+    }
+    if (appRecord == nullptr || !IsCachedProcess(appRecord)) {
+        return;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s is cached and is blocked, which needs exit.",
+        appRecord->GetBundleName().c_str());
+    RemoveCacheRecord(appRecord);
+    KillProcessByRecord(appRecord);
+}
 } // namespace OHOS
 } // namespace AppExecFwk
