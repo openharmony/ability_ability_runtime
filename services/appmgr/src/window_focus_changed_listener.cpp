@@ -31,7 +31,7 @@ WindowFocusChangedListener::~WindowFocusChangedListener() {}
 void WindowFocusChangedListener::OnFocused(const sptr<FocusChangeInfo> &focusChangeInfo)
 {
     if (!focusChangeInfo) {
-        TAG_LOGW(AAFwkTag::APPMGR, "OnFocused invalid focusChangeInfo.");
+        TAG_LOGW(AAFwkTag::APPMGR, "null focusChangeInfo");
         return;
     }
 
@@ -39,7 +39,7 @@ void WindowFocusChangedListener::OnFocused(const sptr<FocusChangeInfo> &focusCha
         auto task = [inner = owner_, focusChangeInfo] {
             auto owner = inner.lock();
             if (!owner) {
-                TAG_LOGW(AAFwkTag::APPMGR, "OnUnfocused failed to get app mgr service inner.");
+                TAG_LOGW(AAFwkTag::APPMGR, "get app mgr service inner fail");
                 return;
             }
             owner->HandleFocused(focusChangeInfo);
@@ -51,7 +51,7 @@ void WindowFocusChangedListener::OnFocused(const sptr<FocusChangeInfo> &focusCha
 void WindowFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo> &focusChangeInfo)
 {
     if (!focusChangeInfo) {
-        TAG_LOGW(AAFwkTag::APPMGR, "OnUnfocused invalid focusChangeInfo.");
+        TAG_LOGW(AAFwkTag::APPMGR, "null focusChangeInfo");
         return;
     }
 
@@ -59,7 +59,7 @@ void WindowFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo> &focusC
         auto task = [inner = owner_, focusChangeInfo] {
             auto owner = inner.lock();
             if (!owner) {
-                TAG_LOGW(AAFwkTag::APPMGR, "OnUnfocused failed to get app mgr service inner.");
+                TAG_LOGW(AAFwkTag::APPMGR, "get fail");
                 return;
             }
             owner->HandleUnfocused(focusChangeInfo);

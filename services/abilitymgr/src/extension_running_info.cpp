@@ -36,7 +36,7 @@ bool ExtensionRunningInfo::ReadFromParcel(Parcel &parcel)
     startTime = parcel.ReadInt32();
     int32_t clientPackageSize = parcel.ReadInt32();
     if (clientPackageSize > CYCLE_LIMIT) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "clientPackageSize is too large.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "too large clientPackageSize");
         return false;
     }
     for (int32_t i = 0; i < clientPackageSize; i++) {

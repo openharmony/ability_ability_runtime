@@ -37,18 +37,18 @@ ErrCode AppSpawnSocket::OpenAppSpawnConnection()
     TAG_LOGD(AAFwkTag::APPMGR, "ready to open connection");
     if (clientSocket_) {
         if (clientSocket_->CreateClient() != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to create socketClient");
+            TAG_LOGE(AAFwkTag::APPMGR, "create socketClient fail");
             return ERR_APPEXECFWK_BAD_APPSPAWN_CLIENT;
         }
         if (clientSocket_->ConnectSocket() != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to connect socket");
+            TAG_LOGE(AAFwkTag::APPMGR, "connect socket fail");
             clientSocket_->CloseClient();
             return ERR_APPEXECFWK_CONNECT_APPSPAWN_FAILED;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "connection has been opened");
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::APPMGR, "failed to open connection without socket");
+    TAG_LOGE(AAFwkTag::APPMGR, "open connection fail");
     return ERR_APPEXECFWK_BAD_APPSPAWN_SOCKET;
 }
 
@@ -63,23 +63,23 @@ ErrCode AppSpawnSocket::WriteMessage(const void *buf, const int32_t len)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "ready to write message");
     if (len <= 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to write message due to invalid length of message");
+        TAG_LOGE(AAFwkTag::APPMGR, "write message fail");
         return ERR_INVALID_VALUE;
     }
     if (buf == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to write message due to null buf");
+        TAG_LOGE(AAFwkTag::APPMGR, "write message fail");
         return ERR_INVALID_VALUE;
     }
     if (clientSocket_) {
         if (clientSocket_->WriteSocketMessage(buf, len) != len) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to write message due to invalid write length");
+            TAG_LOGE(AAFwkTag::APPMGR, "write message fail");
             return ERR_APPEXECFWK_SOCKET_WRITE_FAILED;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "write message success");
         return ERR_OK;
     }
 
-    TAG_LOGE(AAFwkTag::APPMGR, "failed to write message without socket");
+    TAG_LOGE(AAFwkTag::APPMGR, "write message fail");
     return ERR_APPEXECFWK_BAD_APPSPAWN_SOCKET;
 }
 
@@ -87,22 +87,22 @@ ErrCode AppSpawnSocket::ReadMessage(void *buf, const int32_t len)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "ready to read message");
     if (len <= 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to read message due to invalid length of cache");
+        TAG_LOGE(AAFwkTag::APPMGR, "read message fail");
         return ERR_INVALID_VALUE;
     }
     if (buf == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to read message due to null buf");
+        TAG_LOGE(AAFwkTag::APPMGR, "read message fail");
         return ERR_INVALID_VALUE;
     }
     if (clientSocket_) {
         if (clientSocket_->ReadSocketMessage(buf, len) != len) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to read message due to invalid read length");
+            TAG_LOGE(AAFwkTag::APPMGR, "read message fail");
             return ERR_APPEXECFWK_SOCKET_READ_FAILED;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "read message success");
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::APPMGR, "failed to read message without socket");
+    TAG_LOGE(AAFwkTag::APPMGR, "read message fail");
     return ERR_APPEXECFWK_BAD_APPSPAWN_CLIENT;
 }
 

@@ -97,14 +97,14 @@ bool PermissionVerification::CheckSpecificSystemAbilityAccessPermission(const st
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::DEFAULT, "called");
     if (!IsSACall()) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "verify failed");
+        TAG_LOGE(AAFwkTag::DEFAULT, "verify fail");
         return false;
     }
     auto callerToken = GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerToken, nativeTokenInfo);
     if (result != ERR_OK || nativeTokenInfo.processName != processName) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Check process failed");
+        TAG_LOGE(AAFwkTag::DEFAULT, "check process fail");
         return false;
     }
     return true;
@@ -122,7 +122,7 @@ bool PermissionVerification::CheckObserverCallerPermission() const
     int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerToken, nativeTokenInfo);
     if (result != ERR_OK ||
         OBSERVER_NATIVE_CALLER.find(nativeTokenInfo.processName) == OBSERVER_NATIVE_CALLER.end()) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Check token failed");
+        TAG_LOGE(AAFwkTag::DEFAULT, "check token fail");
         return false;
     }
     return true;
@@ -255,7 +255,7 @@ int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInf
 {
     if ((verificationInfo.apiTargetVersion > API8 || isShell) &&
         !JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall, verificationInfo.withContinuousTask)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Start DataAbility failed");
+        TAG_LOGE(AAFwkTag::DEFAULT, "start DataAbility fail");
         return CHECK_PERMISSION_FAILED;
     }
     if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
@@ -264,7 +264,7 @@ int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInf
         return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
     }
     if (!JudgeAssociatedWakeUp(verificationInfo.accessTokenId, verificationInfo.associatedWakeUp)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "associatedWakeUp is false");
+        TAG_LOGE(AAFwkTag::DEFAULT, "associatedWakeUp false");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -287,7 +287,7 @@ int PermissionVerification::CheckCallServiceAbilityPermission(const Verification
         return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
     }
     if (!JudgeAssociatedWakeUp(verificationInfo.accessTokenId, verificationInfo.associatedWakeUp)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "associatedWakeUp is false");
+        TAG_LOGE(AAFwkTag::DEFAULT, "associatedWakeUp false");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -352,7 +352,7 @@ bool PermissionVerification::JudgeStartInvisibleAbility(const uint32_t accessTok
         TAG_LOGD(AAFwkTag::DEFAULT, "Caller PASS");
         return true;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "verification failed");
+    TAG_LOGE(AAFwkTag::DEFAULT, "verification fail");
     return false;
 }
 
@@ -371,7 +371,7 @@ bool PermissionVerification::JudgeStartAbilityFromBackground(
         TAG_LOGD(AAFwkTag::DEFAULT, "Caller PASS");
         return true;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "verification failed");
+    TAG_LOGE(AAFwkTag::DEFAULT, "verification fail");
     return false;
 }
 
@@ -425,6 +425,11 @@ bool PermissionVerification::IsSystemAppCall() const
 {
     auto callerToken = IPCSkeleton::GetCallingFullTokenID();
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken);
+}
+
+bool PermissionVerification::VerifyBackgroundCallPermission(const bool isBackgroundCall) const
+{
+    return JudgeStartAbilityFromBackground(isBackgroundCall);
 }
 
 bool PermissionVerification::VerifyPrepareTerminatePermission() const
@@ -489,18 +494,6 @@ bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
         return true;
     }
     TAG_LOGW(AAFwkTag::APPMGR, "Permission denied");
-    return false;
-}
-
-bool PermissionVerification::VerifyStartNativeChildProcessPermission() const
-{
-    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS)) {
-        TAG_LOGD(AAFwkTag::DEFAULT, "Permission %{public}s granted",
-            PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS);
-        return true;
-    }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission %{public}s denied",
-        PermissionConstants::PERMISSION_START_NATIVE_CHILD_PROCESS);
     return false;
 }
 }  // namespace AAFwk

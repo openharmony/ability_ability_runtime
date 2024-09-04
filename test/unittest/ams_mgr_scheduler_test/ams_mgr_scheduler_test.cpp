@@ -318,72 +318,6 @@ HWTEST_F(AmsMgrSchedulerTest, AmsMgrScheduler_008, TestSize.Level1)
 
 /*
  * Feature: AMS
- * Function: AbilityBehaviorAnalysis
- * SubFunction: IsReady
- * FunctionPoints: Check Params
- * EnvConditions: Mobile that can run ohos test framework.
- * CaseDescription: Optimize based on visibility and perception
- */
-HWTEST_F(AmsMgrSchedulerTest, AmsMgrScheduler_009, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "AmsMgrScheduler_009 start.");
-
-    auto mockAppMgrServiceInner = GetMockAppMgrServiceInner();
-    std::unique_ptr<AmsMgrScheduler> amsMgrScheduler =
-        std::make_unique<AmsMgrScheduler>(mockAppMgrServiceInner, GetAmsTaskHandler());
-    EXPECT_EQ(true, amsMgrScheduler->IsReady());
-
-    EXPECT_CALL(*mockAppMgrServiceInner, AbilityBehaviorAnalysis(_, _, _, _, _))
-        .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockAppMgrServiceInner.get(), &MockAppMgrServiceInner::Post));
-
-    sptr<IRemoteObject> token;
-    sptr<IRemoteObject> preToken;
-    int32_t visibility = 0;
-    int32_t perceptibility = 0;
-    int32_t connectionState = 0;
-
-    amsMgrScheduler->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState);
-
-    mockAppMgrServiceInner->Wait();
-
-    mockAppMgrServiceInner.reset();
-
-    TAG_LOGD(AAFwkTag::TEST, "AmsMgrScheduler_009 end.");
-}
-
-/*
- * Feature: AMS
- * Function: AbilityBehaviorAnalysis
- * SubFunction: IsReady
- * FunctionPoints: Check Params
- * EnvConditions: Mobile that can run ohos test framework.
- * CaseDescription: Optimize based on visibility and perception
- */
-HWTEST_F(AmsMgrSchedulerTest, AmsMgrScheduler_010, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "AmsMgrScheduler_010 start.");
-
-    auto mockAppMgrServiceInner = GetMockAppMgrServiceInner();
-
-    std::unique_ptr<AmsMgrScheduler> amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
-    EXPECT_EQ(false, amsMgrScheduler->IsReady());
-
-    EXPECT_CALL(*mockAppMgrServiceInner, AbilityBehaviorAnalysis(_, _, _, _, _)).Times(0);
-
-    sptr<IRemoteObject> token;
-    sptr<IRemoteObject> preToken;
-    int32_t visibility = 0;
-    int32_t perceptibility = 0;
-    int32_t connectionState = 0;
-
-    amsMgrScheduler->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState);
-
-    TAG_LOGD(AAFwkTag::TEST, "AmsMgrScheduler_010 end.");
-}
-
-/*
- * Feature: AMS
  * Function: IPC
  * SubFunction: appmgr interface
  * FunctionPoints: KillApplication interface
@@ -597,29 +531,6 @@ HWTEST_F(AmsMgrSchedulerTest, RegisterAppStateCallback_001, TestSize.Level0)
     amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
     amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
     amsMgrScheduler->RegisterAppStateCallback(callback);
-}
-
-/*
- * Feature: AmsMgrScheduler
- * Function: AbilityBehaviorAnalysis
- * SubFunction: NA
- * FunctionPoints: AmsMgrScheduler AbilityBehaviorAnalysis
- * EnvConditions: NA
- * CaseDescription: Verify AbilityBehaviorAnalysis
- */
-HWTEST_F(AmsMgrSchedulerTest, AbilityBehaviorAnalysis_001, TestSize.Level0)
-{
-    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
-    ASSERT_NE(amsMgrScheduler, nullptr);
-    sptr<IRemoteObject> token = nullptr;
-    sptr<IRemoteObject> preToken = nullptr;
-    int32_t visibility = 0;
-    int32_t perceptibility = 0;
-    int32_t connectionState = 0;
-    amsMgrScheduler->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState);
-    amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
-    amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
-    amsMgrScheduler->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState);
 }
 
 /*

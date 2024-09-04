@@ -18,7 +18,6 @@
 #include <unistd.h>
 
 #include "errors.h"
-#include "file_monitor.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -55,7 +54,7 @@ DistributedKv::Status AppConfigDataManager::GetKvStore()
 
     DistributedKv::Status status = dataManager_.GetSingleKvStore(options, APP_ID, STORE_ID, kvStorePtr_);
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Return error is %{public}d.", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "error is %{public}d", status);
         return status;
     }
 
@@ -72,7 +71,6 @@ bool AppConfigDataManager::CheckKvStore()
     while (tryTimes > 0) {
         DistributedKv::Status status = GetKvStore();
         if (status == DistributedKv::Status::SUCCESS && kvStorePtr_ != nullptr) {
-            OHOS::AAFwk::FileMonitor::SetDBDeleteMonitorFlag(APP_CONFIG_STORAGE_DIR);
             return true;
         }
         usleep(CHECK_INTERVAL);
@@ -85,14 +83,14 @@ int32_t AppConfigDataManager::SetAppWaitingDebugInfo(const std::string &bundleNa
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called, bundle name is %{public}s.", bundleName.c_str());
     if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Invalid value.");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid value");
         return ERR_INVALID_VALUE;
     }
 
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::APPMGR, "The kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -106,7 +104,7 @@ int32_t AppConfigDataManager::SetAppWaitingDebugInfo(const std::string &bundleNa
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Insert data to kvStore error is %{public}d.", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "error is %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
@@ -118,7 +116,7 @@ int32_t AppConfigDataManager::ClearAppWaitingDebugInfo()
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::APPMGR, "The kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -131,7 +129,7 @@ int32_t AppConfigDataManager::ClearAppWaitingDebugInfo()
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Delete data from kvStore error is %{public}d.", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "error is %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
     return ERR_OK;
@@ -143,7 +141,7 @@ int32_t AppConfigDataManager::GetAppWaitingDebugList(std::vector<std::string> &b
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::APPMGR, "The kvStore is nullptr.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null kvStore");
             return ERR_NO_INIT;
         }
     }
@@ -156,7 +154,7 @@ int32_t AppConfigDataManager::GetAppWaitingDebugList(std::vector<std::string> &b
     }
 
     if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Get entries error is %{public}d.", status);
+        TAG_LOGE(AAFwkTag::APPMGR, "error is %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
 

@@ -473,7 +473,7 @@ HWTEST_F(MissionListManagerTest, MissionListManager_011, Function | MediumTest |
     callRecord->SetCallState(CallState::INIT);
     callContainer->AddCallRecord(connCallback, callRecord);
     abilityRecord->callContainer_ = callContainer;
-    abilityRecord->isReady_ = true;
+    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
     abilityRecord->scheduler_ = new (std::nothrow) MissionListManagerTestAbilityThreadStub();
 
     int testRet = missionListMgr->ResolveAbility(abilityRecord, abilityRequest);
@@ -510,7 +510,6 @@ HWTEST_F(MissionListManagerTest, MissionListManager_012, Function | MediumTest |
     callRecord->SetCallState(CallState::INIT);
     callContainer->AddCallRecord(connCallback, callRecord);
     abilityRecord->callContainer_ = callContainer;
-    abilityRecord->isReady_ = false;
 
     int testRet = missionListMgr->ResolveAbility(abilityRecord, abilityRequest);
 
@@ -608,7 +607,7 @@ HWTEST_F(MissionListManagerTest, MissionListManager_015, Function | MediumTest |
     abilityRequest.startRecent = true;
     std::shared_ptr<AbilityRecord> abilityRecord =
         std::make_shared<AbilityRecord>(want, abilityInfo, abilityInfo.applicationInfo);
-    abilityRecord->isReady_ = true;
+    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
     std::shared_ptr<MissionListManager> missionListMgr = std::make_shared<MissionListManager>(0);
     missionListMgr->defaultStandardList_ = missionList;

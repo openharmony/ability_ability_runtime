@@ -254,49 +254,6 @@ HWTEST_F(AmsIpcAmsmgrModuleTest, ExcuteAmsmgrIPCInterface_004, TestSize.Level3)
  * Feature: ApplicationFramework
  * Function: AppManagerService
  * SubFunction: AmsmgrIPCInterface
- * FunctionPoints: test AbilityBehaviorAnalysis API,then check the function whether is good or not
- * EnvConditions: system running normally
- * CaseDescription: execute AbilityBehaviorAnalysis API 1000 times
- */
-HWTEST_F(AmsIpcAmsmgrModuleTest, ExcuteAmsmgrIPCInterface_005, TestSize.Level3)
-{
-    const int32_t visibility = 1;
-    const int32_t perceptibility = 1;
-    const int32_t connectionState = 1;
-
-    auto mockAppMgrServiceInner = GetMockAppMgrServiceInner();
-    std::unique_ptr<AmsMgrScheduler> amsMgrScheduler =
-        std::make_unique<AmsMgrScheduler>(mockAppMgrServiceInner, GetAmsTaskHandler());
-
-    sptr<MockMockAppMgrService> mockMockAppMgr(new MockMockAppMgrService());
-    sptr<IAppMgr> appMgrClient = iface_cast<IAppMgr>(mockMockAppMgr);
-
-    auto mockHandler = [&]() -> sptr<IAmsMgr> {
-        mockMockAppMgr->Post();
-        return sptr<IAmsMgr>(amsMgrScheduler.get());
-    };
-
-    EXPECT_CALL(*mockMockAppMgr, GetAmsMgr()).Times(1).WillOnce(Invoke(mockHandler));
-
-    auto amsMgrScheduler_ = appMgrClient->GetAmsMgr();
-    mockMockAppMgr->Wait();
-    sptr<OHOS::IRemoteObject> token = new MockAbilityToken();
-
-    for (int i = 0; i < COUNT; i++) {
-        EXPECT_CALL(*mockAppMgrServiceInner, AbilityBehaviorAnalysis(_, _, _, _, _))
-            .WillOnce(InvokeWithoutArgs(mockAppMgrServiceInner.get(), &MockAppMgrServiceInner::Post));
-        amsMgrScheduler_->AbilityBehaviorAnalysis(token, nullptr, visibility, perceptibility, connectionState);
-        mockAppMgrServiceInner->Wait();
-    }
-
-    mockAppMgrServiceInner.reset();
-    amsMgrScheduler.release();
-}
-
-/*
- * Feature: ApplicationFramework
- * Function: AppManagerService
- * SubFunction: AmsmgrIPCInterface
  * FunctionPoints: test KillApplication API,then check the function whether is good or not
  * EnvConditions: system running normally
  * CaseDescription: execute KillApplication API 1000 times

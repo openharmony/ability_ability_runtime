@@ -35,14 +35,14 @@ AmsResidentProcessRdbCallBack::AmsResidentProcessRdbCallBack(const AmsRdbConfig 
 
 int32_t AmsResidentProcessRdbCallBack::OnCreate(NativeRdb::RdbStore &rdbStore)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnCreate");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
 
     std::string createTableSql = "CREATE TABLE IF NOT EXISTS " + rdbConfig_.tableName +
                                  " (KEY_BUNDLE_NAME TEXT NOT NULL PRIMARY KEY," +
                                  "KEEP_ALIVE_ENABLE TEXT NOT NULL, KEEP_ALIVE_CONFIGURED_LIST TEXT NOT NULL);";
     auto sqlResult = rdbStore.ExecuteSql(createTableSql);
     if (sqlResult != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Ability mgr rdb execute sql error");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "execute sql error");
         return sqlResult;
     }
 
@@ -64,7 +64,7 @@ int32_t AmsResidentProcessRdbCallBack::OnCreate(NativeRdb::RdbStore &rdbStore)
     int64_t insertNum = 0;
     int32_t ret = rdbStore.BatchInsert(insertNum, rdbConfig_.tableName, valuesBuckets);
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Ability mgr rdb batch insert error[%{public}d]", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "batch insert error[%{public}d]", ret);
         return ret;
     }
     return NativeRdb::E_OK;
@@ -72,14 +72,14 @@ int32_t AmsResidentProcessRdbCallBack::OnCreate(NativeRdb::RdbStore &rdbStore)
 
 int32_t AmsResidentProcessRdbCallBack::OnUpgrade(NativeRdb::RdbStore &rdbStore, int currentVersion, int targetVersion)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnUpgrade currentVersion: %{plubic}d, targetVersion: %{plubic}d", currentVersion,
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "onUpgrade current:%{plubic}d, target:%{plubic}d", currentVersion,
         targetVersion);
     return NativeRdb::E_OK;
 }
 
 int32_t AmsResidentProcessRdbCallBack::OnDowngrade(NativeRdb::RdbStore &rdbStore, int currentVersion, int targetVersion)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnDowngrade  currentVersion: %{plubic}d, targetVersion: %{plubic}d", currentVersion,
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "onDowngrade current:%{plubic}d, target:%{plubic}d", currentVersion,
         targetVersion);
     return NativeRdb::E_OK;
 }
@@ -99,7 +99,7 @@ int32_t AmsResidentProcessRdbCallBack::onCorruption(std::string databaseFile)
 int32_t AmsResidentProcessRdb::Init()
 {
     if (rdbMgr_ != nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Rdb mgr existed.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "rdb mgr existed");
         return Rdb_OK;
     }
 
@@ -107,7 +107,7 @@ int32_t AmsResidentProcessRdb::Init()
     config.tableName = ABILITY_RDB_TABLE_NAME;
     rdbMgr_ = std::make_unique<RdbDataManager>(config);
     if (rdbMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to create database mgr object.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "create object fail");
         return Rdb_Init_Err;
     }
 
@@ -129,7 +129,7 @@ int32_t AmsResidentProcessRdb::VerifyConfigurationPermissions(
     const std::string &bundleName, const std::string &callerBundleName)
 {
     if (bundleName.empty() || callerBundleName.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Bundle name is null.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundle name");
         return Rdb_Parameter_Err;
     }
 
@@ -139,7 +139,7 @@ int32_t AmsResidentProcessRdb::VerifyConfigurationPermissions(
     }
 
     if (rdbMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Rdb mgr error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "rdb mgr error");
         return Rdb_Parameter_Err;
     }
 
@@ -147,21 +147,21 @@ int32_t AmsResidentProcessRdb::VerifyConfigurationPermissions(
     absRdbPredicates.EqualTo(KEY_BUNDLE_NAME, bundleName);
     auto absSharedResultSet = rdbMgr_->QueryData(absRdbPredicates);
     if (absSharedResultSet == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Ability mgr rdb query data failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null absSharedResultSet");
         return Rdb_Permissions_Err;
     }
 
     ScopeGuard stateGuard([absSharedResultSet] { absSharedResultSet->Close(); });
     auto ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Go to first row failed, ret: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, ret:%{public}d", ret);
         return Rdb_Search_Record_Err;
     }
 
     std::string KeepAliveConfiguredList;
     ret = absSharedResultSet->GetString(INDEX_KEEP_ALIVE_CONFIGURED_LIST, KeepAliveConfiguredList);
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get configured list failed, ret: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, ret: %{public}d", ret);
         return Rdb_Search_Record_Err;
     }
 
@@ -175,12 +175,12 @@ int32_t AmsResidentProcessRdb::VerifyConfigurationPermissions(
 int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundleName, bool &enable)
 {
     if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Bundle name is null.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleName");
         return Rdb_Parameter_Err;
     }
 
     if (rdbMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Rdb mgr error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "rdb mgr error");
         return Rdb_Parameter_Err;
     }
 
@@ -188,21 +188,21 @@ int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundl
     absRdbPredicates.EqualTo(KEY_BUNDLE_NAME, bundleName);
     auto absSharedResultSet = rdbMgr_->QueryData(absRdbPredicates);
     if (absSharedResultSet == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Ability mgr rdb query data failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "rdb query fail");
         return Rdb_Permissions_Err;
     }
 
     ScopeGuard stateGuard([absSharedResultSet] { absSharedResultSet->Close(); });
     auto ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Go to first row failed, ret: %{public}d", ret);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "fail, ret: %{public}d", ret);
         return Rdb_Search_Record_Err;
     }
 
     std::string flag;
     ret = absSharedResultSet->GetString(INDEX_KEEP_ALIVE_ENABLE, flag);
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get enable status failed, ret: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, ret: %{public}d", ret);
         return Rdb_Search_Record_Err;
     }
 
@@ -213,12 +213,12 @@ int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundl
 int32_t AmsResidentProcessRdb::UpdateResidentProcessEnable(const std::string &bundleName, bool enable)
 {
     if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Bundle name is null.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleName");
         return Rdb_Parameter_Err;
     }
 
     if (rdbMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Rdb mgr error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "rdb mgr error");
         return Rdb_Parameter_Err;
     }
 
@@ -232,12 +232,12 @@ int32_t AmsResidentProcessRdb::UpdateResidentProcessEnable(const std::string &bu
 int32_t AmsResidentProcessRdb::RemoveData(std::string &bundleName)
 {
     if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Bundle name is null.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleName");
         return Rdb_Parameter_Err;
     }
 
     if (rdbMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Rdb mgr error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "rdb mgr error");
         return Rdb_Parameter_Err;
     }
     NativeRdb::AbsRdbPredicates absRdbPredicates(ABILITY_RDB_TABLE_NAME);

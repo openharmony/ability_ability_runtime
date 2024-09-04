@@ -1155,7 +1155,7 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_DumpSysState_001, Test
     abilityRequest.abilityInfo.name = "name";
     auto dataAbilityRecord = std::make_shared<DataAbilityRecord>(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->isReady_ = true;
+    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
     dataAbilityRecord->ability_ = abilityRecord;
     dataAbilityRecord->scheduler_ = abilitySchedulerMock_;
     dataAbilityManager->dataAbilityRecordsLoaded_["args"] = dataAbilityRecord;
@@ -1183,7 +1183,6 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_DumpSysState_002, Test
     abilityRequest.abilityInfo.name = "name";
     auto dataAbilityRecord = std::make_shared<DataAbilityRecord>(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->isReady_ = false;
     dataAbilityRecord->ability_ = abilityRecord;
     dataAbilityRecord->scheduler_ = abilitySchedulerMock_;
     dataAbilityManager->dataAbilityRecordsLoaded_["args"] = dataAbilityRecord;
@@ -1320,7 +1319,7 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_DumpSysState_008, Test
     abilityRequest.abilityInfo.name = "name";
     auto dataAbilityRecord = std::make_shared<DataAbilityRecord>(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->isReady_ = true;
+    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
     dataAbilityRecord->ability_ = abilityRecord;
     dataAbilityRecord->scheduler_ = abilitySchedulerMock_;
     dataAbilityManager->dataAbilityRecordsLoaded_["a"] = dataAbilityRecord;
@@ -1348,7 +1347,6 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_DumpSysState_009, Test
     abilityRequest.abilityInfo.name = "name";
     auto dataAbilityRecord = std::make_shared<DataAbilityRecord>(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->isReady_ = false;
     dataAbilityRecord->ability_ = abilityRecord;
     dataAbilityRecord->scheduler_ = abilitySchedulerMock_;
     dataAbilityManager->dataAbilityRecordsLoaded_["a"] = dataAbilityRecord;

@@ -40,8 +40,6 @@ public:
 
     AppMgrResultCode GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo>& info, int32_t userId);
 
-    AppMgrResultCode AbilityBehaviorAnalysis(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState) override;
     AppMgrResultCode ConnectAppMgrService() override;
     AppMgrResultCode RegisterAppStateCallback(const sptr<IAppStateCallback>& callback) override;
 };
