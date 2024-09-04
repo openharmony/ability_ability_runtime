@@ -15,7 +15,9 @@ group("unittest") {
   testonly = true
 
   deps = [
+    "insight_intent_execute_callback_proxy_test:unittest",
     "insight_intent_execute_manager_test:unittest",
     "insight_intent_execute_param_test:unittest",
+    "insight_intent_utils_test:unittest",
   ]
 }
