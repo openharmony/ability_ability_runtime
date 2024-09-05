@@ -560,6 +560,9 @@ public:
 
     const std::list<std::shared_ptr<ApplicationInfo>> GetAppInfoList();
 
+    void SetAppIdentifier(const std::string &appIdentifier);
+    const std::string &GetAppIdentifier() const;
+
     inline const std::shared_ptr<ApplicationInfo> GetApplicationInfo()
     {
         return appInfo_;
@@ -932,6 +935,7 @@ private:
     bool isLauncherApp_;
     std::string mainAppName_;
     int restartResidentProcCount_ = 0;
+    std::string appIdentifier_;
 
     mutable std::mutex specifiedMutex_;
     int32_t specifiedRequestId_ = -1;

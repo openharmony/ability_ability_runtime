@@ -44,6 +44,7 @@ constexpr const char* CONFIG_PATH = "/etc/ability_runtime/resident_process_in_ex
 constexpr const char* RESIDENT_PROCESS_IN_EXTREME_MEMORY = "residentProcessInExtremeMemory";
 constexpr const char* BUNDLE_NAME = "bundleName";
 constexpr const char* ABILITY_NAME = "abilityName";
+constexpr const char* KEY_IDENTIFIER = "identifier";
 constexpr const char* ALLOW_NATIVE_CHILD_PROCESS_APPS_CONFIG_PATH =
     "/etc/ability_runtime/allow_native_child_process_apps.json";
 constexpr const char* KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS = "allowNativeChildProcessApps";
@@ -279,15 +280,16 @@ void AppUtils::LoadResidentProcessInExtremeMemory()
     }
 }
 
-bool AppUtils::IsAllowNativeChildProcess(const std::string& bundleName)
+bool AppUtils::IsAllowNativeChildProcess(const std::string &appIdentifier)
 {
+    TAG_LOGD(AAFwkTag::DEFAULT, "appId:%{private}s", appIdentifier.c_str());
     if (!allowStartNativeProcessApps_.isLoaded) {
         LoadAllowNativeChildProcessApps();
         allowStartNativeProcessApps_.isLoaded = true;
     }
     auto &apps = allowStartNativeProcessApps_.value;
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}zu", apps.size());
-    return std::find(apps.begin(), apps.end(), bundleName) != apps.end();
+    return std::find(apps.begin(), apps.end(), appIdentifier) != apps.end();
 }
 
 void AppUtils::LoadAllowNativeChildProcessApps()
@@ -304,12 +306,12 @@ void AppUtils::LoadAllowNativeChildProcessApps()
 
     for (auto &item : object.at(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS).items()) {
         const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "load bundleName failed");
+        if (!jsonObject.contains(KEY_IDENTIFIER) || !jsonObject.at(KEY_IDENTIFIER).is_string()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load identifier failed");
             return;
         }
-        std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
-        allowStartNativeProcessApps_.value.emplace_back(bundleName);
+        std::string identifier = jsonObject.at(KEY_IDENTIFIER).get<std::string>();
+        allowStartNativeProcessApps_.value.emplace_back(identifier);
     }
 }
 
