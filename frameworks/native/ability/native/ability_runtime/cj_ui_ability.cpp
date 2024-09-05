@@ -57,6 +57,8 @@ const int32_t BASE_DISPLAY_ID_NUM (10);
 #endif
 const char* CJWINDOW_FFI_LIBNAME = "libcj_window_ffi.z.so";
 const char* FUNC_CREATE_CJWINDOWSTAGE = "OHOS_CreateCJWindowStage";
+constexpr const int32_t API12 = 12;
+constexpr const int32_t API_VERSION_MOD = 100;
 using CFFICreateCJWindowStage = int64_t (*)(std::shared_ptr<Rosen::WindowScene>&);
 
 sptr<Rosen::CJWindowStageImpl> CreateCJWindowStage(std::shared_ptr<Rosen::WindowScene> windowScene)
@@ -300,6 +302,21 @@ void CJUIAbility::OnSceneRestored()
     }
 }
 
+void CJUIAbility::OnSceneWillDestroy()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    if (!cjAbilityObj_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj");
+        return;
+    }
+    if (!cjWindowStage_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null CJWindowStage object");
+        return;
+
+    }
+    cjAbilityObj_->OnSceneWillDestroy(cjWindowStage_.GetRefPtr());
+}
+
 void CJUIAbility::OnSceneDestroyed()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ability is %{public}s", GetAbilityName().c_str());
@@ -386,7 +403,14 @@ bool CJUIAbility::OnBackPress()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     UIAbility::OnBackPress();
-    return true;
+    bool defaultRet = BackPressDefaultValue();
+    if (!cjAbilityObj_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj");
+        return defaultRet;
+    }
+    bool ret = cjAbilityObj_->OnBackPress(defaultRet);
+    TAG_LOGD(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
+    return ret;
 }
 
 bool CJUIAbility::OnPrepareTerminate()
@@ -776,6 +800,22 @@ std::shared_ptr<CJAbilityObject> CJUIAbility::GetCJAbility()
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbility object");
     }
     return cjAbilityObj_;
+}
+
+bool CJUIAbility::CheckSatisfyTargetAPIVersion(int32_t version)
+{
+    auto applicationInfo = GetApplicationInfo();
+    if (!applicationInfo) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null targetAPIVersion");
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::UIABILITY, "targetAPIVersion: %{public}d", applicationInfo->apiTargetVersion);
+    return applicationInfo->apiTargetVersion % API_VERSION_MOD >= version;
+}
+
+bool CJUIAbility::BackPressDefaultValue()
+{
+    return CheckSatisfyTargetAPIVersion(API12) ? true : false;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
