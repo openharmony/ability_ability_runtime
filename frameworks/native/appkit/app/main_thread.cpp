@@ -1034,14 +1034,14 @@ bool MainThread::CheckForHandleLaunchApplication(const AppLaunchData &appLaunchD
 
 bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
     const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const std::string &bundleName,
-    const Configuration &config, const ApplicationInfo &appInfo)
+    bool multiProjects, const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     bool isStageBased = entryHapModuleInfo.isStageBasedModel;
-    if (isStageBased && appInfo.multiProjects) {
+    if (isStageBased && multiProjects) {
         TAG_LOGI(AAFwkTag::APPKIT, "multiProjects");
     } else {
-        OnStartAbility(bundleName, resourceManager, entryHapModuleInfo, appInfo.debug);
+        OnStartAbility(bundleName, resourceManager, entryHapModuleInfo);
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -1089,7 +1089,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
 
 void MainThread::OnStartAbility(const std::string &bundleName,
     std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
-    const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const bool isDebugApp)
+    const AppExecFwk::HapModuleInfo &entryHapModuleInfo)
 {
     std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleName);
     std::string loadPath =
@@ -1113,15 +1113,6 @@ void MainThread::OnStartAbility(const std::string &bundleName,
                 TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
             }
             SubscribeOverlayChange(bundleName, loadPath, resourceManager, entryHapModuleInfo);
-        }
-        std::string hqfPath = entryHapModuleInfo.hqfInfo.hqfFilePath;
-        if (!hqfPath.empty() && isDebugApp) {
-            hqfPath = std::regex_replace(hqfPath, pattern, std::string(LOCAL_CODE_PATH));
-            TAG_LOGI(AAFwkTag::APPKIT, "AddPatchResource hapPath:%{public}s, patchPath:%{public}s",
-                loadPath.c_str(), hqfPath.c_str());
-            if (!resourceManager->AddPatchResource(loadPath.c_str(), hqfPath.c_str())) {
-                TAG_LOGE(AAFwkTag::APPKIT, "AddPatchResource failed");
-            }
         }
     }
 }
@@ -1754,7 +1745,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     if (!InitResourceManager(resourceManager, entryHapModuleInfo, bundleInfo.name,
-        appConfig, bundleInfo.applicationInfo)) {
+        bundleInfo.applicationInfo.multiProjects, appConfig)) {
         TAG_LOGE(AAFwkTag::APPKIT, "InitResourceManager failed");
         return;
     }

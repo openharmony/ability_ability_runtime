@@ -701,10 +701,10 @@ private:
     bool CheckForHandleLaunchApplication(const AppLaunchData &appLaunchData);
     bool InitResourceManager(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
         const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const std::string &bundleName,
-        const Configuration &config, const ApplicationInfo &appInfo);
+        bool multiProjects, const Configuration &config);
     void OnStartAbility(const std::string& bundleName,
         std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
-        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const bool isDebugApp);
+        const AppExecFwk::HapModuleInfo &entryHapModuleInfo);
     std::vector<std::string> GetOverlayPaths(const std::string &bundleName,
         const std::vector<OverlayModuleInfo> &overlayModuleInfos);
     void SubscribeOverlayChange(const std::string &bundleName, const std::string &loadPath,
