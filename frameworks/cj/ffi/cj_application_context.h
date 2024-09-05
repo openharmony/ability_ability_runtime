@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "cj_macro.h"
+#include "cj_environment_callback.h"
 #include "ffi_remote_data.h"
 #include "ability_delegator_registry.h"
 
@@ -26,14 +27,18 @@ namespace OHOS {
 namespace ApplicationContextCJ {
 class CJApplicationContext : public FFI::FFIData {
 public:
-    explicit CJApplicationContext(std::weak_ptr<AbilityRuntime::Context> &&applicationContext)
+    explicit CJApplicationContext(std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext)
         : applicationContext_(std::move(applicationContext)) {};
 
     int GetArea();
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo();
+    int32_t OnOnEnvironment(void (*cfgCallback)(AbilityRuntime::CConfiguration),
+        void (*memCallback)(int32_t), bool isSync, int32_t *errCode);
+    void OnOffEnvironment(int32_t callbackId, int32_t *errCode);
 
 private:
-    std::weak_ptr<AbilityRuntime::Context> applicationContext_;
+    std::weak_ptr<AbilityRuntime::ApplicationContext> applicationContext_;
+    std::shared_ptr<AbilityRuntime::CjEnvironmentCallback> envCallback_;
 };
 
 extern "C" {
@@ -44,6 +49,9 @@ struct CApplicationInfo {
 
 CJ_EXPORT int64_t FFIGetArea(int64_t id);
 CJ_EXPORT CApplicationInfo* FFICJApplicationInfo(int64_t id);
+CJ_EXPORT int32_t FFICJApplicationContextOnOn(int64_t id, char* type,
+    void (*cfgCallback)(AbilityRuntime::CConfiguration), void (*memCallback)(int32_t), int32_t *errCode);
+CJ_EXPORT void FFICJApplicationContextOnOff(int64_t id, char* type, int32_t callbackId, int32_t *errCode);
 };
 }
 }
