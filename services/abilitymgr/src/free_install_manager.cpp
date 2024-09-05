@@ -260,7 +260,7 @@ void FreeInstallManager::NotifyFreeInstallResult(int32_t recordId, const Want &w
         return;
     }
 
-    bool isFromRemote = want.GetBoolParam(FROM_REMOTE_KEY, false);
+    // bool isFromRemote = want.GetBoolParam(FROM_REMOTE_KEY, false);
     for (auto it = freeInstallList_.begin(); it != freeInstallList_.end();) {
         FreeInstallInfo &freeInstallInfo = *it;
         std::string bundleName = freeInstallInfo.want.GetElement().GetBundleName();

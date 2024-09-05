@@ -24,7 +24,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-std::shared_ptr<DataObsMgrClient> DataObsMgrClient::instance_ = nullptr;
 std::mutex DataObsMgrClient::mutex_;
 
 class DataObsMgrClient::SystemAbilityStatusChangeListener
@@ -52,13 +51,8 @@ void DataObsMgrClient::SystemAbilityStatusChangeListener::OnAddSystemAbility(
 
 std::shared_ptr<DataObsMgrClient> DataObsMgrClient::GetInstance()
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock_l(mutex_);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<DataObsMgrClient>();
-        }
-    }
-    return instance_;
+    static std::shared_ptr<DataObsMgrClient> proxy = std::make_shared<DataObsMgrClient>();
+    return proxy;
 }
 
 DataObsMgrClient::DataObsMgrClient()
@@ -142,7 +136,7 @@ ErrCode DataObsMgrClient::NotifyChange(const Uri &uri)
  *
  * @return Returns SUCCESS on success, others on failure.
  */
-std::pair<Status, sptr<IDataObsMgr>> DataObsMgrClient::GetObsMgr()
+__attribute__ ((no_sanitize("cfi"))) std::pair<Status, sptr<IDataObsMgr>> DataObsMgrClient::GetObsMgr()
 {
     std::lock_guard<std::mutex> lock(mutex_);
 

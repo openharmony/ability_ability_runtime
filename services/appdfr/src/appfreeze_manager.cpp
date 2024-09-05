@@ -129,11 +129,16 @@ int AppfreezeManager::AppfreezeHandle(const FaultData& faultData, const Appfreez
 
 void AppfreezeManager::CollectFreezeSysMemory(std::string& memoryContent)
 {
+    std::string tmp = "";
+    std::string pressMemInfo = "/proc/pressure/memory";
+    OHOS::LoadStringFromFile(pressMemInfo, tmp);
+    memoryContent = tmp + "\n";
     std::string memInfoPath = "/proc/memview";
     if (!OHOS::FileExists(memInfoPath)) {
         memInfoPath = "/proc/meminfo";
     }
-    OHOS::LoadStringFromFile(memInfoPath, memoryContent);
+    OHOS::LoadStringFromFile(memInfoPath, tmp);
+    memoryContent += tmp;
 }
 
 int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo)

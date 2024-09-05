@@ -36,13 +36,6 @@ AppMgrResultCode MockAppMgrClient::GetProcessRunningInfosByUserId(
     return AppMgrResultCode::RESULT_OK;
 }
 
-AppMgrResultCode MockAppMgrClient::AbilityBehaviorAnalysis(const sptr<IRemoteObject>& token,
-    const sptr<IRemoteObject>& preToken, const int32_t visibility, const int32_t perceptibility,
-    const int32_t connectionState)
-{
-    return AppMgrResultCode::RESULT_OK;
-}
-
 AppMgrResultCode MockAppMgrClient::ConnectAppMgrService()
 {
     return AppMgrResultCode::RESULT_OK;

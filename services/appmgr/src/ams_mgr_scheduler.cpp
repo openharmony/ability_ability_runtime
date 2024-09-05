@@ -36,7 +36,7 @@ constexpr const char* TASK_UPDATE_ABILITY_STATE = "UpdateAbilityStateTask";
 constexpr const char* TASK_UPDATE_EXTENSION_STATE = "UpdateExtensionStateTask";
 constexpr const char* TASK_REGISTER_APP_STATE_CALLBACK = "RegisterAppStateCallbackTask";
 // constexpr const char* TASK_STOP_ALL_PROCESS = "StopAllProcessTask";
-constexpr const char* TASK_ABILITY_BEHAVIOR_ANALYSIS = "AbilityBehaviorAnalysisTask";
+// constexpr const char* TASK_ABILITY_BEHAVIOR_ANALYSIS = "AbilityBehaviorAnalysisTask";
 constexpr const char* TASK_KILL_PROCESS_BY_ABILITY_TOKEN = "KillProcessByAbilityTokenTask";
 constexpr const char* TASK_KILL_PROCESSES_BY_USERID = "KillProcessesByUserIdTask";
 constexpr const char* TASK_KILL_PROCESSES_BY_PIDS = "KillProcessesByPids";
@@ -179,25 +179,6 @@ void AmsMgrScheduler::RegisterAppStateCallback(const sptr<IAppStateCallback> &ca
         amsMgrServiceInner->RegisterAppStateCallback(callback);
     };
     amsHandler_->SubmitTask(registerAppStateCallbackFunc, TASK_REGISTER_APP_STATE_CALLBACK);
-}
-
-void AmsMgrScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-    const int32_t visibility, const int32_t perceptibility, const int32_t connectionState)
-{
-    if (!IsReady()) {
-        return;
-    }
-
-    if (amsMgrServiceInner_->VerifyRequestPermission() != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
-        return;
-    }
-    std::function<void()> abilityBehaviorAnalysisFunc = [amsMgrServiceInner = amsMgrServiceInner_, token, preToken,
-        visibility, perceptibility, connectionState]() {
-        amsMgrServiceInner->AbilityBehaviorAnalysis(token, preToken,
-            visibility, perceptibility, connectionState);
-    };
-    amsHandler_->SubmitTask(abilityBehaviorAnalysisFunc, TASK_ABILITY_BEHAVIOR_ANALYSIS);
 }
 
 void AmsMgrScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
@@ -514,6 +495,10 @@ int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_NAME)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "caller is not foundation");
+        return ERR_INVALID_OPERATION;
+    }
     return amsMgrServiceInner_->AttachAppDebug(bundleName);
 }
 
@@ -521,6 +506,10 @@ int32_t AmsMgrScheduler::DetachAppDebug(const std::string &bundleName)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_NAME)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "caller is not foundation");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->DetachAppDebug(bundleName);

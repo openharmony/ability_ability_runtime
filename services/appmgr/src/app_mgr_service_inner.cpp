@@ -69,6 +69,7 @@
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "render_state_observer_manager.h"
+#include "res_sched_util.h"
 #include "startup_util.h"
 #include "string_ex.h"
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
@@ -173,6 +174,7 @@ constexpr const char* SUPPORT_SERVICE_EXT_MULTI_PROCESS = "component.startup.ext
 constexpr const char* SERVICE_EXT_MULTI_PROCESS_WHITE_LIST = "component.startup.extension.multiprocess.whitelist";
 constexpr const char* SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 constexpr const char* DEBUG_APP = "debugApp";
+constexpr const char* NATIVE_DEBUG = "nativeDebug";
 constexpr const char* SERVICE_EXTENSION = ":ServiceExtension";
 constexpr const char* KEEP_ALIVE = ":KeepAlive";
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
@@ -235,7 +237,6 @@ constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
 
 constexpr const char* PROC_SELF_TASK_PATH = "/proc/self/task/";
-constexpr const char* APP_PROVISION_TYPE_DEBUG = "debug";
 
 constexpr int32_t ROOT_UID = 0;
 constexpr int32_t FOUNDATION_UID = 5523;
@@ -559,13 +560,36 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             abilityRunningRecord->SetUIExtensionAbilityId(uiExtensionAbilityId);
         }
     }
+    AfterLoadAbility(appRecord, abilityInfo, loadParam);
+}
 
-    if (abilityInfo->type == AppExecFwk::AbilityType::PAGE && appRecord != nullptr) {
+void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord,
+    std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!appRecord || !abilityInfo || !loadParam) {
+        return;
+    }
+    if (abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         appRecord->SetUIAbilityLaunched(true);
     }
     PerfProfile::GetInstance().SetAbilityLoadEndTime(GetTickCount());
     PerfProfile::GetInstance().Dump();
     PerfProfile::GetInstance().Reset();
+
+    auto reportLoadTask = [appRecord]() {
+        auto priorityObj = appRecord->GetPriorityObject();
+        if (priorityObj) {
+            auto timeOut = AbilityRuntime::GlobalConstant::GetLoadTimeOutBase() *
+                AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
+            AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::LOAD_BEGIN,
+                priorityObj->GetPid(), appRecord->GetUid(), timeOut);
+        }
+    };
+    if (taskHandler_) {
+        taskHandler_->SubmitTask(reportLoadTask);
+    }
+
     appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
 }
 
@@ -768,7 +792,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
         appInfo->uid, bundleInfo, appInfo->bundleName, bundleIndex, appExistFlag, isPreload, abilityInfo->moduleName,
         abilityInfo->name, strictMode, maxChildProcess, token, want, abilityInfo->extensionAbilityType);
     if (isShellCall) {
-        if (appInfo->appProvisionType != APP_PROVISION_TYPE_DEBUG) {
+        if (appInfo->appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
             TAG_LOGW(AAFwkTag::APPMGR, "Application not debug provision type!");
             return;
         }
@@ -2119,6 +2143,12 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (want != nullptr && (want->GetBoolParam(DEBUG_APP, false) || want->GetBoolParam(NATIVE_DEBUG, false))) {
+        if (appInfo != nullptr && appInfo->appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+            TAG_LOGE(AAFwkTag::APPMGR, "release app not support debug");
+            return nullptr;
+        }
+    }
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager null");
         return nullptr;
@@ -2155,13 +2185,6 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
         appRecord->SetCallerTokenId(want->GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
         appRecord->SetAssignTokenId(want->GetIntParam("specifyTokenId", 0));
         appRecord->SetNativeStart(want->GetBoolParam("native", false));
-    }
-
-    if (preToken) {
-        auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
-        if (abilityRecord) {
-            abilityRecord->SetPreToken(preToken);
-        }
     }
 
     return appRecord;
@@ -2357,34 +2380,6 @@ void AppMgrServiceInner::RemoveDeadAppStateCallback(const wptr<IRemoteObject> &r
     }
 }
 
-void AppMgrServiceInner::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-    const int32_t visibility,       // 0:false,1:true
-    const int32_t perceptibility,   // 0:false,1:true
-    const int32_t connectionState)  // 0:false,1:true
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "token null");
-        return;
-    }
-    auto appRecord = GetAppRunningRecordByAbilityToken(token);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord unexist");
-        return;
-    }
-    auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
-    if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "record unexist");
-        return;
-    }
-    if (preToken) {
-        abilityRecord->SetPreToken(preToken);
-    }
-    abilityRecord->SetVisibility(visibility);
-    abilityRecord->SetPerceptibility(perceptibility);
-    abilityRecord->SetConnectionState(connectionState);
-}
-
 void AppMgrServiceInner::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -2517,7 +2512,6 @@ void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObj
 
     if (ability && preToken) {
         TAG_LOGE(AAFwkTag::APPMGR, "ability already start");
-        ability->SetPreToken(preToken);
         return;
     }
 
@@ -2533,10 +2527,6 @@ void AppMgrServiceInner::StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObj
     if (!ability) {
         TAG_LOGE(AAFwkTag::APPMGR, "add ability fail");
         return;
-    }
-
-    if (preToken != nullptr) {
-        ability->SetPreToken(preToken);
     }
 
     ApplicationState appState = appRecord->GetState();
@@ -5880,7 +5870,7 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
         TAG_LOGE(AAFwkTag::APPMGR, "createAbilityInfo fail");
         return ERR_INVALID_OPERATION;
     }
-    if (abilityInfo.applicationInfo.appProvisionType != APP_PROVISION_TYPE_DEBUG) {
+    if (abilityInfo.applicationInfo.appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
         TAG_LOGW(AAFwkTag::APPMGR, "Application not debug provision type!");
         return ERR_INVALID_OPERATION;
     }
@@ -6174,6 +6164,11 @@ int32_t AppMgrServiceInner::SetAppWaitingDebug(const std::string &bundleName, bo
         return ERR_INVALID_VALUE;
     }
 
+    if (!CheckIsDebugApp(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "is not debug app");
+        return AAFwk::ERR_NOT_DEBUG_APP;
+    }
+
     InitAppWaitingDebugList();
 
     bool isClear = false;
@@ -6269,6 +6264,25 @@ void AppMgrServiceInner::InitAppWaitingDebugList()
             waitingDebugBundleList_.try_emplace(item, true);
         }
     }
+}
+
+bool AppMgrServiceInner::CheckIsDebugApp(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    CHECK_POINTER_AND_RETURN_VALUE(remoteClientManager_, false);
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN_VALUE(bundleMgrHelper, false);
+
+    BundleInfo bundleInfo;
+    auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION), bundleInfo, currentUserId_));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
+        return false;
+    }
+
+    return bundleInfo.applicationInfo.debug &&
+           (bundleInfo.applicationInfo.appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG);
 }
 
 bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
@@ -7577,6 +7591,7 @@ void AppMgrServiceInner::BlockProcessCacheByPids(const std::vector<int32_t>& pid
             continue;
         }
         appRecord->SetProcessCacheBlocked(true);
+        DelayedSingleton<CacheProcessManager>::GetInstance()->OnAppProcessCacheBlocked(appRecord);
     }
 }
 

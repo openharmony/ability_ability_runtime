@@ -183,6 +183,9 @@ ohos_shared_library("appkit_native") {
     "faultloggerd:libdfx_procinfo",
     "faultloggerd:libfaultloggerd",
     "ffrt:libffrt",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:libcomposer",
+    "graphic_2d:EGL",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -190,9 +193,12 @@ ohos_shared_library("appkit_native") {
     "i18n:preferred_language",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "preferences:native_preferences",
     "resource_management:global_resmgr",
+    "runtime_core:libarkbase_static",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
@@ -452,11 +458,14 @@ ohos_shared_library("appkit_delegator") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   public_external_deps = [ "ability_base:configuration" ]
