@@ -6591,8 +6591,9 @@ int32_t AppMgrServiceInner::StartChildProcessPreCheck(pid_t callingPid, int32_t 
     CHECK_POINTER_AND_RETURN_VALUE(hostRecord, ERR_NULL_OBJECT);
     auto &appUtils = AAFwk::AppUtils::GetInstance();
     if (!appUtils.IsMultiProcessModel()) {
-        if (childProcessType != CHILD_PROCESS_TYPE_NATIVE_ARGS ||
-            !appUtils.IsAllowNativeChildProcess(hostRecord->GetBundleName())) {
+        bool checkWhiteList = childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS ||
+            childProcessType == CHILD_PROCESS_TYPE_NATIVE;
+        if (!checkWhiteList || !appUtils.IsAllowNativeChildProcess(hostRecord->GetAppIdentifier())) {
             TAG_LOGE(AAFwkTag::APPMGR, "not support child process.");
             return AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS;
         }
@@ -7449,11 +7450,6 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
         return ERR_INVALID_VALUE;
     }
 
-    if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "unSupport native child process");
-        return ERR_INVALID_OPERATION;
-    }
-
     int32_t errCode = StartChildProcessPreCheck(hostPid, CHILD_PROCESS_TYPE_NATIVE);
     if (errCode != ERR_OK) {
         return errCode;
@@ -7463,6 +7459,12 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     if (!appRecord) {
         TAG_LOGI(AAFwkTag::APPMGR, "get record(hostPid:%{public}d) fail", hostPid);
         return ERR_INVALID_OPERATION;
+    }
+    
+    if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess() &&
+        !AAFwk::AppUtils::GetInstance().IsAllowNativeChildProcess(appRecord->GetAppIdentifier())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "unSupport native child process");
+        return AAFwk::ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS;
     }
 
     auto childRecordMap = appRecord->GetChildProcessRecordMap();
