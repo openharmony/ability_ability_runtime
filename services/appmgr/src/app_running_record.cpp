@@ -392,6 +392,16 @@ const std::list<std::shared_ptr<ApplicationInfo>> AppRunningRecord::GetAppInfoLi
     return appInfoList;
 }
 
+void AppRunningRecord::SetAppIdentifier(const std::string &appIdentifier)
+{
+    appIdentifier_ = appIdentifier;
+}
+
+const std::string &AppRunningRecord::GetAppIdentifier() const
+{
+    return appIdentifier_;
+}
+
 const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> AppRunningRecord::GetAbilities()
 {
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilitysMap;

@@ -95,6 +95,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     appRecord->SetKeepAliveBundle(bundleInfo.isKeepAlive);
     appRecord->SetSignCode(signCode);
     appRecord->SetJointUserId(bundleInfo.jointUserId);
+    appRecord->SetAppIdentifier(bundleInfo.signatureInfo.appIdentifier);
     {
         std::lock_guard guard(runningRecordMapMutex_);
         appRunningRecordMap_.emplace(recordId, appRecord);
