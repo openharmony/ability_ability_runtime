@@ -333,8 +333,8 @@ ErrCode AbilityManagerClient::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> s
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "abilityName: %{public}s, isShow: %{public}d",
-        sessionInfo->want.GetElement().GetAbilityName().c_str(), isShow);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, ChangeUIAbilityVisibilityBySCB abilityName: %{public}s,"
+        "isShow: %{public}d", sessionInfo->want.GetElement().GetAbilityName().c_str(), isShow);
     return abms->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow);
 }
 
@@ -359,7 +359,7 @@ ErrCode AbilityManagerClient::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo,
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "startAbilitybySCB:%{public}s",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, StartUIAbilityBySCB target: %{public}s.",
         sessionInfo->want.GetElement().GetURI().c_str());
     return abms->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
 }
@@ -425,14 +425,16 @@ ErrCode AbilityManagerClient::CloseAbility(sptr<IRemoteObject> token, int result
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
         sptr<AAFwk::SessionInfo> info = new AAFwk::SessionInfo();
         info->want = *resultWant;
         info->resultCode = resultCode;
         info->sessionToken = token;
-        auto err = sceneSessionManager->TerminateSessionNew(info, false);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "closeAbility ret=%{public}d", err);
-        return static_cast<int>(err);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CloseAbility");
+        auto ret = static_cast<int>(sceneSessionManager->TerminateSessionNew(info, false));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, CloseAbility err: %{public}d", ret);
+        }
+        return ret;
     }
 #endif // SUPPORT_SCREEN
     auto abms = GetAbilityManager();
@@ -450,7 +452,8 @@ ErrCode AbilityManagerClient::CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CloseUIAbilityBySCB target: %{public}s",
+        sessionInfo->want.GetElement().GetURI().c_str());
     return abms->CloseUIAbilityBySCB(sessionInfo);
 }
 
@@ -484,7 +487,7 @@ ErrCode AbilityManagerClient::MinimizeUIAbilityBySCB(sptr<SessionInfo> sessionIn
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Minimize UIAbility by SCB: %{public}s",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, MinimizeUIAbilityBySCB target: %{public}s",
         sessionInfo->want.GetElement().GetURI().c_str());
     return abms->MinimizeUIAbilityBySCB(sessionInfo, fromUser, sceneFlag);
 }
@@ -763,9 +766,10 @@ ErrCode AbilityManagerClient::LockMissionForCleanup(int32_t missionId)
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, LockMissionForCleanup");
         auto err = sceneSessionManager->LockSession(missionId);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, LockMissionForCleanup err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -783,9 +787,10 @@ ErrCode AbilityManagerClient::UnlockMissionForCleanup(int32_t missionId)
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, UnlockMissionForCleanup");
         auto err = sceneSessionManager->UnlockSession(missionId);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, UnlockMissionForCleanup err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -809,9 +814,10 @@ ErrCode AbilityManagerClient::RegisterMissionListener(sptr<IMissionListener> lis
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, RegisterMissionListener");
         auto err = sceneSessionManager->RegisterSessionListener(listener);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, RegisterMissionListener err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -828,9 +834,10 @@ ErrCode AbilityManagerClient::UnRegisterMissionListener(sptr<IMissionListener> l
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, UnRegisterMissionListener");
         auto err = sceneSessionManager->UnRegisterSessionListener(listener);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, UnRegisterMissionListener err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -881,9 +888,10 @@ ErrCode AbilityManagerClient::GetMissionInfos(const std::string& deviceId, int32
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, GetMissionInfos");
         auto err = sceneSessionManager->GetSessionInfos(deviceId, numMax, missionInfos);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, GetMissionInfos err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -902,9 +910,10 @@ ErrCode AbilityManagerClient::GetMissionInfo(const std::string& deviceId, int32_
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, GetMissionInfo");
         auto err = sceneSessionManager->GetSessionInfo(deviceId, missionId, missionInfo);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, GetMissionInfo err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -922,9 +931,10 @@ ErrCode AbilityManagerClient::CleanMission(int32_t missionId)
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CleanMission");
         auto err = sceneSessionManager->ClearSession(missionId);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, CleanMission err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -942,9 +952,10 @@ ErrCode AbilityManagerClient::CleanAllMissions()
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CleanAllMissions");
         auto err = sceneSessionManager->ClearAllSessions();
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, CleanAllMissions err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -978,9 +989,10 @@ ErrCode AbilityManagerClient::MoveMissionsToForeground(const std::vector<int32_t
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, MoveMissionsToForeground");
         auto err = sceneSessionManager->MoveSessionsToForeground(missionIds, topMissionId);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, MoveMissionsToForeground err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         auto abms = GetAbilityManager();
@@ -1011,9 +1023,10 @@ ErrCode AbilityManagerClient::MoveMissionsToBackground(const std::vector<int32_t
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, MoveMissionsToBackground");
         auto err = sceneSessionManager->MoveSessionsToBackground(missionIds, result);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, MoveMissionsToBackground err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -1176,9 +1189,10 @@ ErrCode AbilityManagerClient::GetMissionSnapshot(const std::string& deviceId, in
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, GetMissionSnapshot");
         auto err = sceneSessionManager->GetSessionSnapshot(deviceId, missionId, snapshot, isLowResolution);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, GetMissionSnapshot err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -1211,9 +1225,12 @@ ErrCode AbilityManagerClient::GetTopAbility(sptr<IRemoteObject> &token)
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-        auto err = sceneSessionManager->GetFocusSessionToken(token);
-        return static_cast<int>(err);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, GetTopAbility");
+        auto ret = static_cast<int>(sceneSessionManager->GetFocusSessionToken(token));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, GetTopAbility err: %{public}d", ret);
+        }
+        return ret;
     }
 #endif //SUPPORT_SCREEN
     auto abms = GetAbilityManager();
@@ -1246,7 +1263,7 @@ ErrCode AbilityManagerClient::DelegatorDoAbilityForeground(sptr<IRemoteObject> t
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, DelegatorDoAbilityForeground");
         sceneSessionManager->PendingSessionToForeground(token);
     }
 #endif //SUPPORT_SCREEN
@@ -1261,7 +1278,7 @@ ErrCode AbilityManagerClient::DelegatorDoAbilityBackground(sptr<IRemoteObject> t
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, DelegatorDoAbilityBackground");
         sceneSessionManager->PendingSessionToBackgroundForDelegator(token);
     }
 #endif //SUPPORT_SCREEN
@@ -1279,11 +1296,14 @@ ErrCode AbilityManagerClient::SetMissionContinueState(sptr<IRemoteObject> token,
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
         uint32_t value = static_cast<uint32_t>(state);
         Rosen::ContinueState continueState = static_cast<Rosen::ContinueState>(value);
-        auto err = sceneSessionManager->SetSessionContinueState(sessionToken, continueState);
-        return static_cast<int>(err);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, SetMissionContinueState");
+        auto ret = static_cast<int>(sceneSessionManager->SetSessionContinueState(sessionToken, continueState));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, SetMissionContinueState err");
+        }
+        return ret;
     }
 #endif //SUPPORT_SCREEN
     auto abms = GetAbilityManager();
@@ -1297,9 +1317,10 @@ ErrCode AbilityManagerClient::SetMissionLabel(sptr<IRemoteObject> token, const s
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, SetMissionLabel");
         auto err = sceneSessionManager->SetSessionLabel(token, label);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, SetMissionLabel err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -1315,9 +1336,10 @@ ErrCode AbilityManagerClient::SetMissionIcon(
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, SetMissionIcon");
         auto err = sceneSessionManager->SetSessionIcon(abilityToken, icon);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, SetMissionIcon err");
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
         return static_cast<int>(err);
@@ -1492,7 +1514,7 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDevi
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "get sceneSessionManager failed");
                 return elementName;
             }
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, GetTopAbility element");
             (void)sceneSessionManager->GetFocusSessionElement(elementName);
             return elementName;
         }
@@ -1547,7 +1569,7 @@ int32_t AbilityManagerClient::IsValidMissionIds(
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         std::vector<bool> isValidList;
         auto err = sceneSessionManager->IsValidSessionIds(missionIds, isValidList);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "IsValidSessionIds %{public}d size %{public}d",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, IsValidSessionIds: %{public}d, size: %{public}d",
             static_cast<int>(err), static_cast<int32_t>(isValidList.size()));
         for (auto i = 0; i < static_cast<int32_t>(isValidList.size()); ++i) {
             MissionValidResult missionResult = {};
@@ -1625,17 +1647,20 @@ void AbilityManagerClient::SetRootSceneSession(sptr<IRemoteObject> rootSceneSess
 
 void AbilityManagerClient::CallUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB target: %{public}s",
+        sessionInfo->want.GetElement().GetURI().c_str());
     abms->CallUIAbilityBySCB(sessionInfo, isColdStart);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB, isColdStart: %{public}d", isColdStart);
 }
 
 void AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, StartSpecifiedAbilityBySCB, target: %{public}s",
+        want.GetElement().GetURI().c_str());
     abms->StartSpecifiedAbilityBySCB(want);
 }
 
@@ -1731,9 +1756,9 @@ ErrCode AbilityManagerClient::QueryAllAutoStartupApplications(std::vector<AutoSt
 ErrCode AbilityManagerClient::PrepareTerminateAbilityBySCB(sptr<SessionInfo> sessionInfo,
     bool &isPrepareTerminate)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call.");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, PrepareTerminateAbilityBySCB");
     return abms->PrepareTerminateAbilityBySCB(sessionInfo, isPrepareTerminate);
 }
 
@@ -1845,9 +1870,9 @@ int32_t AbilityManagerClient::NotifyDebugAssertResult(uint64_t assertFaultSessio
 int32_t AbilityManagerClient::UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, int32_t userId,
     std::vector<int32_t> &sessionIds)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, UpdateSessionInfoBySCB");
     return abms->UpdateSessionInfoBySCB(sessionInfos, userId, sessionIds);
 }
 
@@ -1946,7 +1971,7 @@ ErrCode AbilityManagerClient::CleanUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, CleanUIAbilityBySCB");
     return abms->CleanUIAbilityBySCB(sessionInfo);
 }
 
@@ -1969,15 +1994,14 @@ ErrCode AbilityManagerClient::OpenLink(const Want& want, sptr<IRemoteObject> cal
 
 ErrCode AbilityManagerClient::TerminateMission(int32_t missionId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
 #ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, TerminateMission");
         auto err = sceneSessionManager->TerminateSessionByPersistentId(missionId);
         if (err != OHOS::Rosen::WMError::WM_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed,err:%{public}d", static_cast<int32_t>(err));
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, TerminateMission err: %{public}d.", static_cast<int32_t>(err));
         }
         if (err == Rosen::WMError::WM_ERROR_INVALID_PERMISSION) {
             return CHECK_PERMISSION_FAILED;
