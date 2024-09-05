@@ -15,7 +15,6 @@
 
 #include "ability_record_mgr.h"
 #include "hilog_tag_wrapper.h"
-#include <mutex>
 namespace OHOS {
 namespace AppExecFwk {
 /**
@@ -78,7 +77,6 @@ void AbilityRecordMgr::SetEventRunner(const std::shared_ptr<EventRunner> &eventR
 void AbilityRecordMgr::AddAbilityRecord(
     const sptr<IRemoteObject> &token, const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
         return;
