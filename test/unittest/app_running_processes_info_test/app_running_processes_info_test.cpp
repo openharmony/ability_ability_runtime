@@ -31,6 +31,8 @@
 #include "mock_application.h"
 #include "mock_app_mgr_service_inner.h"
 #include "mock_app_scheduler.h"
+#include "mock_app_scheduler_client.h"
+#include "mock_application_proxy.h"
 #include "mock_app_spawn_client.h"
 #include "mock_bundle_installer_service.h"
 #include "mock_bundle_manager.h"
@@ -103,7 +105,7 @@ protected:
 protected:
     std::shared_ptr<AbilityRunningRecord> testAbilityRecord_;
     sptr<IAppScheduler> client_;
-    sptr<MockAppScheduler> mockAppSchedulerClient_;
+    sptr<MockAppSchedulerClient> mockAppSchedulerClient_;
     std::shared_ptr<AppRunningRecord> testAppRecord_;
     std::unique_ptr<AppMgrServiceInner> service_;
     sptr<MockAbilityToken> mock_token_;
@@ -119,7 +121,8 @@ void AppRunningProcessesInfoTest::TearDownTestCase()
 
 void AppRunningProcessesInfoTest::SetUp()
 {
-    mockAppSchedulerClient_ = new (std::nothrow) MockAppScheduler();
+    sptr<IRemoteObject> impl = nullptr;
+    mockAppSchedulerClient_ = sptr<MockAppSchedulerClient>::MakeSptr(impl);
     service_.reset(new (std::nothrow) AppMgrServiceInner());
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
     service_->SetBundleManagerHelper(bundleMgrClient);
@@ -150,10 +153,7 @@ void AppRunningProcessesInfoTest::MockBundleInstaller()
 
 sptr<IAppScheduler> AppRunningProcessesInfoTest::GetMockedAppSchedulerClient() const
 {
-    if (client_) {
-        return client_;
-    }
-    return nullptr;
+    return mockAppSchedulerClient_;
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningProcessesInfoTest::GetTestAppRunningRecord()
@@ -256,19 +256,19 @@ HWTEST_F(AppRunningProcessesInfoTest, UpdateAppRunningRecord_002, TestSize.Level
     record->SetUid(uid);
     EXPECT_TRUE(record != nullptr) << ",create apprunningrecord fail!";
 
-    sptr<MockApplication> mockApplication(new MockApplication());
-    sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
-    record->SetApplicationClient(client);
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = new MockApplicationProxy(impl);
+    record->SetApplicationClient(mockApplication);
     EXPECT_CALL(*mockApplication, ScheduleLaunchApplication(_, _))
         .Times(1)
-        .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplication::LaunchApplication));
+        .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplicationProxy::LaunchApplication));
     Configuration config;
     record->LaunchApplication(config);
     mockApplication->Wait();
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
