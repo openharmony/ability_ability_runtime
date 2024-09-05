@@ -43,6 +43,7 @@ ohos_shared_library("wantagent_napi") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "ipc:ipc_core",
     "libuv:uv",

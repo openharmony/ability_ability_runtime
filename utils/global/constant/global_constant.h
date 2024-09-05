@@ -19,6 +19,37 @@
 namespace OHOS::AbilityRuntime {
 namespace GlobalConstant {
 constexpr int32_t MAX_APP_CLONE_INDEX = 1000;
+
+constexpr int32_t TIMEOUT_UNIT_TIME = 1000;
+
+#ifdef SUPPORT_ASAN
+constexpr int32_t COLDSTART_TIMEOUT_MULTIPLE = 15000;
+constexpr int32_t LOAD_TIMEOUT_MULTIPLE = 15000;
+constexpr int32_t FOREGROUND_TIMEOUT_MULTIPLE = 7500;
+constexpr int32_t BACKGROUND_TIMEOUT_MULTIPLE = 4500;
+constexpr int32_t ACTIVE_TIMEOUT_MULTIPLE = 7500;
+constexpr int32_t TERMINATE_TIMEOUT_MULTIPLE = 15000;
+constexpr int32_t INACTIVE_TIMEOUT_MULTIPLE = 800;
+constexpr int32_t DUMP_TIMEOUT_MULTIPLE = 1500;
+constexpr int32_t SHAREDATA_TIMEOUT_MULTIPLE = 7500;
+#else
+constexpr int32_t COLDSTART_TIMEOUT_MULTIPLE = 10;
+constexpr int32_t LOAD_TIMEOUT_MULTIPLE = 10;
+constexpr int32_t FOREGROUND_TIMEOUT_MULTIPLE = 5;
+constexpr int32_t BACKGROUND_TIMEOUT_MULTIPLE = 3;
+constexpr int32_t ACTIVE_TIMEOUT_MULTIPLE = 5;
+constexpr int32_t TERMINATE_TIMEOUT_MULTIPLE = 10;
+constexpr int32_t INACTIVE_TIMEOUT_MULTIPLE = 1;
+constexpr int32_t DUMP_TIMEOUT_MULTIPLE = 1000;
+constexpr int32_t SHAREDATA_TIMEOUT_MULTIPLE = 5;
+constexpr int32_t TYPE_RESERVE = 1;
+constexpr int32_t TYPE_OTHERS = 2;
+#endif
+
+constexpr int32_t GetLoadTimeOutBase()
+{
+    return TIMEOUT_UNIT_TIME * LOAD_TIMEOUT_MULTIPLE;
+}
 }  // namespace GlobalConstant
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_GLOBAL_CONSTANT_H

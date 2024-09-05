@@ -94,6 +94,7 @@ ohos_shared_library("ability_context_native") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "skia:skia_canvaskit",
+    "window_manager:libwm",
   ]
   public_external_deps = [
     "ability_base:extractortool",

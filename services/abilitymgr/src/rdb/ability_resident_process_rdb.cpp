@@ -60,7 +60,7 @@ int32_t AmsResidentProcessRdbCallBack::OnCreate(NativeRdb::RdbStore &rdbStore)
         valuesBuckets.emplace_back(valuesBucket);
     }
 
-    int64_t rowId = -1;
+    // int64_t rowId = -1;
     int64_t insertNum = 0;
     int32_t ret = rdbStore.BatchInsert(insertNum, rdbConfig_.tableName, valuesBuckets);
     if (ret != NativeRdb::E_OK) {

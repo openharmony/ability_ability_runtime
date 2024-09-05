@@ -215,45 +215,6 @@ void AmsMgrProxy::RegisterAppStateCallback(const sptr<IAppStateCallback> &callba
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }
 
-void AmsMgrProxy::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-    const int32_t visibility, const int32_t perceptibility, const int32_t connectionState)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!WriteInterfaceToken(data)) {
-        return;
-    }
-
-    if (!data.WriteRemoteObject(token.GetRefPtr())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
-        return;
-    }
-
-    if (preToken) {
-        if (!data.WriteBool(true) || !data.WriteRemoteObject(preToken.GetRefPtr())) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag and preToken");
-            return;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag");
-            return;
-        }
-    }
-
-    data.WriteInt32(static_cast<int32_t>(visibility));
-    data.WriteInt32(static_cast<int32_t>(perceptibility));
-    data.WriteInt32(static_cast<int32_t>(connectionState));
-    int32_t ret =
-        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::ABILITY_BEHAVIOR_ANALYSIS), data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "end");
-}
-
 void AmsMgrProxy::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");

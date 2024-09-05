@@ -240,38 +240,38 @@ HWTEST_F(AbilityManagerServiceFourthTest, GetConfiguration_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: ReportAbilitStartInfoToRSS
- * FunctionPoints: AbilityManagerService ReportAbilitStartInfoToRSS
+ * Function: ReportAbilityStartInfoToRSS
+ * FunctionPoints: AbilityManagerService ReportAbilityStartInfoToRSS
  */
-HWTEST_F(AbilityManagerServiceFourthTest, ReportAbilitStartInfoToRSS_001, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceFourthTest, ReportAbilityStartInfoToRSS_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportAbilitStartInfoToRSS start");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportAbilityStartInfoToRSS start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
-    abilityMs->ReportAbilitStartInfoToRSS(abilityInfo);
+    abilityMs->ReportAbilityStartInfoToRSS(abilityInfo);
     EXPECT_EQ(abilityInfo.type, AppExecFwk::AbilityType::PAGE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportAbilitStartInfoToRSS end");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportAbilityStartInfoToRSS end");
 }
 
 /*
  * Feature: AbilityManagerService
- * Function: ReportAbilitAssociatedStartInfoToRSS
- * FunctionPoints: AbilityManagerService ReportAbilitAssociatedStartInfoToRSS
+ * Function: ReportAbilityAssociatedStartInfoToRSS
+ * FunctionPoints: AbilityManagerService ReportAbilityAssociatedStartInfoToRSS
  */
-HWTEST_F(AbilityManagerServiceFourthTest, ReportAbilitAssociatedStartInfoToRSS_001, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceFourthTest, ReportAbilityAssociatedStartInfoToRSS_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportAbilitAssociatedStartInfoToRSS start");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportAbilityAssociatedStartInfoToRSS start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
     sptr<IRemoteObject> callerToken = nullptr;
     int64_t type = 0;
-    abilityMs->ReportAbilitAssociatedStartInfoToRSS(abilityInfo, type, callerToken);
+    abilityMs->ReportAbilityAssociatedStartInfoToRSS(abilityInfo, type, callerToken);
     callerToken = MockToken(AbilityType::PAGE);
-    abilityMs->ReportAbilitAssociatedStartInfoToRSS(abilityInfo, type, callerToken);
+    abilityMs->ReportAbilityAssociatedStartInfoToRSS(abilityInfo, type, callerToken);
     EXPECT_EQ(abilityInfo.type, AppExecFwk::AbilityType::PAGE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportAbilitAssociatedStartInfoToRSS end");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportAbilityAssociatedStartInfoToRSS end");
 }
 
 /*

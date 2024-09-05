@@ -41,7 +41,7 @@ static const std::string CONTEXT_HAPS{ "/haps" };
 static const size_t MARK_TEMP_LEN = 12;
 static const int PATH_MAX_SIZE = 256;
 
-const mode_t MODE = 0777;
+// const mode_t MODE = 0777;
 static const int RESULT_OK = 0;
 static const int RESULT_ERR = -1;
 } // namespace

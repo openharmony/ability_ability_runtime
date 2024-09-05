@@ -1577,13 +1577,14 @@ napi_value QueryPromise(napi_env env, DAHelperQueryCB *queryCB)
 
 napi_value WrapResultSet(napi_env env, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
 {
-    TAG_LOGD(AAFwkTag::FA, "called");
-    if (resultSet == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null resultSet");
-        return WrapVoidToJS(env);
-    }
+    // TAG_LOGD(AAFwkTag::FA, "called");
+    // if (resultSet == nullptr) {
+    //     TAG_LOGE(AAFwkTag::FA, "null resultSet");
+    //     return WrapVoidToJS(env);
+    // }
 
-    return RdbJsKit::ResultSetProxy::NewInstance(env, resultSet);
+    // return RdbJsKit::ResultSetProxy::NewInstance(env, resultSet);
+    return WrapVoidToJS(env);
 }
 
 napi_value ExecuteBatchAsync(

@@ -42,6 +42,7 @@ template("errormanager") {
 
     external_deps = [
       "c_utils:utils",
+      "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "hilog:libhilog",
       "napi:ace_napi",

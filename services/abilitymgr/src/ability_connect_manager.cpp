@@ -36,11 +36,11 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-constexpr char EVENT_KEY_UID[] = "UID";
-constexpr char EVENT_KEY_PID[] = "PID";
-constexpr char EVENT_KEY_MESSAGE[] = "MSG";
-constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
-constexpr char EVENT_KEY_PROCESS_NAME[] = "PROCESS_NAME";
+// constexpr char EVENT_KEY_UID[] = "UID";
+// constexpr char EVENT_KEY_PID[] = "PID";
+// constexpr char EVENT_KEY_MESSAGE[] = "MSG";
+// constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
+// constexpr char EVENT_KEY_PROCESS_NAME[] = "PROCESS_NAME";
 const std::string DEBUG_APP = "debugApp";
 const std::string FRS_APP_INDEX = "ohos.extra.param.key.frs_index";
 const std::string FRS_BUNDLE_NAME = "com.ohos.formrenderservice";
@@ -272,13 +272,6 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         EnqueueStartServiceReq(abilityRequest);
         return ERR_OK;
     }
-
-    sptr<Token> token = targetService->GetToken();
-    sptr<Token> preToken = nullptr;
-    if (targetService->GetPreAbilityRecord()) {
-        preToken = targetService->GetPreAbilityRecord()->GetToken();
-    }
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(token, preToken, 0, 1, 1);
     return ERR_OK;
 }
 
@@ -665,10 +658,6 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
         TAG_LOGD(AAFwkTag::ABILITYMGR, "TargetService active");
         targetService->SaveConnectWant(abilityRequest.want);
     }
-
-    auto token = targetService->GetToken();
-    auto preToken = iface_cast<Token>(connectRecord->GetToken());
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(token, preToken, 0, 1, 1);
     return ret;
 }
 
@@ -1601,7 +1590,9 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         if (!isAttached) {
             MoveToTerminatingMap(abilityRecord);
             RemoveServiceAbility(abilityRecord);
-            RestartAbility(abilityRecord, userId_);
+            if (DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId() == userId_) {
+                RestartAbility(abilityRecord, userId_);
+            }
         }
         return;
     }
@@ -3254,7 +3245,7 @@ int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::Abili
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "bundleName is extension, abilityName:%{public}s",
         abilityInfo.name.c_str());
-    auto ret = ReportAbilitStartInfoToRSS(abilityInfo);
+    auto ret = ReportAbilityStartInfoToRSS(abilityInfo);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, ret:%{public}d", ret);
         return ret;
@@ -3262,7 +3253,7 @@ int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::Abili
     return ERR_OK;
 }
 
-int32_t AbilityConnectManager::ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
+int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::vector<AppExecFwk::RunningProcessInfo> runningProcessInfos;
@@ -3280,8 +3271,8 @@ int32_t AbilityConnectManager::ReportAbilitStartInfoToRSS(const AppExecFwk::Abil
             break;
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilitStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
-    ResSchedUtil::GetInstance().ReportAbilitStartInfoToRSS(abilityInfo, pid, isColdStart);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
+    ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
     return ERR_OK;
 }
 }  // namespace AAFwk

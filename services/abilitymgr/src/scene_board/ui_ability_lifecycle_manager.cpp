@@ -49,7 +49,7 @@ constexpr int KILL_TIMEOUT_MULTIPLE = 45;
 #else
 constexpr int KILL_TIMEOUT_MULTIPLE = 3;
 #endif
-constexpr int32_t DEFAULT_USER_ID = 0;
+// constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t MAX_FIND_UIEXTENSION_CALLER_TIMES = 10;
 
 FreezeUtil::TimeoutState MsgId2State(uint32_t msgId)
@@ -1980,7 +1980,7 @@ void UIAbilityLifecycleManager::SetRevicerInfo(const AbilityRequest &abilityRequ
     auto isStandard = abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD && !abilityRequest.startRecent;
     if (isStandard && abilityRequest.sessionInfo != nullptr) {
         // Support standard launch type.
-        auto persistentId = abilityRequest.sessionInfo->persistentId;
+        // auto persistentId = abilityRequest.sessionInfo->persistentId;
         abilityName += std::to_string(abilityRequest.sessionInfo->persistentId);
     }
 

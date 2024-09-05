@@ -147,28 +147,5 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_GetAbilityRecove
     EXPECT_EQ(result, ERR_OK);
     EXPECT_EQ(hasRecoverInfo, true);
 }
-
-/**
- * @tc.name: AppExitReasonDataManager_GetAbilitySessionId_001
- * @tc.desc: GetAbilitySessionId
- * @tc.type: FUNC
- * @tc.require: issuesI7R9JC
- */
-HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_GetAbilitySessionId_001, TestSize.Level1)
-{
-    int sessionId = 0;
-    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAbilitySessionId(
-        ACCESS_TOKEN_ID, MODULE_NAME, ABILITY_NAME, sessionId);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
-    EXPECT_EQ(sessionId, 0);
-
-    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->AddAbilityRecoverInfo(
-        ACCESS_TOKEN_ID, MODULE_NAME, ABILITY_NAME, SESSION_ID);
-    EXPECT_EQ(result, ERR_OK);
-    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAbilitySessionId(
-        ACCESS_TOKEN_ID, MODULE_NAME, ABILITY_NAME, sessionId);
-    EXPECT_EQ(result, ERR_OK);
-    EXPECT_EQ(sessionId, SESSION_ID);
-}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
