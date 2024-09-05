@@ -776,27 +776,6 @@ HWTEST_F(JsRuntimeTest, JsRuntimeInitialize_0200, TestSize.Level0)
 }
 
 /**
- * @tc.name: RegisterQuickFixQueryFunc_0100
- * @tc.desc: JsRuntime test for RegisterQuickFixQueryFunc.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, RegisterQuickFixQueryFunc_0100, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "RegisterQuickFixQueryFunc start");
-
-    auto jsRuntime = std::make_unique<JsRuntime>();
-    EXPECT_TRUE(jsRuntime != nullptr);
-    std::string moudel = "<moudelName>";
-    std::string hqfFile = "<hqfFile>";
-    std::map<std::string, std::string> moduleAndPath;
-    moduleAndPath.insert(std::make_pair(moudel, hqfFile));
-    jsRuntime->RegisterQuickFixQueryFunc(moduleAndPath);
-    jsRuntime.reset();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    TAG_LOGI(AAFwkTag::TEST, "RegisterQuickFixQueryFunc end");
-}
-
-/**
  * @tc.name: RegisterUncaughtExceptionHandler_0100
  * @tc.desc: JsRuntime test for RegisterUncaughtExceptionHandler.
  * @tc.type: FUNC
