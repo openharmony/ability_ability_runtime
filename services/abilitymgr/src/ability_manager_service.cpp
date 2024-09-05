@@ -9263,13 +9263,18 @@ bool AbilityManagerService::CheckUIExtensionCallerIsForeground(const AbilityRequ
 bool AbilityManagerService::CheckUIExtensionCallerIsUIAbility(const AbilityRequest &abilityRequest)
 {
     auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "caller ability invalid");
+        return false;
+    }
+
     if (callerAbility->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE) {
         return true;
     }
 
     if (UIExtensionUtils::IsUIExtension(callerAbility->GetAbilityInfo().extensionAbilityType)) {
-        auto callerability = GetUIExtensionRootCaller(abilityRequest.callerToken, abilityRequest.userId);
-        if (callerAbility->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE) {
+        callerAbility = GetUIExtensionRootCaller(abilityRequest.callerToken, abilityRequest.userId);
+        if (callerAbility != nullptr && callerAbility->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE) {
             return true;
         }
     }
