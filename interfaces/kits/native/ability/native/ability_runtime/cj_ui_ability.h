@@ -179,6 +179,12 @@ public:
      * @brief Called after ability stoped.
      * You can override this function to implement your own processing logic.
      */
+    void OnSceneWillDestroy() override;
+
+    /**
+     * @brief Called after ability stoped.
+     * You can override this function to implement your own processing logic.
+     */
     void OnSceneDestroyed() ;
 
     /**
@@ -279,6 +285,8 @@ private:
     void InitSceneDoOnForeground(std::shared_ptr<Rosen::WindowScene> scene, const Want &want);
     void AddLifecycleEventBeforeCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
     void AddLifecycleEventAfterCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
+    bool CheckSatisfyTargetAPIVersion(int32_t targetAPIVersion);
+    bool BackPressDefaultValue();
 
     CJRuntime &cjRuntime_;
     std::shared_ptr<CJAbilityObject> cjAbilityObj_;
