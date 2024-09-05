@@ -673,20 +673,13 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
-
-        auto autoStartupCallback = [weak, abilityStage, abilityRecord, moduleName, callback]() {
-            auto ohosApplication = weak.lock();
-            if (ohosApplication == nullptr) {
-                TAG_LOGE(AAFwkTag::APPKIT, "ohosApplication is nullptr");
-                return;
+        auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
+        if (autoStartupCallback != nullptr) {
+            abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
+            if (isAsyncCallback) {
+                TAG_LOGI(AAFwkTag::APPKIT, "waiting for startup");
+                return nullptr;
             }
-            ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
-            callback(abilityStage->GetContext());
-        };
-        abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
-        if (isAsyncCallback) {
-            TAG_LOGI(AAFwkTag::APPKIT, "waiting for startup");
-            return nullptr;
         }
 
         Want want;
@@ -706,6 +699,36 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     }
     abilityStage->AddAbility(token, abilityRecord);
     return abilityStage->GetContext();
+}
+
+const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
+    const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+    const std::shared_ptr<AbilityLocalRecord> abilityRecord,
+    const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback)
+{
+    const std::shared_ptr<AbilityInfo> &abilityInfo = abilityRecord->GetAbilityInfo();
+    if (!IsBackupExtension(abilityInfo)) {
+        return nullptr;
+    }
+    std::string moduleName = abilityInfo->moduleName;
+    auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
+    std::weak_ptr<OHOSApplication> weak = application;
+
+    auto autoStartupCallback = [weak, abilityStage, abilityRecord, moduleName, callback]() {
+        auto ohosApplication = weak.lock();
+        if (ohosApplication == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null ohosApplication");
+            return;
+        }
+        ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
+        if (callback == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null callback");
+            return;
+        }
+        callback(abilityStage->GetContext());
+    };
+
+    return autoStartupCallback;
 }
 
 void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
@@ -1043,6 +1066,19 @@ bool OHOSApplication::isUpdateLanguage(Configuration &config, const std::string 
     AbilityRuntime::SetLevel currentSetLevel = !globalLanguageIsSetByApp.empty() ?
         AbilityRuntime::SetLevel::Application : AbilityRuntime::SetLevel::System;
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(currentSetLevel);
+    return true;
+}
+
+bool OHOSApplication::IsBackupExtension(const std::shared_ptr<AbilityInfo> &abilityInfo)
+{
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
+        return false;
+    }
+    if (abilityInfo->extensionAbilityType == ExtensionAbilityType::BACKUP) {
+        TAG_LOGD(AAFwkTag::APPKIT, "Is backup extension");
+        return false;
+    }
     return true;
 }
 }  // namespace AppExecFwk
