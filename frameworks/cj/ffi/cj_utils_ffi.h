@@ -18,6 +18,25 @@
 
 #include <string>
 
+namespace OHOS {
+namespace AbilityRuntime {
+
+struct CConfiguration {
+    char* language;
+    int32_t colorMode;
+    int32_t direction;
+    int32_t screenDensity;
+    int32_t displayId;
+    bool hasPointerDevice;
+    double fontSizeScale;
+    double fontWeightScale;
+    char* mcc;
+    char* mnc;
+};
+
+}
+}
+
 // The return variable needs free in CJ.
 char* CreateCStringFromString(const std::string& source);
 
