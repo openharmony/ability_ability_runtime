@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "abilitychildprocessinfo_fuzzer.h"
+#include "abilityappjsheapmeminfo_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
 
 #define private public
 #define protected public
-#include "child_process_info.h"
+#include "app_jsheap_mem_info.h"
 #undef protected
 #undef private
 #include "parcel.h"
@@ -52,14 +52,9 @@ uint32_t GetU32Data(const char* ptr)
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    std::shared_ptr<ChildProcessInfo>childProcessInfo = std::make_shared<ChildProcessInfo>();
-    if (childProcessInfo == nullptr) {
-        return false;
-    }
+    JsHeapDumpInfo js;
     Parcel parcel;
-    childProcessInfo->ReadFromParcel(parcel);
-    childProcessInfo->Marshalling(parcel);
-    ChildProcessInfo::Unmarshalling(parcel);
+    js.Marshalling(parcel);
     return true;
 }
 }
