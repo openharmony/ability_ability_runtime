@@ -28,10 +28,7 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
         return true;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckSAPermission, extensionType: %{public}d.", extensionType);
-    if (extensionType == AppExecFwk::ExtensionAbilityType::FORM) {
-        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
-            "ohos.permission.CONNECT_FORM_EXTENSION");
-    } else if (extensionType == AppExecFwk::ExtensionAbilityType::WORK_SCHEDULER) {
+    if (extensionType == AppExecFwk::ExtensionAbilityType::WORK_SCHEDULER) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_WORK_SCHEDULER_EXTENSION");
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::INPUTMETHOD) {
@@ -40,9 +37,6 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::ACCESSIBILITY) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_ACCESSIBILITY_EXTENSION");
-    } else if (extensionType == AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER) {
-        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
-            "ohos.permission.CONNECT_STATIC_SUBSCRIBER_EXTENSION");
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::WALLPAPER) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_WALLPAPER_EXTENSION");
