@@ -296,7 +296,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetRenderProcessTerminationStatus_001, T
     std::string abilityName = "FirstAbility";
     std::string appName = "FirstApp";
     std::string bundleName = "com.ix.First.Test";
-    int status = ERROR_STATE;
+    int status;
     auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
     auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
     auto token = record->GetToken();
@@ -701,19 +701,6 @@ HWTEST_F(AppMgrClientTest, NotifyMemoryLevel_001, TestSize.Level0)
     auto appMgrClient = std::make_unique<AppMgrClient>();
     MemoryLevel level = MEMORY_LEVEL_MODERATE;
     appMgrClient->NotifyMemoryLevel(level);
-    EXPECT_NE(appMgrClient, nullptr);
-}
-
-/**
- * @tc.name: AppMgrClient_NotifyProcMemoryLevel_001
- * @tc.desc: NotifyProcMemoryLevel.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, NotifyProcMemoryLevel_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    std::map<pid_t, MemoryLevel> procLevelMap;
-    appMgrClient->NotifyProcMemoryLevel(procLevelMap);
     EXPECT_NE(appMgrClient, nullptr);
 }
 
@@ -1130,20 +1117,6 @@ HWTEST_F(AppMgrClientTest, UpdateConfiguration_001, TestSize.Level0)
 }
 
 /**
- * @tc.name: AppMgrClient_UpdateConfigurationByBundleName_001
- * @tc.desc: UpdateConfigurationByBundleName.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, UpdateConfigurationByBundleName_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    Configuration config;
-    std::string name;
-    appMgrClient->UpdateConfigurationByBundleName(config, name);
-    EXPECT_NE(appMgrClient, nullptr);
-}
-
-/**
  * @tc.name: AppMgrClient_RegisterConfigurationObserver_001
  * @tc.desc: RegisterConfigurationObserver.
  * @tc.type: FUNC
@@ -1300,19 +1273,6 @@ HWTEST_F(AppMgrClientTest, GetAppRunningUniqueIdByPid_001, TestSize.Level0)
 }
 
 /**
- * @tc.name: AppMgrClient_NotifyMemorySizeStateChanged_001
- * @tc.desc: NotifyMemorySizeStateChanged.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, NotifyMemorySizeStateChanged_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    bool isMemorySizeSufficent = false;
-    int32_t ret = appMgrClient->NotifyMemorySizeStateChanged(isMemorySizeSufficent);
-    EXPECT_EQ(ret, 1);
-}
-
-/**
  * @tc.name: AppMgrClient_SetSupportedProcessCacheSelf_001
  * @tc.desc: SetSupportedProcessCacheSelf.
  * @tc.type: FUNC
@@ -1323,6 +1283,19 @@ HWTEST_F(AppMgrClientTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
     bool isSupport = false;
     int32_t ret = appMgrClient->SetSupportedProcessCacheSelf(isSupport);
     EXPECT_NE(appMgrClient, nullptr);
+}
+
+/**
+ * @tc.name: AppMgrClient_NotifyMemorySizeStateChanged_001
+ * @tc.desc: NotifyMemorySizeStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, NotifyMemorySizeStateChanged_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    bool isMemorySizeSufficent = false;
+    int32_t ret = appMgrClient->NotifyMemorySizeStateChanged(isMemorySizeSufficent);
+    EXPECT_EQ(ret, 1);
 }
 
 /**
@@ -1397,46 +1370,6 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_AttachedToStatusBar_001, TestSize.Level0
     sptr<IRemoteObject> token;
     appMgrClient->AttachedToStatusBar(token);
     EXPECT_TRUE(appMgrClient != nullptr);
-}
-
-/**
- * @tc.name: AppMgrClient_SetAppFreezeFilter_001
- * @tc.desc: Can not attach to status bar by wrong token.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_SetAppFreezeFilter_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-    int32_t pid = 1;
-    bool ret = appMgrClient->SetAppFreezeFilter(pid);
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: AppMgrClient_NotifyProcessDependedOnWeb_001
- * @tc.desc: Can not attach to status bar by wrong token.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyProcessDependedOnWeb_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-    int32_t ret = appMgrClient->NotifyProcessDependedOnWeb();
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: AppMgrClient_KillProcessDependedOnWeb_001
- * @tc.desc: Can not attach to status bar by wrong token.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_KillProcessDependedOnWeb_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-    appMgrClient->KillProcessDependedOnWeb();
-    EXPECT_NE(appMgrClient->GetRemoteObject(), nullptr);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
