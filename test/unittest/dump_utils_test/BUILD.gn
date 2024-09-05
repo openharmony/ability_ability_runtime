@@ -14,8 +14,6 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-import("//test/xts/tools/build/suite.gni")
-
 module_output_path = "ability_runtime/abilitymgr"
 
 ohos_unittest("dump_utils_test") {
