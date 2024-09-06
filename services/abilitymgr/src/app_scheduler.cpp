@@ -492,6 +492,12 @@ void AppScheduler::SetCurrentUserId(const int32_t userId)
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetCurrentUserId(userId));
 }
 
+void AppScheduler::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    CHECK_POINTER(appMgrClient_);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetEnableStartProcessFlagByUserId(userId, enableStartProcess));
+}
+
 int32_t AppScheduler::NotifyFault(const AppExecFwk::FaultData &faultData)
 {
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);

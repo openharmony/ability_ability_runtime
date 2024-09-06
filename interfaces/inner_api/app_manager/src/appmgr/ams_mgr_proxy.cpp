@@ -779,6 +779,31 @@ void AmsMgrProxy::SetCurrentUserId(const int32_t userId)
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }
 
+void AmsMgrProxy::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write userId");
+        return;
+    }
+    if (!data.WriteBool(enableStartProcess)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write enableStartProcess");
+        return;
+    }
+    int32_t ret =
+        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::ENABLE_START_PROCESS_FLAG_BY_USER_ID),
+            data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+    }
+}
+
 int32_t AmsMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
 {
     MessageParcel data;
