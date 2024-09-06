@@ -95,7 +95,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
         if (sessionInfo->isNewWant) {
             uiAbilityRecord->SetWant(abilityRequest.want);
-            uiAbilityRecord->GetSessionInfo()->want.CloseAllFd();
+            uiAbilityRecord->GetSessionInfo()->want.RemoveAllFd();
         } else {
             sessionInfo->want.CloseAllFd();
         }
@@ -362,7 +362,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
     TAG_LOGI(
         AAFwkTag::ABILITYMGR, "Reused sessionId: %{public}d, userId: %{public}d.", sessionInfo->persistentId, userId_);
     int ret = NotifySCBPendingActivation(sessionInfo, abilityRequest);
-    sessionInfo->want.CloseAllFd();
+    sessionInfo->want.RemoveAllFd();
     return ret;
 }
 
