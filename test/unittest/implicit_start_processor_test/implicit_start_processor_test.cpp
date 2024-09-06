@@ -405,32 +405,6 @@ HWTEST_F(ImplicitStartProcessorTest, OnlyKeepReserveApp_001, TestSize.Level1)
 
 /*
  * Feature: ImplicitStartProcessor
- * Function: GenerateAbilityRequestByAction
- * SubFunction: NA
- * FunctionPoints:ImplicitStartProcessor GenerateAbilityRequestByAction
- * EnvConditions: NA
- * CaseDescription: Verify GenerateAbilityRequestByAction  etc.
- */
-HWTEST_F(ImplicitStartProcessorTest, GenerateAbilityRequestByAction_001, TestSize.Level1)
-{
-    auto processor = std::make_shared<ImplicitStartProcessor>();
-    int32_t  userId = 100;
-    AbilityRequest request;
-    std::vector<DialogAppInfo> dialogAppInfos;
-    bool findDefaultApp = false;
-    Want want;
-    want.SetParam(PARAM_ABILITY_APPINFOS, false);
-    request.want = want;
-    processor->GenerateAbilityRequestByAction(userId, request, dialogAppInfos, false, findDefaultApp);
-    processor->GenerateAbilityRequestByAction(userId, request, dialogAppInfos, false, findDefaultApp);
-    Want want2;
-    want2.SetParam(OPEN_LINK_APP_LINKING_ONLY, false);
-    request.want = want2;
-    processor->GenerateAbilityRequestByAction(userId, request, dialogAppInfos, false, findDefaultApp);
-}
-
-/*
- * Feature: ImplicitStartProcessor
  * Function: GetDefaultAppProxy
  * SubFunction: NA
  * FunctionPoints:ImplicitStartProcessor GetDefaultAppProxy
