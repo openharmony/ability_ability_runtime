@@ -1559,8 +1559,7 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
     CHECK_POINTER(abilityRecord);
     abilityRecord->SetLoadState(AbilityLoadState::FAILED);
     if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "consume session timeout, abilityUri: %{public}s",
-            abilityRecord->GetURI().c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "consume session timeout, Uri: %{public}s", abilityRecord->GetURI().c_str());
         if (uiExtensionAbilityRecordMgr_ != nullptr && IsCallerValid(abilityRecord)) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "start load timeout");
             uiExtensionAbilityRecordMgr_->LoadTimeout(abilityRecord->GetUIExtensionAbilityId());
@@ -1581,8 +1580,7 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         TAG_LOGE(AAFwkTag::ABILITYMGR, "timeout ability record not exist");
         return;
     }
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "load timeout:%{public}s,user:%{public}d",
-        abilityRecord->GetURI().c_str(), userId_);
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "AbilityUri:%{public}s,user:%{public}d", abilityRecord->GetURI().c_str(), userId_);
     if (abilityRecord->IsSceneBoard()) {
         auto isAttached = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(
             abilityRecord->GetToken()));
@@ -1594,6 +1592,7 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
                 RestartAbility(abilityRecord, userId_);
             }
         }
+        PrintTimeOutLog(abilityRecord, AbilityManagerService::LOAD_TIMEOUT_MSG);
         return;
     }
     MoveToTerminatingMap(abilityRecord);
