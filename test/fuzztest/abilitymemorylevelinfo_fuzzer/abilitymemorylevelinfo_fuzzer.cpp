@@ -52,7 +52,7 @@ uint32_t GetU32Data(const char* ptr)
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    std::shared_ptr<MemoryLevelInfo> memLevelInfo = std::make_shared<MemoryLevelInfo>();
+    std::shared_ptr<MemoryLevelInfo>memLevelInfo = std::make_shared<MemoryLevelInfo>();
     if (memLevelInfo == nullptr) {
         return false;
     }
