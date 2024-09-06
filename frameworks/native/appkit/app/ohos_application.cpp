@@ -439,12 +439,8 @@ void OHOSApplication::UnregisterElementsCallbacks(const std::shared_ptr<Elements
 void OHOSApplication::OnConfigurationUpdated(Configuration config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (!abilityRecordMgr_ || !configuration_) {
-        TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ is null");
-        return;
-    }
-    if (abilityRuntimeContext_ == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "abilityRuntimeContext_ is null");
+    if (!abilityRecordMgr_ || !configuration_ || !abilityRuntimeContext_) {
+        TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ or abilityRuntimeContext_ is null");
         return;
     }
     std::string language = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
