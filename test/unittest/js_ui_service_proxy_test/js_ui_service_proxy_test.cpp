@@ -26,7 +26,7 @@
 #undef private
 #undef protected
 
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "mock_ability_token.h"
 #include "ability_handler.h"
 #include "ohos_application.h"
@@ -177,7 +177,7 @@ HWTEST_F(JsUIServiceProxyTest, CreateJsUIServiceProxy_0200, TestSize.Level1)
     auto infos = std::make_shared<AAFwk::JsUIServiceProxy>(impl, hostProxy);
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     int64_t connectionId = 1;

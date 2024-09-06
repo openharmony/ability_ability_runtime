@@ -21,7 +21,7 @@
 #include "ui_service_extension_module_loader.h"
 #include "js_ui_service_extension_context.cpp"
 
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "mock_ability_token.h"
 #include "ability_handler.h"
 #include "ohos_application.h"
