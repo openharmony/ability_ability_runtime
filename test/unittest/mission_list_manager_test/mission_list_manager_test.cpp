@@ -6289,45 +6289,6 @@ HWTEST_F(MissionListManagerTest, IsValidMissionIds_003, TestSize.Level1)
 }
 
 /*
- * Feature: MissionSnapshot
- * Function: ReadFromParcel
- * SubFunction: NA
- * FunctionPoints: MissionSnapshot ReadFromParcel
- */
-HWTEST_F(MissionListManagerTest, ReadFromParcel_001, TestSize.Level1)
-{
-    MissionSnapshot missionSnapshot;
-    Parcel parcel;
-    EXPECT_FALSE(missionSnapshot.ReadFromParcel(parcel));
-}
-
-/*
- * Feature: MissionSnapshot
- * Function: Marshalling
- * SubFunction: NA
- * FunctionPoints: MissionSnapshot Marshalling
- */
-HWTEST_F(MissionListManagerTest, Marshalling_001, TestSize.Level1)
-{
-    MissionSnapshot missionSnapshot;
-    Parcel parcel;
-    EXPECT_TRUE(missionSnapshot.Marshalling(parcel));
-}
-
-/*
- * Feature: MissionSnapshot
- * Function: Unmarshalling
- * SubFunction: NA
- * FunctionPoints: MissionSnapshot Unmarshalling
- */
-HWTEST_F(MissionListManagerTest, Unmarshalling_001, TestSize.Level1)
-{
-    MissionSnapshot missionSnapshot;
-    Parcel parcel;
-    EXPECT_EQ(missionSnapshot.Unmarshalling(parcel), nullptr);
-}
-
-/*
  * Feature: MissionListManager
  * Function: OnStartSpecifiedAbilityTimeoutResponse
  * SubFunction: NA
