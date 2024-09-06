@@ -1678,7 +1678,8 @@ void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
 
 bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
-    if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+    if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
+        abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         std::lock_guard guard(wantLock_);
         auto callerTokenId = want_.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
         auto callerName = want_.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
