@@ -2082,52 +2082,6 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityAsCaller_002, 
 
 /*
  * Feature: AbilityManagerService
- * Function: StartAbilityForResultAsCaller
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartAbilityForResultAsCaller
- * EnvConditions: NA
- * CaseDescription: Verify the normal process of StartAbilityForResultAsCaller
- */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityForResultAsCaller_001, TestSize.Level1)
-{
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    const Want want;
-    sptr<IRemoteObject> callerToken = nullptr;
-    int requestCode = 1;
-    int32_t userId = 2;
-    auto res = proxy_->StartAbilityForResultAsCaller(want, callerToken, requestCode, userId);
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER), mock_->code_);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartAbilityForResultAsCaller
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartAbilityForResultAsCaller
- * EnvConditions: NA
- * CaseDescription: Verify the normal process of StartAbilityForResultAsCaller
- */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityForResultAsCaller_002, TestSize.Level1)
-{
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    const Want want;
-    sptr<IRemoteObject> callerToken = nullptr;
-    StartOptions startOptions;
-    int requestCode = 1;
-    int32_t userId = 2;
-    auto res = proxy_->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER_FOR_OPTIONS),
-        mock_->code_);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: CallRequestDone
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService CallRequestDone

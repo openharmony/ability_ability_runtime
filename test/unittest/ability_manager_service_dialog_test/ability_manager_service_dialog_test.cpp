@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 
 #define private public
+#include "implicit_start_processor.h"
 #include "ability_info.h"
 #include "ability_record.h"
-#include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #undef private
 #include "ability_manager_errors.h"
