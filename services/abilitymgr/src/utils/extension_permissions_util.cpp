@@ -85,6 +85,12 @@ bool ExtensionPermissionsUtil::CheckSAPermissionMore(const AppExecFwk::Extension
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::DRIVER) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_DRIVER_EXTENSION");
+    } else if (extensionType == AppExecFwk::ExtensionAbilityType::PUSH) {
+        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
+            "ohos.permission.CONNECT_PUSH_EXTENSION");
+    } else if (extensionType == AppExecFwk::ExtensionAbilityType::VOIP) {
+        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
+            "ohos.permission.CONNECT_VOIP_EXTENSION");
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "No need connect permission for extension type %{public}d.", extensionType);
         return true;
