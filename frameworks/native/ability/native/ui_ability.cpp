@@ -332,8 +332,6 @@ void UIAbility::InitConfigurationProperties(const AppExecFwk::Configuration &cha
 {
     resourceConfig.SetMcc(changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     resourceConfig.SetMnc(changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
-    resourceConfig.SetColorModeIsSetByApp(
-        changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP));
     if (setting_) {
         auto displayId =
             std::atoi(setting_->GetProperty(AppExecFwk::AbilityStartSetting::WINDOW_DISPLAY_ID_KEY).c_str());

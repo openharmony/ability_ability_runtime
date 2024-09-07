@@ -12,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <string>
+#include <vector>
 #include "application_configuration_manager.h"
-#include <cstdint>
+#include "configuration_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -42,6 +45,30 @@ void ApplicationConfigurationManager::SetLanguageSetLevel(SetLevel languageSetLe
 SetLevel ApplicationConfigurationManager::GetLanguageSetLevel() const
 {
     return languageSetLevel_;
+}
+
+std::string ApplicationConfigurationManager::SetColorModeSetLevel(SetLevel colorModeSetLevel, const std::string &value)
+{
+    colorModeVal_[static_cast<uint8_t>(colorModeSetLevel)] = value;
+    for (int i = static_cast<uint8_t>(SetLevel::SetLevelCount) - 1; i >= 0; i--) {
+        if (!colorModeVal_[i].empty() &&
+            colorModeVal_[i].compare(AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO) != 0) {
+            colorModeSetLevel_ = static_cast<SetLevel>(i);
+            break;
+        }
+    }
+
+    return colorModeVal_[static_cast<uint8_t>(colorModeSetLevel_)];
+}
+
+SetLevel ApplicationConfigurationManager::GetColorModeSetLevel() const
+{
+    return colorModeSetLevel_;
+}
+
+bool ApplicationConfigurationManager::ColorModeHasSetByApplication() const
+{
+    return !colorModeVal_[static_cast<uint8_t>(SetLevel::Application)].empty();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
