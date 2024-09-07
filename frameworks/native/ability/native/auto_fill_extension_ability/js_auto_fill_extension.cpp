@@ -209,7 +209,7 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
         nullptr, nullptr);
 }
 
-void JsAutoFillExtension::OnStart(const AAFwk::Want &want)
+void JsAutoFillExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     Extension::OnStart(want);
