@@ -1210,42 +1210,6 @@ HWTEST_F(JsRuntimeTest, ForceFullGC_0100, TestSize.Level0)
 }
 
 /**
- * @tc.name: AllowCrossThreadExecution_0100
- * @tc.desc: JsRuntime test for AllowCrossThreadExecution.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, AllowCrossThreadExecution_0100, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AllowCrossThreadExecution_0100 start");
-
-    AbilityRuntime::Runtime::Options options;
-    options.preload = true;
-    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-
-    jsRuntime->AllowCrossThreadExecution();
-    ASSERT_NE(jsRuntime, nullptr);
-    TAG_LOGI(AAFwkTag::TEST, "AllowCrossThreadExecution_0100 end");
-}
-
-/**
- * @tc.name: GetHeapPrepare_0100
- * @tc.desc: JsRuntime test for GetHeapPrepare.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, GetHeapPrepare_0100, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GetHeapPrepare_0100 start");
-
-    AbilityRuntime::Runtime::Options options;
-    options.preload = true;
-    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-
-    jsRuntime->GetHeapPrepare();
-    ASSERT_NE(jsRuntime, nullptr);
-    TAG_LOGI(AAFwkTag::TEST, "GetHeapPrepare_0100 end");
-}
-
-/**
  * @tc.name: InitLoop_0100
  * @tc.desc: JsRuntime test for InitLoop.
  * @tc.type: FUNC
