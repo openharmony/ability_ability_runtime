@@ -36,10 +36,6 @@ int64_t FFIAbilityGetAbilityContext(AbilityHandle abilityHandle)
         return ERR_INVALID_INSTANCE_CODE;
     }
     auto cjContext = FFI::FFIData::Create<CJAbilityContext>(context);
-    if (cjContext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "GetAbilityContext failed, abilityContext is null");
-        return ERR_INVALID_INSTANCE_CODE;
-    }
     return cjContext->GetID();
 }
 

@@ -51,6 +51,7 @@ const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.
 #endif
 // Numerical base (radix) that determines the valid characters and their interpretation.
 const int32_t BASE_DISPLAY_ID_NUM (10);
+
 const char* CJWINDOW_FFI_LIBNAME = "libcj_window_ffi.z.so";
 const char* FUNC_CREATE_CJWINDOWSTAGE = "OHOS_CreateCJWindowStage";
 using CFFICreateCJWindowStage = int64_t (*)(std::shared_ptr<Rosen::WindowScene>&);
@@ -162,7 +163,7 @@ void CJUIAbility::AddLifecycleEventBeforeCall(FreezeUtil::TimeoutState state, co
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
     auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; CJUIAbility::" + methodName +
-        "; the " + methodName + " begin";
+        "; the " + methodName + " begin.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
@@ -170,7 +171,7 @@ void CJUIAbility::AddLifecycleEventAfterCall(FreezeUtil::TimeoutState state, con
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
     auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; CJUIAbility::" + methodName +
-        "; the " + methodName + " end.";
+        "; the " + methodName + " end";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
