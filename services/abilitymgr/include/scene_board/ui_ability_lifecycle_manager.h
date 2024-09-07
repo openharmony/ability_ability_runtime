@@ -389,6 +389,8 @@ private:
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest) const;
     int CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord,
         int resultCode, const Want *resultWant, bool isClearSession);
+    int32_t BackToCallerAbilityWithResultLocked(sptr<SessionInfo> currentSessionInfo,
+        std::shared_ptr<AbilityRecord> callerAbilityRecord);
 
     // byCall
     int CallAbilityLocked(const AbilityRequest &abilityRequest);
@@ -426,8 +428,6 @@ private:
     void TerminateSession(std::shared_ptr<AbilityRecord> abilityRecord);
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
-    int32_t BackToCallerAbilityWithResultLocked(sptr<SessionInfo> currentSessionInfo,
-        std::shared_ptr<AbilityRecord> callerAbilityRecord);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;

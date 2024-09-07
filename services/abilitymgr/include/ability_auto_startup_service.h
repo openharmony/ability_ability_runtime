@@ -151,6 +151,7 @@ private:
     int32_t CheckPermissionForSelf(const std::string &bundleName);
     int32_t CheckPermissionForEDM();
     int32_t InnerApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool isSet, bool flag);
+    int32_t GetAbilityInfo(const AutoStartupInfo &info, std::string &abilityTypeName, std::string &accessTokenId);
     int32_t GetAbilityInfo(const AutoStartupInfo &info, std::string &abilityTypeName,
         std::string &accessTokenId, int32_t &userId);
 
