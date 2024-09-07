@@ -793,6 +793,14 @@ public:
      */
     void SetCurrentUserId(const int32_t userId);
 
+    /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
 #endif
