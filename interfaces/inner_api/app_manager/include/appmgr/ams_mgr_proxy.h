@@ -186,6 +186,8 @@ public:
 
     virtual void SetCurrentUserId(const int32_t userId) override;
 
+    virtual void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess) override;
+
     virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
 
     /**
