@@ -45,7 +45,7 @@ CacheProcessManager::CacheProcessManager()
     maxProcCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_PROC_CACHE_NUM, 0);
     shouldCheckApi = OHOS::system::GetBoolParameter(PROCESS_CACHE_API_CHECK_CONFIG, true);
     shouldCheckSupport = OHOS::system::GetBoolParameter(PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG, true);
-    resourceCacheProcessEnable_ = OHOS::system::GetBoolParameter(RESOURCE_CACHE_PROCESS_ENABLE, true);
+    resourceCacheProcessEnable_ = OHOS::system::GetBoolParameter(RESOURCE_CACHE_PROCESS_ENABLE, false);
     TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum %{public}d", maxProcCacheNum_);
 }
 
