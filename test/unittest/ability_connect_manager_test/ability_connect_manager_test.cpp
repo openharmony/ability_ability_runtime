@@ -3157,24 +3157,6 @@ HWTEST_F(AbilityConnectManagerTest, IsUIExtensionFocused_002, TestSize.Level1)
 
 /*
  * Feature: AbilityConnectManager
- * Function: GetUIExtensionSourceToken
- * SubFunction: GetUIExtensionSourceToken
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityConnectManager GetUIExtensionSourceToken
- */
-HWTEST_F(AbilityConnectManagerTest, GetUIExtensionSourceToken_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(3);
-    ASSERT_NE(connectManager, nullptr);
-    connectManager->uiExtensionMap_.clear();
-    auto sourceToken = connectManager->GetUIExtensionSourceToken(nullptr);
-    EXPECT_EQ(sourceToken, nullptr);
-    connectManager.reset();
-}
-
-/*
- * Feature: AbilityConnectManager
  * Function: PauseExtensions
  * SubFunction: PauseExtensions
  * FunctionPoints: NA
