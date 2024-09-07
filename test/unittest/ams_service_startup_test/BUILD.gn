@@ -90,11 +90,8 @@ ohos_unittest("AmsServiceStartupTest") {
     "memmgr:memmgrclient",
     "memory_utils:libmeminfo",
     "resource_schedule_service:ressched_client",
+    "window_manager:libwm",
   ]
-
-  if (ability_runtime_graphics) {
-    external_deps += [ "window_manager:libwm" ]
-  }
 
   if (ability_runtime_feature_sandboxmanager) {
     external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]

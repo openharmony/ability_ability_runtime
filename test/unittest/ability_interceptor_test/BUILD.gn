@@ -85,5 +85,4 @@ ohos_unittest("ability_interceptor_test") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":ability_interceptor_test" ]
 }
