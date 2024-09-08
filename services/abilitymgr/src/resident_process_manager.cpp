@@ -23,23 +23,53 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-bool IsMainElementTypeOk(const AppExecFwk::AbilityInfo &abilityInfo, int32_t userId)
+bool IsMainElementTypeOk(const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &mainElement,
+    int32_t userId)
 {
     if (userId == 0) {
-        if (abilityInfo.type != AppExecFwk::AbilityType::PAGE) {
-            return true;
+        for (const auto &abilityInfo: hapModuleInfo.abilityInfos) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "compare ability: %{public}s", abilityInfo.name.c_str());
+            if (abilityInfo.name == mainElement) {
+                return abilityInfo.type != AppExecFwk::AbilityType::PAGE;
+            }
         }
+        return true;
     } else {
-        if (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
-            abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-            return true;
+        for (const auto &extensionInfo: hapModuleInfo.extensionInfos) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "compare extension: %{public}s", extensionInfo.name.c_str());
+            if (extensionInfo.name == mainElement) {
+                return extensionInfo.type == AppExecFwk::ExtensionAbilityType::SERVICE;
+            }
         }
+        return false;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "IsMainElementTypeOk: %{public}s, %{public}d, %{public}d",
-        abilityInfo.name.c_str(), userId, abilityInfo.type);
-    return false;
 }
 }
+
+ResidentAbilityInfoGuard::ResidentAbilityInfoGuard(const std::string &bundleName,
+    std::string &abilityName, int32_t userId)
+{
+    residentId_ = DelayedSingleton<ResidentProcessManager>::GetInstance()->PutResidentAbility(bundleName,
+        abilityName, userId);
+}
+
+ResidentAbilityInfoGuard::~ResidentAbilityInfoGuard()
+{
+    if (residentId_ != -1) {
+        DelayedSingleton<ResidentProcessManager>::GetInstance()->RemoveResidentAbility(residentId_);
+    }
+}
+
+void ResidentAbilityInfoGuard::SetResidentAbilityInfo(const std::string &bundleName,
+    std::string &abilityName, int32_t userId)
+{
+    if (residentId_ != -1) {
+        return;
+    }
+    residentId_ = DelayedSingleton<ResidentProcessManager>::GetInstance()->PutResidentAbility(bundleName,
+        abilityName, userId);
+}
+
 ResidentProcessManager::ResidentProcessManager()
 {}
 
@@ -63,6 +93,10 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
     std::set<uint32_t> needEraseIndexSet;
 
     for (size_t i = 0; i < bundleInfos.size(); i++) {
+        if (userId != 0 && !AmsConfigurationParameter::GetInstance().InResidentWhiteList(bundleInfos[i].name)) {
+            needEraseIndexSet.insert(i);
+            continue;
+        }
         std::string processName = bundleInfos[i].applicationInfo.process;
         bool keepAliveEnable = bundleInfos[i].isKeepAlive;
         // Check startup permissions
@@ -81,6 +115,7 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
             // startAbility
             Want want;
             want.SetElementName(hapModuleInfo.bundleName, mainElement);
+            ResidentAbilityInfoGuard residentAbilityInfoGuard(hapModuleInfo.bundleName, mainElement, userId);
             TAG_LOGI(AAFwkTag::ABILITYMGR, "call, bundleName: %{public}s, mainElement: %{public}s",
                 hapModuleInfo.bundleName.c_str(), mainElement.c_str());
             DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, userId,
@@ -130,26 +165,21 @@ bool ResidentProcessManager::CheckMainElement(const AppExecFwk::HapModuleInfo &h
             return false;
         }
     } else {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "new mode: %{public}s", hapModuleInfo.bundleName.c_str());
         // new application model
         mainElement = hapModuleInfo.mainElementName;
         if (mainElement.empty()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "mainElement empty");
             return false;
         }
 
         // new application model, user model 'process'
         if (hapModuleInfo.process != processName) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "processName err: %{public}s", processName.c_str());
             return false;
         }
     }
-
-    // ability need to start, but need to filt page ability
-    for (auto abilityInfo : hapModuleInfo.abilityInfos) {
-        if (abilityInfo.name == mainElement) {
-            return IsMainElementTypeOk(abilityInfo, userId);
-        }
-    }
-
-    return userId == 0 ? true : false;
+    return IsMainElementTypeOk(hapModuleInfo, mainElement, userId);
 }
 
 int32_t ResidentProcessManager::SetResidentProcessEnabled(
@@ -274,6 +304,43 @@ void ResidentProcessManager::OnAppStateChanged(const AppInfo &info)
         return;
     }
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, localEnable));
+}
+
+int32_t ResidentProcessManager::PutResidentAbility(const std::string &bundleName,
+    std::string &abilityName, int32_t userId)
+{
+    std::lock_guard lock(residentAbilityInfoMutex_);
+    auto residentId = residentId_++;
+    residentAbilityInfos_.push_back(ResidentAbilityInfo {
+        .bundleName = bundleName,
+        .abilityName = abilityName,
+        .userId = userId,
+        .residentId = residentId
+    });
+    return residentId;
+}
+
+bool ResidentProcessManager::IsResidentAbility(const std::string &bundleName,
+    const std::string &abilityName, int32_t userId)
+{
+    std::lock_guard lock(residentAbilityInfoMutex_);
+    for (const auto &item: residentAbilityInfos_) {
+        if (item.bundleName == bundleName && item.abilityName == abilityName && item.userId == userId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ResidentProcessManager::RemoveResidentAbility(int32_t residentId)
+{
+    std::lock_guard lock(residentAbilityInfoMutex_);
+    for (auto it = residentAbilityInfos_.begin(); it != residentAbilityInfos_.end(); ++it) {
+        if (it->residentId == residentId) {
+            residentAbilityInfos_.erase(it);
+            return;
+        }
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -957,6 +957,10 @@ public:
     int32_t GetRestartCount() const;
     void SetRestartCount(int32_t restartCount);
     bool GetKeepAlive() const;
+    bool IsKeepAliveBundle() const
+    {
+        return keepAliveBundle_;
+    }
     void SetLoading(bool status);
     bool IsLoading() const;
     int64_t GetRestartTime();
@@ -1260,7 +1264,7 @@ private:
     bool minimizeReason_ = false;
 
     bool clearMissionFlag_ = false;
-
+    bool keepAliveBundle_ = false;
     int32_t restartCount_ = -1;
     int32_t restartMax_ = -1;
     std::string specifiedFlag_;
