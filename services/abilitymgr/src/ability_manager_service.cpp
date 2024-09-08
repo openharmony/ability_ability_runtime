@@ -2258,7 +2258,7 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
     auto bms = GetBundleManager();
     CHECK_POINTER(bms);
     auto userId = uid / BASE_USER_RANGE;
-    if (userId != U0_USER_ID || userId != GetUserId()) {
+    if (userId != U0_USER_ID && userId != GetUserId()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "not current user");
         return;
     }
