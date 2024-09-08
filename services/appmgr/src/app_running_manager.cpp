@@ -20,6 +20,7 @@
 #include "iremote_object.h"
 
 #include "appexecfwk_errors.h"
+#include "app_utils.h"
 #include "common_event_support.h"
 #include "exit_resident_process_manager.h"
 #include "hilog_tag_wrapper.h"
