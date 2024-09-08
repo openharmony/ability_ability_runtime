@@ -164,15 +164,15 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_001, TestSize
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
     code = OH_AbilityRuntime_ApplicationContextGetCacheDir(buffer, -1, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetCacheDir(buffer, 0, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetCacheDir(buffer, bufferSize, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 }
 
@@ -203,15 +203,15 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetCacheDirTest_002, TestSize
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
     code = OH_AbilityRuntime_ApplicationContextGetCacheDir(buffer, -1, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetCacheDir(buffer, 0, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetCacheDir(buffer, bufferSize, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 }
 
@@ -329,7 +329,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetAreaModeTest_001, TestSize
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
     code = OH_AbilityRuntime_ApplicationContextGetAreaMode(&mode);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(mode, ABILITY_RUNTIME_AREA_MODE_EL1);
 }
 
@@ -428,19 +428,19 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_001, TestSi
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
     code = OH_AbilityRuntime_ApplicationContextGetBundleName(buffer, -1, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetBundleName(buffer, 0, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetBundleName(buffer, TEST_BUNDLE_NAME.length(), &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetBundleName(buffer, bufferSize, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 }
 
@@ -471,19 +471,19 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetBundleNameTest_002, TestSi
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
     code = OH_AbilityRuntime_ApplicationContextGetBundleName(buffer, -1, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetBundleName(buffer, 0, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetBundleName(buffer, TEST_BUNDLE_NAME.length(), &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 
     code = OH_AbilityRuntime_ApplicationContextGetBundleName(buffer, bufferSize, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
     ASSERT_EQ(writeLength, 0);
 }
 
