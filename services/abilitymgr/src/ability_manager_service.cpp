@@ -475,7 +475,7 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
         if (userId == DEFAULT_INVAL_VALUE) {
             userId = GetValidUserId(userId);
         }
-        if ((err = StartAbilityUtils::CheckAppProvisionMode(want.GetBundle(), userId)) != ERR_OK) {
+        if ((err = StartAbilityUtils::CheckAppProvisionMode(want, userId)) != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "checkAppProvisionMode returns errcode=%{public}d", err);
             return err;
         }
@@ -1298,7 +1298,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
         if (userId == DEFAULT_INVAL_VALUE) {
             userId = GetValidUserId(userId);
         }
-        if ((err = StartAbilityUtils::CheckAppProvisionMode(want.GetBundle(), userId)) != ERR_OK) {
+        if ((err = StartAbilityUtils::CheckAppProvisionMode(want, userId)) != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "checkAppProvisionMode returns errcode=%{public}d", err);
             return err;
         }
