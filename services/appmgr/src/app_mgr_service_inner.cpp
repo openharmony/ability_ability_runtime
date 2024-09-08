@@ -5861,7 +5861,7 @@ bool AppMgrServiceInner::CreateAbilityInfo(const AAFwk::Want &want, AbilityInfo 
         }
     }
     if (extensionInfos.size() <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get extension info fail");
+        TAG_LOGE(AAFwkTag::APPMGR, "get extension info fail");
         return ERR_INVALID_OPERATION;
     }
     AppExecFwk::ExtensionAbilityInfo extensionInfo = extensionInfos.front();
