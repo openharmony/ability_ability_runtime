@@ -2160,6 +2160,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     }
 
     appRecord->SetProcessAndExtensionType(abilityInfo);
+    appRecord->SetKeepAliveEnableState(bundleInfo.isKeepAlive);
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
@@ -3748,8 +3749,7 @@ void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord
 
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     BundleInfo bundleInfo;
-    auto callerUid = IPCSkeleton::GetCallingUid();
-    auto userId = GetUserIdByUid(callerUid);
+    auto userId = GetUserIdByUid(appRecord->GetUid());
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(
         appRecord->GetBundleName(), BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
         TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
@@ -6444,7 +6444,8 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
         return;
     }
 
-    if (appRecord->IsKeepAliveApp()) {
+    auto userId = GetUserIdByUid(appRecord->GetUid());
+    if (appRecord->IsKeepAliveApp() && (userId == 0 || userId == currentUserId_)) {
         if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
             TAG_LOGI(AAFwkTag::APPMGR, "is killed for upgrade web");
             return;
