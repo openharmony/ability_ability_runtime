@@ -58,20 +58,20 @@ bool StartAbilityUtils::GetApplicationInfo(const std::string &bundleName, int32_
     if (StartAbilityUtils::startAbilityInfo &&
         StartAbilityUtils::startAbilityInfo->GetAppBundleName() == bundleName) {
         appInfo = StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo;
-    } else {
-        if (bundleName.empty()) {
-            return false;
-        }
-        auto bms = AbilityUtil::GetBundleManagerHelper();
-        CHECK_POINTER_AND_RETURN(bms, false);
-        bool result = IN_PROCESS_CALL(
-            bms->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO,
-                userId, appInfo)
-        );
-        if (!result) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "failed: %{public}s", bundleName.c_str());
-            return false;
-        }
+        return true;
+    }
+    if (bundleName.empty()) {
+        return false;
+    }
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bms, false);
+    bool result = IN_PROCESS_CALL(
+        bms->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO,
+            userId, appInfo)
+    );
+    if (!result) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "failed: %{public}s", bundleName.c_str());
+        return false;
     }
     return true;
 }
@@ -102,30 +102,6 @@ int32_t StartAbilityUtils::CheckAppProvisionMode(const std::string& bundleName, 
         return ERR_INVALID_VALUE;
     }
     if (appInfo.appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-        return ERR_NOT_IN_APP_PROVISION_MODE;
-    }
-    return ERR_OK;
-}
-
-int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userId)
-{
-    auto abilityInfo = StartAbilityUtils::startAbilityInfo;
-    if (!abilityInfo || abilityInfo->GetAppBundleName() != want.GetElement().GetBundleName()) {
-        int32_t appIndex = 0;
-        if (!AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid app clone index");
-            return ERR_APP_CLONE_INDEX_INVALID;
-        }
-        abilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want, userId, appIndex);
-    }
-    CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);
-    if (abilityInfo->status != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "unexpected abilityInfo status: %{public}d", abilityInfo->status);
-        return abilityInfo->status;
-    }
-    if ((abilityInfo->abilityInfo).applicationInfo.appProvisionType !=
-        AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "window options invalid");
         return ERR_NOT_IN_APP_PROVISION_MODE;
     }
     return ERR_OK;
