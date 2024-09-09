@@ -2270,6 +2270,9 @@ private:
     int PreStartFreeInstall(const Want &want, sptr<IRemoteObject> callerToken,
         uint32_t specifyTokenId, bool isStartAsCaller, Want &localWant);
 
+    bool IsAtomicServiceUrl(const Want& want, sptr<IRemoteObject> callerToken,
+    int32_t userId, int requestCode);
+
     void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
         const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
     
