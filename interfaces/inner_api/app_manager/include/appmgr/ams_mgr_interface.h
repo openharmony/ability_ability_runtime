@@ -351,17 +351,6 @@ public:
     }
 
     /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
-     */
-    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName)
-    {
-        return true;
-    }
-
-    /**
      * whether the abilities of process specified by pid type only UIAbility.
      * @return Returns true is only UIAbility, otherwise return false
      */
@@ -417,7 +406,6 @@ public:
         ATTACHED_TO_STATUS_BAR,
         BLOCK_PROCESS_CACHE_BY_PIDS,
         IS_KILLED_FOR_UPGRADE_WEB,
-        IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION,
         FORCE_KILL_APPLICATION,
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,

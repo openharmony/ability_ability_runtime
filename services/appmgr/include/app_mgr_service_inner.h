@@ -1135,8 +1135,6 @@ public:
 
     bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
 
-    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
-
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);
