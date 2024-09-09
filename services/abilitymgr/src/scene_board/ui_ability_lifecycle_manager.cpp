@@ -19,6 +19,8 @@
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "app_utils.h"
+#include "ffrt.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
 #include "permission_constants.h"
 #include "process_options.h"
@@ -36,7 +38,6 @@ using AbilityRuntime::FreezeUtil;
 namespace AAFwk {
 namespace {
 constexpr const char* SEPARATOR = ":";
-constexpr int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 constexpr const char* PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
 constexpr const char* DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 constexpr const char* DMS_MISSION_ID = "dmsMissionId";
@@ -2044,20 +2045,14 @@ bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<Ab
         return false;
     }
     // execute onPrepareToTerminate util timeout
-    auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    if (taskHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get AbilityTaskHandler failed");
-        return false;
-    }
     auto promise = std::make_shared<std::promise<bool>>();
     auto future = promise->get_future();
     auto task = [promise, abilityRecord]() {
         promise->set_value(abilityRecord->PrepareTerminateAbility());
     };
-    taskHandler->SubmitTask(task);
-    int prepareTerminateTimeout =
-        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * PREPARE_TERMINATE_TIMEOUT_MULTIPLE;
-    std::future_status status = future.wait_for(std::chrono::milliseconds(prepareTerminateTimeout));
+    ffrt::submit(task);
+    std::future_status status = future.wait_for(std::chrono::milliseconds(
+        GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME));
     if (status == std::future_status::timeout) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareToTerminate timeout");
         return false;
