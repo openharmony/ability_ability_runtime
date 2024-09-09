@@ -820,17 +820,5 @@ int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParc
     }
     return NO_ERROR;
 }
-
-int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply)
-{
-    auto pid = data.ReadUint32();
-
-    auto result = IsProcessContainsOnlyUIAbility(pid);
-    if (!reply.WriteBool(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result in HandleIsProcessContainsOnlyUIAbility.");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS

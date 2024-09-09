@@ -351,12 +351,14 @@ public:
     }
 
     /**
-     * whether the abilities of process specified by pid type only UIAbility.
-     * @return Returns true is only UIAbility, otherwise return false
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
      */
-    virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid)
+    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName)
     {
-        return false;
+        return true;
     }
 
     enum class Message {
