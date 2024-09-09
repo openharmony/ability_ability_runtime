@@ -11034,7 +11034,6 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     auto callerAbilityInfo = abilityRecord->GetAbilityInfo();
     bool continuousFlag = false;
     continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
-    bool continuousFlag = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     if (abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process did not call service or datashare extension Pass");
