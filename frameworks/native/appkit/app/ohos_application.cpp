@@ -61,6 +61,9 @@ OHOSApplication::OHOSApplication()
 
 OHOSApplication::~OHOSApplication()
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    abilityLifecycleCallbacks_.clear();
+    elementsCallbacks_.clear();
 }
 
 /**
@@ -436,8 +439,8 @@ void OHOSApplication::UnregisterElementsCallbacks(const std::shared_ptr<Elements
 void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntime::SetLevel level)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (!abilityRecordMgr_ || !configuration_) {
-        TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ is null");
+    if (!abilityRecordMgr_ || !configuration_ || !abilityRuntimeContext_) {
+        TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ or abilityRuntimeContext_ is null");
         return;
     }
     // Whether the color changes with the system
@@ -518,7 +521,10 @@ void OHOSApplication::OnFontUpdated(Configuration config)
 void OHOSApplication::OnMemoryLevel(int level)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-
+    if (abilityRuntimeContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityRuntimeContext_ is nullptr");
+        return;
+    }
     if (abilityRecordMgr_) {
         TAG_LOGD(
             AAFwkTag::APPKIT, "Number of ability to be notified : [%{public}d]", abilityRecordMgr_->GetRecordCount());
@@ -644,7 +650,6 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
                 return nullptr;
             }
         }
-
         Want want;
         if (abilityRecord->GetWant()) {
             TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
@@ -794,6 +799,10 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
     auto iterator = abilityStages_.find(moduleName);
     if (iterator != abilityStages_.end()) {
         auto abilityStage = iterator->second;
+        if (abilityStage == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+            return;
+        }
         abilityStage->RemoveAbility(token);
         if (!abilityStage->ContainsAbility() && !isCacheProcess) {
             abilityStage->OnDestroy();

@@ -434,6 +434,7 @@ napi_value JsUIExtensionContext::OnStartAbilityForResult(napi_env env, NapiCallb
     std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
     RuntimeTask task = [env, asyncTask](int resultCode, const AAFwk::Want &want, bool isInner) {
         TAG_LOGI(AAFwkTag::UI_EXT, "called");
+        HandleScope handleScope(env);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
             TAG_LOGW(AAFwkTag::UI_EXT, "wrap abilityResult failed");
@@ -506,6 +507,7 @@ napi_value JsUIExtensionContext::OnStartAbilityForResultAsCaller(napi_env env, N
     std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
     RuntimeTask task = [env, asyncTask](int resultCode, const AAFwk::Want &want, bool isInner) {
         TAG_LOGI(AAFwkTag::UI_EXT, "called");
+        HandleScope handleScope(env);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
             TAG_LOGW(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
