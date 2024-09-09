@@ -690,7 +690,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         }
         Want want;
         if (abilityRecord->GetWant()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
+            TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
             want = *(abilityRecord->GetWant());
         }
         abilityStage->OnCreate(want);
