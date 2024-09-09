@@ -25,7 +25,6 @@
 #include "mock_ability_token.h"
 #include "mock_page_ability.h"
 #include "mock_ability_impl.h"
-#include "mock_ability_lifecycle_callbacks.h"
 #include "ohos_application.h"
 #include "page_ability_impl.h"
 #include "locale_config.h"
@@ -1745,7 +1744,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Start_0500, TestSize.Level1)
 /**
  * @tc.number: AaFwk_AbilityImpl_Start_0600
  * @tc.name: Start
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Start failed.
+ * @tc.desc: Verify Start failed.
  */
 HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Start_0600, TestSize.Level1)
 {
@@ -1757,8 +1756,6 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Start_0600, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
-
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     Want want;
     abilityImpl_->Start(want);
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
@@ -1800,7 +1797,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Stop_0300, TestSize.Level1)
 /**
  * @tc.number: AaFwk_AbilityImpl_Stop_0400
  * @tc.name: Stop
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Stop_0400, TestSize.Level1)
 {
@@ -1813,8 +1810,6 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Stop_0400, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
-
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->Stop();
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_Stop_0400 end";
@@ -1859,7 +1854,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Stop_0600, TestSize.Level1)
 /**
  * @tc.number: AaFwk_AbilityImpl_Stop_0700
  * @tc.name: Stop
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Stop_0700, TestSize.Level1)
 {
@@ -1872,8 +1867,6 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Stop_0700, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
-
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     bool isAsyncCallback = true;
     abilityImpl_->Stop(isAsyncCallback);
     EXPECT_FALSE(isAsyncCallback);
@@ -1953,7 +1946,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_StopCallback_0300, TestSize.Level1)
 /**
  * @tc.number: AaFwk_AbilityImpl_StopCallback_0400
  * @tc.name: Stop
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_StopCallback_0400, TestSize.Level1)
 {
@@ -1966,8 +1959,6 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_StopCallback_0400, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
-
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->StopCallback();
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_StopCallback_0400 end";
@@ -2008,7 +1999,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Active_0300, TestSize.Level1)
 /**
  * @tc.number: AaFwk_AbilityImpl_Active_0400
  * @tc.name: Active
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Active failed.
+ * @tc.desc: Verify Active failed.
  */
 HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Active_0400, TestSize.Level1)
 {
@@ -2021,8 +2012,6 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Active_0400, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
-
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->Active();
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_Active_0400 end";
@@ -2063,7 +2052,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Inactive_0300, TestSize.Level1)
 /**
  * @tc.number: AaFwk_AbilityImpl_Inactive_0400
  * @tc.name: Inactive
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Inactive failed.
+ * @tc.desc: Verify Inactive failed.
  */
 HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Inactive_0400, TestSize.Level1)
 {
@@ -2076,8 +2065,6 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Inactive_0400, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
-
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->Inactive();
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_Inactive_0400 end";
@@ -2112,7 +2099,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_DispatchSaveAbilityState_0100, TestS
 /**
  * @tc.number: AaFwk_AbilityImpl_DispatchSaveAbilityState_0200
  * @tc.name: DispatchSaveAbilityState
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify DispatchSaveAbilityState failed.
+ * @tc.desc: Verify DispatchSaveAbilityState failed.
  */
 HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_DispatchSaveAbilityState_0200, TestSize.Level1)
 {
@@ -2124,8 +2111,6 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_DispatchSaveAbilityState_0200, TestS
     contextDeal->SetAbilityInfo(abilityInfo);
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
-
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->DispatchSaveAbilityState();
     EXPECT_FALSE(abilityImpl_->needSaveDate_);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_DispatchSaveAbilityState_0200 end";
