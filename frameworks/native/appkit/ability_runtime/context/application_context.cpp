@@ -740,7 +740,7 @@ bool ApplicationContext::SetFontSizeScale(double fontSizeScale)
     }
 
     AppExecFwk::Configuration config;
-    config.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE, std::to_string(fontSizeScale));
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, std::to_string(fontSizeScale));
     if (appConfigChangeCallback_ != nullptr) {
         appConfigChangeCallback_(config);
     }

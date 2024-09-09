@@ -48,6 +48,7 @@ constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
 constexpr int32_t ERROR_CODE_ONE = 1;
+constexpr double FOUNT_SIZE = 0.0;
 const char* MD_NAME = "JsApplicationContextUtils";
 }  // namespace
 
@@ -713,7 +714,11 @@ napi_value JsApplicationContextUtils::OnSetFontSizeScale(napi_env env, NapiCallb
         return CreateJsUndefined(env);
     }
     TAG_LOGD(AAFwkTag::APPKIT, "fontSizeScale: %{public}f", fontSizeScale);
-    // TODO 范围限制?
+    if (fontSizeScale < FOUNT_SIZE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid size");
+        ThrowInvalidParamError(env, "Invalid font size.");
+        return CreateJsUndefined(env);
+    }
 
     applicationContext->SetFontSizeScale(fontSizeScale);
     return CreateJsUndefined(env);

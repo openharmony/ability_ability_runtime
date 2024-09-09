@@ -37,7 +37,9 @@ class ApplicationConfigurationManager {
 public:
     static ApplicationConfigurationManager& GetInstance();
     void SetLanguageSetLevel(SetLevel languageSetLevel);
+    void SetfontSetLevel(SetLevel fontSetLevel);
     SetLevel GetLanguageSetLevel() const;
+    SetLevel GetFontSetLevel() const;
     std::string SetColorModeSetLevel(SetLevel colorModeSetLevel, const std::string &value);
     SetLevel GetColorModeSetLevel() const;
     bool ColorModeHasSetByApplication() const;
@@ -45,6 +47,7 @@ public:
 private:
     SetLevel languageSetLevel_ = SetLevel::System;
     SetLevel colorModeSetLevel_ = SetLevel::System;
+    SetLevel fontSetLevel_ = SetLevel::System;
     std::vector<std::string> colorModeVal_ = std::vector<std::string>(static_cast<uint8_t>(SetLevel::SetLevelCount));
 };
 } // namespace AbilityRuntime
