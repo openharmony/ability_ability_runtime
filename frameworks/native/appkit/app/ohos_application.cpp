@@ -688,12 +688,12 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
                 return nullptr;
             }
         }
-        auto want = abilityRecord->GetWant();
-        if (want == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "want is nullptr");
-            return nullptr;
+        Want want;
+        if (abilityRecord->GetWant()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
+            want = *(abilityRecord->GetWant());
         }
-        abilityStage->OnCreate(*want);
+        abilityStage->OnCreate(want);
         abilityStages_[moduleName] = abilityStage;
     } else {
         abilityStage = iterator->second;
