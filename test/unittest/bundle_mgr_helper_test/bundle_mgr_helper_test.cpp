@@ -247,7 +247,7 @@ HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_CleanBundleDataFiles_001, Test
 {
     std::string bundleName;
     int32_t userId = DEFAULT_USERID;
-    auto ret = bundleMgrHelper->CleanBundleDataFiles(bundleName, userId, 0);
+    auto ret = bundleMgrHelper->CleanBundleDataFiles(bundleName, userId);
     EXPECT_EQ(ret, false);
 }
 
@@ -437,7 +437,7 @@ HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_GetUidByBundleName_001, TestSi
 {
     std::string bundleName;
     int32_t userId = DEFAULT_USERID;
-    auto ret = bundleMgrHelper->GetUidByBundleName(bundleName, userId, 0);
+    auto ret = bundleMgrHelper->GetUidByBundleName(bundleName, userId);
     EXPECT_EQ(ret, Constants::INVALID_UID);
 }
 

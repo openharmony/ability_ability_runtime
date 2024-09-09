@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,61 +13,41 @@
  * limitations under the License.
  */
 
-#include "abilitymanagerserviceeighth_fuzzer.h"
+#include "abilitystubclearupapplicationdata_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
 
 #define private public
-#define protected public
 #include "ability_manager_service.h"
-#undef protected
 #undef private
-
-#include "ability_record.h"
+#include "message_parcel.h"
+#include "securec.h"
 
 using namespace OHOS::AAFwk;
-using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-constexpr int INPUT_ZERO = 0;
-constexpr int INPUT_ONE = 1;
-constexpr int INPUT_TWO = 2;
-constexpr int INPUT_THREE = 3;
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
-constexpr size_t OFFSET_ZERO = 24;
-constexpr size_t OFFSET_ONE = 16;
-constexpr size_t OFFSET_TWO = 8;
 }
-
-uint32_t GetU32Data(const char* ptr)
-{
-    // convert fuzz input data to an integer
-    return (ptr[INPUT_ZERO] << OFFSET_ZERO) | (ptr[INPUT_ONE] << OFFSET_ONE) | (ptr[INPUT_TWO] << OFFSET_TWO) |
-        ptr[INPUT_THREE];
-}
+const std::u16string ABILITYMGR_INTERFACE_TOKEN = u"ohos.aafwk.AbilityManager";
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    int intParam = static_cast<int>(GetU32Data(data));
-    int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
-    std::string stringParam(data, size);
+    uint32_t code = static_cast<uint32_t>(AbilityManagerInterfaceCode::CLEAR_UP_APPLICATION_DATA);
 
-    // fuzz for AbilityManagerService
-    auto abilityms = std::make_shared<AbilityManagerService>();
-    std::shared_ptr<CallRecord> callRecord;
-    abilityms->OnCallConnectDied(callRecord);
-    intParam = AmsConfigurationParameter::GetInstance().GetMaxRestartNum(true);
-    abilityms->KillProcess(stringParam);
-    abilityms->ClearUpApplicationData(stringParam);
-    abilityms->UninstallApp(stringParam, int32Param);
-    abilityms->GetBundleManager();
-    abilityms->PreLoadAppDataAbilities(stringParam, int32Param);
-    AbilityInfo abilityInfo;
-    abilityms->IsSystemUiApp(abilityInfo);
-    abilityms->IsSystemUI(stringParam);
+    MessageParcel parcel;
+    parcel.WriteInterfaceToken(ABILITYMGR_INTERFACE_TOKEN);
+    parcel.WriteBuffer(data, size);
+    parcel.RewindRead(0);
+    MessageParcel reply;
+    MessageOption option;
+    DelayedSingleton<AbilityManagerService>::GetInstance()->subManagersHelper_ =
+        std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    DelayedSingleton<AbilityManagerService>::GetInstance()->subManagersHelper_->currentUIAbilityManager_ =
+        std::make_shared<UIAbilityLifecycleManager>();
+    DelayedSingleton<AbilityManagerService>::GetInstance()->OnRemoteRequest(code, parcel, reply, option);
 
     return true;
 }
@@ -78,15 +58,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     if (data == nullptr) {
+        std::cout << "invalid data" << std::endl;
         return 0;
     }
 
     /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
+    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return 0;
     }
 
-    char* ch = (char *)malloc(size + 1);
+    char* ch = static_cast<char*>(malloc(size + 1));
     if (ch == nullptr) {
         std::cout << "malloc failed." << std::endl;
         return 0;

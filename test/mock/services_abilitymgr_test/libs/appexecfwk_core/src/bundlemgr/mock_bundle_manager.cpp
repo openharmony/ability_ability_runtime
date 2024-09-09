@@ -205,7 +205,7 @@ bool BundleMgrService::CheckWantEntity(const AAFwk::Want& want, AbilityInfo& abi
     return false;
 }
 
-int BundleMgrService::GetUidByBundleName(const std::string& bundleName, int32_t userId, int32_t appCloneIndex)
+int BundleMgrService::GetUidByBundleName(const std::string& bundleName, const int userId)
 {
     return USER_ID_U1000;
 }

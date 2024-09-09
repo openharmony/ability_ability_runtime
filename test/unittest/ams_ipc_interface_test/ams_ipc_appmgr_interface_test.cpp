@@ -154,9 +154,9 @@ HWTEST_F(AmsIpcAppMgrInterfaceTest, ClearUpApplicationData_008, TestSize.Level1)
     sptr<MockAppMgrService> mockAppMgr(new MockAppMgrService());
     sptr<IAppMgr> appMgrClient = iface_cast<IAppMgr>(mockAppMgr);
 
-    EXPECT_CALL(*mockAppMgr, ClearUpApplicationData(_, _, _)).Times(1);
+    EXPECT_CALL(*mockAppMgr, ClearUpApplicationData(_, _)).Times(1);
 
-    appMgrClient->ClearUpApplicationData("PROCESS", 0);
+    appMgrClient->ClearUpApplicationData("PROCESS");
 
     TAG_LOGD(AAFwkTag::TEST, "ClearUpApplicationData_008 end");
 }

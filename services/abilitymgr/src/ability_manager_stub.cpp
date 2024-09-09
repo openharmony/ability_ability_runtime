@@ -326,6 +326,9 @@ int AbilityManagerStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel 
     if (interfaceCode == AbilityManagerInterfaceCode::IS_RAM_CONSTRAINED_DEVICE) {
         return IsRamConstrainedDeviceInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::CLEAR_UP_APPLICATION_DATA) {
+        return ClearUpApplicationDataInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::LOCK_MISSION_FOR_CLEANUP) {
         return LockMissionForCleanupInner(data, reply);
     }
@@ -1131,6 +1134,18 @@ int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &rep
     int result = KillProcess(bundleName);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove stack error");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::ClearUpApplicationDataInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = Str16ToStr8(data.ReadString16());
+    int32_t userId = data.ReadInt32();
+    int result = ClearUpApplicationData(bundleName, userId);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ClearUpApplicationData error");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
