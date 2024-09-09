@@ -474,9 +474,11 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     }
     appRecord = CreateAppRunningRecord(nullptr, nullptr, appInfo, abilityInfo, processName, bundleInfo,
         hapModuleInfo, want, NO_ABILITY_RECORD_ID);
-    appRecord->SetPreloadState(PreloadState::PRELOADING);
-    LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
-        hapModuleInfo, want, appExistFlag, true);
+    if (appRecord != nullptr) {
+        appRecord->SetPreloadState(PreloadState::PRELOADING);
+        LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
+            hapModuleInfo, want, appExistFlag, true);
+    }
 }
 
 void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,

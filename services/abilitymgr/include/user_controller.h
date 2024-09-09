@@ -83,7 +83,7 @@ public:
      * @return 0 if the user has been successfully started.
      */
     int32_t StopUser(int32_t userId);
-    
+
     /**
      * Logout user, if it is running..
      *
