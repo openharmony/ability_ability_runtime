@@ -782,7 +782,7 @@ void JsUIExtensionBase::OnConfigurationUpdated(const AppExecFwk::Configuration &
     }
 
     auto configUtils = std::make_shared<ConfigurationUtils>();
-    configUtils->UpdateGlobalConfig(configuration, context_->GetResourceManager());
+    configUtils->UpdateGlobalConfig(configuration, context_->GetConfiguration(), context_->GetResourceManager());
 
     ConfigurationUpdated();
 }
