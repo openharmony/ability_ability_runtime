@@ -305,6 +305,8 @@ enum class AbilityManagerInterfaceCode {
 
     GET_PROCESS_RUNNING_INFO = 1026,
 
+    CLEAR_UP_APPLICATION_DATA = 1027,
+
     START_ABILITY_FOR_OPTIONS = 1028,
 
     // ipc id for call ability

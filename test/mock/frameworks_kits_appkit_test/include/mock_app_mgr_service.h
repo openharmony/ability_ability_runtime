@@ -134,7 +134,7 @@ public:
     {
         return nullptr;
     };
-    virtual int32_t ClearUpApplicationData(const std::string& appName, int32_t appCloneIndex) override
+    virtual int32_t ClearUpApplicationData(const std::string& appName) override
     {
         return 0;
     }
