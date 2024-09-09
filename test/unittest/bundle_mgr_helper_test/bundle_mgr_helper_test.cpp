@@ -232,9 +232,7 @@ HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_ImplicitQueryInfos_001, TestSi
     bool withDefault = false;
     std::vector<AbilityInfo> abilityInfos;
     std::vector<ExtensionAbilityInfo> extensionInfos;
-    bool findDefaultApp = false;
-    auto ret = bundleMgrHelper->ImplicitQueryInfos(want, flags, userId, withDefault, abilityInfos, extensionInfos,
-        findDefaultApp);
+    auto ret = bundleMgrHelper->ImplicitQueryInfos(want, flags, userId, withDefault, abilityInfos, extensionInfos);
     EXPECT_EQ(ret, false);
 }
 
