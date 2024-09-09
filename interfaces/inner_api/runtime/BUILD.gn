@@ -48,6 +48,8 @@ config("runtime_all_deps_config") {
 }
 
 ohos_shared_library("runtime") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_path}/services/abilitymgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
