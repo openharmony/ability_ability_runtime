@@ -655,7 +655,7 @@ void JsAbilityContext::DoConnectUIServiceExtension(napi_env env,
         return;
     }
 
-    auto innerErrCode = context->ConnectAbility(want, connection);
+    auto innerErrCode = context->connectUIServiceExtensionAbility(want, connection);
     AbilityErrorCode errcode = AbilityRuntime::GetJsErrorCodeByNativeError(innerErrCode);
     if (errcode != AbilityErrorCode::ERROR_OK) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed, errcode is %{public}d.", errcode);
