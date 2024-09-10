@@ -65,7 +65,7 @@ public:
 
 private:
     int GenerateAbilityRequestByAction(int32_t userId, AbilityRequest &request,
-        std::vector<DialogAppInfo> &dialogAppInfos, bool isMoreHapList, bool &findDefaultApp);
+        std::vector<DialogAppInfo> &dialogAppInfos, bool isMoreHapList);
 
     int GenerateAbilityRequestByAppIndexes(int32_t userId, AbilityRequest &request,
         std::vector<DialogAppInfo> &dialogAppInfos);
@@ -103,8 +103,6 @@ private:
 
     void OnlyKeepReserveApp(std::vector<AppExecFwk::AbilityInfo> &abilityInfos,
         std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos, const AbilityRequest &request);
-
-    bool IsActionImplicitStart(const Want &want, bool findDeafultApp);
 
 private:
     const static std::vector<std::string> blackList;

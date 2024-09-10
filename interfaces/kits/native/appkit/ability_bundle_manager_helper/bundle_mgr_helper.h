@@ -80,8 +80,7 @@ public:
         int32_t flags, int32_t userId, AbilityInfo &abilityInfo, const sptr<IRemoteObject> &callBack);
     void UpgradeAtomicService(const Want &want, int32_t userId);
     bool ImplicitQueryInfos(const Want &want, int32_t flags, int32_t userId, bool withDefault,
-        std::vector<AbilityInfo> &abilityInfos, std::vector<ExtensionAbilityInfo> &extensionInfos,
-        bool &findDefaultApp);
+        std::vector<AbilityInfo> &abilityInfos, std::vector<ExtensionAbilityInfo> &extensionInfos);
     bool CleanBundleDataFiles(const std::string &bundleName, int32_t userId);
     bool QueryDataGroupInfos(const std::string &bundleName, int32_t userId, std::vector<DataGroupInfo> &infos);
     bool RegisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback);
