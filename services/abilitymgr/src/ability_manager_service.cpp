@@ -1020,7 +1020,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
             InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
             return StartExtensionAbilityInner(want, callerToken, userId,
-                AppExecFwk::ExtensionAbilityType::SERVICE, false, false, true);
+                AppExecFwk::ExtensionAbilityType::SERVICE, false, false, true, isStartAsCaller);
         }
     }
 
@@ -2342,7 +2342,7 @@ OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AbilityManagerService::GetAppMgr()
 }
 
 int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
-    int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType, bool isImplicit)
+    int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType, bool isImplicit, bool isStartAsCaller)
 {
     auto abilityInfo = abilityRequest.abilityInfo;
     auto type = abilityInfo.type;
@@ -2375,8 +2375,9 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
             return result;
         }
     }
-
-    UpdateCallerInfo(abilityRequest.want, abilityRequest.callerToken);
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, abilityRequest.callerToken);
+    }
     return ERR_OK;
 }
 
@@ -2701,7 +2702,7 @@ int AbilityManagerService::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sess
 
 int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType, bool checkSystemCaller, bool isImplicit,
-    bool isDlp)
+    bool isDlp, bool isStartAsCaller)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR,
@@ -2772,9 +2773,6 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
-    if (!UriUtils::GetInstance().CheckNonImplicitShareFileUri(abilityRequest)) {
-        return ERR_SHARE_FILE_URI_NON_IMPLICITLY;
-    }
 
     auto abilityInfo = abilityRequest.abilityInfo;
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
@@ -2782,8 +2780,8 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
     result = isDlp ? IN_PROCESS_CALL(
-        CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType, isImplicit)) :
-        CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType, isImplicit);
+        CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType, isImplicit, isStartAsCaller)) :
+        CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType, isImplicit, isStartAsCaller);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckOptExtensionAbility error.");
         eventInfo.errCode = result;
@@ -2807,7 +2805,9 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-    UpdateCallerInfo(abilityRequest.want, callerToken);
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start extension begin, name is %{public}s.", abilityInfo.name.c_str());
     eventInfo.errCode = connectManager->StartAbility(abilityRequest);
     if (eventInfo.errCode != ERR_OK) {
