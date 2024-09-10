@@ -576,11 +576,6 @@ napi_value SetResultPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
         [](napi_env env, void *data) {
             TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
-            if (asyncCallbackInfo == nullptr) {
-                TAG_LOGE(AAFwkTag::FA, "null asyncCallbackInfo");
-                return;
-            }
-
             if (asyncCallbackInfo->ability != nullptr) {
                 asyncCallbackInfo->ability->SetResult(
                     asyncCallbackInfo->param.requestCode, asyncCallbackInfo->param.want);
@@ -593,10 +588,6 @@ napi_value SetResultPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
         [](napi_env env, napi_status status, void *data) {
             TAG_LOGI(AAFwkTag::FA, "complete called");
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
-            if (asyncCallbackInfo == nullptr) {
-                TAG_LOGE(AAFwkTag::FA, "null asyncCallbackInfo");
-                return;
-            }
             napi_value result = nullptr;
             napi_get_null(env, &result);
             napi_resolve_deferred(env, asyncCallbackInfo->deferred, result);
@@ -1063,11 +1054,6 @@ void GetDataAbilityHelperAsyncCompleteCB(napi_env env, napi_status status, void 
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     DataAbilityHelperCB *dataAbilityHelperCB = static_cast<DataAbilityHelperCB *>(data);
-    if (dataAbilityHelperCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelperCB");
-        return;
-    }
-
     std::unique_ptr<DataAbilityHelperCB> callbackPtr {dataAbilityHelperCB};
     napi_value uri = nullptr;
     napi_value callback = nullptr;
@@ -1100,11 +1086,6 @@ void GetDataAbilityHelperPromiseCompleteCB(napi_env env, napi_status status, voi
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     DataAbilityHelperCB *dataAbilityHelperCB = static_cast<DataAbilityHelperCB *>(data);
-    if (dataAbilityHelperCB == nullptr) {
-        TAG_LOGI(AAFwkTag::FA, "null dataAbilityHelperCB");
-        return;
-    }
-
     napi_value uri = nullptr;
     napi_value result = nullptr;
     napi_get_reference_value(env, dataAbilityHelperCB->uri, &uri);
@@ -1218,11 +1199,6 @@ void CreateContinueAsyncWork(napi_env env, napi_value &resourceName, AsyncCallba
         [](napi_env env, void *data) {
             TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
-            if (asyncCallbackInfo == nullptr) {
-                TAG_LOGE(AAFwkTag::FA, "null asyncCallbackInfo");
-                return;
-            }
-
             if (asyncCallbackInfo->ability != nullptr) {
                 asyncCallbackInfo->ability->ContinueAbility(asyncCallbackInfo->optionInfo.deviceId);
             } else {
@@ -1233,10 +1209,6 @@ void CreateContinueAsyncWork(napi_env env, napi_value &resourceName, AsyncCallba
         [](napi_env env, napi_status status, void *data) {
             TAG_LOGI(AAFwkTag::FA, "main event thread end");
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
-            if (asyncCallbackInfo == nullptr) {
-                TAG_LOGE(AAFwkTag::FA, "null asyncCallbackInfo");
-                return;
-            }
             napi_value callback = nullptr;
             napi_value undefined = nullptr;
             napi_value result[ARGS_TWO] = {nullptr};
@@ -1337,11 +1309,7 @@ napi_value ContinueAbilityPromise(napi_env env, napi_value *args, AsyncCallbackI
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             TAG_LOGI(AAFwkTag::FA, "execute called");
-            AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
-            if (asyncCallbackInfo == nullptr) {
-                TAG_LOGE(AAFwkTag::FA, "null asyncCallbackInfo");
-                return;
-            }
+            AsyncCallbackInfo *asyncCallbackInfo = (AsyncCallbackInfo *)data;
             if (asyncCallbackInfo->ability != nullptr) {
                 asyncCallbackInfo->ability->ContinueAbility(asyncCallbackInfo->optionInfo.deviceId);
             } else {
@@ -1351,11 +1319,7 @@ napi_value ContinueAbilityPromise(napi_env env, napi_value *args, AsyncCallbackI
         },
         [](napi_env env, napi_status status, void *data) {
             TAG_LOGI(AAFwkTag::FA, "complete called");
-            AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
-            if (asyncCallbackInfo == nullptr) {
-                TAG_LOGE(AAFwkTag::FA, "null asyncCallbackInfo");
-                return;
-            }
+            AsyncCallbackInfo *asyncCallbackInfo = (AsyncCallbackInfo *)data;
             napi_value result = nullptr;
             napi_get_null(env, &result);
             napi_resolve_deferred(env, asyncCallbackInfo->deferred, result);
