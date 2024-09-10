@@ -412,6 +412,14 @@ int32_t AppMgrService::GetAllRenderProcesses(std::vector<RenderProcessInfo> &inf
     return appMgrServiceInner_->GetAllRenderProcesses(info);
 }
 
+int AppMgrService::GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetAllChildrenProcesses(info);
+}
+
 int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
 {
     if (!IsReady()) {

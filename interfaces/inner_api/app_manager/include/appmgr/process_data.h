@@ -66,6 +66,7 @@ struct ProcessData : public Parcelable {
     bool isTestMode = false; // Indicates whether the process is started by aa test
     int32_t exitReason = 0;
     std::string exitMsg = "";
+    int32_t childUid = -1;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

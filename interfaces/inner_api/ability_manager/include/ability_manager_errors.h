@@ -575,6 +575,26 @@ enum {
      */
     ERR_NOT_SUPPORT_BACK_TO_CALLER = 2097263,
 
+    /*
+     * Result (2097264) for not support child process.
+     */
+    ERR_NOT_SUPPORT_CHILD_PROCESS = 2097264,
+
+    /*
+     * Result (2097265) for already in child process.
+     */
+    ERR_ALREADY_IN_CHILD_PROCESS = 2097265,
+
+    /*
+     * Result (2097266) for child process reach limit.
+     */
+    ERR_CHILD_PROCESS_REACH_LIMIT = 2097266,
+
+    /*
+     * Result (2097268) for native child process reach limit.
+     */
+    ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS = 2097268,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

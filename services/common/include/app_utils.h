@@ -24,6 +24,7 @@ namespace OHOS {
 namespace AAFwk {
 constexpr const int32_t DEFAULT_MAX_EXT_PER_PROC = 10;
 constexpr const int32_t DEFAULT_MAX_EXT_PER_DEV = 100;
+constexpr const int32_t DEFAULT_MAX_CHILD_PROCESS = 0;
 template<typename T>
 class DeviceConfiguration {
 public:
@@ -52,13 +53,16 @@ public:
     bool IsLaunchEmbededUIAbility();
     bool IsSupportNativeChildProcess();
     bool IsAllowResidentInExtremeMemory(const std::string& bundleName, const std::string& abilityName = "");
+    bool IsAllowNativeChildProcess(const std::string &appIdentifier);
     int32_t GetLimitMaximumExtensionsPerProc();
     int32_t GetLimitMaximumExtensionsPerDevice();
     std::string GetCacheExtensionTypeList();
     bool IsAllowStartAbilityWithoutCallerToken(const std::string& bundleName, const std::string& abilityName);
+    int32_t MaxChildProcess();
 
 private:
     void LoadResidentProcessInExtremeMemory();
+    void LoadAllowNativeChildProcessApps();
     void LoadStartAbilityWithoutCallerToken();
     AppUtils();
     volatile bool isSceneBoard_ = false;
@@ -78,10 +82,13 @@ private:
     volatile DeviceConfiguration<bool> isSupportNativeChildProcess_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
+    DeviceConfiguration<std::vector<std::string>>
+        allowStartNativeProcessApps_ = {false, {}};
     volatile DeviceConfiguration<int32_t> limitMaximumExtensionsPerProc_ = {false, DEFAULT_MAX_EXT_PER_PROC};
     volatile DeviceConfiguration<int32_t> limitMaximumExtensionsPerDevice_ = {false, DEFAULT_MAX_EXT_PER_DEV};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         startAbilityWithoutCallerToken_ = {false, {}};
+    volatile DeviceConfiguration<int32_t> maxChildProcess_ = {false, DEFAULT_MAX_CHILD_PROCESS};
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk

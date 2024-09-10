@@ -560,6 +560,9 @@ public:
 
     const std::list<std::shared_ptr<ApplicationInfo>> GetAppInfoList();
 
+    void SetAppIdentifier(const std::string &appIdentifier);
+    const std::string &GetAppIdentifier() const;
+
     inline const std::shared_ptr<ApplicationInfo> GetApplicationInfo()
     {
         return appInfo_;
@@ -734,6 +737,7 @@ public:
     void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
+    int32_t GetChildProcessCount();
 
     void SetPreloadState(PreloadState state);
 
@@ -931,6 +935,7 @@ private:
     bool isLauncherApp_;
     std::string mainAppName_;
     int restartResidentProcCount_ = 0;
+    std::string appIdentifier_;
 
     mutable std::mutex specifiedMutex_;
     int32_t specifiedRequestId_ = -1;

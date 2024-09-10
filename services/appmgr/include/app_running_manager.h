@@ -301,6 +301,7 @@ public:
 
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByChildProcessPid(const pid_t pid);
     std::shared_ptr<ChildProcessRecord> OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
+    bool IsChildProcessReachLimit(uint32_t accessTokenId);
 
     /**
      * @brief Obtain number of app through bundlename.

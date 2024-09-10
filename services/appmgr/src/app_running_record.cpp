@@ -363,6 +363,16 @@ const std::list<std::shared_ptr<ApplicationInfo>> AppRunningRecord::GetAppInfoLi
     return appInfoList;
 }
 
+void AppRunningRecord::SetAppIdentifier(const std::string &appIdentifier)
+{
+    appIdentifier_ = appIdentifier;
+}
+
+const std::string &AppRunningRecord::GetAppIdentifier() const
+{
+    return appIdentifier_;
+}
+
 const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> AppRunningRecord::GetAbilities()
 {
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilitysMap;
@@ -2157,6 +2167,12 @@ std::map<int32_t, std::shared_ptr<ChildProcessRecord>> AppRunningRecord::GetChil
 {
     std::lock_guard lock(childProcessRecordMapLock_);
     return childProcessRecordMap_;
+}
+
+int32_t AppRunningRecord::GetChildProcessCount()
+{
+    std::lock_guard lock(childProcessRecordMapLock_);
+    return childProcessRecordMap_.size();
 }
 
 void AppRunningRecord::SetJITEnabled(const bool jitEnabled)

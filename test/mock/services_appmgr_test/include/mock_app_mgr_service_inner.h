@@ -48,6 +48,7 @@ public:
     MOCK_METHOD1(IsBackgroundRunningRestricted, int32_t(const std::string&));
     MOCK_METHOD1(GetAllRunningProcesses, int32_t(std::vector<RunningProcessInfo>&));
     MOCK_METHOD1(GetAllRenderProcesses, int32_t(std::vector<RenderProcessInfo>&));
+    MOCK_METHOD1(GetAllChildrenProcesses, int(std::vector<ChildProcessInfo>&));
     MOCK_METHOD1(RegisterAppStateCallback, void(const sptr<IAppStateCallback>& callback));
     MOCK_METHOD0(StopAllProcess, void());
     MOCK_CONST_METHOD0(QueryAppSpawnConnectionState, SpawnConnectionState());

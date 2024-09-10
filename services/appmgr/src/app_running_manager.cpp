@@ -20,6 +20,7 @@
 #include "iremote_object.h"
 
 #include "appexecfwk_errors.h"
+#include "app_utils.h"
 #include "common_event_support.h"
 #include "exit_resident_process_manager.h"
 #include "hilog_tag_wrapper.h"
@@ -91,6 +92,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     appRecord->SetSingleton(bundleInfo.singleton);
     appRecord->SetSignCode(signCode);
     appRecord->SetJointUserId(bundleInfo.jointUserId);
+    appRecord->SetAppIdentifier(bundleInfo.signatureInfo.appIdentifier);
     {
         std::lock_guard guard(runningRecordMapMutex_);
         appRunningRecordMap_.emplace(recordId, appRecord);
@@ -1265,6 +1267,22 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByChildP
         return iter->second;
     }
     return nullptr;
+}
+
+bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    int32_t childCount = 0;
+    std::lock_guard guard(runningRecordMapMutex_);
+    for (auto &pair : appRunningRecordMap_) {
+        auto appRecord = pair.second;
+        if (!appRecord || !appRecord->GetApplicationInfo() ||
+            accessTokenId != appRecord->GetApplicationInfo()->accessTokenId) {
+            continue;
+        }
+        childCount += appRecord->GetChildProcessCount();
+    }
+    return childCount >= AAFwk::AppUtils::GetInstance().MaxChildProcess();
 }
 
 std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote)
