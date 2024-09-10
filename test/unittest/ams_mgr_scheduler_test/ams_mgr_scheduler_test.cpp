@@ -912,7 +912,7 @@ HWTEST_F(AmsMgrSchedulerTest, AttachAppDebug_001, TestSize.Level0)
     amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
     amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
     res = amsMgrScheduler->AttachAppDebug(bundleName);
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
 /**
@@ -931,7 +931,7 @@ HWTEST_F(AmsMgrSchedulerTest, DetachAppDebug_001, TestSize.Level0)
     amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
     amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
     res = amsMgrScheduler->DetachAppDebug(bundleName);
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
 /**
@@ -1210,7 +1210,7 @@ HWTEST_F(AmsMgrSchedulerTest, SetAppWaitingDebug_002, TestSize.Level0)
     const std::string bundleName;
     bool isPersist = true;
     auto iret = amsMgrScheduler->SetAppWaitingDebug(bundleName, isPersist);
-    ASSERT_EQ(iret, 22);
+    ASSERT_EQ(iret, ERR_PERMISSION_DENIED);
 }
 
 /*
@@ -1278,7 +1278,7 @@ HWTEST_F(AmsMgrSchedulerTest, GetWaitingDebugApp_002, TestSize.Level0)
     ASSERT_NE(amsMgrScheduler, nullptr);
     std::vector<std::string> debugInfoList;
     auto iret = amsMgrScheduler->GetWaitingDebugApp(debugInfoList);
-    ASSERT_EQ(iret, 22);
+    ASSERT_EQ(iret, ERR_PERMISSION_DENIED);
 }
 
 /*
