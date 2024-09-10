@@ -906,7 +906,7 @@ int32_t AmsMgrProxy::DetachAppDebug(const std::string &bundleName)
     return reply.ReadInt32();
 }
 
-void AmsMgrProxy::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
+void AmsMgrProxy::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -918,8 +918,8 @@ void AmsMgrProxy::SetKeepAliveEnableState(const std::string &bundleName, bool en
         TAG_LOGE(AAFwkTag::APPMGR, "Write bundle name fail.");
         return;
     }
-    if (!data.WriteBool(enable)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write flag fail.");
+    if (!data.WriteBool(enable) || !data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write flag or uid fail.");
         return;
     }
     MessageParcel reply;

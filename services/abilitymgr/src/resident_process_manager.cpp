@@ -49,7 +49,7 @@ bool IsMainElementTypeOk(const AppExecFwk::HapModuleInfo &hapModuleInfo, const s
 }
 
 ResidentAbilityInfoGuard::ResidentAbilityInfoGuard(const std::string &bundleName,
-    std::string &abilityName, int32_t userId)
+    const std::string &abilityName, int32_t userId)
 {
     residentId_ = DelayedSingleton<ResidentProcessManager>::GetInstance()->PutResidentAbility(bundleName,
         abilityName, userId);
@@ -63,7 +63,7 @@ ResidentAbilityInfoGuard::~ResidentAbilityInfoGuard()
 }
 
 void ResidentAbilityInfoGuard::SetResidentAbilityInfo(const std::string &bundleName,
-    std::string &abilityName, int32_t userId)
+    const std::string &abilityName, int32_t userId)
 {
     if (residentId_ != -1) {
         return;
@@ -220,7 +220,7 @@ int32_t ResidentProcessManager::SetResidentProcessEnabled(
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Set keep alive enable state.");
-        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, updateEnable));
+        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, updateEnable, 0));
     }
 
     ffrt::submit([self = shared_from_this(), bundleName, localEnable, updateEnable]() {
@@ -305,11 +305,11 @@ void ResidentProcessManager::OnAppStateChanged(const AppInfo &info)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Set keep alive enable state error.");
         return;
     }
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, localEnable));
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, localEnable, 0));
 }
 
 int32_t ResidentProcessManager::PutResidentAbility(const std::string &bundleName,
-    std::string &abilityName, int32_t userId)
+    const std::string &abilityName, int32_t userId)
 {
     std::lock_guard lock(residentAbilityInfoMutex_);
     auto residentId = residentId_++;
@@ -343,6 +343,31 @@ void ResidentProcessManager::RemoveResidentAbility(int32_t residentId)
             return;
         }
     }
+}
+
+bool ResidentProcessManager::GetResidentBundleInfosForUser(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    int32_t userId)
+{
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, false);
+
+    const auto &residentWhiteList = AmsConfigurationParameter::GetInstance().GetResidentWhiteList();
+    if (userId == 0 || residentWhiteList.empty()) {
+        return IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfos(OHOS::AppExecFwk::GET_BUNDLE_DEFAULT,
+            bundleInfos, userId));
+    }
+
+    for (const auto &bundleName: residentWhiteList) {
+        AppExecFwk::BundleInfo bundleInfo;
+        if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(bundleName,
+            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId))) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "failed get bundle info: %{public}s", bundleName.c_str());
+            continue;
+        }
+        bundleInfos.push_back(bundleInfo);
+    }
+
+    return !bundleInfos.empty();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

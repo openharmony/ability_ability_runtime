@@ -38,8 +38,8 @@ public:
     ~ResidentAbilityInfoGuard();
     ResidentAbilityInfoGuard(ResidentAbilityInfoGuard &) = delete;
     void operator=(ResidentAbilityInfoGuard &) = delete;
-    ResidentAbilityInfoGuard(const std::string &bundleName, std::string &abilityName, int32_t userId);
-    void SetResidentAbilityInfo(const std::string &bundleName, std::string &abilityName, int32_t userId);
+    ResidentAbilityInfoGuard(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+    void SetResidentAbilityInfo(const std::string &bundleName, const std::string &abilityName, int32_t userId);
 private:
     int32_t residentId_ = -1;
 };
@@ -69,9 +69,10 @@ public:
     void StartResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos);
     void StartResidentProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
     void OnAppStateChanged(const AppInfo &info);
-    int32_t PutResidentAbility(const std::string &bundleName, std::string &abilityName, int32_t userId);
+    int32_t PutResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
     bool IsResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
     void RemoveResidentAbility(int32_t residentId);
+    bool GetResidentBundleInfosForUser(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
 private:
     bool CheckMainElement(const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &processName,
         std::string &mainElement, std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex, int32_t userId = 0);

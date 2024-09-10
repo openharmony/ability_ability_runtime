@@ -7163,7 +7163,7 @@ void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::Bund
     }
 }
 
-void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
+void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (bundleName.empty()) {
@@ -7184,7 +7184,8 @@ void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, 
 
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
-        if (appRecord != nullptr && appRecord->GetBundleName() == bundleName) {
+        if (appRecord != nullptr && appRecord->GetBundleName() == bundleName &&
+            (uid == 0 || appRecord->GetUid() == uid)) {
             TAG_LOGD(AAFwkTag::APPMGR, "%{public}s update state: %{public}d",
                 bundleName.c_str(), static_cast<int32_t>(enable));
             appRecord->SetKeepAliveEnableState(enable);

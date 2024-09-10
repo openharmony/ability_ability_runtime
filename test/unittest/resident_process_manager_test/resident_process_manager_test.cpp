@@ -272,5 +272,27 @@ HWTEST_F(ResidentProcessManagerTest, SetResidentProcessEnable_002, TestSize.Leve
     std::string callerName = "resident.process.manager.test";
     EXPECT_EQ(manager->SetResidentProcessEnabled(bundleName, callerName, false), ERR_NO_RESIDENT_PERMISSION);
 }
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: PutResidentAbility
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager PutResidentAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify PutResidentAbility
+ */
+HWTEST_F(ResidentProcessManagerTest, PutResidentAbility_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+
+    std::string bundleName = "com.example.resident.process";
+    std::string callerName = "resident.process.manager.test";
+    auto residentId = manager->PutResidentAbility(bundleName, callerName, 0);
+    EXPECT_GE(residentId, 0);
+    EXPECT_TRUE(manager->IsResidentAbility(bundleName, callerName, 0));
+    manager->RemoveResidentAbility(residentId);
+    EXPECT_TRUE(manager->residentAbilityInfos_.empty());
+}
 }  // namespace AAFwk
 }  // namespace OHOS
