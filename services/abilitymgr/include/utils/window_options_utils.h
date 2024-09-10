@@ -17,6 +17,9 @@
 #define OHOS_ABILITY_RUNTIME_WINDOW_OPTIONS_UTILS_H
 
 #include "ability_info.h"
+#include "iremote_object.h"
+#include "start_options.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
