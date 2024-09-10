@@ -400,6 +400,7 @@ void AbilityManagerService::InitPushTask()
             handler->SubmitTask(task, "BootCompletedDelayTask", BOOTEVENT_COMPLETED_DELAY_TIME);
         } else {
             WatchParameter(BOOTEVENT_BOOT_COMPLETED, ApplicationUtil::AppFwkBootEventCallback, nullptr);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "init call, InitPushTask suc");
         }
     };
     if (!ParseJsonFromBoot(SUSPEND_SERVICE_CONFIG_FILE)) {
