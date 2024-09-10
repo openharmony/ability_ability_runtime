@@ -25,7 +25,7 @@
 #undef private
 #undef protected
 
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "mock_ability_token.h"
 #include "ability_handler.h"
 #include "ohos_application.h"
@@ -754,7 +754,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0200, TestSize.Level1)
 
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
 
@@ -770,7 +770,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0200, TestSize.Level1)
 
     jsUIServiceExtensionContext.OnStartAbilityByType(env, info);
 
-    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 
     TAG_LOGI(AAFwkTag::TEST, "OnStartAbilityByType_0200 end");
 }
@@ -786,7 +786,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0300, TestSize.Level1)
 
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
 
@@ -802,7 +802,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0300, TestSize.Level1)
 
     jsUIServiceExtensionContext.OnStartAbilityByType(env, info);
 
-    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 
     TAG_LOGI(AAFwkTag::TEST, "OnStartAbilityByType_0300 end");
 }
