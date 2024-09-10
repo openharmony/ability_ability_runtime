@@ -44,6 +44,11 @@ public:
     void AddCallRecord(const sptr<IAbilityConnection> &connect, const std::shared_ptr<CallRecord> &callRecord);
     std::shared_ptr<CallRecord> GetCallRecord(const sptr<IAbilityConnection> &connect) const;
     bool RemoveCallRecord(const sptr<IAbilityConnection> &connect);
+    std::shared_ptr<CallRecord> FindCallRecordMap(sptr<IRemoteObject> object) const;
+    std::shared_ptr<CallRecord> RemoveCallRecordMap(sptr<IRemoteObject> object);
+    void InsertCallRecordMap(sptr<IRemoteObject> object, std::shared_ptr<CallRecord> callRecord);
+    CallMapType CopyCallRecordMap() const;
+    bool EmptyCallRecordMap();
     bool CallRequestDone(const sptr<IRemoteObject> &callStub);
     void Dump(std::vector<std::string> &info) const;
     bool IsNeedToCallRequest() const;
@@ -56,6 +61,7 @@ private:
 
 private:
     CallMapType callRecordMap_;
+    mutable std::mutex callRecordMapLock_;
     RecipientMapType deathRecipientMap_;
 
     DISALLOW_COPY_AND_MOVE(CallContainer);
