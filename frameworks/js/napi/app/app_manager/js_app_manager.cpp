@@ -346,6 +346,7 @@ private:
                 task.Reject(env, CreateJsError(env, ret, "kill process failed."));
             }
         };
+
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessByBundleName",
@@ -380,7 +381,7 @@ private:
                 return;
             }
             if (abilityManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                TAG_LOGW(AAFwkTag::APPMGR, "null abilityManager");
                 task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
                 return;
             }
@@ -406,24 +407,25 @@ private:
         int32_t errCode = 0;
         int32_t accountId = -1;
         std::string bundleName;
-        // only support 2 or 3 or 4 params
+
+        // only support 2 or 3 params
         if (argc != ARGC_TWO && argc != ARGC_THREE) {
             TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             errCode = ERR_NOT_OK;
         } else {
-            if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "convert bundleName failed");
+            if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "Parse bundleName failed");
                 errCode = ERR_NOT_OK;
             }
-            if (!ConvertFromJsValue(env, argv[INDEX_ONE], accountId)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "convert userId failed");
+            if (!ConvertFromJsValue(env, argv[1], accountId)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "Parse userId failed");
                 errCode = ERR_NOT_OK;
             }
         }
 
         NapiAsyncTask::CompleteCallback complete =
-            [appManager = appManager_, bundleName, accountId, errCode](
-                napi_env env, NapiAsyncTask &task, int32_t status) {
+            [appManager = appManager_, bundleName, accountId, errCode](napi_env env, NapiAsyncTask &task,
+                int32_t status) {
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;
@@ -452,7 +454,6 @@ private:
             TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             errCode = ERR_NOT_OK;
         }
-
         NapiAsyncTask::CompleteCallback complete =
             [abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (errCode != 0) {
@@ -460,7 +461,7 @@ private:
                     return;
                 }
                 if (abilityManager == nullptr) {
-                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    TAG_LOGW(AAFwkTag::APPMGR, "null abilityManager");
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
                     return;
                 }
@@ -485,7 +486,6 @@ private:
             TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             errCode = ERR_NOT_OK;
         }
-
         NapiAsyncTask::CompleteCallback complete =
             [abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (errCode != 0) {
