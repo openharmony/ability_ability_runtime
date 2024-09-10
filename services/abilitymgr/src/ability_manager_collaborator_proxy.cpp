@@ -480,7 +480,7 @@ void AbilityManagerCollaboratorProxy::NotifyMissionBindPid(int32_t missionId, in
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
         return;
