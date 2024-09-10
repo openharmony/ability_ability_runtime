@@ -63,6 +63,13 @@ public:
     MOCK_METHOD4(PreloadApplication, int32_t(const std::string&, int32_t, AppExecFwk::PreloadMode, int32_t));
     MOCK_METHOD4(StartNativeChildProcess, int32_t(const pid_t hostPid, const std::string &libName,
         int32_t childProcessCount, const sptr<IRemoteObject> &callback));
+    MOCK_METHOD1(DumpIpcAllStart, int(std::string& result));
+    MOCK_METHOD1(DumpIpcAllStop, int(std::string& result));
+    MOCK_METHOD1(DumpIpcAllStat, int(std::string& result));
+    MOCK_METHOD2(DumpIpcStart, int(const int32_t pid, std::string& result));
+    MOCK_METHOD2(DumpIpcStop, int(const int32_t pid, std::string& result));
+    MOCK_METHOD2(DumpIpcStat, int(const int32_t pid, std::string& result));
+    MOCK_METHOD2(DumpFfrt, int(const std::vector<int32_t>& pid, std::string& result));
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
     {}
 
