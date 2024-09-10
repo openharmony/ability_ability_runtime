@@ -383,6 +383,15 @@ public:
     virtual int32_t GetAllRenderProcesses(std::vector<RenderProcessInfo> &info);
 
     /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info);
+
+    /**
      * NotifyMemoryLevel, Notify applications background the current memory level.
      *
      * @param level, current memory level.
@@ -990,12 +999,12 @@ public:
     /**
      * Start child process, called by ChildProcessManager.
      *
-     * @param hostPid Host process pid.
+     * @param callingPid Calling process pid.
      * @param childPid Created child process pid.
      * @param request Child process start request params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartChildProcess(const pid_t hostPid, pid_t &childPid, const ChildProcessRequest &request);
+    virtual int32_t StartChildProcess(const pid_t callingPid, pid_t &childPid, const ChildProcessRequest &request);
 
     /**
      * Get child process record for self.
@@ -1284,6 +1293,8 @@ private:
 
     void GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<RenderProcessInfo> &info);
 
+    void GetChildrenProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<ChildProcessInfo> &info);
+
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
 
@@ -1309,13 +1320,15 @@ private:
     void ApplicationTerminatedSendProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    int32_t StartChildProcessPreCheck(const pid_t callingPid);
+    int32_t StartChildProcessPreCheck(pid_t callingPid, int32_t childProcessType);
 
     int32_t StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args);
+        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args,
+        const ChildProcessOptions &options);
 
     int32_t GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
+        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info,
+        bool isCallFromGetChildrenProcesses = false);
 
     void OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
 

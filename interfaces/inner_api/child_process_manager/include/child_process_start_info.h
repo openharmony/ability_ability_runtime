@@ -26,6 +26,7 @@ struct ChildProcessStartInfo {
     std::string moduleName;
     std::string srcEntry;
     std::string hapPath;
+    std::string entryFunc;
     bool isEsModule = true;
     sptr<IRemoteObject> ipcObj;
 };

@@ -44,6 +44,10 @@ constexpr const char* CONFIG_PATH = "/etc/ability_runtime/resident_process_in_ex
 constexpr const char* RESIDENT_PROCESS_IN_EXTREME_MEMORY = "residentProcessInExtremeMemory";
 constexpr const char* BUNDLE_NAME = "bundleName";
 constexpr const char* ABILITY_NAME = "abilityName";
+constexpr const char* KEY_IDENTIFIER = "identifier";
+constexpr const char* ALLOW_NATIVE_CHILD_PROCESS_APPS_CONFIG_PATH =
+    "/etc/ability_runtime/allow_native_child_process_apps.json";
+constexpr const char* KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS = "allowNativeChildProcessApps";
 constexpr const char* LAUNCH_EMBEDED_UI_ABILITY = "const.abilityms.launch_embeded_ui_ability";
 const std::string SUPPROT_NATIVE_CHILD_PROCESS = "persist.sys.abilityms.start_native_child_process";
 const std::string LIMIT_MAXIMUM_EXTENSIONS_OF_PER_PROCESS =
@@ -55,6 +59,7 @@ constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN = "/system/etc/start_abi
 constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_PATH =
     "/etc/ability_runtime/start_ability_without_caller_token.json";
 constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_TITLE = "startAbilityWithoutCallerToken";
+constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
 }
 
 AppUtils::~AppUtils() {}
@@ -275,6 +280,41 @@ void AppUtils::LoadResidentProcessInExtremeMemory()
     }
 }
 
+bool AppUtils::IsAllowNativeChildProcess(const std::string &appIdentifier)
+{
+    TAG_LOGD(AAFwkTag::DEFAULT, "appId:%{private}s", appIdentifier.c_str());
+    if (!allowStartNativeProcessApps_.isLoaded) {
+        LoadAllowNativeChildProcessApps();
+        allowStartNativeProcessApps_.isLoaded = true;
+    }
+    auto &apps = allowStartNativeProcessApps_.value;
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}zu", apps.size());
+    return std::find(apps.begin(), apps.end(), appIdentifier) != apps.end();
+}
+
+void AppUtils::LoadAllowNativeChildProcessApps()
+{
+    nlohmann::json object;
+    if (!JsonUtils::GetInstance().LoadConfiguration(ALLOW_NATIVE_CHILD_PROCESS_APPS_CONFIG_PATH, object)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "load child process config failed");
+        return;
+    }
+    if (!object.contains(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get key invalid");
+        return;
+    }
+
+    for (auto &item : object.at(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.contains(KEY_IDENTIFIER) || !jsonObject.at(KEY_IDENTIFIER).is_string()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load identifier failed");
+            return;
+        }
+        std::string identifier = jsonObject.at(KEY_IDENTIFIER).get<std::string>();
+        allowStartNativeProcessApps_.value.emplace_back(identifier);
+    }
+}
+
 int32_t AppUtils::GetLimitMaximumExtensionsPerProc()
 {
     if (!limitMaximumExtensionsPerProc_.isLoaded) {
@@ -347,6 +387,17 @@ void AppUtils::LoadStartAbilityWithoutCallerToken()
         std::string abilityName = jsonObject.at(ABILITY_NAME).get<std::string>();
         startAbilityWithoutCallerToken_.value.emplace_back(std::make_pair(bundleName, abilityName));
     }
+}
+
+int32_t AppUtils::MaxChildProcess()
+{
+    if (!maxChildProcess_.isLoaded) {
+        maxChildProcess_.value =
+            system::GetIntParameter<int32_t>(MAX_CHILD_PROCESS, DEFAULT_MAX_CHILD_PROCESS);
+        maxChildProcess_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "MaxChildProcess: %{public}d", maxChildProcess_.value);
+    return maxChildProcess_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
