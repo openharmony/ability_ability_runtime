@@ -57,7 +57,6 @@ public:
 void AbilityInterceptorTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "AbilityInterceptorTest SetUpTestCase called";
-    AbilityManagerClient::GetInstance()->CleanAllMissions();
     OHOS::DelayedSingleton<SaMgrClient>::DestroyInstance();
 
     OHOS::DelayedSingleton<SaMgrClient>::GetInstance()->RegisterSystemAbility(

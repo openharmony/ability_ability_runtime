@@ -1420,7 +1420,8 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
         RemoveServiceAbility(abilityRecord);
         return;
     }
-    if (!abilityRecord->IsDebugApp()) {
+    bool isDebug = abilityRecord->GetWant().GetBoolParam(DEBUG_APP, false);
+    if (!isDebug) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "IsDebug is false, here is not debug app");
         PostTimeOutTask(abilityRecord, AbilityManagerService::LOAD_TIMEOUT_MSG);
     }
@@ -2926,8 +2927,7 @@ void AbilityConnectManager::HandleProcessFrozen(const std::vector<int32_t> &pidL
             pidSet.count(abilityRecord->GetPid()) > 0 &&
             FROZEN_WHITE_LIST.count(abilityRecord->GetAbilityInfo().bundleName) == 0 &&
             abilityRecord->IsConnectListEmpty() &&
-            !abilityRecord->GetKeepAlive() &&
-            abilityRecord->GetStartId() != 0) { // To be honest, this is expected to be true
+            !abilityRecord->GetKeepAlive()) {
             taskHandler->SubmitTask([weakThis, record = abilityRecord]() {
                     auto connectManager = weakThis.lock();
                     if (record && connectManager) {
