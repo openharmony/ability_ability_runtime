@@ -138,6 +138,7 @@ public:
     const std::map<std::string, std::string>& GetPickerMap() const;
 
     bool InResidentWhiteList(const std::string &bundleName) const;
+    const std::vector<std::string> &GetResidentWhiteList() const;
 
 private:
     AmsConfigurationParameter();
