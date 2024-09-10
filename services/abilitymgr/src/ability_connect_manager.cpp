@@ -1931,7 +1931,6 @@ void AbilityConnectManager::AddConnectDeathRecipient(sptr<IRemoteObject> connect
         });
     if (!connectObject->AddDeathRecipient(deathRecipient)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient failed.");
-        return;
     }
     std::lock_guard guard(recipientMapMutex_);
     recipientMap_.emplace(connectObject, deathRecipient);
