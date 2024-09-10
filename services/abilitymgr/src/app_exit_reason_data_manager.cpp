@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cstdint>
 #include <unistd.h>
 
 #include "accesstoken_kit.h"

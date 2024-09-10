@@ -685,7 +685,7 @@ void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &
     std::shared_ptr<ConnectionRecord> &connectRecord)
 {
     if (targetService == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "null target service.");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null target service");
         return;
     }
     if (targetService->GetConnectRecordList().size() > 1) {
@@ -927,6 +927,7 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     } else if (targetState == AbilityState::INITIAL) {
         abilityRecord = GetExtensionByTokenFromTerminatingMap(token);
     }
+
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
@@ -3053,13 +3054,6 @@ bool AbilityConnectManager::IsCallerValid(const std::shared_ptr<AbilityRecord> &
     return true;
 }
 
-std::shared_ptr<AAFwk::AbilityRecord> AbilityConnectManager::GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token)
-{
-    CHECK_POINTER_AND_RETURN(token, nullptr);
-    CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, nullptr);
-    return uiExtensionAbilityRecordMgr_->GetUIExtensionRootHostInfo(token);
-}
-
 int32_t AbilityConnectManager::GetUIExtensionSessionInfo(const sptr<IRemoteObject> token,
     UIExtensionSessionInfo &uiExtensionSessionInfo)
 {
@@ -3080,6 +3074,13 @@ void AbilityConnectManager::SignRestartAppFlag(const std::string &bundleName)
         }
     }
     AbilityCacheManager::GetInstance().SignRestartAppFlag(bundleName);
+}
+
+std::shared_ptr<AAFwk::AbilityRecord> AbilityConnectManager::GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN(token, nullptr);
+    CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, nullptr);
+    return uiExtensionAbilityRecordMgr_->GetUIExtensionRootHostInfo(token);
 }
 
 bool AbilityConnectManager::AddToServiceMap(const std::string &key, std::shared_ptr<AbilityRecord> abilityRecord)
@@ -3207,7 +3208,7 @@ int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::Abi
             break;
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS, abilityName:%{public}s.", abilityInfo.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
     ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
     return ERR_OK;
 }

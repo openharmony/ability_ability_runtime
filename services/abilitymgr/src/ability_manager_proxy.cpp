@@ -5116,6 +5116,31 @@ int32_t AbilityManagerProxy::GetUIExtensionRootHostInfo(const sptr<IRemoteObject
     return reply.ReadInt32();
 }
 
+int32_t AbilityManagerProxy::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write failed.");
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteBool(isAppRecovery)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write isAppRecovery failed.");
+        return IPC_PROXY_ERR;
+    }
+    auto ret = SendRequest(AbilityManagerInterfaceCode::RESTART_APP, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request is failed, error code: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AbilityManagerProxy::GetUIExtensionSessionInfo(const sptr<IRemoteObject> token,
     UIExtensionSessionInfo &uiExtensionSessionInfo, int32_t userId)
 {
@@ -5154,31 +5179,6 @@ int32_t AbilityManagerProxy::GetUIExtensionSessionInfo(const sptr<IRemoteObject>
         return INNER_ERR;
     }
     uiExtensionSessionInfo = *info;
-    return reply.ReadInt32();
-}
-
-int32_t AbilityManagerProxy::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
-        return IPC_PROXY_ERR;
-    }
-    if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write failed.");
-        return IPC_PROXY_ERR;
-    }
-    if (!data.WriteBool(isAppRecovery)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write isAppRecovery failed.");
-        return IPC_PROXY_ERR;
-    }
-    auto ret = SendRequest(AbilityManagerInterfaceCode::RESTART_APP, data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request is failed, error code: %{public}d", ret);
-        return ret;
-    }
     return reply.ReadInt32();
 }
 
