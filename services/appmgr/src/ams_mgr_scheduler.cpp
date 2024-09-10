@@ -590,13 +590,13 @@ bool AmsMgrScheduler::IsAttachDebug(const std::string &bundleName)
     return amsMgrServiceInner_->IsAttachDebug(bundleName);
 }
 
-void AmsMgrScheduler::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
+void AmsMgrScheduler::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return;
     }
-    amsMgrServiceInner_->SetKeepAliveEnableState(bundleName, enable);
+    amsMgrServiceInner_->SetKeepAliveEnableState(bundleName, enable, uid);
 }
 
 void AmsMgrScheduler::ClearProcessByToken(sptr<IRemoteObject> token)

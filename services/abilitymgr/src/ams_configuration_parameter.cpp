@@ -388,5 +388,10 @@ bool AmsConfigurationParameter::InResidentWhiteList(const std::string &bundleNam
     }
     return false;
 }
+
+const std::vector<std::string> &AmsConfigurationParameter::GetResidentWhiteList() const
+{
+    return residentWhiteList_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

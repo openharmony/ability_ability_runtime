@@ -1114,7 +1114,7 @@ public:
 
     void SetAppAssertionPauseState(bool flag);
 
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -1137,7 +1137,7 @@ public:
     virtual int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
-    
+
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
