@@ -320,6 +320,7 @@ public:
     void SignRestartAppFlag(const std::string &bundleName);
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
+    void UninstallApp(const std::string &bundleName);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t CONNECT_TIMEOUT_MSG = 1;

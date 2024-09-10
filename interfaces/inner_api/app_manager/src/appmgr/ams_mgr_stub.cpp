@@ -698,7 +698,8 @@ int32_t AmsMgrStub::HandleSetKeepAliveEnableState(MessageParcel &data, MessagePa
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto bundleName = data.ReadString();
     auto enable = data.ReadBool();
-    SetKeepAliveEnableState(bundleName, enable);
+    auto uid = data.ReadInt32();
+    SetKeepAliveEnableState(bundleName, enable, uid);
     return NO_ERROR;
 }
 
