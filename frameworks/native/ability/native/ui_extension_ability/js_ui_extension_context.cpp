@@ -211,7 +211,7 @@ napi_value JsUIExtensionContext::OnStartAbility(napi_env env, NapiCallbackInfo& 
             *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
-        *innerErrCode = (unwrapArgc == 1) ? context->StartAbility(want) :
+        *innerErrCode = (unwrapArgc == ARGC_ONE) ? context->StartAbility(want) :
             context->StartAbility(want, startOptions);
     };
 
