@@ -60,6 +60,7 @@ bool FreeInstallManager::IsTopAbility(const sptr<IRemoteObject> &callerToken)
 
     auto type = caller->GetAbilityInfo().type;
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "service or extension");
         return true;
     }
 
@@ -288,6 +289,7 @@ void FreeInstallManager::NotifyFreeInstallResult(int32_t recordId, const Want &w
 
 void FreeInstallManager::HandleOnFreeInstallSuccess(int32_t recordId, FreeInstallInfo &freeInstallInfo, bool isAsync)
 {
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "install success");
     freeInstallInfo.isInstalled = true;
 
     if (isAsync) {
@@ -311,6 +313,7 @@ void FreeInstallManager::HandleOnFreeInstallSuccess(int32_t recordId, FreeInstal
 void FreeInstallManager::HandleOnFreeInstallFail(int32_t recordId, FreeInstallInfo &freeInstallInfo, int resultCode,
     bool isAsync)
 {
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "install failed");
     freeInstallInfo.isInstalled = false;
 
     if (isAsync) {
@@ -388,6 +391,7 @@ void FreeInstallManager::StartAbilityByPreInstall(int32_t recordId, FreeInstallI
             result, "start ability failed");
     }
     IPCSkeleton::SetCallingIdentity(identity);
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "preInstall result: %{public}d", result);
     DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinished(
         recordId, bundleName, abilityName, startTime, result);
 }
@@ -418,12 +422,14 @@ void FreeInstallManager::StartAbilityByOriginalWant(FreeInstallInfo &info, const
     IPCSkeleton::SetCallingIdentity(info.identity);
     int result = ERR_INVALID_VALUE;
     if (info.originalWant) {
+        TAG_LOGI(AAFwkTag::FREE_INSTALL, "StartAbility by originalWant");
         result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(*(info.originalWant),
             info.callerToken, info.userId, info.requestCode);
     } else {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null original want");
     }
     IPCSkeleton::SetCallingIdentity(identity);
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "startAbility result: %{public}d", result);
     auto url = info.want.GetUriString();
     int32_t recordId = GetRecordIdByToken(info.callerToken);
     DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinishedByUrl(recordId,
@@ -465,6 +471,7 @@ int FreeInstallManager::FreeInstallAbilityFromRemote(const Want &want, const spt
 
     auto result = StartFreeInstall(info.want, info.userId, info.requestCode, nullptr);
     if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "StartFreeInstall code: %{public}d", result);
         NotifyDmsCallback(info.want, result);
     }
     return result;
@@ -504,6 +511,7 @@ int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
         want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfo)) &&
         !IN_PROCESS_CALL(bundleMgrHelper->QueryExtensionAbilityInfos(
             want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos))) {
+        TAG_LOGI(AAFwkTag::FREE_INSTALL, "try to StartFreeInstall");
         int result = StartFreeInstall(want, userId, DEFAULT_INVAL_VALUE, callerToken);
         if (result) {
             TAG_LOGE(AAFwkTag::FREE_INSTALL, "startFreeInstall error");
@@ -525,6 +533,7 @@ void FreeInstallManager::OnInstallFinished(int32_t recordId, int resultCode, con
     int32_t userId, bool isAsync)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "resultCode: %{public}d", resultCode);
 
     if (!InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         NotifyDmsCallback(want, resultCode);
@@ -538,6 +547,7 @@ void FreeInstallManager::OnInstallFinished(int32_t recordId, int resultCode, con
 
 void FreeInstallManager::PostUpgradeAtomicServiceTask(int resultCode, const Want &want, int32_t userId)
 {
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "called");
     std::weak_ptr<FreeInstallManager> thisWptr(shared_from_this());
     if (resultCode == ERR_OK) {
         auto updateAtmoicServiceTask = [want, userId, thisWptr, &timeStampMap = timeStampMap_]() {
@@ -563,12 +573,14 @@ void FreeInstallManager::PostUpgradeAtomicServiceTask(int resultCode, const Want
 
 void FreeInstallManager::OnRemoteInstallFinished(int32_t recordId, int resultCode, const Want &want, int32_t userId)
 {
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "finished resultCode:%{public}d", resultCode);
     NotifyFreeInstallResult(recordId, want, resultCode);
 }
 
 int FreeInstallManager::AddFreeInstallObserver(const sptr<IRemoteObject> &callerToken,
     const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
 {
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "called");
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (abilityRecord != nullptr) {
         return DelayedSingleton<FreeInstallObserverManager>::GetInstance()->AddObserver(abilityRecord->GetRecordId(),
@@ -711,6 +723,7 @@ void FreeInstallManager::SetFreeInstallTaskSessionId(const std::string& bundleNa
 void FreeInstallManager::NotifyInsightIntentFreeInstallResult(const Want &want, int resultCode)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "insight install result:%{public}d", resultCode);
     if (resultCode != ERR_OK) {
         RemoveFreeInstallInfo(want.GetElement().GetBundleName(), want.GetElement().GetAbilityName(),
             want.GetStringParam(Want::PARAM_RESV_START_TIME));
