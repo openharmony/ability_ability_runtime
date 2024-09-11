@@ -525,7 +525,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     std::string specifiedProcessFlag = GetSpecifiedProcessFlag(abilityInfo, want);
     std::string processName;
     MakeProcessName(abilityInfo, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag, processName);
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s name:%{public}s-%{public}s processName = %{public}s", __func__, abilityInfo->bundleName.c_str(), abilityInfo->name.c_str()， processName.c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s name:%{public}s-%{public}s processName = %{public}s",
+        __func__, abilityInfo->bundleName.c_str(), abilityInfo->name.c_str(), processName.c_str());
 
     std::shared_ptr<AppRunningRecord> appRecord;
     bool isProcCache = false;
