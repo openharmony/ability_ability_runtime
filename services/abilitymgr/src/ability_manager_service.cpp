@@ -60,6 +60,7 @@
 #include "restart_app_manager.h"
 #include "scene_board_judgement.h"
 #include "server_constant.h"
+#include "session_manager_lite.h"
 #include "softbus_bus_center.h"
 #include "start_ability_handler/start_ability_sandbox_savefile.h"
 #include "start_ability_utils.h"
@@ -12139,24 +12140,52 @@ void AbilityManagerService::ReportCleanSession(const sptr<SessionInfo> &sessionI
 
 void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         return;
     }
     abilityRequest.want.RemoveParam(WANT_PARAMS_HOST_WINDOW_ID_KEY);
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if(callerAbilityRecord != nullptr) {
-        sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();
-        if (callerSessionInfo != nullptr) {
-            if (callerAbilityRecord->GetAbilityInfo().type == AbilityType::PAGE) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "UIAbility Caller");
+        if (callerAbilityRecord->GetAbilityInfo().type == AbilityType::PAGE) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "UIAbility Caller");
+            sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();
+            if (callerSessionInfo != nullptr) {
                 abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, callerSessionInfo->persistentId);
-            } else {
-                abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
+            }          
+        } else if (callerAbilityRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::EXTENSION &&
+                    AAFwk::UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {                                   
+            CHECK_POINTER(abilityRequest.callerToken);
+            auto abilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+            CHECK_POINTER(abilityRecord);
+            auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
+            auto connectManager = GetConnectManagerByUserId(userId);
+            if (connectManager == nullptr) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo manager null, userId:%{public}d", userId);
+                return;
             }
-        }
+            UIExtensionSessionInfo uiExtensionSessionInfo;
+            auto ret = connectManager->GetUIExtensionSessionInfo(abilityRequest.callerToken, uiExtensionSessionInfo);
+            if (ret != ERR_OK) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo get ui extension session info failed");
+                return;
+            }   
+            int32_t mainWindowId = 0;
+            auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().
+                                        GetSceneSessionManagerLiteProxy();
+            CHECK_POINTER(sceneSessionManager);                              
+            auto err = sceneSessionManager->GetRootMainWindowId(static_cast<int32_t>(uiExtensionSessionInfo.hostWindowId),mainWindowId);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo uiExtensionSessionInfo.hostWindowId = %{public}d",
+                uiExtensionSessionInfo.hostWindowId);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo mainWindowId = %{public}d, err = %{public}d", mainWindowId, err);
+            abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, mainWindowId);                      
+        } else {
+            abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
+        }        
     } else {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbilityRecord null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbilityRecord is nullptr");
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "complete");
 }
 
 int32_t AbilityManagerService::TerminateMission(int32_t missionId)
