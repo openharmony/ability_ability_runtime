@@ -579,7 +579,7 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(int32_t pid)
         }
         return true;
     } else {
-        if (diff < FREEZE_TIME_LIMIT) {
+        if (currentTime > FREEZE_TIME_LIMIT && diff < FREEZE_TIME_LIMIT) {
             return true;
         }
         SetFreezeState(pid, AppFreezeState::APPFREEZE_STATE_FREEZE);
