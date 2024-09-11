@@ -410,6 +410,9 @@ enum class AbilityManagerInterfaceCode {
     // start ability only ui ability
     START_ABILITY_ONLY_UI_ABILITY = 1067,
 
+    //terminate UIServiceExtensionAbility
+    TERMINATE_UI_SERVICE_EXTENSION_ABILITY = 1068,
+    
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
