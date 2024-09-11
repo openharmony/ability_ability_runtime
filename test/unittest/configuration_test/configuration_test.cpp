@@ -584,6 +584,49 @@ HWTEST_F(ConfigurationTest, InitDisplayConfig_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitDisplayConfig_0200
+ * @tc.desc: Init display config.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, InitDisplayConfig_0200, TestSize.Level1)
+{
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+
+    int displayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
+    float originDensity;
+    std::string originDirection;
+    auto ret = configUtils->GetDisplayConfig(displayId, originDensity, originDirection);
+    EXPECT_EQ(ret, true);
+
+    configUtils->InitDisplayConfig(nullptr, nullptr, displayId, originDensity, 0);
+
+    AppExecFwk::Configuration originConfig;
+    auto configuration = std::make_shared<Configuration>(originConfig);
+    ASSERT_NE(configuration, nullptr);
+    configUtils->InitDisplayConfig(configuration, nullptr, displayId, originDensity, 0);
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    InitResourceManager(resourceManager);
+    configUtils->InitDisplayConfig(configuration, resourceManager, displayId, originDensity, 0);
+
+    // check configurtion
+    std::string displayIdStr = configuration->GetItem(ConfigurationInner::APPLICATION_DISPLAYID);
+    EXPECT_EQ(displayIdStr, std::to_string(displayId));
+    std::string densityStr = configuration->GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
+    EXPECT_EQ(densityStr, GetDensityStr(originDensity));
+    std::string directionStr = configuration->GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
+    EXPECT_EQ(directionStr, ConfigurationInner::DIRECTION_VERTICAL);
+
+    // check resourcemanager
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager->GetResConfig(*resConfig);
+    EXPECT_EQ(originDensity, resConfig->GetScreenDensity());
+    EXPECT_EQ(ConvertDirection(ConfigurationInner::DIRECTION_VERTICAL), resConfig->GetDirection());
+}
+
+/**
  * @tc.name: UpdateDisplayConfig_0100
  * @tc.desc: Update display config with changed config.
  * @tc.type: FUNC
@@ -660,6 +703,87 @@ HWTEST_F(ConfigurationTest, UpdateDisplayConfig_0200, TestSize.Level1)
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     ASSERT_NE(resourceManager, nullptr);
     configUtils->UpdateDisplayConfig(displayId, configuration, resourceManager, configChanged);
+    EXPECT_EQ(configChanged, false);
+}
+
+/**
+ * @tc.name: UpdateDisplayConfig_0300
+ * @tc.desc: Update display config with changed config.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateDisplayConfig_0300, TestSize.Level1)
+{
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+
+    int displayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
+    float originDensity;
+    std::string originDirection;
+    auto ret = configUtils->GetDisplayConfig(displayId, originDensity, originDirection);
+    EXPECT_EQ(ret, true);
+
+    bool configChanged = false;
+    configChanged = configUtils->UpdateDisplayConfig(
+        nullptr, nullptr, displayId, originDensity, Rosen::DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(configChanged, false);
+
+    AppExecFwk::Configuration originConfig;
+    auto configuration = std::make_shared<Configuration>(originConfig);
+    ASSERT_NE(configuration, nullptr);
+    configChanged = configUtils->UpdateDisplayConfig(
+        configuration, nullptr, displayId, originDensity, Rosen::DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(configChanged, false);
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    InitResourceManager(resourceManager);
+    configChanged = configUtils->UpdateDisplayConfig(
+        configuration, resourceManager, displayId, originDensity, Rosen::DisplayOrientation::PORTRAIT);
+    EXPECT_EQ(configChanged, true);
+
+    // check configurtion
+    std::string densityStr = configuration->GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
+    EXPECT_EQ(densityStr, GetDensityStr(originDensity));
+    std::string directionStr = configuration->GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
+    EXPECT_EQ(directionStr, ConfigurationInner::DIRECTION_VERTICAL);
+
+    // check resourcemanager
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager->GetResConfig(*resConfig);
+    EXPECT_EQ(originDensity, resConfig->GetScreenDensity());
+    EXPECT_EQ(ConvertDirection(ConfigurationInner::DIRECTION_VERTICAL), resConfig->GetDirection());
+}
+
+/**
+ * @tc.name: UpdateDisplayConfig_0400
+ * @tc.desc: Update display config with unchanged config.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConfigurationTest, UpdateDisplayConfig_0400, TestSize.Level1)
+{
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    ASSERT_NE(configUtils, nullptr);
+
+    int displayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
+    float originDensity;
+    std::string originDirection;
+    auto ret = configUtils->GetDisplayConfig(displayId, originDensity, originDirection);
+    EXPECT_EQ(ret, true);
+
+    AppExecFwk::Configuration originConfig;
+    auto configuration = std::make_shared<Configuration>(originConfig);
+    ASSERT_NE(configuration, nullptr);
+
+    // Add configuration.
+    configuration->AddItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI, GetDensityStr(originDensity));
+    configuration->AddItem(
+        displayId, ConfigurationInner::APPLICATION_DIRECTION, ConfigurationInner::DIRECTION_VERTICAL);
+    configuration->AddItem(ConfigurationInner::APPLICATION_DISPLAYID, std::to_string(displayId));
+
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceManager, nullptr);
+    bool configChanged = configUtils->UpdateDisplayConfig(
+        configuration, resourceManager, displayId, originDensity, Rosen::DisplayOrientation::PORTRAIT);
     EXPECT_EQ(configChanged, false);
 }
 } // namespace AAFwk
