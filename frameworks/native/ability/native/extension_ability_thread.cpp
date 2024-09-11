@@ -267,7 +267,7 @@ void ExtensionAbilityThread::HandleExtensionTransaction(
     const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::EXT, "%{public}s Begin". __func__);
+    TAG_LOGI(AAFwkTag::EXT, "%{public}s Begin", __func__);
     if (extensionImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extensionImpl_");
         return;
