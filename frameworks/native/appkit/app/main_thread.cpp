@@ -321,7 +321,7 @@ std::shared_ptr<ApplicationImpl> MainThread::GetApplicationImpl()
 bool MainThread::ConnectToAppMgr()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "${public}s start.", __func__);
+    TAG_LOGD(AAFwkTag::APPKIT, "%{public}s start.", __func__);
     auto object = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed to get app manager service");
