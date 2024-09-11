@@ -1661,7 +1661,8 @@ void AbilityRecord::ConnectAbilityWithWant(const Want &want)
 void AbilityRecord::DisconnectAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "DisconnectAbility, bundle:%{public}s, ability:%{public}s.",
+        abilityInfo_.applicationInfo.bundleName.c_str(), abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->DisconnectAbility(GetWant());
     if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
