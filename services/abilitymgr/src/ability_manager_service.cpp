@@ -3362,6 +3362,39 @@ int AbilityManagerService::TerminateAbility(const sptr<IRemoteObject> &token, in
     return TerminateAbilityWithFlag(token, resultCode, resultWant, true);
 }
 
+int32_t AbilityManagerService::TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!VerificationAllToken(token)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s verificationAllToken failed", __func__);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!IsCallerSceneBoard()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard, no allowed");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
+    
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+
+    auto type = abilityRecord->GetAbilityInfo().type;
+    auto extensionAbilityType = abilityRecord->GetAbilityInfo().extensionAbilityType;
+
+    if (type != AppExecFwk::AbilityType::EXTENSION  ||
+        extensionAbilityType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+            return ERR_INVALID_VALUE;
+    }
+    
+    auto userId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    auto connectManager = GetConnectManagerByUserId(userId);
+    if (!connectManager) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null. userId=%{public}d", userId);
+        return ERR_INVALID_VALUE;
+    }
+    return connectManager->TerminateAbility(token);    
+}
+
 int AbilityManagerService::BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
     const Want *resultWant, int64_t callerRequestCode)
 {
