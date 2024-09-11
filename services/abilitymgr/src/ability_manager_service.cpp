@@ -11949,20 +11949,6 @@ void AbilityManagerService::RemovePreStartSession(const std::string& sessionId)
     preStartSessionMap_.erase(sessionId);
 }
 
-bool AbilityManagerService::IsAtomicServiceUrl(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int requestCode)
-{
-    std::string url = want.GetUriString();
-    bool isAtomicServiceShortUrl = false;
-#ifdef APP_DOMAIN_VERIFY_ENABLED
-    isAtomicServiceShortUrl = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance()->IsAtomicServiceUrl(url);
-#endif
-    if (!isAtomicServiceShortUrl) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "not atomic service short url");
-    }
-    return isAtomicServiceShortUrl;
-}
-
 ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
     int32_t userId, int requestCode)
 {
@@ -11970,7 +11956,7 @@ ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> ca
 
     std::string callerBundleName;
     Want convertedWant = want;
-    if (!IsAtomicServiceUrl(want, callerToken, userId, requestCode) ||
+    if (!WantUtils::IsAtomicServiceUrl(want, callerToken, userId, requestCode) ||
         WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK ||
         WantUtils::ConvertToExplicitWant(convertedWant) != ERR_OK ||
         freeInstallManager_ == nullptr) {

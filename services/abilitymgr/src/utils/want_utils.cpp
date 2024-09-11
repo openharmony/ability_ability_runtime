@@ -67,5 +67,19 @@ int32_t  WantUtils::ConvertToExplicitWant(Want& want)
 #endif
     return retCode;
 }
+
+bool WantUtils::IsAtomicServiceUrl(const Want& want, sptr<IRemoteObject> callerToken,
+    int32_t userId, int requestCode)
+{
+    std::string url = want.GetUriString();
+    bool isAtomicServiceShortUrl = false;
+#ifdef APP_DOMAIN_VERIFY_ENABLED
+    isAtomicServiceShortUrl = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance()->IsAtomicServiceUrl(url);
+#endif
+    if (!isAtomicServiceShortUrl) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not atomic service short url");
+    }
+    return isAtomicServiceShortUrl;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -29,6 +29,8 @@ class WantUtils final {
 public:
     static int32_t ConvertToExplicitWant(Want& want);
     static int32_t GetCallerBundleName(std::string &callerBundleName);
+    static bool IsAtomicServiceUrl(const Want& want, sptr<IRemoteObject> callerToken,
+        int32_t userId, int requestCode);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
