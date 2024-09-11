@@ -25,7 +25,6 @@
 #define private public
 #include "quick_fix_manager_service.h"
 #undef private
-#include "quick_fix_result_info.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
 

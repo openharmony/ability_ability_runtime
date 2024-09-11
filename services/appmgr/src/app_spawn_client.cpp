@@ -18,6 +18,7 @@
 
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
 #include "securec.h"
 
@@ -312,20 +313,20 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         }
     }
 
-    if (!startMsg.extensionSandboxPath.empty()) {
-        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_EXTENSION,
-            startMsg.extensionSandboxPath.c_str());
-        if (ret) {
-            TAG_LOGE(AAFwkTag::APPMGR, "SetExtraExtensionSandboxDirs failed, ret: %{public}d", ret);
-            return ret;
-        }
-    }
-
     if (!startMsg.processType.empty()) {
         ret = AppSpawnReqMsgAddExtInfo(reqHandle, MSG_EXT_NAME_PROCESS_TYPE,
             reinterpret_cast<const uint8_t*>(startMsg.processType.c_str()), startMsg.processType.size());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "AppSpawnReqMsgAddExtInfo failed, ret: %{public}d", ret);
+            return ret;
+        }
+    }
+
+    if (!startMsg.extensionSandboxPath.empty()) {
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_EXTENSION,
+            startMsg.extensionSandboxPath.c_str());
+        if (ret) {
+            TAG_LOGE(AAFwkTag::APPMGR, "SetExtraExtensionSandboxDirs failed, ret: %{public}d", ret);
             return ret;
         }
     }
