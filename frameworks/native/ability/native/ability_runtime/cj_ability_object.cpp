@@ -223,5 +223,10 @@ void CJAbilityObject::Init(AbilityHandle ability) const
     }
     g_cjAbilityFuncs->cjAbilityInit(id_, ability);
 }
+
+int64_t CJAbilityObject::GetId() const
+{
+    return id_;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

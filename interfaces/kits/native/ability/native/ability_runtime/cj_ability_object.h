@@ -99,6 +99,7 @@ public:
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) const;
     int32_t OnContinue(AAFwk::WantParams &wantParams) const;
     void Init(AbilityHandle ability) const;
+    int64_t GetId() const;
 
 private:
     int64_t id_ = 0;

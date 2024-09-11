@@ -27,6 +27,19 @@ namespace ApplicationContextCJ {
 using namespace OHOS::FFI;
 using namespace OHOS::AbilityRuntime;
 
+std::vector<std::shared_ptr<CjAbilityLifecycleCallback>> CJApplicationContext::callbacks_;
+CJApplicationContext* CJApplicationContext::cjApplicationContext_ = nullptr;
+
+CJApplicationContext* CJApplicationContext::GetCJApplicationContext(
+        std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext)
+{
+    if (cjApplicationContext_) {
+        return cjApplicationContext_;
+    }
+    cjApplicationContext_ = FFIData::Create<CJApplicationContext>(applicationContext);
+    return cjApplicationContext_;
+}
+
 int CJApplicationContext::GetArea()
 {
     auto context = applicationContext_.lock();
@@ -47,6 +60,162 @@ std::shared_ptr<AppExecFwk::ApplicationInfo> CJApplicationContext::GetApplicatio
     return context->GetApplicationInfo();
 }
 
+bool CJApplicationContext::IsAbilityLifecycleCallbackEmpty()
+{
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    return callbacks_.empty();
+}
+
+void CJApplicationContext::RegisterAbilityLifecycleCallback(
+    const std::shared_ptr<CjAbilityLifecycleCallback> &abilityLifecycleCallback)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    if (abilityLifecycleCallback == nullptr) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    callbacks_.push_back(abilityLifecycleCallback);
+}
+
+void CJApplicationContext::UnregisterAbilityLifecycleCallback(
+    const std::shared_ptr<CjAbilityLifecycleCallback> &abilityLifecycleCallback)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    auto it = std::find(callbacks_.begin(), callbacks_.end(), abilityLifecycleCallback);
+    if (it != callbacks_.end()) {
+        callbacks_.erase(it);
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityCreate(const int64_t &ability)
+{
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "ability is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityCreate(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnWindowStageCreate(const int64_t &ability, WindowStagePtr windowStage)
+{
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "ability or windowStage is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWindowStageCreate(ability, windowStage);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchWindowStageFocus(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWindowStageActive(ability, windowStage);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchWindowStageUnfocus(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWindowStageInactive(ability, windowStage);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnWindowStageDestroy(const int64_t &ability, WindowStagePtr windowStage)
+{
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "ability or windowStage is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWindowStageDestroy(ability, windowStage);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityDestroy(const int64_t &ability)
+{
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityDestroy(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityForeground(const int64_t &ability)
+{
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "ability is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityForeground(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityBackground(const int64_t &ability)
+{
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "ability is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityBackground(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityContinue(const int64_t &ability)
+{
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityContinue(ability);
+        }
+    }
+}
+
 int32_t CJApplicationContext::OnOnEnvironment(void (*cfgCallback)(CConfiguration),
     void (*memCallback)(int32_t), bool isSync, int32_t *errCode)
 {
@@ -57,13 +226,31 @@ int32_t CJApplicationContext::OnOnEnvironment(void (*cfgCallback)(CConfiguration
         return -1;
     }
     if (envCallback_ != nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "envCallback_ is not nullptr.");
+        TAG_LOGD(AAFwkTag::CONTEXT, "envCallback_ is not nullptr.");
         return envCallback_->Register(CJLambda::Create(cfgCallback), CJLambda::Create(memCallback), isSync);
     }
     envCallback_ = std::make_shared<CjEnvironmentCallback>();
     int32_t callbackId = envCallback_->Register(CJLambda::Create(cfgCallback), CJLambda::Create(memCallback), isSync);
     context->RegisterEnvironmentCallback(envCallback_);
-    TAG_LOGD(AAFwkTag::APPKIT, "OnOnEnvironment is end");
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnOnEnvironment is end");
+    return callbackId;
+}
+
+int32_t CJApplicationContext::OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync, int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        return -1;
+    }
+    if (callback_ != nullptr) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "callback_ is not nullptr.");
+        return callback_->Register(cFuncIds, isSync);
+    }
+    callback_ = std::make_shared<CjAbilityLifecycleCallback>();
+    int32_t callbackId = callback_->Register(cFuncIds, isSync);
+    RegisterAbilityLifecycleCallback(callback_);
     return callbackId;
 }
 
@@ -78,13 +265,36 @@ void CJApplicationContext::OnOffEnvironment(int32_t callbackId, int32_t *errCode
     std::weak_ptr<CjEnvironmentCallback> envCallbackWeak(envCallback_);
     auto env_callback = envCallbackWeak.lock();
     if (env_callback == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "env_callback is not nullptr.");
+        TAG_LOGD(AAFwkTag::CONTEXT, "env_callback is not nullptr.");
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "OnOffEnvironment begin");
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnOffEnvironment begin");
     if (!env_callback->UnRegister(callbackId, false)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
+        TAG_LOGE(AAFwkTag::CONTEXT, "call UnRegister failed");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+}
+
+void CJApplicationContext::OnOffAbilityLifecycle(int32_t callbackId, int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    std::weak_ptr<CjAbilityLifecycleCallback> callbackWeak(callback_);
+    auto lifecycle_callback = callbackWeak.lock();
+    if (lifecycle_callback == nullptr) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "env_callback is not nullptr.");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnOffAbilityLifecycle begin");
+    if (!lifecycle_callback->UnRegister(callbackId, false)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "call UnRegister failed");
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
@@ -119,8 +329,8 @@ CApplicationInfo* FFICJApplicationInfo(int64_t id)
     return buffer;
 }
 
-int32_t FFICJApplicationContextOnOn(int64_t id, char* type,
-    void (*cfgCallback)(CConfiguration), void (*memCallback)(int32_t), int32_t *errCode)
+int32_t FFICJApplicationContextOnOnEnvironment(int64_t id, void (*cfgCallback)(CConfiguration),
+    void (*memCallback)(int32_t), int32_t *errCode)
 {
     auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
     if (context == nullptr) {
@@ -128,17 +338,21 @@ int32_t FFICJApplicationContextOnOn(int64_t id, char* type,
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
-    auto typeString = std::string(type);
-    if (typeString == "environment") {
-        return context->OnOnEnvironment(cfgCallback, memCallback, false, errCode);
-    } else {
-        TAG_LOGE(AAFwkTag::CONTEXT, "on function type not match");
+    return context->OnOnEnvironment(cfgCallback, memCallback, false, errCode);
+}
+
+int32_t FFICJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "onAbilityLifecycle null context");
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
+    return context->OnOnAbilityLifecycle(cFuncIds, false, errCode);
 }
 
-void FFICJApplicationContextOnOff(int64_t id, char* type, int32_t callbackId, int32_t *errCode)
+void FFICJApplicationContextOnOff(int64_t id, const char* type, int32_t callbackId, int32_t *errCode)
 {
     auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
     if (context == nullptr) {
@@ -149,11 +363,13 @@ void FFICJApplicationContextOnOff(int64_t id, char* type, int32_t callbackId, in
     auto typeString = std::string(type);
     if (typeString == "environment") {
         return context->OnOffEnvironment(callbackId, errCode);
-    } else {
-        TAG_LOGE(AAFwkTag::CONTEXT, "off function type not match");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
-        return;
     }
+    if (typeString == "abilityLifecycle") {
+        return context->OnOffAbilityLifecycle(callbackId, errCode);
+    }
+    TAG_LOGE(AAFwkTag::CONTEXT, "off function type not match");
+    *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    return;
 }
 }
 }
