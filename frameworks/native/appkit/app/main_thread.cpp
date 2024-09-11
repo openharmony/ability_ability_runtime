@@ -343,7 +343,7 @@ bool MainThread::ConnectToAppMgr()
         TAG_LOGE(AAFwkTag::APPKIT, "failed to iface_cast object to appMgr_");
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "attach to appMGR.");
+    TAG_LOGI(AAFwkTag::APPKIT, "attach to appMGR.");
     appMgr_->AttachApplication(this);
     TAG_LOGD(AAFwkTag::APPKIT, "end");
     return true;
@@ -697,7 +697,8 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
     const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPKIT, "%{public}s called, ability %{public}s, type is %{public}d.", __func__, info.name.c_str(), info.type);
+    TAG_LOGI(AAFwkTag::APPKIT, "%{public}s called, ability %{public}s, type is %{public}d.",
+        __func__, info.name.c_str(), info.type);
 
     if (want != nullptr) {
         AAFwk::Want newWant(*want);
