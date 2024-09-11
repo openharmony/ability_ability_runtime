@@ -2369,6 +2369,7 @@ void AppMgrServiceInner::RegisterAppStateCallback(const sptr<IAppStateCallback>&
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (callback != nullptr) {
         std::lock_guard lock(appStateCallbacksLock_);
+        TAG_LOGI(AAFwkTag::APPMGR, "RegisterAppStateCallback");
         appStateCallbacks_.push_back(
             AppStateCallbackWithUserId { callback, GetUserIdByUid(IPCSkeleton::GetCallingUid()) });
         auto remoteObjedct = callback->AsObject();
@@ -2391,6 +2392,7 @@ void AppMgrServiceInner::RemoveDeadAppStateCallback(const wptr<IRemoteObject> &r
     for (auto it = appStateCallbacks_.begin(); it != appStateCallbacks_.end(); ++it) {
         auto callback = (*it).callback;
         if (callback && callback->AsObject() == remoteObject) {
+            TAG_LOGI(AAFwkTag::APPMGR, "RemoveDeadAppStateCallback");
             appStateCallbacks_.erase(it);
             break;
         }
@@ -3374,9 +3376,12 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     for (const auto &token : appRecord->GetAbilities()) {
         abilityTokens.emplace_back(token.first);
     }
-    for (const auto &item : appStateCallbacks_) {
-        if (item.callback != nullptr) {
-            item.callback->OnAppRemoteDied(abilityTokens);
+    {
+        std::lock_guard lock(appStateCallbacksLock_);
+        for (const auto &item : appStateCallbacks_) {
+            if (item.callback != nullptr) {
+                item.callback->OnAppRemoteDied(abilityTokens);
+            }
         }
     }
     ClearData(appRecord);
