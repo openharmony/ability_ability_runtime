@@ -122,7 +122,8 @@ HWTEST_F(ExtensionRecordManagerTest, GetCallerTokenList_0100, TestSize.Level1)
 
     std::list<sptr<IRemoteObject>> callerList;
     extRecordMgr->GetCallerTokenList(abilityRecord, callerList);
-    EXPECT_EQ(callerList.size(), 0);
+    EXPECT_EQ(callerList.size(), 1);
+    EXPECT_EQ(callerList.front(), callerToken);
 
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
