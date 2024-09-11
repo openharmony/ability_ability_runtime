@@ -23,7 +23,6 @@
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include "pixel_map_napi.h"
-#include <memory>
 
 namespace OHOS {
 namespace AbilityRuntime {
