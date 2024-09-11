@@ -37,7 +37,6 @@ const size_t SIZE_ONE = 1;
 const int32_t ABILITYID = 1002;
 const int32_t UID = 10000;
 const int REQUESTCODE = 1008;
-const int ERR_BUNDLE_MANAGER_INVALID_UID = 8521233;
 }  // namespace
 
 class AbilityManagerClientTest : public testing::Test {
@@ -120,7 +119,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_RecordAppExitReason_0100
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RecordAppExitReason_0100 start");
     ExitReason exitReason = { REASON_JS_ERROR, "Js Error." };
     auto result = AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-    EXPECT_EQ(result, ERR_BUNDLE_MANAGER_INVALID_UID);
+    EXPECT_EQ(result, ERR_NAME_NOT_FOUND);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RecordAppExitReason_0100 end");
 }
 
@@ -134,7 +133,7 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_RecordProcessExitReason_
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RecordProcessExitReason_0100 start");
     ExitReason exitReason = { REASON_JS_ERROR, "Js Error." };
     auto result = AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-    EXPECT_EQ(result, ERR_BUNDLE_MANAGER_INVALID_UID);
+    EXPECT_EQ(result, ERR_NAME_NOT_FOUND);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerClient_RecordProcessExitReason_0100 end");
 }
 
