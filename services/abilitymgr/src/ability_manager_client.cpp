@@ -26,8 +26,8 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "scene_board_judgement.h"
-#include "session_manager_lite.h"
 #include "session_info.h"
+#include "session_manager_lite.h"
 #include "status_bar_delegate_interface.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
@@ -43,6 +43,7 @@ static std::unordered_map<Rosen::WSError, int32_t> SCB_TO_MISSION_ERROR_CODE_MAP
 };
 }
 using OHOS::Rosen::SessionManagerLite;
+
 std::shared_ptr<AbilityManagerClient> AbilityManagerClient::instance_ = nullptr;
 std::once_flag AbilityManagerClient::singletonFlag_;
 #ifdef WITH_DLP

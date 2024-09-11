@@ -233,6 +233,7 @@ void SetDisplayOrientationExecuteCallbackWork(napi_env env, void *data)
         asyncCallbackInfo->error_code = NAPI_ERR_ACE_ABILITY;
         return;
     }
+
     int orientation = asyncCallbackInfo->param.paramArgs.GetIntValue("orientation");
     asyncCallbackInfo->ability->SetDisplayOrientation(orientation);
     asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
@@ -287,6 +288,7 @@ static void SetWakeUpScreenAsyncCompleteCB(napi_env env, napi_status status, voi
             setWakeUpScreenCB->cbBase.errCode = NAPI_ERR_ACE_ABILITY;
             break;
         }
+
         setWakeUpScreenCB->cbBase.ability->SetWakeUpScreen(setWakeUpScreenCB->wakeUp);
     } while (false);
 
