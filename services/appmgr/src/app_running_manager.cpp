@@ -266,8 +266,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByAbilit
     return nullptr;
 }
 
-bool AppRunningManager::ProcessExitByBundleName(
-    const std::string &bundleName, std::list<pid_t> &pids)
+bool AppRunningManager::ProcessExitByBundleName(const std::string &bundleName, std::list<pid_t> &pids)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -282,11 +281,10 @@ bool AppRunningManager::ProcessExitByBundleName(
                 return appInfo->bundleName == bundleName;
             };
             auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-            if (iter == appInfoList.end() || pid <= 0) {
-                continue;
+            if (iter != appInfoList.end() && pid > 0) {
+                pids.push_back(pid);
+                appRecord->ScheduleProcessSecurityExit();
             }
-            pids.push_back(pid);
-            appRecord->ScheduleProcessSecurityExit();
         }
     }
 
@@ -340,21 +338,20 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr) {
-            continue;
+        if (appRecord) {
+            auto appInfoList = appRecord->GetAppInfoList();
+            auto isExist = [&bundleName, &uid](const std::shared_ptr<ApplicationInfo> &appInfo) {
+                return appInfo->bundleName == bundleName && appInfo->uid == uid;
+            };
+            auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
+            pid_t pid = appRecord->GetPriorityObject()->GetPid();
+            if (iter != appInfoList.end() && pid > 0) {
+                pids.push_back(pid);
+
+                appRecord->SetKilling();
+                appRecord->ScheduleProcessSecurityExit();
+            }
         }
-        auto appInfoList = appRecord->GetAppInfoList();
-        auto isExist = [&bundleName, &uid](const std::shared_ptr<ApplicationInfo> &appInfo) {
-            return appInfo->bundleName == bundleName && appInfo->uid == uid;
-        };
-        auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-        pid_t pid = appRecord->GetPriorityObject()->GetPid();
-        if (iter == appInfoList.end() || pid <= 0) {
-            continue;
-        }
-        pids.push_back(pid);
-        appRecord->SetKilling();
-        appRecord->ScheduleProcessSecurityExit();
     }
 
     return (pids.empty() ? false : true);
