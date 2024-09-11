@@ -87,6 +87,26 @@ bool ImplicitStartProcessor::IsImplicitStartAction(const Want &want)
     return false;
 }
 
+int ImplicitStartProcessor::CheckImplicitCallPermission(const AbilityRequest& abilityRequest)
+{
+    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+    CHECK_POINTER_AND_RETURN(abilityMgr, ERR_INVALID_VALUE);
+    bool isBackgroundCall = true;
+    if (abilityMgr->IsCallFromBackground(abilityRequest, isBackgroundCall) != ERR_OK) {
+        return ERR_INVALID_VALUE;
+    }
+    if (!isBackgroundCall) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "hap not background");
+        return ERR_OK;
+    }
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyBackgroundCallPermission(isBackgroundCall);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckImplicitCallPermission failed");
+        return CHECK_PERMISSION_FAILED;
+    }
+    return ERR_OK;
+}
+
 int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_t userId, int32_t windowMode,
     const std::string &replaceWantString, bool isAppCloneSelector)
 {
@@ -95,6 +115,10 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     auto sysDialogScheduler = DelayedSingleton<SystemDialogScheduler>::GetInstance();
     CHECK_POINTER_AND_RETURN(sysDialogScheduler, ERR_INVALID_VALUE);
 
+    auto result = CheckImplicitCallPermission(request);
+    if (ERR_OK != result) {
+        return result;
+    }
     std::vector<DialogAppInfo> dialogAppInfos;
     request.want.RemoveParam(APP_CLONE_INDEX);
     int32_t ret = ERR_OK;
