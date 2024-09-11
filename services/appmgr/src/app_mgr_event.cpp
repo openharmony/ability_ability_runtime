@@ -104,7 +104,7 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
         Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(token, nativeTokenInfo);
         eventInfo.callerBundleName = "";
         eventInfo.callerProcessName = nativeTokenInfo.processName;
-        eventInfo.callerPid = IPCSkeleton::GetCallingPid();
+        eventInfo.callerPid = IPCSkeleton::GetCallingRealPid();
     } else {
         if (callerAppRecord->GetBundleName().empty()) {
             eventInfo.callerBundleName = callerAppRecord->GetName();
