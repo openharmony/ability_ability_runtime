@@ -18,7 +18,6 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
-#include <future>
 #include <mutex>
 #include <regex>
 
@@ -655,7 +654,7 @@ void JsAbilityContext::DoConnectUIServiceExtension(napi_env env,
         return;
     }
 
-    auto innerErrCode = context->connectUIServiceExtensionAbility(want, connection);
+    auto innerErrCode = context->ConnectUIServiceExtensionAbility(want, connection);
     AbilityErrorCode errcode = AbilityRuntime::GetJsErrorCodeByNativeError(innerErrCode);
     if (errcode != AbilityErrorCode::ERROR_OK) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed, errcode is %{public}d.", errcode);
