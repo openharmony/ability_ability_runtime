@@ -21,6 +21,7 @@
 #include "ui_ability.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window_stage_impl.h"
+#include "cj_ability_object.h"
 #endif
 
 namespace OHOS {
@@ -166,6 +167,12 @@ public:
      */
     int32_t OnShare(WantParams &wantParams) override;
 
+    /**
+     * @brief Get JsAbility
+     * @return Return the JsAbility
+     */
+    int64_t GetCjAbilityId();
+
 #ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN
 public:
@@ -185,7 +192,7 @@ public:
      * @brief Called after ability stoped.
      * You can override this function to implement your own processing logic.
      */
-    void OnSceneDestroyed() ;
+    void onSceneDestroyed() override;
 
     /**
      * @brief Called after ability restored.
@@ -260,6 +267,12 @@ public:
     void ExecuteInsightIntentMoveToForeground(const Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
+
+    /**
+     * @brief Get CjWindow Stage
+     * @return Returns the current WindowStagePtr.
+     */
+    WindowStagePtr GetCjWindowStagePtr();
 
 protected:
     void DoOnForeground(const Want &want) override;

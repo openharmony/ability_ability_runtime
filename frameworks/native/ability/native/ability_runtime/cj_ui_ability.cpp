@@ -36,6 +36,7 @@
 #include "cj_runtime.h"
 #include "cj_ability_object.h"
 #include "cj_ability_context.h"
+#include "cj_application_context.h"
 #include "time_util.h"
 #ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
@@ -102,6 +103,15 @@ CJUIAbility::~CJUIAbility()
     }
 }
 
+int64_t CJUIAbility::GetCjAbilityId()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (cjAbilityObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
+    }
+    return cjAbilityObj_->GetId();
+}
+
 void CJUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     const std::shared_ptr<OHOSApplication> application, std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
@@ -161,6 +171,15 @@ void CJUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
         delegator->PostPerformStart(CreateADelegatorAbilityProperty());
+    }
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application context");
+        return;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext != nullptr) {
+        appContext->DispatchOnAbilityCreate(cjAbilityObj_->GetId());
     }
 }
 
@@ -238,6 +257,15 @@ void CJUIAbility::OnStopCallback()
         TAG_LOGE(AAFwkTag::UIABILITY, "the service connection is disconnected");
     }
     ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application context");
+        return;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext != nullptr) {
+        appContext->DispatchOnAbilityDestroy(cjAbilityObj_->GetId());
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -272,8 +300,27 @@ void CJUIAbility::OnSceneCreated()
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceCreated");
         delegator->PostPerformScenceCreated(CreateADelegatorAbilityProperty());
     }
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application context");
+        return;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext != nullptr) {
+        WindowStagePtr windowStage = reinterpret_cast<WindowStagePtr>(cjWindowStage_.GetRefPtr());
+        appContext->DispatchOnWindowStageCreate(cjAbilityObj_->GetId(), windowStage);
+    }
 
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
+}
+
+WindowStagePtr CJUIAbility::GetCjWindowStagePtr()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (cjWindowStage_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjWindowStage_");
+    }
+    return reinterpret_cast<WindowStagePtr>(cjWindowStage_.GetRefPtr());
 }
 
 void CJUIAbility::OnSceneRestored()
@@ -312,12 +359,11 @@ void CJUIAbility::OnSceneWillDestroy()
     if (!cjWindowStage_) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null CJWindowStage object");
         return;
-
     }
     cjAbilityObj_->OnSceneWillDestroy(cjWindowStage_.GetRefPtr());
 }
 
-void CJUIAbility::OnSceneDestroyed()
+void CJUIAbility::onSceneDestroyed()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ability is %{public}s", GetAbilityName().c_str());
     UIAbility::onSceneDestroyed();
@@ -340,6 +386,16 @@ void CJUIAbility::OnSceneDestroyed()
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
         delegator->PostPerformScenceDestroyed(CreateADelegatorAbilityProperty());
+    }
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application context");
+        return;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext != nullptr) {
+        WindowStagePtr windowStage = reinterpret_cast<WindowStagePtr>(cjWindowStage_.GetRefPtr());
+        appContext->DispatchOnWindowStageDestroy(cjAbilityObj_->GetId(), windowStage);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -369,7 +425,15 @@ void CJUIAbility::CallOnForegroundFunc(const Want &want)
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformForeground");
         delegator->PostPerformForeground(CreateADelegatorAbilityProperty());
     }
-
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application context");
+        return;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext != nullptr) {
+        appContext->DispatchOnAbilityForeground(cjAbilityObj_->GetId());
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -395,6 +459,15 @@ void CJUIAbility::OnBackground()
         delegator->PostPerformBackground(CreateADelegatorAbilityProperty());
     }
 
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application context");
+        return;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext != nullptr) {
+        appContext->DispatchOnAbilityBackground(cjAbilityObj_->GetId());
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -677,7 +750,15 @@ int32_t CJUIAbility::OnContinue(WantParams &wantParams)
     }
     auto res = cjAbilityObj_->OnContinue(wantParams);
     TAG_LOGD(AAFwkTag::UIABILITY, "end, value: %{public}d", res);
-
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application context");
+        return res;
+    }
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+    if (appContext != nullptr) {
+        appContext->DispatchOnAbilityContinue(cjAbilityObj_->GetId());
+    }
     return res;
 }
 

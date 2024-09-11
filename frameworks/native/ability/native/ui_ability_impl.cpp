@@ -28,6 +28,10 @@
 #include "scene_board_judgement.h"
 #endif
 #include "time_util.h"
+#ifdef CJ_FRONTEND
+#include "cj_ui_ability.h"
+#include "cj_application_context.h"
+#endif
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -406,6 +410,17 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
             return;
         }
         auto applicationContext = abilityContext->GetApplicationContext();
+#ifdef CJ_FRONTEND
+        auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+        auto &cjAbility = static_cast<CJUIAbility &>(*(impl->ability_));
+        if (appContext != nullptr && !appContext->IsAbilityLifecycleCallbackEmpty()) {
+            if (focuseMode) {
+                appContext->DispatchWindowStageFocus(cjAbility.GetCjAbilityId(), cjAbility.GetCjWindowStagePtr());
+            } else {
+                appContext->DispatchWindowStageUnfocus(cjAbility.GetCjAbilityId(), cjAbility.GetCjWindowStagePtr());
+            }
+        }
+#endif
         if (applicationContext == nullptr || applicationContext->IsAbilityLifecycleCallbackEmpty()) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null applicationContext or lifecycleCallback");
             return;
