@@ -665,7 +665,7 @@ void UIAbility::OnBackground()
 
 bool UIAbility::OnPrepareTerminate()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGI(AAFwkTag::UIABILITY, "called");
     return false;
 }
 
