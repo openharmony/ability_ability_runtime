@@ -150,7 +150,7 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_DumpSysState_0100,
 HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetMissionIcon_0100, TestSize.Level1)
 {
     sptr<IRemoteObject> abilityToken = nullptr;
-    std::shared_ptr<OHOS::Media::PixelMap> icon = std::make_shared<OHOS::Media::PixelMap>();
+    std::shared_ptr<OHOS::Media::PixelMap> icon = nullptr;
 
     auto result = client_->SetMissionIcon(abilityToken, icon);
     EXPECT_NE(result, ERR_OK);
