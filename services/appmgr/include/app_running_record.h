@@ -628,6 +628,8 @@ public:
     bool IsKilling() const;
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
+    void SetInstanceKey(const std::string& instanceKey);
+    std::string GetInstanceKey() const;
     void SetSecurityFlag(bool securityFlag);
     bool GetSecurityFlag() const;
 
@@ -983,6 +985,7 @@ private:
     ffrt::mutex renderPidSetLock_;
     AppSpawnStartMsg startMsg_;
     int32_t appIndex_ = 0;
+    std::string instanceKey_;
     bool securityFlag_ = false;
     int32_t requestProcCode_ = 0;
     ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;

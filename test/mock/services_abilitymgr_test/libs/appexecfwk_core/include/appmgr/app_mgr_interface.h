@@ -112,6 +112,27 @@ public:
     virtual int GetAllRunningProcesses(std::vector<RunningProcessInfo>& info) = 0;
 
     /**
+     * GetAllRunningInstanceKeysBySelf, call GetAllRunningInstanceKeysBySelf() through proxy project.
+     * Obtains running instance keys of multi-instance app that are running on the device.
+     *
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys) = 0;
+
+    /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running isntance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @param userId, user id.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys, int32_t userId = -1) = 0;
+
+    /**
      * GetAllRenderProcesses, call GetAllRenderProcesses() through proxy project.
      * Obtains information about render processes that are running on the device.
      *

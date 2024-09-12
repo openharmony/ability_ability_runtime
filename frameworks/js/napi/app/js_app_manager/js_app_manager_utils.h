@@ -33,6 +33,7 @@ using OHOS::AppExecFwk::ProcessData;
 using OHOS::AppExecFwk::RunningProcessInfo;
 using OHOS::AppExecFwk::RunningMultiAppInfo;
 using OHOS::AppExecFwk::RunningAppClone;
+using OHOS::AppExecFwk::RunningMultiInstanceInfo;
 #ifdef SUPPORT_GRAPHICS
 using OHOS::AppExecFwk::AbilityFirstFrameStateData;
 #endif
@@ -74,6 +75,8 @@ napi_value CreateJsRunningAppCloneArray(napi_env env, const std::vector<RunningA
 napi_value CreateJsRunningAppClone(napi_env env, const RunningAppClone &info);
 napi_value CreateJsKeepAliveBundleInfo(napi_env env, const KeepAliveInfo &info);
 napi_value CreateJsKeepAliveBundleInfoArray(napi_env env, const std::vector<KeepAliveInfo>& data);
+napi_value CreateJsRunningMultiInstanceInfosArray(napi_env env, const std::vector<RunningMultiInstanceInfo>& data);
+napi_value CreateJsRunningMultiInstanceInfo(napi_env env, const RunningMultiInstanceInfo &info);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_UTILS_H

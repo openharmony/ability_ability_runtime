@@ -432,6 +432,37 @@ AppMgrResultCode AppMgrClient::GetProcessRunningInformation(AppExecFwk::RunningP
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->GetAllRunningInstanceKeysBySelf(instanceKeys);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAllRunningInstanceKeysBySelf returns result=%{public}d", result);
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys, int32_t userId)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAllRunningInstanceKeysByBundleName returns result=%{public}d", result);
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
 AppMgrResultCode AppMgrClient::GetAllRenderProcesses(std::vector<RenderProcessInfo> &info)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
