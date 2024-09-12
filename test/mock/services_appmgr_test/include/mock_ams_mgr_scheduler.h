@@ -29,9 +29,6 @@ public:
     MOCK_METHOD4(LoadAbility,
         void(const std::shared_ptr<AbilityInfo>& abilityInfo, const std::shared_ptr<ApplicationInfo>& appInfo,
             const std::shared_ptr<AAFwk::Want>& want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam));
-    MOCK_METHOD5(AbilityBehaviorAnalysis,
-        void(const sptr<OHOS::IRemoteObject>& token, const sptr<OHOS::IRemoteObject>& preToken,
-            const int32_t visibility, const int32_t perceptibility, const int32_t connectionState));
     MOCK_METHOD2(TerminateAbility, void(const sptr<IRemoteObject>& token, bool clearMissionFlag));
     MOCK_METHOD2(UpdateAbilityState, void(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD0(Reset, void());

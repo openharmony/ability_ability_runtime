@@ -328,6 +328,10 @@ void ContextContainer::LoadResources(BundleInfo &bundleInfo,
 {
     TAG_LOGD(AAFwkTag::APPKIT, "hapModuleInfos count: %{public}zu",
         bundleInfo.hapModuleInfos.size());
+    if (resConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "resConfig is nullptr");
+        return;
+    }
     std::regex pattern(AbilityBase::Constants::ABS_CODE_PATH);
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         std::string loadPath;

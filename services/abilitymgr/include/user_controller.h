@@ -74,7 +74,7 @@ public:
      * @param isForeground whether user should brout to foreground.
      * @return 0 if the user has been successfully started.
      */
-    void StartUser(int32_t userId, sptr<IUserCallback> callback, bool isForeground);
+    void StartUser(int32_t userId, sptr<IUserCallback> callback);
 
     /**
      * Stop user, if it is running..
@@ -83,7 +83,7 @@ public:
      * @return 0 if the user has been successfully started.
      */
     int32_t StopUser(int32_t userId);
-    
+
     /**
      * Logout user, if it is running..
      *

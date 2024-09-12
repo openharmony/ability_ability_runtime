@@ -36,6 +36,7 @@
 #include "mock_ability_token.h"
 #include "mock_app_mgr_service_inner.h"
 #include "mock_app_scheduler.h"
+#include "mock_app_scheduler_client.h"
 #include "mock_app_spawn_client.h"
 #include "mock_bundle_installer_service.h"
 #include "mock_bundle_manager_service.h"
@@ -106,7 +107,7 @@ protected:
 protected:
     std::shared_ptr<AbilityRunningRecord> testAbilityRecord_;
     sptr<IAppScheduler> client_;
-    sptr<MockAppScheduler> mockAppSchedulerClient_;
+    sptr<MockAppSchedulerClient> mockAppSchedulerClient_;
     std::shared_ptr<AppRunningRecord> testAppRecord_;
     std::unique_ptr<AppMgrServiceInner> service_;
     sptr<MockAbilityToken> mock_token_;
@@ -120,10 +121,12 @@ void AmsAppRunningRecordTest::TearDownTestCase()
 
 void AmsAppRunningRecordTest::SetUp()
 {
-    mockAppSchedulerClient_ = new (std::nothrow) MockAppScheduler();
+    sptr<IRemoteObject> impl = nullptr;
+    mockAppSchedulerClient_ = sptr<MockAppSchedulerClient>::MakeSptr(impl);
     service_.reset(new (std::nothrow) AppMgrServiceInner());
     mock_token_ = new (std::nothrow) MockAbilityToken();
-    client_ = iface_cast<IAppScheduler>(mockAppSchedulerClient_.GetRefPtr());
+    sptr<MockAppScheduler> mockAppScheduler = sptr<MockAppScheduler>::MakeSptr();
+    client_ = iface_cast<IAppScheduler>(mockAppScheduler.GetRefPtr());
     mockSystemAbility_ = new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
     iSystemAbilityMgr_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
@@ -155,10 +158,7 @@ void AmsAppRunningRecordTest::MockBundleInstaller() const
 
 sptr<IAppScheduler> AmsAppRunningRecordTest::GetMockedAppSchedulerClient() const
 {
-    if (client_) {
-        return client_;
-    }
-    return nullptr;
+    return mockAppSchedulerClient_;
 }
 
 std::shared_ptr<AppRunningRecord> AmsAppRunningRecordTest::GetTestAppRunningRecord()
@@ -778,7 +778,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_001, TestSize.Level1)
     appInfo->bundleName = GetTestAppName();
     sptr<IRemoteObject> token = GetMockToken();
     const pid_t newPid = 1234;
-    service_->AttachApplication(newPid, mockAppSchedulerClient_);
+    service_->AttachApplication(newPid, client_);
     EXPECT_TRUE(service_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest AttachApplication_001 end");
 }
@@ -805,7 +805,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_002, TestSize.Level1)
     sptr<IRemoteObject> token = GetMockToken();
     const pid_t newPid = 1234;
     const pid_t invalidPid = -1;
-    service_->AttachApplication(invalidPid, mockAppSchedulerClient_);
+    service_->AttachApplication(invalidPid, client_);
     EXPECT_TRUE(service_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest AttachApplication_002 end");
 }
@@ -832,7 +832,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_003, TestSize.Level1)
     sptr<IRemoteObject> token = GetMockToken();
     const pid_t newPid = 1234;
     const pid_t anotherPid = 1000;
-    service_->AttachApplication(anotherPid, mockAppSchedulerClient_);
+    service_->AttachApplication(anotherPid, client_);
     EXPECT_TRUE(service_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest AttachApplication_003 end");
 }
@@ -859,7 +859,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_004, TestSize.Level1)
     appInfo->bundleName = GetTestAppName();
     sptr<IRemoteObject> token = GetMockToken();
     const pid_t newPid = 1234;
-    service_->AttachApplication(newPid, mockAppSchedulerClient_);
+    service_->AttachApplication(newPid, client_);
     EXPECT_TRUE(service_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest AttachApplication_004 end");
 }
@@ -887,7 +887,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_005, TestSize.Level1)
 
     sptr<IRemoteObject> token = GetMockToken();
     const pid_t newPid = 1234;
-    service_->AttachApplication(newPid, mockAppSchedulerClient_);
+    service_->AttachApplication(newPid, client_);
     EXPECT_TRUE(service_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest AttachApplication_005 end");
 }
@@ -927,7 +927,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_006, TestSize.Level1)
     const uint32_t EXPECT_RECORD_SIZE = 3;
     const int EXPECT_ABILITY_LAUNCH_TIME = 3;
     const pid_t PID = 1234;
-    service_->AttachApplication(PID, mockAppSchedulerClient_);
+    service_->AttachApplication(PID, client_);
     EXPECT_TRUE(service_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest AttachApplication_006 end");
 }

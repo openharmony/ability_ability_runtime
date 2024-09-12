@@ -407,6 +407,7 @@ bool JsUIServiceExtension::CreateWindowIfNeeded()
     auto option = GetWindowOption(extensionWindowConfig, hostWindowIdInStart_);
     sptr<Rosen::Window> extensionWindow = nullptr;
     if (option != nullptr) {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
         extensionWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
     }
     if (extensionWindow == nullptr) {
@@ -534,7 +535,13 @@ napi_value JsUIServiceExtension::CallObjectMethod(const char* name, napi_value c
     }
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "CallFunction(%{public}s) ok", name);
     napi_value result = nullptr;
+
+    TryCatch tryCatch(env);
     napi_call_function(env, obj, method, argc, argv, &result);
+    if (tryCatch.HasCaught()) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "HandleUncaughtException");
+        reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();
+    }
     return result;
 }
 

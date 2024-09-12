@@ -40,6 +40,16 @@ public:
      */
     void UpdateGlobalConfig(const Configuration &configuration, std::shared_ptr<ResourceManager> resourceManager);
 
+    /**
+     * @brief Update global configuration to context configuration and resource manager.
+     *
+     * @param configuration global configuration
+     * @param contextConfig context configuration
+     * @param resourceManager resource manager
+     */
+    void UpdateGlobalConfig(const Configuration &configuration, std::shared_ptr<Configuration> contextConfig,
+        std::shared_ptr<ResourceManager> resourceManager);
+
 private:
     void GetGlobalConfig(const Configuration &configuration,
         OHOS::AbilityRuntime::ResourceConfigHelper &resourceConfig);

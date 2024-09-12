@@ -130,8 +130,8 @@ bool UriUtils::CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest
     return false;
 }
 
-std::vector<Uri> UriUtils::GetPermissionedUriList(Want &want, std::vector<std::string> &uriVec,
-    std::vector<bool> &checkResults)
+std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string> &uriVec,
+    const std::vector<bool> &checkResults, Want &want)
 {
     std::vector<Uri> permissionedUris;
     if (uriVec.size() != checkResults.size()) {

@@ -54,9 +54,6 @@ public:
     MOCK_CONST_METHOD2(AddAppDeathRecipient, void(const pid_t pid, const sptr<AppDeathRecipient>& appDeathRecipient));
     MOCK_METHOD1(KillProcessByAbilityToken, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(KillProcessesByUserId, void(int32_t userId));
-    MOCK_METHOD5(AbilityBehaviorAnalysis,
-        void(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& preToken, const int32_t visibility,
-            const int32_t perceptibility, const int32_t connectionState));
     MOCK_METHOD1(AddAbilityStageDone, void(const int32_t recordId));
     MOCK_METHOD0(GetConfiguration, std::shared_ptr<Configuration>());
     MOCK_METHOD2(IsSharedBundleRunning, bool(const std::string &bundleName, uint32_t versionCode));
@@ -66,6 +63,13 @@ public:
     MOCK_METHOD4(PreloadApplication, int32_t(const std::string&, int32_t, AppExecFwk::PreloadMode, int32_t));
     MOCK_METHOD4(StartNativeChildProcess, int32_t(const pid_t hostPid, const std::string &libName,
         int32_t childProcessCount, const sptr<IRemoteObject> &callback));
+    MOCK_METHOD1(DumpIpcAllStart, int(std::string& result));
+    MOCK_METHOD1(DumpIpcAllStop, int(std::string& result));
+    MOCK_METHOD1(DumpIpcAllStat, int(std::string& result));
+    MOCK_METHOD2(DumpIpcStart, int(const int32_t pid, std::string& result));
+    MOCK_METHOD2(DumpIpcStop, int(const int32_t pid, std::string& result));
+    MOCK_METHOD2(DumpIpcStat, int(const int32_t pid, std::string& result));
+    MOCK_METHOD2(DumpFfrt, int(const std::vector<int32_t>& pid, std::string& result));
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
     {}
 

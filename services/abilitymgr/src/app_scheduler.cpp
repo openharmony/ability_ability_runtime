@@ -149,15 +149,6 @@ void AppScheduler::UpdateExtensionState(const sptr<IRemoteObject> &token, const 
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->UpdateExtensionState(token, state));
 }
 
-void AppScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-    const int32_t visibility, const int32_t perceptibility, const int32_t connectionState)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability behavior analysis.");
-    CHECK_POINTER(appMgrClient_);
-    IN_PROCESS_CALL_WITHOUT_RET(
-        appMgrClient_->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState));
-}
-
 void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "kill process");
@@ -499,6 +490,12 @@ void AppScheduler::SetCurrentUserId(const int32_t userId)
 {
     CHECK_POINTER(appMgrClient_);
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetCurrentUserId(userId));
+}
+
+void AppScheduler::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    CHECK_POINTER(appMgrClient_);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetEnableStartProcessFlagByUserId(userId, enableStartProcess));
 }
 
 int32_t AppScheduler::NotifyFault(const AppExecFwk::FaultData &faultData)

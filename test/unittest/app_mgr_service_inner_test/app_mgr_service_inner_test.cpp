@@ -1481,38 +1481,6 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterAppStateCallback_001, TestSize.Level0)
 }
 
 /**
- * @tc.name: AbilityBehaviorAnalysis_001
- * @tc.desc: ability behavior analysis.
- * @tc.type: FUNC
- * @tc.require: issueI5W4S7
- */
-HWTEST_F(AppMgrServiceInnerTest, AbilityBehaviorAnalysis_001, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityBehaviorAnalysis_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-
-    appMgrServiceInner->AbilityBehaviorAnalysis(nullptr, nullptr, 0, 0, 0);
-
-    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    appMgrServiceInner->AbilityBehaviorAnalysis(token, nullptr, 0, 0, 0);
-
-    BundleInfo bundleInfo;
-    HapModuleInfo hapModuleInfo;
-    std::shared_ptr<AAFwk::Want> want;
-    std::string processName = "test_processName";
-    std::shared_ptr<AppRunningRecord> appRecord = appMgrServiceInner->CreateAppRunningRecord(token, nullptr,
-        applicationInfo_, abilityInfo_, processName, bundleInfo, hapModuleInfo, want, 0);
-    EXPECT_NE(appRecord, nullptr);
-    appMgrServiceInner->AbilityBehaviorAnalysis(token, nullptr, 0, 0, 0);
-
-    OHOS::sptr<IRemoteObject> preToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    appMgrServiceInner->AbilityBehaviorAnalysis(token, preToken, 0, 0, 0);
-
-    TAG_LOGI(AAFwkTag::TEST, "AbilityBehaviorAnalysis_001 end");
-}
-
-/**
  * @tc.name: KillProcessByAbilityToken_001
  * @tc.desc: kill process by ability token.
  * @tc.type: FUNC

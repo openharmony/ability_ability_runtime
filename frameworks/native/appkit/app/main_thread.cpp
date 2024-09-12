@@ -127,6 +127,7 @@ constexpr int32_t DISTRIBUTE_TIME = 100;
 constexpr int32_t START_HIGH_SENSITIVE = 1;
 constexpr int32_t EXIT_HIGH_SENSITIVE = 2;
 constexpr int32_t UNSPECIFIED_USERID = -2;
+constexpr int32_t JS_ERROR_EXIT = -2;
 constexpr int32_t TIME_OUT = 120;
 constexpr int32_t DEFAULT_SLEEP_TIME = 100000;
 
@@ -146,6 +147,7 @@ constexpr char EVENT_KEY_HAPPEN_TIME[] = "HAPPEN_TIME";
 constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_JSVM[] = "JSVM";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
+constexpr char EVENT_KEY_PNAME[] = "PNAME";
 constexpr char EVENT_KEY_APP_RUNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
@@ -320,7 +322,7 @@ std::shared_ptr<ApplicationImpl> MainThread::GetApplicationImpl()
 bool MainThread::ConnectToAppMgr()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "start.");
+    TAG_LOGD(AAFwkTag::APPKIT, "%{public}s start.", __func__);
     auto object = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed to get app manager service");
@@ -342,7 +344,7 @@ bool MainThread::ConnectToAppMgr()
         TAG_LOGE(AAFwkTag::APPKIT, "failed to iface_cast object to appMgr_");
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "attach to appMGR.");
+    TAG_LOGI(AAFwkTag::APPKIT, "attach to appMGR.");
     appMgr_->AttachApplication(this);
     TAG_LOGD(AAFwkTag::APPKIT, "end");
     return true;
@@ -696,7 +698,8 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
     const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "ability %{public}s, type is %{public}d.", info.name.c_str(), info.type);
+    TAG_LOGI(AAFwkTag::APPKIT, "%{public}s called, ability %{public}s, type is %{public}d.",
+        __func__, info.name.c_str(), info.type);
 
     if (want != nullptr) {
         AAFwk::Want newWant(*want);
@@ -846,7 +849,7 @@ bool MainThread::CheckAbilityItem(const std::shared_ptr<AbilityLocalRecord> &rec
 void MainThread::HandleTerminateApplicationLocal()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    if (application_ == nullptr) {
+    if (applicationImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "error!");
         return;
     }
@@ -902,7 +905,10 @@ void MainThread::HandleProcessSecurityExit()
         TAG_LOGE(AAFwkTag::APPKIT, "abilityRecordMgr_ is null");
         return;
     }
-
+    if (application_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "application_ is null");
+        return;
+    }
     std::vector<sptr<IRemoteObject>> tokens = (abilityRecordMgr_->GetAllTokens());
 
     for (auto iter = tokens.begin(); iter != tokens.end(); ++iter) {
@@ -966,11 +972,6 @@ bool MainThread::InitCreate(
 
 bool MainThread::CheckForHandleLaunchApplication(const AppLaunchData &appLaunchData)
 {
-    if (application_ != nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "already create application");
-        return false;
-    }
-
     if (!CheckLaunchApplicationParam(appLaunchData)) {
         TAG_LOGE(AAFwkTag::APPKIT, "appLaunchData invalid");
         return false;
@@ -1360,7 +1361,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         [] (const auto &reqPermission) {
         return reqPermission == OHOS::AppExecFwk::Constants::PERMISSION_REQUIRE_FORM;
     });
-    Ace::AceForwardCompatibility::Init(bundleName, appInfo.apiCompatibleVersion, (isFullUpdate || isReqForm));
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Ace::AceForwardCompatibility::Init");
+        Ace::AceForwardCompatibility::Init(bundleName, appInfo.apiCompatibleVersion, (isFullUpdate || isReqForm));
+    }
 #endif
 
     if (IsNeedLoadLibrary(bundleName)) {
@@ -1562,6 +1566,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     EVENT_KEY_REASON, errorObj.name,
                     EVENT_KEY_JSVM, JSVM_TYPE,
                     EVENT_KEY_SUMMARY, summary,
+                    EVENT_KEY_PNAME, processName,
                     EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId);
                 ErrorObject appExecErrorObj = {
                     .name = errorObj.name,
@@ -1589,7 +1594,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
                 AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObj.name };
                 AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-                appThread->ScheduleProcessSecurityExit();
+                _exit(JS_ERROR_EXIT);
             };
             (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 #ifdef CJ_FRONTEND
@@ -3218,6 +3223,10 @@ void MainThread::DetachAppDebug()
 bool MainThread::NotifyDeviceDisConnect()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (appMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appMgr is nullptr");
+        return false;
+    }
     bool isLastProcess = appMgr_->IsFinalAppProcess();
     ScheduleTerminateApplication(isLastProcess);
     return true;

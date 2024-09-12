@@ -392,6 +392,16 @@ const std::list<std::shared_ptr<ApplicationInfo>> AppRunningRecord::GetAppInfoLi
     return appInfoList;
 }
 
+void AppRunningRecord::SetAppIdentifier(const std::string &appIdentifier)
+{
+    appIdentifier_ = appIdentifier;
+}
+
+const std::string &AppRunningRecord::GetAppIdentifier() const
+{
+    return appIdentifier_;
+}
+
 const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> AppRunningRecord::GetAbilities()
 {
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilitysMap;
@@ -482,7 +492,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
 
-    TAG_LOGD(AAFwkTag::APPMGR, "app is %{public}s.", GetName().c_str());
+    TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     appLifeCycleDeal_->LaunchApplication(launchData, config);
 }
 
@@ -636,7 +646,7 @@ void AppRunningRecord::ScheduleTerminate()
 
 void AppRunningRecord::LaunchPendingAbilities()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Launch pending abilities.");
+    TAG_LOGI(AAFwkTag::APPMGR, "Launch pending abilities.");
 
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {

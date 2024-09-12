@@ -30,7 +30,7 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/impl/ark/ark_native_deferred.h"
 #include "native_engine/native_engine.h"
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "napi_common_want.h"
 
 using namespace testing;
@@ -379,14 +379,14 @@ HWTEST_F(UIExtensionContextTest, AbilityRuntime_UIExtensionContext_0106, TestSiz
 
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
 
     NapiCallbackInfo info{1};
     jsUIExtensionContext_->OnStartUIServiceExtension(env, info);
 
-    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 
     GTEST_LOG_(INFO) << "AbilityRuntime_UIExtensionContext_0106 end";
 }

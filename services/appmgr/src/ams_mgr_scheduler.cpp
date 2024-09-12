@@ -181,25 +181,6 @@ void AmsMgrScheduler::RegisterAppStateCallback(const sptr<IAppStateCallback> &ca
     amsHandler_->SubmitTask(registerAppStateCallbackFunc, TASK_REGISTER_APP_STATE_CALLBACK);
 }
 
-void AmsMgrScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-    const int32_t visibility, const int32_t perceptibility, const int32_t connectionState)
-{
-    if (!IsReady()) {
-        return;
-    }
-
-    if (amsMgrServiceInner_->VerifyRequestPermission() != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
-        return;
-    }
-    std::function<void()> abilityBehaviorAnalysisFunc = [amsMgrServiceInner = amsMgrServiceInner_, token, preToken,
-        visibility, perceptibility, connectionState]() {
-        amsMgrServiceInner->AbilityBehaviorAnalysis(token, preToken,
-            visibility, perceptibility, connectionState);
-    };
-    amsHandler_->SubmitTask(abilityBehaviorAnalysisFunc, TASK_ABILITY_BEHAVIOR_ANALYSIS);
-}
-
 void AmsMgrScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
     if (!IsReady()) {
@@ -480,6 +461,18 @@ void AmsMgrScheduler::SetCurrentUserId(const int32_t userId)
         return;
     }
     amsMgrServiceInner_->SetCurrentUserId(userId);
+}
+
+void AmsMgrScheduler::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    if (!IsReady()) {
+        return;
+    }
+    if (amsMgrServiceInner_->VerifyRequestPermission() != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return;
+    }
+    amsMgrServiceInner_->SetEnableStartProcessFlagByUserId(userId, enableStartProcess);
 }
 
 int32_t AmsMgrScheduler::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)

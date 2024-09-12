@@ -41,6 +41,26 @@ void ConfigurationUtils::UpdateGlobalConfig(const Configuration &configuration,
     resourceConfig.UpdateResConfig(configuration, resourceManager);
 }
 
+void ConfigurationUtils::UpdateGlobalConfig(const Configuration &configuration,
+    std::shared_ptr<Configuration> targetConfiguration, std::shared_ptr<ResourceManager> resourceManager)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (targetConfiguration == nullptr || resourceManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "Input invalid");
+        return;
+    }
+    std::vector<std::string> changeKeyV;
+    targetConfiguration->CompareDifferent(changeKeyV, configuration);
+    if (changeKeyV.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITY, "There's no changed config");
+        return;
+    }
+    targetConfiguration->Merge(changeKeyV, configuration);
+    ResourceConfigHelper resourceConfig;
+    GetGlobalConfig(configuration, resourceConfig);
+    resourceConfig.UpdateResConfig(configuration, resourceManager);
+}
+
 void ConfigurationUtils::GetGlobalConfig(const Configuration &configuration,
     OHOS::AbilityRuntime::ResourceConfigHelper &resourceConfig)
 {
@@ -49,8 +69,6 @@ void ConfigurationUtils::GetGlobalConfig(const Configuration &configuration,
     resourceConfig.SetHasPointerDevice(configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE));
     resourceConfig.SetMcc(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     resourceConfig.SetMnc(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
-    resourceConfig.SetColorModeIsSetByApp(
-        configuration.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP));
     resourceConfig.SetThemeId(configuration.GetItem(AAFwk::GlobalConfigurationKey::THEME_ID));
 }
 
