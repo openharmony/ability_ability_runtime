@@ -14,6 +14,7 @@
  */
 
 #include "mock_lifecycle_observer.h"
+
 #include <gtest/gtest.h>
 
 namespace OHOS {

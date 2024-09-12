@@ -53,14 +53,16 @@ class AbilityManagerServiceThirdTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
-    sptr<Token> MockToken(AbilityType);
     void SetUp();
     void TearDown();
+
+    std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
+    sptr<Token> MockToken(AbilityType);
 
     AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
         const std::string& appName, const std::string& bundleName, const std::string& moduleName);
 public:
+
     AbilityRequest abilityRequest_{};
     Want want_{};
 };
@@ -1302,7 +1304,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetRunningMultiAppIndex_001, TestSize.L
     int32_t  APPINDEX = 28;
     abilityMs_->GetRunningMultiAppIndex("com.ix.hiservcie", UID, APPINDEX);
 }
-
 
 /*
  * Feature: AbilityManagerService
