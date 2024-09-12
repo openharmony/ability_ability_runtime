@@ -239,13 +239,12 @@ void UIAbilityImpl::ExecuteInsightIntentDone(uint64_t intentId, const InsightInt
 #ifdef SUPPORT_SCREEN
 bool UIAbilityImpl::PrepareTerminateAbility()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (ability_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return false;
     }
     bool ret = ability_->OnPrepareTerminate();
-    TAG_LOGD(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
+    TAG_LOGI(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
     return ret;
 }
 #endif
