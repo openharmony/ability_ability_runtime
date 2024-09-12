@@ -54,6 +54,17 @@ class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
 
+class MultiUserConfigurationMgr {
+public:
+    void Insert(const int32_t userId, const Configuration& config);
+
+    Configuration GetConfigurationByUserId(const int32_t userId);
+
+private:
+    std::map<int32_t, Configuration> multiUserConfiguration_;
+    std::mutex multiUserConfigurationMutex_;
+};
+
 /**
  * @class RenderRecord
  * Record nweb render process info.
@@ -536,6 +547,7 @@ public:
     void SetEmptyKeepAliveAppState(bool isEmptyKeepAliveApp);
 
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
+    void SetKeepAliveBundle(bool isKeepAliveBundle);
 
     void SetMainProcess(bool isMainProcess);
 
@@ -546,6 +558,9 @@ public:
     std::list<std::shared_ptr<ModuleRunningRecord>> GetAllModuleRecord() const;
 
     const std::list<std::shared_ptr<ApplicationInfo>> GetAppInfoList();
+
+    void SetAppIdentifier(const std::string &appIdentifier);
+    const std::string &GetAppIdentifier() const;
 
     inline const std::shared_ptr<ApplicationInfo> GetApplicationInfo()
     {
@@ -721,6 +736,7 @@ public:
     void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
+    int32_t GetChildProcessCount();
 
     void SetPreloadState(PreloadState state);
 
@@ -880,7 +896,8 @@ private:
         }
     };
 
-    bool isKeepAliveApp_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
@@ -922,6 +939,7 @@ private:
     bool isLauncherApp_;
     std::string mainAppName_;
     int restartResidentProcCount_ = 0;
+    std::string appIdentifier_;
 
     mutable std::mutex specifiedMutex_;
     int32_t specifiedRequestId_ = -1;
@@ -943,7 +961,7 @@ private:
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
-    bool isKilling_ = false;
+    std::atomic<bool> isKilling_ = false;
     bool isContinuousTask_ = false;    // Only continuesTask processes can be set to true, please choose carefully
     std::atomic_bool isSpawned_ = false;
 

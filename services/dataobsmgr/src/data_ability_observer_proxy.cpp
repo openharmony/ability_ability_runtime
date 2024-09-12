@@ -63,7 +63,7 @@ void DataAbilityObserverProxy::OnChangeExt(const ChangeInfo &changeInfo)
     }
 
     if (!ChangeInfo::Marshalling(changeInfo, data)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "changeInfo marshalling failed");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "changeInfo marshalling fail");
         return;
     }
 

@@ -43,7 +43,7 @@ bool AppPreloader::PreCheck(const std::string &bundleName, PreloadMode preloadMo
     int32_t mode = static_cast<int32_t>(preloadMode);
     auto allow = ResourceSchedule::ResSchedClient::GetInstance().IsAllowedAppPreload(bundleName, mode);
     if (!allow) {
-        TAG_LOGI(AAFwkTag::APPMGR, "BundleName: %{public}s not allow preload by RSS", bundleName.c_str());
+        TAG_LOGI(AAFwkTag::APPMGR, "BundleName: %{public}s not allow preload", bundleName.c_str());
         return false;
     }
     return true;
@@ -57,25 +57,25 @@ int32_t AppPreloader::GeneratePreloadRequest(const std::string &bundleName, int3
 
     AAFwk::Want launchWant;
     if (!GetLaunchWant(bundleName, userId, launchWant)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GetLaunchWant failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "GetLaunchWant failed");
         return AAFwk::ERR_TARGET_BUNDLE_NOT_EXIST;
     }
 
     AbilityInfo abilityInfo;
     if (!GetLaunchAbilityInfo(launchWant, userId, abilityInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GetLaunchAbilityInfo failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "GetLaunchAbilityInfo failed");
         return AAFwk::ERR_GET_LAUNCH_ABILITY_INFO_FAILED;
     }
 
     if (!CheckPreloadConditions(abilityInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication CheckPreloadConditions failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "CheckPreloadConditions failed");
         return AAFwk::ERR_CHECK_PRELOAD_CONDITIONS_FAILED;
     }
 
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     if (!GetBundleAndHapInfo(bundleName, userId, abilityInfo, bundleInfo, hapModuleInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GetBundleAndHapInfo failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "GetBundleAndHapInfo failed");
         return AAFwk::GET_BUNDLE_INFO_FAILED;
     }
 
@@ -94,13 +94,13 @@ bool AppPreloader::GetLaunchWant(const std::string &bundleName, int32_t userId, 
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto bundleMgrHelper = GetBundleManagerHelper();
     if (!bundleMgrHelper) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null bundleMgrHelper");
         return false;
     }
 
     auto errCode = IN_PROCESS_CALL(bundleMgrHelper->GetLaunchWantForBundle(bundleName, launchWant, userId));
     if (errCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GetLaunchWantForBundle failed, errCode: %{public}d.", errCode);
+        TAG_LOGE(AAFwkTag::APPMGR, "errCode: %{public}d", errCode);
         return false;
     }
     return true;
@@ -111,13 +111,13 @@ bool AppPreloader::GetLaunchAbilityInfo(const AAFwk::Want &want, int32_t userId,
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto bundleMgrHelper = GetBundleManagerHelper();
     if (!bundleMgrHelper) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null bundleMgrHelper");
         return false;
     }
 
     auto abilityInfoFlag = AbilityRuntime::StartupUtil::BuildAbilityInfoFlag();
     if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(want, abilityInfoFlag, userId, abilityInfo))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GetLaunchAbilityInfo failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "GetLaunchAbilityInfo failed");
         return false;
     }
 
@@ -130,18 +130,18 @@ bool AppPreloader::GetBundleAndHapInfo(const std::string &bundleName, int32_t us
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto bundleMgrHelper = GetBundleManagerHelper();
     if (!bundleMgrHelper) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null bundleMgrHelper");
         return false;
     }
 
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(bundleName, BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
         userId))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GetBundleInfo failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "GetBundleInfo failed");
         return false;
     }
 
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetHapModuleInfo(abilityInfo, userId, hapModuleInfo))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GetHapModuleInfo failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "GetHapModuleInfo failed");
         return false;
     }
     return true;
@@ -150,17 +150,16 @@ bool AppPreloader::GetBundleAndHapInfo(const std::string &bundleName, int32_t us
 bool AppPreloader::CheckPreloadConditions(const AbilityInfo &abilityInfo)
 {
     if (abilityInfo.type != AppExecFwk::AbilityType::PAGE || !abilityInfo.isStageBasedModel) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication Launch Ability type is not UIAbility");
+        TAG_LOGE(AAFwkTag::APPMGR, "AbilityType is not UIAbility");
         return false;
     }
     ApplicationInfo appInfo = abilityInfo.applicationInfo;
     if (abilityInfo.name.empty() || appInfo.name.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication abilityInfo or appInfo name is empty");
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo or appInfo name is empty");
         return false;
     }
     if (abilityInfo.applicationName != appInfo.name) {
-        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication abilityInfo and appInfo have different appName, \
-        don't load for it");
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo and appInfo have different appName");
         return false;
     }
     return true;
@@ -169,7 +168,7 @@ bool AppPreloader::CheckPreloadConditions(const AbilityInfo &abilityInfo)
 std::shared_ptr<BundleMgrHelper> AppPreloader::GetBundleManagerHelper()
 {
     if (!remoteClientManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager_ is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null remoteClientManager_");
         return nullptr;
     }
     return remoteClientManager_->GetBundleManagerHelper();

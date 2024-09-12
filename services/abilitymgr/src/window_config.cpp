@@ -25,24 +25,18 @@ WindowConfig *WindowConfig::Unmarshalling(Parcel &parcel)
 {
     WindowConfig *data = new (std::nothrow) WindowConfig();
     if (!data) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "data is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null data");
         return nullptr;
     }
     data->windowType = parcel.ReadInt32();
-    data->posx = parcel.ReadInt32();
-    data->posy = parcel.ReadInt32();
-    data->width = parcel.ReadUint32();
-    data->height = parcel.ReadUint32();
+    data->windowId = parcel.ReadUint32();
     return data;
 }
 
 bool WindowConfig::Marshalling(Parcel &parcel) const
 {
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(windowType));
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(posx));
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(posy));
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, static_cast<uint32_t>(width));
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, static_cast<uint32_t>(height));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, static_cast<uint32_t>(windowId));
     return true;
 }
 }  // namespace AppExecFwk

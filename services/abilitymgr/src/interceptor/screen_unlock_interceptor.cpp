@@ -55,9 +55,7 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
         }
     }
 
-    // temp add isSystemApp pass, remove after systemapp adjust
-    if (targetAbilityInfo.applicationInfo.isSystemApp ||
-        targetAbilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked) {
+    if (targetAbilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked) {
         return ERR_OK;
     }
 #ifdef SUPPORT_SCREEN
@@ -65,7 +63,7 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
         return ERR_OK;
     }
 #endif
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not startup when device first locked.");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "no startup when device first locked");
     return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
 }
 } // namespace AAFwk

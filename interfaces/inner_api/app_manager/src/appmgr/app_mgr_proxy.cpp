@@ -862,7 +862,7 @@ int AppMgrProxy::GetRenderProcessTerminationStatus(pid_t renderPid, int &status)
     return 0;
 }
 
-int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config)
+int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config, const int32_t userId)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfiguration");
     MessageParcel data;
@@ -873,6 +873,10 @@ int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config)
     }
     if (!data.WriteParcelable(&config)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel config failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel userId failed");
         return ERR_INVALID_DATA;
     }
     int32_t ret = SendRequest(AppMgrInterfaceCode::UPDATE_CONFIGURATION, data, reply, option);
@@ -908,7 +912,7 @@ int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::GetConfiguration(Configuration &config)
+int32_t AppMgrProxy::GetConfiguration(Configuration& config)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -932,7 +936,7 @@ int32_t AppMgrProxy::GetConfiguration(Configuration &config)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
+int32_t AppMgrProxy::RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer)
 {
     if (!observer) {
         TAG_LOGE(AAFwkTag::APPMGR, "observer null");
@@ -951,8 +955,7 @@ int32_t AppMgrProxy::RegisterConfigurationObserver(const sptr<IConfigurationObse
         return ERR_FLATTEN_OBJECT;
     }
 
-    auto error = SendRequest(AppMgrInterfaceCode::REGISTER_CONFIGURATION_OBSERVER,
-        data, reply, option);
+    auto error = SendRequest(AppMgrInterfaceCode::REGISTER_CONFIGURATION_OBSERVER, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPMGR, "Send request error: %{public}d", error);
         return error;
@@ -1833,6 +1836,24 @@ int32_t AppMgrProxy::SetSupportedProcessCacheSelf(bool isSupport)
     MessageOption option;
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE_SELF, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isSupport);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
+    MessageParcel reply;
+    MessageOption option;
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE, data, reply, option);
     return reply.ReadInt32();
 }
 

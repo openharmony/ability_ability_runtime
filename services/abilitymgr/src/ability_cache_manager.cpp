@@ -59,7 +59,7 @@ void AbilityCacheManager::RemoveAbilityRecInProcList(std::shared_ptr<AbilityReco
     uint32_t accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
     auto findProcInfo = procLruMap_.find(accessTokenId);
     if (findProcInfo == procLruMap_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can't find record");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "can't find record");
         return;
     }
     auto it = findProcInfo->second.recList.begin();
@@ -122,7 +122,7 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::AddToDevLru(std::shared_ptr<
 std::shared_ptr<AbilityRecord> AbilityCacheManager::Put(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The param abilityRecord is nullptr for Put operation.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityRecord");
         return nullptr;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Put the ability to lru, service:%{public}s, extension type %{public}d",
@@ -135,7 +135,7 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::Put(std::shared_ptr<AbilityR
 void AbilityCacheManager::Remove(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The param abilityRecord is nullptr for Remove operation.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityRecord");
         return;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Remove the ability from lru, service:%{public}s, extension type %{public}d",
@@ -156,7 +156,7 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::GetAbilityRecInProcList(cons
 {
     auto findProcInfo = procLruMap_.find(abilityRequest.appInfo.accessTokenId);
     if (findProcInfo == procLruMap_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can't found the bundleName in process list for get.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "can't found bundleName");
         return nullptr;
     }
     ProcRecordsInfo &procRecordsInfo = findProcInfo->second;
@@ -191,7 +191,7 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::Get(const AbilityRequest& ab
 std::shared_ptr<AbilityRecord> AbilityCacheManager::FindRecordByToken(const sptr<IRemoteObject> &token)
 {
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "The param token is nullptr for FindRecordByToken operation.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
         return nullptr;
     }
     std::lock_guard<std::mutex> lock(mutex_);

@@ -24,14 +24,14 @@ void PrepareTerminateCallbackProxy::DoPrepareTerminate()
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     MessageParcel data;
     if (!data.WriteInterfaceToken(IPrepareTerminateCallback::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token failed");
         return;
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Remote() is NULL");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote");
         return;
     }
     int error = remote->SendRequest(ON_DO_PREPARE_TERMINATE, data, reply, option);

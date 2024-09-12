@@ -73,7 +73,7 @@ public:
         void(const int32_t recordId, const AAFwk::Want& want, const std::string& flag));
     MOCK_METHOD2(GetAbilityRecordsByProcessID, int(const int pid, std::vector<sptr<IRemoteObject>>& tokens));
     MOCK_METHOD1(GetConfiguration, int32_t(Configuration& config));
-    MOCK_METHOD1(UpdateConfiguration, int32_t(const Configuration& config));
+    MOCK_METHOD2(UpdateConfiguration, int32_t(const Configuration& config, const int32_t userId));
     MOCK_METHOD2(UpdateConfigurationByBundleName, int32_t(const Configuration& config, const std::string &name));
     MOCK_METHOD1(RegisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));
     MOCK_METHOD1(UnregisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));
@@ -106,6 +106,7 @@ public:
 
     MOCK_METHOD0(IsFinalAppProcess, bool());
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupport));
+    MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
     MOCK_METHOD2(GetSupportedProcessCachePids, int32_t(const std::string &bundleName,

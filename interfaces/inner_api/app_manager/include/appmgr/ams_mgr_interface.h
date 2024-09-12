@@ -86,20 +86,6 @@ public:
     virtual void RegisterAppStateCallback(const sptr<IAppStateCallback> &callback) = 0;
 
     /**
-     * AbilityBehaviorAnalysis,call AbilityBehaviorAnalysis() through the proxy object,
-     * ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return
-     */
-    virtual void AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState) = 0;
-
-    /**
      * KillProcessByAbilityToken, call KillProcessByAbilityToken() through proxy object,
      * kill the process by ability token.
      *
@@ -224,6 +210,14 @@ public:
      * @return
      */
     virtual void SetCurrentUserId(const int32_t userId) = 0;
+
+    /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    virtual void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess) {}
 
     /**
      * Get bundleName by pid.
@@ -379,13 +373,17 @@ public:
         return false;
     }
 
+    virtual bool IsAppKilling(sptr<IRemoteObject> token)
+    {
+        return false;
+    }
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
         UPDATE_ABILITY_STATE,
         UPDATE_EXTENSION_STATE,
         REGISTER_APP_STATE_CALLBACK,
-        ABILITY_BEHAVIOR_ANALYSIS,
         KILL_PEOCESS_BY_ABILITY_TOKEN,
         KILL_PROCESSES_BY_USERID,
         KILL_PROCESS_WITH_ACCOUNT,
@@ -402,6 +400,7 @@ public:
         KILL_APPLICATION_SELF,
         UPDATE_APPLICATION_INFO_INSTALLED,
         SET_CURRENT_USER_ID,
+        ENABLE_START_PROCESS_FLAG_BY_USER_ID,
         Get_BUNDLE_NAME_BY_PID,
         SET_ABILITY_FOREGROUNDING_FLAG,
         REGISTER_APP_DEBUG_LISTENER,
@@ -431,6 +430,9 @@ public:
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
         IS_PROCESS_ATTACHED,
+        IS_APP_KILLING,
+        // Add enumeration values above
+        END
     };
 };
 }  // namespace AppExecFwk

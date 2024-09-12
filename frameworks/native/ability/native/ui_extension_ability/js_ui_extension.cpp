@@ -719,6 +719,7 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
     option->SetParentId(sessionInfo->hostWindowId);
     option->SetRealParentId(sessionInfo->realHostWindowId);
+    option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
@@ -945,7 +946,7 @@ void JsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& conf
     }
 
     auto configUtils = std::make_shared<ConfigurationUtils>();
-    configUtils->UpdateGlobalConfig(configuration, context->GetResourceManager());
+    configUtils->UpdateGlobalConfig(configuration, context->GetConfiguration(), context->GetResourceManager());
 
     ConfigurationUpdated();
 }

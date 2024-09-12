@@ -275,7 +275,6 @@ struct AbilityRequest {
     uint32_t specifyTokenId = 0;
     bool uriReservedFlag = false;
     std::string reservedBundleName;
-
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -420,6 +419,10 @@ public:
      */
     void PostForegroundTimeoutTask();
 
+    void RemoveForegroundTimeoutTask();
+
+    void RemoveLoadTimeoutTask();
+
     void PostUIExtensionAbilityTimeoutTask(uint32_t messageId);
 
     /**
@@ -544,6 +547,8 @@ public:
      * @return true : ready ,false: not ready
      */
     bool IsReady() const;
+    void SetLoadState(AbilityLoadState loadState);
+    AbilityLoadState GetLoadState() const;
 
     void UpdateRecoveryInfo(bool hasRecoverInfo);
 
@@ -951,6 +956,10 @@ public:
     int32_t GetRestartCount() const;
     void SetRestartCount(int32_t restartCount);
     bool GetKeepAlive() const;
+    bool IsKeepAliveBundle() const
+    {
+        return keepAliveBundle_;
+    }
     void SetLoading(bool status);
     bool IsLoading() const;
     int64_t GetRestartTime();
@@ -1193,7 +1202,7 @@ private:
     std::weak_ptr<AbilityRecord> nextAbilityRecord_ = {};  // ability that started by this ability
     int64_t startTime_ = 0;                           // records first time of ability start
     int64_t restartTime_ = 0;                         // the time of last trying restart
-    bool isReady_ = false;                            // is ability thread attached?
+    std::atomic<AbilityLoadState> loadState_ = AbilityLoadState::INIT;  // ability thread attach state
     bool isWindowStarted_ = false;                     // is window hotstart or coldstart?
     bool isWindowAttached_ = false;                   // Is window of this ability attached?
     bool isLauncherAbility_ = false;                  // is launcher?
@@ -1254,7 +1263,7 @@ private:
     bool minimizeReason_ = false;
 
     bool clearMissionFlag_ = false;
-
+    bool keepAliveBundle_ = false;
     int32_t restartCount_ = -1;
     int32_t restartMax_ = -1;
     std::string specifiedFlag_;

@@ -82,7 +82,8 @@ public:
         const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0,
         int32_t abilityId = -1) override;
     int32_t GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
-        const std::string &targetBundleName, int32_t appIndex = 0) override;
+        const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId,
+        int32_t abilityId) override;
     
     std::vector<bool> CheckUriAuthorization(const std::vector<std::string> &uriVec, uint32_t flag,
         uint32_t tokenId) override;

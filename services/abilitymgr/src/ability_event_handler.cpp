@@ -24,7 +24,7 @@ AbilityEventHandler::AbilityEventHandler(
     const std::shared_ptr<TaskHandlerWrap> &taskHandler, const std::weak_ptr<AbilityManagerService> &server)
     : EventHandlerWrap(taskHandler), server_(server)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Constructors.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "constructors");
 }
 
 void AbilityEventHandler::ProcessEvent(const EventWrap &event)
@@ -40,8 +40,12 @@ void AbilityEventHandler::ProcessEvent(const EventWrap &event)
         return;
     }
     switch (event.GetEventId()) {
+        case AbilityManagerService::LOAD_HALF_TIMEOUT_MSG: {
+            ProcessLoadTimeOut(event, true);
+            break;
+        }
         case AbilityManagerService::LOAD_TIMEOUT_MSG: {
-            ProcessLoadTimeOut(event);
+            ProcessLoadTimeOut(event, false);
             break;
         }
         case AbilityManagerService::ACTIVE_TIMEOUT_MSG: {
@@ -54,8 +58,12 @@ void AbilityEventHandler::ProcessEvent(const EventWrap &event)
             ProcessInactiveTimeOut(event.GetParam());
             break;
         }
+        case AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG: {
+            ProcessForegroundTimeOut(event, true);
+            break;
+        }
         case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
-            ProcessForegroundTimeOut(event);
+            ProcessForegroundTimeOut(event, false);
             break;
         }
         case AbilityManagerService::SHAREDATA_TIMEOUT_MSG: {
@@ -63,28 +71,18 @@ void AbilityEventHandler::ProcessEvent(const EventWrap &event)
             break;
         }
         default: {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "Unsupported timeout message.");
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "unsupported timeout message");
             break;
         }
     }
 }
 
-void AbilityEventHandler::ProcessLoadTimeOut(const EventWrap &event)
+void AbilityEventHandler::ProcessLoadTimeOut(const EventWrap &event, bool isHalf)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto server = server_.lock();
     CHECK_POINTER(server);
-    if (event.GetRunCount() == 0) {
-        uint32_t timeout = event.GetTimeout();
-        if (timeout == 0) {
-            timeout = 3000; // 3000 : default timeout
-        }
-        auto eventWrap = EventWrap(AbilityManagerService::LOAD_TIMEOUT_MSG, event.GetParam(), event.IsExtension());
-        eventWrap.SetRunCount(event.GetRunCount() + 1);
-        eventWrap.SetTimeout(timeout);
-        SendEvent(eventWrap, timeout);
-    }
-    server->HandleLoadTimeOut(event.GetParam(), event.GetRunCount() == 0, event.IsExtension());
+    server->HandleLoadTimeOut(event.GetParam(), isHalf, event.IsExtension());
 }
 
 void AbilityEventHandler::ProcessActiveTimeOut(int64_t abilityRecordId)
@@ -103,28 +101,17 @@ void AbilityEventHandler::ProcessInactiveTimeOut(int64_t abilityRecordId)
     server->HandleInactiveTimeOut(abilityRecordId);
 }
 
-void AbilityEventHandler::ProcessForegroundTimeOut(const EventWrap &event)
+void AbilityEventHandler::ProcessForegroundTimeOut(const EventWrap &event, bool isHalf)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Foreground timeout.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "foreground timeout");
     auto server = server_.lock();
     CHECK_POINTER(server);
-    if (event.GetRunCount() == 0) {
-        uint32_t timeout = event.GetTimeout();
-        if (timeout == 0) {
-            timeout = 3000; // 3000 : default timeout
-        }
-        auto eventWrap = EventWrap(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, event.GetParam(),
-            event.IsExtension());
-        eventWrap.SetRunCount(event.GetRunCount() + 1);
-        eventWrap.SetTimeout(timeout);
-        SendEvent(eventWrap, timeout);
-    }
-    server->HandleForegroundTimeOut(event.GetParam(), event.GetRunCount() == 0, event.IsExtension());
+    server->HandleForegroundTimeOut(event.GetParam(), isHalf, event.IsExtension());
 }
 
 void AbilityEventHandler::ProcessShareDataTimeOut(int64_t uniqueId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ShareData timeout.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "shareData timeout");
     auto server = server_.lock();
     CHECK_POINTER(server);
     server->HandleShareDataTimeOut(uniqueId);

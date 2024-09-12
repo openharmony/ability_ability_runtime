@@ -21,7 +21,6 @@
 #include "want_params_wrapper.h"
 #include "pending_want.h"
 #include "want_agent_client.h"
-#include "want_agent_log_wrapper.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
 
@@ -192,7 +191,7 @@ WantAgentConstant::OperationType WantAgentHelper::GetType(std::shared_ptr<WantAg
 ErrCode WantAgentHelper::TriggerWantAgent(std::shared_ptr<WantAgent> agent,
     const std::shared_ptr<CompletedCallback> &callback, const TriggerInfo &paramsInfo)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "call");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "call");
     if (agent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
@@ -209,7 +208,7 @@ ErrCode WantAgentHelper::TriggerWantAgent(std::shared_ptr<WantAgent> agent,
 ErrCode WantAgentHelper::Send(const std::shared_ptr<PendingWant> &pendingWant,
     WantAgentConstant::OperationType type, const sptr<CompletedDispatcher> &callBack, const TriggerInfo &paramsInfo)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "call");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "call");
     if (pendingWant == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
@@ -340,19 +339,19 @@ void WantAgentHelper::UnregisterCancelListener(
 std::string WantAgentHelper::ToString(const std::shared_ptr<WantAgent> &agent)
 {
     if (agent == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid param");
         return "";
     }
 
     std::shared_ptr<PendingWant> pendingWant = agent->GetPendingWant();
     if (pendingWant == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid param");
         return "";
     }
 
     std::shared_ptr<WantSenderInfo> info = pendingWant->GetWantSenderInfo(pendingWant->GetTarget());
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid param");
         return "";
     }
     nlohmann::json jsonObject;

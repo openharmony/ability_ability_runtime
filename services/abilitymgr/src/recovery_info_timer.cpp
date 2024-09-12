@@ -53,7 +53,7 @@ void RecoveryInfoTimer::SubmitSaveRecoveryInfo(RecoveryInfo recoveryInfo)
     timeoutCount -= reserveNumber;
     for (; timeoutCount > 0; timeoutCount--) {
         auto recoveryInfo = recoveryInfoQueue_.begin();
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "clearRecoveryInfo bundleName = %{public}s, abilityName = %{public}s",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "clearRecoveryInfo bundleName: %{public}s, abilityName: %{public}s",
             recoveryInfo->bundleName.c_str(), recoveryInfo->abilityName.c_str());
         (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
             DeleteAbilityRecoverInfo(recoveryInfo->tokenId, recoveryInfo->moduleName, recoveryInfo->abilityName);

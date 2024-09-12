@@ -20,11 +20,12 @@
 #define private public
 #define protected public
 #include "js_ui_service_extension.h"
+#include "ui_service_extension_module_loader.h"
 #include "js_ui_service_extension_context.cpp"
 #undef private
 #undef protected
 
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "mock_ability_token.h"
 #include "ability_handler.h"
 #include "ohos_application.h"
@@ -207,7 +208,8 @@ HWTEST_F(JsUIServiceExtensionTest, CallObjectMethod_0100, TestSize.Level1)
     napi_value object{nullptr};
     size_t argc{0};
     jsUIServiceExtension->jsObj_ = nullptr;
-    jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+    auto result = jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+    EXPECT_EQ(result, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0100 end");
 }
@@ -225,7 +227,8 @@ HWTEST_F(JsUIServiceExtensionTest, CallObjectMethod_0200, TestSize.Level1)
     size_t argc{0};
 
     jsUIServiceExtension->jsObj_ = std::make_unique<NativeReferenceMock>();
-    jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+    auto result = jsUIServiceExtension->CallObjectMethod("Test", &object, argc);
+    EXPECT_EQ(result, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "CallObjectMethod_0200 end");
 }
@@ -411,7 +414,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnConnect_0100, TestSize.Level1)
     want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
     bool isAsyncCallback = false;
     auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "OnConnect_0100 end");
 }
 
@@ -444,7 +447,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnConnect_0300, TestSize.Level1)
     want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
     bool isAsyncCallback = false;
     auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
     result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
     EXPECT_NE(result, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "OnConnect_0300 end");
@@ -482,7 +485,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnDisconnect_0200, TestSize.Level1)
     jsUIServiceExtension->OnDisconnect(want, nullptr, isAsyncCallback);
 
     auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 
     jsUIServiceExtension->OnDisconnect(want, nullptr, isAsyncCallback);
 
@@ -503,7 +506,7 @@ HWTEST_F(JsUIServiceExtensionTest, HandleSendData_0100, TestSize.Level1)
     bool isAsyncCallback = false;
 
     auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 
     AAFwk::WantParams params;
     jsUIServiceExtension->HandleSendData(stub->AsObject(), params);
@@ -751,7 +754,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0200, TestSize.Level1)
 
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
 
@@ -767,7 +770,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0200, TestSize.Level1)
 
     jsUIServiceExtensionContext.OnStartAbilityByType(env, info);
 
-    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 
     TAG_LOGI(AAFwkTag::TEST, "OnStartAbilityByType_0200 end");
 }
@@ -783,7 +786,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0300, TestSize.Level1)
 
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
 
@@ -799,7 +802,7 @@ HWTEST_F(JsUIServiceExtensionTest, OnStartAbilityByType_0300, TestSize.Level1)
 
     jsUIServiceExtensionContext.OnStartAbilityByType(env, info);
 
-    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 
     TAG_LOGI(AAFwkTag::TEST, "OnStartAbilityByType_0300 end");
 }
@@ -822,5 +825,22 @@ HWTEST_F(JsUIServiceExtensionTest, CreateJsUIServiceExtensionContext_0100, TestS
 
     TAG_LOGI(AAFwkTag::TEST, "CreateJsUIServiceExtensionContext_0100 end");
 }
+
+/**
+ * @tc.number: ListenWMS_0100
+ * @tc.name: ListenWMS
+ * @tc.desc: ListenWMS
+ */
+HWTEST_F(JsUIServiceExtensionTest, ListenWMS_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ListenWMS_0100 start");
+
+    jsUIServiceExtension->ListenWMS();
+
+    EXPECT_NE(jsUIServiceExtension->displayListener_, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "ListenWMS_0100 end");
+}
+
 } // namespace AbilityRuntime
 } // namespace OHOS

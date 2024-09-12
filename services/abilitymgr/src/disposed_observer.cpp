@@ -53,7 +53,7 @@ void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData 
         TAG_LOGD(AAFwkTag::ABILITYMGR, "FA modal system");
         bool ret = IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want));
         if (!ret) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start system UIExtension");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
         }
         interceptor_->UnregisterObserver(abilityStateData.bundleName);
     }
@@ -66,7 +66,7 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
         int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*disposedRule_.want));
         if (ret != ERR_OK) {
             interceptor_->UnregisterObserver(pageStateData.bundleName);
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start disposed ability");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
             return;
         }
     }
@@ -80,7 +80,7 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
             bool ret = IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want));
             if (!ret) {
                 interceptor_->UnregisterObserver(pageStateData.bundleName);
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start system UIExtension");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
                 return;
             }
         } else {
@@ -95,7 +95,7 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
             int ret = abilityRecord->CreateModalUIExtension(want);
             if (ret != ERR_OK) {
                 interceptor_->UnregisterObserver(pageStateData.bundleName);
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start disposed UIExtension");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
                 return;
             }
         }

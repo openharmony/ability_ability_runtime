@@ -112,9 +112,9 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessWithArgs(
     const AppExecFwk::ChildProcessOptions &options)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "StartChildProcessWithArgs, childProcessType:%{public}d, startWitDebug: %{public}d,"
-        " processName:%{public}s, native:%{public}d, entryParams:%{private}s, fdsSize:%{public}zu,"
+        " processName:%{public}s, native:%{public}d, entryParams size:%{public}zu, fdsSize:%{public}zu,"
         " options.isolationMode:%{public}d", childProcessType, g_debugOption.isStartWithDebug,
-        g_debugOption.processName.c_str(), g_debugOption.isStartWithNative, args.entryParams.c_str(), args.fds.size(),
+        g_debugOption.processName.c_str(), g_debugOption.isStartWithNative, args.entryParams.length(), args.fds.size(),
         options.isolationMode);
     ChildProcessManagerErrorCode errorCode = PreCheck(childProcessType);
     if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
@@ -147,7 +147,7 @@ ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSp
     const std::string &libName, const sptr<IRemoteObject> &callbackStub)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "libName:%{private}s", libName.c_str());
-    ChildProcessManagerErrorCode errorCode = PreCheckNativeProcess();
+    ChildProcessManagerErrorCode errorCode = PreCheck(AppExecFwk::CHILD_PROCESS_TYPE_NATIVE);
     if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
         return errorCode;
     }
@@ -164,11 +164,7 @@ ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSp
 
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "StartNativeChildProcess error:%{public}d", ret);
-        if (ret == ERR_OVERFLOW) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "Max native child processes readched");
-            return ChildProcessManagerErrorCode::ERR_MAX_NATIVE_CHILD_PROCESSES;
-        }
-        return ChildProcessManagerErrorCode::ERR_APP_MGR_FAILED_INNER;
+        return ChildProcessManagerErrorUtil::GetChildProcessManagerErrorCode(ret);
     }
 
     ++childProcessCount_;
@@ -207,7 +203,8 @@ ChildProcessManagerErrorCode ChildProcessManager::PreCheck()
 ChildProcessManagerErrorCode ChildProcessManager::PreCheck(int32_t childProcessType)
 {
     if (!AAFwk::AppUtils::GetInstance().IsMultiProcessModel() &&
-        childProcessType != AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS) {
+        childProcessType != AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS &&
+        childProcessType != AppExecFwk::CHILD_PROCESS_TYPE_NATIVE) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Not support child process.");
         auto useNewErrorCode = childProcessType != AppExecFwk::CHILD_PROCESS_TYPE_JS;
         return useNewErrorCode ? ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW :
@@ -217,21 +214,6 @@ ChildProcessManagerErrorCode ChildProcessManager::PreCheck(int32_t childProcessT
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Already in child process");
         return ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS;
     }
-    return ChildProcessManagerErrorCode::ERR_OK;
-}
-
-ChildProcessManagerErrorCode ChildProcessManager::PreCheckNativeProcess()
-{
-    ChildProcessManagerErrorCode errCode = PreCheck();
-    if (errCode != ChildProcessManagerErrorCode::ERR_OK) {
-        return errCode;
-    }
-
-    if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess()) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Unsupport native child process");
-        return ChildProcessManagerErrorCode::ERR_UNSUPPORT_NATIVE_CHILD_PROCESS;
-    }
-
     return ChildProcessManagerErrorCode::ERR_OK;
 }
 

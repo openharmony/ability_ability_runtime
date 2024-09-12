@@ -298,7 +298,7 @@ HWTEST_F(ContinuationRegisterManagerTest, ContinuationRegisterManager_Disconnect
     continuationRegisterManager->Init(continuationRegisterManagerProxy);
 
     continuationRegisterManager->Disconnect();
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(continuationRegisterManager != nullptr);
 }
 
 /*
@@ -333,7 +333,7 @@ HWTEST_F(ContinuationRegisterManagerTest, ContinuationRegisterManager_Disconnect
     continuationRegisterManager->Init(continuationRegisterManagerProxy);
 
     continuationRegisterManager->Disconnect();
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(continuationRegisterManager != nullptr);
 }
 }   // namespace AppExecFwk
 }   // namespace OHOS
