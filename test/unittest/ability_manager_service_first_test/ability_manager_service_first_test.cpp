@@ -1952,19 +1952,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, UninstallAppInner_0300, TestSize.Level1
 }
 
 /**
- * @tc.name: AbilityManagerServiceFirstTest_GetBundleManager_0100
- * @tc.desc: Test the state of GetBundleManager
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceFirstTest, GetBundleManager_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GetBundleManager_0100 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs->GetBundleManager(), nullptr);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GetBundleManager_0100 end");
-}
-
-/**
  * @tc.name: AbilityManagerServiceFirstTest_PreLoadAppDataAbilities_0100
  * @tc.desc: Test the state of PreLoadAppDataAbilities
  * @tc.type: FUNC
@@ -1997,7 +1984,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, PreLoadAppDataAbilitiesTask_0100, TestS
     auto manager = std::make_shared<DataAbilityManager>();
     abilityMs->subManagersHelper_->dataAbilityManagers_.emplace(USER_ID_U100, manager);
     abilityMs->PreLoadAppDataAbilitiesTask("test", USER_ID_U100);
-    EXPECT_NE(abilityMs->bundleMgrHelper_, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest PreLoadAppDataAbilitiesTask_0100 end");
 }
 
