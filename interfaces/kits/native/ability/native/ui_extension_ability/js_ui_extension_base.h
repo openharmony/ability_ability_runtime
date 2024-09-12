@@ -95,6 +95,11 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnStop() override;
+    void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) override;
+    /**
+     * @brief The callback of OnStop.
+     */
+    void OnStopCallBack() override;
 
     /**
      * @brief Called when the system configuration is updated.
