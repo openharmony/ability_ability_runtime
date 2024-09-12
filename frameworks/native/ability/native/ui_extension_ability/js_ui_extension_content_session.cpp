@@ -612,7 +612,7 @@ napi_value JsUIExtensionContentSession::OnSetReceiveDataCallback(napi_env env, N
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-
+    
     if (!CheckTypeForNapiValue(env, info.argv[INDEX_ZERO], napi_function)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
         ThrowInvalidParamError(env, "Parameter error: Callback must be a function");
@@ -827,6 +827,8 @@ napi_value JsUIExtensionContentSession::OnSetWindowPrivacyMode(napi_env env, Nap
 
 napi_value JsUIExtensionContentSession::OnStartAbilityByType(napi_env env, NapiCallbackInfo& info)
 {
+    TAG_LOGE(AAFwkTag::UI_EXT, "called");
+
     std::string type;
     AAFwk::WantParams wantParam;
 
