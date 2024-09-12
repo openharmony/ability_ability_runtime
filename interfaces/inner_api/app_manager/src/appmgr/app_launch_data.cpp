@@ -106,6 +106,11 @@ bool AppLaunchData::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteString(instanceKey_)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write instance key.");
+        return false;
+    }
+
     return true;
 }
 
@@ -152,6 +157,7 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
     appRunningUniqueId_ = parcel.ReadString();
     isMultiThread_ = parcel.ReadBool();
     isErrorInfoEnhance_ = parcel.ReadBool();
+    instanceKey_ = parcel.ReadString();
     return true;
 }
 
