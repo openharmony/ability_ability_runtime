@@ -27,11 +27,9 @@
 namespace OHOS {
 namespace AAFwk {
 class Want;
-struct ExitReason;
 }
 namespace AbilityRuntime {
 using AppConfigUpdateCallback = std::function<void(const AppExecFwk::Configuration &config)>;
-using AppProcessExitCallback = std::function<void(const AAFwk::ExitReason &exitReason)>;
 class ApplicationContext : public Context {
 public:
     ApplicationContext() = default;
@@ -135,7 +133,6 @@ public:
     void SetApplicationInfoUpdateFlag(bool flag);
     void RegisterAppConfigUpdateObserver(AppConfigUpdateCallback appConfigChangeCallback);
     void RegisterAppFontObserver(AppConfigUpdateCallback appFontCallback);
-    void RegisterProcessSecurityExit(AppProcessExitCallback appProcessExitCallback);
 
     std::string GetAppRunningUniqueId() const;
     void SetAppRunningUniqueId(const std::string &appRunningUniqueId);
@@ -144,7 +141,6 @@ public:
     void SetCurrentAppCloneIndex(int32_t appIndex);
     int32_t GetCurrentAppMode();
     void SetCurrentAppMode(int32_t appIndex);
-    void ProcessSecurityExit(const AAFwk::ExitReason &exitReason);
 
     using SelfType = ApplicationContext;
     static const size_t CONTEXT_TYPE_ID;
@@ -166,7 +162,6 @@ private:
     bool applicationInfoUpdateFlag_ = false;
     AppConfigUpdateCallback appConfigChangeCallback_ = nullptr;
     AppConfigUpdateCallback appFontCallback_ = nullptr;
-    AppProcessExitCallback appProcessExitCallback_ = nullptr;
     std::string appRunningUniqueId_;
     int32_t appIndex_ = 0;
     int32_t appMode_ = 0;
