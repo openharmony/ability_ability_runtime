@@ -3435,7 +3435,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_001, TestSize.L
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
     std::vector<bool> checkResults = {};
-    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
     EXPECT_EQ(permissionUris.size(), 0);
 }
 
@@ -3454,7 +3454,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_002, TestSize.L
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
     std::vector<bool> checkResults = { false };
-    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
     EXPECT_EQ(permissionUris.size(), 0);
     EXPECT_EQ(want.GetUriString(), "");
 }
@@ -3474,7 +3474,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_003, TestSize.L
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
     std::vector<bool> checkResults = { false };
-    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
     EXPECT_EQ(permissionUris.size(), 0);
     EXPECT_EQ(want.GetUriString(), uri);
 }
@@ -3494,7 +3494,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_004, TestSize.L
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
     std::vector<bool> checkResults = { true };
-    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
     EXPECT_EQ(permissionUris.size(), 1);
     EXPECT_EQ(want.GetUriString(), uri);
 }
@@ -3515,7 +3515,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_005, TestSize.L
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec = { uri };
     std::vector<bool> checkResults = { true };
-    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
     EXPECT_EQ(permissionUris.size(), 1);
     auto paramStramUris = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
     EXPECT_EQ(paramStramUris.size(), 1);
@@ -3539,7 +3539,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_006, TestSize.L
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec = { uri1, uri2 };
     std::vector<bool> checkResults = { true, true };
-    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(want, uriVec, checkResults);
+    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
     EXPECT_EQ(permissionUris.size(), 2);
     EXPECT_EQ(want.GetUriString(), uri1);
     auto paramStramUris = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);

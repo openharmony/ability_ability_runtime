@@ -167,19 +167,6 @@ public:
     void RemoveDeadAppStateCallback(const wptr<IRemoteObject> &remote);
 
     /**
-     * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return
-     */
-    virtual void AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState);
-
-    /**
      * KillProcessByAbilityToken, kill the process by ability token.
      *
      * @param token, the unique identification to the ability.
@@ -806,6 +793,14 @@ public:
      */
     void SetCurrentUserId(const int32_t userId);
 
+    /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
 #endif
@@ -827,6 +822,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t NotifyAppFault(const FaultData &faultData);
+
+    /**
+     * Transformed Notify Fault Data
+     *
+     * @param faultData Transformed the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+
+    int32_t TransformedNotifyAppFault(const AppFaultDataBySA &faultData);
 
     /**
      * Notify Fault Data By SA
@@ -1551,6 +1555,7 @@ private:
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
     void DealMultiUserConfig(const Configuration &config, const int32_t userId);
+    bool CheckIsDebugApp(const std::string &bundleName);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;

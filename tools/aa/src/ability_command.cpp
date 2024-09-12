@@ -215,6 +215,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE] = "error: unlock screen failed in developer mode.";
     messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = "error: not supported in the current product type.";
     messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = "error: not supported in non-app-provision mode.";
+    messageMap_[ERR_NOT_DEBUG_APP] = "error: not debug app.";
     return OHOS::ERR_OK;
 }
 

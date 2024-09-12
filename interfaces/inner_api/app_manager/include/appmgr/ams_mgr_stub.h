@@ -49,7 +49,6 @@ private:
     int32_t HandleUpdateExtensionState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterAppStateCallback(MessageParcel &data, MessageParcel &reply);
     int32_t HandleReset(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleAbilityBehaviorAnalysis(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessByAbilityToken(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessesByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessesByPids(MessageParcel &data, MessageParcel &reply);
@@ -70,6 +69,7 @@ private:
     int32_t HandleNotifyAppMgrRecordExitReason(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateApplicationInfoInstalled(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetCurrentUserId(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetEnableStartProcessFlagByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterAppDebugListener(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterAppDebugListener(MessageParcel &data, MessageParcel &reply);

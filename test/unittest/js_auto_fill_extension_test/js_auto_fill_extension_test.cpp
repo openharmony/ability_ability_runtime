@@ -163,7 +163,9 @@ HWTEST_F(JsAutoFillExtensionTest, OnStart_0100, TestSize.Level1)
 {
     Want want;
     ASSERT_NE(jsAutoFillExtension_, nullptr);
-    jsAutoFillExtension_->OnStart(want);
+    sptr<AAFwk::SessionInfo> sessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    ASSERT_NE(sessionInfo, nullptr);
+    jsAutoFillExtension_->OnStart(want, sessionInfo);
 
     auto context = jsAutoFillExtension_->GetContext();
     ASSERT_NE(context, nullptr);

@@ -82,6 +82,7 @@ void FreeInstallObserverManager::OnInstallFinished(int32_t recordId, const std::
             TAG_LOGE(AAFwkTag::FREE_INSTALL, "null self");
             return;
         }
+        TAG_LOGI(AAFwkTag::FREE_INSTALL, "OnInstallFinished come");
         self->HandleOnInstallFinished(recordId, bundleName, abilityName, startTime, resultCode);
     };
 
@@ -99,6 +100,7 @@ void FreeInstallObserverManager::OnInstallFinishedByUrl(int32_t recordId, const 
             TAG_LOGE(AAFwkTag::FREE_INSTALL, "null self");
             return;
         }
+        TAG_LOGI(AAFwkTag::FREE_INSTALL, "OnInstallFinishedByUrl come");
         self->HandleOnInstallFinishedByUrl(recordId, startTime, url, resultCode);
     };
 
@@ -129,6 +131,7 @@ void FreeInstallObserverManager::HandleOnInstallFinishedByUrl(int32_t recordId, 
 
 void FreeInstallObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote)
 {
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "called");
     auto remoteObj = remote.promote();
     if (remoteObj == nullptr) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null observer");
@@ -153,6 +156,7 @@ FreeInstallObserverRecipient::~FreeInstallObserverRecipient()
 
 void FreeInstallObserverRecipient::OnRemoteDied(const wptr<IRemoteObject> &__attribute__((unused)) remote)
 {
+    TAG_LOGI(AAFwkTag::FREE_INSTALL, "called");
     if (handler_) {
         handler_(remote);
     }

@@ -97,8 +97,6 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data
             return HandleUpdateExtensionState(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::REGISTER_APP_STATE_CALLBACK):
             return HandleRegisterAppStateCallback(data, reply);
-        case static_cast<uint32_t>(IAmsMgr::Message::ABILITY_BEHAVIOR_ANALYSIS):
-            return HandleAbilityBehaviorAnalysis(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PEOCESS_BY_ABILITY_TOKEN):
             return HandleKillProcessByAbilityToken(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_BY_USERID):
@@ -139,6 +137,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &dat
             return HandleUpdateApplicationInfoInstalled(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::SET_CURRENT_USER_ID):
             return HandleSetCurrentUserId(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::ENABLE_START_PROCESS_FLAG_BY_USER_ID):
+            return HandleSetEnableStartProcessFlagByUserId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID):
             return HandleGetBundleNameByPid(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::REGISTER_APP_DEBUG_LISTENER):
@@ -284,22 +284,6 @@ ErrCode AmsMgrStub::HandleRegisterAppStateCallback(MessageParcel &data, MessageP
         callback = iface_cast<IAppStateCallback>(obj);
     }
     RegisterAppStateCallback(callback);
-    return NO_ERROR;
-}
-
-ErrCode AmsMgrStub::HandleAbilityBehaviorAnalysis(MessageParcel &data, MessageParcel &reply)
-{
-    HITRACE_METER(HITRACE_TAG_APP);
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    sptr<IRemoteObject> preToke = nullptr;
-    if (data.ReadBool()) {
-        preToke = data.ReadRemoteObject();
-    }
-    int32_t visibility = data.ReadInt32();
-    int32_t perceptibility = data.ReadInt32();
-    int32_t connectionState = data.ReadInt32();
-
-    AbilityBehaviorAnalysis(token, preToke, visibility, perceptibility, connectionState);
     return NO_ERROR;
 }
 
@@ -549,6 +533,14 @@ int32_t AmsMgrStub::HandleSetCurrentUserId(MessageParcel &data, MessageParcel &r
 {
     int32_t userId = data.ReadInt32();
     SetCurrentUserId(userId);
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleSetEnableStartProcessFlagByUserId(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    bool enableStartProcess = data.ReadBool();
+    SetEnableStartProcessFlagByUserId(userId, enableStartProcess);
     return NO_ERROR;
 }
 

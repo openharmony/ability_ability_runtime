@@ -60,8 +60,10 @@ const std::map<ChildProcessManagerErrorCode, AbilityErrorCode> INTERNAL_ERR_CODE
 
 const std::map<int32_t, ChildProcessManagerErrorCode> ABILITY_MANAGER_ERR_CODE_MAP = {
     { AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS, ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW },
+    { AAFwk::ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS, ChildProcessManagerErrorCode::ERR_UNSUPPORT_NATIVE_CHILD_PROCESS },
     { AAFwk::ERR_ALREADY_IN_CHILD_PROCESS, ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS },
     { AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT, ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES },
+    { ERR_OVERFLOW, ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES },
 };
 
 class ChildProcessManagerErrorUtil {

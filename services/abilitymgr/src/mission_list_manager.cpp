@@ -395,12 +395,12 @@ int MissionListManager::GetTargetMission(const AbilityRequest &abilityRequest, s
         return ERR_INVALID_VALUE;
     }
 
-    if (targetAbilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND.");
+    if (targetAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
         targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
         return ERR_OK;
     } else {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND  or BACKGROUND");
         targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
         if (targetAbilityRecord->IsLoading()) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "ability: %{public}s is loading", abilityRequest.abilityInfo.name.c_str());
@@ -972,13 +972,16 @@ int MissionListManager::MinimizeAbilityLocked(const std::shared_ptr<AbilityRecor
         return ERR_INVALID_VALUE;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", abilityRecord->GetAbilityInfo().name.c_str());
-    abilityRecord->SetPendingState(AbilityState::BACKGROUND);
-
+    if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
+        abilityRecord->SetPendingState(AbilityState::BACKGROUND);
+        return ERR_OK;
+    }
     if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUND)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ability state not foreground");
         return ERR_OK;
     }
-
+    abilityRecord->SetPendingState(AbilityState::BACKGROUND);
     abilityRecord->SetMinimizeReason(fromUser);
     MoveToBackgroundTask(abilityRecord);
 
@@ -1021,10 +1024,10 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
         if (abilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             abilityRecord->SetStartToForeground(true);
             abilityRecord->PostForegroundTimeoutTask();
-            abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
         } else {
             abilityRecord->SetStartToBackground(true);
+            abilityRecord->SetPendingState(AbilityState::BACKGROUND);
             MoveToBackgroundTask(abilityRecord);
         }
         return ERR_OK;
@@ -1042,7 +1045,6 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
     abilityRecord->PostCancelStartingWindowHotTask();
 #endif
     abilityRecord->PostForegroundTimeoutTask();
-    abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
     DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
 
     return ERR_OK;
@@ -1365,6 +1367,7 @@ void MissionListManager::TerminatePreviousAbility(const std::shared_ptr<AbilityR
     abilityRecord->SetPreAbilityRecord(nullptr);
     auto self(shared_from_this());
     if (terminatingAbilityRecord->GetAbilityState() == AbilityState::FOREGROUND) {
+        terminatingAbilityRecord->SetPendingState(AbilityState::BACKGROUND);
         MoveToBackgroundTask(terminatingAbilityRecord, true);
     }
     if (terminatingAbilityRecord->GetAbilityState() == AbilityState::BACKGROUND) {
@@ -1413,7 +1416,6 @@ void MissionListManager::CompleteBackground(const std::shared_ptr<AbilityRecord>
     DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
     if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
         abilityRecord->PostForegroundTimeoutTask();
-        abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
         DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
     } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "not continuous startup.");
@@ -1516,11 +1518,15 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
 
     if (abilityRecord->IsAbilityState(FOREGROUND) || abilityRecord->IsAbilityState(FOREGROUNDING)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "current ability is active");
-        abilityRecord->SetPendingState(AbilityState::BACKGROUND);
         auto nextAbilityRecord = specifiedNextRecord ? specifiedNextRecord : abilityRecord->GetNextAbilityRecord();
         if (nextAbilityRecord) {
             nextAbilityRecord->SetPreAbilityRecord(abilityRecord);
 #ifdef SUPPORT_SCREEN
+            if (nextAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
+                nextAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+                return ERR_OK;
+            }
             nextAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
             nextAbilityRecord->ProcessForegroundAbility(abilityRecord, false);
         } else {
@@ -1535,6 +1541,12 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
             nextAbilityRecord->ProcessForegroundAbility(0);
         } else {
 #endif
+            if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
+                abilityRecord->SetPendingState(AbilityState::BACKGROUND);
+                return ERR_OK;
+            }
+            abilityRecord->SetPendingState(AbilityState::BACKGROUND);
             MoveToBackgroundTask(abilityRecord, true);
         }
         return ERR_OK;
@@ -1665,11 +1677,15 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
     // 1. if the ability was foreground, first should find whether there is other ability foreground
     if (abilityRecord->IsAbilityState(FOREGROUND) || abilityRecord->IsAbilityState(FOREGROUNDING)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "current ability is active");
-        abilityRecord->SetPendingState(AbilityState::BACKGROUND);
         auto nextAbilityRecord = abilityRecord->GetNextAbilityRecord();
         if (nextAbilityRecord) {
             nextAbilityRecord->SetPreAbilityRecord(abilityRecord);
 #ifdef SUPPORT_SCREEN
+            if (nextAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
+                nextAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+                return ERR_OK;
+            }
             nextAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
             nextAbilityRecord->ProcessForegroundAbility(abilityRecord);
         } else {
@@ -1680,6 +1696,12 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
             nextAbilityRecord->ProcessForegroundAbility(0);
         } else {
 #endif
+            if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
+                abilityRecord->SetPendingState(AbilityState::BACKGROUND);
+                return ERR_OK;
+            }
+            abilityRecord->SetPendingState(AbilityState::BACKGROUND);
             MoveToBackgroundTask(abilityRecord, true);
         }
         return ERR_OK;
@@ -2394,6 +2416,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
     if (state == AbilityState::FOREGROUND_DO_NOTHING) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundFailed. WMS return do_nothing");
         abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
+        abilityRecord->SetPendingState(AbilityState::BACKGROUND);
         MoveToBackgroundTask(abilityRecord);
         return;
     }
@@ -3863,7 +3886,13 @@ void MissionListManager::PauseManager()
             continue;
         }
         abilityRecord->SetSwitchingPause(true);
-        MoveToBackgroundTask(abilityRecord);
+        if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
+            abilityRecord->SetPendingState(AbilityState::BACKGROUND);
+        } else {
+            abilityRecord->SetPendingState(AbilityState::BACKGROUND);
+            MoveToBackgroundTask(abilityRecord);
+        }
     }
 }
 
@@ -4048,8 +4077,8 @@ int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abil
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
         return ERR_INVALID_VALUE;
     }
-    if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND.");
+    if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
         abilityRecord->SetPendingState(AbilityState::FOREGROUND);
         return ERR_OK;
     } else {

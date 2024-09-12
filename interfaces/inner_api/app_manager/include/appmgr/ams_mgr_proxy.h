@@ -76,20 +76,6 @@ public:
     virtual void RegisterAppStateCallback(const sptr<IAppStateCallback> &callback) override;
 
     /**
-     * AbilityBehaviorAnalysis,call AbilityBehaviorAnalysis() through the proxy object,
-     * ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return
-     */
-    virtual void AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState) override;
-
-    /**
      * KillProcessByAbilityToken, call KillProcessByAbilityToken() through proxy object,
      * kill the process by ability token.
      *
@@ -199,6 +185,8 @@ public:
         int32_t requestId = 0) override;
 
     virtual void SetCurrentUserId(const int32_t userId) override;
+
+    virtual void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess) override;
 
     virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
 

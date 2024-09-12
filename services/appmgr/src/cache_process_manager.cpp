@@ -45,7 +45,7 @@ CacheProcessManager::CacheProcessManager()
     maxProcCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_PROC_CACHE_NUM, 0);
     shouldCheckApi = OHOS::system::GetBoolParameter(PROCESS_CACHE_API_CHECK_CONFIG, true);
     shouldCheckSupport = OHOS::system::GetBoolParameter(PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG, true);
-    warmStartProcesEnable_ = OHOS::system::GetBoolParameter(RESOURCE_WARM_START_PROCESS_ENABLE, true);
+    warmStartProcesEnable_ = OHOS::system::GetBoolParameter(RESOURCE_WARM_START_PROCESS_ENABLE, false);
     TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum %{public}d", maxProcCacheNum_);
 }
 
@@ -551,6 +551,21 @@ bool CacheProcessManager::IsAppContainsSrvExt(const std::shared_ptr<AppRunningRe
     }
     srvExtCheckedFlag.insert(appRecord);
     return srvExtRecords.find(appRecord) != srvExtRecords.end() ? true : false;
+}
+
+void CacheProcessManager::OnAppProcessCacheBlocked(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!QueryEnableProcessCache()) {
+        return;
+    }
+    if (appRecord == nullptr || !IsCachedProcess(appRecord)) {
+        return;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s is cached and is blocked, which needs exit.",
+        appRecord->GetBundleName().c_str());
+    RemoveCacheRecord(appRecord);
+    KillProcessByRecord(appRecord);
 }
 } // namespace OHOS
 } // namespace AppExecFwk

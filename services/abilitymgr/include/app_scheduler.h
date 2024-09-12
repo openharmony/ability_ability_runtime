@@ -180,19 +180,6 @@ public:
     void UpdateExtensionState(const sptr<IRemoteObject> &token, const AppExecFwk::ExtensionState state);
 
     /**
-     * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return Returns RESULT_OK on success, others on failure.
-     */
-    void AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState);
-
-    /**
      * KillProcessByAbilityToken, call KillProcessByAbilityToken() through proxy object,
      * kill the process by ability token.
      *
@@ -372,6 +359,14 @@ public:
      * @return
      */
     void SetCurrentUserId(int32_t userId);
+
+    /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
 
     /**
      * Get bundleName by pid.

@@ -13,23 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_APP_MGR_SERVICE_INNER_H
-#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_APP_MGR_SERVICE_INNER_H
+#ifndef OHOS_ABILITY_RUNTIME_WANT_UTILS_H
+#define OHOS_ABILITY_RUNTIME_WANT_UTILS_H
 
-#include "gmock/gmock.h"
-#include "app_mgr_service_inner.h"
+#include "want.h"
+
+#ifdef APP_DOMAIN_VERIFY_ENABLED
+#include "ag_convert_callback_impl.h"
+#include "app_domain_verify_mgr_client.h"
+#endif
 
 namespace OHOS {
-namespace AppExecFwk {
-class MockAppMgrServiceInner : public AppMgrServiceInner {
+namespace AAFwk {
+class WantUtils final {
 public:
-    MockAppMgrServiceInner()
-    {}
-    virtual ~MockAppMgrServiceInner()
-    {}
-
-    MOCK_METHOD2(DumpFfrt, int(const std::vector<int32_t>& pid, std::string& result));
+    static int32_t ConvertToExplicitWant(Want& want);
+    static int32_t GetCallerBundleName(std::string &callerBundleName);
+    static bool IsAtomicServiceUrl(const Want& want, sptr<IRemoteObject> callerToken,
+        int32_t userId, int requestCode);
 };
-}  // namespace AppExecFwk
+}  // namespace AAFwk
 }  // namespace OHOS
-#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_APP_MGR_SERVICE_INNER_H
+#endif  // OHOS_ABILITY_RUNTIME_WANT_UTILS_H
