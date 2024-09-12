@@ -11325,14 +11325,6 @@ void AbilityManagerService::NotifyFrozenProcessByRSS(const std::vector<int32_t> 
     connectManager->HandleProcessFrozen(pidList, uid);
 }
 
-void AbilityManagerService::HandleRestartResidentProcessDependedOnWeb()
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    auto appMgr = GetAppMgr();
-    CHECK_POINTER_LOG(appMgr, "get appMgr fail");
-    appMgr->RestartResidentProcessDependedOnWeb();
-}
-
 int32_t AbilityManagerService::PreStartMission(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, const std::string& startTime)
 {

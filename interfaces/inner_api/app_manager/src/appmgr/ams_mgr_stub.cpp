@@ -192,8 +192,6 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
             return 0;
         case static_cast<uint32_t>(IAmsMgr::Message::BLOCK_PROCESS_CACHE_BY_PIDS):
             return HandleBlockProcessCacheByPids(data, reply);
-        case static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB):
-            return HandleIsKilledForUpgradeWeb(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -793,23 +791,6 @@ ErrCode AmsMgrStub::HandleCleanAbilityByUserRequest(MessageParcel &data, Message
     auto result = CleanAbilityByUserRequest(token);
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "fail to write the result.");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
-int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    auto bundleName = data.ReadString();
-    if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
-        return ERR_INVALID_VALUE;
-    }
-
-    auto result = IsKilledForUpgradeWeb(bundleName);
-    if (!reply.WriteBool(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

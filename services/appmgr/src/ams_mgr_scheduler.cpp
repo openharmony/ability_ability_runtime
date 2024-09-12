@@ -689,14 +689,5 @@ bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token
     }
     return amsMgrServiceInner_->CleanAbilityByUserRequest(token);
 }
-
-bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
-{
-    if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
-        return false;
-    }
-    return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
-}
 } // namespace AppExecFwk
 }  // namespace OHOS

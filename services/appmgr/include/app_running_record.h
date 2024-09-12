@@ -817,16 +817,6 @@ public:
         return isStrictMode_;
     }
 
-    inline void SetIsDependedOnArkWeb(bool isDepend)
-    {
-        isDependedOnArkWeb_ = isDepend;
-    }
-
-    inline bool IsDependedOnArkWeb()
-    {
-        return isDependedOnArkWeb_;
-    }
-
     void SetProcessCacheBlocked(bool isBlocked);
     bool GetProcessCacheBlocked();
 
@@ -1000,7 +990,6 @@ private:
     pid_t gpuPid_ = 0;
     bool isStrictMode_ = false;
     bool isAttachedToStatusBar = false;
-    bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
 };
 

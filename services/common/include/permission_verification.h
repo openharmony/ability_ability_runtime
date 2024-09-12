@@ -101,8 +101,6 @@ struct VerificationInfo {
 
     bool VerifyPreStartAtomicServicePermission() const;
 
-    bool VerifyKillProcessDependedOnWebPermission() const;
-
     bool VerifyBackgroundCallPermission(const bool isBackgroundCall) const;
 
 private:
