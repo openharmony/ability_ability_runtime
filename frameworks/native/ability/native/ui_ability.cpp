@@ -39,7 +39,6 @@ constexpr int32_t DEFAULT_DMS_SESSION_ID = 0;
 constexpr char LAUNCHER_BUNDLE_NAME[] = "com.ohos.launcher";
 constexpr char LAUNCHER_ABILITY_NAME[] = "com.ohos.launcher.MainAbility";
 constexpr char SHOW_ON_LOCK_SCREEN[] = "ShowOnLockScreen";
-
 constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
 constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 constexpr int32_t ERR_INVALID_VALUE = -1;
@@ -156,14 +155,14 @@ void UIAbility::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessio
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null AbilityInfo_");
         return;
     }
 
     securityFlag_ = want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false);
     (const_cast<AAFwk::Want &>(want)).RemoveParam(DLP_PARAMS_SECURITY_FLAG);
     SetWant(want);
-    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", abilityInfo_->name.c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s.", abilityInfo_->name.c_str());
 #ifdef SUPPORT_GRAPHICS
     if (sessionInfo != nullptr) {
         SetSessionToken(sessionInfo->sessionToken);
@@ -191,7 +190,10 @@ void UIAbility::OnStop()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 #ifdef SUPPORT_GRAPHICS
-    TAG_LOGD(AAFwkTag::UIABILITY, "unregisterDisplayInfoChangedListener");
+    if (abilityRecovery_ == nullptr) {
+        abilityRecovery_->ScheduleSaveAbilityState(AppExecFwk::StateReason::LIFECYCLE);
+    }
+    TAG_LOGI(AAFwkTag::UIABILITY, "UnregisterDisplayInfoChangedListener");
     (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(token_, abilityDisplayListener_);
     auto &&window = GetWindow();
     if (window != nullptr) {

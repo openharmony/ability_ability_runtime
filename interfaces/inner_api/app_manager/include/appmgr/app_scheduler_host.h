@@ -16,7 +16,6 @@
 #ifndef OHOS_ABILITY_RUNTIME_APP_SCHEDULER_HOST_H
 #define OHOS_ABILITY_RUNTIME_APP_SCHEDULER_HOST_H
 
-#include <cstdint>
 #include <map>
 
 #include "iremote_object.h"

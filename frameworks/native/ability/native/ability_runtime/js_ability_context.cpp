@@ -373,14 +373,14 @@ napi_value JsAbilityContext::HideAbility(napi_env env, napi_callback_info info)
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnHideAbility);
 }
 
-napi_value JsAbilityContext::OpenAtomicService(napi_env env, napi_callback_info info)
-{
-    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnOpenAtomicService);
-}
-
 napi_value JsAbilityContext::MoveAbilityToBackground(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnMoveAbilityToBackground);
+}
+
+napi_value JsAbilityContext::OpenAtomicService(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnOpenAtomicService);
 }
 
 void JsAbilityContext::ClearFailedCallConnection(
@@ -408,10 +408,7 @@ napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info
     }
 
     AAFwk::Want want;
-    if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
-        ThrowInvalidParamError(env, "Parse param want failed, must be a Want");
-        return CreateJsUndefined(env);
-    }
+    OHOS::AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want);
     InheritWindowMode(want);
     decltype(info.argc) unwrapArgc = ARGC_ONE;
     TAG_LOGD(AAFwkTag::CONTEXT, "ability:%{public}s", want.GetElement().GetAbilityName().c_str());
@@ -1728,10 +1725,8 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
         JsAbilityContext::ShowAbility);
     BindNativeFunction(env, object, "hideAbility", moduleName,
         JsAbilityContext::HideAbility);
-    BindNativeFunction(env, object, "openAtomicService", moduleName,
-        JsAbilityContext::OpenAtomicService);
-    BindNativeFunction(env, object, "moveAbilityToBackground", moduleName,
-        JsAbilityContext::MoveAbilityToBackground);
+    BindNativeFunction(env, object, "moveAbilityToBackground", moduleName, JsAbilityContext::MoveAbilityToBackground);
+    BindNativeFunction(env, object, "openAtomicService", moduleName, JsAbilityContext::OpenAtomicService);
 
 #ifdef SUPPORT_GRAPHICS
     BindNativeFunction(env, object, "setMissionLabel", moduleName, JsAbilityContext::SetMissionLabel);
@@ -1747,20 +1742,20 @@ JSAbilityConnection::~JSAbilityConnection()
     uv_loop_t *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "~JSAbilityConnection: failed to get uv loop.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null uv loop");
         return;
     }
 
     ConnectCallback *cb = new (std::nothrow) ConnectCallback();
     if (cb == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "~JSAbilityConnection: failed to create cb.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cb");
         return;
     }
     cb->jsConnectionObject_ = std::move(jsConnectionObject_);
 
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "~JSAbilityConnection: failed to create work.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null work");
         delete cb;
         cb = nullptr;
         return;
@@ -1769,11 +1764,11 @@ JSAbilityConnection::~JSAbilityConnection()
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {},
     [](uv_work_t *work, int status) {
         if (work == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "~JSAbilityConnection: work is nullptr.");
+            TAG_LOGE(AAFwkTag::CONTEXT, "null work");
             return;
         }
         if (work->data == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "~JSAbilityConnection: data is nullptr.");
+            TAG_LOGE(AAFwkTag::CONTEXT, "null data");
             delete work;
             work = nullptr;
             return;
@@ -2163,6 +2158,7 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 return;
             }
+
             auto errcode = context->StartAbilityByType(type, wantParam, callback);
             (errcode != 0) ? task.Reject(env, CreateJsErrorByNativeErr(env, errcode)) :
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
@@ -2245,6 +2241,36 @@ napi_value JsAbilityContext::ChangeAbilityVisibility(napi_env env, NapiCallbackI
     return result;
 }
 
+napi_value JsAbilityContext::OnMoveAbilityToBackground(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "start");
+    auto abilityContext = context_.lock();
+
+    NapiAsyncTask::CompleteCallback complete =
+        [weak = context_](napi_env env, NapiAsyncTask& task, int32_t status) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "start task");
+            auto context = weak.lock();
+            if (!context) {
+                TAG_LOGW(AAFwkTag::CONTEXT, "released context");
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+                return;
+            }
+
+            auto errcode = context->MoveUIAbilityToBackground();
+            if (errcode == 0) {
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, errcode));
+            }
+        };
+
+    napi_value lastParam = (info.argc > ARGC_ZERO) ? info.argv[INDEX_ZERO] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnMoveAbilityToBackground",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
 napi_value JsAbilityContext::OnOpenAtomicService(napi_env env, NapiCallbackInfo& info)
 {
     if (info.argc == ARGC_ZERO) {
@@ -2316,36 +2342,6 @@ napi_value JsAbilityContext::OpenAtomicServiceInner(napi_env env, NapiCallbackIn
         context->OpenAtomicService(want, options, requestCode, std::move(task));
     }
     TAG_LOGD(AAFwkTag::CONTEXT, "end");
-    return result;
-}
-
-napi_value JsAbilityContext::OnMoveAbilityToBackground(napi_env env, NapiCallbackInfo& info)
-{
-    TAG_LOGD(AAFwkTag::CONTEXT, "start");
-    auto abilityContext = context_.lock();
-
-    NapiAsyncTask::CompleteCallback complete =
-        [weak = context_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            TAG_LOGD(AAFwkTag::CONTEXT, "start task");
-            auto context = weak.lock();
-            if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "released context");
-                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
-                return;
-            }
-
-            auto errcode = context->MoveUIAbilityToBackground();
-            if (errcode == 0) {
-                task.ResolveWithNoError(env, CreateJsUndefined(env));
-            } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, errcode));
-            }
-        };
-
-    napi_value lastParam = (info.argc > ARGC_ZERO) ? info.argv[INDEX_ZERO] : nullptr;
-    napi_value result = nullptr;
-    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnMoveAbilityToBackground",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
