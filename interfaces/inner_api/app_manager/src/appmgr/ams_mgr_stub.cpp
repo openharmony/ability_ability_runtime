@@ -353,9 +353,7 @@ ErrCode AmsMgrStub::HandleKillProcessWithAccount(MessageParcel &data, MessagePar
     std::string bundleName = data.ReadString();
     int accountId = data.ReadInt32();
 
-    TAG_LOGI(AAFwkTag::APPMGR,
-        "bundleName = %{public}s, accountId = %{public}d",
-        bundleName.c_str(), accountId);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d", bundleName.c_str(), accountId);
 
     int32_t result = KillProcessWithAccount(bundleName, accountId);
     reply.WriteInt32(result);
@@ -369,9 +367,6 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
-
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s",
-        bundleName.c_str());
 
     int32_t result = KillApplication(bundleName);
     reply.WriteInt32(result);

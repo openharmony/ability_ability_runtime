@@ -1018,6 +1018,5 @@ void JSUIExtensionConnection::CallJsFailed(int32_t errorCode)
     napi_call_function(env_, obj, method, ARGC_ONE, argv, nullptr);
     TAG_LOGD(AAFwkTag::UI_EXT, "CallJsFailed end");
 }
-
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -132,7 +132,7 @@ int FormExtensionProviderClient::NotifyFormDelete(const int64_t formId, const Wa
         formId, want, callerToken]() {
         client->NotifyFormExtensionDelete(formId, want, callerToken);
     };
-    mainHandler->PostSyncTask(notifyFormExtensionDeleteFunc);
+    mainHandler->PostSyncTask(notifyFormExtensionDeleteFunc, "FormExtensionProviderClient::NotifyFormDelete");
     return ERR_OK;
 }
 

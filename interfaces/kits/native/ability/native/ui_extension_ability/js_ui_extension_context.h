@@ -62,7 +62,6 @@ protected:
 private:
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
     friend class JsEmbeddableUIAbilityContext;
-
     bool CheckStartAbilityInputParam(napi_env env, NapiCallbackInfo& info, AAFwk::Want& want,
         AAFwk::StartOptions& startOptions, size_t& unwrapArgc) const;
     napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,

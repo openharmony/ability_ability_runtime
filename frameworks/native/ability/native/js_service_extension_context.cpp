@@ -313,7 +313,6 @@ private:
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "OnOpenLink");
-
         std::string linkValue("");
         AAFwk::OpenLinkOptions openLinkOptions;
         AAFwk::Want want;
