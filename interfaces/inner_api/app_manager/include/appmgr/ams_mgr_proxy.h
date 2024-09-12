@@ -317,14 +317,6 @@ public:
      */
     virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
 
-    /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
-     */
-    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
-
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);

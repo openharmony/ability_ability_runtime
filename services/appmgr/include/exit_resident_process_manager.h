@@ -46,21 +46,16 @@ public:
     ~ExitResidentProcessManager();
     bool IsMemorySizeSufficent() const;
     bool RecordExitResidentBundleName(const std::string &bundleName, int32_t uid);
-    void RecordExitResidentBundleDependedOnWeb(const std::string &bundleName, int32_t uid);
     int32_t HandleMemorySizeInSufficent();
     int32_t HandleMemorySizeSufficient(std::vector<ExitResidentProcessInfo>& bundleNames);
-    void HandleExitResidentBundleDependedOnWeb(std::vector<ExitResidentProcessInfo>& bundleNames);
     void QueryExitBundleInfos(const std::vector<ExitResidentProcessInfo>& exitBundleNames,
         std::vector<AppExecFwk::BundleInfo>& exitBundleInfos);
-    bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
 
 private:
     ExitResidentProcessManager();
     MemorySizeState currentMemorySizeState_ = MemorySizeState::MEMORY_SIZE_SUFFICIENT;
     std::vector<ExitResidentProcessInfo> exitResidentInfos_;
-    std::vector<ExitResidentProcessInfo> exitResidentBundlesDependedOnWeb_;
     mutable ffrt::mutex mutexLock_;
-    mutable ffrt::mutex webMutexLock_;
     DISALLOW_COPY_AND_MOVE(ExitResidentProcessManager);
 };
 }  // namespace AppExecFwk
