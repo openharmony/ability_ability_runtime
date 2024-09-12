@@ -119,9 +119,7 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     InitErmsCallerInfo(want, nullptr, callerInfo, userId);
 
     ExperienceRule rule;
-    AAFwk::Want newWant = want;
-    newWant.RemoveAllFd();
-    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
+    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,
         callerInfo, rule));
     if (ret != ERR_OK) {
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule failed");

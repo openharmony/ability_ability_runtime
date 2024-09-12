@@ -21,8 +21,8 @@
 #include <list>
 #include <memory>
 #include <vector>
-#include <set>
 #include <utility>
+#include <set>
 #include "cpp/mutex.h"
 #include "cpp/condition_variable.h"
 
@@ -1041,9 +1041,8 @@ public:
     void SetRestartAppFlag(bool isRestartApp);
     bool GetRestartAppFlag() const;
 
-    void UpdateUIExtensionInfo(const WantParams &wantParams);
-
     void SetSpecifyTokenId(const uint32_t specifyTokenId);
+    void UpdateUIExtensionInfo(const WantParams &wantParams);
 
     void SaveConnectWant(const Want &want);
 

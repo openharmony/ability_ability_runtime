@@ -410,6 +410,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Clear extensionInfos when isOpenLink.");
         extensionInfos.clear();
     }
+
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu.", abilityInfos.size(),
         extensionInfos.size());
@@ -858,7 +859,6 @@ bool ImplicitStartProcessor::IsExistDefaultApp(int32_t userId, const std::string
 void ImplicitStartProcessor::SetTargetLinkInfo(const std::vector<AppExecFwk::SkillUriForAbilityAndExtension> &skillUri,
     Want &want)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     for (const auto& iter : skillUri) {
         if (iter.isMatch) {
             want.RemoveParam("send_to_erms_targetLinkFeature");

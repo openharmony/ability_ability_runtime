@@ -160,7 +160,7 @@ bool AbilityJumpInterceptor::CheckIfExemptByBundleName(const std::string &bundle
     }
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(appInfo.accessTokenId, permission, false);
     if (ret == Security::AccessToken::PermissionState::PERMISSION_DENIED) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "PERMISSION_DENIED.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "VerifyPermission %{public}d: PERMISSION_DENIED.", appInfo.accessTokenId);
         return false;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR,
