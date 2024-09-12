@@ -2907,6 +2907,26 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsAbilityStarted_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_IsAbilityStarted_0200
+ * @tc.desc: IsAbilityStarted
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, IsAbilityStarted_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->persistentId = 1;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, targetRecord);
+    EXPECT_EQ(uiAbilityLifecycleManager->IsAbilityStarted(abilityRequest, targetRecord), true);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_TryPrepareTerminateByPids_0100
  * @tc.desc: TryPrepareTerminateByPids
  * @tc.type: FUNC
@@ -3336,26 +3356,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_003, TestSi
     AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
     auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
     EXPECT_EQ(ret.empty(), false);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_IsAbilityStarted_0200
- * @tc.desc: IsAbilityStarted
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, IsAbilityStarted_002, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->sessionToken = new Rosen::Session(info);
-    sessionInfo->persistentId = 1;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, targetRecord);
-    EXPECT_EQ(uiAbilityLifecycleManager->IsAbilityStarted(abilityRequest, targetRecord), true);
 }
 
 /**

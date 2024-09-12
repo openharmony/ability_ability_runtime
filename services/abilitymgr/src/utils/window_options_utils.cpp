@@ -16,6 +16,7 @@
 #include "utils/window_options_utils.h"
 
 #include "ability_record.h"
+#include "app_utils.h"
 
 namespace OHOS {
 namespace AAFwk {

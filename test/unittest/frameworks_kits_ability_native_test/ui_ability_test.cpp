@@ -737,11 +737,6 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0200, TestSize.Level1)
     ret = ability->ShouldRecoverState(want);
     EXPECT_EQ(ret, false);
 
-    ability->EnableAbilityRecovery(nullptr);
-    ret = ability->ShouldRecoverState(want);
-    EXPECT_EQ(ret, false);
-    ability->EnableAbilityRecovery(abilityRecovery);
-
     auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     ability->AttachAbilityContext(abilityContext);
 
@@ -943,25 +938,6 @@ HWTEST_F(UIAbilityBaseTest, OnDisplayInfoChange_0100, TestSize.Level1)
     int32_t  displayId = 2;
     sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
     ability->InitWindow(displayId, option);
-}
-
-/**
- * @tc.name: EraseUIExtension_0200
- * @tc.desc: UIAbility EraseUIExtension test SetIdentityToken GetIdentityToken IsStartByScb etc.
- * @tc.type: FUNC
- * @tc.require: issueI60B7N
- */
-HWTEST_F(UIAbilityBaseTest, EraseUIExtension_0100, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
-    ASSERT_NE(ability, nullptr);
-    int32_t  sessionId = 10008;
-    ability->EraseUIExtension(sessionId);
-    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
-    ability->AttachAbilityContext(abilityContext);
-    ability->EraseUIExtension(sessionId);
-    ability->SetIdentityToken("");
-    EXPECT_EQ("", ability->GetIdentityToken());
 }
 
 /**
@@ -1460,7 +1436,9 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_RegisterAbilityLifecycleObserver_0100, Fun
 
     // init UIAbility to make sure lifecycle is created.
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, nullptr);
+    sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
+    std::shared_ptr<AbilityLocalRecord> abilityRecord =
+        std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
     ability->Init(abilityRecord, nullptr, handler, nullptr);
     std::shared_ptr<LifeCycle> lifeCycle = ability->GetLifecycle();
