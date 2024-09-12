@@ -3025,7 +3025,7 @@ void AppMgrServiceInner::QueryExtensionSandBox(const std::string &moduleName, co
     }
     auto infoExisted = [&moduleName, &abilityName, &strictMode, &isExist, &isolatedSandbox](
                            const ExtensionAbilityInfo &info) {
-        auto ret = info.moduleName == moduleName && info.name == abilityName && info.needCreateSandbox && strictMode;
+        auto ret = info.moduleName == moduleName && info.name == abilityName && info.needCreateSandbox;
         if (isExist) {
             return ret && isolatedSandbox;
         }
