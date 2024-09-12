@@ -3004,8 +3004,7 @@ int AbilityManagerStub::RegisterWindowManagerServiceHandlerInner(MessageParcel &
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s read WMS handler failed!", __func__);
         return ERR_NULL_OBJECT;
     }
-    bool animationEnabled = data.ReadBool();
-    return RegisterWindowManagerServiceHandler(handler, animationEnabled);
+    return RegisterWindowManagerServiceHandler(handler);
 }
 
 int AbilityManagerStub::CompleteFirstFrameDrawingInner(MessageParcel &data, MessageParcel &reply)
