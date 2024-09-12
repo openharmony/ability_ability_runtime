@@ -23,6 +23,8 @@
 #include "app_utils.h"
 #include "cache_process_manager.h"
 #include "hisysevent.h"
+#include "res_sched_util.h"
+#include "ui_extension_utils.h"
 
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
@@ -86,6 +88,9 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
         TAG_LOGE(AAFwkTag::APPMGR, "precheck failed");
         return false;
     }
+    if (IsCachedProcess(appRecord)) {
+        return false;
+    }
     if (appRecord->IsKeepAliveApp()) {
         TAG_LOGW(AAFwkTag::APPMGR, "Not cache process");
         return false;
@@ -120,7 +125,6 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
             appRecord->GetName().c_str());
         return true;
     }
-    appRecord->ScheduleCacheProcess();
     auto appInfo = appRecord->GetApplicationInfo();
     HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
@@ -241,13 +245,18 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return true;
     }
+    if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+        if (appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT) {
+            appRecord->SetSupportedProcessCache(false);
+        }
+    }
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     TAG_LOGI(AAFwkTag::APPMGR, "app none cached state is notified: %{public}s, uid: %{public}d, %{public}s",
         appRecord->GetBundleName().c_str(), appRecord->GetUid(), PrintCacheQueue().c_str());
     return true;
 }
 
-bool CacheProcessManager::IsAppSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord)
+bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     auto actualVer = appInfo->apiTargetVersion % API_VERSION_MOD;
     if (shouldCheckApi && actualVer < API12) {
@@ -262,6 +271,29 @@ bool CacheProcessManager::IsAppSupportHotStart(const std::shared_ptr<AppRunningR
     }
 }
 
+bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType)) {
+        return true;
+    }
+    auto supportState = appRecord->GetSupportProcessCacheState();
+    if (supportState == SupportProcessCacheState::SUPPORT) {
+        return true;
+    }
+    if (!appRecord->GetPriorityObject()) {
+        return false;
+    }
+    bool forceKillProcess =
+        ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
+    if (!forceKillProcess) {
+        appRecord->SetSupportedProcessCache(true);
+        return true;
+    } else {
+        appRecord->SetSupportedProcessCache(false);
+        return false;        
+    }
+}
+
 bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (appRecord == nullptr) {
@@ -271,9 +303,6 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo == nullptr) {
         TAG_LOGD(AAFwkTag::APPMGR, "appinfo nullptr");
-        return false;
-    }
-    if (maxProcCacheNum_ > 0 && !IsAppSupportHotStart()) {
         return false;
     }
     if (appRecord->IsAttachedToStatusBar()) {
@@ -287,6 +316,12 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
     }
     if (appRecord->GetParentAppRecord() != nullptr) {
         TAG_LOGD(AAFwkTag::APPMGR, "Child App, not support.");
+        return false;
+    }
+    if (maxProcCacheNum_ > 0 && !IsAppSupportHotStart()) {
+        return false;
+    }
+    if (warmStartProcesEnable_ && !IsProcessSupportWarmStart(appRecord)) {
         return false;
     }
     return IsAppSupportProcessCacheInnerFirst(appRecord);
