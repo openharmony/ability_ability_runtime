@@ -549,6 +549,7 @@ public:
     void SetEmptyKeepAliveAppState(bool isEmptyKeepAliveApp);
 
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
+    void SetKeepAliveBundle(bool isKeepAliveBundle);
 
     void SetMainProcess(bool isMainProcess);
 
@@ -893,7 +894,8 @@ private:
         }
     };
 
-    bool isKeepAliveApp_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
