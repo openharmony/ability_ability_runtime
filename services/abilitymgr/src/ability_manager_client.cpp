@@ -1285,12 +1285,11 @@ ErrCode AbilityManagerClient::SetMissionIcon(
     return abms->SetMissionIcon(abilityToken, icon);
 }
 
-ErrCode AbilityManagerClient::RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler,
-    bool animationEnabled)
+ErrCode AbilityManagerClient::RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->RegisterWindowManagerServiceHandler(handler, animationEnabled);
+    return abms->RegisterWindowManagerServiceHandler(handler);
 }
 
 void AbilityManagerClient::CompleteFirstFrameDrawing(sptr<IRemoteObject> abilityToken)
