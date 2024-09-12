@@ -113,10 +113,6 @@ class AbilityContext extends Context {
     return this.__context_impl__.startAbilityForResultWithAccount(want, accountId, options, callback);
   }
 
-  startUIServiceExtensionAbility(want, callback) {
-    return this.__context_impl__.startUIServiceExtensionAbility(want, callback);
-  }
-
   startServiceExtensionAbility(want, callback) {
     return this.__context_impl__.startServiceExtensionAbility(want, callback);
   }
