@@ -177,12 +177,13 @@ void LaunchDebugInfo::Update(const OHOS::AAFwk::Want &want)
 
 AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
     const AppExecFwk::ApplicationInfo &applicationInfo, int requestCode)
-    : want_(want), abilityInfo_(abilityInfo), applicationInfo_(applicationInfo), requestCode_(requestCode)
+    : want_(want), abilityInfo_(abilityInfo), requestCode_(requestCode)
 {
+    abilityInfo_.applicationInfo = applicationInfo;
     recordId_ = abilityRecordId++;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (abilityMgr) {
-        bool isRootLauncher = (applicationInfo_.bundleName == LAUNCHER_BUNDLE_NAME);
+        bool isRootLauncher = (abilityInfo_.applicationInfo.bundleName == LAUNCHER_BUNDLE_NAME);
         restartMax_ = AmsConfigurationParameter::GetInstance().GetMaxRestartNum(isRootLauncher);
         bool flag = abilityMgr->GetStartUpNewRuleFlag();
         want_.SetParam(COMPONENT_STARTUP_NEW_RULES, flag);
@@ -252,7 +253,7 @@ bool AbilityRecord::Init()
     token_ = new (std::nothrow) Token(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(token_);
 
-    if (applicationInfo_.isLauncherApp) {
+    if (abilityInfo_.applicationInfo.isLauncherApp) {
         isLauncherAbility_ = true;
     }
     return true;
@@ -277,7 +278,7 @@ void AbilityRecord::LoadUIAbility()
 {
     SetLoading(true);
     int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
-    if (applicationInfo_.asanEnabled || applicationInfo_.tsanEnabled) {
+    if (abilityInfo_.applicationInfo.asanEnabled || abilityInfo_.applicationInfo.tsanEnabled) {
         loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_ASANENABLED;
         SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, loadTimeout / HALF_TIMEOUT);
         SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, loadTimeout);
@@ -304,7 +305,7 @@ int AbilityRecord::LoadAbility()
         LoadUIAbility();
     }
 
-    std::string appName = applicationInfo_.name;
+    std::string appName = abilityInfo_.applicationInfo.name;
     if (appName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "app name empty");
         return ERR_INVALID_VALUE;
@@ -330,7 +331,7 @@ int AbilityRecord::LoadAbility()
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token_, callerToken_, abilityInfo_, applicationInfo_, want_, recordId_);
+        token_, callerToken_, abilityInfo_, abilityInfo_.applicationInfo, want_, recordId_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
     SetLoadState(AbilityLoadState::LOADING);
 
@@ -404,7 +405,7 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     // grant uri permission
     {
         std::lock_guard guard(wantLock_);
-        GrantUriPermission(want_, applicationInfo_.bundleName, false, 0);
+        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0);
     }
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
@@ -430,7 +431,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability record: %{public}s", element.c_str());
     {
         std::lock_guard guard(wantLock_);
-        GrantUriPermission(want_, applicationInfo_.bundleName, false, tokenId);
+        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, tokenId);
     }
 
     if (IsReady()) {
@@ -519,7 +520,7 @@ void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
 std::string AbilityRecord::GetLabel()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    std::string strLabel = applicationInfo_.label;
+    std::string strLabel = abilityInfo_.applicationInfo.label;
 
     if (abilityInfo_.resourcePath.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "resource path empty");
@@ -532,7 +533,7 @@ std::string AbilityRecord::GetLabel()
         return strLabel;
     }
 
-    auto result = resourceMgr->GetStringById(applicationInfo_.labelId, strLabel);
+    auto result = resourceMgr->GetStringById(abilityInfo_.applicationInfo.labelId, strLabel);
     if (result != OHOS::Global::Resource::RState::SUCCESS) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, fail", __func__);
     }
@@ -686,7 +687,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     TAG_LOGD(AAFwkTag::ABILITYMGR, "SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
     {
         std::lock_guard guard(wantLock_);
-        GrantUriPermission(want_, applicationInfo_.bundleName, false, 0);
+        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0);
     }
 
     if (IsReady() && !GetRestartAppFlag()) {
@@ -1173,7 +1174,7 @@ void AbilityRecord::InitColdStartingWindowResource(
 
 bool AbilityRecord::ReportAtomicServiceDrawnCompleteEvent()
 {
-    if (applicationInfo_.bundleType != AppExecFwk::BundleType::ATOMIC_SERVICE) {
+    if (abilityInfo_.applicationInfo.bundleType != AppExecFwk::BundleType::ATOMIC_SERVICE) {
         return false;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Report atomic service first frame complete event.");
@@ -1289,7 +1290,7 @@ const AppExecFwk::AbilityInfo &AbilityRecord::GetAbilityInfo() const
 
 const AppExecFwk::ApplicationInfo &AbilityRecord::GetApplicationInfo() const
 {
-    return applicationInfo_;
+    return abilityInfo_.applicationInfo;
 }
 
 AbilityState AbilityRecord::GetAbilityState() const
@@ -1422,8 +1423,8 @@ void AbilityRecord::SetAbilityState(AbilityState state)
 #endif // SUPPORT_SCREEN
 void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundle:%{public}s, ability: %{public}s", applicationInfo_.bundleName.c_str(),
-        abilityInfo_.name.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundle:%{public}s, ability: %{public}s",
+        abilityInfo_.applicationInfo.bundleName.c_str(), abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     if (scheduler != nullptr) {
         if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
@@ -1603,7 +1604,7 @@ void AbilityRecord::Terminate(const Closure &task)
     if (!IsDebug()) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (handler && task) {
-            if (applicationInfo_.asanEnabled) {
+            if (abilityInfo_.applicationInfo.asanEnabled) {
                 int terminateTimeout =
                     AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_ASANENABLED;
                 handler->SubmitTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
@@ -1693,7 +1694,7 @@ bool AbilityRecord::GrantUriPermissionForServiceExtension()
         auto callerName = want_.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
         TAG_LOGD(AAFwkTag::ABILITYMGR,
             "CallerName is %{public}s, callerTokenId is %{public}u", callerName.c_str(), callerTokenId);
-        GrantUriPermission(want_, applicationInfo_.bundleName, false, callerTokenId);
+        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, callerTokenId);
         return true;
     }
     return false;
@@ -1764,7 +1765,7 @@ void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
     CHECK_POINTER(scheduler_);
     auto result = GetResult();
     CHECK_POINTER(result);
-    GrantUriPermission(result->resultWant_, applicationInfo_.bundleName, isSandboxApp, tokeId);
+    GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId);
     scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
     // reset result to avoid send result next time
     SetResult(nullptr);
@@ -1830,7 +1831,7 @@ void AbilityRecord::SendResultToCallers(bool schedulerdied)
         std::shared_ptr<AbilityRecord> callerAbilityRecord = caller->GetCaller();
         if (callerAbilityRecord != nullptr && callerAbilityRecord->GetResult() != nullptr) {
             bool isSandboxApp = appIndex_ > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX ? true : false;
-            callerAbilityRecord->SendResult(isSandboxApp, applicationInfo_.accessTokenId);
+            callerAbilityRecord->SendResult(isSandboxApp, abilityInfo_.applicationInfo.accessTokenId);
         } else {
             std::shared_ptr<SystemAbilityCallerRecord> callerSystemAbilityRecord = caller->GetSaCaller();
             if (callerSystemAbilityRecord != nullptr) {
@@ -1893,9 +1894,9 @@ void AbilityRecord::SaveResult(int resultCode, const Want *resultWant, std::shar
     if (callerAbilityRecord != nullptr) {
         Want* newWant = const_cast<Want*>(resultWant);
         if (callerAbilityRecord->GetApplicationInfo().name == AppUtils::GetInstance().GetBrokerDelegateBundleName()) {
-            newWant->SetParam(std::string(PARAM_SEND_RESULT_CALLER_BUNDLENAME), applicationInfo_.name);
+            newWant->SetParam(std::string(PARAM_SEND_RESULT_CALLER_BUNDLENAME), abilityInfo_.applicationInfo.name);
             newWant->SetParam(std::string(PARAM_SEND_RESULT_CALLER_TOKENID), static_cast<int32_t>(
-                applicationInfo_.accessTokenId));
+                abilityInfo_.applicationInfo.accessTokenId));
         }
         callerAbilityRecord->SetResult(
             std::make_shared<AbilityResult>(caller->GetRequestCode(), resultCode, *newWant));
@@ -2808,7 +2809,8 @@ bool AbilityRecord::GetKeepAlive() const
         }
     }
     bool keepAliveEnable = keepAliveBundle_;
-    AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(applicationInfo_.bundleName, keepAliveEnable);
+    AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(
+        abilityInfo_.applicationInfo.bundleName, keepAliveEnable);
     return keepAliveEnable;
 }
 
@@ -3371,7 +3373,8 @@ void AbilityRecord::RevokeUriPermission()
 {
     if (isGrantedUriPermission_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To remove uri permission.");
-        UriPermissionManagerClient::GetInstance().RevokeUriPermission(applicationInfo_.accessTokenId, recordId_);
+        UriPermissionManagerClient::GetInstance().RevokeUriPermission(
+            abilityInfo_.applicationInfo.accessTokenId, recordId_);
         isGrantedUriPermission_ = false;
     }
 }
@@ -3662,14 +3665,15 @@ void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
 
 void AbilityRecord::SetDebugAppByWaitingDebugFlag()
 {
-    if (!(applicationInfo_.debug && applicationInfo_.appProvisionType == APP_PROVISION_TYPE_DEBUG) ||
+    if (!(abilityInfo_.applicationInfo.debug &&
+        abilityInfo_.applicationInfo.appProvisionType == APP_PROVISION_TYPE_DEBUG) ||
         !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Not meeting the set debugging conditions.");
         return;
     }
 
     if (IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsWaitingDebugApp(
-        applicationInfo_.bundleName))) {
+        abilityInfo_.applicationInfo.bundleName))) {
         want_.SetParam(DEBUG_APP, true);
         launchDebugInfo_.isDebugAppSet = true;
         launchDebugInfo_.debugApp = true;
