@@ -1361,7 +1361,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         [] (const auto &reqPermission) {
         return reqPermission == OHOS::AppExecFwk::Constants::PERMISSION_REQUIRE_FORM;
     });
-    Ace::AceForwardCompatibility::Init(bundleName, appInfo.apiCompatibleVersion, (isFullUpdate || isReqForm));
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Ace::AceForwardCompatibility::Init");
+        Ace::AceForwardCompatibility::Init(bundleName, appInfo.apiCompatibleVersion, (isFullUpdate || isReqForm));
+    }
 #endif
 
     if (IsNeedLoadLibrary(bundleName)) {

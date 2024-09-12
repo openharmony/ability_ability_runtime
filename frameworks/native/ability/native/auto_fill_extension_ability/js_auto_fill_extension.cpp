@@ -499,7 +499,11 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         option->SetRealParentId(sessionInfo->realHostWindowId);
         option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
-        auto uiWindow = Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
+        sptr<Rosen::Window> uiWindow;
+        {
+            HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
+            uiWindow = Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
+        }
         if (uiWindow == nullptr) {
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Create uiWindow error");
             return false;
@@ -547,7 +551,10 @@ void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<A
     auto obj = sessionInfo->sessionToken;
     auto& uiWindow = uiWindowMap_[obj];
     if (uiWindow) {
-        uiWindow->Show();
+        {
+            HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::show");
+            uiWindow->Show();
+        }
         TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "uiWindow show");
         foregroundWindows_.emplace(obj);
 
