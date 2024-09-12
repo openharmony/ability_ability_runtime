@@ -26,9 +26,38 @@
 #include "save_request_callback_interface.h"
 #include "task_handler_wrap.h"
 #include "ui_content.h"
+#include "view_data.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace AutoFill {
+enum class AutoFillCommand {
+    NONE,
+    FILL,
+    SAVE,
+    UPDATE,
+    RESIZE,
+    INPUT,
+    RELOAD_IN_MODAL
+};
+
+/**
+ * @struct AutoFillRequest
+ * AutoFillRequest is used to define the auto fill request parameter structure.
+ */
+struct AutoFillRequest {
+    AbilityBase::AutoFillType autoFillType = AbilityBase::AutoFillType::UNSPECIFIED;
+    AutoFillCommand autoFillCommand = AutoFillCommand::NONE;
+    AbilityBase::ViewData viewData;
+    AutoFillCustomConfig config;
+    std::function<void()> doAfterAsyncModalBinding;
+};
+
+struct AutoFillResult {
+    bool isPopup = false;
+    uint32_t autoFillSessionId = 0;
+};
+}
 class AutoFillManager {
 public:
     static AutoFillManager &GetInstance();
