@@ -200,6 +200,14 @@ class ApplicationContext {
   getCurrentAppCloneIndex() {
     return this.__context_impl__.getCurrentAppCloneIndex();
   }
+
+  getCurrentInstanceKey() {
+    return this.__context_impl__.getCurrentInstanceKey();
+  }
+
+  getAllRunningInstanceKeys() {
+    return this.__context_impl__.getAllRunningInstanceKeys();
+  }
   
   set area(mode) {
     return this.__context_impl__.switchArea(mode);

@@ -162,6 +162,9 @@ enum class AbilityErrorCode {
     // Not support back to caller.
     ERROR_CODE_NOT_SUPPROT_BACK_TO_CALLER = 16000075,
 
+    // The multi-instance is not supported.
+    ERROR_MULTI_INSTANCE_NOT_SUPPORTED = 16000078,
+
     // Target application not found.
     ERROR_CODE_GET_BUNFLE_INFO_FAILED = 16000081,
 

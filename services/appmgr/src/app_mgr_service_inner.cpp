@@ -1772,8 +1772,175 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys)
+{
+    if (remoteClientManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager_ null");
+        return ERR_NO_INIT;
+    }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
+        return ERR_INVALID_VALUE;
+    }
+    std::string bundleName;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callingUid, bundleName));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetNameForUid failed, ret=%{public}d", ret);
+        return AAFwk::ERR_BUNDLE_NOT_EXIST;
+    }
+    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, currentUserId_);
+}
+
+int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys, int32_t userId)
+{
+    if (userId == -1) {
+        userId = currentUserId_;
+    }
+    if (VerifyAccountPermission(AAFwk::PermissionConstants::PERMISSION_GET_RUNNING_INFO, userId) ==
+        ERR_PERMISSION_DENIED) {
+        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Permission verification fail", __func__);
+        return ERR_PERMISSION_DENIED;
+    }
+    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, userId);
+}
+
+int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys, int32_t userId)
+{
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundlename null");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+    if (remoteClientManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager_ null");
+        return ERR_INVALID_VALUE;
+    }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
+        return ERR_INVALID_VALUE;
+    }
+    ApplicationInfo appInfo;
+    auto queryRet = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
+        ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo));
+    if (!queryRet) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundle unexist");
+        return AAFwk::ERR_BUNDLE_NOT_EXIST;
+    }
+    if (appInfo.multiAppMode.multiAppModeType != MultiAppModeType::MULTI_INSTANCE) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundle unsupport multi-instance");
+        return AAFwk::ERR_MULTI_INSTANCE_NOT_SUPPORTED;
+    }
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager null");
+        return ERR_INVALID_VALUE;
+    }
+    auto multiAppInfoMap = appRunningManager_->GetAppRunningRecordMap();
+    for (const auto &item : multiAppInfoMap) {
+        const std::shared_ptr<AppRunningRecord> &appRecord = item.second;
+        if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
+            continue;
+        }
+        if (GetUserIdByUid(appRecord->GetUid()) != userId) {
+            continue;
+        }
+        GetRunningMultiInstanceKeys(appRecord, instanceKeys);
+    }
+    return ERR_OK;
+}
+
 void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
     RunningMultiAppInfo &info)
+{
+    if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
+        GetAppCloneInfo(appRecord, info);
+        return;
+    }
+    if (info.mode == static_cast<int32_t>(MultiAppModeType::MULTI_INSTANCE)) {
+        GetMultiInstanceInfo(appRecord, info);
+    }
+}
+
+bool AppMgrServiceInner::CheckAppRecordAndPriorityObject(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return false;
+    }
+    if (appRecord->GetPriorityObject() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "priorityObject null");
+        return false;
+    }
+    return true;
+}
+
+void AppMgrServiceInner::GetAppCloneInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+    RunningMultiAppInfo &info)
+{
+    if (!CheckAppRecordAndPriorityObject(appRecord)) {
+        return;
+    }
+    auto PriorityObject = appRecord->GetPriorityObject();
+    size_t index = 0;
+    for (; index < info.runningAppClones.size(); index++) {
+        if (info.runningAppClones[index].appCloneIndex == appRecord->GetAppIndex()) {
+            break;
+        }
+    }
+    auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
+    if (index < info.runningAppClones.size()) {
+        info.runningAppClones[index].pids.emplace_back(PriorityObject->GetPid());
+        for (auto it : childProcessRecordMap) {
+            info.runningAppClones[index].pids.emplace_back(it.first);
+        }
+        return;
+    }
+    RunningAppClone cloneInfo;
+    cloneInfo.appCloneIndex = appRecord->GetAppIndex();
+    cloneInfo.uid = appRecord->GetUid();
+    cloneInfo.pids.emplace_back(PriorityObject->GetPid());
+    for (auto it : childProcessRecordMap) {
+        cloneInfo.pids.emplace_back(it.first);
+    }
+    info.runningAppClones.emplace_back(cloneInfo);
+}
+
+void AppMgrServiceInner::GetMultiInstanceInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+    RunningMultiAppInfo &info)
+{
+    if (!CheckAppRecordAndPriorityObject(appRecord)) {
+        return;
+    }
+    auto PriorityObject = appRecord->GetPriorityObject();
+    size_t index = 0;
+    for (; index < info.runningMultiIntanceInfos.size(); index++) {
+        if (info.runningMultiIntanceInfos[index].instanceKey == appRecord->GetInstanceKey()) {
+            break;
+        }
+    }
+    auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
+    if (index < info.runningMultiIntanceInfos.size()) {
+        info.runningMultiIntanceInfos[index].pids.emplace_back(PriorityObject->GetPid());
+        for (auto it : childProcessRecordMap) {
+            info.runningMultiIntanceInfos[index].pids.emplace_back(it.first);
+        }
+        return;
+    }
+    RunningMultiInstanceInfo instanceInfo;
+    instanceInfo.instanceKey = appRecord->GetInstanceKey();
+    instanceInfo.uid = appRecord->GetUid();
+    instanceInfo.pids.emplace_back(PriorityObject->GetPid());
+    for (auto it : childProcessRecordMap) {
+        instanceInfo.pids.emplace_back(it.first);
+    }
+    info.runningMultiIntanceInfos.emplace_back(instanceInfo);
+}
+
+void AppMgrServiceInner::GetRunningMultiInstanceKeys(const std::shared_ptr<AppRunningRecord> &appRecord,
+    std::vector<std::string> &instanceKeys)
 {
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
@@ -1784,30 +1951,13 @@ void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunning
         TAG_LOGE(AAFwkTag::APPMGR, "The PriorityObject is nullptr!");
         return;
     }
-    if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
-        size_t index = 0;
-        for (; index < info.runningAppClones.size(); index++) {
-            if (info.runningAppClones[index].appCloneIndex == appRecord->GetAppIndex()) {
-                break;
-            }
-        }
-        auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
-        if (index < info.runningAppClones.size()) {
-            info.runningAppClones[index].pids.emplace_back(PriorityObject->GetPid());
-            for (auto it : childProcessRecordMap) {
-                info.runningAppClones[index].pids.emplace_back(it.first);
-            }
-        } else {
-            RunningAppClone cloneInfo;
-            cloneInfo.appCloneIndex = appRecord->GetAppIndex();
-            cloneInfo.uid = appRecord->GetUid();
-            cloneInfo.pids.emplace_back(PriorityObject->GetPid());
-            for (auto it : childProcessRecordMap) {
-                cloneInfo.pids.emplace_back(it.first);
-            }
-            info.runningAppClones.emplace_back(cloneInfo);
+    size_t index = 0;
+    for (; index < instanceKeys.size(); ++index) {
+        if (instanceKeys[index] == appRecord->GetInstanceKey()) {
+            return;
         }
     }
+    instanceKeys.emplace_back(appRecord->GetInstanceKey());
 }
 
 int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId)
