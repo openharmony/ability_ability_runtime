@@ -1642,7 +1642,7 @@ void AbilityRecord::ShareData(const int32_t &uniqueId)
 
 void AbilityRecord::ConnectAbility()
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Connect ability.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s called.", __func__);
     ConnectAbilityWithWant(GetWant());
 }
 
