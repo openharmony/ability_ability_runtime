@@ -76,7 +76,6 @@ enum class AAFwkLogTag : uint32_t {
     UI_EXT,
     ACTION_EXT,
     EMBEDDED_EXT,
-    UISERVC_EXT,
 
     WANTAGENT = DEFAULT + 0x50, // 0xD001350
     AUTOFILLMGR,
@@ -145,7 +144,7 @@ inline const char* GetDomainName3(AAFwkLogTag tag)
 inline const char* GetDomainName4(AAFwkLogTag tag)
 {
     const char* tagNames[] = { "Ext", "AutoFillExt", "ServiceExt", "FormExt", "ShareExt",
-        "UIExt", "ActionExt", "EmbeddedExt", "UIServiceExt" };
+        "UIExt", "ActionExt", "EmbeddedExt"};
     uint32_t offset = GetOffset(tag, AAFwkLogTag::EXT);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";
