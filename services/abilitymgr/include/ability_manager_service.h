@@ -1874,8 +1874,6 @@ private:
      */
     void InitGlobalConfiguration();
 
-    std::shared_ptr<AppExecFwk::BundleMgrHelper> GetBundleManager();
-
     sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
 
     int StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
@@ -2292,7 +2290,6 @@ private:
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
-    std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper_;
     sptr<OHOS::AppExecFwk::IAppMgr> appMgr_ { nullptr };
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
