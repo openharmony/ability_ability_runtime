@@ -991,12 +991,14 @@ bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime:
         needUpdate = false;
     }
 
-    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
-        AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetColorModeSetLevel(level, colorMode));
+    if (!colorMode.empty()) {
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+            AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetColorModeSetLevel(level, colorMode));
 
-    if (level > AbilityRuntime::SetLevel::System) {
-        config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP,
-            AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
+        if (level > AbilityRuntime::SetLevel::System) {
+            config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP,
+                AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
+        }
     }
 
     return needUpdate;
