@@ -721,6 +721,7 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetRealParentId(sessionInfo->realHostWindowId);
     option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }
 
@@ -750,6 +751,7 @@ void JsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::
     auto componentId = sessionInfo->uiExtensionComponentId;
     auto& uiWindow = uiWindowMap_[componentId];
     if (uiWindow) {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::show");
         uiWindow->Show();
         foregroundWindows_.emplace(componentId);
     }

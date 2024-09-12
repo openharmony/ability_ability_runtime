@@ -407,6 +407,7 @@ bool JsUIServiceExtension::CreateWindowIfNeeded()
     auto option = GetWindowOption(extensionWindowConfig, hostWindowIdInStart_);
     sptr<Rosen::Window> extensionWindow = nullptr;
     if (option != nullptr) {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
         extensionWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
     }
     if (extensionWindow == nullptr) {
