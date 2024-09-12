@@ -74,6 +74,7 @@ void ChildMainThread::Start(const std::map<std::string, int32_t> &fds)
     ret = runner->Run();
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "ChildMainThread runner->Run failed ret = %{public}d", ret);
+        return;
     }
 
     TAG_LOGD(AAFwkTag::APPKIT, "ChildMainThread end");
@@ -82,7 +83,13 @@ void ChildMainThread::Start(const std::map<std::string, int32_t> &fds)
 int32_t ChildMainThread::GetChildProcessInfo(ChildProcessInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    auto object = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(APP_MGR_SERVICE_ID);
+    auto sysMgr = DelayedSingleton<SysMrgClient>::GetInstance();
+    if (sysMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "sys mgr invalid");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto object = sysMgr->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed to get app manager service");
         return ERR_INVALID_VALUE;
@@ -97,7 +104,7 @@ int32_t ChildMainThread::GetChildProcessInfo(ChildProcessInfo &info)
 
 void ChildMainThread::SetFds(const std::map<std::string, int32_t> &fds)
 {
-    if (!processArgs_) {
+    if (processArgs_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "processArgs_ is nullptr");
         return;
     }
@@ -153,7 +160,7 @@ bool ChildMainThread::ScheduleLoadChild()
         TAG_LOGE(AAFwkTag::APPKIT, "mainHandler_ is null");
         return false;
     }
-    if (!processInfo_) {
+    if (processInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "processInfo is nullptr");
         return false;
     }
@@ -183,7 +190,7 @@ bool ChildMainThread::ScheduleLoadChild()
 void ChildMainThread::HandleLoadJs()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    if (!processInfo_ || !bundleInfo_) {
+    if (processInfo_ == nullptr || bundleInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "processInfo or bundleInfo_ is null");
         return;
     }
