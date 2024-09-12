@@ -673,7 +673,8 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
             auto delayTime = appRecord->ExtensionAbilityRecordExists() ?
                 AMSEventHandler::DELAY_KILL_EXTENSION_PROCESS_TIMEOUT : AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT;
-            appRecord->PostTask("DELAY_KILL_PROCESS", delayTime, killProcess);
+            std::string taskName = std::string("DELAY_KILL_PROCESS_") + std::to_string(appRecord->GetRecordId());
+            appRecord->PostTask(taskName, delayTime, killProcess);
         }
     }
 }
