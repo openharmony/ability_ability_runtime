@@ -1177,7 +1177,6 @@ public:
     }
 
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) {};
-
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
 
@@ -1530,7 +1529,7 @@ public:
         return 0;
     }
 
-    /**
+    /*
      * @brief Get host info of root caller.
      *
      * @param token The ability token.

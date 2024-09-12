@@ -1462,9 +1462,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             };
             runtime->SetDeviceDisconnectCallback(cb);
         }
-
         auto perfCmd = appLaunchData.GetPerfCmd();
-
         int32_t pid = -1;
         std::string processName = "";
         if (processInfo_ != nullptr) {
@@ -2181,7 +2179,7 @@ void MainThread::HandleForegroundApplication()
 void MainThread::HandleBackgroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "start");
 
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "error");
@@ -3288,12 +3286,6 @@ int32_t MainThread::ScheduleDumpIpcStat(std::string& result)
     return ERR_OK;
 }
 
-int32_t MainThread::ScheduleDumpFfrt(std::string& result)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "pid:%{public}d", getprocpid());
-    return DumpFfrtHelper::DumpFfrt(result);
-}
-
 /**
  *
  * @brief Notify application to prepare for process caching.
@@ -3344,7 +3336,6 @@ void MainThread::ParseAppConfigurationParams(const std::string configuration, Co
     }
     if (jsonObject.contains(JSON_KEY_APP_FONT_SIZE_SCALE)
         && jsonObject[JSON_KEY_APP_FONT_SIZE_SCALE].is_string()) {
-        std::string configFontSizeScal = jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>();
         appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE,
             jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>());
     }
@@ -3378,6 +3369,12 @@ void MainThread::HandleCacheProcess()
         }
         runtime->ForceFullGC();
     }
+}
+
+int32_t MainThread::ScheduleDumpFfrt(std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "pid:%{public}d", getprocpid());
+    return DumpFfrtHelper::DumpFfrt(result);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
