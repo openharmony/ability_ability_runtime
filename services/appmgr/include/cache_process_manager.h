@@ -56,7 +56,8 @@ private:
     bool CheckAndNotifyCachedState(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsAppContainsSrvExt(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsAppSupportProcessCacheInnerFirst(const std::shared_ptr<AppRunningRecord> &appRecord);
-    bool IsAppSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord);
+    bool IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord);
+    bool IsProcessSupportWarmStart(const std::shared_ptr<AppRunningRecord> &appRecord);  
     bool warmStartProcesEnable_ = false;
     int32_t maxProcCacheNum_ = 0;
     std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
