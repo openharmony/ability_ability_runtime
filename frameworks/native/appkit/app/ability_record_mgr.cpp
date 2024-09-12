@@ -15,7 +15,6 @@
 
 #include "ability_record_mgr.h"
 #include "hilog_tag_wrapper.h"
-
 namespace OHOS {
 namespace AppExecFwk {
 /**
@@ -87,7 +86,6 @@ void AbilityRecordMgr::AddAbilityRecord(
         TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord is nullptr");
         return;
     }
-
     abilityRecords_[token] = abilityRecord;
 }
 

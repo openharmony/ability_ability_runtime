@@ -29,12 +29,12 @@ namespace OHOS {
 namespace AAFwk {
 MissionInfoMgr::MissionInfoMgr()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "MissionInfoMgr instance is created");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "MissionInfoMgr created");
 }
 
 MissionInfoMgr::~MissionInfoMgr()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "MissionInfoMgr instance is destroyed");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "MissionInfoMgr destroyed");
 }
 
 bool MissionInfoMgr::GenerateMissionId(int32_t &missionId)
@@ -53,7 +53,7 @@ bool MissionInfoMgr::GenerateMissionId(int32_t &missionId)
         }
     }
 
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "cannot generate mission id");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "not generate missionId");
     return false;
 }
 
@@ -63,7 +63,7 @@ bool MissionInfoMgr::Init(int userId)
     if (!taskDataPersistenceMgr_) {
         taskDataPersistenceMgr_ = DelayedSingleton<TaskDataPersistenceMgr>::GetInstance();
         if (!taskDataPersistenceMgr_) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr_ is nullptr");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr null");
             return false;
         }
     }
@@ -92,7 +92,7 @@ bool MissionInfoMgr::AddMissionInfoInner(const InnerMissionInfo &missionInfo)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto id = missionInfo.missionInfo.id;
     if (missionIdMap_.find(id) != missionIdMap_.end() && missionIdMap_[id]) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "add mission info failed, missionId %{public}d already exists", id);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "add fail, missionId %{public}d already exists", id);
         return false;
     }
 
@@ -104,7 +104,7 @@ bool MissionInfoMgr::AddMissionInfoInner(const InnerMissionInfo &missionInfo)
     }
 
     if (!taskDataPersistenceMgr_->SaveMissionInfo(missionInfo)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "save mission info failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "save fail");
         return false;
     }
 
@@ -119,7 +119,7 @@ bool MissionInfoMgr::UpdateMissionInfo(const InnerMissionInfo &missionInfo)
     std::lock_guard<ffrt::mutex> lock(mutex_);
     auto id = missionInfo.missionInfo.id;
     if (missionIdMap_.find(id) == missionIdMap_.end() || !missionIdMap_[id]) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "update mission info failed, missionId %{public}d not exists", id);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update fail, missionId %{public}d not exists", id);
         return false;
     }
 
@@ -131,7 +131,7 @@ bool MissionInfoMgr::UpdateMissionInfo(const InnerMissionInfo &missionInfo)
     }
 
     if (listIter == missionInfoList_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "update mission info failed, missionId %{public}d not exists", id);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update fail, missionId %{public}d not exists", id);
         return false;
     }
 
@@ -139,7 +139,7 @@ bool MissionInfoMgr::UpdateMissionInfo(const InnerMissionInfo &missionInfo)
         // time not changes, no need sort again
         *listIter = missionInfo;
         if (!taskDataPersistenceMgr_->SaveMissionInfo(missionInfo)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "save mission info failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "save fail");
             return false;
         }
         return true;
@@ -155,23 +155,23 @@ bool MissionInfoMgr::DeleteMissionInfo(int missionId)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (missionIdMap_.find(missionId) == missionIdMap_.end()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionId %{public}d not exists, no need delete", missionId);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionId %{public}d not exists", missionId);
         return true;
     }
 
     if (!missionIdMap_[missionId]) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionId %{public}d distributed but not saved, no need delete", missionId);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionId %{public}d distributed but not saved", missionId);
         missionIdMap_.erase(missionId);
         return true;
     }
 
     if (!taskDataPersistenceMgr_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr null");
         return false;
     }
 
     if (!taskDataPersistenceMgr_->DeleteMissionInfo(missionId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "delete mission info failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "delete fail");
         return false;
     }
 
@@ -191,7 +191,7 @@ bool MissionInfoMgr::DeleteAllMissionInfos(const std::shared_ptr<MissionListener
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!taskDataPersistenceMgr_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr null");
         return false;
     }
 
@@ -259,7 +259,7 @@ int MissionInfoMgr::GetMissionInfoById(int32_t missionId, MissionInfo &missionIn
     TAG_LOGI(AAFwkTag::ABILITYMGR, "missionId:%{public}d", missionId);
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (missionIdMap_.find(missionId) == missionIdMap_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "missionId %{public}d not exists, get mission info failed", missionId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "missionId %{public}d not exists", missionId);
         return -1;
     }
 
@@ -286,7 +286,7 @@ int MissionInfoMgr::GetInnerMissionInfoById(int32_t missionId, InnerMissionInfo 
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (missionIdMap_.find(missionId) == missionIdMap_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "missionId %{public}d not exists, get inner mission info failed", missionId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "missionId %{public}d not exists", missionId);
         return MISSION_NOT_FOUND;
     }
 
@@ -331,7 +331,7 @@ bool MissionInfoMgr::FindReusedMissionInfo(const std::string &missionName,
             return false;
         });
     if (it == missionInfoList_.end()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "can not find target singleton mission:%{public}s", missionName.c_str());
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "not find target singleton mission:%{public}s", missionName.c_str());
         return false;
     }
     info = *it;
@@ -340,11 +340,11 @@ bool MissionInfoMgr::FindReusedMissionInfo(const std::string &missionName,
 
 int MissionInfoMgr::UpdateMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "UpdateMissionContinueState Start. Mission id: %{public}d, state: %{public}d",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "start. Mission id: %{public}d, state: %{public}d",
         missionId, state);
 
     if (missionId <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "UpdateMissionContinueState failed, missionId %{public}d invalid", missionId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, missionId %{public}d invalid", missionId);
         return -1;
     }
    
@@ -354,14 +354,14 @@ int MissionInfoMgr::UpdateMissionContinueState(int32_t missionId, const AAFwk::C
     });
     if (it == missionInfoList_.end()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR,
-            "UpdateMissionContinueState to %{public}d failed, missionId %{public}d not exists.", state, missionId);
+            "%{public}d fail, missionId %{public}d not exists", state, missionId);
         return -1;
     }
 
     it->missionInfo.continueState = state;
 
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "UpdateMissionContinueState success. Mission id: %{public}d, ContinueState set to: %{public}d", missionId,
+        "success. Mission id: %{public}d, ContinueState set to: %{public}d", missionId,
         state);
     return 0;
 }
@@ -370,20 +370,20 @@ int MissionInfoMgr::UpdateMissionLabel(int32_t missionId, const std::string& lab
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!taskDataPersistenceMgr_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "task data persist not init.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "task data persist not init");
         return -1;
     }
     auto it = find_if(missionInfoList_.begin(), missionInfoList_.end(), [missionId](const InnerMissionInfo &info) {
         return missionId == info.missionInfo.id;
     });
     if (it == missionInfoList_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "UpdateMissionLabel failed, missionId %{public}d not exists", missionId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, missionId %{public}d not exists", missionId);
         return -1;
     }
 
     it->missionInfo.label = label;
     if (!taskDataPersistenceMgr_->SaveMissionInfo(*it)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "save mission info failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "save fail");
         return -1;
     }
     return 0;
@@ -399,7 +399,7 @@ void MissionInfoMgr::SetMissionAbilityState(int32_t missionId, AbilityState stat
         return missionId == info.missionInfo.id;
     });
     if (it == missionInfoList_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "SetMissionAbilityState failed, missionId %{public}d not exists", missionId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, missionId %{public}d not exists", missionId);
         return;
     }
     it->missionInfo.abilityState = state;
@@ -408,12 +408,12 @@ void MissionInfoMgr::SetMissionAbilityState(int32_t missionId, AbilityState stat
 bool MissionInfoMgr::LoadAllMissionInfo()
 {
     if (!taskDataPersistenceMgr_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr null");
         return false;
     }
 
     if (!taskDataPersistenceMgr_->LoadAllMissionInfo(missionInfoList_)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "load mission info failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "load fail");
         return false;
     }
 
@@ -469,7 +469,7 @@ void MissionInfoMgr::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handl
 void MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const std::shared_ptr<Media::PixelMap> &pixelMap,
     bool isPrivate)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Update mission snapshot, missionId:%{public}d.", missionId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Update mission snapshot, missionId:%{public}d", missionId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     MissionSnapshot savedSnapshot;
     {
@@ -479,13 +479,13 @@ void MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const std::shared_
             return missionId == info.missionInfo.id;
         });
         if (it == missionInfoList_.end()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: get mission failed, missionId %{public}d not exists", missionId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, missionId %{public}d not exists", missionId);
             return;
         }
         savedSnapshot.topAbility = it->missionInfo.want.GetElement();
     }
     if (!taskDataPersistenceMgr_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: taskDataPersistenceMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr null");
         return;
     }
 
@@ -501,14 +501,14 @@ void MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const std::shared_
 
 
     if (!taskDataPersistenceMgr_->SaveMissionSnapshot(missionId, savedSnapshot)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: save mission snapshot failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "save fail");
     }
 }
 #endif
 bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
     MissionSnapshot& missionSnapshot, bool isLowResolution)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "missionId:%{public}d.", missionId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "missionId:%{public}d", missionId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "FindTargetMissionSnapshot");
@@ -517,23 +517,23 @@ bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemote
             return missionId == info.missionInfo.id;
         });
         if (it == missionInfoList_.end()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: get mission failed, missionId %{public}d not exists", missionId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, missionId %{public}d not exists", missionId);
             return false;
         }
         missionSnapshot.topAbility = it->missionInfo.want.GetElement();
     }
     if (!taskDataPersistenceMgr_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: taskDataPersistenceMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr null");
         return false;
     }
     if (!snapshotHandler_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: snapshotHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshotHandler null");
         return false;
     }
     Snapshot snapshot;
     int32_t result = snapshotHandler_->GetSnapshot(abilityToken, snapshot);
     if (result != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: get WMS snapshot failed, result = %{public}d", result);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, result = %{public}d", result);
         return false;
     }
 
@@ -560,7 +560,7 @@ bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemote
         }
     }
     if (!taskDataPersistenceMgr_->SaveMissionSnapshot(missionId, savedSnapshot)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: save mission snapshot failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "save fail");
         CompleteSaveSnapshot(missionId);
         return false;
     }
@@ -594,12 +594,12 @@ std::shared_ptr<Media::PixelMap> MissionInfoMgr::GetSnapshot(int32_t missionId) 
             return missionId == info.missionInfo.id;
         });
         if (it == missionInfoList_.end()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: get mission failed, missionId %{public}d not exists", missionId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, missionId %{public}d not exists", missionId);
             return nullptr;
         }
     }
     if (!taskDataPersistenceMgr_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: taskDataPersistenceMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr null");
         return nullptr;
     }
 
@@ -618,13 +618,13 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
             return missionId == info.missionInfo.id;
         });
         if (it == missionInfoList_.end()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: get mission failed, missionId %{public}d not exists", missionId);
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, missionId %{public}d not exists", missionId);
             return false;
         }
         missionSnapshot.topAbility = it->missionInfo.want.GetElement();
     }
     if (!taskDataPersistenceMgr_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: taskDataPersistenceMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskDataPersistenceMgr null");
         return false;
     }
 
@@ -644,7 +644,7 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
                 ++waitingNum;
                 auto iter = savingSnapshot_.find(missionId);
                 if (iter == savingSnapshot_.end() || waitingNum == waitingCount) {
-                    TAG_LOGI(AAFwkTag::ABILITYMGR, "Saved successfully or waiting failed.");
+                    TAG_LOGI(AAFwkTag::ABILITYMGR, "saved successfully or waiting fail");
                     break;
                 }
             }
@@ -652,7 +652,7 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
     }
 
     if (taskDataPersistenceMgr_->GetMissionSnapshot(missionId, missionSnapshot, isLowResolution)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "mission_list_info GetMissionSnapshot, find snapshot OK, missionId:%{public}d",
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetMissionSnapshot OK, missionId:%{public}d",
             missionId);
         return true;
     }
@@ -664,14 +664,14 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
 void MissionInfoMgr::CreateWhitePixelMap(Snapshot &snapshot) const
 {
     if (snapshot.GetPixelMap() == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateWhitePixelMap error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateWhitePixelMap error");
         return;
     }
     int32_t dataLength = snapshot.GetPixelMap()->GetByteCount();
     const uint8_t *pixelData = snapshot.GetPixelMap()->GetPixels();
     uint8_t *data = const_cast<uint8_t *>(pixelData);
     if (memset_s(data, dataLength, 0xff, dataLength) != EOK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateWhitePixelMap memset_s error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateWhitePixelMap memset_s error");
     }
 }
 #endif

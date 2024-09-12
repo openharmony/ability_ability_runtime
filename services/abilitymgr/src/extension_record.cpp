@@ -59,12 +59,12 @@ void ExtensionRecord::UnloadUIExtensionAbility()
     auto ret = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->UnregisterApplicationStateObserver(
         preLoadUIExtStateObserver_);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Unregister application state observer error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unRegisterObserver error");
     }
     auto result = DelayedSingleton<AAFwk::AbilityManagerService>::GetInstance()->UnloadUIExtensionAbility(
         abilityRecord_, hostBundleName_);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Unload UIExtension error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "UIExtension unload error");
     }
 }
 

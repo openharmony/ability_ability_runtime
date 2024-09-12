@@ -173,6 +173,12 @@ ABILITY_ONINACTIVE:
   ABILITY_NAME: {type: STRING, desc: ability name}
   BUNDLE_TYPE: {type: INT32, desc: 'type of componment, atomic service or normal app'}
 
+START_ABILITY_BY_APP_LINKING:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: start ability by App Linking}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  CALLER_BUNDLENAME: {type: STRING, desc: caller bundle name}
+  URI: {type: STRING, desc: uri information}
+
 # serviceExtensionAbility behavior event
 
 START_SERVICE:
@@ -220,6 +226,14 @@ DISCONNECT_SERVICE:
   PROCESS_NAME: {type: STRING, desc: process name}
   CALLER_PROCESS_ID: {type: INT32, desc: caller processId}
   CALLER_PROCESS_NAME: {type: STRING, desc: caller process name}
+
+START_ABILITY_OTHER_EXTENSION:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: start extension by startAbility}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  EXTENSION_TYPE: {type: INT32, desc: extension type}
+  CALLER_BUNLED_NAME: {type: STRING, desc: caller bunle name}
 
 # app behavior event
 

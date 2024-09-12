@@ -264,6 +264,8 @@ public:
      */
     virtual int32_t ScheduleDumpIpcStat(std::string& result) = 0;
 
+    virtual void ScheduleCacheProcess() = 0;
+
     /**
      * ScheduleDumpFfrt, call ScheduleDumpFfrt(std::string& result) through proxy project,
      * Start querying the application's ffrt usage.
@@ -273,8 +275,6 @@ public:
      * @return Returns 0 on success, error code on failure.
      */
     virtual int32_t ScheduleDumpFfrt(std::string& result) = 0;
-
-    virtual void ScheduleCacheProcess() = 0;
 
     enum class Message {
         SCHEDULE_FOREGROUND_APPLICATION_TRANSACTION = 0,

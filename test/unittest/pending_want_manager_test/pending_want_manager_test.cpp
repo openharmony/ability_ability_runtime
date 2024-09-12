@@ -971,5 +971,18 @@ HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_3700, TestSize.Level1)
     pendingManager_->ClearPendingWantRecordTask("bundleName3", 1);
     EXPECT_EQ((int)pendingManager_->wantRecords_.size(), 2);
 }
+
+/*
+ * @tc.number    : PendingWantManagerTest_3800
+ * @tc.name      : PendingWantManager ClearPendingWantRecordTask
+ * @tc.desc      : 1.ClearPendingWantRecordTask.
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_3800, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    int32_t pid = 0;
+    bool ret = pendingManager_->CheckWindowState(pid);
+    EXPECT_EQ(false, ret);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

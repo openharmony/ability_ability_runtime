@@ -704,8 +704,6 @@ void ApplicationContext::SetColorMode(int32_t colorMode)
     }
     AppExecFwk::Configuration config;
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, AppExecFwk::GetColorModeStr(colorMode));
-    config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP,
-        AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
     if (appConfigChangeCallback_ != nullptr) {
         appConfigChangeCallback_(config);
     }
@@ -716,8 +714,6 @@ void ApplicationContext::SetLanguage(const std::string &language)
     TAG_LOGD(AAFwkTag::APPKIT, "language:%{public}s", language.c_str());
     AppExecFwk::Configuration config;
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
-    config.AddItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP,
-        AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
     if (appConfigChangeCallback_ != nullptr) {
         appConfigChangeCallback_(config);
     }

@@ -43,7 +43,7 @@ int UserCallbackStub::OnRemoteRequest(
     std::u16string descriptor = UserCallbackStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Local descriptor is not equal to remote");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "local descriptor invalid");
         return ERR_INVALID_STATE;
     }
 

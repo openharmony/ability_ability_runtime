@@ -74,12 +74,14 @@ enum class EventName {
     ABILITY_ONBACKGROUND,
     ABILITY_ONACTIVE,
     ABILITY_ONINACTIVE,
+    START_ABILITY_BY_APP_LINKING,
 
     // serviceExtensionAbility behavior event
     START_SERVICE,
     STOP_SERVICE,
     CONNECT_SERVICE,
     DISCONNECT_SERVICE,
+    START_ABILITY_OTHER_EXTENSION,
 
     // app behavior event
     APP_ATTACH,
@@ -125,6 +127,7 @@ public:
     static void SendStopServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendConnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendDisconnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
+    static void SendStartAbilityOtherExtensionEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendGrantUriPermissionEvent(const EventName &eventName, const EventInfo &eventInfo);
 
 private:
@@ -136,6 +139,7 @@ private:
     static void LogAbilityOnBackgroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnActiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartStandardEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogStartAbilityByAppLinking(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
 };
 }  // namespace AAFWK
 }  // namespace OHOS

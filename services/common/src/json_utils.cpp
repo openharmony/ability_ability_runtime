@@ -48,18 +48,18 @@ std::string JsonUtils::GetConfigPath(const std::string& path, const std::string&
 bool JsonUtils::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)
 {
     if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Deeplink reserve config not exist.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "deepLink config not exist");
         return false;
     }
 
     if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "File path is empty.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "filePath empty");
         return false;
     }
 
     char path[PATH_MAX] = {0};
     if (realpath(filePath.c_str(), path) == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "realpath error, errno is %{public}d.", errno);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "realpath error, errno: %{public}d", errno);
         return false;
     }
 
@@ -69,14 +69,14 @@ bool JsonUtils::ReadFileInfoJson(const std::string &filePath, nlohmann::json &js
     in.open(path, std::ios_base::in);
     if (!in.is_open()) {
         strerror_r(errno, errBuf, sizeof(errBuf));
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file cannot be open due to  %{public}s", errBuf);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "file not open: %{public}s", errBuf);
         return false;
     }
 
     in.seekg(0, std::ios::end);
     int64_t size = in.tellg();
     if (size <= 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file is an empty file");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty file");
         in.close();
         return false;
     }

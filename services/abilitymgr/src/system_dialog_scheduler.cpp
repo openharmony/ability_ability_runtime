@@ -202,7 +202,7 @@ void SystemDialogScheduler::GetSelectorDialogPortraitPosition(
     if (portraitMax < position.height) {
         position.oversizeHeight = true;
         position.height = static_cast<int32_t>(UI_SELECTOR_PORTRAIT_PHONE_H1 * densityPixels);
-        TAG_LOGI(AAFwkTag::DIALOG, "portrait ratio 0.9 height is %{public}d", portraitMax);
+        TAG_LOGI(AAFwkTag::DIALOG, "portrait ratio 0.9 height: %{public}d", portraitMax);
     }
 
     position.offsetX = static_cast<int32_t>(width * UI_SELECTOR_PORTRAIT_WIDTH_EDGE_RATIO);
@@ -248,7 +248,7 @@ void SystemDialogScheduler::GetSelectorDialogLandscapePosition(
     if (position.height > landscapeMax) {
         position.oversizeHeight = true;
         position.height = static_cast<int32_t>(UI_SELECTOR_LANDSCAPE_PHONE_H1 * densityPixels);
-        TAG_LOGI(AAFwkTag::DIALOG, "landscape ratio 0.9 height is %{public}d", landscapeMax);
+        TAG_LOGI(AAFwkTag::DIALOG, "landscape ratio 0.9 height:%{public}d", landscapeMax);
     }
 
     TAG_LOGD(AAFwkTag::DIALOG, "dialog height is %{public}d", position.height);
@@ -324,7 +324,7 @@ const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<Dia
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (infos.empty()) {
-        TAG_LOGW(AAFwkTag::DIALOG, "Invalid abilityInfos");
+        TAG_LOGW(AAFwkTag::DIALOG, "invalid abilityInfos");
         return {};
     }
 
@@ -369,7 +369,7 @@ const std::string SystemDialogScheduler::GetPcSelectorParams(const std::vector<D
 {
     TAG_LOGD(AAFwkTag::DIALOG, "start");
     if (infos.empty()) {
-        TAG_LOGW(AAFwkTag::DIALOG, "Invalid abilityInfos");
+        TAG_LOGW(AAFwkTag::DIALOG, "invalid abilityInfos");
         return {};
     }
 
@@ -570,7 +570,7 @@ void SystemDialogScheduler::GetDialogPositionAndSize(DialogType type, DialogPosi
                 break;
         }
     } else {
-        TAG_LOGW(AAFwkTag::DIALOG, "get display fail, use default wide");
+        TAG_LOGW(AAFwkTag::DIALOG, "fail, use default wide");
         if (type == DialogType::DIALOG_SELECTOR) {
             DialogPositionAdaptive(position, lineNums);
         }
@@ -590,7 +590,7 @@ bool SystemDialogScheduler::GetAssertFaultDialogWant(Want &want)
     std::string bundleName;
     auto callingUid = IPCSkeleton::GetCallingUid();
     if (IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callingUid, bundleName)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::DIALOG, "VerifyPermission failed to get bundle name by uid");
+        TAG_LOGE(AAFwkTag::DIALOG, "VerifyPermission get bundle name failed");
         return false;
     }
 

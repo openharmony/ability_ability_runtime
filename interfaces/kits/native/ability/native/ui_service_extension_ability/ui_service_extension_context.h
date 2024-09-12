@@ -101,6 +101,7 @@ public:
      * @return UIContent object of ACE.
      */
     Ace::UIContent *GetUIContent();
+    using SelfType = UIServiceExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
 
 protected:

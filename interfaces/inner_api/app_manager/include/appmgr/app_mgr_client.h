@@ -109,20 +109,6 @@ public:
     virtual AppMgrResultCode ConnectAppMgrService();
 
     /**
-     * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return Returns RESULT_OK on success, others on failure.
-     */
-    virtual AppMgrResultCode AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token,
-        const sptr<IRemoteObject> &preToken, const int32_t visibility, const int32_t perceptibility,
-        const int32_t connectionState);
-
-    /**
      * KillProcessByAbilityToken, call KillProcessByAbilityToken() through proxy object,
      * kill the process by ability token.
      *
@@ -360,7 +346,7 @@ public:
      * @param config System environment change parameters.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode UpdateConfiguration(const Configuration &config);
+    virtual AppMgrResultCode UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
     /**
      *  Update config by bundle name.
@@ -511,6 +497,14 @@ public:
      * @return
      */
     void SetCurrentUserId(const int32_t userId);
+
+    /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
 
     /**
      * Get bundleName by pid.
@@ -768,6 +762,8 @@ public:
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
+
     void SaveBrowserChannel(sptr<IRemoteObject> browser);
 
     /**
@@ -820,6 +816,8 @@ public:
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
+    bool IsAppKilling(sptr<IRemoteObject> token) const;
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

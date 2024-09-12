@@ -49,6 +49,10 @@ void ApplicationImpl::SetApplication(const std::shared_ptr<OHOSApplication> &app
 bool ApplicationImpl::PerformAppReady()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (application_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
+        return false;
+    }
     application_->CleanUselessTempData();
     if (curState_ == APP_STATE_CREATE && application_ != nullptr) {
         application_->OnStart();
@@ -162,7 +166,7 @@ void ApplicationImpl::PerformConfigurationUpdated(const Configuration &config)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ != nullptr) {
-        application_->OnConfigurationUpdated(config);
+        application_->OnConfigurationUpdated(config, AbilityRuntime::SetLevel::System);
     }
 }
 

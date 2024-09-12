@@ -83,6 +83,9 @@ void AutoFillExtensionCallback::OnError(int32_t errCode, const std::string &name
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called, errcode: %{public}d, name: %{public}s, message: %{public}s",
         errCode, name.c_str(), message.c_str());
+    if (name.compare("extension_node_transparent") == 0) {
+        return;
+    }
     AutoFillManager::GetInstance().RemoveEvent(callbackId_);
     CloseUIExtension();
     if (errCode != 0) {

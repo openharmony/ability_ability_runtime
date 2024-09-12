@@ -47,6 +47,10 @@ constexpr const char* CONFIG_PATH = "/etc/ability_runtime/resident_process_in_ex
 constexpr const char* RESIDENT_PROCESS_IN_EXTREME_MEMORY = "residentProcessInExtremeMemory";
 constexpr const char* BUNDLE_NAME = "bundleName";
 constexpr const char* ABILITY_NAME = "abilityName";
+constexpr const char* KEY_IDENTIFIER = "identifier";
+constexpr const char* ALLOW_NATIVE_CHILD_PROCESS_APPS_CONFIG_PATH =
+    "/etc/ability_runtime/allow_native_child_process_apps.json";
+constexpr const char* KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS = "allowNativeChildProcessApps";
 constexpr const char* LAUNCH_EMBEDED_UI_ABILITY = "const.abilityms.launch_embeded_ui_ability";
 const std::string SUPPROT_NATIVE_CHILD_PROCESS = "persist.sys.abilityms.start_native_child_process";
 const std::string LIMIT_MAXIMUM_EXTENSIONS_OF_PER_PROCESS =
@@ -61,7 +65,7 @@ constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_TITLE = "startAbilityWit
 constexpr const char* BROKER_DELEGATE_BUNDLE_NAME = "const.sys.abilityms.broker_delegate_bundle_name";
 constexpr const char* COLLABORATOR_BROKER_UID = "const.sys.abilityms.collaborator_broker_uid";
 constexpr const char* COLLABORATOR_BROKER_RESERVE_UID = "const.sys.abilityms.collaborator_broker_reserve_uid";
-constexpr const char* MAX_NATIVE_ARGS_CHILD_PROCESS = "const.max_native_child_process";
+constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
 }
 
 AppUtils::~AppUtils() {}
@@ -284,6 +288,41 @@ void AppUtils::LoadResidentProcessInExtremeMemory()
     }
 }
 
+bool AppUtils::IsAllowNativeChildProcess(const std::string &appIdentifier)
+{
+    TAG_LOGD(AAFwkTag::DEFAULT, "appId:%{private}s", appIdentifier.c_str());
+    if (!allowStartNativeProcessApps_.isLoaded) {
+        LoadAllowNativeChildProcessApps();
+        allowStartNativeProcessApps_.isLoaded = true;
+    }
+    auto &apps = allowStartNativeProcessApps_.value;
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}zu", apps.size());
+    return std::find(apps.begin(), apps.end(), appIdentifier) != apps.end();
+}
+
+void AppUtils::LoadAllowNativeChildProcessApps()
+{
+    nlohmann::json object;
+    if (!JsonUtils::GetInstance().LoadConfiguration(ALLOW_NATIVE_CHILD_PROCESS_APPS_CONFIG_PATH, object)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "load child process config failed");
+        return;
+    }
+    if (!object.contains(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get key invalid");
+        return;
+    }
+
+    for (auto &item : object.at(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.contains(KEY_IDENTIFIER) || !jsonObject.at(KEY_IDENTIFIER).is_string()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load identifier failed");
+            return;
+        }
+        std::string identifier = jsonObject.at(KEY_IDENTIFIER).get<std::string>();
+        allowStartNativeProcessApps_.value.emplace_back(identifier);
+    }
+}
+
 int32_t AppUtils::GetLimitMaximumExtensionsPerProc()
 {
     if (!limitMaximumExtensionsPerProc_.isLoaded) {
@@ -389,15 +428,15 @@ int32_t AppUtils::GetCollaboratorBrokerReserveUID()
     return collaboratorBrokerReserveUid_.value;
 }
 
-int32_t AppUtils::MaxNativeArgsChildProcess()
+int32_t AppUtils::MaxChildProcess()
 {
-    if (!maxNativeArgsChildProcess_.isLoaded) {
-        maxNativeArgsChildProcess_.value =
-            system::GetIntParameter<int32_t>(MAX_NATIVE_ARGS_CHILD_PROCESS, DEFAULT_MAX_NATIVE_ARGS_CHILD_PROCESS);
-        maxNativeArgsChildProcess_.isLoaded = true;
+    if (!maxChildProcess_.isLoaded) {
+        maxChildProcess_.value =
+            system::GetIntParameter<int32_t>(MAX_CHILD_PROCESS, DEFAULT_MAX_CHILD_PROCESS);
+        maxChildProcess_.isLoaded = true;
     }
-    TAG_LOGD(AAFwkTag::DEFAULT, "maxNativeArgsChildProcess: %{public}d", maxNativeArgsChildProcess_.value);
-    return maxNativeArgsChildProcess_.value;
+    TAG_LOGD(AAFwkTag::DEFAULT, "MaxChildProcess: %{public}d", maxChildProcess_.value);
+    return maxChildProcess_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

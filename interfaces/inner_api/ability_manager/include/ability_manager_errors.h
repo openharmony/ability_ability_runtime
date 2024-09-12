@@ -586,14 +586,19 @@ enum {
     ERR_ALREADY_IN_CHILD_PROCESS = 2097265,
 
     /*
-     * Result (2097266) for native args child process reach limit.
+     * Result (2097266) for child process reach limit.
      */
-    ERR_NATIVE_ARGS_CHILD_PROCESS_REACH_LIMIT = 2097266,
+    ERR_CHILD_PROCESS_REACH_LIMIT = 2097266,
+
+    /**
+     * Result(2097267) for check is debug app.
+     */
+    ERR_NOT_DEBUG_APP = 2097267,
 
     /*
-     * Result (2097267) for not syatem app call.
+     * Result (2097268) for native child process reach limit.
      */
-    ERR_NOT_SYSTEM_APP_CALL = 2097267,
+    ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS = 2097268,
 
     /**
      * Native error(3000000) for target bundle not exist.

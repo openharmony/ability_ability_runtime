@@ -270,8 +270,8 @@ private:
         auto &options = param.options;
         auto childProcessType = param.childProcessType;
         TAG_LOGD(AAFwkTag::PROCESSMGR, "StartChildProcessWithArgs, childProcessType:%{public}d, srcEntry:%{private}s, "
-            "args.entryParams:%{private}s, args.fds size:%{public}zu, options.isolationMode:%{public}d",
-            childProcessType, srcEntry.c_str(), args.entryParams.c_str(), args.fds.size(), options.isolationMode);
+            "args.entryParams size:%{public}zu, args.fds size:%{public}zu, options.isolationMode:%{public}d",
+            childProcessType, srcEntry.c_str(), args.entryParams.length(), args.fds.size(), options.isolationMode);
         auto innerErrorCode = std::make_shared<ChildProcessManagerErrorCode>(ChildProcessManagerErrorCode::ERR_OK);
         auto pid = std::make_shared<pid_t>(0);
         NapiAsyncTask::ExecuteCallback execute = [srcEntry, args, options, childProcessType, pid, innerErrorCode]() {

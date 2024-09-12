@@ -84,6 +84,11 @@ const int AREA2 = 2;
 const int AREA3 = 3;
 const int AREA4 = 4;
 
+ContextImpl::~ContextImpl()
+{
+    UnsubscribeToOverlayEvents();
+}
+
 std::string ContextImpl::GetBundleName() const
 {
     if (parentContext_ != nullptr) {
@@ -956,6 +961,9 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
     const std::string &name, const std::string &hapModuleName, std::string &loadPath,
     std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos)
 {
+    if (overlaySubscriber_ != nullptr) {
+        return;
+    }
     // add listen overlay change
     overlayModuleInfos_ = overlayModuleInfos;
     EventFwk::MatchingSkills matchingSkills;
@@ -967,9 +975,17 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
         TAG_LOGI(AAFwkTag::APPKIT, "On overlay changed.");
         this->OnOverlayChanged(data, resourceManager, bundleName, moduleName, loadPath);
     };
-    auto subscriber = std::make_shared<AppExecFwk::OverlayEventSubscriber>(subscribeInfo, callback);
-    bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
+    overlaySubscriber_ = std::make_shared<AppExecFwk::OverlayEventSubscriber>(subscribeInfo, callback);
+    bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(overlaySubscriber_);
     TAG_LOGI(AAFwkTag::APPKIT, "Overlay event subscriber register result is %{public}d", subResult);
+}
+
+void ContextImpl::UnsubscribeToOverlayEvents()
+{
+    if (overlaySubscriber_ != nullptr) {
+        EventFwk::CommonEventManager::UnSubscribeCommonEvent(overlaySubscriber_);
+        overlaySubscriber_ = nullptr;
+    }
 }
 
 void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager)
@@ -997,7 +1013,7 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
     }
 #ifdef SUPPORT_SCREEN
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLocale(), status);
     resConfig->SetLocaleInfo(locale);
     if (resConfig->GetLocaleInfo() != nullptr) {
         TAG_LOGD(AAFwkTag::APPKIT,

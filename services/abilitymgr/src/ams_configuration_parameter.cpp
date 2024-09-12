@@ -22,8 +22,9 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-const int LOAD_CONFIGURATION_FAILED = -1;
-const int LOAD_CONFIGURATION_SUCCESS = 0;
+constexpr int32_t LOAD_CONFIGURATION_FAILED = -1;
+constexpr int32_t LOAD_CONFIGURATION_SUCCESS = 0;
+constexpr int32_t MAX_RESIDENT_WHITE_LIST_SIZE = 100;
 }
 
 AmsConfigurationParameter::AmsConfigurationParameter() {}
@@ -48,7 +49,7 @@ void AmsConfigurationParameter::Parse()
         return;
     }
     std::string customConfig = filePath;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "The configuration file path is :%{private}s", customConfig.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "file path: %{private}s", customConfig.c_str());
     LoadUIExtensionPickerConfig(customConfig);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "load config ref : %{private}d", ref);
 }
@@ -119,12 +120,12 @@ void AmsConfigurationParameter::LoadUIExtensionPickerConfig(const std::string &f
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file is not existed due to empty file path.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty file path");
         return;
     }
 
     if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not access the file: %{private}s.", filePath.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not access the file: %{private}s", filePath.c_str());
         return;
     }
     std::ifstream inFile;
@@ -179,18 +180,18 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     int ret[2] = {0};
     if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the file is not existed due to empty file path.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty file path");
         return READ_FAIL;
     }
 
     if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not access the file: %{private}s.", filePath.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "can not access the file: %{private}s", filePath.c_str());
         return READ_FAIL;
     }
     std::ifstream inFile;
     inFile.open(filePath, std::ios::in);
     if (!inFile.is_open()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Read ability manager service config error.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "error");
         nonConfigFile_ = true;
         return READ_FAIL;
     }
@@ -218,6 +219,7 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
     LoadBackToCallerConfig(amsJson);
     LoadSupportSCBCrashRebootConfig(amsJson);
     SetPickerJsonObject(amsJson);
+    LoadResidentWhiteListConfig(amsJson);
     amsJson.clear();
     inFile.close();
 
@@ -228,7 +230,7 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
         }
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Reading ability manager service config success.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "reading ability manager service config success");
     return READ_OK;
 }
 
@@ -348,6 +350,43 @@ void AmsConfigurationParameter::UpdateStartUpServiceConfigString(nlohmann::json&
 int AmsConfigurationParameter::MultiUserType() const
 {
     return multiUserType_;
+}
+
+void AmsConfigurationParameter::LoadResidentWhiteListConfig(nlohmann::json& Object)
+{
+    if (!Object.contains(AmsConfig::RESIDENT_WHITE_LIST)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "no normal_resident_apps");
+        return;
+    }
+    const auto &whiteListJson = Object.at(AmsConfig::RESIDENT_WHITE_LIST);
+    if (!whiteListJson.is_array()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "normal_resident_apps type error");
+        return;
+    }
+    auto size = whiteListJson.size();
+    if (size > MAX_RESIDENT_WHITE_LIST_SIZE) {
+        size = MAX_RESIDENT_WHITE_LIST_SIZE;
+    }
+    for (decltype(size) i = 0; i < size; i++) {
+        const auto &item = whiteListJson.at(i);
+        if (item.is_string()) {
+            residentWhiteList_.push_back(item.get<std::string>());
+        }
+    }
+}
+
+bool AmsConfigurationParameter::InResidentWhiteList(const std::string &bundleName) const
+{
+    if (residentWhiteList_.empty()) {
+        return true;
+    }
+
+    for (const auto &item: residentWhiteList_) {
+        if (bundleName == item) {
+            return true;
+        }
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

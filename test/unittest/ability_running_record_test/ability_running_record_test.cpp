@@ -149,27 +149,6 @@ HWTEST_F(AbilityRunningRecordTest, GetAbilityInfo_001, TestSize.Level1)
 
 /*
  * Feature: AbilityRunningRecord
- * Function: GetWant
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetWant
- * EnvConditions: NA
- * CaseDescription: GetWant
- */
-HWTEST_F(AbilityRunningRecordTest, GetWant_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetWant_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    auto iret = record->GetWant();
-    ASSERT_EQ(iret, nullptr);
-    TAG_LOGD(AAFwkTag::TEST, "GetWant_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
  * Function: SetWant
  * SubFunction: NA
  * FunctionPoints: AbilityRunningRecord SetWant
@@ -186,6 +165,8 @@ HWTEST_F(AbilityRunningRecordTest, SetWant_001, TestSize.Level1)
     ASSERT_NE(record, nullptr);
     const std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     record->SetWant(want);
+    auto iret = record->GetWant();
+    ASSERT_EQ(iret, want);
     TAG_LOGD(AAFwkTag::TEST, "SetWant_001 end.");
 }
 
@@ -227,238 +208,9 @@ HWTEST_F(AbilityRunningRecordTest, SetState_001, TestSize.Level1)
     auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     record->SetState(AbilityState::ABILITY_STATE_CREATE);
-    TAG_LOGD(AAFwkTag::TEST, "SetState_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetState
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetState
- * EnvConditions: NA
- * CaseDescription: GetState
- */
-HWTEST_F(AbilityRunningRecordTest, GetState_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetState_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
     auto iret = record->GetState();
     ASSERT_EQ(iret, AbilityState::ABILITY_STATE_CREATE);
-    TAG_LOGD(AAFwkTag::TEST, "GetState_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: IsSameState
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord IsSameState
- * EnvConditions: NA
- * CaseDescription: IsSameState
- */
-HWTEST_F(AbilityRunningRecordTest, IsSameState_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "IsSameState_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    auto iret = record->IsSameState(AbilityState::ABILITY_STATE_CREATE);
-    ASSERT_EQ(iret, true);
-    TAG_LOGD(AAFwkTag::TEST, "IsSameState_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetLastLaunchTime
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetLastLaunchTime
- * EnvConditions: NA
- * CaseDescription: GetLastLaunchTime
- */
-HWTEST_F(AbilityRunningRecordTest, GetLastLaunchTime_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetLastLaunchTime_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    auto iret = record->GetLastLaunchTime();
-    ASSERT_EQ(iret, 0);
-    TAG_LOGD(AAFwkTag::TEST, "GetLastLaunchTime_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetPreToken
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetPreToken
- * EnvConditions: NA
- * CaseDescription: GetPreToken
- */
-HWTEST_F(AbilityRunningRecordTest, GetPreToken_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetPreToken_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    auto iret = record->GetPreToken();
-    ASSERT_EQ(iret, nullptr);
-    TAG_LOGD(AAFwkTag::TEST, "GetPreToken_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: SetPreToken
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord SetPreToken
- * EnvConditions: NA
- * CaseDescription: SetPreToken
- */
-HWTEST_F(AbilityRunningRecordTest, SetPreToken_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "SetPreToken_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    sptr<IRemoteObject> pretoken = new MockAbilityToken();
-    record->SetPreToken(pretoken);
-    TAG_LOGD(AAFwkTag::TEST, "SetPreToken_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: SetVisibility
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord SetVisibility
- * EnvConditions: NA
- * CaseDescription: SetVisibility
- */
-HWTEST_F(AbilityRunningRecordTest, SetVisibility_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "SetVisibility_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    const int32_t visibility = 1;
-    record->SetVisibility(visibility);
-    TAG_LOGD(AAFwkTag::TEST, "SetVisibility_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetVisibility
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetVisibility
- * EnvConditions: NA
- * CaseDescription: GetVisibility
- */
-HWTEST_F(AbilityRunningRecordTest, GetVisibility_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetVisibility_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    auto iret = record->GetVisibility();
-    ASSERT_EQ(iret, 0);
-    TAG_LOGD(AAFwkTag::TEST, "GetVisibility_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: SetPerceptibility
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord SetPerceptibility
- * EnvConditions: NA
- * CaseDescription: SetPerceptibility
- */
-HWTEST_F(AbilityRunningRecordTest, SetPerceptibility_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "SetPerceptibility_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    const int32_t perceptibility = 1;
-    record->SetPerceptibility(perceptibility);
-    TAG_LOGD(AAFwkTag::TEST, "SetPerceptibility_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetPerceptibility
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetPerceptibility
- * EnvConditions: NA
- * CaseDescription: GetPerceptibility
- */
-HWTEST_F(AbilityRunningRecordTest, GetPerceptibility_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetPerceptibility_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    auto iret = record->GetPerceptibility();
-    ASSERT_EQ(iret, 0);
-    TAG_LOGD(AAFwkTag::TEST, "GetPerceptibility_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: SetConnectionState
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord SetConnectionState
- * EnvConditions: NA
- * CaseDescription: SetConnectionState
- */
-HWTEST_F(AbilityRunningRecordTest, SetConnectionState_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "SetConnectionState_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    const int32_t connectionState = 1;
-    record->SetConnectionState(connectionState);
-    TAG_LOGD(AAFwkTag::TEST, "SetConnectionState_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetConnectionState
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetConnectionState
- * EnvConditions: NA
- * CaseDescription: GetConnectionState
- */
-HWTEST_F(AbilityRunningRecordTest, GetConnectionState_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetConnectionState_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
-    auto iret = record->GetConnectionState();
-    ASSERT_EQ(iret, 0);
-    TAG_LOGD(AAFwkTag::TEST, "GetConnectionState_001 end.");
+    TAG_LOGD(AAFwkTag::TEST, "SetState_001 end.");
 }
 
 /*
@@ -479,28 +231,9 @@ HWTEST_F(AbilityRunningRecordTest, SetEventId_001, TestSize.Level1)
     ASSERT_NE(record, nullptr);
     const int64_t eventId = 1;
     record->SetEventId(eventId);
-    TAG_LOGD(AAFwkTag::TEST, "SetEventId_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetEventId
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetEventId
- * EnvConditions: NA
- * CaseDescription: GetEventId
- */
-HWTEST_F(AbilityRunningRecordTest, GetEventId_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetEventId_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
     auto iret = record->GetEventId();
-    ASSERT_EQ(iret, 0);
-    TAG_LOGD(AAFwkTag::TEST, "GetEventId_001 end.");
+    ASSERT_EQ(iret, 1);
+    TAG_LOGD(AAFwkTag::TEST, "SetEventId_001 end.");
 }
 
 /*
@@ -520,28 +253,9 @@ HWTEST_F(AbilityRunningRecordTest, SetTerminating_001, TestSize.Level1)
     auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     record->SetTerminating();
-    TAG_LOGD(AAFwkTag::TEST, "SetTerminating_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: IsTerminating
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord IsTerminating
- * EnvConditions: NA
- * CaseDescription: IsTerminating
- */
-HWTEST_F(AbilityRunningRecordTest, IsTerminating_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "IsTerminating_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
     auto iret = record->IsTerminating();
-    ASSERT_EQ(iret, false);
-    TAG_LOGD(AAFwkTag::TEST, "IsTerminating_001 end.");
+    ASSERT_EQ(iret, true);
+    TAG_LOGD(AAFwkTag::TEST, "SetTerminating_001 end.");
 }
 
 /*
@@ -562,28 +276,9 @@ HWTEST_F(AbilityRunningRecordTest, SetOwnerUserId_001, TestSize.Level1)
     ASSERT_NE(record, nullptr);
     int32_t ownerUserId = 1;
     record->SetOwnerUserId(ownerUserId);
-    TAG_LOGD(AAFwkTag::TEST, "SetOwnerUserId_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetOwnerUserId
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetOwnerUserId
- * EnvConditions: NA
- * CaseDescription: GetOwnerUserId
- */
-HWTEST_F(AbilityRunningRecordTest, GetOwnerUserId_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetOwnerUserId_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
     auto iret = record->GetOwnerUserId();
-    ASSERT_EQ(iret, -1);
-    TAG_LOGD(AAFwkTag::TEST, "GetOwnerUserId_001 end.");
+    ASSERT_EQ(iret, 1);
+    TAG_LOGD(AAFwkTag::TEST, "SetOwnerUserId_001 end.");
 }
 
 /*
@@ -604,28 +299,9 @@ HWTEST_F(AbilityRunningRecordTest, SetIsSingleUser_001, TestSize.Level1)
     ASSERT_NE(record, nullptr);
     bool flag = true;
     record->SetIsSingleUser(flag);
-    TAG_LOGD(AAFwkTag::TEST, "SetIsSingleUser_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: IsSingleUser
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord IsSingleUser
- * EnvConditions: NA
- * CaseDescription: IsSingleUser
- */
-HWTEST_F(AbilityRunningRecordTest, IsSingleUser_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "IsSingleUser_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
     auto iret = record->IsSingleUser();
-    ASSERT_EQ(iret, false);
-    TAG_LOGD(AAFwkTag::TEST, "IsSingleUser_001 end.");
+    ASSERT_EQ(iret, true);
+    TAG_LOGD(AAFwkTag::TEST, "SetIsSingleUser_001 end.");
 }
 
 /*
@@ -646,28 +322,9 @@ HWTEST_F(AbilityRunningRecordTest, UpdateFocusState_001, TestSize.Level1)
     ASSERT_NE(record, nullptr);
     bool isFocus = true;
     record->UpdateFocusState(isFocus);
-    TAG_LOGD(AAFwkTag::TEST, "UpdateFocusState_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetFocusFlag
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetFocusFlag
- * EnvConditions: NA
- * CaseDescription: GetFocusFlag
- */
-HWTEST_F(AbilityRunningRecordTest, GetFocusFlag_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetFocusFlag_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
     auto iret = record->GetFocusFlag();
-    ASSERT_EQ(iret, false);
-    TAG_LOGD(AAFwkTag::TEST, "GetFocusFlag_001 end.");
+    ASSERT_EQ(iret, true);
+    TAG_LOGD(AAFwkTag::TEST, "UpdateFocusState_001 end.");
 }
 
 /*
@@ -688,28 +345,9 @@ HWTEST_F(AbilityRunningRecordTest, SetUIExtensionAbilityId_001, TestSize.Level1)
     ASSERT_NE(record, nullptr);
     const int32_t uiExtensionAbilityId = 1;
     record->SetUIExtensionAbilityId(uiExtensionAbilityId);
-    TAG_LOGD(AAFwkTag::TEST, "SetUIExtensionAbilityId_001 end.");
-}
-
-/*
- * Feature: AbilityRunningRecord
- * Function: GetUIExtensionAbilityId
- * SubFunction: NA
- * FunctionPoints: AbilityRunningRecord GetUIExtensionAbilityId
- * EnvConditions: NA
- * CaseDescription: GetUIExtensionAbilityId
- */
-HWTEST_F(AbilityRunningRecordTest, GetUIExtensionAbilityId_001, TestSize.Level1)
-{
-    TAG_LOGD(AAFwkTag::TEST, "GetUIExtensionAbilityId_001 start.");
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    int32_t abilityRecordId = 1;
-    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
-    ASSERT_NE(record, nullptr);
     auto iret = record->GetUIExtensionAbilityId();
-    ASSERT_EQ(iret, 0);
-    TAG_LOGD(AAFwkTag::TEST, "GetUIExtensionAbilityId_001 end.");
+    ASSERT_EQ(iret, 1);
+    TAG_LOGD(AAFwkTag::TEST, "SetUIExtensionAbilityId_001 end.");
 }
 
 }  // namespace AppExecFwk

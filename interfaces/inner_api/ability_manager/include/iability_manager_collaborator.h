@@ -177,7 +177,7 @@ public:
         return;
     }
 
-    virtual int32_t CheckStaticCfgPermission(const Want &want)
+    virtual int32_t CheckStaticCfgPermission(const Want &want, bool isImplicit)
     {
         return 0;
     }
