@@ -434,6 +434,8 @@ HWTEST_F(AmsAbilityRunningRecordTest, UpdateAbilityRunningRecord_006, TestSize.L
     anotherAbilityRunningRecord->SetState(AbilityState::ABILITY_STATE_FOREGROUND);
     appRunningRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
     abilityRunningRecord->SetState(AbilityState::ABILITY_STATE_FOREGROUND);
+
+    EXPECT_CALL(*mockedAppClient_, ScheduleBackgroundApplication()).Times(1);
     appRunningRecord->UpdateAbilityState(anotherToken, AbilityState::ABILITY_STATE_FOREGROUND);
 
     auto abilities = appRunningRecord->GetAbilities();
