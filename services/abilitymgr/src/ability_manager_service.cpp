@@ -12057,7 +12057,7 @@ void AbilityManagerService::ForceTerminateSerivceExtensionByPid(int32_t pid)
         for (const auto& token : tokens) {
             auto abilityRecord = Token::GetAbilityRecordByToken(token);
             if (abilityRecord &&
-                abilityRecord->GetAbilityInfo.extensionAbilityType ==
+                abilityRecord->GetAbilityInfo().extensionAbilityType ==
                 AppExecFwk::ExtensionAbilityType::SERVICE) {
                 connectManager->TerminateAbility(token);
             }
