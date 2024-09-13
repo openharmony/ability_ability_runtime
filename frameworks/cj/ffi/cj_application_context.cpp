@@ -31,7 +31,7 @@ std::vector<std::shared_ptr<CjAbilityLifecycleCallback>> CJApplicationContext::c
 CJApplicationContext* CJApplicationContext::cjApplicationContext_ = nullptr;
 
 CJApplicationContext* CJApplicationContext::GetCJApplicationContext(
-        std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext)
+    std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext)
 {
     if (cjApplicationContext_) {
         return cjApplicationContext_;
@@ -216,6 +216,204 @@ void CJApplicationContext::DispatchOnAbilityContinue(const int64_t &ability)
     }
 }
 
+void CJApplicationContext::DispatchOnAbilityWillCreate(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityWillCreate(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnWindowStageWillCreate(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWindowStageWillCreate(ability, windowStage);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnWindowStageWillDestroy(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWindowStageWillDestroy(ability, windowStage);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityWillDestroy(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityWillDestroy(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityWillForeground(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityWillForeground(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityWillBackground(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityWillBackground(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnNewWant(const int64_t &ability)
+{
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnNewWant(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnWillNewWant(const int64_t &ability)
+{
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWillNewWant(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityWillContinue(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Dispatch onAbilityWillContinue");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityWillContinue(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnWindowStageWillRestore(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Dispatch onWindowStageWillRestore");
+    if (!ability || windowStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is null");
+        return;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWindowStageWillRestore(ability, windowStage);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnWindowStageRestore(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Dispatch onWindowStageRestore");
+    if (!ability || windowStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is null");
+        return;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnWindowStageRestore(ability, windowStage);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilityWillSaveState(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Dispatch onAbilityWillSaveState");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilityWillSaveState(ability);
+        }
+    }
+}
+
+void CJApplicationContext::DispatchOnAbilitySaveState(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
+    for (auto callback : callbacks_) {
+        if (callback != nullptr) {
+            callback->OnAbilitySaveState(ability);
+        }
+    }
+}
+
 int32_t CJApplicationContext::OnOnEnvironment(void (*cfgCallback)(CConfiguration),
     void (*memCallback)(int32_t), bool isSync, int32_t *errCode)
 {
@@ -329,7 +527,7 @@ CApplicationInfo* FFICJApplicationInfo(int64_t id)
     return buffer;
 }
 
-int32_t FFICJApplicationContextOnOnEnvironment(int64_t id, void (*cfgCallback)(CConfiguration),
+int32_t FfiCJApplicationContextOnOnEnvironment(int64_t id, void (*cfgCallback)(CConfiguration),
     void (*memCallback)(int32_t), int32_t *errCode)
 {
     auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
@@ -341,7 +539,7 @@ int32_t FFICJApplicationContextOnOnEnvironment(int64_t id, void (*cfgCallback)(C
     return context->OnOnEnvironment(cfgCallback, memCallback, false, errCode);
 }
 
-int32_t FFICJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds, int32_t *errCode)
+int32_t FfiCJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds, int32_t *errCode)
 {
     auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
     if (context == nullptr) {
@@ -352,7 +550,7 @@ int32_t FFICJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds
     return context->OnOnAbilityLifecycle(cFuncIds, false, errCode);
 }
 
-void FFICJApplicationContextOnOff(int64_t id, const char* type, int32_t callbackId, int32_t *errCode)
+void FfiCJApplicationContextOnOff(int64_t id, const char* type, int32_t callbackId, int32_t *errCode)
 {
     auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
     if (context == nullptr) {

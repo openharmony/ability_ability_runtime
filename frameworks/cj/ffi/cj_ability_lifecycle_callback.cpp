@@ -26,9 +26,22 @@ CjAbilityLifecycleCallback::CjAbilityLifecycleCallback()
 
 int32_t CjAbilityLifecycleCallback::serialNumber_ = 0;
 
+void EmplaceAbilityFunc(int32_t callbackId, int64_t cFuncId,
+    std::map<int32_t, std::function<void(int64_t)>> &cFuncMap)
+{
+    auto callback = CJLambda::Create(reinterpret_cast<void(*)(int64_t)>(cFuncId));
+    cFuncMap.emplace(callbackId, callback);
+}
+
+void EmplaceAbilityWindowStageFunc(int32_t callbackId, int64_t cFuncId,
+    std::map<int32_t, std::function<void(int64_t, WindowStagePtr)>> &cFuncMap)
+{
+    auto callback = CJLambda::Create(reinterpret_cast<void(*)(int64_t, WindowStagePtr)>(cFuncId));
+    cFuncMap.emplace(callbackId, callback);
+}
+
 int32_t CjAbilityLifecycleCallback::Register(CArrI64 cFuncIds, bool isSync)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "enter");
     int32_t callbackId = serialNumber_;
     if (serialNumber_ < INT32_MAX) {
         serialNumber_++;
@@ -39,41 +52,29 @@ int32_t CjAbilityLifecycleCallback::Register(CArrI64 cFuncIds, bool isSync)
         return -1;
     } else {
         int64_t i = 0;
-        // onAbilityCreate
-        auto onAbilityCreatecallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t)>(cFuncIds.head[i]));
-        onAbilityCreatecallbacks_.emplace(callbackId, onAbilityCreatecallback);
-        // onWindowStageCreate
-        i++;
-        auto onWindowStageCreatecallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t, WindowStagePtr)>(cFuncIds.head[i]));
-        onWindowStageCreatecallbacks_.emplace(callbackId, onWindowStageCreatecallback);
-        // onWindowStageActive
-        i++;
-        auto onWindowStageActivecallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t, WindowStagePtr)>(cFuncIds.head[i]));
-        onWindowStageActivecallbacks_.emplace(callbackId, onWindowStageActivecallback);
-        // onWindowStageInactive
-        i++;
-        auto onWindowStageInactivecallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t, WindowStagePtr)>(cFuncIds.head[i]));
-        onWindowStageInactivecallbacks_.emplace(callbackId, onWindowStageInactivecallback);
-        // onWindowStageDestroy
-        i++;
-        auto onWindowStageDestroycallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t, WindowStagePtr)>(cFuncIds.head[i]));
-        onWindowStageDestroycallbacks_.emplace(callbackId, onWindowStageDestroycallback);
-        // onAbilityDestroy
-        i++;
-        auto onAbilityDestroycallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t)>(cFuncIds.head[i]));
-        onAbilityDestroycallbacks_.emplace(callbackId, onAbilityDestroycallback);
-        // onAbilityForeground
-        i++;
-        auto onAbilityForegroundcallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t)>(cFuncIds.head[i]));
-        onAbilityForegroundcallbacks_.emplace(callbackId, onAbilityForegroundcallback);
-        // onAbilityBackground
-        i++;
-        auto onAbilityBackgroundcallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t)>(cFuncIds.head[i]));
-        onAbilityBackgroundcallbacks_.emplace(callbackId, onAbilityBackgroundcallback);
-        // onAbilityContinue
-        i++;
-        auto onAbilityContinuecallback = CJLambda::Create(reinterpret_cast<void(*)(int64_t)>(cFuncIds.head[i]));
-        onAbilityContinuecallbacks_.emplace(callbackId, onAbilityContinuecallback);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityCreatecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageCreatecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageActivecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageInactivecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageDestroycallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityDestroycallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityForegroundcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityBackgroundcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityContinuecallbacks_);
+        // optional callbacks
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillCreatecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageWillCreatecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageWillDestroycallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillForegroundcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillDestroycallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillBackgroundcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onWillNewWantcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onNewWantcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillContinuecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageWillRestorecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageRestorecallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillSaveStatecallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilitySaveStatecallbacks_);
     }
     return callbackId;
 }
@@ -84,8 +85,8 @@ bool CjAbilityLifecycleCallback::UnRegister(int32_t callbackId, bool isSync)
     if (isSync) {
         return false;
     }
-    auto it = onAbilityBackgroundcallbacks_.find(callbackId);
-    if (it == onAbilityBackgroundcallbacks_.end()) {
+    auto it = onAbilityCreatecallbacks_.find(callbackId);
+    if (it == onAbilityCreatecallbacks_.end()) {
         TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacks_", callbackId);
         return false;
     }
@@ -97,7 +98,21 @@ bool CjAbilityLifecycleCallback::UnRegister(int32_t callbackId, bool isSync)
     onAbilityDestroycallbacks_.erase(callbackId);
     onAbilityForegroundcallbacks_.erase(callbackId);
     onAbilityBackgroundcallbacks_.erase(callbackId);
-    return onAbilityContinuecallbacks_.erase(callbackId) == 1;
+    onAbilityContinuecallbacks_.erase(callbackId);
+    // optional callbacks
+    onAbilityWillCreatecallbacks_.erase(callbackId);
+    onWindowStageWillCreatecallbacks_.erase(callbackId);
+    onWindowStageWillDestroycallbacks_.erase(callbackId);
+    onAbilityWillForegroundcallbacks_.erase(callbackId);
+    onAbilityWillDestroycallbacks_.erase(callbackId);
+    onAbilityWillBackgroundcallbacks_.erase(callbackId);
+    onWillNewWantcallbacks_.erase(callbackId);
+    onNewWantcallbacks_.erase(callbackId);
+    onAbilityWillContinuecallbacks_.erase(callbackId);
+    onWindowStageWillRestorecallbacks_.erase(callbackId);
+    onWindowStageRestorecallbacks_.erase(callbackId);
+    onAbilityWillSaveStatecallbacks_.erase(callbackId);
+    return onAbilitySaveStatecallbacks_.erase(callbackId) == 1;
 }
 
 void CjAbilityLifecycleCallback::OnAbilityCreate(const int64_t &ability)
@@ -236,6 +251,213 @@ void CjAbilityLifecycleCallback::OnAbilityContinue(const int64_t &ability)
         return;
     }
     for (auto &callback : onAbilityContinuecallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+
+// optional callbacks
+void CjAbilityLifecycleCallback::OnAbilityWillCreate(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillCreate");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onAbilityWillCreatecallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnWindowStageWillCreate(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageWillCreate");
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is nullptr");
+        return;
+    }
+    for (auto &callback : onWindowStageWillCreatecallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability, windowStage);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnWindowStageWillDestroy(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageWillDestroy");
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is nullptr");
+        return;
+    }
+    for (auto &callback : onWindowStageWillDestroycallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability, windowStage);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnAbilityWillDestroy(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillDestroy");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onAbilityWillDestroycallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+void CjAbilityLifecycleCallback::OnAbilityWillForeground(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillForeground");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onAbilityWillForegroundcallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+void CjAbilityLifecycleCallback::OnAbilityWillBackground(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillBackground");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onAbilityWillBackgroundcallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnNewWant(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnNewWant");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onNewWantcallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnWillNewWant(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWillNewWant");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onWillNewWantcallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnAbilityWillContinue(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillContinue");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onAbilityWillContinuecallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnWindowStageWillRestore(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageWillRestore");
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is nullptr");
+        return;
+    }
+    for (auto &callback : onWindowStageWillRestorecallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability, windowStage);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnWindowStageRestore(const int64_t &ability, WindowStagePtr windowStage)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageRestore");
+    if (!ability || !windowStage) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is nullptr");
+        return;
+    }
+    for (auto &callback : onWindowStageRestorecallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability, windowStage);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnAbilityWillSaveState(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillSaveState");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onAbilityWillSaveStatecallbacks_) {
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
+            return;
+        }
+        callback.second(ability);
+    }
+}
+
+void CjAbilityLifecycleCallback::OnAbilitySaveState(const int64_t &ability)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilitySaveState");
+    if (!ability) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        return;
+    }
+    for (auto &callback : onAbilitySaveStatecallbacks_) {
         if (!callback.second) {
             TAG_LOGE(AAFwkTag::APPKIT, "Invalid cjCallback");
             return;
