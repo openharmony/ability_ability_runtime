@@ -47,6 +47,16 @@ SetLevel ApplicationConfigurationManager::GetLanguageSetLevel() const
     return languageSetLevel_;
 }
 
+void ApplicationConfigurationManager::SetfontSetLevel(SetLevel fontSetLevel)
+{
+    fontSetLevel_ = fontSetLevel;
+}
+
+SetLevel ApplicationConfigurationManager::GetFontSetLevel() const
+{
+    return fontSetLevel_;
+}
+
 std::string ApplicationConfigurationManager::SetColorModeSetLevel(SetLevel colorModeSetLevel, const std::string &value)
 {
     colorModeVal_[static_cast<uint8_t>(colorModeSetLevel)] = value;

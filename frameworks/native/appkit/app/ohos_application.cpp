@@ -51,7 +51,7 @@ namespace {
 }
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
 constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;
-
+using ApplicationConfigurationManager = AbilityRuntime::ApplicationConfigurationManager;
 OHOSApplication::OHOSApplication()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
@@ -446,7 +446,7 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
     // Whether the color changes with the system
     bool isUpdateAppColor = IsUpdateColorNeeded(config, level);
     // Whether the font changes with the system
-    bool isUpdateAppFontSize = isUpdateFontSize(config);
+    bool isUpdateAppFontSize = isUpdateFontSize(config, level);
     // Whether the language changes with the system
     bool isUpdateAppLanguage = IsUpdateLanguageNeeded(config, level);
     if (!isUpdateAppColor && !isUpdateAppFontSize && !isUpdateAppLanguage && config.GetItemSize() == 0) {
@@ -829,6 +829,10 @@ void OHOSApplication::SetConfiguration(const Configuration &config)
     auto colorMode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().
         SetColorModeSetLevel(AbilityRuntime::SetLevel::System, colorMode);
+
+    if (abilityRuntimeContext_ && configuration_) {
+        abilityRuntimeContext_->SetConfiguration(configuration_);
+    }
 }
 
 void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName, std::string &flag)
@@ -1004,19 +1008,33 @@ bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime:
     return needUpdate;
 }
 
-bool OHOSApplication::isUpdateFontSize(Configuration &config)
+bool OHOSApplication::isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level)
 {
-    std::string fontSizeScal = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    std::string globalFontFollowSysteme = configuration_->GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
-    if (!globalFontFollowSysteme.empty()
-        && globalFontFollowSysteme.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
-        return true;
+    std::string fontSize = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (fontSize.empty()) {
+        TAG_LOGW(AAFwkTag::APPKIT, "fontSize is empty");
+        return false;
     }
-    TAG_LOGW(AAFwkTag::APPKIT, "the font size configured for the app does not take effect with the system");
-    config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE,
-        ConfigurationInner::SYSTEM_DEFAULT_FONTSIZE_SCALE);
-    return false;
+
+    auto preLevle = ApplicationConfigurationManager::GetInstance().GetFontSetLevel();
+    if (level < preLevle) {
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+        return false;
+    }
+
+    std::string globalFontFollowSysteme = configuration_->GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    if (level == preLevle && !globalFontFollowSysteme.empty()) {
+        if (globalFontFollowSysteme.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
+            return true;
+        }
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+        return false;
+    }
+
+    // level > preLevle
+    configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    ApplicationConfigurationManager::GetInstance().SetfontSetLevel(level);
+    return true;
 }
 
 bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRuntime::SetLevel level)
