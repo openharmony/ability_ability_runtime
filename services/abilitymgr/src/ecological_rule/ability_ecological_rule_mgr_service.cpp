@@ -124,7 +124,9 @@ int32_t AbilityEcologicalRuleMgrServiceClient::EvaluateResolveInfos(const AAFwk:
     }
     int32_t res = ecologicalRuleMgrServiceProxy_->EvaluateResolveInfos(want, callerInfo, type, abilityInfos);
     int64_t cost = GetCurrentTimeMicro() - start;
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms", static_cast<long long>(cost));
+    TAG_LOGD(
+        AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms",
+        static_cast<long long>(cost));
     return res;
 }
 
@@ -147,7 +149,9 @@ int32_t AbilityEcologicalRuleMgrServiceClient::QueryStartExperience(const OHOS::
             rule.resultCode, rule.sceneCode.c_str(), (*(rule.replaceWant)).ToString().c_str());
     }
     int64_t cost = GetCurrentTimeMicro() - start;
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms", static_cast<long long>(cost));
+    TAG_LOGD(
+        AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms",
+        static_cast<long long>(cost));
     return res;
 }
 

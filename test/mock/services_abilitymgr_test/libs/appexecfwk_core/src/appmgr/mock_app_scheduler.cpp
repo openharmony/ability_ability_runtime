@@ -130,6 +130,12 @@ void AppScheduler::OnAppStateChanged(const AppExecFwk::AppProcessData& appData)
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAppStateChanged()");
 }
 
+int AppScheduler::ClearUpApplicationData(const std::string& bundleName, const int32_t userId)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::ClearUpApplicationData()");
+    return ERR_OK;
+}
+
 void AppScheduler::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyConfigurationChange()");
@@ -143,12 +149,6 @@ void AppScheduler::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo
 void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAppRemoteDied()");
-}
-
-int AppScheduler::ClearUpApplicationData(const std::string& bundleName, const int32_t userId)
-{
-    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::ClearUpApplicationData()");
-    return ERR_OK;
 }
 
 void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject>& token, const AppExecFwk::AbilityState state)

@@ -108,7 +108,7 @@ void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<ExitResi
     for (const auto &item: exitProcessInfos) {
         if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(item.bundleName,
             AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, item.uid / BASE_USER_RANGE))) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get bundle info from %{public}s.", item.bundleName.c_str());
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail from %{public}s", item.bundleName.c_str());
             continue;
         }
         if (!bundleInfo.isKeepAlive) {
