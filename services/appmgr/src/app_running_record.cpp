@@ -23,8 +23,8 @@
 #include "ui_extension_utils.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
-#include "cache_process_manager.h"
 #include "window_visibility_info.h"
+#include "cache_process_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {

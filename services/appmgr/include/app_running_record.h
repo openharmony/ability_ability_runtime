@@ -554,7 +554,7 @@ public:
     void SetMainProcess(bool isMainProcess);
 
     void SetSingleton(bool isSingleton);
-
+ 
     void SetStageModelState(bool isStageBasedModel);
 
     std::list<std::shared_ptr<ModuleRunningRecord>> GetAllModuleRecord() const;
