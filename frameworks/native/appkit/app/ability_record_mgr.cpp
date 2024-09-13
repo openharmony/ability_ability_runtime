@@ -145,13 +145,11 @@ std::shared_ptr<AbilityLocalRecord> AbilityRecordMgr::GetAbilityItem(const sptr<
 std::vector<sptr<IRemoteObject>> AbilityRecordMgr::GetAllTokens()
 {
     std::vector<sptr<IRemoteObject>> tokens;
-    for (std::map<sptr<IRemoteObject>, std::shared_ptr<AbilityLocalRecord>>::iterator it = abilityRecords_.begin();
-         it != abilityRecords_.end();
-         ++it) {
+    for (auto it = abilityRecords_.begin(); it != abilityRecords_.end(); ++it) {
         sptr<IRemoteObject> token = it->first;
         tokens.emplace_back(token);
     }
     return tokens;
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
+} // namespace AppExecFwk
+} // namespace OHOS

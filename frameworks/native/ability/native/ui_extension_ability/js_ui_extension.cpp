@@ -627,6 +627,7 @@ void JsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sess
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    CHECK_POINTER(sessionInfo);
     Extension::OnForeground(want, sessionInfo);
 
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {

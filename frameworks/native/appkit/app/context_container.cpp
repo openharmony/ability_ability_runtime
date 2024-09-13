@@ -237,7 +237,7 @@ std::string ContextContainer::GetProcessName()
     return (processInfo_ != nullptr) ? processInfo_->GetProcessName() : "";
 }
 
-std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundleName, int flag, int accountId)
+std::shared_ptr<Context> ContextContainer::CreateBundleContext(const std::string &bundleName, int flag, int accountId)
 {
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "The bundleName is empty");

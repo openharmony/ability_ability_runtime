@@ -1077,7 +1077,7 @@ std::vector<std::string> MainThread::GetOverlayPaths(const std::string &bundleNa
     const std::vector<OverlayModuleInfo> &overlayModuleInfos)
 {
     std::vector<std::string> overlayPaths;
-    for (auto it : overlayModuleInfos_) {
+    for (auto &it : overlayModuleInfos_) {
         if (std::regex_search(it.hapPath, std::regex(bundleName))) {
             it.hapPath = std::regex_replace(it.hapPath, std::regex(std::string(ABS_CODE_PATH) +
                 std::string(FILE_SEPARATOR) + bundleName), std::string(LOCAL_CODE_PATH));
@@ -1670,7 +1670,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     // init resourceManager.
-
     auto moduleName = entryHapModuleInfo.moduleName;
     std::string loadPath =
         entryHapModuleInfo.hapPath.empty() ? entryHapModuleInfo.resourcePath : entryHapModuleInfo.hapPath;
@@ -1887,11 +1886,6 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo &app
         return;
     }
     application_->UpdateApplicationInfoInstalled(appInfo);
-
-    if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
-        return;
-    }
 }
 
 void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
@@ -1916,11 +1910,6 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "LoadAllExtensions");
-    if (!extensionConfigMgr_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ExtensionConfigMgr is invalid");
-        return;
-    }
-
     auto extensionPlugins = AbilityRuntime::ExtensionPluginInfo::GetInstance().GetExtensionPlugins();
     if (extensionPlugins.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "no extension type map");
@@ -2245,7 +2234,7 @@ void MainThread::HandleTerminateApplication(bool isLastProcess)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "start");
-    if ((application_ == nullptr) || (appMgr_ == nullptr)) {
+    if ((applicationImpl_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "error");
         return;
     }
@@ -3128,7 +3117,7 @@ int MainThread::GetOverlayModuleInfos(const std::string &bundleName, const std::
 std::vector<std::string> MainThread::GetAddOverlayPaths(const std::vector<OverlayModuleInfo> &overlayModuleInfos)
 {
     std::vector<std::string> addPaths;
-    for (auto it : overlayModuleInfos) {
+    for (auto &it : overlayModuleInfos) {
         auto iter = std::find_if(
             overlayModuleInfos_.begin(), overlayModuleInfos_.end(), [it](OverlayModuleInfo item) {
                 return it.moduleName == item.moduleName;
@@ -3146,7 +3135,7 @@ std::vector<std::string> MainThread::GetAddOverlayPaths(const std::vector<Overla
 std::vector<std::string> MainThread::GetRemoveOverlayPaths(const std::vector<OverlayModuleInfo> &overlayModuleInfos)
 {
     std::vector<std::string> removePaths;
-    for (auto it : overlayModuleInfos) {
+    for (auto &it : overlayModuleInfos) {
         auto iter = std::find_if(
             overlayModuleInfos_.begin(), overlayModuleInfos_.end(), [it](OverlayModuleInfo item) {
                 return it.moduleName == item.moduleName;

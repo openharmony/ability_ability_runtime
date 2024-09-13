@@ -503,11 +503,11 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
  */
 void OHOSApplication::OnFontUpdated(Configuration config)
 {
-    #ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_GRAPHICS
     // Notify Window
     auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
     Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
-    #endif
+#endif
 }
 
 /**
@@ -583,7 +583,7 @@ void OHOSApplication::OnAbilitySaveState(const PacMap &outState)
 
 void OHOSApplication::SetAppEnv(const std::vector<AppEnvironment>& appEnvironments)
 {
-    if (!appEnvironments.size()) {
+    if (appEnvironments.empty()) {
         return;
     }
 
@@ -638,6 +638,10 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         }
 
         abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *hapModuleInfo);
+        if (abilityStage == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
+            return nullptr;
+        }
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
@@ -702,15 +706,17 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
 void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
     const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName)
 {
+    if (abilityStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+        return;
+    }
+
     Want want;
     if (abilityRecord->GetWant()) {
         TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
         want = *(abilityRecord->GetWant());
     }
-    if (abilityStage == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
-        return;
-    }
+
     abilityStage->OnCreate(want);
     abilityStages_[moduleName] = abilityStage;
     const sptr<IRemoteObject> &token = abilityRecord->GetToken();
@@ -774,6 +780,10 @@ bool OHOSApplication::AddAbilityStage(const AppExecFwk::HapModuleInfo &hapModule
     }
 
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *moduleInfo);
+    if (abilityStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
+        return false;
+    }
     auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
     std::weak_ptr<OHOSApplication> weak = application;
     abilityStage->Init(stageContext, weak);
@@ -866,7 +876,7 @@ void OHOSApplication::ScheduleNewProcessRequest(const AAFwk::Want &want, const s
     }
 }
 
-std::shared_ptr<Configuration> OHOSApplication::GetConfiguration()
+std::shared_ptr<Configuration> OHOSApplication::GetConfiguration() const
 {
     return configuration_;
 }

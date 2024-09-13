@@ -284,7 +284,7 @@ public:
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
 
-    virtual std::shared_ptr<Configuration> GetConfiguration();
+    virtual std::shared_ptr<Configuration> GetConfiguration() const;
 
     void GetExtensionNameByType(int32_t type, std::string &name)
     {
