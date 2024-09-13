@@ -103,11 +103,20 @@ static std::string ErrorMessageReturn(int32_t code)
         case OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET:
             return std::string("The operation device must be the device where the "
                 "application to be continued is currently located or the target device.");
+        case ERR_CONTINUE_ALREADY_IN_PROGRESS:
         case CONTINUE_ALREADY_IN_PROGRESS:
             return std::string("the local continuation task is already in progress.");
         case MISSION_FOR_CONTINUING_IS_NOT_ALIVE:
             return std::string("the mission for continuing is not alive, "
                 "try again after restart this mission.");
+        case ERR_GET_MISSION_INFO_OF_BUNDLE_NAME:
+            return std::string("Failed to get the missionInfo of the specified bundle name.");
+        case ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE:
+            return std::string("bind error due to the remote device hotspot enable, try again after disable "
+                "the remote device hotspot.");
+        case ERR_BIND_REMOTE_IN_BUSY_LINK:
+            return std::string("the remote device has been linked with other devices, try again when "
+                "the remote device is idle.");
         case NOT_SYSTEM_APP:
             return std::string("The app is not system-app.");
         default:
