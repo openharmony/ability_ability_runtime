@@ -696,7 +696,7 @@ public:
      * @param token the unique identification to the ability.
      */
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
-
+  
     /**
      * Whether the current application process is the last surviving process.
      *

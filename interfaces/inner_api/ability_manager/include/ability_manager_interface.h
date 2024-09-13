@@ -454,7 +454,7 @@ public:
      */
     virtual int TerminateAbility(
         const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant = nullptr) = 0;
-
+    
     /**
      * BackToCallerAbilityWithResult, return to the caller ability.
      *
