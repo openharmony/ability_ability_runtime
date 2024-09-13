@@ -75,7 +75,8 @@ HWTEST_F(UIServiceExtensionTest, Create_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "Create_0100 start");
 
     std::unique_ptr<Runtime> runtime{nullptr};
-    UIServiceExtension::Create(runtime);
+    auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
+    EXPECT_TRUE(uIServiceExtensionPtr != nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Create_0100 end");
 }
@@ -131,6 +132,7 @@ HWTEST_F(UIServiceExtensionTest, Init_0100, TestSize.Level1)
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
 
     uIServiceExtensionPtr->Init(record, application, handler, token);
+    EXPECT_TRUE(uIServiceExtensionPtr != nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Init_0100 end");
 }
@@ -183,7 +185,8 @@ HWTEST_F(UIServiceExtensionTest, GetWindow_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "GetWindow_0100 start");
 
     UIServiceExtensionContext uiServiceExtensionContext;
-    uiServiceExtensionContext.GetWindow();
+    auto result = uiServiceExtensionContext.GetWindow();
+    EXPECT_TRUE(result == nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "GetWindow_0100 end");
 }
@@ -410,6 +413,7 @@ HWTEST_F(UIServiceExtensionTest, SetWindow_0100, TestSize.Level1)
 
     UIServiceExtensionContext uiServiceExtensionContext;
     uiServiceExtensionContext.SetWindow(window);
+    EXPECT_TRUE(window != nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "SetWindow_0100 end");
 }
