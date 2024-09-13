@@ -54,7 +54,7 @@ bool ApplicationImpl::PerformAppReady()
         return false;
     }
     application_->CleanUselessTempData();
-    if (curState_ == APP_STATE_CREATE && application_ != nullptr) {
+    if (curState_ == APP_STATE_CREATE) {
         application_->OnStart();
         curState_ = APP_STATE_READY;
         return true;
