@@ -125,12 +125,9 @@ constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_
 // UIExtension type
 constexpr const char* UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
-constexpr const char* SYSTEM_SHARE = "share";
-constexpr const char* SYSTEM_SHARE_TYPE = "sysPicker/share";
 // Share picker params
 constexpr char SHARE_PICKER_DIALOG_BUNDLE_NAME_KEY[] = "const.system.sharePicker.bundleName";
 constexpr char SHARE_PICKER_DIALOG_ABILITY_NAME_KEY[] = "const.system.sharePicker.abilityName";
-constexpr char SHARE_PICKER_UIEXTENSION_NAME_KEY[] = "const.system.sharePicker.UIExtensionAbilityName";
 constexpr char SHARE_PICKER_DIALOG_DEFAULY_BUNDLE_NAME[] = "com.ohos.sharepickerdialog";
 constexpr char SHARE_PICKER_DIALOG_DEFAULY_ABILITY_NAME[] = "PickerDialog";
 constexpr char TOKEN_KEY[] = "ohos.ability.params.token";
@@ -150,8 +147,8 @@ constexpr const char* DMS_PERSISTENT_ID = "ohos.dms.persistentId";
 
 constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* NATIVE_DEBUG = "nativeDebug";
-constexpr const char* AUTO_FILL_PASSWORD_TPYE = "autoFill/password";
-constexpr const char* AUTO_FILL_SMART_TPYE = "autoFill/smart";
+constexpr const char* AUTO_FILL_PASSWORD_TYPE = "autoFill/password";
+constexpr const char* AUTO_FILL_SMART_TYPE = "autoFill/smart";
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
@@ -2911,9 +2908,9 @@ void AbilityManagerService::SetAutoFillElementName(const sptr<SessionInfo> &exte
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER_IS_NULLPTR(extensionSessionInfo);
     std::vector<std::string> argList;
-    if (extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY) == AUTO_FILL_PASSWORD_TPYE) {
+    if (extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY) == AUTO_FILL_PASSWORD_TYPE) {
         SplitStr(KEY_AUTO_FILL_ABILITY, "/", argList);
-    } else if (extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY) == AUTO_FILL_SMART_TPYE) {
+    } else if (extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY) == AUTO_FILL_SMART_TYPE) {
         SplitStr(KEY_SMART_AUTO_FILL_ABILITY, "/", argList);
     } else {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "not autofill");
@@ -2999,6 +2996,8 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         int32_t result = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(
             extensionSessionInfo->want, AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY);
         if (result != ERR_OK) {
+            eventInfo.errCode = ERR_INVALID_VALUE;
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
             return result;
         }
     }
@@ -6172,11 +6171,9 @@ int32_t AbilityManagerService::InitialAbilityRequest(AbilityRequest &request,
     request.appInfo = request.abilityInfo.applicationInfo;
     request.uid = request.appInfo.uid;
     TAG_LOGD(AAFwkTag::ABILITYMGR,
-        "GenerateExtensionAbilityRequest end, app name: %{public}s, bundle name: %{public}s, uid: %{public}d.",
-        request.appInfo.name.c_str(), request.appInfo.bundleName.c_str(), request.uid);
+        "GenerateExtensionAbilityRequest end, app name:%{public}s, bundle name:%{public}s, uid:%{public}d, moduleName:%{public}s",
+        request.appInfo.name.c_str(), request.appInfo.bundleName.c_str(), request.uid, request.abilityInfo.moduleName.c_str());
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR,
-        "GenerateExtensionAbilityRequest, moduleName: %{public}s.", request.abilityInfo.moduleName.c_str());
     request.want.SetModuleName(request.abilityInfo.moduleName);
 
     return ERR_OK;
@@ -9416,9 +9413,8 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
         return ERR_OK;
     }
 
-    const std::string fileAccessPermission = "ohos.permission.FILE_ACCESS_MANAGER";
     if (extensionType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION &&
-        AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(fileAccessPermission)) {
+        AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Temporary, FILEACCESS_EXTENSION use serviceExtension start-up rule.");
         return CheckCallServiceExtensionPermission(abilityRequest);
     }

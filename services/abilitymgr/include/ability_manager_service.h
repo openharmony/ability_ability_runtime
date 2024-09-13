@@ -85,7 +85,6 @@ constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t INVALID_USER_ID = -1;
 constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 using OHOS::AppExecFwk::IAbilityController;
-class PendingWantManager;
 struct StartAbilityInfo;
 class WindowFocusChangedListener;
 
@@ -2287,7 +2286,6 @@ private:
         const Want& want, uint32_t specifyTokenId);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
-    constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
