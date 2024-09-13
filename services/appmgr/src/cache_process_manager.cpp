@@ -291,7 +291,7 @@ bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRun
         return true;
     } else {
         appRecord->SetSupportedProcessCache(false);
-        return false;        
+        return false;
     }
 }
 
