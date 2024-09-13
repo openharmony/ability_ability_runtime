@@ -190,7 +190,7 @@ void UIAbility::OnStop()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 #ifdef SUPPORT_GRAPHICS
-    if (abilityRecovery_ == nullptr) {
+    if (abilityRecovery_ != nullptr) {
         abilityRecovery_->ScheduleSaveAbilityState(AppExecFwk::StateReason::LIFECYCLE);
     }
     TAG_LOGI(AAFwkTag::UIABILITY, "UnregisterDisplayInfoChangedListener");
