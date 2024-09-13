@@ -48,6 +48,7 @@ constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
 constexpr int32_t ERROR_CODE_ONE = 1;
+constexpr double FOUNT_SIZE = 0.0;
 const char* MD_NAME = "JsApplicationContextUtils";
 }  // namespace
 
@@ -682,6 +683,44 @@ napi_value JsApplicationContextUtils::OnSetLanguage(napi_env env, NapiCallbackIn
         return CreateJsUndefined(env);
     }
     applicationContext->SetLanguage(language);
+    return CreateJsUndefined(env);
+}
+
+napi_value JsApplicationContextUtils::SetFontSizeScale(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnSetFontSizeScale, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnSetFontSizeScale(napi_env env, NapiCallbackInfo& info)
+{
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
+        return CreateJsUndefined(env);
+    }
+
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext released");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    double fontSizeScale = 1;
+    if (!ConvertFromJsNumber(env, info.argv[INDEX_ZERO], fontSizeScale)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse fontSizeScale failed");
+        ThrowInvalidParamError(env, "Parse fontSizeScale failed, fontSizeScale must be number.");
+        return CreateJsUndefined(env);
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "fontSizeScale: %{public}f", fontSizeScale);
+    if (fontSizeScale < FOUNT_SIZE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid size");
+        ThrowInvalidParamError(env, "Invalid font size.");
+        return CreateJsUndefined(env);
+    }
+
+    applicationContext->SetFontSizeScale(fontSizeScale);
     return CreateJsUndefined(env);
 }
 
@@ -1561,6 +1600,8 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
     BindNativeFunction(env, object, "restartApp", MD_NAME, JsApplicationContextUtils::RestartApp);
     BindNativeFunction(env, object, "setSupportedProcessCache", MD_NAME,
         JsApplicationContextUtils::SetSupportedProcessCacheSelf);
+    BindNativeFunction(env, object, "setFontSizeScale", MD_NAME,
+        JsApplicationContextUtils::SetFontSizeScale);
 }
 
 JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(

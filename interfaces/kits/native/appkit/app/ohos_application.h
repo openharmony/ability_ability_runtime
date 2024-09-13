@@ -322,7 +322,7 @@ public:
 private:
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
-    bool isUpdateFontSize(Configuration &config);
+    bool isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level);
     bool IsUpdateLanguageNeeded(Configuration &config, AbilityRuntime::SetLevel level);
     const std::function<void()> CreateAutoStartupCallback(
         const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
