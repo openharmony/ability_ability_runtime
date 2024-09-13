@@ -49,6 +49,21 @@ public:
     void DispatchOnAbilityForeground(const int64_t &ability);
     void DispatchOnAbilityBackground(const int64_t &ability);
     void DispatchOnAbilityContinue(const int64_t &ability);
+    // optional callbacks
+    void DispatchOnAbilityWillCreate(const int64_t &ability);
+    void DispatchOnWindowStageWillCreate(const int64_t &ability, WindowStagePtr windowStage);
+    void DispatchOnWindowStageWillDestroy(const int64_t &ability, WindowStagePtr windowStage);
+    void DispatchOnAbilityWillDestroy(const int64_t &ability);
+    void DispatchOnAbilityWillForeground(const int64_t &ability);
+    void DispatchOnAbilityWillBackground(const int64_t &ability);
+    void DispatchOnNewWant(const int64_t &ability);
+    void DispatchOnWillNewWant(const int64_t &ability);
+    void DispatchOnAbilityWillContinue(const int64_t &ability);
+    void DispatchOnWindowStageWillRestore(const int64_t &ability, WindowStagePtr windowStage);
+    void DispatchOnWindowStageRestore(const int64_t &ability, WindowStagePtr windowStage);
+    void DispatchOnAbilityWillSaveState(const int64_t &ability);
+    void DispatchOnAbilitySaveState(const int64_t &ability);
+
     int32_t OnOnEnvironment(void (*cfgCallback)(AbilityRuntime::CConfiguration),
         void (*memCallback)(int32_t), bool isSync, int32_t *errCode);
     int32_t OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync, int32_t *errCode);
@@ -73,10 +88,10 @@ struct CApplicationInfo {
 
 CJ_EXPORT int64_t FFIGetArea(int64_t id);
 CJ_EXPORT CApplicationInfo* FFICJApplicationInfo(int64_t id);
-CJ_EXPORT int32_t FFICJApplicationContextOnOnEnvironment(int64_t id, void (*cfgCallback)(CConfiguration),
+CJ_EXPORT int32_t FfiCJApplicationContextOnOnEnvironment(int64_t id, void (*cfgCallback)(CConfiguration),
     void (*memCallback)(int32_t), int32_t *errCode);
-CJ_EXPORT int32_t FFICJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds, int32_t *errCode);
-CJ_EXPORT void FFICJApplicationContextOnOff(int64_t id, const char* type, int32_t callbackId, int32_t *errCode);
+CJ_EXPORT int32_t FfiCJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds, int32_t *errCode);
+CJ_EXPORT void FfiCJApplicationContextOnOff(int64_t id, const char* type, int32_t callbackId, int32_t *errCode);
 };
 }
 }

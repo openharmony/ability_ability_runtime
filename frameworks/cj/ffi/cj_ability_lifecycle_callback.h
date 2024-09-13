@@ -38,6 +38,21 @@ public:
     void OnAbilityForeground(const int64_t &ability);
     void OnAbilityBackground(const int64_t &ability);
     void OnAbilityContinue(const int64_t &ability);
+    // optional callbacks
+    void OnAbilityWillCreate(const int64_t &ability);
+    void OnWindowStageWillCreate(const int64_t &ability, WindowStagePtr windowStage);
+    void OnWindowStageWillDestroy(const int64_t &ability, WindowStagePtr windowStage);
+    void OnAbilityWillDestroy(const int64_t &ability);
+    void OnAbilityWillForeground(const int64_t &ability);
+    void OnAbilityWillBackground(const int64_t &ability);
+    void OnNewWant(const int64_t &ability);
+    void OnWillNewWant(const int64_t &ability);
+    void OnAbilityWillContinue(const int64_t &ability);
+    void OnWindowStageWillRestore(const int64_t &ability, WindowStagePtr windowStage);
+    void OnWindowStageRestore(const int64_t &ability, WindowStagePtr windowStage);
+    void OnAbilityWillSaveState(const int64_t &ability);
+    void OnAbilitySaveState(const int64_t &ability);
+
     int32_t Register(CArrI64 cFuncIds, bool isSync = false);
     bool UnRegister(int32_t callbackId, bool isSync = false);
     bool IsEmpty() const;
@@ -53,6 +68,20 @@ private:
     std::map<int32_t, std::function<void(int64_t)>> onAbilityForegroundcallbacks_;
     std::map<int32_t, std::function<void(int64_t)>> onAbilityBackgroundcallbacks_;
     std::map<int32_t, std::function<void(int64_t)>> onAbilityContinuecallbacks_;
+    // optional callbacks
+    std::map<int32_t, std::function<void(int64_t)>> onAbilityWillCreatecallbacks_;
+    std::map<int32_t, std::function<void(int64_t, WindowStagePtr)>> onWindowStageWillCreatecallbacks_;
+    std::map<int32_t, std::function<void(int64_t, WindowStagePtr)>> onWindowStageWillDestroycallbacks_;
+    std::map<int32_t, std::function<void(int64_t)>> onAbilityWillForegroundcallbacks_;
+    std::map<int32_t, std::function<void(int64_t)>> onAbilityWillDestroycallbacks_;
+    std::map<int32_t, std::function<void(int64_t)>> onAbilityWillBackgroundcallbacks_;
+    std::map<int32_t, std::function<void(int64_t)>> onWillNewWantcallbacks_;
+    std::map<int32_t, std::function<void(int64_t)>> onNewWantcallbacks_;
+    std::map<int32_t, std::function<void(int64_t)>> onAbilityWillContinuecallbacks_;
+    std::map<int32_t, std::function<void(int64_t, WindowStagePtr)>> onWindowStageWillRestorecallbacks_;
+    std::map<int32_t, std::function<void(int64_t, WindowStagePtr)>> onWindowStageRestorecallbacks_;
+    std::map<int32_t, std::function<void(int64_t)>> onAbilityWillSaveStatecallbacks_;
+    std::map<int32_t, std::function<void(int64_t)>> onAbilitySaveStatecallbacks_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
