@@ -258,6 +258,7 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
 
 bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    auto appInfo = appRecord->GetApplicationInfo();
     auto actualVer = appInfo->apiTargetVersion % API_VERSION_MOD;
     if (shouldCheckApi && actualVer < API12) {
         TAG_LOGD(AAFwkTag::APPMGR, "App %{public}s 's apiTargetVersion has %{public}d, smaller than 12",
@@ -273,7 +274,7 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
 
 bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType)) {
+    if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
         return true;
     }
     auto supportState = appRecord->GetSupportProcessCacheState();
@@ -284,7 +285,7 @@ bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRun
         return false;
     }
     bool forceKillProcess =
-        ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
+        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
     if (!forceKillProcess) {
         appRecord->SetSupportedProcessCache(true);
         return true;
@@ -318,7 +319,7 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
         TAG_LOGD(AAFwkTag::APPMGR, "Child App, not support.");
         return false;
     }
-    if (maxProcCacheNum_ > 0 && !IsAppSupportHotStart()) {
+    if (maxProcCacheNum_ > 0 && !IsProcessSupportHotStart(appRecord)) {
         return false;
     }
     if (warmStartProcesEnable_ && !IsProcessSupportWarmStart(appRecord)) {
