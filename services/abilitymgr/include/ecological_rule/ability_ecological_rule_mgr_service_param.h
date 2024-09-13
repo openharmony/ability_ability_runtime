@@ -79,6 +79,7 @@ struct AbilityCallerInfo : public Parcelable {
     AppExecFwk::AbilityType targetAbilityType = AppExecFwk::AbilityType::UNKNOWN;
     AppExecFwk::ExtensionAbilityType targetExtensionAbilityType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     int32_t userId = 0;
+    int32_t targetApplicationReservedFlag = 0;
 
     bool ReadFromParcel(Parcel &parcel);
 
