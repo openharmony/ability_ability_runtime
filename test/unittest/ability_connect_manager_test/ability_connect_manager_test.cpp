@@ -1531,8 +1531,8 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_OnAppStateChanged_001, TestS
     std::string name = "name";
     int32_t uid = 0;
     info.processName = bundleName;
-    abilityRecord->applicationInfo_.bundleName = bundleName;
-    abilityRecord->applicationInfo_.name = name;
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = bundleName;
+    abilityRecord->abilityInfo_.applicationInfo.name = name;
     abilityRecord->abilityInfo_.uid = uid;
     info.appData.push_back({name, uid});
     connectManager->serviceMap_.emplace("first", abilityRecord);
@@ -1557,8 +1557,8 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_OnAppStateChanged_002, TestS
     std::string name = "name";
     int32_t uid = 0;
     info.processName = "";
-    abilityRecord->applicationInfo_.bundleName = bundleName;
-    abilityRecord->applicationInfo_.name = name;
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = bundleName;
+    abilityRecord->abilityInfo_.applicationInfo.name = name;
     abilityRecord->abilityInfo_.uid = uid;
     info.appData.push_back({name, uid});
     connectManager->serviceMap_.emplace("first", abilityRecord);
