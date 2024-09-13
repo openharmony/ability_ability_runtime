@@ -43,6 +43,8 @@ config("ability_context_public_config") {
 }
 
 ohos_shared_library("ability_context_native") {
+  branch_protector_ret = "pac_ret"
+
   public_configs = [ ":ability_context_public_config" ]
 
   sources = [

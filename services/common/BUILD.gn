@@ -53,6 +53,8 @@ config("common_config") {
 
 #build so
 ohos_shared_library("perm_verification") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [ "${ability_runtime_utils_path}/server/constant" ]
 
   public_configs = [ ":common_config" ]
@@ -76,6 +78,8 @@ ohos_shared_library("perm_verification") {
 }
 
 ohos_shared_library("event_report") {
+  branch_protector_ret = "pac_ret"
+
   public_configs = [ ":common_config" ]
 
   sources = [ "src/event_report.cpp" ]
@@ -92,6 +96,8 @@ ohos_shared_library("event_report") {
 }
 
 ohos_shared_library("task_handler_wrap") {
+  branch_protector_ret = "pac_ret"
+
   public_configs = [ ":common_config" ]
   include_dirs = [ "include" ]
 
@@ -112,6 +118,8 @@ ohos_shared_library("task_handler_wrap") {
 }
 
 ohos_shared_library("app_util") {
+  branch_protector_ret = "pac_ret"
+
   public_configs = [ ":common_config" ]
   include_dirs = [ "include" ]
 
