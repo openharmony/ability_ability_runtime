@@ -246,8 +246,7 @@ sptr<AbilityManagerService> AbilityManagerService::instance_;
 
 AbilityManagerService::AbilityManagerService()
     : SystemAbility(ABILITY_MGR_SERVICE_ID, true),
-      state_(ServiceRunningState::STATE_NOT_START),
-      bundleMgrHelper_(nullptr)
+      state_(ServiceRunningState::STATE_NOT_START)
 {}
 
 AbilityManagerService::~AbilityManagerService()
@@ -432,7 +431,7 @@ void AbilityManagerService::OnStop()
     }
 #endif
     if (abilityBundleEventCallback_) {
-        auto bms = GetBundleManager();
+        auto bms = AbilityUtil::GetBundleManagerHelper();
         if (bms) {
             bool ret = IN_PROCESS_CALL(bms->UnregisterBundleEventCallback(abilityBundleEventCallback_));
             if (ret != ERR_OK) {
@@ -2254,7 +2253,7 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
         return;
     }
 
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER(bms);
     auto userId = uid / BASE_USER_RANGE;
     if (userId != U0_USER_ID && userId != GetUserId()) {
@@ -2499,7 +2498,7 @@ void AbilityManagerService::SubscribeBundleEventCallback()
     // Register abilityBundleEventCallback to receive hap updates
     abilityBundleEventCallback_ =
         new (std::nothrow) AbilityBundleEventCallback(taskHandler_, abilityAutoStartupService_);
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     if (bms) {
         bool ret = IN_PROCESS_CALL(bms->RegisterBundleEventCallback(abilityBundleEventCallback_));
         if (!ret) {
@@ -2884,7 +2883,7 @@ void AbilityManagerService::SetPickerElementName(const sptr<SessionInfo> &extens
             return;
         }
         pickerType = it->second;
-        auto bms = GetBundleManager();
+        auto bms = AbilityUtil::GetBundleManagerHelper();
         CHECK_POINTER(bms);
         int32_t validUserId = GetValidUserId(userId);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "targetType: %{public}s, pickerType: %{public}s, userId: %{public}d",
@@ -2960,7 +2959,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
             TAG_LOGE(AAFwkTag::ABILITYMGR, "only support embedded pull-ups");
             return ERR_INVALID_VALUE;
         }
-        auto bms = GetBundleManager();
+        auto bms = AbilityUtil::GetBundleManagerHelper();
         CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
         AppExecFwk::BundleInfo bundleInfo;
         if (!IN_PROCESS_CALL(bms->GetBundleInfo(extensionSessionInfo->want.GetBundle(),
@@ -3856,7 +3855,7 @@ int AbilityManagerService::ConnectAbilityCommon(
         TAG_LOGD(AAFwkTag::ABILITYMGR,
             "%{public}s called. uri:%{public}s, userId %{public}d", __func__, uri.c_str(), validUserId);
         AppExecFwk::ExtensionAbilityInfo extensionInfo;
-        auto bms = GetBundleManager();
+        auto bms = AbilityUtil::GetBundleManagerHelper();
         CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
 
         bool queryResult = IN_PROCESS_CALL(bms->QueryExtensionAbilityInfoByUri(uri, validUserId, extensionInfo));
@@ -3951,7 +3950,7 @@ int AbilityManagerService::ConnectUIExtensionAbility(const Want &want, const spt
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "%{public}s called. uri:%{public}s, userId %{public}d", __func__, uri.c_str(), validUserId);
         AppExecFwk::ExtensionAbilityInfo extensionInfo;
-        auto bms = GetBundleManager();
+        auto bms = AbilityUtil::GetBundleManagerHelper();
         CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
 
         bool queryResult = IN_PROCESS_CALL(bms->QueryExtensionAbilityInfoByUri(uri, validUserId, extensionInfo));
@@ -4479,7 +4478,7 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
     auto pendingWantManager = GetCurrentPendingWantManager();
     CHECK_POINTER_AND_RETURN(pendingWantManager, nullptr);
 
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, nullptr);
 
     int32_t callerUid = IPCSkeleton::GetCallingUid();
@@ -4549,7 +4548,7 @@ void AbilityManagerService::CancelWantSender(const sptr<IWantSender> &sender)
         return;
     }
 
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER(bms);
 
     int32_t callerUid = IPCSkeleton::GetCallingUid();
@@ -5003,7 +5002,7 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityManagerService::GetConnectRe
 bool AbilityManagerService::GenerateDataAbilityRequestByUri(const std::string& dataAbilityUri,
     AbilityRequest &abilityRequest, sptr<IRemoteObject> callerToken, int32_t userId)
 {
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, false);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called userId %{public}d", userId);
     bool queryResult = IN_PROCESS_CALL(bms->QueryAbilityInfoByUri(dataAbilityUri, userId, abilityRequest.abilityInfo));
@@ -6005,7 +6004,7 @@ int32_t AbilityManagerService::GetUserId() const
 void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER(bms);
 
     /* Query the highest priority ability or extension ability, and start it. usually, it is OOBE or launcher */
@@ -6306,7 +6305,7 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, const bool
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s, clearPageStack: %{public}d",
         bundleName.c_str(), clearPageStack);
     CHECK_CALLER_IS_SYSTEM_APP;
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
     int32_t userId = GetUserId();
     AppExecFwk::BundleInfo bundleInfo;
@@ -6381,14 +6380,6 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
     return ERR_OK;
 }
 
-std::shared_ptr<AppExecFwk::BundleMgrHelper> AbilityManagerService::GetBundleManager()
-{
-    if (bundleMgrHelper_ == nullptr) {
-        bundleMgrHelper_ = AbilityUtil::GetBundleManagerHelper();
-    }
-    return bundleMgrHelper_;
-}
-
 int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId)
 {
     if (bundleName.empty()) {
@@ -6422,7 +6413,7 @@ void AbilityManagerService::PreLoadAppDataAbilitiesTask(const std::string &bundl
         return;
     }
 
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER(bms);
 
     AppExecFwk::BundleInfo bundleInfo;
@@ -6775,7 +6766,7 @@ void AbilityManagerService::StartResidentApps(int32_t userId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartResidentApps %{public}d", userId);
     ConnectBmsService();
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_IS_NULLPTR(bms);
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     if (!IN_PROCESS_CALL(
@@ -7563,11 +7554,8 @@ void AbilityManagerService::ScheduleClearRecoveryPageStack()
 {
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     std::string bundleName;
-    auto bms = GetBundleManager();
-    if (bms == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduleClearRecoveryPageStack get bms failed");
-        return;
-    }
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_IS_NULLPTR(bms);
 
     if (IN_PROCESS_CALL(bms->GetNameForUid(callerUid, bundleName)) != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduleClearRecoveryPageStack get bundleName failed");
@@ -7721,39 +7709,36 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "appRecovery bundleName not match, not recovery ability");
                 ReportAppRecoverResult(record->GetUid(), appInfo, abilityInfo.name, "FAIL_BUNDLE_NAME_NOT_MATCH");
                 return;
-            } else if (want->GetElement().GetAbilityName().empty()) {
+            }
+            if (want->GetElement().GetAbilityName().empty()) {
                 TAG_LOGD(AAFwkTag::ABILITYMGR, "AppRecovery recovery target ability is empty");
                 ReportAppRecoverResult(record->GetUid(), appInfo, abilityInfo.name, "FAIL_TARGET_ABILITY_EMPTY");
                 return;
-            } else {
-                auto bms = GetBundleManager();
-                if (bms == nullptr) {
-                    TAG_LOGE(AAFwkTag::ABILITYMGR, "bms null");
-                    return;
+            }
+            auto bms = AbilityUtil::GetBundleManagerHelper();
+            CHECK_POINTER_IS_NULLPTR(bms);
+            AppExecFwk::BundleInfo bundleInfo;
+            auto bundleName = want->GetElement().GetBundleName();
+            int32_t userId = GetUserId();
+            bool ret = IN_PROCESS_CALL(
+                bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo,
+                userId));
+            if (!ret) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "appRecovery get bundleInfo fail, not recovery");
+                return;
+            }
+            bool isRestartPage = false;
+            auto abilityName = want->GetElement().GetAbilityName();
+            for (auto it = bundleInfo.abilityInfos.begin(); it != bundleInfo.abilityInfos.end(); ++it) {
+                if ((abilityName.compare(it->name) == 0) && it->type == AppExecFwk::AbilityType::PAGE) {
+                    isRestartPage = true;
+                    break;
                 }
-                AppExecFwk::BundleInfo bundleInfo;
-                auto bundleName = want->GetElement().GetBundleName();
-                int32_t userId = GetUserId();
-                bool ret = IN_PROCESS_CALL(
-                    bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo,
-                    userId));
-                if (!ret) {
-                    TAG_LOGE(AAFwkTag::ABILITYMGR, "appRecovery get bundleInfo fail, not recovery");
-                    return;
-                }
-                bool isRestartPage = false;
-                auto abilityName = want->GetElement().GetAbilityName();
-                for (auto it = bundleInfo.abilityInfos.begin(); it != bundleInfo.abilityInfos.end(); ++it) {
-                    if ((abilityName.compare(it->name) == 0) && it->type == AppExecFwk::AbilityType::PAGE) {
-                        isRestartPage = true;
-                        break;
-                    }
-                }
-                if (!isRestartPage) {
-                    TAG_LOGI(AAFwkTag::ABILITYMGR, "appRecovery target ability type not PAGE");
-                    ReportAppRecoverResult(record->GetUid(), appInfo, abilityName, "FAIL_TARGET_ABILITY_NOT_PAGE");
-                    return;
-                }
+            }
+            if (!isRestartPage) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "appRecovery target ability type not PAGE");
+                ReportAppRecoverResult(record->GetUid(), appInfo, abilityName, "FAIL_TARGET_ABILITY_NOT_PAGE");
+                return;
             }
         }
 
@@ -8046,7 +8031,7 @@ int AbilityManagerService::StartUserTest(const Want &want, const sptr<IRemoteObj
         return ERR_INVALID_VALUE;
     }
 
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, START_USER_TEST_FAIL);
     AppExecFwk::BundleInfo bundleInfo;
     if (!IN_PROCESS_CALL(
@@ -8245,7 +8230,7 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!abilityRecord) {
         std::string bundleName;
-        auto bundleMgr = GetBundleManager();
+        auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
         if (bundleMgr != nullptr) {
             IN_PROCESS_CALL(bundleMgr->GetNameForUid(callerUid, bundleName));
         }
@@ -8276,7 +8261,7 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
 
 void AbilityManagerService::UpdateSignatureInfo(std::string bundleName, Want& want)
 {
-    auto bundleMgr = GetBundleManager();
+    auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgr != nullptr) {
         AppExecFwk::SignatureInfo signatureInfo;
         IN_PROCESS_CALL(bundleMgr->GetSignatureInfoByBundleName(bundleName, signatureInfo));
@@ -10023,7 +10008,7 @@ int AbilityManagerService::VerifyPermission(const std::string &permission, int p
         return CHECK_PERMISSION_FAILED;
     }
 
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
 
     std::string bundleName;
@@ -10101,7 +10086,7 @@ int32_t AbilityManagerService::NotifySaveAsResult(const Want &want, int resultCo
     CHECK_CALLER_IS_SYSTEM_APP;
 #ifdef WITH_DLP
     //caller check
-    if (!DlpUtils::CheckCallerIsDlpManager(GetBundleManager())) {
+    if (!DlpUtils::CheckCallerIsDlpManager(AbilityUtil::GetBundleManagerHelper())) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "caller check failed");
         return CHECK_PERMISSION_FAILED;
     }
@@ -10944,11 +10929,8 @@ int32_t AbilityManagerService::CheckDebugAssertPermission()
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
-    auto bundleMgr = GetBundleManager();
-    if (bundleMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundle manager instance null");
-        return ERR_INVALID_VALUE;
-    }
+    auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bundleMgr, ERR_INVALID_VALUE);
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
     AppExecFwk::BundleInfo bundleInfo;
     auto ret = bundleMgr->GetBundleInfoForSelf(flags, bundleInfo);
@@ -11102,7 +11084,7 @@ int32_t AbilityManagerService::UpdateSessionInfoBySCB(std::list<SessionInfo> &se
 bool AbilityManagerService::CheckSenderWantInfo(int32_t callerUid, const WantSenderInfo &wantSenderInfo)
 {
     if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
-        auto bms = GetBundleManager();
+        auto bms = AbilityUtil::GetBundleManagerHelper();
         CHECK_POINTER_AND_RETURN(bms, false);
 
         std::string bundleName;
@@ -11276,7 +11258,7 @@ int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want)
         return AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY;
     }
 
-    auto bms = GetBundleManager();
+    auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
     auto abilityInfoFlag = AbilityRuntime::StartupUtil::BuildAbilityInfoFlag();
     auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
