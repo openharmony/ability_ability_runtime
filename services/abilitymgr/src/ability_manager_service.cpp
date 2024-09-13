@@ -12041,24 +12041,28 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
     if (!forceKillProcess) {
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->SetProcessCacheStatus(
             abilityRecord->GetPid(), true));
-        std::vector<sptr<IRemoteObject>> tokens;
-        IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->GetAbilityRecordsByProcessID(
-            abilityRecord->GetPid(), tokens));
-        auto connectManager = GetCurrentConnectManager();
-        if (connectManager) {
-            for (const auto& token : tokens) {
-                auto abilityRecord = Token::GetAbilityRecordByToken(token);
-                if (abilityRecord &&
-                    abilityRecord->GetAbilityInfo.extensionAbilityType ==
-                    AppExecFwk::ExtensionAbilityType::SERVICE) {
-                    connectManager->TerminateAbility(token);
-                }
-            }
-        }
     }
     int32_t errCode = uiAbilityManager->CleanUIAbility(abilityRecord, forceKillProcess);
     ReportCleanSession(sessionInfo, abilityRecord, errCode);
     return errCode;
+}
+
+void AbilityManagerService::ForceTerminateSerivceExtensionByPid(int32_t pid)
+{
+    std::vector<sptr<IRemoteObject>> tokens;
+    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->GetAbilityRecordsByProcessID(
+        pid, tokens));
+    auto connectManager = GetCurrentConnectManager();
+    if (connectManager) {
+        for (const auto& token : tokens) {
+            auto abilityRecord = Token::GetAbilityRecordByToken(token);
+            if (abilityRecord &&
+                abilityRecord->GetAbilityInfo.extensionAbilityType ==
+                AppExecFwk::ExtensionAbilityType::SERVICE) {
+                connectManager->TerminateAbility(token);
+            }
+        }
+    }
 }
 
 void AbilityManagerService::ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
