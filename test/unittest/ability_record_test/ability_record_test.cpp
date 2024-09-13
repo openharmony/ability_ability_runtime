@@ -809,7 +809,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_LoadAbility_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->applicationInfo_.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
     abilityRecord->isLauncherRoot_ = true;
     abilityRecord->isRestarting_ = true;
     abilityRecord->isLauncherAbility_ = true;
@@ -831,7 +831,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_LoadAbility_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     std::shared_ptr<CallerRecord> caller = std::make_shared<CallerRecord>(0, abilityRecord);
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->applicationInfo_.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
     abilityRecord->isLauncherRoot_ = true;
     abilityRecord->isRestarting_ = true;
     abilityRecord->isLauncherAbility_ = false;
@@ -853,7 +853,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_LoadAbility_003, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     std::shared_ptr<CallerRecord> caller = std::make_shared<CallerRecord>(0, nullptr);
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->applicationInfo_.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
     abilityRecord->isLauncherRoot_ = true;
     abilityRecord->isRestarting_ = true;
     abilityRecord->isLauncherAbility_ = true;
@@ -875,7 +875,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_LoadAbility_004, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->applicationInfo_.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
     abilityRecord->isLauncherRoot_ = false;
     abilityRecord->callerList_.push_back(nullptr);
     int res = abilityRecord->LoadAbility();
@@ -1011,7 +1011,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_003, TestSi
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_GetLabel_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    abilityRecord->applicationInfo_.label = "label";
+    abilityRecord->abilityInfo_.applicationInfo.label = "label";
     abilityRecord->abilityInfo_.resourcePath = "resource";
     std::string res = abilityRecord->GetLabel();
     EXPECT_EQ(res, "label");
@@ -2610,11 +2610,11 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ReportAtomicServiceDrawnCompleteEvent_
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     ASSERT_NE(abilityRecord, nullptr);
 
-    abilityRecord->applicationInfo_.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    abilityRecord->abilityInfo_.applicationInfo.bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
     auto ret = abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
     EXPECT_EQ(ret, true);
 
-    abilityRecord->applicationInfo_.bundleType = AppExecFwk::BundleType::APP;
+    abilityRecord->abilityInfo_.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
     ret = abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
     EXPECT_EQ(ret, false);
 }
@@ -2644,13 +2644,13 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_LoadAbility_005, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     abilityRecord->abilityInfo_.type = AbilityType::UNKNOWN;
-    abilityRecord->applicationInfo_.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
     abilityRecord->isLauncherRoot_ = true;
     abilityRecord->isRestarting_ = true;
     abilityRecord->isLauncherAbility_ = true;
     abilityRecord->restartCount_ = 0;
-    abilityRecord->applicationInfo_.asanEnabled = true;
-    abilityRecord->applicationInfo_.tsanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.tsanEnabled = true;
     int res = abilityRecord->LoadAbility();
     EXPECT_NE(abilityRecord_, nullptr);
     EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::UNKNOWN);
@@ -2666,9 +2666,9 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_LoadUIAbility_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->applicationInfo_.name = "app";
-    abilityRecord->applicationInfo_.asanEnabled = true;
-    abilityRecord->applicationInfo_.tsanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.tsanEnabled = true;
     abilityRecord->LoadUIAbility();
     EXPECT_NE(abilityRecord_, nullptr);
     EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
@@ -2704,7 +2704,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     uint32_t sceneFlag = 0;
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->applicationInfo_.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
     abilityRecord->isAttachDebug_ = false;
     abilityRecord->isAssertDebug_ = false;
     abilityRecord->ForegroundUIExtensionAbility(sceneFlag);
@@ -2811,7 +2811,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_Terminate_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     Closure task = []() {};
     abilityRecord->want_.SetParam(DEBUG_APP, true);
-    abilityRecord->applicationInfo_.asanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
     abilityRecord->Terminate(task);
     EXPECT_NE(abilityRecord_, nullptr);
 }
@@ -2828,11 +2828,11 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ShareData_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->applicationInfo_.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
     abilityRecord->isAttachDebug_ = false;
     abilityRecord->isAssertDebug_ = false;
     abilityRecord->want_.SetParam(DEBUG_APP, true);
-    abilityRecord->applicationInfo_.asanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
     int32_t uniqueId = 1;
     abilityRecord->ShareData(uniqueId);
     EXPECT_NE(abilityRecord_, nullptr);

@@ -526,10 +526,10 @@ HWTEST_F(MissionListTest, mission_list_get_mission_by_specified_flag_001, TestSi
     abilityRecord->Init();
     want.SetElementName("ability", "bundle");
     abilityRecord->abilityInfo_.name = "ability";
-    abilityRecord->applicationInfo_.bundleName = "bundle";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "bundle";
     abilityRecord->SetSpecifiedFlag("");
     auto mission1 = std::make_shared<Mission>(1, abilityRecord, "name");
-    abilityRecord->applicationInfo_.bundleName = "";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "";
     auto mission2 = std::make_shared<Mission>(2, abilityRecord, "name");
     abilityRecord->abilityInfo_.name = "";
     auto mission3 = std::make_shared<Mission>(3, abilityRecord, "name");

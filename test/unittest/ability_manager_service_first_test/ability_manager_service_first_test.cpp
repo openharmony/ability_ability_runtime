@@ -996,7 +996,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_002, TestSize.Leve
     want.SetElement(element);
     auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
     abilityRecord->appIndex_ = -1;
-    abilityRecord->applicationInfo_.bundleName = "com.ix.hiservcie";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, abilityRecord->GetToken(), -1, ExtensionAbilityType::SERVICE),
         CHECK_PERMISSION_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StopExtensionAbility_002 end");
@@ -1017,7 +1017,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_003, TestSize.Leve
     want.SetElement(element);
     auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
     abilityRecord->appIndex_ = -1;
-    abilityRecord->applicationInfo_.bundleName = "com.ix.hiservcie";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     MyFlag::flag_ = 1;
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, abilityRecord->GetToken(), -1, ExtensionAbilityType::SERVICE),
         RESOLVE_ABILITY_ERR);
@@ -1040,7 +1040,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_004, TestSize.Leve
     want.SetElement(element);
     auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
     abilityRecord->appIndex_ = -1;
-    abilityRecord->applicationInfo_.bundleName = "com.ix.hiservcie";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     MyFlag::flag_ = 1;
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, nullptr, -1, ExtensionAbilityType::SERVICE),
         RESOLVE_ABILITY_ERR);
@@ -1063,7 +1063,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_005, TestSize.Leve
     want.SetElement(element);
     auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
     abilityRecord->appIndex_ = -1;
-    abilityRecord->applicationInfo_.bundleName = "com.ix.hiservcie";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     MyFlag::flag_ = 1;
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, abilityRecord->GetToken(), -1, ExtensionAbilityType::SERVICE),
         RESOLVE_ABILITY_ERR);
