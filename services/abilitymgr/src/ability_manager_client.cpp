@@ -42,8 +42,8 @@ static std::unordered_map<Rosen::WSError, int32_t> SCB_TO_MISSION_ERROR_CODE_MAP
     { Rosen::WSError::WS_ERROR_INVALID_PARAM, INVALID_PARAMETERS_ERR },
 };
 }
-using OHOS::Rosen::SessionManagerLite;
 
+using OHOS::Rosen::SessionManagerLite;
 std::shared_ptr<AbilityManagerClient> AbilityManagerClient::instance_ = nullptr;
 std::once_flag AbilityManagerClient::singletonFlag_;
 #ifdef WITH_DLP
@@ -1790,15 +1790,6 @@ int32_t AbilityManagerClient::UpdateSessionInfoBySCB(std::list<SessionInfo> &ses
     return abms->UpdateSessionInfoBySCB(sessionInfos, userId, sessionIds);
 }
 
-ErrCode AbilityManagerClient::GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token,
-    UIExtensionHostInfo &hostInfo, int32_t userId)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get ui extension host info.");
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->GetUIExtensionRootHostInfo(token, hostInfo, userId);
-}
-
 ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject> token,
     UIExtensionSessionInfo &uiExtensionSessionInfo, int32_t userId)
 {
@@ -1806,6 +1797,15 @@ ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo, userId);
+}
+
+ErrCode AbilityManagerClient::GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token,
+    UIExtensionHostInfo &hostInfo, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get ui extension host info.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetUIExtensionRootHostInfo(token, hostInfo, userId);
 }
 
 int32_t AbilityManagerClient::RestartApp(const AAFwk::Want &want)

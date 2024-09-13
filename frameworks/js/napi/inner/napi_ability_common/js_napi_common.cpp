@@ -1062,7 +1062,7 @@ napi_value JsNapiCommon::CreateAppVersionInfo(napi_env env, const std::shared_pt
     return objContext;
 }
 
-bool JsNapiCommon::UnwrapVerifyPermissionParams(napi_env env, napi_callback_info info, JsPermissionOptions &options)
+bool JsNapiCommon::UnwarpVerifyPermissionParams(napi_env env, napi_callback_info info, JsPermissionOptions &options)
 {
     bool flagCall = true;
     size_t argc = ARGS_MAX_COUNT;
