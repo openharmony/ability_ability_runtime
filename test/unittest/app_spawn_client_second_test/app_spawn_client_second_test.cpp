@@ -537,7 +537,8 @@ HWTEST_F(AppSpawnClientSecondTest, SetExtMsgFds_ShouldReturnErrOk_WhenAllItemsIn
 }
 
 // Scenario2: Test when AppSpawnReqMsgAddFd returns ERR_NO_PERMISSION for some items in fds.
-HWTEST_F(AppSpawnClientSecondTest, SetExtMsgFds_ShouldReturnErrNoPermission_WhenSomeItemsInFdsReturnNoPermission, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest,
+    SetExtMsgFds_ShouldReturnErrNoPermission_WhenSomeItemsInFdsReturnNoPermission, TestSize.Level0)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnReqMsgHandle reqHandle = nullptr;
@@ -549,7 +550,8 @@ HWTEST_F(AppSpawnClientSecondTest, SetExtMsgFds_ShouldReturnErrNoPermission_When
 }
 
 // Scenario3: Test when AppSpawnReqMsgAddFd returns ERR_INVALID_ARGS for some items in fds.
-HWTEST_F(AppSpawnClientSecondTest, SetExtMsgFds_ShouldReturnErrInvalidArgs_WhenSomeItemsInFdsReturnInvalidArgs, TestSize.Level0)
+HWTEST_F(AppSpawnClientSecondTest,
+    SetExtMsgFds_ShouldReturnErrInvalidArgs_WhenSomeItemsInFdsReturnInvalidArgs, TestSize.Level0)
 {
     AppSpawnClient appSpawnClient;
     AppSpawnReqMsgHandle reqHandle = nullptr;
