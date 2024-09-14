@@ -282,7 +282,8 @@ void JsUIExtensionBase::OnStopCallBack()
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityDestroy(jsObj_);
+        std::shared_ptr<NativeReference> sharedJsObj = std::move(jsObj_);
+        applicationContext->DispatchOnAbilityDestroy(sharedJsObj);
     }
 }
 
