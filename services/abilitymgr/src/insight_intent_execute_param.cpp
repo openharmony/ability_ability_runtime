@@ -113,6 +113,9 @@ bool InsightIntentExecuteParam::RemoveInsightIntent(AAFwk::Want &want)
     if (want.HasParameter(INSIGHT_INTENT_EXECUTE_PARAM_PARAM)) {
         want.RemoveParam(INSIGHT_INTENT_EXECUTE_PARAM_PARAM);
     }
+    if (want.HasParameter(INSIGHT_INTENT_SRC_ENTRY)) {
+        want.RemoveParam(INSIGHT_INTENT_SRC_ENTRY);
+    }
     return true;
 }
 

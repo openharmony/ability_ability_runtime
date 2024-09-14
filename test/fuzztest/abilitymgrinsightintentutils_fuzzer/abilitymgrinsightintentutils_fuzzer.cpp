@@ -67,8 +67,12 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
     std::shared_ptr<AbilityRuntime::InsightIntentUtils> infos = std::make_shared<AbilityRuntime::InsightIntentUtils>();
     std::string jsonStr(data, size);
-    infos->GetSrcEntry(jsonStr, jsonStr, jsonStr);
-    
+    ElementName element("", jsonStr, jsonStr, jsonStr);
+    std::string srcEntry;
+    infos->GetSrcEntry(element, jsonStr, AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND, srcEntry);
+    infos->GetSrcEntry(element, jsonStr, AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND, srcEntry);
+    infos->GetSrcEntry(element, jsonStr, AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY, srcEntry);
+    infos->GetSrcEntry(element, jsonStr, AppExecFwk::ExecuteMode::SERVICE_EXTENSION_ABILITY, srcEntry);
     return true;
 }
 }
