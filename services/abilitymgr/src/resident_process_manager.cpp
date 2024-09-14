@@ -47,7 +47,7 @@ bool IsMainElementTypeOk(const AppExecFwk::HapModuleInfo &hapModuleInfo, const s
 }
 
 ResidentAbilityInfoGuard::ResidentAbilityInfoGuard(const std::string &bundleName,
-    std::string &abilityName, int32_t userId)
+    const std::string &abilityName, int32_t userId)
 {
     residentId_ = DelayedSingleton<ResidentProcessManager>::GetInstance()->PutResidentAbility(bundleName,
         abilityName, userId);
@@ -61,7 +61,7 @@ ResidentAbilityInfoGuard::~ResidentAbilityInfoGuard()
 }
 
 void ResidentAbilityInfoGuard::SetResidentAbilityInfo(const std::string &bundleName,
-    std::string &abilityName, int32_t userId)
+    const std::string &abilityName, int32_t userId)
 {
     if (residentId_ != -1) {
         return;
@@ -118,8 +118,11 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
             ResidentAbilityInfoGuard residentAbilityInfoGuard(hapModuleInfo.bundleName, mainElement, userId);
             TAG_LOGI(AAFwkTag::ABILITYMGR, "call, bundleName: %{public}s, mainElement: %{public}s",
                 hapModuleInfo.bundleName.c_str(), mainElement.c_str());
-            DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, userId,
+            auto ret = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, userId,
                 DEFAULT_INVAL_VALUE);
+            if (ret != ERR_OK) {
+                AddFailedResidentAbility(hapModuleInfo.bundleName, mainElement, userId);
+            }
         }
     }
 
@@ -218,7 +221,7 @@ int32_t ResidentProcessManager::SetResidentProcessEnabled(
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Set keep alive enable state.");
-        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, updateEnable));
+        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, updateEnable, 0));
     }
 
     ffrt::submit([self = shared_from_this(), bundleName, localEnable, updateEnable]() {
@@ -303,11 +306,11 @@ void ResidentProcessManager::OnAppStateChanged(const AppInfo &info)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set keep alive enable state error");
         return;
     }
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, localEnable));
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, localEnable, 0));
 }
 
 int32_t ResidentProcessManager::PutResidentAbility(const std::string &bundleName,
-    std::string &abilityName, int32_t userId)
+    const std::string &abilityName, int32_t userId)
 {
     std::lock_guard lock(residentAbilityInfoMutex_);
     auto residentId = residentId_++;
@@ -341,6 +344,72 @@ void ResidentProcessManager::RemoveResidentAbility(int32_t residentId)
             return;
         }
     }
+}
+
+bool ResidentProcessManager::GetResidentBundleInfosForUser(std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    int32_t userId)
+{
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, false);
+
+    const auto &residentWhiteList = AmsConfigurationParameter::GetInstance().GetResidentWhiteList();
+    if (userId == 0 || residentWhiteList.empty()) {
+        return IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfos(OHOS::AppExecFwk::GET_BUNDLE_DEFAULT,
+            bundleInfos, userId));
+    }
+
+    for (const auto &bundleName: residentWhiteList) {
+        AppExecFwk::BundleInfo bundleInfo;
+        if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(bundleName,
+            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId))) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "failed get bundle info: %{public}s", bundleName.c_str());
+            continue;
+        }
+        bundleInfos.push_back(bundleInfo);
+    }
+
+    return !bundleInfos.empty();
+}
+
+void ResidentProcessManager::StartFailedResidentAbilities()
+{
+    unlockedAfterBoot_ = true;
+    std::list<ResidentAbilityInfo> tmpList;
+    {
+        std::lock_guard lock(failedResidentAbilityInfoMutex_);
+        if (failedResidentAbilityInfos_.empty()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "no failed abilities");
+            return;
+        }
+        tmpList = std::move(failedResidentAbilityInfos_);
+    }
+    for (const auto &item: tmpList) {
+        ResidentAbilityInfoGuard residentAbilityInfoGuard(item.bundleName, item.abilityName, item.userId);
+        Want want;
+        want.SetElementName(item.bundleName, item.abilityName);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "call, bundleName: %{public}s, mainElement: %{public}s",
+            item.bundleName.c_str(), item.abilityName.c_str());
+        DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, item.userId,
+            DEFAULT_INVAL_VALUE);
+    }
+}
+
+void ResidentProcessManager::AddFailedResidentAbility(const std::string &bundleName,
+    const std::string &abilityName, int32_t userId)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "failed bundleName: %{public}s, mainElement: %{public}s",
+        bundleName.c_str(), abilityName.c_str());
+    if (unlockedAfterBoot_) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "already unlocked");
+        return;
+    }
+
+    std::lock_guard lock(failedResidentAbilityInfoMutex_);
+    failedResidentAbilityInfos_.push_back(ResidentAbilityInfo {
+        .bundleName = bundleName,
+        .abilityName = abilityName,
+        .userId = userId,
+    });
 }
 }  // namespace AAFwk
 }  // namespace OHOS
