@@ -44,6 +44,9 @@ static const int PATH_MAX_SIZE = 256;
 const mode_t MODE = 0777;
 static const int RESULT_OK = 0;
 static const int RESULT_ERR = -1;
+
+static const char TASK_NAME[] = "ApplicationCleaner::ClearTempData";
+static constexpr uint64_t DELAY = 5000000; //5s
 } // namespace
 void ApplicationCleaner::RenameTempData()
 {
@@ -98,7 +101,10 @@ void ApplicationCleaner::ClearTempData()
             }
         }
     };
-    ffrt::submit(cleanTemp);
+    ffrt::task_attr attr;
+    attr.name(TASK_NAME);
+    attr.delay(DELAY); // Delay by five seconds
+    ffrt::submit(std::move(cleanTemp), attr);
 }
 
 int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
