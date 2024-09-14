@@ -2646,8 +2646,8 @@ int32_t UIAbilityLifecycleManager::CleanUIAbility(
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard guard(sessionLock_);
     if (forceKillProcess) {
-        std::lock_guard guard(sessionLock_);
         std::string element = abilityRecord->GetElementName().GetURI();
         if (DelayedSingleton<AppScheduler>::GetInstance()->CleanAbilityByUserRequest(abilityRecord->GetToken())) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s success", element.c_str());
