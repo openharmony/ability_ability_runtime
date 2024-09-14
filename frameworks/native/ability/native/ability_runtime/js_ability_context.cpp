@@ -2399,25 +2399,19 @@ napi_value JsAbilityContext::OnSetMissionLabel(napi_env env, NapiCallbackInfo& i
         ThrowInvalidParamError(env, "Parse param label failed, label must be string.");
         return CreateJsUndefined(env);
     }
-    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, label, innerErrCode]() {
+    NapiAsyncTask::CompleteCallback complete =
+        [weak = context_, label](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
-                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 return;
             }
-            *innerErrCode = context->SetMissionLabel(label);
-    };
-    NapiAsyncTask::CompleteCallback complete =
-        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrCode == ERR_OK) {
+            auto errCode = context->SetMissionLabel(label);
+            if (errCode == ERR_OK) {
                 task.Resolve(env, CreateJsUndefined(env));
-            } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
             } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+                task.Reject(env, CreateJsErrorByNativeErr(env, errCode));
             }
     };
 
