@@ -230,10 +230,6 @@ void JsUIExtensionBase::OnStop()
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
-#ifdef SUPPORT_GRAPHICS
-    UnregisterDisplayInfoChangedListener();
-#endif // SUPPORT_GRAPHICS
-
     OnStopCallBack();
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
