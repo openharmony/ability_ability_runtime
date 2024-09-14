@@ -410,6 +410,7 @@ group("unittest") {
       "app_scheduler_host_test:unittest",
       "app_scheduler_proxy_test:unittest",
       "app_scheduler_test:unittest",
+      "app_spawn_client_second_test:unittest",
       "app_spawn_client_test:unittest",
       "app_state_observer_manager_test:unittest",
       "app_utils_test:unittest",
