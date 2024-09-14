@@ -367,7 +367,6 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
-
     int32_t result = KillApplication(bundleName);
     reply.WriteInt32(result);
     return NO_ERROR;

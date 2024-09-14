@@ -66,8 +66,8 @@ public:
     static napi_value RequestModalUIExtension(napi_env env, napi_callback_info info);
     static napi_value ShowAbility(napi_env env, napi_callback_info info);
     static napi_value HideAbility(napi_env env, napi_callback_info info);
-    static napi_value OpenAtomicService(napi_env env, napi_callback_info info);
     static napi_value MoveAbilityToBackground(napi_env env, napi_callback_info info);
+    static napi_value OpenAtomicService(napi_env env, napi_callback_info info);
 
     static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
@@ -120,12 +120,12 @@ private:
     napi_value OnShowAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnHideAbility(napi_env env, NapiCallbackInfo& info);
     napi_value ChangeAbilityVisibility(napi_env env, NapiCallbackInfo& info, bool isShow);
-    napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo& info);
-    napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
-        AAFwk::StartOptions &options);
     napi_value OnMoveAbilityToBackground(napi_env env, NapiCallbackInfo& info);
     bool CreateOpenLinkTask(const napi_env &env, const napi_value &lastParam, AAFwk::Want &want,
         int &requestCode);
+    napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo& info);
+    napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
+        AAFwk::StartOptions &options);
     void RemoveOpenLinkTask(int requestCode);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);

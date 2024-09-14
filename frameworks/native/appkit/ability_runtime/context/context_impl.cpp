@@ -288,7 +288,7 @@ std::string ContextImpl::GetResourceDir()
         return "";
     }
     std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR +
-                      hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
+        hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
     if (OHOS::FileExists(dir)) {
         return dir;
     }
@@ -343,7 +343,7 @@ std::string ContextImpl::GetDistributedFilesDir()
             CONTEXT_DISTRIBUTEDFILES_BASE_MIDDLE + GetBundleName();
     } else {
         if (currArea_ == CONTEXT_ELS[1] || currArea_ == CONTEXT_ELS[AREA2] || currArea_ == CONTEXT_ELS[AREA3] ||
-	    currArea_ == CONTEXT_ELS[AREA4]) {
+	              currArea_ == CONTEXT_ELS[AREA4]) {
             // when areamode swith to el3/el4/el5, the distributedfiles dir should be always el2's
             // distributedfilesdir dir
             dir = CONTEXT_DATA_STORAGE + CONTEXT_ELS[1] + CONTEXT_FILE_SEPARATOR + CONTEXT_DISTRIBUTEDFILES;
