@@ -12041,6 +12041,7 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
     if (!forceKillProcess) {
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->SetProcessCacheStatus(
             abilityRecord->GetPid(), true));
+        ForceTerminateSerivceExtensionByPid(abilityRecord->GetPid());
     }
     int32_t errCode = uiAbilityManager->CleanUIAbility(abilityRecord, forceKillProcess);
     ReportCleanSession(sessionInfo, abilityRecord, errCode);
