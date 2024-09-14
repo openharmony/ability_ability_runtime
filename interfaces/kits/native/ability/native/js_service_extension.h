@@ -233,6 +233,7 @@ private:
     };
 
     sptr<JsServiceExtensionDisplayListener> displayListener_ = nullptr;
+    sptr<SystemAbilityStatusChangeListener> saStatusChangeListener_ = nullptr;
 #endif
 };
 }  // namespace AbilityRuntime
