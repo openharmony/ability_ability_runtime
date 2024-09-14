@@ -680,6 +680,7 @@ public:
 
     int32_t NotifyAppFault(const FaultData &faultData);
 #ifdef SUPPORT_SCREEN
+    void ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisibilityInfo> &info);
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
 #endif //SUPPORT_SCREEN
     bool IsAbilitytiesBackground();
