@@ -5923,7 +5923,7 @@ bool AppMgrServiceInner::CreateAbilityInfo(const AAFwk::Want &want, AbilityInfo 
     auto userId = GetCurrentAccountId();
     auto abilityInfoFlag = AbilityRuntime::StartupUtil::BuildAbilityInfoFlag();
     if (IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(want, abilityInfoFlag, userId, abilityInfo))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "queryAbilityInfo fail");
+        TAG_LOGI(AAFwkTag::APPMGR, "queryAbilityInfo ok");
         return true;
     }
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
