@@ -1991,6 +1991,35 @@ bool AppRunningRecord::IsAbilitytiesBackground()
     return true;
 }
 #ifdef SUPPORT_SCREEN
+
+void AppRunningRecord::ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisibilityInfo> &info)
+{
+    if (info == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null info");
+        return;
+    }
+
+    if (GetPriorityObject() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
+        return;
+    } else {
+        if (info->pid_ != GetPriorityObject()->GetPid()) {
+            return;
+        }
+    }
+    
+    auto iter = windowIds_.find(info->windowId_);
+    if (iter != windowIds_.end() &&
+        info->visibilityState_ == OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        windowIds_.erase(iter);
+        return;
+    }
+    if (iter == windowIds_.end() &&
+        info->visibilityState_ < OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        windowIds_.emplace(info->windowId_);
+    }
+}
+
 void AppRunningRecord::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {

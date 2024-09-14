@@ -5292,24 +5292,34 @@ void AppMgrServiceInner::InitWindowVisibilityChangedListener()
     }
     windowVisibilityChangedListener_ =
         new (std::nothrow) WindowVisibilityChangedListener(weak_from_this(), taskHandler_);
-    auto registerTask = [innerService = weak_from_this()] () {
-        auto inner = innerService.lock();
-        if (inner == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "service inner null");
-            return;
-        }
-        if (inner->windowVisibilityChangedListener_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "window visibility changed listener null");
-            return;
-        }
-        WindowManager::GetInstance().RegisterVisibilityChangedListener(inner->windowVisibilityChangedListener_);
-    };
-
-    if (taskHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "task handler null");
+    if (windowVisibilityChangedListener_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "window visibility changed listener null");
         return;
     }
-    taskHandler_->SubmitTask(registerTask, "RegisterVisibilityListener.", REGISTER_VISIBILITY_DELAY);
+    WindowManager::GetInstance().RegisterVisibilityChangedListener(windowVisibilityChangedListener_);
+
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    windowVisibilityInfos.clear();
+    WindowManager::GetInstance().GetVisibilityWindowInfo(windowVisibilityInfos);
+
+    if (windowVisibilityInfos.empty()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "window visibility info is empty");
+        return;
+    }
+
+    for (const auto &info : windowVisibilityInfos) {
+        if (info == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "info null");
+            continue;
+        }
+        auto appRecord = GetAppRunningRecordByPid(info->pid_);
+        if (appRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+            continue;
+        }
+        appRecord->ChangeWindowVisibility(info);
+    }
+
     TAG_LOGD(AAFwkTag::APPMGR, "End.");
 }
 
