@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 
 #include <cstdint>
+#include <cstdint>
 #include <future>
 #include <map>
 #include <memory>
@@ -31,6 +32,7 @@
 #include "ability_connect_manager.h"
 #include "ability_debug_deal.h"
 #include "ability_event_handler.h"
+#include "ability_info.h"
 #include "ability_info.h"
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
@@ -1660,7 +1662,7 @@ public:
      */
     int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
 
-    /**
+    /*
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1767,7 +1769,7 @@ public:
     void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
         const std::string& reason);
 
-    /**
+     /**
      * Judge if Caller-Application is in background state.
      *
      * @param abilityRequest, abilityRequest.

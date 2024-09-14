@@ -611,7 +611,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
 void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
     std::shared_ptr<ConnectionRecord> &connectRecord)
 {
-    if (targetService == nullptr) {
+    if (!targetService) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "null target service");
         return;
     }
@@ -690,7 +690,7 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
 
 void AbilityConnectManager::TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     if (!GetExtensionByIdFromServiceMap(abilityRecord->GetRecordId()) &&
         !AbilityCacheManager::GetInstance().FindRecordByToken(abilityRecord->GetToken())) {
         return;
@@ -1127,11 +1127,7 @@ int AbilityConnectManager::ScheduleCommandAbilityWindowDone(
 
 void AbilityConnectManager::HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo)
 {
-    if (sessionInfo == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "null session info.");
-        return;
-    }
-    if (sessionInfo->sessionToken) {
+    if (sessionInfo && sessionInfo->sessionToken) {
         RemoveUIExtWindowDeathRecipient(sessionInfo->sessionToken);
         size_t ret = 0;
         {
@@ -2789,7 +2785,7 @@ void AbilityConnectManager::HandleUIExtWindowDiedTask(const sptr<IRemoteObject> 
 
 bool AbilityConnectManager::IsUIExtensionFocused(uint32_t uiExtensionTokenId, const sptr<IRemoteObject>& focusToken)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called, id %{public}u", uiExtensionTokenId);
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, false);
     std::lock_guard guard(uiExtensionMapMutex_);
     for (auto& item: uiExtensionMap_) {
@@ -3110,7 +3106,7 @@ std::string AbilityConnectManager::GenerateBundleName(const AbilityRequest &abil
 
 int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo)
 {
-    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
+    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION || 
         abilityInfo.bundleName != XIAOYI_BUNDLE_NAME) {
         return ERR_OK;
     }
@@ -3143,7 +3139,7 @@ int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::Abi
             break;
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR,"ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
     ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
     return ERR_OK;
 }
