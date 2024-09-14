@@ -31,7 +31,6 @@
 #include <unordered_set>
 
 #include "ability_background_connection.h"
-#include "ability_connect_manager.h"
 #include "ability_debug_deal.h"
 #include "ability_manager_constants.h"
 #include "ability_manager_errors.h"
