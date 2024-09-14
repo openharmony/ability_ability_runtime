@@ -270,6 +270,7 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
     }
+    return true;
 }
 
 bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRunningRecord> &appRecord)
