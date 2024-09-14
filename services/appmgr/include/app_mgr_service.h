@@ -347,6 +347,20 @@ public:
 
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
+    /**
+     * Register KIA interceptor.
+     * @param interceptor KIA interceptor.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor) override;
+
+    /**
+     * Check if the given pid is a KIA process.
+     * @param pid process id.
+     * @return Returns true if it is a KIA process, false otherwise.
+     */
+    virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia) override;
+
     bool GetAppRunningStateByBundleName(const std::string &bundleName) override;
 
     int32_t NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) override;

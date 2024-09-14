@@ -138,6 +138,8 @@ private:
     int32_t HandleClearUpApplicationDataBySelf(MessageParcel &data, MessageParcel& reply);
     int32_t HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterKiaInterceptor(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCheckIsKiaProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateRenderState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSignRestartAppFlag(MessageParcel &data, MessageParcel &reply);
