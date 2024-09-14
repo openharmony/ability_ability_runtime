@@ -31,10 +31,10 @@ using namespace OHOS::AbilityRuntime;
 #define APP_LIB_NAME "arm64"
 #elif defined(APP_USE_ARM)
 #define APP_LIB_NAME "arm"
-#elif defined(APP_USE_x86_64)
+#elif defined(APP_USE_X86_64)
 #define APP_LIB_NAME "x86_64"
 #else
-#error unsupport platform
+#error unsupported platform
 #endif
 
 namespace {
