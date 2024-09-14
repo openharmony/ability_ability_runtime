@@ -26,6 +26,7 @@
 #include "app_context.h"
 #include "context.h"
 #include "element_callback.h"
+#include "application_configuration_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -175,8 +176,9 @@ public:
      *
      * @param config Indicates the new Configuration object.
      */
-    virtual void OnConfigurationUpdated(Configuration config);
-    
+    virtual void OnConfigurationUpdated(Configuration config,
+        AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::System);
+
     /**
      *
      * @brief Will be Called when the application font of the device changes.
@@ -255,7 +257,7 @@ public:
      * @param abilityInfo
      */
     void CleanAbilityStage(const sptr<IRemoteObject> &token, const std::shared_ptr<AbilityInfo> &abilityInfo,
-        bool isCacheProcess = false);
+        bool isCacheProcess);
 
     /**
      * @brief return the application context
@@ -282,7 +284,7 @@ public:
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
 
-    virtual std::shared_ptr<Configuration> GetConfiguration();
+    virtual std::shared_ptr<Configuration> GetConfiguration() const;
 
     void GetExtensionNameByType(int32_t type, std::string &name)
     {
@@ -318,13 +320,15 @@ public:
     void CleanEmptyAbilityStage();
 
 private:
-    void DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo);
     void UpdateAppContextResMgr(const Configuration &config);
-    bool isUpdateColor(Configuration &config, std::string colorMode, std::string globalColorMode,
-        std::string globalColorModeIsSetBySa, std::string colorModeIsSetByApp, std::string colorModeIsSetBySa);
-    bool isUpdateFontSize(Configuration &config);
-    bool isUpdateLanguage(Configuration &config, const std::string language,
-        const std::string languageIsSetByApp, const std::string globalLanguageIsSetByApp);
+    bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
+    bool isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level);
+    bool IsUpdateLanguageNeeded(Configuration &config, AbilityRuntime::SetLevel level);
+    const std::function<void()> CreateAutoStartupCallback(
+        const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        const std::shared_ptr<AbilityLocalRecord> abilityRecord,
+        const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback);
+    bool IsMainProcess(const std::string &bundleName, const std::string &process);
 
 private:
     std::list<std::shared_ptr<AbilityLifecycleCallbacks>> abilityLifecycleCallbacks_;

@@ -29,15 +29,25 @@ using AbilityInfo = AppExecFwk::AbilityInfo;
 constexpr int64_t RES_TYPE_SCB_START_ABILITY = 0;
 constexpr int64_t RES_TYPE_EXTENSION_START_ABILITY = 1;
 constexpr int64_t RES_TYPE_MISSION_LIST_START_ABILITY = 2;
+
+enum class LoadingStage : int32_t {
+    LOAD_BEGIN = 1,
+    LOAD_END,
+    FOREGROUND_BEGIN,
+    FOREGROUND_END
+};
+
 class ResSchedUtil final {
 public:
     static ResSchedUtil &GetInstance();
-    void ReportAbilitStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart);
-    void ReportAbilitAssociatedStartInfoToRSS(
+    void ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart);
+    void ReportAbilityAssociatedStartInfoToRSS(
         const AbilityInfo &abilityInfo, int64_t resSchedType, int32_t callerUid, int32_t callerPid);
     void ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
         const int32_t callerPid = -1);
     void GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPids);
+    bool CheckShouldForceKillProcess(int32_t pid);
+    void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid, int64_t timeDuration = 0);
 private:
     ResSchedUtil() = default;
     ~ResSchedUtil() = default;

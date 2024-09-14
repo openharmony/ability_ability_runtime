@@ -25,7 +25,7 @@ UnlockScreenCallback::UnlockScreenCallback() {}
 
 void UnlockScreenCallback::OnCallBack(const int32_t screenLockResult)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Unlock Screen result is %{public}d", screenLockResult);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "result: %{public}d", screenLockResult);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

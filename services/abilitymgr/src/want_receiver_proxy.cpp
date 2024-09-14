@@ -39,7 +39,7 @@ void WantReceiverProxy::Send(const int32_t resultCode)
     data.WriteInt32(resultCode);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "remote is NULL");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null remote");
         return;
     }
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(IWantReceiver::WANT_RECEIVER_SEND), data, reply, option);
@@ -66,7 +66,7 @@ void WantReceiverProxy::PerformReceive(const Want &want, int resultCode, const s
     msgData.WriteInt32(sendingUser);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "remote is NULL");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null remote");
         return;
     }
     int32_t ret = remote->SendRequest(

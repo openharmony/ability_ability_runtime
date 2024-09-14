@@ -62,7 +62,7 @@ bool LaunchParam::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteString16(Str8ToStr16(lastExitMessage))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write parcel lastExitMessage failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write lastExitMessage failed");
         return false;
     }
     return true;

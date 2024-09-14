@@ -40,6 +40,11 @@ AbilityExperienceRule *AbilityExperienceRule::Unmarshalling(Parcel &in)
 
     rule->replaceWant = in.ReadParcelable<Want>();
 
+    if (!in.ReadBool(rule->isBackSkuExempt)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "read isBackSkuExempt failed");
+        rule->isBackSkuExempt = true;
+    }
+
     return rule;
 }
 
@@ -59,6 +64,10 @@ bool AbilityExperienceRule::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(isBackSkuExempt)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write isBackSkuExempt failed");
+    }
+
     return true;
 }
 
@@ -72,7 +81,7 @@ AbilityCallerInfo *AbilityCallerInfo::Unmarshalling(Parcel &in)
 {
     auto *info = new (std::nothrow) AbilityCallerInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "new callerInfo failed, return nullptr");
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "info null");
         return nullptr;
     }
 
@@ -162,6 +171,16 @@ bool AbilityCallerInfo::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(static_cast<int32_t>(targetExtensionAbilityType))) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetExtensionAbilityType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write userId failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(targetApplicationReservedFlag)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetApplicationReservedFlag failed");
         return false;
     }
     return true;

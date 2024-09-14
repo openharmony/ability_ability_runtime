@@ -114,6 +114,22 @@ HWTEST_F(ChildProcessManagerTest, StartChildProcessByAppSpawnFork_0100, TestSize
 }
 
 /**
+ * @tc.number: StartChildProcessWithArgs_0100
+ * @tc.desc: Test StartChildProcessWithArgs works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, StartChildProcessWithArgs_0100, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "StartChildProcessWithArgs_0100 called.");
+    pid_t pid;
+    AppExecFwk::ChildProcessArgs args;
+    AppExecFwk::ChildProcessOptions options;
+    auto ret = ChildProcessManager::GetInstance().StartChildProcessWithArgs("libentry.so:Main", pid,
+        AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS, args, options);
+    EXPECT_NE(ret, ChildProcessManagerErrorCode::ERR_FORK_FAILED);
+}
+
+/**
  * @tc.number: IsChildProcess_0100
  * @tc.desc: Test IsChildProcess works.
  * @tc.type: FUNC
@@ -123,6 +139,19 @@ HWTEST_F(ChildProcessManagerTest, IsChildProcess_0100, TestSize.Level0)
     TAG_LOGD(AAFwkTag::TEST, "IsChildProcess_0100 called.");
     auto manager = std::make_shared<ChildProcessManager>();
     ChildProcessManager::GetInstance().IsChildProcess();
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.number: IsChildProcessBySelfFork_0100
+ * @tc.desc: Test IsChildProcessBySelfFork works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, IsChildProcessBySelfFork_0100, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "IsChildProcessBySelfFork_0100 called.");
+    auto manager = std::make_shared<ChildProcessManager>();
+    ChildProcessManager::GetInstance().IsChildProcessBySelfFork();
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -256,10 +285,10 @@ HWTEST_F(ChildProcessManagerTest, LoadJsFile_0200, TestSize.Level0)
  */
 HWTEST_F(ChildProcessManagerTest, SetForkProcessDebugOption_0100, TestSize.Level0)
 {
-TAG_LOGD(AAFwkTag::TEST, "SetForkProcessDebugOption called.");
-AbilityRuntime::Runtime::DebugOption debugOption;
-ChildProcessManager::GetInstance().SetForkProcessDebugOption("test", false, false, false);
-EXPECT_TRUE(true);
+    TAG_LOGD(AAFwkTag::TEST, "SetForkProcessDebugOption called.");
+    AbilityRuntime::Runtime::DebugOption debugOption;
+    ChildProcessManager::GetInstance().SetForkProcessDebugOption("test", false, false, false);
+    EXPECT_EQ(ChildProcessManager::GetInstance().isChildProcessBySelfFork_, true);
 }
 
 /**
@@ -341,6 +370,18 @@ HWTEST_F(ChildProcessManagerTest, SetAppSpawnForkDebugOption_0200, TestSize.Leve
     processInfo->processName = processName;
     ChildProcessManager::GetInstance().SetAppSpawnForkDebugOption(debugOption, processInfo);
     EXPECT_EQ(debugOption.processName, processName);
+}
+
+/**
+ * @tc.number: LoadNativeLibWithArgs_0100
+ * @tc.desc: Test LoadNativeLibWithArgs works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, LoadNativeLibWithArgs_0100, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "LoadNativeLibWithArgs_0100 called.");
+    auto ret = ChildProcessManager::GetInstance().LoadNativeLibWithArgs("entry", "libentry.so", "Main", nullptr);
+    EXPECT_FALSE(ret);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

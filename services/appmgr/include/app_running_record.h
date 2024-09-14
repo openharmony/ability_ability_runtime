@@ -54,6 +54,17 @@ class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
 
+class MultiUserConfigurationMgr {
+public:
+    void Insert(const int32_t userId, const Configuration& config);
+
+    Configuration GetConfigurationByUserId(const int32_t userId);
+
+private:
+    std::map<int32_t, Configuration> multiUserConfiguration_;
+    std::mutex multiUserConfigurationMutex_;
+};
+
 /**
  * @class RenderRecord
  * Record nweb render process info.
@@ -319,26 +330,6 @@ public:
      */
     void SetTrimMemoryLevel(int32_t level);
 
-    // Kill this process with a given reason
-    /**
-     * ForceKillApp, Kill this process with a given reason.
-     *
-     * @param reason, The reason to kill the process.
-     *
-     * @return
-     */
-    void ForceKillApp(const std::string &reason) const;
-
-    // Schedule to crash this app with a given description
-    /**
-     * ScheduleAppCrash, Schedule to crash this app with a given description.
-     *
-     * @param description, the given description.
-     *
-     * @return
-     */
-    void ScheduleAppCrash(const std::string &description) const;
-
     /**
      * LaunchApplication, Notify application to launch application.
      *
@@ -556,6 +547,7 @@ public:
     void SetEmptyKeepAliveAppState(bool isEmptyKeepAliveApp);
 
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
+    void SetKeepAliveBundle(bool isKeepAliveBundle);
 
     void SetMainProcess(bool isMainProcess);
 
@@ -566,6 +558,9 @@ public:
     std::list<std::shared_ptr<ModuleRunningRecord>> GetAllModuleRecord() const;
 
     const std::list<std::shared_ptr<ApplicationInfo>> GetAppInfoList();
+
+    void SetAppIdentifier(const std::string &appIdentifier);
+    const std::string &GetAppIdentifier() const;
 
     inline const std::shared_ptr<ApplicationInfo> GetApplicationInfo()
     {
@@ -732,12 +727,16 @@ public:
     void SetApplicationPendingState(ApplicationPendingState pendingState);
     ApplicationPendingState GetApplicationPendingState() const;
 
+    void SetApplicationScheduleState(ApplicationScheduleState scheduleState);
+    ApplicationScheduleState GetApplicationScheduleState() const;
+
     void GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode);
 
     void AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record);
     void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
+    int32_t GetChildProcessCount();
 
     void SetPreloadState(PreloadState state);
 
@@ -846,6 +845,20 @@ public:
     void SetUserRequestCleaning();
     bool IsUserRequestCleaning() const;
     bool IsAllAbilityReadyToCleanedByUserRequest();
+    bool IsProcessAttached() const;
+    // records whether uiability has launched before.
+    void SetUIAbilityLaunched(bool hasLaunched);
+    bool HasUIAbilityLaunched();
+
+    inline void SetIsKia(bool isKia)
+    {
+        isKia_ = isKia;
+    }
+
+    inline bool GetIsKia() const
+    {
+        return isKia_;
+    }
 
 private:
     /**
@@ -893,13 +906,15 @@ private:
         }
     };
 
-    bool isKeepAliveApp_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
     bool isStageBasedModel_ = false;
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
     ApplicationPendingState pendingState_ = ApplicationPendingState::READY;
+    ApplicationScheduleState scheduleState_ = ApplicationScheduleState::SCHEDULE_READY;
     bool isFocused_ = false; // if process is focused.
     /**
      * If there is an ability is foregrounding, this flag will be true,
@@ -934,6 +949,7 @@ private:
     bool isLauncherApp_;
     std::string mainAppName_;
     int restartResidentProcCount_ = 0;
+    std::string appIdentifier_;
 
     mutable std::mutex specifiedMutex_;
     int32_t specifiedRequestId_ = -1;
@@ -955,7 +971,7 @@ private:
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
-    bool isKilling_ = false;
+    std::atomic<bool> isKilling_ = false;
     bool isContinuousTask_ = false;    // Only continuesTask processes can be set to true, please choose carefully
     std::atomic_bool isSpawned_ = false;
 
@@ -998,6 +1014,8 @@ private:
     bool isAttachedToStatusBar = false;
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
+    bool hasUIAbilityLaunched_ = false;
+    bool isKia_ = false;
 };
 
 }  // namespace AppExecFwk

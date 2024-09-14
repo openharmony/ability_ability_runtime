@@ -86,6 +86,8 @@ public:
                         const sptr<AbilityConnectCallback> &connectCallback) override;
     ErrCode ConnectAbilityWithAccount(const AAFwk::Want &want, int accountId,
                         const sptr<AbilityConnectCallback> &connectCallback) override;
+    ErrCode ConnectUIServiceExtensionAbility(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback) override;
     void DisconnectAbility(const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback,
         int32_t accountId = -1) override;
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const override;
@@ -309,7 +311,7 @@ private:
     wptr<IRemoteObject> sessionToken_;
     std::mutex uiExtensionMutex_;
     std::map<int32_t, Want> uiExtensionMap_;
-    std::atomic<bool> restoreEnabled_ = true;
+    std::atomic<bool> restoreEnabled_ = false;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);

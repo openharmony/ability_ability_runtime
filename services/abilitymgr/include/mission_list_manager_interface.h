@@ -56,6 +56,8 @@ public:
     virtual std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) = 0;
     virtual std::shared_ptr<AbilityRecord> GetAbilityRecordByMissionId(int missionId) = 0;
     virtual int MoveAbilityToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord) = 0;
+    virtual int32_t BackToCallerAbilityWithResult(std::shared_ptr<AbilityRecord> abilityRecord,
+        int32_t resultCode, const Want *resultWant, int64_t callerRequestCode) = 0;
     virtual int TerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
         int resultCode, const Want *resultWant, bool flag) = 0;
     virtual int AbilityTransactionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) = 0;
@@ -95,10 +97,6 @@ public:
 #endif // SUPPORT_SCREEN
 
     virtual void EnableRecoverAbility(int32_t missionId) = 0;
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-    virtual int BlockAbility(int abilityRecordId) = 0;
-#endif
 
     virtual void UninstallApp(const std::string &bundleName, int32_t uid) = 0;
 

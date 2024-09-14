@@ -93,6 +93,17 @@ ErrCode UIExtensionContext::ConnectAbility(
     return ret;
 }
 
+ErrCode UIExtensionContext::ConnectUIServiceExtensionAbility(
+    const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin, ability:%{public}s",
+        want.GetElement().GetAbilityName().c_str());
+    ErrCode ret =
+        ConnectionManager::GetInstance().ConnectUIServiceExtensionAbility(token_, want, connectCallback);
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtensionContext::ConnectUIServiceExtensionAbility ErrorCode = %{public}d", ret);
+    return ret;
+}
+
 ErrCode UIExtensionContext::DisconnectAbility(
     const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
 {
@@ -242,6 +253,7 @@ void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, c
 
 int UIExtensionContext::GenerateCurRequestCode()
 {
+    std::lock_guard lock(requestCodeMutex_);
     curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
     return curRequestCode_;
 }
@@ -291,5 +303,8 @@ ErrCode UIExtensionContext::AddFreeInstallObserver(const sptr<IFreeInstallObserv
     }
     return ret;
 }
+
+int32_t UIExtensionContext::curRequestCode_ = 0;
+std::mutex UIExtensionContext::requestCodeMutex_;
 }  // namespace AbilityRuntime
 }  // namespace OHOS

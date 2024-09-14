@@ -41,7 +41,7 @@ void QuickFixManagerServiceAbility::OnStart()
 
     service_ = QuickFixManagerService::GetInstance();
     if (service_ == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "instance is nullptr");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null instance");
         return;
     }
 

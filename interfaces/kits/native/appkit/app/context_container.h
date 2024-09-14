@@ -208,7 +208,8 @@ public:
      *
      * @return Returns a Context object created for the specified application.
      */
-    std::shared_ptr<Context> CreateBundleContext(std::string bundleName, int flag, int accountId = DEFAULT_ACCOUNT_ID);
+    std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName, int flag,
+        int accountId = DEFAULT_ACCOUNT_ID);
 
     /**
      * @brief Obtains information about the caller of this ability.
@@ -230,9 +231,6 @@ public:
      * @param bundleInfo  BundleInfo
      */
     void InitResourceManager(BundleInfo &bundleInfo, std::shared_ptr<ContextDeal> &deal);
-
-    void LoadResources(BundleInfo &bundleInfo, std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
-        std::unique_ptr<Global::Resource::ResConfig> &resConfig, std::shared_ptr<ContextDeal> &deal);
 
     /**
      * @brief Get the string of this Context based on the specified resource ID.
@@ -347,7 +345,11 @@ public:
      * @param info the info to set.
      */
     void SetLifeCycleStateInfo(const AAFwk::LifeCycleStateInfo &info);
+
 private:
+    void LoadResources(BundleInfo &bundleInfo, std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
+        std::unique_ptr<Global::Resource::ResConfig> &resConfig, std::shared_ptr<ContextDeal> &deal);
+
     std::shared_ptr<ContextDeal> baseContext_ = nullptr;
     std::shared_ptr<ProcessInfo> processInfo_ = nullptr;
     AAFwk::LifeCycleStateInfo lifeCycleStateInfo_;

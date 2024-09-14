@@ -32,9 +32,9 @@ bool ChildSchedulerProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-bool ChildSchedulerProxy::ScheduleLoadJs()
+bool ChildSchedulerProxy::ScheduleLoadChild()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "ScheduleLoadJs start");
+    TAG_LOGD(AAFwkTag::APPMGR, "ScheduleLoadChild start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -54,7 +54,7 @@ bool ChildSchedulerProxy::ScheduleLoadJs()
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "ScheduleLoadJs end");
+    TAG_LOGD(AAFwkTag::APPMGR, "ScheduleLoadChild end");
     return true;
 }
 

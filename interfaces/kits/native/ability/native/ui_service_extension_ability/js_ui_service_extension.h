@@ -86,16 +86,6 @@ public:
      */
     virtual void OnStart(const AAFwk::Want &want) override;
 
-    /**
-    * @brief Called when this extension is started. You must override this function if you want to perform some
-    *        initialization operations during extension startup.
-    *
-    * This function can be called only once in the entire lifecycle of an extension.
-    * @param Want Indicates the {@link Want} structure containing startup information about the extension.
-    * @param sessionInfo Indicates the {@link SessionInfo} structure containing window session info.
-    */
-    virtual void OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo) override;
-
      /**
      * @brief Called when this extension enters the <b>STATE_STOP</b> state.
      *
@@ -167,8 +157,9 @@ protected:
     bool showOnLockScreen_ = false;
 
 private:
-    void AbilityWindowConfigTransition(sptr<Rosen::WindowOption>& option,
-        const std::shared_ptr<Rosen::ExtensionWindowConfig>& extensionWindowConfig);
+    bool CreateWindowIfNeeded();
+
+    void AbilityWindowConfigTransition(sptr<Rosen::WindowOption>& option, uint32_t windowId);
 
     napi_value CallObjectMethod(const char* name, napi_value const *argv = nullptr, size_t argc = 0);
 
@@ -189,6 +180,7 @@ private:
     std::shared_ptr<AbilityContext> aContext_ = nullptr;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
+    int32_t hostWindowIdInStart_ = 0;
     sptr<UIServiceStubImpl> extensionStub_;
     std::map<sptr<IRemoteObject>, std::unique_ptr<NativeReference>> hostProxyMap_;
     bool firstRequest_ = true;

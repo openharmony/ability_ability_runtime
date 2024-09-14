@@ -57,6 +57,7 @@ ohos_unittest("start_other_app_interceptor_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
   ]
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]

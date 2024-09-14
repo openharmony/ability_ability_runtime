@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include "app_death_recipient.h"
+#include "app_mgr_constants.h"
 #include "child_scheduler_interface.h"
 #include "child_process_info.h"
 #include "child_process_request.h"
@@ -50,6 +51,7 @@ public:
     int32_t GetUid() const;
     std::string GetProcessName() const;
     std::string GetSrcEntry() const;
+    std::string GetEntryFunc() const;
     std::shared_ptr<AppRunningRecord> GetHostRecord() const;
     void SetScheduler(const sptr<IChildScheduler> &scheduler);
     sptr<IChildScheduler> GetScheduler() const;
@@ -63,6 +65,7 @@ public:
     void ClearMainProcessCallback();
     void SetEntryParams(const std::string &entryParams);
     std::string GetEntryParams() const;
+    ProcessType GetProcessType() const;
 
 private:
     void MakeProcessName(const std::shared_ptr<AppRunningRecord> hostRecord);
@@ -74,12 +77,14 @@ private:
     int32_t childProcessType_ = CHILD_PROCESS_TYPE_JS;
     std::string processName_;
     std::string srcEntry_;
+    std::string entryFunc_;
     std::weak_ptr<AppRunningRecord> hostRecord_;
     sptr<IChildScheduler> scheduler_ = nullptr;
     sptr<AppDeathRecipient> deathRecipient_ = nullptr;
     sptr<IRemoteObject> mainProcessCb_ = nullptr;
     bool isStartWithDebug_;
     std::string entryParams_;
+    ProcessType processType_ = ProcessType::CHILD;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

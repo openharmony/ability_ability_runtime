@@ -35,7 +35,8 @@ public:
         std::shared_ptr<AppExecFwk::AbilityHandler> &handler,
         const sptr<IRemoteObject> &token) = 0;
 
-    virtual void OnStart(const AAFwk::Want &want, AAFwk::LaunchParam &launchParam) = 0;
+    virtual void OnStart(
+        const AAFwk::Want &want, AAFwk::LaunchParam &launchParam, sptr<AAFwk::SessionInfo> sessionInfo) = 0;
 
     virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId) = 0;
 
@@ -43,6 +44,10 @@ public:
         AAFwk::WindowCommand winCmd) = 0;
 
     virtual void OnStop() = 0;
+
+    virtual void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) = 0;
+
+    virtual void OnStopCallBack() = 0;
 
     virtual void OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo) = 0;
 

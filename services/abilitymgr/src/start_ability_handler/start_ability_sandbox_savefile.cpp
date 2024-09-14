@@ -66,7 +66,7 @@ int StartAbilitySandboxSavefile::HandleStartRequest(StartAbilityParams &params)
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto callerRecord = params.GetCallerRecord();
     if (!callerRecord) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "this shouldn't happen: caller is null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null caller shouldn't happen");
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -103,7 +103,7 @@ int StartAbilitySandboxSavefile::StartAbility(StartAbilityParams &params, int re
     auto ret = abilityMs->GenerateAbilityRequest(params.want, requestCode,
         abilityRequest, params.callerToken, params.GetValidUserId());
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Generate ability request error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request error");
         return ret;
     }
 

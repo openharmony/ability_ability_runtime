@@ -36,6 +36,7 @@ ohos_unittest("child_process_manager_test") {
     "child_process_test.cpp",
     "js_child_process_test.cpp",
     "mock_bundle_manager.cpp",
+    "native_args_child_process_test.cpp",
   ]
 
   deps = [
@@ -54,6 +55,7 @@ ohos_unittest("child_process_manager_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_capi",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",

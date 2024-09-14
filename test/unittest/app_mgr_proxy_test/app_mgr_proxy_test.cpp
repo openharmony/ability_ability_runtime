@@ -145,6 +145,28 @@ HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllRenderProcesses_0100, TestSize.Level
 }
 
 /**
+ * @tc.name: AppMgrProxy_GetAllChildrenProcesses_0100
+ * @tc.desc: GetAllChildrenProcesses
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrProxyTest, AppMgrProxy_GetAllChildrenProcesses_0100, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "AppMgrProxy_GetAllChildrenProcesses_0100 start";
+
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
+
+    std::vector<ChildProcessInfo> info;
+    appMgrProxy_->GetAllChildrenProcesses(info);
+
+    EXPECT_EQ(
+        mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_CHILDREN_PROCESSES));
+
+    GTEST_LOG_(INFO) << "AppMgrProxy_GetAllChildrenProcesses_0100 end";
+}
+
+/**
  * @tc.name: GetAppRunningStateByBundleName_0100
  * @tc.desc: Get app running state by bundle name.
  * @tc.type: FUNC
@@ -660,6 +682,28 @@ HWTEST_F(AppMgrProxyTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level
     auto result = mockAppMgrService_->OnRemoteRequest(
         static_cast<uint32_t>(AppMgrInterfaceCode::GET_RUNNING_MULTIAPP_INFO_BY_BUNDLENAME), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: GetSupportedProcessCachePids_001
+ * @tc.desc: Get pids of processes which belong to specific bundle name and support process cache feature.
+ * @tc.type: FUNC
+ * @tc.require: issueIAGZ7H
+ */
+HWTEST_F(AppMgrProxyTest, GetSupportedProcessCachePids_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
+
+    std::string bundleName = "testBundleName";
+    std::vector<int32_t> pidList;
+    appMgrProxy_->GetSupportedProcessCachePids(bundleName, pidList);
+    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS));
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }

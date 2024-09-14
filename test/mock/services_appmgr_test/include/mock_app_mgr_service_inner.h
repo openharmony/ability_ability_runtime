@@ -21,6 +21,9 @@
 #include "app_mgr_service_inner.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace AppExecFwk {
 class MockAppMgrServiceInner : public AppMgrServiceInner {
 public:
@@ -29,10 +32,8 @@ public:
     virtual ~MockAppMgrServiceInner()
     {}
 
-    MOCK_METHOD6(LoadAbility,
-        void(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-            std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
-            std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId));
+    MOCK_METHOD4(LoadAbility, void(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
+        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam));
     MOCK_METHOD2(AttachApplication, void(const pid_t pid, const sptr<IAppScheduler>& app));
     MOCK_METHOD1(ApplicationForegrounded, void(const int32_t recordId));
     MOCK_METHOD1(ApplicationBackgrounded, void(const int32_t recordId));
@@ -49,15 +50,13 @@ public:
     MOCK_METHOD1(IsBackgroundRunningRestricted, int32_t(const std::string&));
     MOCK_METHOD1(GetAllRunningProcesses, int32_t(std::vector<RunningProcessInfo>&));
     MOCK_METHOD1(GetAllRenderProcesses, int32_t(std::vector<RenderProcessInfo>&));
+    MOCK_METHOD1(GetAllChildrenProcesses, int(std::vector<ChildProcessInfo>&));
     MOCK_METHOD1(RegisterAppStateCallback, void(const sptr<IAppStateCallback>& callback));
     MOCK_METHOD0(StopAllProcess, void());
     MOCK_CONST_METHOD0(QueryAppSpawnConnectionState, SpawnConnectionState());
     MOCK_CONST_METHOD2(AddAppDeathRecipient, void(const pid_t pid, const sptr<AppDeathRecipient>& appDeathRecipient));
     MOCK_METHOD1(KillProcessByAbilityToken, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(KillProcessesByUserId, void(int32_t userId));
-    MOCK_METHOD5(AbilityBehaviorAnalysis,
-        void(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& preToken, const int32_t visibility,
-            const int32_t perceptibility, const int32_t connectionState));
     MOCK_METHOD1(AddAbilityStageDone, void(const int32_t recordId));
     MOCK_METHOD0(GetConfiguration, std::shared_ptr<Configuration>());
     MOCK_METHOD2(IsSharedBundleRunning, bool(const std::string &bundleName, uint32_t versionCode));

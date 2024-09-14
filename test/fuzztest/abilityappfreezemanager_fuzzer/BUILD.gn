@@ -59,6 +59,7 @@ ohos_fuzztest("AbilityAppFreezeManagerFuzzTest") {
     "init:libbegetutil",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
     "window_manager:libwm",
   ]

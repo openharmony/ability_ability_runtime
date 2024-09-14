@@ -107,5 +107,63 @@ HWTEST_F(StartupUtilTest, IsSupportAppClone_002, TestSize.Level1)
     auto queryRet = StartupUtil::IsSupportAppClone(type);
     EXPECT_FALSE(queryRet);
 }
+
+/**
+ * @tc.name: GenerateFullRequestCode_001
+ * @tc.desc: test class StartupUtil number function GenerateFullRequestCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupUtilTest, GenerateFullRequestCode_001, TestSize.Level1)
+{
+    auto requestCode = StartupUtil::GenerateFullRequestCode(1, true, 0);
+    EXPECT_EQ(requestCode, 0);
+    
+    requestCode = StartupUtil::GenerateFullRequestCode(0, true, 1);
+    EXPECT_EQ(requestCode, 0);
+
+    requestCode = StartupUtil::GenerateFullRequestCode(1, true, 1);
+    uint64_t tempNum = 1;
+    EXPECT_EQ((requestCode & tempNum), 1);
+    EXPECT_EQ((requestCode & (tempNum << 32)), (tempNum << 32));
+    EXPECT_EQ((requestCode & (tempNum << 48)), (tempNum << 48));
+}
+
+/**
+ * @tc.name: GenerateFullRequestCode_001
+ * @tc.desc: test class StartupUtil number function ParseFullRequestCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupUtilTest, ParseFullRequestCode_001, TestSize.Level1)
+{
+    auto requestInfo = StartupUtil::ParseFullRequestCode(-1);
+    EXPECT_EQ(requestInfo.requestCode, 0);
+    
+    requestInfo = StartupUtil::ParseFullRequestCode(0);
+    EXPECT_EQ(requestInfo.requestCode, 0);
+
+    requestInfo = StartupUtil::ParseFullRequestCode(1);
+    EXPECT_EQ(requestInfo.requestCode, 1);
+    EXPECT_EQ(requestInfo.pid, 0);
+    EXPECT_EQ(requestInfo.backFlag, false);
+
+    uint64_t tempNum = 1;
+    requestInfo = StartupUtil::ParseFullRequestCode((tempNum << 49));
+    EXPECT_FALSE(requestInfo.backFlag);
+    
+    requestInfo = StartupUtil::ParseFullRequestCode((tempNum << 48));
+    EXPECT_TRUE(requestInfo.backFlag);
+
+    auto requestCode = StartupUtil::GenerateFullRequestCode(1, true, 1);
+    requestInfo = StartupUtil::ParseFullRequestCode(requestCode);
+    EXPECT_EQ(requestInfo.requestCode, 1);
+    EXPECT_EQ(requestInfo.pid, 1);
+    EXPECT_EQ(requestInfo.backFlag, true);
+
+    requestCode = StartupUtil::GenerateFullRequestCode(1, false, 1);
+    requestInfo = StartupUtil::ParseFullRequestCode(requestCode);
+    EXPECT_EQ(requestInfo.requestCode, 1);
+    EXPECT_EQ(requestInfo.pid, 1);
+    EXPECT_EQ(requestInfo.backFlag, false);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

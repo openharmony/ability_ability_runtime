@@ -40,6 +40,7 @@ constexpr const char *PAGE_INFO_AUTOFILLTYPE = "autoFillType";
 constexpr const char *PAGE_INFO_TAG = "tag";
 constexpr const char *PAGE_INFO_VALUE = "value";
 constexpr const char *PAGE_INFO_PLACEHOLDER = "placeholder";
+constexpr const char *PAGE_INFO_META_DATA = "metadata";
 constexpr const char *PAGE_INFO_PASSWORDRULES = "passwordRules";
 constexpr const char *PAGE_INFO_ENABLEAUTOFILL = "enableAutoFill";
 constexpr const char *PAGE_INFO_IS_FOCUS = "isFocus";
@@ -89,7 +90,7 @@ napi_value JsAutoFillExtensionUtil::WrapViewData(const napi_env env, const Abili
         if (jsSubValue != nullptr && napi_set_element(env, jsArray, index, jsSubValue) == napi_ok) {
             index++;
         } else {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Set element fail.");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Set element fail");
         }
     }
 
@@ -137,6 +138,9 @@ napi_value JsAutoFillExtensionUtil::WrapPageNodeInfo(const napi_env env, const A
 
     jsValue = WrapStringToJS(env, pageNodeInfo.placeholder);
     SetPropertyValueByPropertyName(env, jsObject, PAGE_INFO_PLACEHOLDER, jsValue);
+
+    jsValue = WrapStringToJS(env, pageNodeInfo.metadata);
+    SetPropertyValueByPropertyName(env, jsObject, PAGE_INFO_META_DATA, jsValue);
 
     jsValue = WrapBoolToJS(env, pageNodeInfo.enableAutoFill);
     SetPropertyValueByPropertyName(env, jsObject, PAGE_INFO_ENABLEAUTOFILL, jsValue);
@@ -196,7 +200,7 @@ void JsAutoFillExtensionUtil::UnwrapViewData(
     if (jsValue != nullptr) {
         uint32_t jsProCount = 0;
         if (!IsArrayForNapiValue(env, jsValue, jsProCount)) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Get PAGE_NODE_INFOS from JS failed.");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Get PAGE_NODE_INFOS from JS failed");
             return;
         }
 
@@ -225,6 +229,7 @@ void JsAutoFillExtensionUtil::UnwrapPageNodeInfo(
     UnwrapStringByPropertyName(env, jsNode, PAGE_INFO_VALUE, node.value);
     UnwrapStringByPropertyName(env, jsNode, PAGE_INFO_PASSWORDRULES, node.passwordRules);
     UnwrapStringByPropertyName(env, jsNode, PAGE_INFO_PLACEHOLDER, node.placeholder);
+    UnwrapStringByPropertyName(env, jsNode, PAGE_INFO_META_DATA, node.metadata);
     UnwrapBooleanByPropertyName(env, jsNode, PAGE_INFO_ENABLEAUTOFILL, node.enableAutoFill);
     auto jsValue = GetPropertyValueByPropertyName(env, jsNode, PAGE_INFO_PAGE_NODE_RECT, napi_object);
     UnwrapRectData(env, jsValue, node.rect);
@@ -255,7 +260,7 @@ napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, con
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     if (jsObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to create jsObject.");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "create jsObject failed");
         return nullptr;
     }
 
@@ -270,7 +275,7 @@ napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, con
     if (want.HasParameter(WANT_PARAMS_VIEW_DATA)) {
         std::string viewDataString = want.GetStringParam(WANT_PARAMS_VIEW_DATA);
         if (viewDataString.empty()) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "View data is empty.");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "empty view data");
             return jsObject;
         }
 
@@ -290,11 +295,11 @@ napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, con
     if (want.HasParameter(WANT_PARAMS_CUSTOM_DATA)) {
         std::string customDataString = want.GetStringParam(WANT_PARAMS_CUSTOM_DATA);
         if (customDataString.empty()) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Custom data is empty.");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "empty custom data");
             return jsObject;
         }
         if (!AAFwk::WantParamWrapper::ValidateStr(customDataString)) {
-            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Custom data string is invalid.");
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "invalid Custom data string");
             return jsObject;
         }
         AAFwk::WantParams param = AAFwk::WantParamWrapper::ParseWantParams(customDataString);
@@ -311,13 +316,13 @@ napi_value JsAutoFillExtensionUtil::WrapUpdateRequest(const AAFwk::WantParams &w
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     if (jsObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to create Object.");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to create Object");
         return nullptr;
     }
 
     std::string viewDataString = wantParams.GetStringParam(WANT_PARAMS_VIEW_DATA);
     if (viewDataString.empty()) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "View data is empty.");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "empty view data");
         return jsObject;
     }
 

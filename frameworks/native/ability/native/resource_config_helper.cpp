@@ -16,6 +16,7 @@
 #include "hilog_tag_wrapper.h"
 #include "configuration_convertor.h"
 #include "hitrace_meter.h"
+#include "application_configuration_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -67,25 +68,16 @@ void ResourceConfigHelper::SetThemeId(std::string themeId)
     themeId_ = themeId;
 }
 
-std::string ResourceConfigHelper::GetColorModeIsSetByApp()
-{
-    return colorModeIsSetByApp_;
-}
-void ResourceConfigHelper::SetColorModeIsSetByApp(std::string colorModeIsSetByApp)
-{
-    colorModeIsSetByApp_ = colorModeIsSetByApp;
-}
-
 void ResourceConfigHelper::UpdateResConfig(
     const AppExecFwk::Configuration &configuration, std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
 {
     if (resourceManager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Resource manager is invalid.");
+        TAG_LOGE(AAFwkTag::ABILITY, "invalid Resource manager");
         return;
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (resConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Create res config failed.");
+        TAG_LOGE(AAFwkTag::ABILITY, "create resConfig failed");
         return;
     }
     resourceManager->GetResConfig(*resConfig);
@@ -93,13 +85,16 @@ void ResourceConfigHelper::UpdateResConfig(
     if (!language_.empty()) {
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(language_, status);
-        TAG_LOGD(AAFwkTag::ABILITY, "Get forLanguageTag return[%{public}d].", static_cast<int>(status));
-        if (status == U_ZERO_ERROR) {
+        TAG_LOGD(AAFwkTag::ABILITY, "get forLanguageTag return[%{public}d]", static_cast<int>(status));
+        SetLevel curSetLevel = ApplicationConfigurationManager::GetInstance().GetLanguageSetLevel();
+        if (status == U_ZERO_ERROR && curSetLevel < SetLevel::Application) {
             resConfig->SetLocaleInfo(locale);
+        } else if (status == U_ZERO_ERROR) {
+            resConfig->SetPreferredLocaleInfo(locale);
         }
         const icu::Locale *localeInfo = resConfig->GetLocaleInfo();
         if (localeInfo != nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITY, "Update config, language: %{public}s, script: %{public}s,"
+            TAG_LOGD(AAFwkTag::ABILITY, "update config, language: %{public}s, script: %{public}s,"
             " region: %{public}s", localeInfo->getLanguage(), localeInfo->getScript(), localeInfo->getCountry());
         }
     }
@@ -108,17 +103,17 @@ void ResourceConfigHelper::UpdateResConfig(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "resourceManager->UpdateResConfig");
     Global::Resource::RState ret = resourceManager->UpdateResConfig(*resConfig);
     if (ret != Global::Resource::RState::SUCCESS) {
-        TAG_LOGE(AAFwkTag::ABILITY, "Update resource config failed with %{public}d.", static_cast<int>(ret));
+        TAG_LOGE(AAFwkTag::ABILITY, "update resConfig failed:%{public}d", static_cast<int>(ret));
         return;
     }
-    TAG_LOGD(AAFwkTag::ABILITY, "Current colorMode: %{public}d, hasPointerDevice: %{public}d.",
+    TAG_LOGD(AAFwkTag::ABILITY, "current colorMode: %{public}d, hasPointerDevice: %{public}d",
              resConfig->GetColorMode(), resConfig->GetInputDevice());
 }
 
 void ResourceConfigHelper::UpdateResConfig(std::unique_ptr<Global::Resource::ResConfig> &resConfig)
 {
     if (resConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "resConfig is nullptr!");
+        TAG_LOGE(AAFwkTag::ABILITY, "null resConfig");
         return;
     }
     if (!colormode_.empty()) {
@@ -127,7 +122,7 @@ void ResourceConfigHelper::UpdateResConfig(std::unique_ptr<Global::Resource::Res
     if (!hasPointerDevice_.empty()) {
         resConfig->SetInputDevice(AppExecFwk::ConvertHasPointerDevice(hasPointerDevice_));
     }
-    if (!colorModeIsSetByApp_.empty()) {
+    if (ApplicationConfigurationManager::GetInstance().ColorModeHasSetByApplication()) {
         TAG_LOGD(AAFwkTag::ABILITY, "set app true");
         resConfig->SetAppColorMode(true);
     }
@@ -159,7 +154,7 @@ bool ResourceConfigHelper::ConvertStringToUint32(std::string source, uint32_t &r
     try {
         result = static_cast<uint32_t>(std::stoi(source));
     } catch (...) {
-        TAG_LOGW(AAFwkTag::ABILITY, "source:%{public}s is invalid.", source.c_str());
+        TAG_LOGW(AAFwkTag::ABILITY, "invalid source:%{public}s", source.c_str());
         return false;
     }
     return true;

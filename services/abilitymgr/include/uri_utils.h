@@ -34,6 +34,9 @@ public:
 
     bool CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest);
 
+    std::vector<Uri> GetPermissionedUriList(const std::vector<std::string> &uriVec,
+        const std::vector<bool> &checkResults, Want &want);
+
 private:
     UriUtils();
     ~UriUtils();

@@ -462,25 +462,6 @@ HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_022, TestS
     EXPECT_EQ(IAbilityScheduler::CONTINUE_ABILITY, mock_->code_);
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-/*
- * Feature: AbilitySchedulerProxy
- * Function: BlockAbility
- * SubFunction: NA
- * FunctionPoints: AbilitySchedulerProxy BlockAbility
- * EnvConditions: NA
- * CaseDescription: verify BlockAbility Normal case
- */
-HWTEST_F(AbilitySchedulerProxyTest, ability_scheduler_proxy_operating_023, TestSize.Level1)
-{
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilitySchedulerMock::InvokeSendRequest));
-    abilitySchedulerProxy_->BlockAbility();
-    EXPECT_EQ(IAbilityScheduler::BLOCK_ABILITY_INNER, mock_->code_);
-}
-#endif
-
 /*
  * Feature: AbilitySchedulerProxy
  * Function: ScheduleCommandAbilityWindow

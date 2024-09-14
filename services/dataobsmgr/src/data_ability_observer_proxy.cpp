@@ -36,13 +36,13 @@ void DataAbilityObserverProxy::OnChange()
     MessageOption option(MessageOption::TF_ASYNC);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "data.WriteInterfaceToken(GetDescriptor()) return false");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");
         return;
     }
 
     int result = SendTransactCmd(IDataAbilityObserver::DATA_ABILITY_OBSERVER_CHANGE, data, reply, option);
     if (result != ERR_NONE) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "SendRequest error, result=%{public}d", result);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "error,result:%{public}d", result);
     }
 }
 
@@ -58,18 +58,18 @@ void DataAbilityObserverProxy::OnChangeExt(const ChangeInfo &changeInfo)
     MessageOption option(MessageOption::TF_ASYNC);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "data.WriteInterfaceToken(GetDescriptor()) return false");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");
         return;
     }
 
     if (!ChangeInfo::Marshalling(changeInfo, data)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "changeInfo marshalling failed");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "changeInfo marshalling fail");
         return;
     }
 
     int result = SendTransactCmd(IDataAbilityObserver::DATA_ABILITY_OBSERVER_CHANGE_EXT, data, reply, option);
     if (result != ERR_NONE) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "SendRequest error, result=%{public}d", result);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "error result:%{public}d", result);
     }
 }
 
@@ -85,19 +85,19 @@ void DataAbilityObserverProxy::OnChangePreferences(const std::string &key)
     MessageOption option(MessageOption::TF_ASYNC);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "data.WriteInterfaceToken(GetDescriptor()) return false");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write token false");
         return;
     }
 
     if (!data.WriteString(key)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "data.WriteString(key) return false");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write string false");
         return;
     }
 
     int result =
         SendTransactCmd(IDataAbilityObserver::DATA_ABILITY_OBSERVER_CHANGE_PREFERENCES, data, reply, option);
     if (result != ERR_NONE) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "SendRequest error, result=%{public}d", result);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "error result:%{public}d", result);
     }
 }
 
@@ -106,7 +106,7 @@ int32_t DataAbilityObserverProxy::SendTransactCmd(uint32_t code, MessageParcel &
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Remote is nullptr.");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null remote");
         return ERR_NULL_OBJECT;
     }
 

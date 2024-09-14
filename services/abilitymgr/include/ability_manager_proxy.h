@@ -234,6 +234,19 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * Start ui ability
+     *
+     * @param want the want of the ability to start.
+     * @param callerToken caller ability token.
+     * @param specifyTokenId The Caller ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartAbilityOnlyUIAbility(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        uint32_t specifyTokenId) override;
+
+    /**
      * Start extension ability with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
@@ -326,6 +339,14 @@ public:
      */
     virtual int BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
         const Want *resultWant, int64_t callerRequestCode) override;
+
+    /**
+     * TerminateUIServiceExtensionAbility, terminate UIServiceExtensionAbility.
+     *
+     * @param token, the token of the UIServiceExtensionAbility to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token) override;
 
     /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
@@ -577,7 +598,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearpagestack = false) override;
+    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = false) override;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -864,30 +885,6 @@ public:
      * @param callStub The callee object.
      */
     void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token) override;
-
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block ability manager service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAmsService() override;
-
-    /**
-     * Block ability.
-     *
-     * @param abilityRecordId The Ability Record Id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAbility(int32_t abilityRecordId) override;
-
-    /**
-     * Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService() override;
-    #endif
 
     /**
      * Call free install from remote.
@@ -1190,6 +1187,14 @@ public:
         std::vector<int32_t> &sessionIds) override;
 
     /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @param isAppRecovery True indicates that the app is restarted because of recovery.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
+
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1210,14 +1215,6 @@ public:
      */
     int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
-
-    /**
-     * @brief Restart app self.
-     * @param want The ability type must be UIAbility.
-     * @param isAppRecovery True indicates that the app is restarted because of recovery.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
 
     /**
      * @brief Pop-up launch of full-screen atomic service.

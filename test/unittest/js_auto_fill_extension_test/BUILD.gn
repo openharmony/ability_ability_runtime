@@ -36,6 +36,7 @@ ohos_unittest("js_auto_fill_extension_test") {
   deps = [
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:auto_fill_extension",
+    "${ability_runtime_native_path}/ability/native:ui_extension",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/icu/icu4c:shared_icuuc",

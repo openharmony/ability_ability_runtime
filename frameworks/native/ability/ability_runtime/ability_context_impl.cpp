@@ -37,9 +37,10 @@
 namespace OHOS {
 namespace AbilityRuntime {
 const size_t AbilityContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("AbilityContext"));
-const std::string START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
-const std::string UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
-const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
+constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
+constexpr const char* UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
+constexpr const char* FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
+constexpr const char* DISPOSED_PROHIBIT_BACK = "APPGALLERY_APP_DISPOSED_PROHIBIT_BACK";
 
 struct RequestResult {
     int32_t resultCode {0};
@@ -287,7 +288,7 @@ ErrCode AbilityContextImpl::StartUIServiceExtensionAbility(const AAFwk::Want& wa
 
 ErrCode AbilityContextImpl::StartServiceExtensionAbility(const AAFwk::Want& want, int32_t accountId)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "name:%{public}s %{public}s, accountId=%{public}d",
+    TAG_LOGI(AAFwkTag::CONTEXT, "name:%{public}s %{public}s, accountId=%{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), accountId);
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
         want, token_, accountId, AppExecFwk::ExtensionAbilityType::SERVICE);
@@ -319,7 +320,7 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
         if (sessionToken == nullptr) {
             return ERR_INVALID_VALUE;
         }
-        sptr<AAFwk::SessionInfo> info = new AAFwk::SessionInfo();
+        sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
         info->want = want;
         info->resultCode = resultCode;
         auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
@@ -342,7 +343,7 @@ ErrCode AbilityContextImpl::BackToCallerAbilityWithResult(const AAFwk::Want& wan
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->BackToCallerAbilityWithResult(
         token_, resultCode, &want, requestCode);
-    TAG_LOGI(AAFwkTag::CONTEXT, "ret is %{public}d", err);
+    TAG_LOGI(AAFwkTag::CONTEXT, "ret:%{public}d", err);
     return static_cast<int32_t>(err);
 }
 
@@ -413,6 +414,19 @@ ErrCode AbilityContextImpl::ConnectAbilityWithAccount(const AAFwk::Want& want, i
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     ErrCode ret =
         ConnectionManager::GetInstance().ConnectAbilityWithAccount(token_, want, accountId, connectCallback);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed, ret:%{public}d", ret);
+    }
+    return ret;
+}
+
+ErrCode AbilityContextImpl::ConnectUIServiceExtensionAbility(const AAFwk::Want& want,
+    const sptr<AbilityConnectCallback>& connectCallback)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::CONTEXT,
+        "called, name:%{public}s", abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str());
+    ErrCode ret = ConnectionManager::GetInstance().ConnectUIServiceExtensionAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed, ret:%{public}d", ret);
     }
@@ -564,9 +578,9 @@ ErrCode AbilityContextImpl::TerminateSelf()
     }
 #ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
-        TAG_LOGI(AAFwkTag::CONTEXT, "terminateSelf SCB");
+        TAG_LOGI(AAFwkTag::CONTEXT, "Terminate %{public}s", abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str());
         AAFwk::Want resultWant;
-        sptr<AAFwk::SessionInfo> info = new AAFwk::SessionInfo();
+        sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
         info->want = resultWant;
         info->resultCode = -1;
         auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
@@ -672,7 +686,7 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
 #endif // SUPPORT_SCREEN
     auto resultTask =
         [env, outTask = std::move(task)](int32_t resultCode, const AAFwk::Want &resultWant) {
-        auto retData = new RequestResult();
+        auto retData = new (std::nothrow) RequestResult();
         retData->resultCode = resultCode;
         retData->resultWant = resultWant;
         retData->task = std::move(outTask);
@@ -683,7 +697,7 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
             TAG_LOGE(AAFwkTag::CONTEXT, "null uv loop");
             return;
         }
-        auto work = new uv_work_t;
+        auto work = new (std::nothrow) uv_work_t;
         work->data = static_cast<void*>(retData);
         int rev = uv_queue_work_with_qos(
             loop,
@@ -701,7 +715,7 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
         }
     };
 
-    sptr<IRemoteObject> remoteObject = new DialogRequestCallbackImpl(std::move(resultTask));
+    sptr<IRemoteObject> remoteObject = sptr<DialogRequestCallbackImpl>::MakeSptr(std::move(resultTask));
     want.SetParam(RequestConstants::REQUEST_CALLBACK_KEY, remoteObject);
 
     auto err = AAFwk::AbilityManagerClient::GetInstance()->RequestDialogService(want, token_);
@@ -722,7 +736,7 @@ ErrCode AbilityContextImpl::RequestDialogService(AAFwk::Want &want, RequestDialo
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_WIDTH_KEY, width);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_HEIGHT_KEY, height);
 
-    sptr<IRemoteObject> remoteObject = new DialogRequestCallbackImpl(std::move(task));
+    sptr<IRemoteObject> remoteObject = sptr<DialogRequestCallbackImpl>::MakeSptr(std::move(task));
     want.SetParam(RequestConstants::REQUEST_CALLBACK_KEY, remoteObject);
 
     auto err = AAFwk::AbilityManagerClient::GetInstance()->RequestDialogService(want, token_);
@@ -783,10 +797,6 @@ ErrCode AbilityContextImpl::SetMissionContinueState(const AAFwk::ContinueState &
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "called, stage: %{public}d", state);
     auto sessionToken = GetSessionToken();
-    if (sessionToken == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null sessionToken");
-        return ERR_INVALID_VALUE;
-    }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->SetMissionContinueState(token_, state, sessionToken);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed: %{public}d", err);
@@ -984,6 +994,9 @@ ErrCode AbilityContextImpl::CreateModalUIExtensionWithApp(const AAFwk::Want &wan
     };
     Ace::ModalUIExtensionConfig config;
     config.prohibitedRemoveByRouter = true;
+    if (want.GetBoolParam(DISPOSED_PROHIBIT_BACK, false)) {
+        config.isProhibitBack = true;
+    }
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed");
