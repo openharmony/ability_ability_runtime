@@ -1026,13 +1026,15 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
         auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
         CheckCallerFromBackground(abilityRecord, sessionInfo);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
+            sessionInfo->want.GetElement().GetAbilityName().c_str());
         return static_cast<int>(callerSession->PendingSessionActivation(sessionInfo));
     }
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
     CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
     sessionInfo->canStartAbilityFromBackground = true;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s",
+        sessionInfo->want.GetElement().GetAbilityName().c_str());
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
 }
 
