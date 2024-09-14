@@ -7401,7 +7401,7 @@ void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::Bund
     }
 }
 
-void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
+void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (bundleName.empty()) {
@@ -7422,7 +7422,8 @@ void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, 
 
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
-        if (appRecord != nullptr && appRecord->GetBundleName() == bundleName) {
+        if (appRecord != nullptr && appRecord->GetBundleName() == bundleName &&
+            (uid == 0 || appRecord->GetUid() == uid)) {
             TAG_LOGD(AAFwkTag::APPMGR, "%{public}s update state: %{public}d",
                 bundleName.c_str(), static_cast<int32_t>(enable));
             appRecord->SetKeepAliveEnableState(enable);
@@ -7570,7 +7571,7 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
         TAG_LOGI(AAFwkTag::APPMGR, "get record(hostPid:%{public}d) fail", hostPid);
         return ERR_INVALID_OPERATION;
     }
-    
+
     if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess() &&
         !AAFwk::AppUtils::GetInstance().IsAllowNativeChildProcess(appRecord->GetAppIdentifier())) {
         TAG_LOGE(AAFwkTag::APPMGR, "unSupport native child process");
