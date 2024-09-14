@@ -19,13 +19,15 @@
 #include <string>
 
 #include "bundlemgr/bundle_mgr_interface.h"
+#include "element_name.h"
+#include "insight_intent_execute_param.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 class InsightIntentUtils {
 public:
-    static std::string GetSrcEntry(const std::string &bundleName, const std::string &moduleName,
-        const std::string &intentName);
+    static uint32_t GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
+        const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

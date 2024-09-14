@@ -90,9 +90,11 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     if (result != ERR_OK) {
         return result;
     }
-    auto srcEntry = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName.GetBundleName(),
-        elementName.GetModuleName(), want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME));
-    if (srcEntry.empty()) {
+
+    std::string srcEntry;
+    auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName,
+        want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME), executeMode, srcEntry);
+    if (ret != ERR_OK || srcEntry.empty()) {
         TAG_LOGE(AAFwkTag::INTENT, "empty srcEntry");
         return ERR_INVALID_VALUE;
     }
@@ -222,11 +224,13 @@ int32_t InsightIntentExecuteManager::GenerateWant(
         }
     }
 
-    auto srcEntry = AbilityRuntime::InsightIntentUtils::GetSrcEntry(param->bundleName_, param->moduleName_,
-        param->insightIntentName_);
+    std::string srcEntry;
+    auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(want.GetElement(), param->insightIntentName_,
+        static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry);
     if (!srcEntry.empty()) {
         want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
-    } else if (param->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) {
+    } else if (ret == ERR_INSIGHT_INTENT_GET_PROFILE_FAILED &&
+        param->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) {
         TAG_LOGI(AAFwkTag::INTENT, "Insight intent srcEntry invalid, may need free install on demand");
         std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count());
