@@ -358,6 +358,7 @@ enum {
      * Result(2097219) for prouct application boot setting.
      */
     ERR_NOT_SUPPORTED_PRODUCT_TYPE,
+
     /**
      * Result(2097220) for starting invalid component.
      */
@@ -447,7 +448,7 @@ enum {
      * Native error(2097237) for ability state check failed.
      */
     ERR_NATIVE_ABILITY_STATE_CHECK_FAILED,
-    
+
     /**
      * Native error(2097238) for kill process not exist.
      */
@@ -569,7 +570,7 @@ enum {
      * Result (2097262) caller not exists.
      */
     ERR_CALLER_NOT_EXISTS = 2097262,
-    
+
     /*
      * Result (2097263) Not support back to caller.
      */
@@ -594,6 +595,11 @@ enum {
      * Result (2097268) for native child process reach limit.
      */
     ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS = 2097268,
+
+    /*
+     * Result (2097269) for failed to get profile when execute insight intent.
+     */
+    ERR_INSIGHT_INTENT_GET_PROFILE_FAILED = 2097269,
 
     /**
      * Native error(3000000) for target bundle not exist.

@@ -17,10 +17,11 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-std::string InsightIntentUtils::GetSrcEntry(const std::string &bundleName, const std::string &moduleName,
-    const std::string &intentName)
+uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
+    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry)
 {
-    return "test.srcEntry";
+    srcEntry = "test.srcEntry";
+    return ERR_OK;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
