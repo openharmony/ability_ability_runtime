@@ -26,6 +26,7 @@
 #include "mock_native_token.h"
 #include "mock_sa_call.h"
 #include "ipc_skeleton.h"
+#include "parameters.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -379,6 +380,42 @@ HWTEST_F(AppMgrServiceTest, GetAllRenderProcesses_002, TestSize.Level0)
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     int32_t res = appMgrService->GetAllRenderProcesses(info);
+    EXPECT_NE(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllChildrenProcesses
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllChildrenProcesses
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllChildrenProcesses
+ */
+HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_001, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    std::vector<ChildProcessInfo> info;
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->GetAllChildrenProcesses(info);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllChildrenProcesses
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllChildrenProcesses
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllChildrenProcesses
+ */
+HWTEST_F(AppMgrServiceTest, GetAllChildrenProcesses_002, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    std::vector<ChildProcessInfo> info;
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    int32_t res = appMgrService->GetAllChildrenProcesses(info);
     EXPECT_NE(res, ERR_INVALID_OPERATION);
 }
 
@@ -997,42 +1034,6 @@ HWTEST_F(AppMgrServiceTest, UnregisterConfigurationObserver_002, TestSize.Level0
     int32_t res = appMgrService->UnregisterConfigurationObserver(observer);
     EXPECT_NE(res, ERR_INVALID_OPERATION);
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-/*
- * Feature: AppMgrService
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AppMgrService BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify BlockAppService
- */
-HWTEST_F(AppMgrServiceTest, BlockAppService_001, TestSize.Level0)
-{
-    auto appMgrService = std::make_shared<AppMgrService>();
-    appMgrService->SetInnerService(nullptr);
-    int res = appMgrService->BlockAppService();
-    EXPECT_EQ(res, ERR_INVALID_OPERATION);
-}
-
-/*
- * Feature: AppMgrService
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AppMgrService BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify BlockAppService
- */
-HWTEST_F(AppMgrServiceTest, BlockAppService_002, TestSize.Level0)
-{
-    auto appMgrService = std::make_shared<AppMgrService>();
-    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
-    appMgrService->taskHandler_ = taskHandler_;
-    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
-    int res = appMgrService->BlockAppService();
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
-}
-#endif
 
 /*
  * Feature: AppMgrService
@@ -1749,7 +1750,12 @@ HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_002, TestSize.Level0)
         recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
     }
     res = appMgrService->SetSupportedProcessCacheSelf(false);
-    EXPECT_EQ(res, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
+    if (OHOS::system::GetIntParameter<int>(MAX_PROC_CACHE_NUM, 0) <= 0) {
+        EXPECT_EQ(res, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(res, ERR_OK);
+    }
 }
 
 /*
@@ -1817,6 +1823,49 @@ HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0100, TestSize.Level1)
     sptr<IRemoteObject> callback;
     int32_t res = appMgrService->StartNativeChildProcess("test.so", 1, callback);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetSupportedProcessCachePids
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetSupportedProcessCachePids
+ * EnvConditions: NA
+ * CaseDescription: Verify GetSupportedProcessCachePids
+ */
+HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_001, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+
+    std::string bundleName = "testBundleName";
+    std::vector<int32_t> pidList;
+    int32_t res = appMgrService->GetSupportedProcessCachePids(bundleName, pidList);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetSupportedProcessCachePids
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetSupportedProcessCachePids
+ * EnvConditions: NA
+ * CaseDescription: Verify GetSupportedProcessCachePids
+ */
+HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level0)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+
+    std::string bundleName = "testBundleName";
+    std::vector<int32_t> pidList;
+    int32_t res = appMgrService->GetSupportedProcessCachePids(bundleName, pidList);
+    EXPECT_EQ(res, AAFwk::CHECK_PERMISSION_FAILED);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -20,10 +20,12 @@
 #include "ui_service_extension.h"
 #include "ui_service_extension_module_loader.h"
 #include "ui_service_extension_context.h"
+#include "ability_manager_client.h"
 #undef private
 #undef protected
 
 #include "mock_ability_token.h"
+#include "mock_ability_manager_service.h"
 #include "ability_handler.h"
 #include "ohos_application.h"
 #include "runtime.h"
@@ -33,6 +35,16 @@ using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace AbilityRuntime {
+class MockWindow : public Rosen::Window {
+public:
+    virtual Ace::UIContent* GetUIContent() const
+    {
+        return uiContent_.get();
+    }
+
+    std::unique_ptr<Ace::UIContent> uiContent_ = Ace::UIContent::Create(nullptr, nullptr);
+};
+
 class UIServiceExtensionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -63,7 +75,8 @@ HWTEST_F(UIServiceExtensionTest, Create_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "Create_0100 start");
 
     std::unique_ptr<Runtime> runtime{nullptr};
-    UIServiceExtension::Create(runtime);
+    auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
+    EXPECT_TRUE(uIServiceExtensionPtr != nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Create_0100 end");
 }
@@ -78,6 +91,7 @@ HWTEST_F(UIServiceExtensionTest, CreateAndInitContext_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "CreateAndInitContext_0100 start");
 
     Runtime::Options options;
+    options.lang = Runtime::Language::JS;
     auto runtime = Runtime::Create(options);
     auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
 
@@ -89,8 +103,8 @@ HWTEST_F(UIServiceExtensionTest, CreateAndInitContext_0100, TestSize.Level1)
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
 
-    uIServiceExtensionPtr->CreateAndInitContext(record, application, handler, token);
-
+    auto result = uIServiceExtensionPtr->CreateAndInitContext(record, application, handler, token);
+    EXPECT_NE(result, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "CreateAndInitContext_0100 end");
 }
@@ -105,6 +119,7 @@ HWTEST_F(UIServiceExtensionTest, Init_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "Init_0100 start");
 
     Runtime::Options options;
+    options.lang = Runtime::Language::CJ;
     auto runtime = Runtime::Create(options);
     auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
 
@@ -117,6 +132,7 @@ HWTEST_F(UIServiceExtensionTest, Init_0100, TestSize.Level1)
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
 
     uIServiceExtensionPtr->Init(record, application, handler, token);
+    EXPECT_TRUE(uIServiceExtensionPtr != nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Init_0100 end");
 }
@@ -133,8 +149,12 @@ HWTEST_F(UIServiceExtensionTest, StartAbility_0100, TestSize.Level1)
     AAFwk::Want want;
     AAFwk::StartOptions startOptions;
 
+    sptr<AAFwk::MockAbilityManagerService> porxyNew = new (std::nothrow) AAFwk::MockAbilityManagerService();
+    AbilityManagerClient::GetInstance()->proxy_ = porxyNew;
+
     UIServiceExtensionContext uiServiceExtensionContext;
-    uiServiceExtensionContext.StartAbility(want, startOptions);
+    auto result = uiServiceExtensionContext.StartAbility(want, startOptions);
+    EXPECT_EQ(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "StartAbility_0100 end");
 }
@@ -149,7 +169,8 @@ HWTEST_F(UIServiceExtensionTest, TerminateSelf_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "TerminateSelf_0100 start");
 
     UIServiceExtensionContext uiServiceExtensionContext;
-    uiServiceExtensionContext.TerminateSelf();
+    auto result = uiServiceExtensionContext.TerminateSelf();
+    EXPECT_EQ(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "TerminateSelf_0100 end");
 }
@@ -164,7 +185,8 @@ HWTEST_F(UIServiceExtensionTest, GetWindow_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "GetWindow_0100 start");
 
     UIServiceExtensionContext uiServiceExtensionContext;
-    uiServiceExtensionContext.GetWindow();
+    auto result = uiServiceExtensionContext.GetWindow();
+    EXPECT_TRUE(result == nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "GetWindow_0100 end");
 }
@@ -179,6 +201,12 @@ HWTEST_F(UIServiceExtensionTest, GetUIContent_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "GetUIContent_0100 start");
 
     UIServiceExtensionContext uiServiceExtensionContext;
+    uiServiceExtensionContext.SetWindow(nullptr);
+    auto result = uiServiceExtensionContext.GetUIContent();
+    EXPECT_EQ(result, nullptr);
+
+    sptr<Rosen::Window> window = new Rosen::Window();
+    uiServiceExtensionContext.SetWindow(window);
     uiServiceExtensionContext.GetUIContent();
 
     TAG_LOGI(AAFwkTag::TEST, "GetUIContent_0100 end");
@@ -195,12 +223,83 @@ HWTEST_F(UIServiceExtensionTest, StartAbilityByType_0100, TestSize.Level1)
 
     std::string type;
     AAFwk::WantParams wantParam;
-    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks;
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks{nullptr};
 
     UIServiceExtensionContext uiServiceExtensionContext;
-    uiServiceExtensionContext.StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    auto result = uiServiceExtensionContext.StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0100 end");
+}
+
+/**
+ * @tc.number: StartAbilityByType_0200
+ * @tc.name: UIServiceExtension StartAbilityByType
+ * @tc.desc: UIServiceExtension StartAbilityByType.
+ */
+HWTEST_F(UIServiceExtensionTest, StartAbilityByType_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0200 start");
+
+    std::string type;
+    AAFwk::WantParams wantParam;
+    napi_env env;
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks = std::make_shared<JsUIExtensionCallback>(env);
+
+    UIServiceExtensionContext uiServiceExtensionContext;
+    uiServiceExtensionContext.SetWindow(nullptr);
+    auto result = uiServiceExtensionContext.StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0200 end");
+}
+
+/**
+ * @tc.number: StartAbilityByType_0300
+ * @tc.name: UIServiceExtension StartAbilityByType
+ * @tc.desc: UIServiceExtension StartAbilityByType.
+ */
+HWTEST_F(UIServiceExtensionTest, StartAbilityByType_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0300 start");
+
+    std::string type;
+    AAFwk::WantParams wantParam;
+    napi_env env;
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks = std::make_shared<JsUIExtensionCallback>(env);
+    sptr<Rosen::Window> window = new MockWindow();
+
+    UIServiceExtensionContext uiServiceExtensionContext;
+    uiServiceExtensionContext.SetWindow(window);
+    auto result = uiServiceExtensionContext.StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0300 end");
+}
+
+/**
+ * @tc.number: StartAbilityByType_0400
+ * @tc.name: UIServiceExtension StartAbilityByType
+ * @tc.desc: UIServiceExtension StartAbilityByType.
+ */
+HWTEST_F(UIServiceExtensionTest, StartAbilityByType_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0400 start");
+
+    std::string type;
+    AAFwk::WantParams wantParam;
+    const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
+    wantParam.SetParam(FLAG_AUTH_READ_URI_PERMISSION, 0);
+    napi_env env;
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallbacks = std::make_shared<JsUIExtensionCallback>(env);
+    sptr<Rosen::Window> window = new MockWindow();
+
+    UIServiceExtensionContext uiServiceExtensionContext;
+    uiServiceExtensionContext.SetWindow(window);
+    auto result = uiServiceExtensionContext.StartAbilityByType(type, wantParam, uiExtensionCallbacks);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0400 end");
 }
 
 /**
@@ -212,17 +311,93 @@ HWTEST_F(UIServiceExtensionTest, GetWindowOption_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0100 start");
 
-    AAFwk::Want want;
     std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig
         = std::make_shared<Rosen::ExtensionWindowConfig>();
+    extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SUB_WINDOW;
+    extensionWindowConfig->subWindowOptions.isModal = true;
+    extensionWindowConfig->subWindowOptions.isTopmost = true;
+    int32_t hostWindowId{1};
+
+    Runtime::Options options;
+    auto runtime = Runtime::Create(options);
+    auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
+    auto result = uIServiceExtensionPtr->GetWindowOption(extensionWindowConfig, hostWindowId);
+    EXPECT_NE(result, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0100 end");
+}
+
+/**
+ * @tc.number: GetWindowOption_0200
+ * @tc.name: UIServiceExtension GetWindowOption
+ * @tc.desc: UIServiceExtension GetWindowOption.
+ */
+HWTEST_F(UIServiceExtensionTest, GetWindowOption_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0200 start");
+
+    std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig
+        = std::make_shared<Rosen::ExtensionWindowConfig>();
+    extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SUB_WINDOW;
+    extensionWindowConfig->subWindowOptions.isModal = false;
+    extensionWindowConfig->subWindowOptions.isTopmost = true;
+    int32_t hostWindowId{100};
+
+    Runtime::Options options;
+    auto runtime = Runtime::Create(options);
+    auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
+    auto result = uIServiceExtensionPtr->GetWindowOption(extensionWindowConfig, hostWindowId);
+    EXPECT_NE(result, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0200 end");
+}
+
+/**
+ * @tc.number: GetWindowOption_0300
+ * @tc.name: UIServiceExtension GetWindowOption
+ * @tc.desc: UIServiceExtension GetWindowOption.
+ */
+HWTEST_F(UIServiceExtensionTest, GetWindowOption_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0300 start");
+
+    std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig
+        = std::make_shared<Rosen::ExtensionWindowConfig>();
+    extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SUB_WINDOW;
+    extensionWindowConfig->subWindowOptions.isModal = true;
+    extensionWindowConfig->subWindowOptions.isTopmost = false;
+    int32_t hostWindowId{100};
+
+    Runtime::Options options;
+    auto runtime = Runtime::Create(options);
+    auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
+    auto result = uIServiceExtensionPtr->GetWindowOption(extensionWindowConfig, hostWindowId);
+    EXPECT_NE(result, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0300 end");
+}
+
+/**
+ * @tc.number: GetWindowOption_0400
+ * @tc.name: UIServiceExtension GetWindowOption
+ * @tc.desc: UIServiceExtension GetWindowOption.
+ */
+HWTEST_F(UIServiceExtensionTest, GetWindowOption_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0400 start");
+
+    std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig
+        = std::make_shared<Rosen::ExtensionWindowConfig>();
+    extensionWindowConfig->windowAttribute = Rosen::ExtensionWindowAttribute::SYSTEM_WINDOW;
     int32_t hostWindowId{0};
 
     Runtime::Options options;
     auto runtime = Runtime::Create(options);
     auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
-    uIServiceExtensionPtr->GetWindowOption(want, extensionWindowConfig, hostWindowId);
+    auto result = uIServiceExtensionPtr->GetWindowOption(extensionWindowConfig, hostWindowId);
+    EXPECT_EQ(result, nullptr);
 
-    TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0100 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetWindowOption_0400 end");
 }
 
 /**
@@ -238,6 +413,7 @@ HWTEST_F(UIServiceExtensionTest, SetWindow_0100, TestSize.Level1)
 
     UIServiceExtensionContext uiServiceExtensionContext;
     uiServiceExtensionContext.SetWindow(window);
+    EXPECT_TRUE(window != nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "SetWindow_0100 end");
 }

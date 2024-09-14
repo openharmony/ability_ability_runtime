@@ -25,12 +25,12 @@
 #include "js_extension_window.h"
 #include "js_runtime_utils.h"
 #include "js_ui_extension_context.h"
-#include "string_wrapper.h"
 #include "napi_common_start_options.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include "native_engine.h"
 #include "native_value.h"
+#include "string_wrapper.h"
 #include "tokenid_kit.h"
 #ifdef SUPPORT_SCREEN
 #include "ui_content.h"
@@ -83,7 +83,7 @@ void AbilityResultListeners::RemoveListener(const uint64_t &uiExtensionComponent
 
 void AbilityResultListeners::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
-    for (auto item:listeners_) {
+    for (auto &item : listeners_) {
         if (item.second && item.second->IsMatch(requestCode)) {
             item.second->OnAbilityResult(requestCode, resultCode, resultData);
             return;
@@ -134,10 +134,8 @@ JsUIExtensionContentSession::JsUIExtensionContentSession(
     : sessionInfo_(sessionInfo), uiWindow_(uiWindow), context_(context)
 {
     listener_ = std::make_shared<UISessionAbilityResultListener>();
-    if (abilityResultListeners == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "abilityResultListeners is nullptr");
-    } else if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo is nullptr");
+    if (abilityResultListeners == nullptr || sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "params is nullptr");
     } else {
         abilityResultListeners->AddListener(sessionInfo->uiExtensionComponentId, listener_);
     }

@@ -36,7 +36,7 @@ void AMSEventHandler::ProcessEvent(const AAFwk::EventWrap &event)
 {
     auto appManager = appMgr_.lock();
     if (!appManager) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app manager is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appManager");
         return;
     }
     appManager->HandleTimeOut(event);

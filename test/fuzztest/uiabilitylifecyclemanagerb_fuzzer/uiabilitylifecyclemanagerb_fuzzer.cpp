@@ -106,10 +106,6 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     uIAbilityLifecycleManager->GetAbilityRunningInfos(info, boolParam);
     int intParam = static_cast<int>(GetU32Data(data));
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    uIAbilityLifecycleManager->BlockAbility(intParam);
-    #endif
-
     std::vector<std::string> info1;
     uIAbilityLifecycleManager->Dump(info1);
     uIAbilityLifecycleManager->DumpMissionList(info1, boolParam, strParam);
@@ -125,7 +121,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     uIAbilityLifecycleManager->UpdateSessionInfoBySCB(sessionInfos, sessionIds);
     uIAbilityLifecycleManager->IsCallerInStatusBar();
     std::vector<int32_t> pids;
-    uIAbilityLifecycleManager->KillProcessWithPrepareTerminate(pids);
+    uIAbilityLifecycleManager->TryPrepareTerminateByPids(pids);
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
     uIAbilityLifecycleManager->ChangeAbilityVisibility(token, boolParam);
     sptr<SessionInfo> sessionInfo;

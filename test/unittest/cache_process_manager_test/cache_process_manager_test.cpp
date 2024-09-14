@@ -85,6 +85,7 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_QueryEnableProcessCache_01
     auto cacheProcMgr = std::make_shared<CacheProcessManager>();
     EXPECT_NE(cacheProcMgr, nullptr);
     cacheProcMgr->maxProcCacheNum_ = 0;
+    cacheProcMgr->resourceCacheProcessEnable_ = false;
     EXPECT_EQ(cacheProcMgr->QueryEnableProcessCache(), false);
 }
 
@@ -98,6 +99,7 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_QueryEnableProcessCache_02
     auto cacheProcMgr = std::make_shared<CacheProcessManager>();
     EXPECT_NE(cacheProcMgr, nullptr);
     cacheProcMgr->maxProcCacheNum_ = 100;
+    cacheProcMgr->resourceCacheProcessEnable_ = false;
     EXPECT_EQ(cacheProcMgr->QueryEnableProcessCache(), true);
 }
 
@@ -131,6 +133,8 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_PenddingCacheProcess_0100,
     appRecord->SetKeepAliveEnableState(true);
     appRecord->SetSingleton(true);
     appRecord->SetEmptyKeepAliveAppState(true);
+    appRecord->SetKeepAliveBundle(true);
+    appRecord->SetMainProcess(true);
     EXPECT_EQ(cacheProcMgr->PenddingCacheProcess(appRecord), false);
     // nullptr not allowed
     std::shared_ptr<AppRunningRecord> appRecord2 = nullptr;
@@ -268,6 +272,8 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_IsAppSupportProcessCache_0
     EXPECT_NE(appRecord3, nullptr);
     EXPECT_EQ(cacheProcMgr->IsAppSupportProcessCache(appRecord3), false);
     appRecord3->SetSupportedProcessCache(true);
+    EXPECT_EQ(cacheProcMgr->IsAppSupportProcessCache(appRecord3), false);
+    appRecord3->SetUIAbilityLaunched(true);
     EXPECT_EQ(cacheProcMgr->IsAppSupportProcessCache(appRecord3), true);
     appRecord3->procCacheSupportState_ = SupportProcessCacheState::NOT_SUPPORT;
     EXPECT_EQ(cacheProcMgr->IsAppSupportProcessCache(appRecord3), false);
@@ -336,6 +342,7 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_IsAppShouldCache_0100, Tes
 
     // Not enable
     cacheProcMgr->maxProcCacheNum_ = 0;
+    cacheProcMgr->resourceCacheProcessEnable_ = false;
     EXPECT_EQ(cacheProcMgr->IsAppShouldCache(nullptr), false);
 
     // Cached app

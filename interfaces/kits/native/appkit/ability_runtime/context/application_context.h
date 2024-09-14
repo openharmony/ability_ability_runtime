@@ -111,6 +111,7 @@ public:
     void SetColorMode(int32_t colorMode);
     void SetLanguage(const std::string &language);
     void SetFont(const std::string &font);
+    bool SetFontSizeScale(double fontSizeScale);
     void SetMcc(const std::string &mcc);
     void SetMnc(const std::string &mnc);
     void ClearUpApplicationData();
@@ -120,7 +121,7 @@ public:
     void AppHasDarkRes(bool &darkRes);
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
-    void KillProcessBySelf(const bool clearpagestack = false);
+    void KillProcessBySelf(const bool clearPageStack = false);
     int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
     int32_t RestartApp(const AAFwk::Want& want);
 

@@ -18,10 +18,19 @@
 
 #include "ability_info.h"
 #include "app_running_record.h"
+#include "child_process_record.h"
 #include "event_report.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+enum class ProcessStartFailedReason {
+    UNKNOWN = 0,
+    APPSPAWN_FAILED = 1,
+    CREATE_START_MSG_FAILED = 2,
+    GET_SPAWN_CLIENT_FAILED = 3,
+    GENERATE_RENDER_UID_FAILED = 4,
+    CHECK_CHILD_FDS_FAILED = 5,
+};
 
 class AppMgrEventUtil {
 public:
@@ -31,6 +40,15 @@ public:
     
     static bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &callerAppRecord,
         const std::shared_ptr<AppRunningRecord> &appRecord, AAFwk::EventInfo &eventInfo);
+
+    static bool SendProcessStartFailedEvent(std::shared_ptr<AppRunningRecord> callerAppRecord,
+        std::shared_ptr<AppRunningRecord> appRecord, AAFwk::EventInfo &eventInfo);
+
+    static bool SendChildProcessStartFailedEvent(std::shared_ptr<ChildProcessRecord> childRecord,
+        ProcessStartFailedReason reason, int32_t subReason);
+
+    static bool SendRenderProcessStartFailedEvent(std::shared_ptr<RenderRecord> renderRecord,
+        ProcessStartFailedReason reason, int32_t subReason);
     
     static void SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid, int64_t restartTime);
 
@@ -39,6 +57,9 @@ private:
 
     static void UpdateStartupType(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &abilityType,
         int32_t &extensionType);
+
+    static void UpdateCallerInfo(AAFwk::EventInfo &eventInfo, std::shared_ptr<AppRunningRecord> callerAppRecord,
+        std::shared_ptr<AppRunningRecord> appRecord);
 };
 }
 }

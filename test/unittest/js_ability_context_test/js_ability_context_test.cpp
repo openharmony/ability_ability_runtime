@@ -21,12 +21,19 @@
 #include "ability_business_error.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
+#define private public
+#define protected public
 #include "js_ability_context.h"
+#undef private
+#undef protected
 #include "js_runtime_utils.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/impl/ark/ark_native_deferred.h"
 #include "native_engine/native_engine.h"
+#include "js_runtime_lite.h"
 #include "napi_common_want.h"
+
+#include "mock_parse_requestcode.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -96,7 +103,7 @@ public:
 
 class MockAbilityContextImpl : public AbilityContextImpl {
 public:
-    virtual ErrCode ConnectAbility(const AAFwk::Want &want,
+    virtual ErrCode ConnectUIServiceExtensionAbility(const AAFwk::Want &want,
         const sptr<AbilityConnectCallback> &connectCallback) override
     {
         callback_ = connectCallback;
@@ -361,6 +368,73 @@ HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_0105, TestSize.Level1
         engine->lastException_.Empty();
     }
     GTEST_LOG_(INFO) << "AbilityRuntime_AbilityContext_0105 end";
+}
+
+HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_RequestCodeFromStringToInt64_0100, TestSize.Level1)
+{
+    // requestCode is too long
+    std::string requestCodeStr1 = "1000000000000001";
+    auto requestCode = RequestCodeFromStringToInt64(requestCodeStr1);
+    EXPECT_EQ(requestCode, 0);
+    
+    // requestCode not match
+    std::string requestCodeStr2 = "001000";
+    requestCode = RequestCodeFromStringToInt64(requestCodeStr2);
+    EXPECT_EQ(requestCode, 0);
+
+    std::string requestCodeStr3 = "aaa100";
+    requestCode = RequestCodeFromStringToInt64(requestCodeStr3);
+    EXPECT_EQ(requestCode, 0);
+
+    std::string requestCodeStr4 = "100aaa";
+    requestCode = RequestCodeFromStringToInt64(requestCodeStr4);
+    EXPECT_EQ(requestCode, 0);
+
+    std::string requestCodeStr5 = "-1";
+    requestCode = RequestCodeFromStringToInt64(requestCodeStr5);
+    EXPECT_EQ(requestCode, 0);
+    
+    // requestCode is too large
+    std::string requestCodeStr6 = "562949953421312";
+    requestCode = RequestCodeFromStringToInt64(requestCodeStr6);
+    EXPECT_EQ(requestCode, 0);
+
+    // requestCode is valid
+    std::string requestCodeStr7 = "562949953421311";
+    requestCode = RequestCodeFromStringToInt64(requestCodeStr7);
+    EXPECT_EQ(requestCode, 562949953421311);
+
+    std::string requestCodeStr8 = "0";
+    requestCode = RequestCodeFromStringToInt64(requestCodeStr8);
+    EXPECT_EQ(requestCode, 0);
+
+    std::string requestCodeStr9 = "1";
+    requestCode = RequestCodeFromStringToInt64(requestCodeStr9);
+    EXPECT_EQ(requestCode, 1);
+}
+
+HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_StartUIServiceExtension_0100, TestSize.Level1)
+{
+    napi_env env{nullptr};
+    napi_callback_info info{nullptr};
+    jsAbilityContext_->StartUIServiceExtension(env, info);
+    EXPECT_EQ(info, nullptr);
+}
+
+HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_OnStartUIServiceExtension_0100, TestSize.Level1)
+{
+    OHOS::AbilityRuntime::Runtime::Options options;
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
+    EXPECT_EQ(err, napi_status::napi_ok);
+    napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+
+    NapiCallbackInfo info{1};
+    AAFwk::Want want;
+    info.argv[0] = OHOS::AppExecFwk::WrapWant(env, want);
+    jsAbilityContext_->OnStartUIServiceExtension(env, info);
+
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 }
 
 }  // namespace AAFwk

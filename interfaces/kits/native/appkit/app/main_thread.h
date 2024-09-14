@@ -363,6 +363,8 @@ private:
 
     void HandleScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
 
+    void HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
+
     /**
      *
      * @brief Schedule the application process exit safely.
@@ -423,6 +425,7 @@ private:
      *
      */
     void HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCacheProcess = false);
+    void AfterCleanAbilityGC();
 
     /**
      *
@@ -670,7 +673,7 @@ private:
      */
     void LoadAbilityLibrary(const std::vector<std::string> &libraryPaths);
     void LoadAceAbilityLibrary();
-    
+
     void CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
     void LoadNativeLiabrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
 

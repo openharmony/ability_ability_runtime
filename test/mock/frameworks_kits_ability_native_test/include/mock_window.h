@@ -74,7 +74,7 @@ public:
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) {return WMError::WM_OK;}
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false,
         bool isFromInnerkits = true) {return WMError::WM_OK;}
-    virtual WMError MoveTo(int32_t x, int32_t y) {return WMError::WM_OK;}
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) {return WMError::WM_OK;}
     virtual WMError Resize(uint32_t width, uint32_t height) {return WMError::WM_OK;}
     virtual WMError SetKeepScreenOn(bool keepScreenOn) {return WMError::WM_OK;}
     virtual bool IsKeepScreenOn() const {return false;}
@@ -178,7 +178,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() {return nullptr;}
     virtual WMError NotifyMemoryLevel(int32_t level) {return WMError::WM_OK;}
     virtual bool IsAllowHaveSystemSubWindow() {return false;}
-    virtual WmErrorCode RaiseToAppTop() {return WmErrorCode::WM_OK;}
+    virtual WMError RaiseToAppTop() {return WMError::WM_OK;}
     virtual WMError SetAspectRatio(float ratio) {return WMError::WM_OK;}
     virtual WMError ResetAspectRatio() {return WMError::WM_OK;}
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) {return WMError::WM_OK;}

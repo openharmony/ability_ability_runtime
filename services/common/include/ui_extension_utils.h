@@ -64,7 +64,8 @@ inline std::unordered_set<AppExecFwk::ExtensionAbilityType> GetUiExtensionSet()
         AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR,
         AppExecFwk::ExtensionAbilityType::PHOTO_EDITOR,
         AppExecFwk::ExtensionAbilityType::SYSPICKER_AUDIOPICKER,
-        AppExecFwk::ExtensionAbilityType::SYS_VISUAL
+        AppExecFwk::ExtensionAbilityType::SYS_VISUAL,
+        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO
     };
 }
 
@@ -101,7 +102,8 @@ inline bool IsSystemUIExtension(const AppExecFwk::ExtensionAbilityType type)
         AppExecFwk::ExtensionAbilityType::SYSPICKER_FILEPICKER,
         AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH,
         AppExecFwk::ExtensionAbilityType::HMS_ACCOUNT,
-        AppExecFwk::ExtensionAbilityType::SYS_VISUAL
+        AppExecFwk::ExtensionAbilityType::SYS_VISUAL,
+        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO
     };
     return systemUiExtensionSet.find(type) != systemUiExtensionSet.end();
 }
@@ -127,10 +129,10 @@ inline bool IsPublicForEmbedded(const AppExecFwk::ExtensionAbilityType type)
     const std::unordered_set<AppExecFwk::ExtensionAbilityType> publicForEmbeddedSet = {
         AppExecFwk::ExtensionAbilityType::EMBEDDED_UI, // EMBEDDED_UI usage within the app
         AppExecFwk::ExtensionAbilityType::ADS,
-        AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOPICKER,
         AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL,
         AppExecFwk::ExtensionAbilityType::SYS_VISUAL,
-        AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART
+        AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART,
+        AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD
     };
     return publicForEmbeddedSet.find(type) != publicForEmbeddedSet.end();
 }
@@ -139,7 +141,8 @@ inline bool IsPublicForEmbedded(const AppExecFwk::ExtensionAbilityType type)
 inline bool IsPublicForConstrainedEmbedded(const AppExecFwk::ExtensionAbilityType type)
 {
     const std::unordered_set<AppExecFwk::ExtensionAbilityType> publicForConstrainedEmbeddedSet = {
-        AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOPICKER
+        AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOPICKER,
+        AppExecFwk::ExtensionAbilityType::RECENT_PHOTO
     };
     return publicForConstrainedEmbeddedSet.find(type) != publicForConstrainedEmbeddedSet.end();
 }

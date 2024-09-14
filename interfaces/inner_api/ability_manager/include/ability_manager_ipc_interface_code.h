@@ -310,12 +310,6 @@ enum class AbilityManagerInterfaceCode {
 
     START_ABILITY_FOR_OPTIONS = 1028,
 
-    BLOCK_AMS_SERVICE = 1029,
-
-    BLOCK_ABILITY = 1030,
-
-    BLOCK_APP_SERVICE = 1031,
-
     // ipc id for call ability
     START_CALL_ABILITY = 1032,
 
@@ -413,6 +407,12 @@ enum class AbilityManagerInterfaceCode {
     // ipc id for clean uiability from user
     CLEAN_UI_ABILITY_BY_SCB = 1066,
 
+    // start ability only ui ability
+    START_ABILITY_ONLY_UI_ABILITY = 1067,
+
+    //terminate UIServiceExtensionAbility
+    TERMINATE_UI_SERVICE_EXTENSION_ABILITY = 1068,
+    
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 

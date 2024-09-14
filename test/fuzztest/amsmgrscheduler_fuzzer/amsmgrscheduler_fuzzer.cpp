@@ -22,6 +22,7 @@
 #include "ams_mgr_scheduler.h"
 #undef private
 #include "ability_record.h"
+#include "param.h"
 #include "parcel.h"
 #include "securec.h"
 
@@ -73,7 +74,12 @@ std::shared_ptr<AmsMgrScheduler> DoSomethingInterestingWithMyAPI1(sptr<IRemoteOb
     std::shared_ptr<ApplicationInfo> appInfo;
     std::shared_ptr<AAFwk::Want> wantptr;
     int32_t abilityRecordId = static_cast<int32_t>(GetU32Data(data));
-    amsMgrScheduler->LoadAbility(token, preToken, abilityInfoptr, appInfo, wantptr, abilityRecordId);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = abilityRecordId;
+    loadParam.token = token;
+    loadParam.preToken = preToken;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    amsMgrScheduler->LoadAbility(abilityInfoptr, appInfo, wantptr, loadParamPtr);
     bool clearMissionFlag = *data % ENABLE;
     amsMgrScheduler->TerminateAbility(token, clearMissionFlag);
     return amsMgrScheduler;
@@ -92,10 +98,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     amsMgrScheduler->TerminateAbility(token, clearMissionFlag);
     sptr<IAppStateCallback> callback;
     amsMgrScheduler->RegisterAppStateCallback(callback);
-    int32_t visibility = static_cast<int32_t>(GetU32Data(data));
-    int32_t perceptibility = static_cast<int32_t>(GetU32Data(data));
-    int32_t connectionState = static_cast<int32_t>(GetU32Data(data));
-    amsMgrScheduler->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState);
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     amsMgrScheduler->KillProcessesByUserId(userId);
     std::string bundleName(data, size);

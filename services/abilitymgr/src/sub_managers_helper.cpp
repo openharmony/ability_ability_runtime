@@ -123,7 +123,7 @@ void SubManagersHelper::InitMissionListManager(int userId, bool switchUser)
     }
     auto manager = CreateMissionListMgr(userId);
     if (manager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to create mission list manager");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "manager empty");
         return;
     }
     manager->Init();
@@ -172,7 +172,7 @@ std::shared_ptr<DataAbilityManager> SubManagersHelper::GetCurrentDataAbilityMana
 std::shared_ptr<DataAbilityManager> SubManagersHelper::GetDataAbilityManager(const sptr<IAbilityScheduler> &scheduler)
 {
     if (scheduler == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "the param ability scheduler is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null scheduler");
         return nullptr;
     }
 
@@ -192,7 +192,7 @@ std::shared_ptr<DataAbilityManager> SubManagersHelper::GetDataAbilityManagerByUs
     if (it != dataAbilityManagers_.end()) {
         return it->second;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get Manager. UserId = %{public}d", userId);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "failed. UserId: %{public}d", userId);
     return nullptr;
 }
 
@@ -227,7 +227,7 @@ std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByUse
     if (it != connectManagers_.end()) {
         return it->second;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get Manager. UserId = %{public}d", userId);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "failed. UserId: %{public}d", userId);
     return nullptr;
 }
 
@@ -249,6 +249,25 @@ std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByTok
     return nullptr;
 }
 
+std::shared_ptr<AbilityConnectManager> SubManagersHelper::GetConnectManagerByAbilityRecordId(
+    const int64_t &abilityRecordId)
+{
+    std::lock_guard<ffrt::mutex> lock(managersMutex_);
+    for (auto& item: connectManagers_) {
+        if (item.second == nullptr) {
+            continue;
+        }
+        if (item.second->GetExtensionByIdFromServiceMap(abilityRecordId)) {
+            return item.second;
+        }
+        if (item.second->GetExtensionByIdFromTerminatingMap(abilityRecordId)) {
+            return item.second;
+        }
+    }
+
+    return nullptr;
+}
+
 std::shared_ptr<PendingWantManager> SubManagersHelper::GetCurrentPendingWantManager()
 {
     std::lock_guard<ffrt::mutex> lock(managersMutex_);
@@ -262,7 +281,7 @@ std::shared_ptr<PendingWantManager> SubManagersHelper::GetPendingWantManagerByUs
     if (it != pendingWantManagers_.end()) {
         return it->second;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get Manager. UserId = %{public}d", userId);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "failed.UserId: %{public}d", userId);
     return nullptr;
 }
 
@@ -285,7 +304,7 @@ std::shared_ptr<MissionListManagerInterface> SubManagersHelper::GetMissionListMa
     if (it != missionListManagers_.end()) {
         return it->second;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get Manager. UserId = %{public}d", userId);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "failed UserId: %{public}d", userId);
     return nullptr;
 }
 
@@ -322,7 +341,7 @@ std::shared_ptr<UIAbilityLifecycleManager> SubManagersHelper::GetUIAbilityManage
     if (it != uiAbilityManagers_.end()) {
         return it->second;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get Manager. UserId = %{public}d", userId);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "fail UserId: %{public}d", userId);
     return nullptr;
 }
 
@@ -445,7 +464,7 @@ bool SubManagersHelper::VerificationAllToken(const sptr<IRemoteObject> &token)
             return true;
         }
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to verify all token.");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "fail");
     return false;
 }
 
@@ -463,7 +482,7 @@ std::shared_ptr<MissionListWrap> SubManagersHelper::GetMissionListWrap()
     if (missionLibHandle_ == nullptr) {
         missionLibHandle_ = dlopen("libmission_list.z.so", RTLD_NOW | RTLD_GLOBAL);
         if (missionLibHandle_ == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to open mission_list library");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "open mission_list library failed");
             return nullptr;
         }
     }
@@ -471,7 +490,7 @@ std::shared_ptr<MissionListWrap> SubManagersHelper::GetMissionListWrap()
     auto createMissionListWrapFunc = reinterpret_cast<CreateMissionListMgrFunc>(dlsym(missionLibHandle_,
         "CreateMissionListWrap"));
     if (createMissionListWrapFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get create func");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "createFunc empty");
         dlclose(missionLibHandle_);
         missionLibHandle_ = nullptr;
         return nullptr;

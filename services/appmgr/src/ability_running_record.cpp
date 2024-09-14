@@ -17,6 +17,10 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
+constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
+}
 AbilityRunningRecord::AbilityRunningRecord(std::shared_ptr<AbilityInfo> info,
     sptr<IRemoteObject> token, int32_t abilityRecordId)
     : info_(info), token_(token), abilityRecordId_(abilityRecordId)
@@ -68,56 +72,6 @@ void AbilityRunningRecord::SetState(const AbilityState state)
 AbilityState AbilityRunningRecord::GetState() const
 {
     return state_;
-}
-
-bool AbilityRunningRecord::IsSameState(const AbilityState state) const
-{
-    return state_ == state;
-}
-
-int32_t AbilityRunningRecord::GetLastLaunchTime() const
-{
-    return lastLaunchTime_;
-}
-
-const sptr<IRemoteObject> AbilityRunningRecord::GetPreToken() const
-{
-    return preToken_;
-}
-
-void AbilityRunningRecord::SetPreToken(const sptr<IRemoteObject> &preToken)
-{
-    preToken_ = preToken;
-}
-
-void AbilityRunningRecord::SetVisibility(const int32_t visibility)
-{
-    visibility_ = visibility;
-}
-
-int32_t AbilityRunningRecord::GetVisibility() const
-{
-    return visibility_;
-}
-
-void AbilityRunningRecord::SetPerceptibility(const int32_t perceptibility)
-{
-    perceptibility_ = perceptibility;
-}
-
-int32_t AbilityRunningRecord::GetPerceptibility() const
-{
-    return perceptibility_;
-}
-
-void AbilityRunningRecord::SetConnectionState(const int32_t connectionState)
-{
-    connectionState_ = connectionState;
-}
-
-int32_t AbilityRunningRecord::GetConnectionState() const
-{
-    return connectionState_;
 }
 
 void AbilityRunningRecord::SetEventId(const int64_t eventId)
@@ -188,6 +142,14 @@ void AbilityRunningRecord::SetUserRequestCleaningStatus()
 bool AbilityRunningRecord::IsUserRequestCleaning() const
 {
     return isUserRequestCleaning_;
+}
+
+bool AbilityRunningRecord::IsSceneBoard() const
+{
+    if (info_ == nullptr) {
+        return false;
+    }
+    return info_->name == SCENEBOARD_ABILITY_NAME && info_->bundleName == BUNDLE_NAME_SCENEBOARD;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

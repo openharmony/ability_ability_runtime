@@ -48,7 +48,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     AppDebugInfo info;
     manager->RemoveAppDebugInfo(info);
     std::vector<AppDebugInfo> incrementInfos;
-    manager->GetIncrementAppDebugInfos(infos,incrementInfos);
+    manager->GetIncrementAppDebugInfos(infos, incrementInfos);
     return true;
 }
 }

@@ -15,7 +15,6 @@
 
 #include "hilog_tag_wrapper.h"
 #include "want_agent.h"
-#include "want_agent_log_wrapper.h"
 
 namespace OHOS::AbilityRuntime::WantAgent {
 WantAgent::WantAgent(const std::shared_ptr<PendingWant> &pendingWant)

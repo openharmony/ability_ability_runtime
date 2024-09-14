@@ -39,10 +39,12 @@ public:
 
     static void HandleSigChild(int32_t signo);
     bool IsChildProcess();
+    bool IsChildProcessBySelfFork();
     ChildProcessManagerErrorCode StartChildProcessBySelfFork(const std::string &srcEntry, pid_t &pid);
     ChildProcessManagerErrorCode StartChildProcessByAppSpawnFork(const std::string &srcEntry, pid_t &pid);
-    ChildProcessManagerErrorCode StartArkChildProcess(const std::string &srcEntry, pid_t &pid, int32_t childProcessType,
-        const AppExecFwk::ChildProcessArgs &args, const AppExecFwk::ChildProcessOptions &options);
+    ChildProcessManagerErrorCode StartChildProcessWithArgs(const std::string &srcEntry, pid_t &pid,
+        int32_t childProcessType, const AppExecFwk::ChildProcessArgs &args,
+        const AppExecFwk::ChildProcessOptions &options);
     ChildProcessManagerErrorCode StartNativeChildProcessByAppSpawnFork(
         const std::string &libName, const sptr<IRemoteObject> &callbackStub);
     bool GetBundleInfo(AppExecFwk::BundleInfo &bundleInfo);
@@ -56,6 +58,8 @@ public:
         std::shared_ptr<AppExecFwk::ChildProcessArgs> args = nullptr);
     bool LoadNativeLib(const std::string &moduleName, const std::string &libPath,
         const sptr<IRemoteObject> &mainProcessCb);
+    bool LoadNativeLibWithArgs(const std::string &moduleName, const std::string &srcEntry,
+        const std::string &entryFunc, std::shared_ptr<AppExecFwk::ChildProcessArgs> args);
     void SetForkProcessJITEnabled(bool jitEnabled);
     void SetForkProcessDebugOption(const std::string bundleName, const bool isStartWithDebug, const bool isDebugApp,
         const bool isStartWithNative);
@@ -66,8 +70,8 @@ public:
 private:
     ChildProcessManager();
 
-    ChildProcessManagerErrorCode PreCheck(bool useNewErrorCode = false);
-    ChildProcessManagerErrorCode PreCheckNativeProcess();
+    ChildProcessManagerErrorCode PreCheck();
+    ChildProcessManagerErrorCode PreCheck(int32_t childProcessType);
     void RegisterSignal();
     void HandleChildProcessBySelfFork(const std::string &srcEntry, const AppExecFwk::BundleInfo &bundleInfo);
     bool HasChildProcessRecord();

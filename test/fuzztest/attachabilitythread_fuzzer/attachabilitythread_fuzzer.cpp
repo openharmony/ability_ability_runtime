@@ -150,12 +150,6 @@ public:
     {
         return 0;
     }
-#ifdef ABILITY_COMMAND_FOR_TEST
-    int BlockAbility() override
-    {
-        return 0;
-    }
-#endif
     void CallRequest() override
     {
         return;

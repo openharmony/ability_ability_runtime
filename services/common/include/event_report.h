@@ -53,6 +53,8 @@ struct EventInfo {
     int32_t processType = -1;
     int32_t callerPid = -1;
     int64_t duration = 0;
+    int32_t reason = -1;
+    int32_t subReason = -1;
 };
 
 enum class EventName {
@@ -72,12 +74,14 @@ enum class EventName {
     ABILITY_ONBACKGROUND,
     ABILITY_ONACTIVE,
     ABILITY_ONINACTIVE,
+    START_ABILITY_BY_APP_LINKING,
 
     // serviceExtensionAbility behavior event
     START_SERVICE,
     STOP_SERVICE,
     CONNECT_SERVICE,
     DISCONNECT_SERVICE,
+    START_ABILITY_OTHER_EXTENSION,
 
     // app behavior event
     APP_ATTACH,
@@ -89,6 +93,7 @@ enum class EventName {
     PROCESS_EXIT,
     DRAWN_COMPLETED,
     APP_STARTUP_TYPE,
+    PROCESS_START_FAILED,
 
     // key behavior event
     GRANT_URI_PERMISSION,
@@ -116,11 +121,13 @@ public:
     static void SendAppForegroundEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendAppBackgroundEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendProcessStartEvent(const EventName &eventName, const EventInfo &eventInfo);
+    static void SendProcessStartFailedEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendProcessExitEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendStartServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendStopServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendConnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendDisconnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
+    static void SendStartAbilityOtherExtensionEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendGrantUriPermissionEvent(const EventName &eventName, const EventInfo &eventInfo);
 
 private:
@@ -132,6 +139,7 @@ private:
     static void LogAbilityOnBackgroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnActiveEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartStandardEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogStartAbilityByAppLinking(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
 };
 }  // namespace AAFWK
 }  // namespace OHOS

@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include "app_mgr_client.h"
+#include "param.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -30,8 +31,8 @@ public:
     {}
     MOCK_METHOD0(ConnectAppMgrService, AppMgrResultCode());
     MOCK_METHOD1(RegisterAppStateCallback, AppMgrResultCode(const sptr<IAppStateCallback> &callback));
-    MOCK_METHOD6(LoadAbility, AppMgrResultCode(sptr<IRemoteObject>, sptr<IRemoteObject>,
-        const AbilityInfo&, const ApplicationInfo&, const AAFwk::Want&, int32_t));
+    MOCK_METHOD4(LoadAbility, AppMgrResultCode(const AbilityInfo&, const ApplicationInfo&,
+        const AAFwk::Want&, AbilityRuntime::LoadParam));
     MOCK_METHOD2(TerminateAbility, AppMgrResultCode(const sptr<IRemoteObject>&, bool));
     MOCK_METHOD2(UpdateExtensionState, AppMgrResultCode(const sptr<IRemoteObject> &token, const ExtensionState state));
     MOCK_METHOD2(UpdateApplicationInfoInstalled, AppMgrResultCode(const std::string &bundleName, const int uid));
@@ -43,17 +44,17 @@ public:
     MOCK_METHOD3(StartSpecifiedAbility, void(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t));
     MOCK_METHOD1(GetAllRunningProcesses, AppMgrResultCode(std::vector<RunningProcessInfo> &info));
     MOCK_METHOD1(GetAllRenderProcesses, AppMgrResultCode(std::vector<RenderProcessInfo> &info));
+    MOCK_METHOD1(GetAllChildrenProcesses, AppMgrResultCode(std::vector<ChildProcessInfo> &info));
     MOCK_METHOD2(GetProcessRunningInfosByUserId, AppMgrResultCode(
         std::vector<RunningProcessInfo> &info, int32_t userId));
     MOCK_METHOD4(StartUserTestProcess, int(
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId));
     MOCK_METHOD3(FinishUserTest, int(
         const std::string &msg, const int64_t &resultCode, const std::string &bundleName));
-    MOCK_METHOD1(UpdateConfiguration, AppMgrResultCode(const Configuration &config));
+    MOCK_METHOD2(UpdateConfiguration, AppMgrResultCode(const Configuration &config, const int32_t userId));
     MOCK_METHOD1(GetConfiguration, AppMgrResultCode(Configuration& config));
     MOCK_METHOD2(GetAbilityRecordsByProcessID, int(
         const int pid, std::vector<sptr<IRemoteObject>> &tokens));
-    MOCK_METHOD0(BlockAppService, AppMgrResultCode());
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

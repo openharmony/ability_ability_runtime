@@ -42,24 +42,23 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
     if (!jsContext || !config) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "jsContext or config is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null jsContext/config");
         return;
     }
 
     napi_value value = jsContext->GetNapiValue();
     if (value == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "value is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "null value");
         return;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, value, "onUpdateConfiguration", &method);
     if (!method) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Failed to get onUpdateConfiguration from object");
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "Failed");
         return;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "JsAbilityStageContext call onUpdateConfiguration.");
     napi_value argv[] = { CreateJsConfiguration(env, *config) };
     napi_value callResult = nullptr;
     napi_call_function(env, value, method, 1, argv, &callResult);

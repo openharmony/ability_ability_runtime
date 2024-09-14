@@ -30,6 +30,7 @@ ohos_unittest("js_ability_context_test") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
+    "mock_parse_requestcode.h",
   ]
 
   sources = [ "js_ability_context_test.cpp" ]
@@ -47,9 +48,11 @@ ohos_unittest("js_ability_context_test") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "ability_runtime:js_environment",
     "ability_runtime:runtime",
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",

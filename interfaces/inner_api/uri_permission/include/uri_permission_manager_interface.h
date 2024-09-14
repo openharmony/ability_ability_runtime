@@ -59,7 +59,8 @@ public:
      * @return Returns ERR_OK if the authorization is successful, otherwise returns error code.
      */
     virtual int32_t GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
-        const std::string &targetBundleName, int32_t appIndex = 0) = 0;
+        const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId,
+        int32_t abilityId) = 0;
 
     /**
      * @brief Clear user's uri authorization record with autoremove flag.

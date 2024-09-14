@@ -401,25 +401,6 @@ void MissionList::DumpList(std::vector<std::string> &info, bool isClient)
     }
 }
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-int MissionList::BlockAbilityByRecordId(int32_t abilityRecordId)
-{
-    int ret = -1;
-    for (const auto& mission : missions_) {
-        if (mission) {
-            auto abilityRecord = mission->GetAbilityRecord();
-            if (abilityRecord) {
-                if (abilityRecord->GetRecordId() == abilityRecordId) {
-                    TAG_LOGI(AAFwkTag::ABILITYMGR, "record begin to call BlockAbilityByRecordId %{public}s", __func__);
-                    return abilityRecord->BlockAbility();
-                }
-            }
-        }
-    }
-    return ret;
-}
-#endif
-
 int32_t MissionList::GetMissionCountByUid(int32_t targetUid) const
 {
     int32_t count = 0;
@@ -489,18 +470,23 @@ void MissionList::GetActiveAbilityList(int32_t uid, std::vector<std::string> &ab
 
 void MissionList::SignRestartAppFlag(const std::string &bundleName)
 {
-    for (auto mission : missions_) {
+    for (auto it = missions_.begin(); it != missions_.end();) {
+        auto mission = *it;
         if (!mission) {
+            it++;
             continue;
         }
         auto abilityRecord = mission->GetAbilityRecord();
         if (!abilityRecord) {
+            it++;
             continue;
         }
         if (abilityRecord->GetApplicationInfo().bundleName != bundleName) {
+            it++;
             continue;
         }
         abilityRecord->SetRestartAppFlag(true);
+        it = missions_.erase(it);
     }
 }
 }  // namespace AAFwk

@@ -33,7 +33,7 @@ int32_t AbilityForegroundStateObserverStub::OnRemoteRequest(
     std::u16string descriptor = AbilityForegroundStateObserverStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Local descriptor is not equal to remote.");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid descriptor");
         return ERR_INVALID_STATE;
     }
 
@@ -47,7 +47,7 @@ int32_t AbilityForegroundStateObserverStub::HandleOnAbilityStateChanged(MessageP
 {
     std::unique_ptr<AbilityStateData> processData(data.ReadParcelable<AbilityStateData>());
     if (processData == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ProcessData is null.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null processData");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
@@ -61,7 +61,7 @@ AbilityForegroundStateObserverRecipient::AbilityForegroundStateObserverRecipient
 
 void AbilityForegroundStateObserverRecipient::OnRemoteDied(const wptr<IRemoteObject> &__attribute__((unused)) remote)
 {
-    TAG_LOGE(AAFwkTag::APPMGR, "Remote died.");
+    TAG_LOGE(AAFwkTag::APPMGR, "Remote died");
     if (handler_) {
         handler_(remote);
     }

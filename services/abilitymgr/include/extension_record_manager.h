@@ -70,8 +70,6 @@ public:
 
     static bool IsBelongToManager(const AppExecFwk::AbilityInfo &abilityInfo);
 
-    bool IsFocused(int32_t extensionRecordId, const sptr<IRemoteObject>& focusToken);
-
     /**
      * @brief Get extensionList by pid.
      * @param pid Process id.
@@ -114,12 +112,18 @@ public:
 
     int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo);
 
+    bool IsFocused(
+        int32_t extensionRecordId, const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &focusToken);
+
     void LoadTimeout(int32_t extensionRecordId);
     void ForegroundTimeout(int32_t extensionRecordId);
     void BackgroundTimeout(int32_t extensionRecordId);
     void TerminateTimeout(int32_t extensionRecordId);
 
     int32_t GetHostBundleNameForExtensionId(int32_t extensionRecordId, std::string& hostBundleName);
+    void GetCallerTokenList(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
+        std::list<sptr<IRemoteObject>> &callerList);
+
 private:
     inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);
 
@@ -135,8 +139,8 @@ private:
 
     void SetCachedFocusedCallerToken(int32_t extensionRecordId, sptr<IRemoteObject> &focusedCallerToken);
     sptr<IRemoteObject> GetCachedFocusedCallerToken(int32_t extensionRecordId) const;
-    sptr<IRemoteObject> GetCallerTokenList(int32_t extensionRecordId, std::list<sptr<IRemoteObject>> &callerList);
-    sptr<IRemoteObject> GetRootCallerTokenLocked(int32_t extensionRecordId);
+    sptr<IRemoteObject> GetRootCallerTokenLocked(
+        int32_t extensionRecordId, const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord);
 
     int32_t GetOrCreateExtensionRecordInner(const AAFwk::AbilityRequest &abilityRequest,
         const std::string &hostBundleName, std::shared_ptr<ExtensionRecord> &extensionRecord, bool &isLoaded);

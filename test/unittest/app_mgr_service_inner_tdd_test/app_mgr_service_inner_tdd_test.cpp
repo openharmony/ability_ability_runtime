@@ -22,6 +22,7 @@
 #include "remote_client_manager.h"
 #undef private
 #include "app_scheduler.h"
+#include "app_mgr_event.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
@@ -346,6 +347,89 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SendProcessStartFailedEvent_001
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls abnormal parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    EXPECT_FALSE(appMgrServiceInner->SendProcessStartFailedEvent(nullptr,
+        ProcessStartFailedReason::APPSPAWN_FAILED, 0));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_001 end");
+}
+
+/**
+ * @tc.name: SendProcessStartFailedEvent_002
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls abnormal parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+    EXPECT_TRUE(
+        appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED, 0));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_002 end");
+}
+
+/**
+ * @tc.name: SendProcessStartFailedEvent_003
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "testBundleName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    auto abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
+        1));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_003 end");
+}
+
+/**
  * @tc.name: SendProcessExitEvent_001
  * @tc.desc: Verify that the SendProcessExitEvent interface calls normally
  * @tc.type: FUNC
@@ -655,6 +739,82 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level0)
         strictMode, nullptr);
     EXPECT_EQ(startMsg.dataGroupInfoList.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_004 end");
+}
+
+/**
+ * @tc.name: SetAppEnvInfo_001
+ * @tc.desc: The hwasanEnabled is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    info.applicationInfo.hwasanEnabled = true;
+    AppSpawnStartMsg startMsg;
+    appMgrServiceInner->SetAppEnvInfo(info, startMsg);
+    std::string hwasanEnabled = "hwasanEnabled";
+    EXPECT_EQ(startMsg.appEnv.find(hwasanEnabled)->second, "1");
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_001 end");
+}
+
+/**
+ * @tc.name: SetAppEnvInfo_002
+ * @tc.desc: The hwasanEnabled is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    info.applicationInfo.hwasanEnabled = false;
+    AppSpawnStartMsg startMsg;
+    appMgrServiceInner->SetAppEnvInfo(info, startMsg);
+    std::string hwasanEnabled = "hwasanEnabled";
+    EXPECT_EQ(startMsg.appEnv.find(hwasanEnabled)->second, "0");
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_002 end");
+}
+
+/**
+ * @tc.name: SetAppEnvInfo_003
+ * @tc.desc: The ubsanEnabled is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    info.applicationInfo.ubsanEnabled = false;
+    AppSpawnStartMsg startMsg;
+    appMgrServiceInner->SetAppEnvInfo(info, startMsg);
+    std::string ubsanEnabled = "ubsanEnabled";
+    EXPECT_EQ(startMsg.appEnv.find(ubsanEnabled)->second, "0");
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_003 end");
+}
+
+/**
+ * @tc.name: SetAppEnvInfo_004
+ * @tc.desc: The ubsanEnabled is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    info.applicationInfo.ubsanEnabled = true;
+    AppSpawnStartMsg startMsg;
+    appMgrServiceInner->SetAppEnvInfo(info, startMsg);
+    std::string ubsanEnabled = "ubsanEnabled";
+    EXPECT_EQ(startMsg.appEnv.find(ubsanEnabled)->second, "1");
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_004 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

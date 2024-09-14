@@ -24,7 +24,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-std::shared_ptr<DataObsMgrClient> DataObsMgrClient::instance_ = nullptr;
 std::mutex DataObsMgrClient::mutex_;
 
 class DataObsMgrClient::SystemAbilityStatusChangeListener
@@ -43,7 +42,7 @@ public:
 void DataObsMgrClient::SystemAbilityStatusChangeListener::OnAddSystemAbility(
     int32_t systemAbilityId, const std::string &deviceId)
 {
-    TAG_LOGI(AAFwkTag::DBOBSMGR, "ObsManager restart");
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "called");
     if (systemAbilityId != DATAOBS_MGR_SERVICE_SA_ID) {
         return;
     }
@@ -52,13 +51,8 @@ void DataObsMgrClient::SystemAbilityStatusChangeListener::OnAddSystemAbility(
 
 std::shared_ptr<DataObsMgrClient> DataObsMgrClient::GetInstance()
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock_l(mutex_);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<DataObsMgrClient>();
-        }
-    }
-    return instance_;
+    static std::shared_ptr<DataObsMgrClient> proxy = std::make_shared<DataObsMgrClient>();
+    return proxy;
 }
 
 DataObsMgrClient::DataObsMgrClient()
@@ -142,7 +136,7 @@ ErrCode DataObsMgrClient::NotifyChange(const Uri &uri)
  *
  * @return Returns SUCCESS on success, others on failure.
  */
-std::pair<Status, sptr<IDataObsMgr>> DataObsMgrClient::GetObsMgr()
+__attribute__ ((no_sanitize("cfi"))) std::pair<Status, sptr<IDataObsMgr>> DataObsMgrClient::GetObsMgr()
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
@@ -152,19 +146,19 @@ std::pair<Status, sptr<IDataObsMgr>> DataObsMgrClient::GetObsMgr()
 
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "fail to get Registry");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "registry failed");
         return std::make_pair(GET_DATAOBS_SERVICE_FAILED, nullptr);
     }
 
     auto remoteObject = systemManager->CheckSystemAbility(DATAOBS_MGR_SERVICE_SA_ID);
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "fail to get systemAbility");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "systemAbility failed");
         return std::make_pair(GET_DATAOBS_SERVICE_FAILED, nullptr);
     }
 
     dataObsManger_ = iface_cast<IDataObsMgr>(remoteObject);
     if (dataObsManger_ == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "fail to get IDataObsMgr");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "iDataObsMgr failed");
         return std::make_pair(GET_DATAOBS_SERVICE_FAILED, nullptr);
     }
     sptr<ServiceDeathRecipient> serviceDeathRecipient(new (std::nothrow) ServiceDeathRecipient(GetInstance()));
@@ -246,7 +240,7 @@ void DataObsMgrClient::OnRemoteDied()
     if (errCode != SUCCESS) {
         sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (systemManager == nullptr) {
-            TAG_LOGE(AAFwkTag::DBOBSMGR, "System mgr is nullptr");
+            TAG_LOGE(AAFwkTag::DBOBSMGR, "null systemmgr");
             return;
         }
         systemManager->SubscribeSystemAbility(DATAOBS_MGR_SERVICE_SA_ID, callback_);

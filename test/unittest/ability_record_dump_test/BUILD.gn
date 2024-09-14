@@ -39,6 +39,7 @@ ohos_unittest("ability_record_dump_test") {
     "hilog:libhilog",
     "init:libbeget_proxy",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
   ]
 
   if (background_task_mgr_continuous_task_enable) {

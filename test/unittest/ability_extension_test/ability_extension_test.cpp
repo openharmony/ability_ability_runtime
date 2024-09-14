@@ -115,7 +115,7 @@ HWTEST_F(AbilityExtensionTest, SetLastRequestWant_0100, TestSize.Level1)
     Want want;
     want.SetElement(elementName);
     extension.SetLastRequestWant(want);
-    EXPECT_TRUE(true);
+    EXPECT_NE(extension.lastRequestWant_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "SetLastRequestWant end");
 }
@@ -144,7 +144,7 @@ HWTEST_F(AbilityExtensionTest, SetLaunchWant_0100, TestSize.Level1)
 
     Extension extension;
     extension.SetLaunchWant(want);
-    EXPECT_TRUE(true);
+    EXPECT_NE(extension.launchWant_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "SetLaunchWant end");
 }
@@ -166,7 +166,7 @@ HWTEST_F(AbilityExtensionTest, Init_0100, TestSize.Level1)
 
     Extension extension;
     extension.Init(record, application, handler, token);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Init end");
 }
@@ -190,7 +190,7 @@ HWTEST_F(AbilityExtensionTest, Init_0200, TestSize.Level1)
 
     Extension extension;
     extension.Init(record, application, handler, token);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Init end");
 }
@@ -214,7 +214,7 @@ HWTEST_F(AbilityExtensionTest, Init_0300, TestSize.Level1)
 
     Extension extension;
     extension.Init(record, application, handler, token);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Init end");
 }
@@ -238,7 +238,7 @@ HWTEST_F(AbilityExtensionTest, Init_0400, TestSize.Level1)
 
     Extension extension;
     extension.Init(record, application, handler, token);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Init end");
 }
@@ -262,7 +262,7 @@ HWTEST_F(AbilityExtensionTest, Init_0500, TestSize.Level1)
 
     Extension extension;
     extension.Init(record, application, handler, token);
-    EXPECT_TRUE(true);
+    EXPECT_NE(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Init end");
 }
@@ -301,7 +301,7 @@ HWTEST_F(AbilityExtensionTest, OnStart_0100, TestSize.Level1)
 
     // Test
     extension.OnStart(want);
-    EXPECT_TRUE(true);
+    EXPECT_NE(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnStart end");
 }
@@ -328,7 +328,7 @@ HWTEST_F(AbilityExtensionTest, OnStop_0100, TestSize.Level1)
 
     // Test
     extension.OnStop();
-    EXPECT_TRUE(true);
+    EXPECT_NE(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnStop end");
 }
@@ -366,8 +366,8 @@ HWTEST_F(AbilityExtensionTest, OnConnect_0100, TestSize.Level1)
     want.SetElement(elementName);
 
     // Test
-    extension.OnConnect(want);
-    EXPECT_TRUE(true);
+    auto result = extension.OnConnect(want);
+    EXPECT_EQ(result, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnConnect end");
 }
@@ -406,7 +406,7 @@ HWTEST_F(AbilityExtensionTest, OnDisconnect_0100, TestSize.Level1)
 
     // Test
     extension.OnDisconnect(want);
-    EXPECT_TRUE(true);
+    EXPECT_NE(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnDisconnect end");
 }
@@ -478,7 +478,7 @@ HWTEST_F(AbilityExtensionTest, OnCommand_0100, TestSize.Level1)
 
     Extension extension;
     extension.OnCommand(want, restart, startId);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnCommand end");
 }
@@ -509,7 +509,7 @@ HWTEST_F(AbilityExtensionTest, OnCommand_0200, TestSize.Level1)
 
     Extension extension;
     extension.OnCommand(want, restart, startId);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnCommand end");
 }
@@ -528,7 +528,7 @@ HWTEST_F(AbilityExtensionTest, OnConfigurationUpdated_0100, TestSize.Level1)
 
     Extension extension;
     extension.OnConfigurationUpdated(configuration);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated end");
 }
@@ -546,7 +546,7 @@ HWTEST_F(AbilityExtensionTest, OnMemoryLevel_0100, TestSize.Level1)
     Extension extension;
     int level = 0;
     extension.OnMemoryLevel(level);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "OnMemoryLevel end");
 }
@@ -572,7 +572,7 @@ HWTEST_F(AbilityExtensionTest, Dump_0100, TestSize.Level1)
 
     Extension extension;
     extension.Dump(params, info);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(extension.abilityInfo_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "Dump end");
 }
