@@ -224,13 +224,14 @@ void JsServiceExtension::ListenWMS()
         return;
     }
 
-    auto listener = sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_, context->GetToken());
-    if (listener == nullptr) {
+    auto saStatusChangeListener_ =
+        sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_, context->GetToken());
+    if (saStatusChangeListener_ == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "create status change listener failed");
         return;
     }
 
-    auto ret = abilityManager->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, listener);
+    auto ret = abilityManager->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, saStatusChangeListener_);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "subscribe system ability error:%{public}d.", ret);
     }
@@ -332,6 +333,14 @@ void JsServiceExtension::OnStop()
 #ifdef SUPPORT_GRAPHICS
     Rosen::WindowManager::GetInstance()
         .UnregisterDisplayInfoChangedListener(context->GetToken(), displayListener_);
+    if (saStatusChangeListener_) {
+        auto saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (saMgr) {
+            saMgr->UnSubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, saStatusChangeListener_);
+        } else {
+            TAG_LOGW(AAFwkTag::SERVICE_EXT, "OnStop SaMgr null");
+        }
+    }
 #endif //SUPPORT_GRAPHICS
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "ok");
 }
