@@ -1454,6 +1454,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
                 options.hapModulePath[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
                 options.packageNameList[hapModuleInfo.moduleName] = hapModuleInfo.packageName;
+                options.aotCompileStatusMap[hapModuleInfo.moduleName] =
+                    static_cast<int32_t>(hapModuleInfo.aotCompileStatus);
             }
         }
         auto runtime = AbilityRuntime::Runtime::Create(options);
