@@ -27,6 +27,7 @@
 #include "mock_sa_call.h"
 #include "ipc_skeleton.h"
 #include "parameters.h"
+#include "mock_kia_interceptor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1866,6 +1867,104 @@ HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level0)
     std::vector<int32_t> pidList;
     int32_t res = appMgrService->GetSupportedProcessCachePids(bundleName, pidList);
     EXPECT_EQ(res, AAFwk::CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: RegisterKiaInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService RegisterKiaInterceptor
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterKiaInterceptor
+ */
+HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_001, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, RegisterKiaInterceptor(_))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+    sptr<IKiaInterceptor> interceptor = new MockKiaInterceptor();
+    int32_t res = appMgrService->RegisterKiaInterceptor(interceptor);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: RegisterKiaInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService RegisterKiaInterceptor
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterKiaInterceptor
+ */
+HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_002, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, RegisterKiaInterceptor(_))
+        .Times(1)
+        .WillOnce(Return(ERR_INVALID_VALUE));
+    sptr<IKiaInterceptor> interceptor = new MockKiaInterceptor();
+    int32_t res = appMgrService->RegisterKiaInterceptor(interceptor);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: CheckIsKiaProcess
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService CheckIsKiaProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckIsKiaProcess
+ */
+HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_001, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, CheckIsKiaProcess(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+    pid_t pid = 1234;
+    bool isKia = false;
+    int32_t res = appMgrService->CheckIsKiaProcess(pid, isKia);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: CheckIsKiaProcess
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService CheckIsKiaProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckIsKiaProcess
+ */
+HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_002, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, CheckIsKiaProcess(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_INVALID_VALUE));
+    pid_t pid = 1234;
+    bool isKia = false;
+    int32_t res = appMgrService->CheckIsKiaProcess(pid, isKia);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

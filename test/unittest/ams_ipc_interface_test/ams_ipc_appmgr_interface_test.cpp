@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#include "app_scheduler_proxy.h"
 #include <unistd.h>
 #include <gtest/gtest.h>
-#include "errors.h"
-#include "ipc_types.h"
+
 #include "app_mgr_proxy.h"
 #include "app_record_id.h"
+#include "app_scheduler_proxy.h"
+#include "application_state_observer_stub.h"
+#include "errors.h"
 #include "hilog_tag_wrapper.h"
+#include "ipc_types.h"
 #include "mock_application.h"
 #include "mock_app_mgr_service.h"
-#include "application_state_observer_stub.h"
+#include "mock_kia_interceptor.h"
 
 using namespace testing::ext;
 
@@ -234,6 +236,92 @@ HWTEST_F(AmsIpcAppMgrInterfaceTest, UnregisterApplicationStateObserver_001, Test
     EXPECT_EQ(OHOS::NO_ERROR, err);
 
     TAG_LOGD(AAFwkTag::TEST, "UnregisterApplicationStateObserver_001 end");
+}
+
+/*
+ * @tc.name: RegisterKiaInterceptor_001
+ * @tc.desc: Register kia interceptor test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterKiaInterceptor_001, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 start");
+
+    sptr<MockAppMgrService> mockAppMgr(new MockAppMgrService());
+    sptr<IAppMgr> appMgrClient = iface_cast<IAppMgr>(mockAppMgr);
+
+    EXPECT_CALL(*mockAppMgr, RegisterKiaInterceptor(_)).Times(1).WillOnce(Return(ERR_OK));
+
+    sptr<IKiaInterceptor> interceptor = new MockKiaInterceptor();
+    int32_t err = appMgrClient->RegisterKiaInterceptor(interceptor);
+    EXPECT_EQ(ERR_OK, err);
+
+    TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 end");
+}
+
+/*
+ * @tc.name: RegisterKiaInterceptor_002
+ * @tc.desc: Register kia interceptor test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsIpcAppMgrInterfaceTest, RegisterKiaInterceptor_002, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_002 start");
+
+    sptr<MockAppMgrService> mockAppMgr(new MockAppMgrService());
+    sptr<IAppMgr> appMgrClient = iface_cast<IAppMgr>(mockAppMgr);
+
+    EXPECT_CALL(*mockAppMgr, RegisterKiaInterceptor(_)).Times(1).WillOnce(Return(ERR_INVALID_VALUE));
+
+    sptr<IKiaInterceptor> interceptor = new MockKiaInterceptor();
+    int32_t err = appMgrClient->RegisterKiaInterceptor(interceptor);
+    EXPECT_EQ(ERR_INVALID_VALUE, err);
+
+    TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_002 end");
+}
+
+/*
+ * @tc.name: CheckIsKiaProcess_001
+ * @tc.desc: Check if a process is kia protected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsIpcAppMgrInterfaceTest, CheckIsKiaProcess_001, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 start");
+
+    sptr<MockAppMgrService> mockAppMgr(new MockAppMgrService());
+    sptr<IAppMgr> appMgrClient = iface_cast<IAppMgr>(mockAppMgr);
+
+    EXPECT_CALL(*mockAppMgr, CheckIsKiaProcess(_, _)).Times(1).WillOnce(Return(ERR_OK));
+
+    pid_t pid = 1234;
+    bool isKia = false;
+    int32_t err = appMgrClient->CheckIsKiaProcess(pid, isKia);
+    EXPECT_EQ(ERR_OK, err);
+
+    TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 end");
+}
+
+/*
+ * @tc.name: CheckIsKiaProcess_002
+ * @tc.desc: Check if a process is kia protected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsIpcAppMgrInterfaceTest, CheckIsKiaProcess_002, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_002 start");
+
+    sptr<MockAppMgrService> mockAppMgr(new MockAppMgrService());
+    sptr<IAppMgr> appMgrClient = iface_cast<IAppMgr>(mockAppMgr);
+
+    EXPECT_CALL(*mockAppMgr, CheckIsKiaProcess(_, _)).Times(1).WillOnce(Return(ERR_INVALID_VALUE));
+
+    pid_t pid = 1234;
+    bool isKia = false;
+    int32_t err = appMgrClient->CheckIsKiaProcess(pid, isKia);
+    EXPECT_EQ(ERR_INVALID_VALUE, err);
+
+    TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_002 end");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
