@@ -639,6 +639,7 @@ void JsRuntime::PostPreload(const Options& options)
     postOption.SetEnableProfile(profileEnabled);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ASMM JIT Verify PostFork, jitEnabled: %{public}d", options.jitEnabled);
     postOption.SetEnableJIT(options.jitEnabled);
+    postOption.SetAOTCompileStatusMap(options.aotCompileStatusMap);
     {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "panda::JSNApi::PostFork");
         panda::JSNApi::PostFork(vm, postOption);
