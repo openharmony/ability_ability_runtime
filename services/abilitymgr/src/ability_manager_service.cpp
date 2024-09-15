@@ -2045,9 +2045,8 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
     FreeInstallInfo taskInfo;
     if (!freeInstallManager_->GetFreeInstallTaskInfo(sessionId, taskInfo)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "failed to find free install task");
-        if (sessionInfo->isAtomicService &&
-            ((sessionInfo->want).GetElement().GetAbilityName().empty() ||
-            (sessionInfo->want).GetElement().GetModuleName().empty())) {
+        if ((sessionInfo->want).GetElement().GetAbilityName().empty() ||
+            (sessionInfo->want).GetElement().GetModuleName().empty()) {
             auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
             CHECK_POINTER_AND_RETURN(bundleMgrHelper, ERR_INVALID_VALUE);
             Want launchWant;
