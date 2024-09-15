@@ -750,8 +750,12 @@ void FreeInstallManager::NotifyInsightIntentFreeInstallResult(const Want &want, 
 
         auto moduleName = (*it).want.GetElement().GetModuleName();
         auto insightIntentName = (*it).want.GetStringParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME);
-        auto srcEntry = AbilityRuntime::InsightIntentUtils::GetSrcEntry(bundleName, moduleName, insightIntentName);
-        if (srcEntry.empty()) {
+        auto executeMode = static_cast<AppExecFwk::ExecuteMode>(
+            it->want.GetIntParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE, 0));
+        std::string srcEntry;
+        auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(it->want.GetElement(), insightIntentName,
+            executeMode, srcEntry);
+        if (ret != ERR_OK || srcEntry.empty()) {
             TAG_LOGE(AAFwkTag::FREE_INSTALL, "failed. bundleName: %{public}s, "
                 "moduleName: %{public}s, insightIntentName: %{public}s", bundleName.c_str(), moduleName.c_str(),
                 insightIntentName.c_str());
