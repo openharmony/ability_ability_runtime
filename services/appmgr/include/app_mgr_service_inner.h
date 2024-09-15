@@ -1197,9 +1197,9 @@ public:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList);
 
-    int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor);
+    virtual int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor);
 
-    int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
+    virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1562,9 +1562,9 @@ private:
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
     void DealMultiUserConfig(const Configuration &config, const int32_t userId);
     bool CheckIsDebugApp(const std::string &bundleName);
-    void MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,
+    int32_t MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,
         bool &isWatermarkEnabled, bool &isFileUri, std::string &processName);
-    void ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
+    int32_t ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
         const std::string& watermarkBusinessName, bool isWatermarkEnabled);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
