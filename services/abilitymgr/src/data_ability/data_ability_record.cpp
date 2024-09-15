@@ -315,21 +315,20 @@ int DataAbilityRecord::RemoveClients(const std::shared_ptr<AbilityRecord> &clien
                 ++it;
             }
         }
-    } else {
-        TAG_LOGD(AAFwkTag::DATA_ABILITY, "Removing clients");
-        auto it = clients_.begin();
-        while (it != clients_.end()) {
-            if (!it->isNotHap) {
-                auto clientAbilityRecord = Token::GetAbilityRecordByToken(it->client);
-                if (!clientAbilityRecord) {
-                    TAG_LOGD(AAFwkTag::DATA_ABILITY, "null clientAbilityRecord");
-                    it = clients_.erase(it);
-                    continue;
-                }
+        return ERR_OK;
+    }
+    auto it = clients_.begin();
+    while (it != clients_.end()) {
+        if (!it->isNotHap) {
+            auto clientAbilityRecord = Token::GetAbilityRecordByToken(it->client);
+            if (!clientAbilityRecord) {
+                TAG_LOGD(AAFwkTag::DATA_ABILITY, "null clientAbilityRecord");
                 it = clients_.erase(it);
-            } else {
-                ++it;
+                continue;
             }
+            it = clients_.erase(it);
+        } else {
+            ++it;
         }
     }
 
@@ -495,18 +494,17 @@ void DataAbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
                 ++it;
             }
         }
-    } else {
-        auto it = clients_.begin();
-        while (it != clients_.end()) {
-            if (it->isNotHap) {
-                TAG_LOGD(AAFwkTag::DATA_ABILITY, "remove system caller");
-                it = clients_.erase(it);
-                TAG_LOGI(AAFwkTag::DATA_ABILITY, "dataability '%{public}s|%{public}s'",
-                    ability_->GetApplicationInfo().bundleName.c_str(),
-                    ability_->GetAbilityInfo().name.c_str());
-            } else {
-                ++it;
-            }
+        return;
+    }
+    auto it = clients_.begin();
+    while (it != clients_.end()) {
+        if (it->isNotHap) {
+            it = clients_.erase(it);
+            TAG_LOGI(AAFwkTag::DATA_ABILITY, "dataability '%{public}s|%{public}s'",
+                ability_->GetApplicationInfo().bundleName.c_str(),
+                ability_->GetAbilityInfo().name.c_str());
+        } else {
+            ++it;
         }
     }
 }
