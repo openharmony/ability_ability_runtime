@@ -70,6 +70,9 @@ public:
     MOCK_METHOD2(DumpIpcStop, int(const int32_t pid, std::string& result));
     MOCK_METHOD2(DumpIpcStat, int(const int32_t pid, std::string& result));
     MOCK_METHOD2(DumpFfrt, int(const std::vector<int32_t>& pid, std::string& result));
+    MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
+    MOCK_METHOD2(CheckIsKiaProcess, int32_t(pid_t pid, bool &isKia));
+
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
     {}
 

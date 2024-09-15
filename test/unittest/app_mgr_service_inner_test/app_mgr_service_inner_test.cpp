@@ -31,6 +31,7 @@
 #include "mock_bundle_manager.h"
 #include "mock_configuration_observer.h"
 #include "mock_iapp_state_callback.h"
+#include "mock_kia_interceptor.h"
 #include "mock_native_token.h"
 #include "mock_render_scheduler.h"
 #include "mock_sa_call.h"
@@ -4445,6 +4446,41 @@ HWTEST_F(AppMgrServiceInnerTest, GetSupportedProcessCachePids_001, TestSize.Leve
     EXPECT_NE(ret, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "GetSupportedProcessCachePids_001 end");
+}
+
+/**
+ * @tc.name: RegisterKiaInterceptor_001
+ * @tc.desc: verify RegisterKiaInterceptor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, RegisterKiaInterceptor_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RegisterKiaInterceptor_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    sptr<IKiaInterceptor> interceptor = new MockKiaInterceptor();
+    appMgrServiceInner->RegisterKiaInterceptor(interceptor);
+
+    TAG_LOGI(AAFwkTag::TEST, "RegisterKiaInterceptor_001 end");
+}
+
+/**
+ * @tc.name: CheckIsKiaProcess_001
+ * @tc.desc: verify CheckIsKiaProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, CheckIsKiaProcess_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckIsKiaProcess_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    pid_t pid = 1234;
+    bool isKia = false;
+    appMgrServiceInner->CheckIsKiaProcess(pid, isKia);
+
+    TAG_LOGI(AAFwkTag::TEST, "CheckIsKiaProcess_001 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS
