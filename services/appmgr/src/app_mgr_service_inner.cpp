@@ -7325,16 +7325,6 @@ bool AppMgrServiceInner::IsMemorySizeSufficent()
     return ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent();
 }
 
-void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
-{
-    std::lock_guard lock(appStateCallbacksLock_);
-    for (const auto &item : appStateCallbacks_) {
-        if (item.callback != nullptr) {
-            item.callback->NotifyStartResidentProcess(bundleInfos);
-        }
-    }
-}
-
 void AppMgrServiceInner::NotifyAppPreCache(int32_t pid)
 {
     std::lock_guard lock(appStateCallbacksLock_);
@@ -7343,6 +7333,16 @@ void AppMgrServiceInner::NotifyAppPreCache(int32_t pid)
             item.callback->NotifyAppPreCache(pid);
         }
     }   
+}
+
+void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->NotifyStartResidentProcess(bundleInfos);
+        }
+    }
 }
 
 void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
