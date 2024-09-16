@@ -166,7 +166,7 @@ void AppStateCallbackProxy::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
     }
 }
 
-void AppStateCallbackProxy::NotityAppPreCache(int32_t pid)
+void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid)
 {
     MessageParcel data;
     MessageParcel reply;
