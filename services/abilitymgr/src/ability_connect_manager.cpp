@@ -708,7 +708,7 @@ int AbilityConnectManager::DisconnectRecordNormal(ConnectListType &list,
     }
 
     if (connectRecord->GetConnectState() == ConnectionState::DISCONNECTED) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "disconnect record:%{public}d",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "DisconnectRecordNormal disconnect record:%{public}d",
             connectRecord->GetRecordId());
         connectRecord->CompleteDisconnect(ERR_OK, callerDied);
         list.emplace_back(connectRecord);
@@ -1063,7 +1063,8 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     }
 
     std::string element = abilityRecord->GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Disconnect ability done, service:%{public}s.", element.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleDisconnectAbilityDoneLocked called, service:%{public}s.",
+        element.c_str());
 
     // complete disconnect and remove record from conn map
     connect->ScheduleDisconnectAbilityDone();
@@ -1075,7 +1076,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
             AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "don't terminate uiservice");
         } else {
-            TAG_LOGD(AAFwkTag::ABILITYMGR,
+            TAG_LOGI(AAFwkTag::ABILITYMGR,
                 "Service ability has no any connection, and not started, need terminate or cache.");
             TerminateOrCacheAbility(abilityRecord);
         }
@@ -1093,7 +1094,7 @@ int AbilityConnectManager::ScheduleCommandAbilityDoneLocked(const sptr<IRemoteOb
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s called, Ability: %{public}s", __func__, element.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called, Ability: %{public}s", __func__, element.c_str());
 
     if ((!abilityRecord->IsAbilityState(AbilityState::INACTIVE)) &&
         (!abilityRecord->IsAbilityState(AbilityState::ACTIVE))) {
