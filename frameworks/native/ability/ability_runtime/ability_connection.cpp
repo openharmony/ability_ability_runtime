@@ -90,6 +90,7 @@ void AbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& e
         (*item)->OnAbilityDisconnectDone(element, resultCode);
         item++;
     }
+    SetRemoteObject(nullptr);
 }
 
 void AbilityConnection::AddConnectCallback(const sptr<AbilityConnectCallback>& abilityConnectCallback)

@@ -484,13 +484,16 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     }
 }
 
-void AppMgrServiceInner::MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia,
+int32_t AppMgrServiceInner::MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia,
     std::string &watermarkBusinessName, bool &isWatermarkEnabled,
     bool &isFileUri, std::string &processName)
 {
+    if (!AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        return ERR_OK;
+    }
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
-        return;
+        return ERR_INVALID_VALUE;
     }
 #ifdef INCLUDE_ZURI
     isFileUri = !want->GetUriString().empty() && want->GetUri().GetScheme() == "file";
@@ -508,17 +511,18 @@ void AppMgrServiceInner::MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool 
             processName += "_KIA";
         }
     }
+    return ERR_OK;
 }
 
-void AppMgrServiceInner::ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
+int32_t AppMgrServiceInner::ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
     const std::string& watermarkBusinessName, bool isWatermarkEnabled)
 {
+    if (!AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation() || !isKia) {
+        return ERR_OK;
+    }
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr");
-        return;
-    }
-    if (!isKia) {
-        return;
+        return ERR_INVALID_VALUE;
     }
 #ifdef SUPPORT_SCREEN
     TAG_LOGI(AAFwkTag::APPMGR, "Openning KIA file, start setting watermark");
@@ -526,17 +530,18 @@ void AppMgrServiceInner::ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord
         appRecord->GetPriorityObject()->GetPid(), watermarkBusinessName, isWatermarkEnabled));
     if (resultCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "setting watermark fails with result code:%{public}d", resultCode);
-        return;
+        return resultCode;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "setting watermark succeeds, start setting snapshot skip");
     resultCode = static_cast<int32_t>(WindowManager::GetInstance().SkipSnapshotForAppProcess(
         appRecord->GetPriorityObject()->GetPid(), isWatermarkEnabled));
     if (resultCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "setting snapshot skip fails with result code:%{public}d", resultCode);
-        return;
+        return resultCode;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "setting snapshot skip succeeds");
 #endif // SUPPORT_SCREEN
+    return ERR_OK;
 }
 
 void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
@@ -590,7 +595,10 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     std::string watermarkBusinessName;
     bool isWatermarkEnabled = false;
     bool isFileUri = false;
-    MakeKiaProcess(want, isKia, watermarkBusinessName, isWatermarkEnabled, isFileUri, processName);
+    if (MakeKiaProcess(want, isKia, watermarkBusinessName, isWatermarkEnabled, isFileUri, processName) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "MakeKiaProcess failed");
+        return;
+    }
 
     std::shared_ptr<AppRunningRecord> appRecord;
     bool isProcCache = false;
@@ -612,7 +620,10 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             processName, bundleInfo, hapModuleInfo, want, loadParam->abilityRecordId, isKia);
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false, loadParam->token);
-        ProcessKia(isKia, appRecord, watermarkBusinessName, isWatermarkEnabled);
+        if (ProcessKia(isKia, appRecord, watermarkBusinessName, isWatermarkEnabled) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "ProcessKia failed");
+            return;
+        }
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "have apprecord");
         if (!isProcCache) {
@@ -1271,6 +1282,7 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
 
     ApplicationTerminatedSendProcessEvent(appRecord);
+    taskHandler_->CancelTask("DELAY_KILL_PROCESS_" + std::to_string(recordId));
 
     auto uid = appRecord->GetUid();
     auto result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",

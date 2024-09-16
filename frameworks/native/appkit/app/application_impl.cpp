@@ -53,7 +53,6 @@ bool ApplicationImpl::PerformAppReady()
         TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
         return false;
     }
-    application_->CleanUselessTempData();
     if (curState_ == APP_STATE_CREATE) {
         application_->OnStart();
         curState_ = APP_STATE_READY;
@@ -74,6 +73,7 @@ bool ApplicationImpl::PerformForeground()
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (((curState_ == APP_STATE_READY) || (curState_ == APP_STATE_BACKGROUND)) && application_ != nullptr) {
         application_->OnForeground();
+        application_->CleanUselessTempData();
         curState_ = APP_STATE_FOREGROUND;
         return true;
     }
