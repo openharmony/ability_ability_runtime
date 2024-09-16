@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_UTILS_H
-#define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_UTILS_H
+#ifndef OHOS_ABILITY_RUNTIME_KIA_INTERCEPTOR_IMPL_H
+#define OHOS_ABILITY_RUNTIME_KIA_INTERCEPTOR_IMPL_H
 
-#include <string>
-
-#include "bundlemgr/bundle_mgr_interface.h"
-#include "element_name.h"
-#include "insight_intent_execute_param.h"
+#include "kia_interceptor_stub.h"
 
 namespace OHOS {
-namespace AbilityRuntime {
-class InsightIntentUtils {
+namespace AppExecFwk {
+/**
+ * @class MockKiaInterceptor the implementation of the KiaInterceptorStub
+*/
+class MockKiaInterceptor : public KiaInterceptorStub {
 public:
-    static uint32_t GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
-        const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry);
+    MockKiaInterceptor() {}
+    virtual ~MockKiaInterceptor() = default;
+
+    int OnIntercept(AAFwk::Want &want)  override
+    {
+        return 0;
+    }
 };
-} // namespace AbilityRuntime
+} // namespace AppExecFwk
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_UTILS_H
+
+#endif // OHOS_ABILITY_RUNTIME_KIA_INTERCEPTOR_IMPL_H

@@ -1224,13 +1224,11 @@ std::list<std::shared_ptr<ModuleRunningRecord>> AppRunningRecord::GetAllModuleRe
 {
     std::list<std::shared_ptr<ModuleRunningRecord>> moduleRecordList;
     std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
-    TAG_LOGD(AAFwkTag::APPMGR, "Begin.");
     for (const auto &item : hapModules_) {
         for (const auto &list : item.second) {
             moduleRecordList.push_back(list);
         }
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "End.");
     return moduleRecordList;
 }
 
@@ -1557,11 +1555,9 @@ bool AppRunningRecord::CanRestartResidentProc()
 void AppRunningRecord::GetBundleNames(std::vector<std::string> &bundleNames)
 {
     std::lock_guard<ffrt::mutex> appInfosLock(appInfosLock_);
-    TAG_LOGD(AAFwkTag::APPMGR, "Begin.");
     for (auto &app : appInfos_) {
         bundleNames.emplace_back(app.first);
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "End.");
 }
 
 void AppRunningRecord::SetUserTestInfo(const std::shared_ptr<UserTestRecord> &record)
