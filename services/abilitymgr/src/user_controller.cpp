@@ -85,7 +85,7 @@ void UserController::ClearAbilityUserItems(int32_t userId)
     }
 }
 
-void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool isForeground)
+void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback)
 {
     if (userId < 0 || userId == USER_ID_NO_HEAD) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser userId is invalid:%{public}d", userId);
@@ -99,13 +99,20 @@ void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, boo
         return;
     }
 
+    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    if (!appScheduler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appScheduler");
+        return;
+    }
+    appScheduler->SetEnableStartProcessFlagByUserId(userId, true);
+
     if (!IsExistOsAccount(userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser not exist such account:%{public}d", userId);
         callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
         return;
     }
 
-    if (isForeground && GetCurrentUserId() != USER_ID_NO_HEAD && !Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+    if (GetCurrentUserId() != USER_ID_NO_HEAD && !Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         // start freezing screen
         SetFreezingNewUserId(userId);
         DelayedSingleton<AbilityManagerService>::GetInstance()->StartFreezingScreen();
@@ -120,10 +127,8 @@ void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, boo
         return;
     }
 
-    if (isForeground) {
-        SetCurrentUserId(userId);
-        // notify wms switching now
-    }
+    SetCurrentUserId(userId);
+    // notify wms switching now
 
     bool needStart = false;
     if (state == STATE_BOOTING) {
@@ -132,20 +137,16 @@ void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, boo
         SendSystemUserStart(userId);
     }
 
-    if (isForeground) {
-        SendSystemUserCurrent(oldUserId, userId);
-        SendReportUserSwitch(oldUserId, userId, userItem);
-        SendUserSwitchTimeout(oldUserId, userId, userItem);
-    }
+    SendSystemUserCurrent(oldUserId, userId);
+    SendReportUserSwitch(oldUserId, userId, userItem);
+    SendUserSwitchTimeout(oldUserId, userId, userItem);
 
     if (needStart) {
         BroadcastUserStarted(userId);
     }
 
     UserBootDone(userItem);
-    if (isForeground) {
-        MoveUserToForeground(oldUserId, userId, callback);
-    }
+    MoveUserToForeground(oldUserId, userId, callback);
 }
 
 int32_t UserController::StopUser(int32_t userId)
@@ -221,10 +222,11 @@ int32_t UserController::LogoutUser(int32_t userId)
         return INVALID_USERID_VALUE;
     }
     abilityManagerService->ClearUserData(userId);
-    appScheduler->KillProcessesByUserId(userId);
+    appScheduler->SetEnableStartProcessFlagByUserId(userId, false);
     if (IsCurrentUser(userId)) {
         SetCurrentUserId(0);
     }
+    appScheduler->KillProcessesByUserId(userId);
     ClearAbilityUserItems(userId);
     return 0;
 }
