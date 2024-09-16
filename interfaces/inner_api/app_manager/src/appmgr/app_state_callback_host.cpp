@@ -55,7 +55,7 @@ int AppStateCallbackHost::OnRemoteRequest(
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_REMOTE_DIED):
             return HandleOnAppRemoteDied(data, reply);
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_PRE_CACHE):
-            return HandlenNotifyAppPreCache(data, reply);
+            return HandleNotifyAppPreCache(data, reply);
     }
 
     TAG_LOGD(AAFwkTag::APPMGR, "AppStateCallbackHost::OnRemoteRequest end");
@@ -168,7 +168,7 @@ int32_t AppStateCallbackHost::HandleOnAppRemoteDied(MessageParcel &data, Message
     return NO_ERROR;
 }
 
-int32_t AppStateCallbackHost::HandlenNotifyAppPreCache(MessageParcel &data, MessageParcel &reply)
+int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<sptr<IRemoteObject>> abilityTokens;
     int32_t pid = data.ReadInt32();
