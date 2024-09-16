@@ -94,7 +94,7 @@ public:
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
-    void NotifyAppPreCache(int32_t pid) {}
+    virtual void NotifyAppPreCache(int32_t pid) {}
 
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 };
