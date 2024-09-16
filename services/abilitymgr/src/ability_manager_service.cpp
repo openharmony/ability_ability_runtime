@@ -10820,6 +10820,11 @@ void AbilityManagerService::NotifyStartResidentProcess(std::vector<AppExecFwk::B
     }
 }
 
+void AbilityManagerService::NotifyAppPreCache(int32_t pid)
+{
+    ForceTerminateSerivceExtensionByPid(pid);
+}
+
 void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     std::shared_ptr<AbilityRecord> abilityRecord;
@@ -12041,7 +12046,6 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
     if (!forceKillProcess) {
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->SetProcessCacheStatus(
             abilityRecord->GetPid(), true));
-        ForceTerminateSerivceExtensionByPid(abilityRecord->GetPid());
     }
     int32_t errCode = uiAbilityManager->CleanUIAbility(abilityRecord, forceKillProcess);
     ReportCleanSession(sessionInfo, abilityRecord, errCode);
@@ -12060,6 +12064,7 @@ void AbilityManagerService::ForceTerminateSerivceExtensionByPid(int32_t pid)
             if (abilityRecord &&
                 abilityRecord->GetAbilityInfo().extensionAbilityType ==
                 AppExecFwk::ExtensionAbilityType::SERVICE) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "app ForceTerminateSerivceExtensionByPid, pid is %{public}d", pid);
                 connectManager->TerminateAbility(token);
             }
         }

@@ -56,10 +56,17 @@ public:
      */
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
+    /**
+     * @brief Notify abilityms app process pre cache
+     * @param pid process pid.
+     */
+    virtual void NotifyAppPreCache(int32_t pid) override;
+
 private:
     int32_t HandleOnAppStateChanged(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnAbilityRequestDone(MessageParcel& data, MessageParcel& reply);
     int32_t HandleNotifyStartResidentProcess(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply);
 
     using AppStateCallbackFunc = int32_t(AppStateCallbackHost::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, AppStateCallbackFunc> memberFuncMap_;
