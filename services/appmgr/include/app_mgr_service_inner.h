@@ -1052,7 +1052,7 @@ public:
      * @return Returns true is final application process, others return false.
      */
     bool IsFinalAppProcessByBundleName(const std::string &bundleName);
-
+    
     /**
      * @brief Notify memory size state changed to sufficient or insufficent.
      * @param isMemorySizeSufficent Indicates the memory size state.
@@ -1358,8 +1358,7 @@ private:
 
     bool CheckGetRunningInfoPermission() const;
 
-    int32_t KillApplicationByBundleName(
-        const std::string &bundleName);
+    int32_t KillApplicationByBundleName(const std::string &bundleName);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 

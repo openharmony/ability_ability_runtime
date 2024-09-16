@@ -1436,10 +1436,10 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_RegisterAbilityLifecycleObserver_0100, Fun
 
     // init UIAbility to make sure lifecycle is created.
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
     sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
     std::shared_ptr<AbilityLocalRecord> abilityRecord =
         std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
-    std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
     ability->Init(abilityRecord, nullptr, handler, nullptr);
     std::shared_ptr<LifeCycle> lifeCycle = ability->GetLifecycle();
     EXPECT_NE(lifeCycle, nullptr);
