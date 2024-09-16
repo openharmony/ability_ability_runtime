@@ -1034,7 +1034,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     int32_t oriValidUserId = GetValidUserId(userId);
     int32_t validUserId = oriValidUserId;
-
+    SetTargetCloneIndexInSameBundle(want, callerToken);
     int32_t appIndex = 0;
     if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
         return ERR_APP_CLONE_INDEX_INVALID;
@@ -1612,6 +1612,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
 
     int32_t oriValidUserId = GetValidUserId(userId);
     int32_t validUserId = oriValidUserId;
+    SetTargetCloneIndexInSameBundle(want, callerToken);
     int32_t appIndex = 0;
     if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
         return ERR_APP_CLONE_INDEX_INVALID;
@@ -7132,7 +7133,7 @@ int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback)
     }
 
     if (userController_) {
-        userController_->StartUser(userId, callback, true);
+        userController_->StartUser(userId, callback);
     }
     return 0;
 }
@@ -10598,6 +10599,24 @@ int AbilityManagerService::CreateCloneSelectorDialog(AbilityRequest &request, in
 {
     CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
     return implicitStartProcessor_->ImplicitStartAbility(request, userId, 0, replaceWantString, true);
+}
+
+void AbilityManagerService::SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken)
+{
+    auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
+    CHECK_POINTER(callerRecord);
+    if (callerRecord->GetAbilityInfo().bundleName != want.GetElement().GetBundleName()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not the same bundle");
+        return;
+    }
+    if (want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "want with app clone index.");
+        return;
+    }
+    int32_t appIndex = callerRecord->GetApplicationInfo().appIndex;
+    if (appIndex >= 0 && appIndex < AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+        (const_cast<Want &>(want)).SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+    }
 }
 
 void AbilityManagerService::RemoveLauncherDeathRecipient(int32_t userId)
