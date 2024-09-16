@@ -222,6 +222,14 @@ public:
     virtual void SetCurrentUserId(const int32_t userId) = 0;
 
     /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    virtual void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess) {}
+
+    /**
      * Get bundleName by pid.
      *
      * @param pid process id.
@@ -411,6 +419,7 @@ public:
         FORCE_KILL_APPLICATION,
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
+        ENABLE_START_PROCESS_FLAG_BY_USER_ID,
     };
 };
 }  // namespace AppExecFwk
