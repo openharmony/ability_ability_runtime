@@ -7335,6 +7335,16 @@ void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::Bund
     }
 }
 
+void AppMgrServiceInner::NotifyAppPreCache(int32_t pid)
+{
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->NotifyAppPreCache(pid);
+        }
+    }   
+}
+
 void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");

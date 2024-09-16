@@ -69,12 +69,20 @@ public:
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 
+
+    /**
+     * @brief Notify abilityms app process pre cache
+     * @param pid process pid.
+     */
+    virtual void NotifyAppPreCache(int32_t pid) {}
+
     enum class Message {
         TRANSACT_ON_APP_STATE_CHANGED = 0,
         TRANSACT_ON_ABILITY_REQUEST_DONE,
         TRANSACT_ON_NOTIFY_CONFIG_CHANGE,
         TRANSACT_ON_NOTIFY_START_RESIDENT_PROCESS,
-        TRANSACT_ON_APP_REMOTE_DIED
+        TRANSACT_ON_APP_REMOTE_DIED,
+        TRANSACT_ON_APP_PRE_CACHE
     };
 };
 }  // namespace AppExecFwk

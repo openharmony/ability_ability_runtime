@@ -62,7 +62,13 @@ public:
      * @param abilityTokens abilities in died process.
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
-    
+
+    /**
+     * @brief Notify abilityms app process pre cache
+     * @param pid process pid.
+     */
+    virtual void NotifyAppPreCache(int32_t pid) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<AppStateCallbackProxy> delegator_;

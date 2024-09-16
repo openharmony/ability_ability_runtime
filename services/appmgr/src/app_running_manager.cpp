@@ -667,6 +667,9 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
                 appRecord->GetBundleName().c_str());
+            if (clearMissionFlag && appMgrServiceInner && appRecord->GetPriorityObject()) {
+                appMgrServiceInner->NotifyAppPreCache(appRecord->GetPriorityObject()->GetPid());
+            }
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
