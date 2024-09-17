@@ -31,7 +31,7 @@ int32_t WantUtils::GetCallerBundleName(std::string &callerBundleName)
     return IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callerUid, callerBundleName));
 }
 
-int32_t  WantUtils::ConvertToExplicitWant(Want& want)
+int32_t WantUtils::ConvertToExplicitWant(Want& want)
 {
     int32_t retCode = ERR_OK;
 #ifdef APP_DOMAIN_VERIFY_ENABLED
@@ -68,8 +68,7 @@ int32_t  WantUtils::ConvertToExplicitWant(Want& want)
     return retCode;
 }
 
-bool WantUtils::IsAtomicServiceUrl(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int requestCode)
+bool WantUtils::IsAtomicServiceUrl(const Want& want)
 {
     std::string url = want.GetUriString();
     bool isAtomicServiceShortUrl = false;
