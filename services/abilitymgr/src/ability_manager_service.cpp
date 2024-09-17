@@ -11980,7 +11980,7 @@ ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> ca
 
     std::string callerBundleName;
     Want convertedWant = want;
-    if (!WantUtils::IsAtomicServiceUrl(want, callerToken, userId, requestCode) ||
+    if (!WantUtils::IsAtomicServiceUrl(want) ||
         WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK ||
         WantUtils::ConvertToExplicitWant(convertedWant) != ERR_OK ||
         freeInstallManager_ == nullptr) {

@@ -575,6 +575,7 @@ group("unittest") {
       "want_sender_info_test:unittest",
       "want_sender_proxy_test:unittest",
       "want_sender_stub_test:unittest",
+      "want_utils_test:unittest",
       "wants_info_test:unittest",
       "window_options_utils_test:unittest",
       "window_visibility_changed_listener_test:unittest",
