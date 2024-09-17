@@ -258,6 +258,9 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
 
 bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    if (appRecord == nullptr) {
+        return false;
+    }
     auto appInfo = appRecord->GetApplicationInfo();
     auto actualVer = appInfo->apiTargetVersion % API_VERSION_MOD;
     if (shouldCheckApi && actualVer < API12) {
@@ -275,6 +278,9 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
 
 bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    if (appRecord == nullptr) {
+        return false;
+    }
     if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
         return true;
     }
