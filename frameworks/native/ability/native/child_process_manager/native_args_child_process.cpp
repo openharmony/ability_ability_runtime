@@ -79,6 +79,7 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
     }
     if (strcpy_s(args.entryParams, entryParams.size() + 1, entryParams.c_str()) != ERR_OK) {
         delete[] args.entryParams;
+        args.entryParams = nullptr;
         TAG_LOGE(AAFwkTag::APPKIT, "strcpy_s failed.");
         return args;
     }
@@ -98,6 +99,7 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
             delete[] node->fdName;
             node->fdName = nullptr;
             delete node;
+            node = nullptr;
             TAG_LOGE(AAFwkTag::APPKIT, "strcpy_s failed.");
             return args;
         }
