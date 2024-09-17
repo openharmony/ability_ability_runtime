@@ -2344,6 +2344,7 @@ void AppMgrServiceInner::RegisterAppStateCallback(const sptr<IAppStateCallback> 
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (callback != nullptr) {
         std::lock_guard lock(appStateCallbacksLock_);
+        TAG_LOGI(AAFwkTag::APPMGR, "RegisterAppStateCallback");
         appStateCallbacks_.push_back(callback);
     }
 }
@@ -3339,9 +3340,12 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     for (const auto &token : appRecord->GetAbilities()) {
         abilityTokens.emplace_back(token.first);
     }
-    for (const auto &callback : appStateCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAppRemoteDied(abilityTokens);
+    {
+        std::lock_guard lock(appStateCallbacksLock_);
+        for (const auto &callback : appStateCallbacks_) {
+            if (callback != nullptr) {
+                callback->OnAppRemoteDied(abilityTokens);
+            }
         }
     }
     ClearData(appRecord);
