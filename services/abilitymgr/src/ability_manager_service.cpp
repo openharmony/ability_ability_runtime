@@ -167,7 +167,6 @@ constexpr const char* UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
 constexpr const char* SUPPORT_CLOSE_ON_BLUR = "supportCloseOnBlur";
 constexpr const char* ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohosSpecifiedProcessFlag";
-constexpr const char* VERIFY_DOMINATE_SCREEN = "persist.sys.abilityms.verify_start_ability_without_caller_token";
 constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
 
 constexpr char ASSERT_FAULT_DETAIL[] = "assertFaultDialogDetail";
@@ -977,8 +976,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 #endif // SUPPORT_SCREEN
 
     // prevent the app from dominating the screen
-    if (system::GetBoolParameter(VERIFY_DOMINATE_SCREEN, true) &&
-        callerToken == nullptr && !IsCallerSceneBoard() && !isSendDialogResult && !isForegroundToRestartApp &&
+    if (callerToken == nullptr && !IsCallerSceneBoard() && !isSendDialogResult && !isForegroundToRestartApp &&
         AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller invalid");
         return ERR_INVALID_CALLER;
@@ -1599,8 +1597,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // prevent the app from dominating the screen
-    if (system::GetBoolParameter(VERIFY_DOMINATE_SCREEN, true) &&
-        callerToken == nullptr && !IsCallerSceneBoard() &&
+    if (callerToken == nullptr && !IsCallerSceneBoard() &&
         AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller invalid");
         return ERR_INVALID_CALLER;
@@ -12066,52 +12063,56 @@ void AbilityManagerService::ReportCleanSession(const sptr<SessionInfo> &sessionI
 void AbilityManagerService::SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
     const Want& want, uint32_t specifyTokenId)
 {
-    if (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
-        abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
-        EventInfo eventInfo;
-        eventInfo.bundleName = abilityInfo.bundleName;
-        eventInfo.moduleName = abilityInfo.moduleName;
-        eventInfo.abilityName = abilityInfo.name;
-        eventInfo.extensionType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
-        if (specifyTokenId > 0) {
-            // come from want agent or form
-            Security::AccessToken::HapTokenInfo hapInfo;
-            if (Security::AccessToken::AccessTokenKit::GetHapTokenInfo(specifyTokenId, hapInfo) == ERR_OK) {
-                eventInfo.callerBundleName = hapInfo.bundleName;
-            }
-        } else {
-            eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-            if (eventInfo.callerBundleName.empty()) {
-                eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
-            }
-        }
-        TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "SendStartAbilityOtherExtensionEvent, bundleName:%{public}s, extensionAbilityType:%{public}d",
-            eventInfo.bundleName.c_str(), eventInfo.extensionType);
-        EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
+    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
+        abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        return;        
     }
+    EventInfo eventInfo;
+    eventInfo.bundleName = abilityInfo.bundleName;
+    eventInfo.moduleName = abilityInfo.moduleName;
+    eventInfo.abilityName = abilityInfo.name;
+    eventInfo.extensionType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
+    if (specifyTokenId > 0) {
+        // come from want agent or form
+        Security::AccessToken::HapTokenInfo hapInfo;
+        if (Security::AccessToken::AccessTokenKit::GetHapTokenInfo(specifyTokenId, hapInfo) == ERR_OK) {
+            eventInfo.callerBundleName = hapInfo.bundleName;
+        }
+    } else {
+        eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+        if (eventInfo.callerBundleName.empty()) {
+            eventInfo.callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+        }
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "SendStartAbilityOtherExtensionEvent, bundleName:%{public}s, extensionAbilityType:%{public}d",
+        eventInfo.bundleName.c_str(), eventInfo.extensionType);
+    EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
 }
 
-void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType)
+void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest,
+    AppExecFwk::ExtensionAbilityType extensionType)
 {
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         return;
     }
     abilityRequest.want.RemoveParam(WANT_PARAMS_HOST_WINDOW_ID_KEY);
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    if(callerAbilityRecord != nullptr) {
-        sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();
-        if (callerSessionInfo != nullptr) {
-            if (callerAbilityRecord->GetAbilityInfo().type == AbilityType::PAGE) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "UIAbility Caller");
-                abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, callerSessionInfo->persistentId);
-            } else {
-                abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
-            }
-        }
-    } else {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbilityRecord null");
+    if (callerAbilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo, callerAbilityRecord null");
+        return;
     }
+    sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();
+    if (callerSessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo, callerSessionInfo null");
+        return;
+    }
+    if (callerAbilityRecord->GetAbilityInfo().type == AbilityType::PAGE) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo, caller is UIAbility");
+        abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, callerSessionInfo->persistentId);
+        return;
+    }
+    abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
 }
 
 int32_t AbilityManagerService::TerminateMission(int32_t missionId)
