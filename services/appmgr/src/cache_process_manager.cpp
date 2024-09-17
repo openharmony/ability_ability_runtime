@@ -262,6 +262,10 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
         return false;
     }
     auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo == nullptr) {
+        TAG_LOGD(AAFwkTag::APPMGR, "appinfo nullptr");
+        return false;
+    }
     auto actualVer = appInfo->apiTargetVersion % API_VERSION_MOD;
     if (shouldCheckApi && actualVer < API12) {
         TAG_LOGD(AAFwkTag::APPMGR, "App %{public}s 's apiTargetVersion has %{public}d, smaller than 12",
