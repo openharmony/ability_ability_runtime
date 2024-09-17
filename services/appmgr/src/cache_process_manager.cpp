@@ -312,11 +312,6 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
         TAG_LOGI(AAFwkTag::APPMGR, "precheck failed");
         return false;
     }
-    auto appInfo = appRecord->GetApplicationInfo();
-    if (appInfo == nullptr) {
-        TAG_LOGD(AAFwkTag::APPMGR, "appinfo nullptr");
-        return false;
-    }
     if (appRecord->IsAttachedToStatusBar()) {
         TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s is attached to statusbar, not support cache",
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
