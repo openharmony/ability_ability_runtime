@@ -611,6 +611,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
 void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
     std::shared_ptr<ConnectionRecord> &connectRecord)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called.", __func__);
     if (targetService == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "null target service");
         return;
@@ -714,7 +715,7 @@ int AbilityConnectManager::DisconnectRecordNormal(ConnectListType &list,
     }
 
     if (connectRecord->GetConnectState() == ConnectionState::DISCONNECTED) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "This record: %{public}d complete disconnect directly.",
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "DisconnectRecordNormal disconnect record:%{public}d",
             connectRecord->GetRecordId());
         connectRecord->CompleteDisconnect(ERR_OK, callerDied);
         list.emplace_back(connectRecord);
@@ -857,7 +858,8 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
 
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called, ability:%{public}s, state:%{public}s",
+        __func__, element.c_str(), abilityState.c_str());
 
     switch (targetState) {
         case AbilityState::INACTIVE: {
@@ -928,7 +930,8 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
     std::string element = abilityRecord->GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Connect ability done, ability: %{public}s.", element.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called, Connect ability done, ability: %{public}s.",
+        __func__, element.c_str());
 
     if ((!abilityRecord->IsAbilityState(AbilityState::INACTIVE)) &&
         (!abilityRecord->IsAbilityState(AbilityState::ACTIVE))) {
@@ -1046,7 +1049,8 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     }
 
     std::string element = abilityRecord->GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Disconnect ability done, service:%{public}s.", element.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleDisconnectAbilityDoneLocked called, service:%{public}s.",
+        element.c_str());
 
     // complete disconnect and remove record from conn map
     connect->ScheduleDisconnectAbilityDone();
@@ -1055,7 +1059,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
         if (IsUIExtensionAbility(abilityRecord) && CheckUIExtensionAbilitySessionExist(abilityRecord)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "There exist ui extension component, don't terminate when disconnect.");
         } else {
-            TAG_LOGD(AAFwkTag::ABILITYMGR,
+            TAG_LOGI(AAFwkTag::ABILITYMGR,
                 "Service ability has no any connection, and not started, need terminate or cache.");
             TerminateOrCacheAbility(abilityRecord);
         }
@@ -1073,7 +1077,7 @@ int AbilityConnectManager::ScheduleCommandAbilityDoneLocked(const sptr<IRemoteOb
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability: %{public}s", element.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called, Ability: %{public}s", __func__, element.c_str());
 
     if ((!abilityRecord->IsAbilityState(AbilityState::INACTIVE)) &&
         (!abilityRecord->IsAbilityState(AbilityState::ACTIVE))) {
