@@ -452,6 +452,26 @@ int32_t CJApplicationContext::OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync
     return callbackId;
 }
 
+int32_t CJApplicationContext::OnOnApplicationStateChange(void (*foregroundCallback)(void),
+    void (*backgroundCallback)(void), int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        return -1;
+    }
+    std::lock_guard<std::mutex> lock(applicationStateCallbackLock_);
+    if (applicationStateCallback_ != nullptr) {
+        return applicationStateCallback_->Register(CJLambda::Create(foregroundCallback),
+            CJLambda::Create(backgroundCallback));
+    }
+    applicationStateCallback_ = std::make_shared<CjApplicationStateChangeCallback>();
+    int32_t callbackId = applicationStateCallback_->Register(CJLambda::Create(foregroundCallback), CJLambda::Create(backgroundCallback));
+    context->RegisterApplicationStateChangeCallback(applicationStateCallback_);
+    return callbackId;
+}
+
 void CJApplicationContext::OnOffEnvironment(int32_t callbackId, int32_t *errCode)
 {
     auto context = applicationContext_.lock();
@@ -548,6 +568,18 @@ int32_t FfiCJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds
         return -1;
     }
     return context->OnOnAbilityLifecycle(cFuncIds, false, errCode);
+}
+
+int32_t FfiCJApplicationContextOnOnApplicationStateChange(int64_t id, void (*foregroundCallback)(void),
+    void (*backgroundCallback)(void), int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return -1;
+    }
+    return context->OnOnApplicationStateChange(foregroundCallback, backgroundCallback, errCode);
 }
 
 void FfiCJApplicationContextOnOff(int64_t id, const char* type, int32_t callbackId, int32_t *errCode)
