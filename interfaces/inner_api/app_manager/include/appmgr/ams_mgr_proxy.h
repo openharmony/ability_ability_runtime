@@ -280,7 +280,7 @@ public:
      * @param bundleName The application bundle name.
      * @param enable The current updated enable status.
      */
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable) override;
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid) override;
 
     /**
      * To clear the process by ability token.

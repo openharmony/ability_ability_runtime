@@ -2058,7 +2058,7 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         }
     }
 
-    if (abilityRecord->GetKeepAlive() && userId_ != USER_ID_NO_HEAD && userId_ != currentUserId) {
+    if (userId_ != USER_ID_NO_HEAD && userId_ != currentUserId) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Not current user's ability");
         return;
     }
@@ -3138,6 +3138,16 @@ int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::Abi
     TAG_LOGI(AAFwkTag::ABILITYMGR,"ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
     ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
     return ERR_OK;
+}
+
+void AbilityConnectManager::UninstallApp(const std::string &bundleName)
+{
+    std::lock_guard lock(serviceMapMutex_);
+    for (const auto &[key, abilityRecord]: serviceMap_) {
+        if (abilityRecord && abilityRecord->GetAbilityInfo().bundleName == bundleName) {
+            abilityRecord->SetKeepAliveBundle(false);
+        }
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
