@@ -94,7 +94,7 @@ HWTEST_F(WantUtilsTest, ConvertToExplicitWant_003, TestSize.Level1)
     want.SetUri("a_short_atomic_service_uri");
     auto client = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance();
     EXPECT_NE(client, nullptr);
-    AppDomainVerify::AppDomainVerifyMgrClient::convertDelaySeconds_ = 3; // 3 seconds
+    AppDomainVerify::AppDomainVerifyMgrClient::convertResultCode_ = ERR_TIMED_OUT;
     auto errCode = WantUtils::ConvertToExplicitWant(want);
     EXPECT_EQ(errCode, ERR_TIMED_OUT);
     TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest ConvertToExplicitWant_003 end");
