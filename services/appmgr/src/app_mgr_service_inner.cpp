@@ -7417,7 +7417,7 @@ int32_t AppMgrServiceInner::SetSupportedProcessCache(int32_t pid, bool isSupport
         TAG_LOGE(AAFwkTag::APPMGR, "process cache feature disabled");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
-    appRecord->SetSupportedProcessCache(isSupport);
+    appRecord->SetEnableProcessCache(isSupport);
     return ERR_OK;
 }
 
