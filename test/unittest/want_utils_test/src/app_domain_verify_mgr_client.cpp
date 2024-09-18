@@ -20,13 +20,14 @@ namespace AppDomainVerify {
 bool AppDomainVerifyMgrClient::isAtomicServiceUrlFlag_ = false;
 AAFwk::Want AppDomainVerifyMgrClient::explicitWant_;
 int AppDomainVerifyMgrClient::convertResultCode_ = 0;
-int AppDomainVerifyMgrClient::convertDelaySeconds_ = 0;
 
-AppDomainVerifyMgrClient::AppDomainVerifyMgrClient() {
+AppDomainVerifyMgrClient::AppDomainVerifyMgrClient()
+{
     taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("app_domain_verify_task_queue");
 }
 
-AppDomainVerifyMgrClient::~AppDomainVerifyMgrClient() {
+AppDomainVerifyMgrClient::~AppDomainVerifyMgrClient()
+{
     taskHandler_.reset();
 }
 
@@ -39,7 +40,6 @@ void AppDomainVerifyMgrClient::ConvertToExplicitWant(OHOS::AAFwk::Want& implicit
 {
     if (taskHandler_ != nullptr) {
         taskHandler_->SubmitTask([want = implicitWant, callback = callback]() {
-            sleep(AppDomainVerifyMgrClient::convertDelaySeconds_);
             AppDomainVerifyMgrClient::explicitWant_.SetUri(want.GetUriString());
             if (callback != nullptr) {
                 callback->OnConvert(AppDomainVerifyMgrClient::convertResultCode_,
