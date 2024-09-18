@@ -507,6 +507,7 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     return StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
 }
 
@@ -3374,7 +3375,7 @@ int32_t AbilityManagerService::TerminateUIServiceExtensionAbility(const sptr<IRe
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard, no allowed");
         return ERR_WRONG_INTERFACE_CALL;
     }
-    
+
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
@@ -3385,14 +3386,14 @@ int32_t AbilityManagerService::TerminateUIServiceExtensionAbility(const sptr<IRe
         extensionAbilityType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
             return ERR_INVALID_VALUE;
     }
-    
+
     auto userId = GetValidUserId(DEFAULT_INVAL_VALUE);
     auto connectManager = GetConnectManagerByUserId(userId);
     if (!connectManager) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null. userId=%{public}d", userId);
         return ERR_INVALID_VALUE;
     }
-    return connectManager->TerminateAbility(token);    
+    return connectManager->TerminateAbility(token);
 }
 
 int AbilityManagerService::BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
