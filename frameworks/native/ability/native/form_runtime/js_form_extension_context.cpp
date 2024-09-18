@@ -172,23 +172,24 @@ private:
             want.GetBundle().c_str(),
             want.GetElement().GetAbilityName().c_str());
         unwrapArgc++;
+
         NapiAsyncTask::CompleteCallback complete =
             [weak = context_, want](napi_env env, NapiAsyncTask& task, int32_t status) {
                 TAG_LOGI(AAFwkTag::FORM_EXT, "startAbility begin");
                 auto context = weak.lock();
                 if (!context) {
                     TAG_LOGW(AAFwkTag::FORM_EXT, "context is released");
-                    task.Reject(env,
-                        NapiFormUtil::CreateErrorByInternalErrorCode(env, ERR_APPEXECFWK_FORM_COMMON_CODE));
+                    task.Reject(env, NapiFormUtil::CreateErrorByInternalErrorCode(
+                        env, ERR_APPEXECFWK_FORM_COMMON_CODE));
                     return;
                 }
                 // entry to the core functionality.
-                auto errcode = context->StartAbility(want);
+                ErrCode innerErrorCode = context->StartAbility(want);
                 if (errcode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
-                    TAG_LOGE(AAFwkTag::FORM_EXT, "Start failed: %{public}d", errcode);
-                    task.Reject(env, NapiFormUtil::CreateErrorByInternalErrorCode(env, errcode));
+                    TAG_LOGE(AAFwkTag::FORM_EXT, "Start failed: %{public}d", innerErrorCode);
+                    task.Reject(env, NapiFormUtil::CreateErrorByInternalErrorCode(env, innerErrorCode));
                 }
             };
 
@@ -238,6 +239,7 @@ private:
                     connection->CallJsFailed(errcode);
                     RemoveConnection(connectId);
                 }
+                task.Resolve(env, CreateJsUndefined(env));
             };
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSFormExtensionConnection::OnConnectAbility",
@@ -298,7 +300,7 @@ private:
                     return;
                 }
                 auto innerErrorCode = context->DisconnectAbility(want, connection);
-                if (innerErrorCode == ERR_OK) {
+                if (innerErrorCode == 0) {
                     task.Resolve(env, CreateJsUndefined(env));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, innerErrorCode));
@@ -308,7 +310,7 @@ private:
         napi_value lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JSFormExtensionConnection::OnDisconnectAbility",
-            env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
