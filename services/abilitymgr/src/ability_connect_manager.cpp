@@ -981,6 +981,8 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
         }
     }
     CompleteStartServiceReq(abilityRecord->GetURI());
+    ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_END, abilityRecord->GetPid(),
+        abilityRecord->GetUid());
     return ERR_OK;
 }
 
@@ -1460,6 +1462,8 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
     } else if (messageId == AbilityConnectManager::CONNECT_TIMEOUT_MSG) {
         taskName = std::string("ConnectTimeout_") + std::to_string(connectRecordId);
         delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * CONNECT_TIMEOUT_MULTIPLE;
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord->GetPid(),
+            abilityRecord->GetUid(), delayTime);
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "messageId error");
         return;
