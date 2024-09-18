@@ -28,6 +28,7 @@ namespace ApplicationUtil {
 using Want = OHOS::AAFwk::Want;
 constexpr int32_t BOOT_COMPLETED_SIZE = 6;
 constexpr const char* BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
+constexpr const char* ENABLE_APP_GALLERY_SELECTOR_UTIL = "abilitymanagerservice.support.appgallery.selector";
 
 [[maybe_unused]] static void AppFwkBootEventCallback(const char *key, const char *value, void *context)
 {
@@ -43,10 +44,20 @@ constexpr const char* BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
     TAG_LOGE(AAFwkTag::ABILITYMGR, "init call, AppFwkBootEventCallback key: %{public}s, value: %{public}s", key, value);
 }
 
-bool IsBootCompleted()
+inline bool IsBootCompleted()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     std::string ret = OHOS::system::GetParameter(BOOTEVENT_BOOT_COMPLETED, "false");
+    if (ret == "true") {
+        return true;
+    }
+    return false;
+}
+
+inline bool IsEnableAppGallerySelector()
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    std::string ret = OHOS::system::GetParameter(ENABLE_APP_GALLERY_SELECTOR_UTIL, "true");
     if (ret == "true") {
         return true;
     }
