@@ -108,6 +108,7 @@ public:
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupport));
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
+
     virtual int StartUserTestProcess(
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId)
     {
@@ -172,7 +173,8 @@ public:
 
     virtual int32_t JudgeSandboxByPid(pid_t pid, bool &isSandbox)
     {
-        return 0;
+        isSandbox = isSandbox_;
+        return judgeSandboxByPidRet_;
     }
 
     void KillApplicationImpl(const std::string& data)
@@ -255,6 +257,10 @@ private:
     Semaphore sem_;
     std::string data_;
     sptr<IAppStateCallback> callback_;
+
+public:
+    uint32_t judgeSandboxByPidRet_ = 0;
+    bool isSandbox_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -1500,41 +1500,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, GetForegroundUIAbilities_001, TestSize.
     EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
 }
 
-/*
- * Feature: AbilityManagerService
- * Function: GenerateEmbeddableUIAbilityRequest
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GenerateEmbeddableUIAbilityRequest
- */
-HWTEST_F(AbilityManagerServiceFirstTest, GenerateEmbeddableUIAbilityRequest_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GenerateEmbeddableUIAbilityRequest_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    Want want;
-    want.SetParam("ohos.extra.param.key.startupMode", 1);
-    AbilityRequest request;
-    auto res = abilityMs_->GenerateEmbeddableUIAbilityRequest(want, request, nullptr, USER_ID_U100);
-    EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GenerateEmbeddableUIAbilityRequest_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: GenerateEmbeddableUIAbilityRequest
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GenerateEmbeddableUIAbilityRequest
- */
-HWTEST_F(AbilityManagerServiceFirstTest, GenerateEmbeddableUIAbilityRequest_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GenerateEmbeddableUIAbilityRequest_002 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    Want want;
-    AbilityRequest request;
-    auto res = abilityMs_->GenerateEmbeddableUIAbilityRequest(want, request, nullptr, USER_ID_U100);
-    EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GenerateEmbeddableUIAbilityRequest_002 end");
-}
-
 /**
  * @tc.name: AbilityManagerServiceFirstTest_RegisterAutoStartupSystemCallback_0100
  * @tc.desc: Test the state of RegisterAutoStartupSystemCallback
@@ -1678,6 +1643,41 @@ HWTEST_F(AbilityManagerServiceFirstTest, QueryAllAutoStartupApplications_0200, T
     std::vector<AutoStartupInfo> infoList;
     auto result = abilityMs_->QueryAllAutoStartupApplications(infoList);
     EXPECT_NE(result, ERR_NO_INIT);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GenerateEmbeddableUIAbilityRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GenerateEmbeddableUIAbilityRequest
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GenerateEmbeddableUIAbilityRequest_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GenerateEmbeddableUIAbilityRequest_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    want.SetParam("ohos.extra.param.key.showMode", 1);
+    AbilityRequest request;
+    auto res = abilityMs_->GenerateEmbeddableUIAbilityRequest(want, request, nullptr, USER_ID_U100);
+    EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GenerateEmbeddableUIAbilityRequest_001 end");
+}
+ 
+/*
+ * Feature: AbilityManagerService
+ * Function: GenerateEmbeddableUIAbilityRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GenerateEmbeddableUIAbilityRequest
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GenerateEmbeddableUIAbilityRequest_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GenerateEmbeddableUIAbilityRequest_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    AbilityRequest request;
+    auto res = abilityMs_->GenerateEmbeddableUIAbilityRequest(want, request, nullptr, USER_ID_U100);
+    EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GenerateEmbeddableUIAbilityRequest_002 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

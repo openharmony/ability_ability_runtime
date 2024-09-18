@@ -3222,9 +3222,9 @@ bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUr
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Grant uri permission to shell.");
     std::vector<Uri> uriVec;
-    for (auto&& str : strUriVec) {
+    for (auto && str : strUriVec) {
         Uri uri(str);
-        auto&& scheme = uri.GetScheme();
+        auto && scheme = uri.GetScheme();
         if (scheme != "content") {
             return false;
         }
@@ -3550,6 +3550,11 @@ bool AbilityRecord::GetRestartAppFlag() const
     return isRestartApp_;
 }
 
+void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
+{
+    specifyTokenId_ = specifyTokenId;
+}
+
 void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
 {
     if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
@@ -3566,11 +3571,6 @@ void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
         want_.RemoveParam(UIEXTENSION_ROOT_HOST_PID);
     }
     want_.SetParam(UIEXTENSION_ROOT_HOST_PID, wantParams.GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1));
-}
-
-void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
-{
-    specifyTokenId_ = specifyTokenId;
 }
 
 void AbilityRecord::SetDebugAppByWaitingDebugFlag()
