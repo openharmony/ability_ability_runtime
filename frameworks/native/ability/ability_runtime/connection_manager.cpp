@@ -64,11 +64,16 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
             break;
         }
     }
-    TAG_LOGD(AAFwkTag::CONNECTION, "abilityConnectionsSize: %{public}zu", abilityConnections_.size());
     if (connectionIter != abilityConnections_.end()) {
         std::vector<sptr<AbilityConnectCallback>>& callbacks = connectionIter->second;
         callbacks.push_back(connectCallback);
         abilityConnection = connectionIter->first.abilityConnection;
+        if (!abilityConnection) {
+            TAG_LOGE(AAFwkTag::CONNECTION, "AbilityConnection not exist");
+            return AAFwk::ERR_INVALID_CALLER;
+        }
+        TAG_LOGI(AAFwkTag::CONNECTION, "abilityConnectionsSize: %{public}zu, ConnectionState: %{public}d",
+            abilityConnections_.size(), abilityConnection->GetConnectionState());
         abilityConnection->AddConnectCallback(connectCallback);
         TAG_LOGD(AAFwkTag::CONNECTION, "abilityConnection exist, callbackSize:%{public}zu", callbacks.size());
         if (abilityConnection->GetConnectionState() == CONNECTION_STATE_CONNECTED) {
