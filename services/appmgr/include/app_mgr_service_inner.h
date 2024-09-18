@@ -83,6 +83,15 @@ constexpr int32_t BASE_USER_RANGE = 200000;
 
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
 public:
+    struct ConfigurationObserverWithUserId {
+        sptr<IConfigurationObserver> observer;
+        int32_t userId = -1;
+    };
+    struct AppStateCallbackWithUserId {
+        sptr<IAppStateCallback> callback;
+        int32_t userId = -1;
+    };
+
     AppMgrServiceInner();
     virtual ~AppMgrServiceInner();
 
@@ -622,7 +631,7 @@ public:
      * @param config, System environment change parameters.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UpdateConfiguration(const Configuration &config);
+    int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
     int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
 
@@ -1474,7 +1483,7 @@ private:
     void SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void InitAppWaitingDebugList();
-    void HandleConfigurationChange(const Configuration &config);
+    void HandleConfigurationChange(const Configuration &config, const int32_t userId = -1);
     bool CheckIsThreadInFoundation(pid_t pid);
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
     int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
@@ -1489,7 +1498,7 @@ private:
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
     bool CheckIsDebugApp(const std::string &bundleName);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
-    std::vector<const sptr<IAppStateCallback>> appStateCallbacks_;
+    std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
     std::shared_ptr<AppRunningManager> appRunningManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
@@ -1502,7 +1511,8 @@ private:
     ffrt::mutex browserHostLock_;
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     ffrt::mutex configurationObserverLock_;
-    std::vector<sptr<IConfigurationObserver>> configurationObservers_;
+    std::vector<ConfigurationObserverWithUserId> configurationObservers_;
+
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
@@ -1530,6 +1540,7 @@ private:
 
     std::mutex loadTaskListMutex_;
     std::vector<LoabAbilityTaskFunc> loadAbilityTaskFuncList_;
+    std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

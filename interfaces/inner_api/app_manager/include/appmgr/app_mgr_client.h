@@ -358,7 +358,7 @@ public:
      * @param config System environment change parameters.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode UpdateConfiguration(const Configuration &config);
+    virtual AppMgrResultCode UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
     /**
      *  Update config by bundle name.
