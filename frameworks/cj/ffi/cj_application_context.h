@@ -22,6 +22,7 @@
 #include "cj_macro.h"
 #include "cj_environment_callback.h"
 #include "cj_ability_lifecycle_callback.h"
+#include "cj_application_state_change_callback.h"
 #include "cj_common_ffi.h"
 #include "ffi_remote_data.h"
 #include "ability_delegator_registry.h"
@@ -67,6 +68,8 @@ public:
     int32_t OnOnEnvironment(void (*cfgCallback)(AbilityRuntime::CConfiguration),
         void (*memCallback)(int32_t), bool isSync, int32_t *errCode);
     int32_t OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync, int32_t *errCode);
+    int32_t OnOnApplicationStateChange(void (*foregroundCallback)(void),
+        void (*backgroundCallback)(void), int32_t *errCode);
     void OnOffEnvironment(int32_t callbackId, int32_t *errCode);
     void OnOffAbilityLifecycle(int32_t callbackId, int32_t *errCode);
     static CJApplicationContext* GetCJApplicationContext(
@@ -75,6 +78,8 @@ private:
     std::weak_ptr<AbilityRuntime::ApplicationContext> applicationContext_;
     std::shared_ptr<AbilityRuntime::CjAbilityLifecycleCallback> callback_;
     std::shared_ptr<AbilityRuntime::CjEnvironmentCallback> envCallback_;
+    std::shared_ptr<CjApplicationStateChangeCallback> applicationStateCallback_;
+    std::mutex applicationStateCallbackLock_;
     std::recursive_mutex callbackLock_;
     static std::vector<std::shared_ptr<CjAbilityLifecycleCallback>> callbacks_;
     static CJApplicationContext* cjApplicationContext_;
@@ -91,6 +96,8 @@ CJ_EXPORT CApplicationInfo* FFICJApplicationInfo(int64_t id);
 CJ_EXPORT int32_t FfiCJApplicationContextOnOnEnvironment(int64_t id, void (*cfgCallback)(CConfiguration),
     void (*memCallback)(int32_t), int32_t *errCode);
 CJ_EXPORT int32_t FfiCJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds, int32_t *errCode);
+CJ_EXPORT int32_t FfiCJApplicationContextOnOnApplicationStateChange(int64_t id, void (*foregroundCallback)(void),
+    void (*backgroundCallback)(void), int32_t *errCode);
 CJ_EXPORT void FfiCJApplicationContextOnOff(int64_t id, const char* type, int32_t callbackId, int32_t *errCode);
 };
 }
