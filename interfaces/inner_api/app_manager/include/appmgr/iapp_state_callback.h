@@ -69,7 +69,6 @@ public:
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 
-
     /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.
