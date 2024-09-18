@@ -47,7 +47,7 @@ const std::string HELP_MSG = "usage: aa <command> <options>\n"
 #else
     "  test                        start the test framework with options\n"
     "  appdebug                    set / cancel / get waiting debug status\n"
-    "  process                     optimize performance\n";
+    "  process                     debug and tune\n";
 #endif
 
 const std::string HELP_ApplicationNotResponding =
