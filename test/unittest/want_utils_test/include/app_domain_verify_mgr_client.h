@@ -33,7 +33,6 @@ public:
     static bool isAtomicServiceUrlFlag_;
     static AAFwk::Want explicitWant_;
     static int convertResultCode_;
-    static int convertDelaySeconds_;
     /**
      * IsAtomicServiceUrl
      * @descrition check input url is atomic service or not.
