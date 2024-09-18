@@ -640,7 +640,7 @@ public:
      * @param bundleName The application bundle name.
      * @param enable The current updated enable status.
      */
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     /**
      * Register application or process state observer.
