@@ -2224,7 +2224,7 @@ private:
 
     bool CheckUIExtensionCallerPidByHostWindowId(const AbilityRequest &abilityRequest);
 
-    int CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest);
+    int CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest, uint32_t specifyTokenId);
 
     int CheckServiceCallPermission(const AbilityRequest& abilityRequest,
         const AppExecFwk::AbilityInfo& abilityInfo);
