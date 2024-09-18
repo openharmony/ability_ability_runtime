@@ -1130,17 +1130,9 @@ public:
     void AttachedToStatusBar(const sptr<IRemoteObject> &token);
     void KillApplicationByRecord(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    int32_t NotifyProcessDependedOnWeb();
-
-    void KillProcessDependedOnWeb();
-
-    void RestartResidentProcessDependedOnWeb();
-
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
 
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
-
-    bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,

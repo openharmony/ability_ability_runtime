@@ -1264,19 +1264,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, PreStartMission_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: HandleRestartResidentProcessDependedOnWeb
- * FunctionPoints: HandleRestartResidentProcessDependedOnWeb
- */
-HWTEST_F(AbilityManagerServiceThirdTest, HandleRestartResidentProcessDependedOnWeb_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
-
-    abilityMs_->HandleRestartResidentProcessDependedOnWeb();
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: NotifyFrozenProcessByRSS
  * FunctionPoints: NotifyFrozenProcessByRSS
  */

@@ -53,13 +53,6 @@ bool ExitResidentProcessManager::RecordExitResidentBundleName(const std::string 
     return true;
 }
 
-void ExitResidentProcessManager::RecordExitResidentBundleDependedOnWeb(const std::string &bundleName, int32_t uid)
-{
-    std::lock_guard<ffrt::mutex> lock(webMutexLock_);
-    TAG_LOGE(AAFwkTag::APPMGR, "call");
-    exitResidentBundlesDependedOnWeb_.emplace_back(bundleName, uid);
-}
-
 int32_t ExitResidentProcessManager::HandleMemorySizeInSufficent()
 {
     std::lock_guard<ffrt::mutex> lock(mutexLock_);
@@ -81,14 +74,6 @@ int32_t ExitResidentProcessManager::HandleMemorySizeSufficient(std::vector<ExitR
     currentMemorySizeState_ = MemorySizeState::MEMORY_SIZE_SUFFICIENT;
     processInfos = std::move(exitResidentInfos_);
     return ERR_OK;
-}
-
-void ExitResidentProcessManager::HandleExitResidentBundleDependedOnWeb(
-    std::vector<ExitResidentProcessInfo> &bundleNames)
-{
-    std::lock_guard<ffrt::mutex> lock(webMutexLock_);
-    TAG_LOGE(AAFwkTag::APPMGR, "call");
-    bundleNames = std::move(exitResidentBundlesDependedOnWeb_);
 }
 
 void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<ExitResidentProcessInfo> &exitProcessInfos,
@@ -117,24 +102,6 @@ void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<ExitResi
         }
         exitBundleInfos.emplace_back(bundleInfo);
     }
-}
-
-bool ExitResidentProcessManager::IsKilledForUpgradeWeb(const std::string &bundleName) const
-{
-    TAG_LOGE(AAFwkTag::APPMGR, "call");
-    std::vector<ExitResidentProcessInfo> bundleNames;
-    {
-        std::lock_guard<ffrt::mutex> lock(webMutexLock_);
-        bundleNames = exitResidentBundlesDependedOnWeb_;
-    }
-    for (const auto &innerBundleName : bundleNames) {
-        if (innerBundleName.bundleName == bundleName) {
-            TAG_LOGD(AAFwkTag::APPMGR, "Is killed for upgrade web.");
-            return true;
-        }
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "Not killed for upgrade web.");
-    return false;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
