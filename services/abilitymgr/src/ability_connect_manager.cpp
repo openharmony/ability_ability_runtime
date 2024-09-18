@@ -1514,23 +1514,16 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         return;
     }
     TAG_LOGW(AAFwkTag::ABILITYMGR, "AbilityUri:%{public}s,user:%{public}d", abilityRecord->GetURI().c_str(), userId_);
+    MoveToTerminatingMap(abilityRecord);
+    RemoveServiceAbility(abilityRecord);
+    DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
     if (abilityRecord->IsSceneBoard()) {
-        auto isAttached = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(
-            abilityRecord->GetToken()));
-        DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
-        if (!isAttached) {
-            MoveToTerminatingMap(abilityRecord);
-            RemoveServiceAbility(abilityRecord);
-            if (DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId() == userId_) {
-                RestartAbility(abilityRecord, userId_);
-            }
+        if (DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId() == userId_) {
+            RestartAbility(abilityRecord, userId_);
         }
         PrintTimeOutLog(abilityRecord, AbilityManagerService::LOAD_TIMEOUT_MSG);
         return;
     }
-    MoveToTerminatingMap(abilityRecord);
-    RemoveServiceAbility(abilityRecord);
-    DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
     if (IsAbilityNeedKeepAlive(abilityRecord)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "load timeout");
         RestartAbility(abilityRecord, userId_);
@@ -2170,6 +2163,12 @@ void AbilityConnectManager::HandleAbilityDiedTask(
 
     if (IsUIExtensionAbility(abilityRecord)) {
         HandleUIExtensionDied(abilityRecord);
+    }
+
+    std::string serviceKey = GetServiceKey(abilityRecord);
+    if (GetServiceRecordByElementName(serviceKey) == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s ability record is not exist in service map.", serviceKey.c_str());
+        return;
     }
 
     bool isRemove = false;
