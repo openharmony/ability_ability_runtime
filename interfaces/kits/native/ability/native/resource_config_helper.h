@@ -40,8 +40,6 @@ public:
     void SetMcc(std::string mcc);
     std::string GetMnc();
     void SetMnc(std::string mnc);
-    std::string GetColorModeIsSetByApp();
-    void SetColorModeIsSetByApp(std::string colorModeIsSetByApp);
     void SetThemeId(std::string themeId);
 
     void UpdateResConfig(const AppExecFwk::Configuration &configuration,

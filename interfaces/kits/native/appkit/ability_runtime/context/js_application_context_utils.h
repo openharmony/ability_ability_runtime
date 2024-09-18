@@ -100,6 +100,7 @@ public:
     napi_value OnSetSupportedProcessCacheSelf(napi_env env, NapiCallbackInfo& info);
     napi_value OnPreloadUIExtensionAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetCurrentAppCloneIndex(napi_env env, NapiCallbackInfo& info);
+    napi_value OnSetFontSizeScale(napi_env env, NapiCallbackInfo& info);
 
     static napi_value GetCacheDir(napi_env env, napi_callback_info info);
     static napi_value GetTempDir(napi_env env, napi_callback_info info);
@@ -123,6 +124,7 @@ public:
     static napi_value SetSupportedProcessCacheSelf(napi_env env, napi_callback_info info);
     static napi_value PreloadUIExtensionAbility(napi_env env, napi_callback_info info);
     static napi_value GetCurrentAppCloneIndex(napi_env env, napi_callback_info info);
+    static napi_value SetFontSizeScale(napi_env env, napi_callback_info info);
 
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;

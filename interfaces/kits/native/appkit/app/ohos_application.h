@@ -26,6 +26,7 @@
 #include "ability_stage.h"
 #include "app_context.h"
 #include "element_callback.h"
+#include "application_configuration_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -175,7 +176,8 @@ public:
      *
      * @param config Indicates the new Configuration object.
      */
-    virtual void OnConfigurationUpdated(Configuration config);
+    virtual void OnConfigurationUpdated(Configuration config,
+        AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::System);
     
     /**
      *
@@ -320,11 +322,9 @@ public:
 private:
     void DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo);
     void UpdateAppContextResMgr(const Configuration &config);
-    bool isUpdateColor(Configuration &config, std::string colorMode, std::string globalColorMode,
-        std::string globalColorModeIsSetBySa, std::string colorModeIsSetByApp, std::string colorModeIsSetBySa);
-    bool isUpdateFontSize(Configuration &config);
-    bool isUpdateLanguage(Configuration &config, const std::string language,
-        const std::string languageIsSetByApp, const std::string globalLanguageIsSetByApp);
+    bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
+    bool isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level);
+    bool IsUpdateLanguageNeeded(Configuration &config, AbilityRuntime::SetLevel level);
     const std::function<void()> CreateAutoStartupCallback(
         const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
         const std::shared_ptr<AbilityLocalRecord> abilityRecord,

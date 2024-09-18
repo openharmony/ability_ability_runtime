@@ -109,6 +109,7 @@ public:
     void SetColorMode(int32_t colorMode);
     void SetLanguage(const std::string &language);
     void SetFont(const std::string &font);
+    bool SetFontSizeScale(double fontSizeScale);
     void SetMcc(const std::string &mcc);
     void SetMnc(const std::string &mnc);
     void ClearUpApplicationData();
