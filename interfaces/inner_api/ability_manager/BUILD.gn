@@ -56,6 +56,10 @@ config("ability_manager_public_config") {
   }
 }
 
+config("ability_manager_exception_config") {
+  cflags_cc = [ "-fexceptions" ]
+}
+
 ohos_shared_library("ability_manager") {
   sources = [
     "${ability_runtime_native_path}/ability/native/data_ability_operation.cpp",
@@ -113,6 +117,8 @@ ohos_shared_library("ability_manager") {
       "src/ability_first_frame_state_observer_stub.cpp",
     ]
   }
+
+  configs = [ ":ability_manager_exception_config" ]
 
   public_configs = [
     ":ability_manager_public_config",
