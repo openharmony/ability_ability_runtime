@@ -149,7 +149,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
         return CreateJsUndefined(env);
     }
 
-    NapiAsyncTask::CompleteCallback complete = [weak = context_, image, packOption = std::move(packOption), newWant](
+    NapiAsyncTask::CompleteCallback complete = [weak = context_, image, packOption = std::move(packOption)](
                                                    napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage begin");
         auto context = weak.lock();
@@ -158,6 +158,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)));
             return;
         }
+
         AAFwk::Want newWant;
         PhotoEditorErrorCode errCode = context->SaveEditedContent(image, packOption, newWant);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(errCode), newWant);
@@ -166,16 +167,17 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)));
             return;
         }
-        
+
         task.Resolve(env, abilityResult);
     };
+
     napi_value lastParam = nullptr;
     if (AppExecFwk::IsTypeForNapiValue(env, info.argv[INDEX_TWO], napi_function)) {
         lastParam = info.argv[INDEX_TWO];
     }
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsPhotoEditorExtensionContext OnSaveEditedContentWithImage", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+                                   CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
