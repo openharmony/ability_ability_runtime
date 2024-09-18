@@ -1190,13 +1190,13 @@ private:
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[0], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Get bundle name wrong.");
-            ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
+            ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string");
             return CreateJsUndefined(env);
         }
         int32_t appCloneIndex = 0;
         if (argc > ARGC_ONE && !ConvertFromJsValue(env, argv[1], appCloneIndex)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Get appCloneIndex wrong.");
-            ThrowInvalidParamError(env, "Parse param appCloneIndex failed, must be a string.");
+            ThrowInvalidParamError(env, "Parse param appCloneIndex failed, must be a string");
             return CreateJsUndefined(env);
         }
 

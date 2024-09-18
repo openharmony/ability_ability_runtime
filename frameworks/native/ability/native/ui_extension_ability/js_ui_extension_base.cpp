@@ -358,7 +358,6 @@ bool JsUIExtensionBase::CallPromise(napi_value result, AppExecFwk::AbilityTransa
     return true;
 }
 
-
 void JsUIExtensionBase::OnCommandWindow(
     const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
 {
