@@ -7332,7 +7332,7 @@ void AppMgrServiceInner::NotifyAppPreCache(int32_t pid)
         if (item.callback != nullptr) {
             item.callback->NotifyAppPreCache(pid);
         }
-    }   
+    }
 }
 
 void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
