@@ -2277,6 +2277,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_IsAbilityNeedKeepAlive_001, TestSize.L
     ConnectManager()->SetTaskHandler(TaskHandler());
     ConnectManager()->SetEventHandler(EventHandler());
 
+    serviceRecord2_->SetKeepAliveBundle(true);
     // mock bms return
     EXPECT_TRUE(ConnectManager()->IsAbilityNeedKeepAlive(serviceRecord2_));
 }

@@ -1076,7 +1076,7 @@ public:
 
     void SetAppAssertionPauseState(bool flag);
 
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 

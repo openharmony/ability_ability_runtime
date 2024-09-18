@@ -924,6 +924,10 @@ public:
     int32_t GetRestartCount() const;
     void SetRestartCount(int32_t restartCount);
     bool GetKeepAlive() const;
+    void SetKeepAliveBundle(bool value)
+    {
+        keepAliveBundle_ = value;
+    }
     bool IsKeepAliveBundle() const
     {
         return keepAliveBundle_;
