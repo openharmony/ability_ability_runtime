@@ -149,7 +149,6 @@ ErrCode AbilityManagerShellCommand::CreateCommandMap()
 {
     commandMap_ = {
         {"help", [this]() { return this->RunAsHelpCommand(); }},
-        {"screen", [this]() { return this->RunAsScreenCommand(); }},
         {"start", [this]() { return this->RunAsStartAbility(); }},
         {"stop-service", [this]() { return this->RunAsStopService(); }},
         {"dump", [this]() { return this->RunAsDumpsysCommand(); }},
@@ -218,108 +217,6 @@ ErrCode AbilityManagerShellCommand::RunAsHelpCommand()
     resultReceiver_.append(HELP_MSG);
 
     return OHOS::ERR_OK;
-}
-
-void AbilityManagerShellCommand::HandleInvalidScreenOptions(int& result)
-{
-    switch (optopt) {
-        case 'p': {
-            // 'aa screen -p' with no argument
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' with no argument.", cmd_.c_str());
-
-            resultReceiver_.append("error: option ");
-            resultReceiver_.append("requires a value.\n");
-
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-        case 0: {
-            // 'aa screen' with an unknown option: aa screen --x
-            // 'aa screen' with an unknown option: aa screen --xxx
-            std::string unknownOption = "";
-            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa screen' with an unknown option.");
-
-            resultReceiver_.append(unknownOptionMsg);
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-        default: {
-            // 'aa screen' with an unknown option: aa screen -x
-            // 'aa screen' with an unknown option: aa screen -xxx
-            std::string unknownOption = "";
-            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa screen' with an unknown option.");
-
-            resultReceiver_.append(unknownOptionMsg);
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-    }
-}
-
-ErrCode AbilityManagerShellCommand::RunAsScreenCommand()
-{
-    TAG_LOGI(AAFwkTag::AA_TOOL, "enter");
-
-    int result = OHOS::ERR_OK;
-
-    int option = -1;
-    int counter = 0;
-
-    while (true) {
-        counter++;
-
-        option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
-
-        TAG_LOGI(
-            AAFwkTag::AA_TOOL, "option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
-
-        if (optind < 0 || optind > argc_) {
-            return OHOS::ERR_INVALID_VALUE;
-        }
-
-        if (option == -1) {
-            // When scanning the first argument
-            if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
-                // 'aa screen' with no option: aa screen
-                // 'aa screen' with a wrong argument: aa screen xxx
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' %{public}s.", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
-                resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
-                result = OHOS::ERR_INVALID_VALUE;
-            }
-            break;
-        }
-
-        if (option == '?') {
-            HandleInvalidScreenOptions(result);
-            break;
-        }
-
-        switch (option) {
-            case 'h': {
-                // 'aa screen -h'
-                // 'aa screen --help'
-                result = OHOS::ERR_INVALID_VALUE;
-                break;
-            }
-            case 0: {
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
-    if (result != OHOS::ERR_OK) {
-        resultReceiver_.append(HELP_MSG_SCREEN);
-        result = OHOS::ERR_INVALID_VALUE;
-    }
-
-    return result;
 }
 
 ErrCode AbilityManagerShellCommand::RunAsStartAbility()
@@ -2071,7 +1968,6 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
     }
 
     if (result != OHOS::ERR_OK) {
-        resultReceiver_.append(HELP_MSG_SCREEN);
         result = OHOS::ERR_INVALID_VALUE;
     }
 
@@ -2195,7 +2091,6 @@ ErrCode AbilityManagerShellCommand::RunAsNotifyAppFaultCommand()
     }
 
     if (result != OHOS::ERR_OK) {
-        resultReceiver_.append(HELP_MSG_SCREEN);
         result = OHOS::ERR_INVALID_VALUE;
     }
 
