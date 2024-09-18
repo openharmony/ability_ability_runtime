@@ -537,6 +537,7 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     return StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
 }
 
