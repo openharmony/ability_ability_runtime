@@ -5935,6 +5935,11 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
         if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
             localWant.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
             localWant.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
+            localWant.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
+            localWant.RemoveParam(Want::PARAM_RESV_CALLER_UID);
+            localWant.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+            localWant.SetParam(Want::PARAM_RESV_CALLER_TOKEN, static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
+            localWant.SetParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
         }
         abilityInfo = StartAbilityInfo::CreateStartAbilityInfo(localWant, userId, appIndex);
     }
@@ -8366,7 +8371,13 @@ int AbilityManagerService::CheckStaticCfgPermission(const AppExecFwk::AbilityReq
     }
 
     if (abilityInfo.applicationInfo.accessTokenId == tokenId) {
-        return ERR_OK;
+        return AppExecFwk::Constants::PERMISSION_GRANTED;
+    }
+
+    if (abilityRequest.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) ==
+        SHELL_ASSISTANT_BUNDLENAME &&
+        abilityRequest.abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
+        return AppExecFwk::Constants::PERMISSION_GRANTED;
     }
 
     if ((abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
