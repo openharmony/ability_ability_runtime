@@ -26,7 +26,6 @@
 #include "ability_impl_factory.h"
 #include "context_deal.h"
 #include "mock_ability_impl.h"
-#include "mock_ability_lifecycle_callbacks.h"
 #include "mock_ability_thread.h"
 #include "mock_ability_token.h"
 #include "mock_data_ability.h"

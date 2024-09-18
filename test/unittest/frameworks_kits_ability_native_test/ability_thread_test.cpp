@@ -26,7 +26,6 @@
 #include "ability_impl_factory.h"
 #include "context_deal.h"
 #include "mock_ability_impl.h"
-#include "mock_ability_lifecycle_callbacks.h"
 #include "mock_ability_thread.h"
 #include "mock_ability_token.h"
 #include "mock_data_ability.h"
@@ -1291,7 +1290,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_SendResult_0300, Function | Medi
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
     std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
     abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
-    
+
     abilitythread->abilityImpl_ = std::make_shared<AbilityImpl>();
     EXPECT_NE(abilitythread->abilityImpl_, nullptr);
 
@@ -1313,7 +1312,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_SendResult_0400, Function | Medi
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_SendResult_0400 start";
     AbilityRuntime::FAAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
     EXPECT_NE(abilitythread, nullptr);
-    
+
     abilitythread->abilityImpl_ = std::make_shared<AbilityImpl>();
     EXPECT_NE(abilitythread->abilityImpl_, nullptr);
 
