@@ -15,6 +15,9 @@
 
 #include "js_context_utils.h"
 
+#include <atomic>
+#include <cstdint>
+
 #include "ability_runtime_error_util.h"
 #include "application_context.h"
 #include "application_context_manager.h"
@@ -26,8 +29,6 @@
 #include "js_runtime_utils.h"
 #include "tokenid_kit.h"
 #include "js_error_utils.h"
-#include <atomic>
-#include <cstdint>
 
 namespace OHOS {
 namespace AbilityRuntime {
