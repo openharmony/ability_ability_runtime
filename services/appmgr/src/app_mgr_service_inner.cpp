@@ -3951,7 +3951,7 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
     if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
         TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
         return ERR_INVALID_OPERATION;
-     }
+    }
     auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info);
     CHECK_POINTER_AND_RETURN_VALUE(appRecord, ERR_INVALID_VALUE);
 
