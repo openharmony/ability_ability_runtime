@@ -249,6 +249,14 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->collaboratorType_ = abilityRequest.collaboratorType;
     abilityRecord->missionAffinity_ = abilityRequest.want.GetStringParam(PARAM_MISSION_AFFINITY_KEY);
 
+    auto userId = abilityRequest.appInfo.uid / BASE_USER_RANGE;
+    if ((userId == 0 ||
+        AmsConfigurationParameter::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
+        DelayedSingleton<ResidentProcessManager>::GetInstance()->IsResidentAbility(
+            abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, userId)) {
+        abilityRecord->keepAliveBundle_ = true;
+    }
+
     return abilityRecord;
 }
 
@@ -2721,7 +2729,7 @@ bool AbilityRecord::GetKeepAlive() const
             return true;
         }
     }
-    bool keepAliveEnable = false;
+    bool keepAliveEnable = keepAliveBundle_;
     AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(applicationInfo_.bundleName, keepAliveEnable);
     return keepAliveEnable;
 }
@@ -3567,7 +3575,9 @@ void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
 
 void AbilityRecord::SetDebugAppByWaitingDebugFlag()
 {
-    if (!applicationInfo_.debug || !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+    if (!(applicationInfo_.debug &&
+            applicationInfo_.appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) ||
+        !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Not meeting the set debugging conditions.");
         return;
     }

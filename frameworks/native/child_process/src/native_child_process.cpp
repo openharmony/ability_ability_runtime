@@ -118,7 +118,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
         return NCP_ERR_INVALID_PARAM;
     }
     if (pid == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "pid null.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "pid null");
         return NCP_ERR_INVALID_PARAM;
     }
 

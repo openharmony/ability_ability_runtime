@@ -2986,7 +2986,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_PrepareTerminateAbilityBySCB
 {
     MessageParcel data;
     MessageParcel reply;
-    auto prepareTerminateAbilityBySCBTask = [&](const sptr<SessionInfo> &sessionInfo, bool &isTerminate) {
+    auto prepareTerminateAbilityBySCBTask = [](const sptr<SessionInfo> &sessionInfo, bool &isTerminate) {
         GTEST_LOG_(INFO) << "AbilityManagerStub_IsValidMissionIdsInner_002 caller";
         return ERR_INVALID_VALUE;
     };

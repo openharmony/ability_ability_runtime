@@ -69,7 +69,6 @@ ConnectServerManager::~ConnectServerManager()
 
 ConnectServerManager& ConnectServerManager::Get()
 {
-    std::lock_guard<std::mutex> lock(instanceMutex_);
     static ConnectServerManager connectServerManager;
     return connectServerManager;
 }

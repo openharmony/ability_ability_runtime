@@ -1233,27 +1233,5 @@ bool AmsMgrProxy::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     }
     return reply.ReadBool();
 }
-
-bool AmsMgrProxy::IsKilledForUpgradeWeb(const std::string &bundleName)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
-        return false;
-    }
-    if (!data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "parcel WriteString failed");
-        return false;
-    }
-
-    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB), data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, error code is %{public}d.", ret);
-        return false;
-    }
-    return reply.ReadBool();
-}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -99,6 +99,15 @@ bool StartAbilityUtils::GetCallerAbilityInfo(const sptr<IRemoteObject> &callerTo
     return true;
 }
 
+std::vector<int32_t> StartAbilityUtils::GetCloneAppIndexes(const std::string &bundleName, int32_t userId)
+{
+    std::vector<int32_t> appIndexes;
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bms, appIndexes);
+    IN_PROCESS_CALL_WITHOUT_RET(bms->GetCloneAppIndexes(bundleName, appIndexes, userId));
+    return appIndexes;
+}
+
 int32_t StartAbilityUtils::CheckAppProvisionMode(const std::string& bundleName, int32_t userId)
 {
     AppExecFwk::ApplicationInfo appInfo;
@@ -125,24 +134,15 @@ int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userI
     }
     CHECK_POINTER_AND_RETURN(abilityInfo, GET_ABILITY_SERVICE_FAILED);
     if (abilityInfo->status != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "unexpected abilityInfo status: %{public}d", abilityInfo->status);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unexpected abilityInfo status=%{public}d", abilityInfo->status);
         return abilityInfo->status;
     }
     if ((abilityInfo->abilityInfo).applicationInfo.appProvisionType !=
         AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "window options invalid");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "window options are not supported in non-app-provision mode.");
         return ERR_NOT_IN_APP_PROVISION_MODE;
     }
     return ERR_OK;
-}
-
-std::vector<int32_t> StartAbilityUtils::GetCloneAppIndexes(const std::string &bundleName, int32_t userId)
-{
-    std::vector<int32_t> appIndexes;
-    auto bms = AbilityUtil::GetBundleManagerHelper();
-    CHECK_POINTER_AND_RETURN(bms, appIndexes);
-    IN_PROCESS_CALL_WITHOUT_RET(bms->GetCloneAppIndexes(bundleName, appIndexes, userId));
-    return appIndexes;
 }
 
 StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId, int32_t appIndex,

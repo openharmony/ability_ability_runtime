@@ -1052,7 +1052,7 @@ public:
      * @return Returns true is final application process, others return false.
      */
     bool IsFinalAppProcessByBundleName(const std::string &bundleName);
-
+    
     /**
      * @brief Notify memory size state changed to sufficient or insufficent.
      * @param isMemorySizeSufficent Indicates the memory size state.
@@ -1130,17 +1130,9 @@ public:
     void AttachedToStatusBar(const sptr<IRemoteObject> &token);
     void KillApplicationByRecord(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    int32_t NotifyProcessDependedOnWeb();
-
-    void KillProcessDependedOnWeb();
-
-    void RestartResidentProcessDependedOnWeb();
-
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
 
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
-
-    bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1358,8 +1350,7 @@ private:
 
     bool CheckGetRunningInfoPermission() const;
 
-    int32_t KillApplicationByBundleName(
-        const std::string &bundleName);
+    int32_t KillApplicationByBundleName(const std::string &bundleName);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -1496,6 +1487,7 @@ private:
     void CheckCleanAbilityByUserRequest(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityRunningRecord> &abilityRecord, const AbilityState state);
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
+    bool CheckIsDebugApp(const std::string &bundleName);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<const sptr<IAppStateCallback>> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;

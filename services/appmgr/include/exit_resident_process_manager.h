@@ -28,8 +28,16 @@
 namespace OHOS {
 namespace AppExecFwk {
 enum class MemorySizeState {
-    MEMORY_SIZE_SUFFICENT = 0,
-    MEMORY_SIZE_INSUFFICENT = 1
+    MEMORY_SIZE_SUFFICIENT = 0,
+    MEMORY_SIZE_INSUFFICIENT = 1
+};
+
+struct ExitResidentProcessInfo {
+    ExitResidentProcessInfo() = default;
+    ExitResidentProcessInfo(const std::string &bundleName, int32_t uid)
+        : bundleName(bundleName), uid(uid) {}
+    std::string bundleName;
+    int32_t uid = 0;
 };
 
 class ExitResidentProcessManager {
@@ -37,22 +45,17 @@ public:
     static ExitResidentProcessManager &GetInstance();
     ~ExitResidentProcessManager();
     bool IsMemorySizeSufficent() const;
-    bool RecordExitResidentBundleName(const std::string &bundleName);
-    void RecordExitResidentBundleDependedOnWeb(const std::string &bundleName);
+    bool RecordExitResidentBundleName(const std::string &bundleName, int32_t uid);
     int32_t HandleMemorySizeInSufficent();
-    int32_t HandleMemorySizeSufficent(std::vector<std::string>& bundleNames);
-    void HandleExitResidentBundleDependedOnWeb(std::vector<std::string>& bundleNames);
-    void QueryExitBundleInfos(const std::vector<std::string>& exitBundleNames,
+    int32_t HandleMemorySizeSufficient(std::vector<ExitResidentProcessInfo>& bundleNames);
+    void QueryExitBundleInfos(const std::vector<ExitResidentProcessInfo>& exitBundleNames,
         std::vector<AppExecFwk::BundleInfo>& exitBundleInfos);
-    bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
 
 private:
     ExitResidentProcessManager();
-    MemorySizeState currentMemorySizeState_ = MemorySizeState::MEMORY_SIZE_SUFFICENT;
-    std::vector<std::string> exitResidentBundleNames_;
-    std::vector<std::string> exitResidentBundlesDependedOnWeb_;
+    MemorySizeState currentMemorySizeState_ = MemorySizeState::MEMORY_SIZE_SUFFICIENT;
+    std::vector<ExitResidentProcessInfo> exitResidentInfos_;
     mutable ffrt::mutex mutexLock_;
-    mutable ffrt::mutex webMutexLock_;
     DISALLOW_COPY_AND_MOVE(ExitResidentProcessManager);
 };
 }  // namespace AppExecFwk

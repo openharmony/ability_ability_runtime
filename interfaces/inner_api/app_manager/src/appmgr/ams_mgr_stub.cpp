@@ -192,8 +192,6 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
             return 0;
         case static_cast<uint32_t>(IAmsMgr::Message::BLOCK_PROCESS_CACHE_BY_PIDS):
             return HandleBlockProcessCacheByPids(data, reply);
-        case static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB):
-            return HandleIsKilledForUpgradeWeb(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -353,9 +351,7 @@ ErrCode AmsMgrStub::HandleKillProcessWithAccount(MessageParcel &data, MessagePar
     std::string bundleName = data.ReadString();
     int accountId = data.ReadInt32();
 
-    TAG_LOGI(AAFwkTag::APPMGR,
-        "bundleName = %{public}s, accountId = %{public}d",
-        bundleName.c_str(), accountId);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d", bundleName.c_str(), accountId);
 
     int32_t result = KillProcessWithAccount(bundleName, accountId);
     reply.WriteInt32(result);
@@ -369,10 +365,6 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
-
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s",
-        bundleName.c_str());
-
     int32_t result = KillApplication(bundleName);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -799,23 +791,6 @@ ErrCode AmsMgrStub::HandleCleanAbilityByUserRequest(MessageParcel &data, Message
     auto result = CleanAbilityByUserRequest(token);
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "fail to write the result.");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
-int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    auto bundleName = data.ReadString();
-    if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
-        return ERR_INVALID_VALUE;
-    }
-
-    auto result = IsKilledForUpgradeWeb(bundleName);
-    if (!reply.WriteBool(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

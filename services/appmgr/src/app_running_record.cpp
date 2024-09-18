@@ -23,8 +23,8 @@
 #include "ui_extension_utils.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
-#include "cache_process_manager.h"
 #include "window_visibility_info.h"
+#include "cache_process_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -1409,12 +1409,24 @@ bool AppRunningRecord::IsTerminating()
 
 bool AppRunningRecord::IsKeepAliveApp() const
 {
-    return isKeepAliveApp_ && isSingleton_ && isMainProcess_;
+    if (!isMainProcess_ || !isKeepAliveBundle_ || !isKeepAliveRdb_) {
+        return false;
+    }
+    auto userId = GetUid() / BASE_USER_RANGE;
+    if (userId == 0) {
+        return isSingleton_;
+    }
+    return true;
 }
 
 void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 {
-    isKeepAliveApp_ = isKeepAliveEnable;
+    isKeepAliveRdb_ = isKeepAliveEnable;
+}
+
+void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)
+{
+    isKeepAliveBundle_ = isKeepAliveBundle;
 }
 
 bool AppRunningRecord::IsEmptyKeepAliveApp() const

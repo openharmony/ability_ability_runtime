@@ -696,8 +696,6 @@ public:
         return 0;
     }
 
-    virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
-
     /**
      * Set application assertion pause state.
      *
@@ -705,15 +703,7 @@ public:
      */
     virtual void SetAppAssertionPauseState(bool flag) {}
 
-    /**
-     * Start native child process, callde by ChildProcessManager.
-     * @param libName lib file name to be load in child process
-     * @param childProcessCount current started child process count
-     * @param callback callback for notify start result
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
-        const sptr<IRemoteObject> &callback) = 0;
+    virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) = 0;
 
@@ -729,28 +719,14 @@ public:
     }
 
     /**
-     * Notify that the process depends on web by itself.
+     * Start native child process, callde by ChildProcessManager.
+     * @param libName lib file name to be load in child process
+     * @param childProcessCount current started child process count
+     * @param callback callback for notify start result
+     * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t NotifyProcessDependedOnWeb()
-    {
-        return 0;
-    }
-
-    /**
-     * Kill process depended on web by sa.
-     */
-    virtual void KillProcessDependedOnWeb()
-    {
-        return;
-    }
-
-    /**
-     * Restart resident process depended on web.
-     */
-    virtual void RestartResidentProcessDependedOnWeb()
-    {
-        return;
-    }
+    virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback) = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

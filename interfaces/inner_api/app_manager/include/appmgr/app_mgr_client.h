@@ -696,7 +696,7 @@ public:
      * @param token the unique identification to the ability.
      */
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
-
+  
     /**
      * Whether the current application process is the last surviving process.
      *
@@ -784,10 +784,6 @@ public:
      */
     virtual AppMgrResultCode AttachedToStatusBar(const sptr<IRemoteObject> &token);
 
-    int32_t NotifyProcessDependedOnWeb();
-
-    void KillProcessDependedOnWeb();
-
     /**
      * Temporarily block the process cache feature.
      *
@@ -802,14 +798,6 @@ public:
      * @return Returns true if clean success, others return false.
      */
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
-
-    /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
-     */
-    bool IsKilledForUpgradeWeb(const std::string &bundleName);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

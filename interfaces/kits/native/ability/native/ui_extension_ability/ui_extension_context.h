@@ -166,9 +166,12 @@ protected:
 private:
     static int ILLEGAL_REQUEST_CODE;
     std::map<int, RuntimeTask> resultCallbacks_;
+
     static int32_t curRequestCode_;
     static std::mutex requestCodeMutex_;
+
     sptr<Rosen::Window> window_ = nullptr;
+
     std::mutex mutexlock_;
     /**
      * @brief Get Current Ability Type

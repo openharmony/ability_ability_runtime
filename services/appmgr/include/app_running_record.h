@@ -549,11 +549,12 @@ public:
     void SetEmptyKeepAliveAppState(bool isEmptyKeepAliveApp);
 
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
+    void SetKeepAliveBundle(bool isKeepAliveBundle);
 
     void SetMainProcess(bool isMainProcess);
 
     void SetSingleton(bool isSingleton);
-
+ 
     void SetStageModelState(bool isStageBasedModel);
 
     std::list<std::shared_ptr<ModuleRunningRecord>> GetAllModuleRecord() const;
@@ -816,16 +817,6 @@ public:
         return isStrictMode_;
     }
 
-    inline void SetIsDependedOnArkWeb(bool isDepend)
-    {
-        isDependedOnArkWeb_ = isDepend;
-    }
-
-    inline bool IsDependedOnArkWeb()
-    {
-        return isDependedOnArkWeb_;
-    }
-
     void SetProcessCacheBlocked(bool isBlocked);
     bool GetProcessCacheBlocked();
 
@@ -893,7 +884,8 @@ private:
         }
     };
 
-    bool isKeepAliveApp_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
+    bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
@@ -998,7 +990,6 @@ private:
     pid_t gpuPid_ = 0;
     bool isStrictMode_ = false;
     bool isAttachedToStatusBar = false;
-    bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
 };
 

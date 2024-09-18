@@ -1409,7 +1409,7 @@ public:
      */
     int32_t RestartApp(const AAFwk::Want &want);
 
-    /**
+    /*
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
