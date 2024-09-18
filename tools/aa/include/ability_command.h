@@ -46,14 +46,9 @@ const std::string HELP_MSG = "usage: aa <command> <options>\n"
     "  ApplicationNotResponding     Pass in pid with options\n"
 #else
     "  test                        start the test framework with options\n"
-    "  appdebug                    set / cancel / get waiting debug status\n";
+    "  appdebug                    set / cancel / get waiting debug status\n"
+    "  process                     debug and tune\n";
 #endif
-
-const std::string HELP_MSG_SCREEN =
-    "usage: aa screen <options>\n"
-    "options list:\n"
-    "  -h, --help                                                   list available commands\n"
-    "  -p, --power <state>                                          power on or off with a state name\n";
 
 const std::string HELP_ApplicationNotResponding =
     "usage: aa ApplicationNotResponding <options>\n"
@@ -219,8 +214,6 @@ private:
     ErrCode init() override;
 
     ErrCode RunAsHelpCommand();
-    ErrCode RunAsScreenCommand();
-    void HandleInvalidScreenOptions(int& result);
     ErrCode RunAsStartAbility();
     ErrCode RunAsStopService();
     ErrCode RunAsDumpsysCommand();
