@@ -350,7 +350,7 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
         return false;
     }
     if (!appRecord->HasUIAbilityLaunched() &&
-        !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType()) {
+        !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
         TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s has not created uiability before.",
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
