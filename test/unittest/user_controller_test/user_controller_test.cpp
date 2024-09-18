@@ -92,7 +92,7 @@ HWTEST_F(UserControllerTest, StartUserTest_0100, TestSize.Level0)
     userController.GetOrCreateUserItem(1000);
     userController.SetCurrentUserId(1000);
     sptr<TestUserCallback> callback = new TestUserCallback();
-    userController.StartUser(1000, callback, true);
+    userController.StartUser(1000, callback);
     EXPECT_TRUE(callback->errCode_ == 0);
 }
 
@@ -106,7 +106,7 @@ HWTEST_F(UserControllerTest, StartUserTest_0200, TestSize.Level0)
 {
     UserController userController;
     sptr<TestUserCallback> callback = new TestUserCallback();
-    userController.StartUser(666, callback, true);
+    userController.StartUser(666, callback);
     EXPECT_TRUE(callback->errCode_ != 0);
 }
 
