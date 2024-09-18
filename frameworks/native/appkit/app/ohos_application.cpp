@@ -55,33 +55,11 @@ using ApplicationConfigurationManager = AbilityRuntime::ApplicationConfiguration
 OHOSApplication::OHOSApplication()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    abilityLifecycleCallbacks_.clear();
-    elementsCallbacks_.clear();
 }
 
 OHOSApplication::~OHOSApplication()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    abilityLifecycleCallbacks_.clear();
-    elementsCallbacks_.clear();
-}
-
-/**
- *
- * @brief Called when Ability#onSaveAbilityState(PacMap) was called on an ability.
- *
- * @param outState Indicates the PacMap object passed to Ability#onSaveAbilityState(PacMap)
- * for storing user data and states. This parameter cannot be null.
- */
-
-void OHOSApplication::DispatchAbilitySavedState(const PacMap &outState)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilitySaveState(outState);
-        }
-    }
 }
 
 /**
@@ -234,204 +212,6 @@ void OHOSApplication::SetAbilityRecordMgr(const std::shared_ptr<AbilityRecordMgr
 
 /**
  *
- * Register AbilityLifecycleCallbacks with OHOSApplication
- *
- * @param callBack callBack When the life cycle of the ability in the application changes,
- */
-void OHOSApplication::RegisterAbilityLifecycleCallbacks(const std::shared_ptr<AbilityLifecycleCallbacks> &callBack)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
-    if (callBack == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "observer is null");
-        return;
-    }
-
-    abilityLifecycleCallbacks_.emplace_back(callBack);
-}
-
-/**
- *
- * Unregister AbilityLifecycleCallbacks with OHOSApplication
- *
- * @param callBack RegisterAbilityLifecycleCallbacks`s callBack
- */
-void OHOSApplication::UnregisterAbilityLifecycleCallbacks(const std::shared_ptr<AbilityLifecycleCallbacks> &callBack)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
-    if (callBack == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "observer is null");
-        return;
-    }
-
-    abilityLifecycleCallbacks_.remove(callBack);
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onStart
- *
- * @param Ability Indicates the ability object that calls the onStart() method.
- */
-void OHOSApplication::OnAbilityStart(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityStart(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onInactive
- *
- * @param Ability Indicates the Ability object that calls the onInactive() method.
- */
-void OHOSApplication::OnAbilityInactive(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityInactive(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onBackground
- *
- * @param Ability Indicates the Ability object that calls the onBackground() method.
- */
-void OHOSApplication::OnAbilityBackground(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityBackground(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onForeground
- *
- * @param Ability Indicates the Ability object that calls the onForeground() method.
- */
-void OHOSApplication::OnAbilityForeground(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityForeground(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onActive
- *
- * @param Ability Indicates the Ability object that calls the onActive() method.
- */
-void OHOSApplication::OnAbilityActive(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityActive(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onStop
- *
- * @param Ability Indicates the Ability object that calls the onStop() method.
- */
-void OHOSApplication::OnAbilityStop(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityStop(ability);
-        }
-    }
-}
-
-/**
- *
- * @brief Register ElementsCallback with OHOSApplication
- *
- * @param callBack callBack when the system configuration of the device changes.
- */
-void OHOSApplication::RegisterElementsCallbacks(const std::shared_ptr<ElementsCallback> &callback)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
-    if (callback == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "observer is null");
-        return;
-    }
-
-    elementsCallbacks_.emplace_back(callback);
-}
-
-/**
- *
- * @brief Unregister ElementsCallback with OHOSApplication
- *
- * @param callback RegisterElementsCallbacks`s callback
- */
-void OHOSApplication::UnregisterElementsCallbacks(const std::shared_ptr<ElementsCallback> &callback)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
-    if (callback == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "observer is null");
-        return;
-    }
-
-    elementsCallbacks_.remove(callback);
-}
-
-/**
- *
  * @brief Will be Called when the system configuration of the device changes.
  *
  * @param config Indicates the new Configuration object.
@@ -484,11 +264,6 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
     Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
 #endif
 
-    for (auto callback : elementsCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnConfigurationUpdated(nullptr, config);
-        }
-    }
     abilityRuntimeContext_->DispatchConfigurationUpdated(*configuration_);
     abilityRuntimeContext_->SetMcc(configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     abilityRuntimeContext_->SetMnc(configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
@@ -545,12 +320,6 @@ void OHOSApplication::OnMemoryLevel(int level)
     }
 
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : elementsCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnMemoryLevel(level);
-        }
-    }
-
     abilityRuntimeContext_->DispatchMemoryLevel(level);
 }
 
@@ -568,18 +337,6 @@ void OHOSApplication::OnStart()
  */
 void OHOSApplication::OnTerminate()
 {}
-
-/**
- *
- * @brief Called when an ability calls Ability#onSaveAbilityState(PacMap).
- * You can implement your own logic in this method.
- * @param outState IIndicates the {@link PacMap} object passed to the onSaveAbilityState() callback.
- *
- */
-void OHOSApplication::OnAbilitySaveState(const PacMap &outState)
-{
-    DispatchAbilitySavedState(outState);
-}
 
 void OHOSApplication::SetAppEnv(const std::vector<AppEnvironment>& appEnvironments)
 {
