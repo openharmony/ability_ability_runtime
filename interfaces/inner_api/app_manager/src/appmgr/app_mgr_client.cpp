@@ -691,13 +691,13 @@ void AppMgrClient::ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::W
     service->ScheduleAcceptWantDone(recordId, want, flag);
 }
 
-AppMgrResultCode AppMgrClient::UpdateConfiguration(const Configuration &config)
+AppMgrResultCode AppMgrClient::UpdateConfiguration(const Configuration &config, const int32_t userId)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    service->UpdateConfiguration(config);
+    service->UpdateConfiguration(config, userId);
     return AppMgrResultCode::RESULT_OK;
 }
 
