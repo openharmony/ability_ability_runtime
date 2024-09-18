@@ -642,14 +642,5 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     }
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
 }
-
-bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
-{
-    if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
-        return false;
-    }
-    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
-}
 } // namespace AAFwk
 }  // namespace OHOS

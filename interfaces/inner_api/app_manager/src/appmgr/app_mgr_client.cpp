@@ -1250,28 +1250,6 @@ AppMgrResultCode AppMgrClient::AttachedToStatusBar(const sptr<IRemoteObject> &to
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-int32_t AppMgrClient::NotifyProcessDependedOnWeb()
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
-    return service->NotifyProcessDependedOnWeb();
-}
-
-void AppMgrClient::KillProcessDependedOnWeb()
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
-        return;
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
-    service->KillProcessDependedOnWeb();
-}
-
 AppMgrResultCode AppMgrClient::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1299,22 +1277,6 @@ bool AppMgrClient::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     }
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     return amsService->CleanAbilityByUserRequest(token);
-}
-
-bool AppMgrClient::IsKilledForUpgradeWeb(const std::string &bundleName)
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
-        return false;
-    }
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr.");
-        return false;
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
-    return amsService->IsKilledForUpgradeWeb(bundleName);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
