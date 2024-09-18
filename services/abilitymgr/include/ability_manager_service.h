@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 
 #include <cstdint>
+#include <cstdint>
 #include <future>
 #include <map>
 #include <memory>
@@ -31,6 +32,7 @@
 #include "ability_connect_manager.h"
 #include "ability_debug_deal.h"
 #include "ability_event_handler.h"
+#include "ability_info.h"
 #include "ability_info.h"
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
@@ -1029,7 +1031,8 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType,
         bool checkSystemCaller = true,
         bool isImplicit = false,
-        bool isDlp = false);
+        bool isDlp = false,
+        bool isStartAsCaller = false);
 
     int RequestModalUIExtensionInner(Want want);
 
@@ -1659,7 +1662,7 @@ public:
      */
     int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
 
-    /**
+    /*
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1747,8 +1750,6 @@ public:
      */
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
 
-    void HandleRestartResidentProcessDependedOnWeb();
-
     /**
      * Open atomic service window prior to finishing free install.
      *
@@ -1766,7 +1767,7 @@ public:
     void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
         const std::string& reason);
 
-    /**
+     /**
      * Judge if Caller-Application is in background state.
      *
      * @param abilityRequest, abilityRequest.
@@ -1976,7 +1977,7 @@ private:
 
     bool IsNeedTimeoutForTest(const std::string &abilityName, const std::string &state) const;
 
-    void StartResidentApps();
+    void StartResidentApps(int32_t userId);
 
     void StartAutoStartupApps();
     void RetryStartAutoStartupApps(const std::vector<AutoStartupInfo> &infoList, int32_t retryCount);
@@ -2002,7 +2003,8 @@ private:
         const sptr<IRemoteObject> &callerToken, int32_t userId);
     int32_t InitialAbilityRequest(AbilityRequest &request, const StartAbilityInfo &abilityInfo) const;
     int CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
-        int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType, bool isImplicit = false);
+        int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType, bool isImplicit = false,
+        bool isStartAsCaller = false);
 
     void SubscribeBackgroundTask();
 

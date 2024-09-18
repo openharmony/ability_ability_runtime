@@ -57,8 +57,8 @@ void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void
             break;
     }
 
-    if (g_eventHandler  == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid parameters");
+    if (g_eventHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid parameters!");
         return;
     }
     g_eventHandler->PostTask(task, "uv_io_cb", 0, prio);
@@ -169,7 +169,7 @@ void OHOSJsEnvironmentImpl::InitWorkerModule(NativeEngine* engine, std::shared_p
     engine->SetInitWorkerFunc(InitWorkerFunc);
     engine->SetOffWorkerFunc(OffWorkerFunc);
     engine->SetGetAssetFunc(AssetHelper(workerInfo));
-    engine->SetApiVersion(workerInfo->apiTargetVersion);
+    engine->SetApiVersion(static_cast<int32_t>(workerInfo->apiTargetVersion.GetOriginPointer()));
 
     engine->SetGetContainerScopeIdFunc(GetContainerId);
     engine->SetInitContainerScopeFunc(UpdateContainerScope);

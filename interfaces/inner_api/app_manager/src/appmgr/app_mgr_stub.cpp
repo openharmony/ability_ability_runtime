@@ -325,12 +325,6 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleIsAppRunning(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::CHECK_CALLING_IS_USER_TEST_MODE):
             return HandleCheckCallingIsUserTestMode(data, reply);
-        case static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_PROCESS_DEPENDED_ON_WEB):
-            return HandleNotifyProcessDependedOnWeb(data, reply);
-        case static_cast<uint32_t>(AppMgrInterfaceCode::KILL_PROCESS_DEPENDED_ON_WEB):
-            return HandleKillProcessDependedOnWeb(data, reply);
-        case static_cast<uint32_t>(AppMgrInterfaceCode::RESTART_RESIDENT_PROCESS_DEPENDED_ON_WEB):
-            return HandleRestartResidentProcessDependedOnWeb(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_CHILDREN_PROCESSES):
             return HandleGetAllChildrenProcesses(data, reply);
     }
@@ -1499,6 +1493,14 @@ int32_t AppMgrStub::HandleNotifyMemorySizeStateChanged(MessageParcel &data, Mess
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    bool flag = data.ReadBool();
+    SetAppAssertionPauseState(flag);
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -1508,29 +1510,6 @@ int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, Mess
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
     }
-    return NO_ERROR;
-}
-
-int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    bool flag = data.ReadBool();
-    SetAppAssertionPauseState(flag);
-    return NO_ERROR;
-}
-
-int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::string libName = data.ReadString();
-    int32_t childCount = data.ReadInt32();
-    sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    int32_t result = StartNativeChildProcess(libName, childCount, callback);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
-        return IPC_STUB_ERR;
-    }
-
     return NO_ERROR;
 }
 
@@ -1551,29 +1530,18 @@ int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, Messag
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleNotifyProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
-    int32_t ret = NotifyProcessDependedOnWeb();
-    if (!reply.WriteInt32(ret)) {
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::string libName = data.ReadString();
+    int32_t childCount = data.ReadInt32();
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    int32_t result = StartNativeChildProcess(libName, childCount, callback);
+    if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
     }
 
-    return NO_ERROR;
-}
-
-int32_t AppMgrStub::HandleKillProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
-    KillProcessDependedOnWeb();
-    return NO_ERROR;
-}
-
-int32_t AppMgrStub::HandleRestartResidentProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
-    RestartResidentProcessDependedOnWeb();
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

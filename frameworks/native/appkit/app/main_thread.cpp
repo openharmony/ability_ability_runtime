@@ -127,6 +127,7 @@ constexpr int32_t DISTRIBUTE_TIME = 100;
 constexpr int32_t START_HIGH_SENSITIVE = 1;
 constexpr int32_t EXIT_HIGH_SENSITIVE = 2;
 constexpr int32_t UNSPECIFIED_USERID = -2;
+constexpr int32_t JS_ERROR_EXIT = -2;
 constexpr int32_t TIME_OUT = 120;
 constexpr int32_t DEFAULT_SLEEP_TIME = 100000;
 
@@ -433,8 +434,7 @@ void MainThread::ScheduleForegroundApplication()
  */
 void MainThread::ScheduleBackgroundApplication()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "called");
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     wptr<MainThread> weak = this;
     auto task = [weak]() {
         auto appThread = weak.promote();
@@ -1371,6 +1371,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     application_->SetApplicationContext(applicationContext);
 
 #ifdef SUPPORT_GRAPHICS
+    TAG_LOGD(AAFwkTag::APPKIT, "HandleLaunchApplication cacheDir: %{public}s", applicationContext->GetCacheDir().c_str());
     OHOS::EglSetCacheDir(applicationContext->GetCacheDir());
 #endif
 
@@ -1380,12 +1381,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Get base shared bundle infos failed: %{public}d", ret);
     }
-
+    
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         pkgContextInfoJsonStringMap[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
     }
-
+    
     AppLibPathMap appLibPaths {};
     GetNativeLibPath(bundleInfo, hspList, appLibPaths);
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
@@ -1462,9 +1463,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             };
             runtime->SetDeviceDisconnectCallback(cb);
         }
-
         auto perfCmd = appLaunchData.GetPerfCmd();
-
         int32_t pid = -1;
         std::string processName = "";
         if (processInfo_ != nullptr) {
@@ -1550,7 +1549,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
                 AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObj.name };
                 AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-                appThread->ScheduleProcessSecurityExit();
+                _exit(JS_ERROR_EXIT);
             };
             (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 #ifdef CJ_FRONTEND
@@ -2171,7 +2170,7 @@ void MainThread::HandleForegroundApplication()
 void MainThread::HandleBackgroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPKIT, "start");
+    TAG_LOGD(AAFwkTag::APPKIT, "start");
 
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "error");
@@ -3278,12 +3277,6 @@ int32_t MainThread::ScheduleDumpIpcStat(std::string& result)
     return ERR_OK;
 }
 
-int32_t MainThread::ScheduleDumpFfrt(std::string& result)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "pid:%{public}d", getprocpid());
-    return DumpFfrtHelper::DumpFfrt(result);
-}
-
 /**
  *
  * @brief Notify application to prepare for process caching.
@@ -3334,7 +3327,6 @@ void MainThread::ParseAppConfigurationParams(const std::string configuration, Co
     }
     if (jsonObject.contains(JSON_KEY_APP_FONT_SIZE_SCALE)
         && jsonObject[JSON_KEY_APP_FONT_SIZE_SCALE].is_string()) {
-        std::string configFontSizeScal = jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>();
         appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE,
             jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>());
     }
@@ -3368,6 +3360,12 @@ void MainThread::HandleCacheProcess()
         }
         runtime->ForceFullGC();
     }
+}
+
+int32_t MainThread::ScheduleDumpFfrt(std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpFfrt::pid:%{public}d", getprocpid());
+    return DumpFfrtHelper::DumpFfrt(result);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

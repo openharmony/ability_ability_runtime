@@ -350,17 +350,6 @@ public:
         return false;
     }
 
-    /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
-     */
-    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName)
-    {
-        return true;
-    }
-
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,

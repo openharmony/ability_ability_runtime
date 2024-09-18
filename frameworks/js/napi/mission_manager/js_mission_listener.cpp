@@ -127,7 +127,7 @@ void JsMissionListener::OnMissionIconUpdated(int32_t missionId, const std::share
 {
     TAG_LOGI(AAFwkTag::MISSION, "missionId: %{public}d", missionId);
     if (env_ == nullptr) {
-        TAG_LOGE(AAFwkTag::MISSION, "env_ null");
+        TAG_LOGE(AAFwkTag::MISSION, "env_ is null");
         return;
     }
 

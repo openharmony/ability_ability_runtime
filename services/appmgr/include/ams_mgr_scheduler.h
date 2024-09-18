@@ -132,8 +132,7 @@ public:
      * @param accountId, account ID.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillProcessWithAccount(
-        const std::string &bundleName, const int accountId) override;
+    virtual int32_t KillProcessWithAccount(const std::string &bundleName, const int accountId) override;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
@@ -184,7 +183,7 @@ public:
     virtual int KillApplicationSelf() override;
 
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug) override;
-
+    
     virtual int32_t NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg) override;
 
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) override;
@@ -324,14 +323,6 @@ public:
      * @return Returns true if clean success, others return false.
      */
     virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
-
-    /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
-     */
-    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
 
 private:
     /**

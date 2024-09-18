@@ -552,11 +552,6 @@ public:
     int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback) override;
 
-    virtual int32_t NotifyProcessDependedOnWeb() override;
-
-    virtual void KillProcessDependedOnWeb() override;
-
-    virtual void RestartResidentProcessDependedOnWeb() override;
 private:
     /**
      * Init, Initialize application services.

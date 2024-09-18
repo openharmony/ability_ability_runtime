@@ -115,7 +115,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         UpdateProcessName(abilityRequest, uiAbilityRecord);
     }
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartUIAbility");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartUIAbility, specifyTokenId is %{public}u.", abilityRequest.specifyTokenId);
     uiAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
 
     if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
@@ -277,9 +277,9 @@ void UIAbilityLifecycleManager::OnAbilityRequestDone(const sptr<IRemoteObject> &
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability request state %{public}d done.", state);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
     AppAbilityState abilityState = DelayedSingleton<AppScheduler>::GetInstance()->ConvertToAppAbilityState(state);
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
-        std::lock_guard<ffrt::mutex> guard(sessionLock_);
         auto abilityRecord = GetAbilityRecordByToken(token);
         CHECK_POINTER(abilityRecord);
         if (abilityRecord->IsTerminating()) {
@@ -781,8 +781,7 @@ int UIAbilityLifecycleManager::MinimizeUIAbility(const std::shared_ptr<AbilityRe
         return ERR_OK;
     }
     if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUND)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability state is not foreground: %{public}d",
-            abilityRecord->GetAbilityState());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability state is not foreground");
         return ERR_OK;
     }
     abilityRecord->SetPendingState(AbilityState::BACKGROUND);
@@ -2050,7 +2049,7 @@ void UIAbilityLifecycleManager::GetActiveAbilityList(int32_t uid, std::vector<st
         }
         const auto &abilityInfo = abilityRecord->GetAbilityInfo();
         if (abilityInfo.applicationInfo.uid == uid && !abilityInfo.name.empty()) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "find ability name is %{public}s.", abilityInfo.name.c_str());
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "find ability name is %{public}s", abilityInfo.name.c_str());
             abilityList.push_back(abilityInfo.name);
         }
     }

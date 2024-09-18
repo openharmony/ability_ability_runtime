@@ -149,7 +149,7 @@ JsUIAbility::JsUIAbility(JsRuntime &jsRuntime) : jsRuntime_(jsRuntime)
 
 JsUIAbility::~JsUIAbility()
 {
-    //"maintenance log
+    // maintenance log
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     if (abilityContext_ != nullptr) {
         abilityContext_->Unbind();
@@ -757,8 +757,7 @@ void JsUIAbility::AbilityContinuationOrRecover(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // multi-instance ability continuation
-    TAG_LOGD(AAFwkTag::UIABILITY, "launch reason: %{public}d, last exit reasion: %{public}d",
-        launchParam_.launchReason, launchParam_.lastExitReason);
+    TAG_LOGD(AAFwkTag::UIABILITY, "launch reason: %{public}d", launchParam_.launchReason);
     if (IsRestoredInContinuation()) {
         RestorePageStack(want);
         OnSceneRestored();
@@ -771,7 +770,7 @@ void JsUIAbility::AbilityContinuationOrRecover(const Want &want)
         if (mainWindow != nullptr) {
             mainWindow->NapiSetUIContent(pageStack, env, abilityContext_->GetContentStorage()->GetNapiValue(), true);
         } else {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null mainWindow");
+            TAG_LOGE(AAFwkTag::UIABILITY, "null MainWindow");
         }
         OnSceneRestored();
     } else {

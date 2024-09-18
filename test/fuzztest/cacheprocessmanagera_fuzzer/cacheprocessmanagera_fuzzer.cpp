@@ -79,7 +79,8 @@ void CacheProcessManagerFuzztestFunc1(bool boolParam, std::string &stringParam, 
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<AppRunningRecord> appRecord1 = std::make_shared<AppRunningRecord>(appInfo, int32Param, stringParam);
     mgr->PenddingCacheProcess(nullptr); // nullptr
-    appRecord1->isKeepAliveApp_ = true;
+    appRecord1->isKeepAliveRdb_ = true;
+    appRecord1->isKeepAliveBundle_ = true;
     appRecord1->isSingleton_ = true;
     appRecord1->isMainProcess_ = true;
     mgr->PenddingCacheProcess(appRecord1); // keepalive
@@ -142,7 +143,8 @@ void CacheProcessManagerFuzztestFunc2(bool boolParam, std::string &stringParam, 
     mgr->IsAppSupportProcessCache(appRecord2); // appInfo not null &attached true
     appRecord2->SetAttachedToStatusBar(false);
     mgr->IsAppSupportProcessCache(appRecord2); // appInfo not null &attached false
-    appRecord2->isKeepAliveApp_ = true;
+    appRecord2->isKeepAliveRdb_ = true;
+    appRecord2->isKeepAliveBundle_ = true;
     appRecord2->isSingleton_ = true;
     appRecord2->isMainProcess_ = true;
     mgr->IsAppSupportProcessCache(appRecord2); // appInfo not null &attached false & keepalive called
@@ -152,31 +154,14 @@ void CacheProcessManagerFuzztestFunc3(bool boolParam, std::string &stringParam, 
 {
     std::shared_ptr<CacheProcessManager> mgr = std::make_shared<CacheProcessManager>();
     std::shared_ptr<AppMgrServiceInner> serviceInner1;
-    mgr->SetAppMgr(serviceInner1);
-    mgr->IsAppSupportProcessCacheInnerFirst(nullptr); // nullptr
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<AppRunningRecord> appRecord1 = std::make_shared<AppRunningRecord>(appInfo, int32Param, stringParam);
-    mgr->shouldCheckSupport = true;
-    appRecord1->procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
-    mgr->IsAppSupportProcessCacheInnerFirst(appRecord1); // case CacheState UNSPECIFIED
-    appRecord1->procCacheSupportState_ = SupportProcessCacheState::SUPPORT;
-    mgr->IsAppSupportProcessCacheInnerFirst(appRecord1); // case CacheState SUPPORT
-    appRecord1->procCacheSupportState_ = SupportProcessCacheState::NOT_SUPPORT;
-    mgr->IsAppSupportProcessCacheInnerFirst(appRecord1); // case CacheState SUPPORT
-    int32_t num = static_cast<int32_t>(SupportProcessCacheState::NOT_SUPPORT) + 1;
-    appRecord1->procCacheSupportState_ = static_cast<SupportProcessCacheState>(num);
-    mgr->IsAppSupportProcessCacheInnerFirst(appRecord1); // case CacheState default branch
-
-    mgr->shouldCheckSupport = false;
-    appRecord1->procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
-    mgr->IsAppSupportProcessCacheInnerFirst(appRecord1); // case CacheState UNSPECIFIED
-
+    mgr->SetAppMgr(serviceInner1);
     mgr->IsAppShouldCache(nullptr); // called.
     mgr->maxProcCacheNum_ = int32Param;
     mgr->IsAppShouldCache(appRecord1); // not ccached called.
     mgr->cachedAppRecordQueue_.emplace_back(appRecord1);
     mgr->IsAppShouldCache(appRecord1); //ccached called.
-
     mgr->IsAppAbilitiesEmpty(nullptr); // called
     mgr->IsAppAbilitiesEmpty(appRecord1); // called
 }

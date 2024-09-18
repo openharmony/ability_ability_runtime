@@ -117,15 +117,16 @@ int32_t AbilityEcologicalRuleMgrServiceClient::EvaluateResolveInfos(const AAFwk:
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int64_t start = GetCurrentTimeMicro();
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "want: %{public}s, callerInfo: %{public}s, type: %{public}d",
+    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "want: %{private}s, callerInfo: %{public}s, type: %{private}d",
         want.ToString().c_str(), callerInfo.ToString().c_str(), type);
     if (!CheckConnectService()) {
         return AAFwk::ERR_CONNECT_ERMS_FAILED;
     }
     int32_t res = ecologicalRuleMgrServiceProxy_->EvaluateResolveInfos(want, callerInfo, type, abilityInfos);
     int64_t cost = GetCurrentTimeMicro() - start;
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE,
-        "[ERMS-DFX] cost %{public}" PRId64 " ms", cost);
+    TAG_LOGD(
+        AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms",
+        static_cast<long long>(cost));
     return res;
 }
 
@@ -134,7 +135,7 @@ int32_t AbilityEcologicalRuleMgrServiceClient::QueryStartExperience(const OHOS::
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int64_t start = GetCurrentTimeMicro();
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "callerInfo: %{public}s, want: %{public}s", callerInfo.ToString().c_str(),
+    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "callerInfo: %{public}s, want: %{private}s", callerInfo.ToString().c_str(),
         want.ToString().c_str());
 
     if (!CheckConnectService()) {
@@ -148,8 +149,9 @@ int32_t AbilityEcologicalRuleMgrServiceClient::QueryStartExperience(const OHOS::
             rule.resultCode, rule.sceneCode.c_str(), (*(rule.replaceWant)).ToString().c_str());
     }
     int64_t cost = GetCurrentTimeMicro() - start;
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE,
-        "[ERMS-DFX] cost %{public}" PRId64 " ms", cost);
+    TAG_LOGD(
+        AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms",
+        static_cast<long long>(cost));
     return res;
 }
 

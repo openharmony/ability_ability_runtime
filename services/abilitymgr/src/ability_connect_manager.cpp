@@ -93,77 +93,6 @@ bool IsSpecialAbility(const AppExecFwk::AbilityInfo &abilityInfo)
     }
     return false;
 }
-
-std::mutex g_keepAliveAbilitiesMutex;
-std::vector<std::pair<std::string, std::string>> g_keepAliveAbilities;
-void GetKeepAliveAbilities()
-{
-    if (!g_keepAliveAbilities.empty()) {
-        return;
-    }
-    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-    CHECK_POINTER(bundleMgrHelper);
-    std::vector<AppExecFwk::BundleInfo> bundleInfos;
-    bool getBundleInfos = bundleMgrHelper->GetBundleInfos(
-        OHOS::AppExecFwk::GET_BUNDLE_DEFAULT, bundleInfos, USER_ID_NO_HEAD);
-    if (!getBundleInfos) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Handle ability died task, get bundle infos failed.");
-        return;
-    }
-
-    auto checkIsAbilityNeedKeepAlive = [](const AppExecFwk::HapModuleInfo &hapModuleInfo,
-        const std::string &processName, std::string &mainElement) {
-        if (hapModuleInfo.isModuleJson) {
-            // new application model
-            if (hapModuleInfo.process == processName) {
-                mainElement = hapModuleInfo.mainElementName;
-                return true;
-            }
-            return false;
-        }
-
-        // old application model
-        mainElement = hapModuleInfo.mainAbility;
-        for (auto abilityInfo : hapModuleInfo.abilityInfos) {
-            if (abilityInfo.process == processName && abilityInfo.name == mainElement) {
-                return true;
-            }
-        }
-
-        return false;
-    };
-
-    for (const auto &bundleInfo : bundleInfos) {
-        std::string processName = bundleInfo.applicationInfo.process;
-        if (!bundleInfo.isKeepAlive || processName.empty()) {
-            continue;
-        }
-        std::string bundleName = bundleInfo.name;
-        for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
-            std::string mainElement;
-            if (checkIsAbilityNeedKeepAlive(hapModuleInfo, processName, mainElement) && !mainElement.empty()) {
-                g_keepAliveAbilities.emplace_back(bundleName, mainElement);
-            }
-        }
-    }
-}
-
-bool IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo)
-{
-    std::lock_guard guard(g_keepAliveAbilitiesMutex);
-    GetKeepAliveAbilities();
-    for (const auto &pair : g_keepAliveAbilities) {
-        if (abilityInfo.bundleName == pair.first && abilityInfo.name == pair.second) {
-            // Fault tolerance processing, originally returning true here
-            bool keepAliveEnable = true;
-            AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(abilityInfo.bundleName, keepAliveEnable);
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s get keep alive enable: %{public}d",
-                abilityInfo.bundleName.c_str(), static_cast<int32_t>(keepAliveEnable));
-            return keepAliveEnable;
-        }
-    }
-    return false;
-}
 }
 
 AbilityConnectManager::AbilityConnectManager(int userId) : userId_(userId)
@@ -507,14 +436,12 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
     isLoadedAbility = true;
     if (noReuse || targetService == nullptr) {
         targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
-        if (targetService) {
-            targetService->SetOwnerMissionUserId(userId_);
-        }
-
-        if (isCreatedByConnect && targetService != nullptr) {
+        CHECK_POINTER(targetService);
+        targetService->SetOwnerMissionUserId(userId_);
+        if (isCreatedByConnect) {
             targetService->SetCreateByConnectMode();
         }
-        if (targetService && abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
+        if (abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
             targetService->SetLauncherRoot();
             targetService->SetRestartTime(abilityRequest.restartTime);
             targetService->SetRestartCount(abilityRequest.restartCount);
@@ -684,7 +611,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
 void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
     std::shared_ptr<ConnectionRecord> &connectRecord)
 {
-    if (targetService == nullptr) {
+    if (!targetService) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "null target service");
         return;
     }
@@ -763,7 +690,7 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
 
 void AbilityConnectManager::TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     if (!GetExtensionByIdFromServiceMap(abilityRecord->GetRecordId()) &&
         !AbilityCacheManager::GetInstance().FindRecordByToken(abilityRecord->GetToken())) {
         return;
@@ -1200,11 +1127,7 @@ int AbilityConnectManager::ScheduleCommandAbilityWindowDone(
 
 void AbilityConnectManager::HandleCommandDestroy(const sptr<SessionInfo> &sessionInfo)
 {
-    if (sessionInfo == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "null session info.");
-        return;
-    }
-    if (sessionInfo->sessionToken) {
+    if (sessionInfo && sessionInfo->sessionToken) {
         RemoveUIExtWindowDeathRecipient(sessionInfo->sessionToken);
         size_t ret = 0;
         {
@@ -2098,10 +2021,7 @@ bool AbilityConnectManager::IsAbilityNeedKeepAlive(const std::shared_ptr<Ability
         return true;
     }
 
-    if (IsInKeepAliveList(abilityInfo)) {
-        return true;
-    }
-    return false;
+    return abilityRecord->IsKeepAliveBundle();
 }
 
 void AbilityConnectManager::ClearPreloadUIExtensionRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -2138,6 +2058,11 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         }
     }
 
+    if (abilityRecord->GetKeepAlive() && userId_ != USER_ID_NO_HEAD && userId_ != currentUserId) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Not current user's ability");
+        return;
+    }
+
     if (abilityRecord->IsSceneBoard()) {
         static int sceneBoardCrashCount = 0;
         static int64_t tickCount = GetTickCount();
@@ -2156,10 +2081,6 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         }
     }
 
-    if (DelayedSingleton<AppScheduler>::GetInstance()->IsKilledForUpgradeWeb(abilityInfo.bundleName)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "bundle is killed for upgrade web");
-        return;
-    }
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent() ||
         IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard() ||
         AppUtils::GetInstance().IsAllowResidentInExtremeMemory(abilityInfo.bundleName, abilityInfo.name)) {
@@ -2332,6 +2253,11 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
     requestInfo.restart = true;
     requestInfo.uid = abilityRecord->GetUid();
     abilityRecord->SetRestarting(true);
+    ResidentAbilityInfoGuard residentAbilityInfoGuard;
+    if (abilityRecord->IsKeepAliveBundle()) {
+        residentAbilityInfoGuard.SetResidentAbilityInfo(requestInfo.abilityInfo.bundleName,
+            requestInfo.abilityInfo.name, userId_);
+    }
 
     if (AppUtils::GetInstance().IsLauncherAbility(abilityRecord->GetAbilityInfo().name)) {
         if (currentUserId != userId_) {
@@ -2560,7 +2486,8 @@ void AbilityConnectManager::PauseExtensions()
         for (auto it = serviceMap_.begin(); it != serviceMap_.end();) {
             auto targetExtension = it->second;
             if (targetExtension != nullptr && targetExtension->GetAbilityInfo().type == AbilityType::EXTENSION &&
-                (IsLauncher(targetExtension) || targetExtension->IsSceneBoard())) {
+                (IsLauncher(targetExtension) || targetExtension->IsSceneBoard() ||
+                (targetExtension->GetKeepAlive() && userId_ != USER_ID_NO_HEAD))) {
                 terminatingExtensionList_.push_back(it->second);
                 it = serviceMap_.erase(it);
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "terminate ability:%{public}s.",
@@ -2854,7 +2781,7 @@ void AbilityConnectManager::HandleUIExtWindowDiedTask(const sptr<IRemoteObject> 
 
 bool AbilityConnectManager::IsUIExtensionFocused(uint32_t uiExtensionTokenId, const sptr<IRemoteObject>& focusToken)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called, id %{public}u", uiExtensionTokenId);
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, false);
     std::lock_guard guard(uiExtensionMapMutex_);
     for (auto& item: uiExtensionMap_) {
@@ -2881,7 +2808,7 @@ sptr<IRemoteObject> AbilityConnectManager::GetUIExtensionSourceToken(const sptr<
     for (auto &item : uiExtensionMap_) {
         auto sessionInfo = item.second.second;
         auto uiExtension = item.second.first.lock();
-        if (sessionInfo != nullptr && uiExtension->GetToken() != nullptr &&
+        if (sessionInfo != nullptr && uiExtension != nullptr && uiExtension->GetToken() != nullptr &&
             uiExtension->GetToken()->AsObject() == token) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "The source token found.");
             return sessionInfo->callerToken;
@@ -3175,7 +3102,7 @@ std::string AbilityConnectManager::GenerateBundleName(const AbilityRequest &abil
 
 int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo)
 {
-    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
+    if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION || 
         abilityInfo.bundleName != XIAOYI_BUNDLE_NAME) {
         return ERR_OK;
     }
@@ -3208,7 +3135,7 @@ int32_t AbilityConnectManager::ReportAbilityStartInfoToRSS(const AppExecFwk::Abi
             break;
         }
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR,"ReportAbilityStartInfoToRSS, abilityName:%{public}s", abilityInfo.name.c_str());
     ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart);
     return ERR_OK;
 }

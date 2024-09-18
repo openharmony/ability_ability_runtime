@@ -80,7 +80,7 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
                 "; AppLifeCycleDeal::LaunchAbility; the LoadAbility lifecycle.";
             FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "Launch ability.");
+        TAG_LOGW(AAFwkTag::APPMGR, "LoadLifecycle: Launch ability.");
         appThread->ScheduleLaunchAbility(*abilityInfo, ability->GetToken(),
             ability->GetWant(), ability->GetAbilityRecordId());
     } else {
