@@ -38,6 +38,7 @@ ohos_unittest("ability_connect_manager_test") {
   sources = [
     # add mock file
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
+    "${ability_runtime_test_path}/mock/task_handler_wrap_mock/src/mock_task_handler_wrap.cpp",
     "ability_connect_manager_test.cpp",
   ]
 
