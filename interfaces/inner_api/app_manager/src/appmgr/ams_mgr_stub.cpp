@@ -138,6 +138,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &dat
             return HandleUpdateApplicationInfoInstalled(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::SET_CURRENT_USER_ID):
             return HandleSetCurrentUserId(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::ENABLE_START_PROCESS_FLAG_BY_USER_ID):
+            return HandleSetEnableStartProcessFlagByUserId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID):
             return HandleGetBundleNameByPid(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::REGISTER_APP_DEBUG_LISTENER):
@@ -535,6 +537,14 @@ int32_t AmsMgrStub::HandleSetCurrentUserId(MessageParcel &data, MessageParcel &r
 {
     int32_t userId = data.ReadInt32();
     SetCurrentUserId(userId);
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleSetEnableStartProcessFlagByUserId(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    bool enableStartProcess = data.ReadBool();
+    SetEnableStartProcessFlagByUserId(userId, enableStartProcess);
     return NO_ERROR;
 }
 
