@@ -485,7 +485,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
 
-    TAG_LOGD(AAFwkTag::APPMGR, "app is %{public}s.", GetName().c_str());
+    TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     appLifeCycleDeal_->LaunchApplication(launchData, config);
 }
 
@@ -639,7 +639,7 @@ void AppRunningRecord::ScheduleTerminate()
 
 void AppRunningRecord::LaunchPendingAbilities()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Launch pending abilities.");
+    TAG_LOGI(AAFwkTag::APPMGR, "Launch pending abilities.");
 
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {
