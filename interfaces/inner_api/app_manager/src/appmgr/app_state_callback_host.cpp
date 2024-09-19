@@ -170,7 +170,6 @@ int32_t AppStateCallbackHost::HandleOnAppRemoteDied(MessageParcel &data, Message
 
 int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<sptr<IRemoteObject>> abilityTokens;
     int32_t pid = data.ReadInt32();
     if (pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "pid is illegal");
