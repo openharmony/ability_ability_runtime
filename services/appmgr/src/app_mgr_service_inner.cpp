@@ -79,6 +79,7 @@
 #include "time_util.h"
 #include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
+#include "user_record_manager.h"
 #ifdef APP_MGR_SERVICE_APPMS
 #include "net_conn_client.h"
 #endif
@@ -336,6 +337,10 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
         return;
     }
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return;
+    }
 
     std::string processName;
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
@@ -384,6 +389,10 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     }
     if (userId == CURRENT_USER_ID) {
         userId = currentUserId_;
+    }
+    if (UserRecordManager::GetInstance().IsLogoutUser(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
     }
     auto allowPreload = appPreloader_->PreCheck(bundleName, preloadMode);
     if (!allowPreload) {
@@ -481,6 +490,11 @@ void AppMgrServiceInner::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObje
 
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return;
+    }
+
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
         return;
     }
 
@@ -3658,6 +3672,10 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
     if (!appMultiUserExistFlag) {
         NotifyAppRunningStatusEvent(info.name, appInfo->uid, AbilityRuntime::RunningStatus::APP_RUNNING_START);
     }
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return;
+    }
 
     auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info);
     if (!appRecord) {
@@ -3942,11 +3960,12 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
     if (!appMultiUserExistFlag) {
         NotifyAppRunningStatusEvent(info.name, appInfo->uid, AbilityRuntime::RunningStatus::APP_RUNNING_START);
     }
-    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to start process [%{public}s]!", processName.c_str());
-        return ERR_INVALID_VALUE;
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
     }
+    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info);
+    CHECK_POINTER_AND_RETURN_VALUE(appRecord, ERR_INVALID_VALUE);
 
     auto isDebug = want.GetBoolParam(DEBUG_APP, false);
     TAG_LOGI(AAFwkTag::APPMGR, "Set Debug : %{public}s", (isDebug ? "true" : "false"));
@@ -3973,10 +3992,7 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
         appIndex, appExistFlag);
 
     // If it is empty, the startup failed
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to start process [%{public}s]!", processName.c_str());
-        return ERR_INVALID_VALUE;
-    }
+    CHECK_POINTER_AND_RETURN_VALUE(appRecord, ERR_INVALID_VALUE);
 
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
@@ -4061,6 +4077,10 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
+        return;
+    }
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
         return;
     }
 
@@ -4735,6 +4755,10 @@ int AppMgrServiceInner::PreStartNWebSpawnProcess(const pid_t hostPid)
         TAG_LOGE(AAFwkTag::APPMGR, "nwebSpawnClient is null");
         return ERR_INVALID_VALUE;
     }
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(IPCSkeleton::GetCallingUid()))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
+    }
 
     auto appRecord = appRunningManager_->GetAppRunningRecordByPid(hostPid);
     if (!appRecord) {
@@ -4755,24 +4779,21 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
     int32_t ipcFd, int32_t sharedFd, int32_t crashFd, pid_t &renderPid, bool isGPU)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start render process, hostPid:%{public}d", hostPid);
-    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 ||
-        crashFd <= 0) {
+    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 || crashFd <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid param: hostPid:%{public}d renderParam:%{private}s "
                     "ipcFd:%{public}d  crashFd:%{public}d sharedFd:%{public}d",
             hostPid, renderParam.c_str(), ipcFd, crashFd, sharedFd);
         return ERR_INVALID_VALUE;
     }
 
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr, not start render process");
-        return ERR_INVALID_VALUE;
+    CHECK_POINTER_AND_RETURN_VALUE(appRunningManager_, ERR_INVALID_VALUE);
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(IPCSkeleton::GetCallingUid()))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
     }
 
     auto appRecord = GetAppRunningRecordByPid(hostPid);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, hostPid:%{public}d", hostPid);
-        return ERR_INVALID_VALUE;
-    }
+    CHECK_POINTER_AND_RETURN_VALUE(appRecord, ERR_INVALID_VALUE);
 
     auto renderRecordMap = appRecord->GetRenderRecordMap();
     if (!isGPU && !renderRecordMap.empty() && !AAFwk::AppUtils::GetInstance().IsUseMultiRenderProcess()) {
@@ -5758,14 +5779,10 @@ bool AppMgrServiceInner::CreateAbilityInfo(const AAFwk::Want &want, AbilityInfo 
 
 int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &want)
 {
-    if (!remoteClientManager_ || !appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager or appRunningManager is nullptr!");
-        return ERR_INVALID_OPERATION;
-    }
-
-    TAG_LOGI(AAFwkTag::APPMGR, "debuggablePipe bundleName:%{public}s", want.GetElement().GetBundleName().c_str());
-    TAG_LOGI(AAFwkTag::APPMGR, "debuggablePipe moduleName:%{public}s", want.GetElement().GetModuleName().c_str());
-    TAG_LOGI(AAFwkTag::APPMGR, "debuggablePipe abilityName:%{public}s", want.GetElement().GetAbilityName().c_str());
+    CHECK_POINTER_AND_RETURN_VALUE(appRunningManager_, ERR_INVALID_OPERATION);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetModuleName().c_str(),
+        want.GetElement().GetAbilityName().c_str());
 
     AbilityInfo abilityInfo;
     if (!CreateAbilityInfo(want, abilityInfo)) {
@@ -5776,7 +5793,6 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
         TAG_LOGW(AAFwkTag::APPMGR, "Application not debug provision type!");
         return ERR_INVALID_OPERATION;
     }
-
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
@@ -5788,7 +5804,10 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
     std::string processName;
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
     MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, 0, "", processName);
-
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(appInfo->uid))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
+    }
     auto&& appRecord =
         appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, bundleInfo);
     AppSpawnStartMsg startMsg;
@@ -5852,6 +5871,11 @@ void AppMgrServiceInner::SetCurrentUserId(const int32_t userId)
     }
     TAG_LOGD(AAFwkTag::APPMGR, "set current userId: %{public}d", userId);
     currentUserId_ = userId;
+}
+
+void AppMgrServiceInner::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    UserRecordManager::GetInstance().SetEnableStartProcessFlagByUserId(userId, enableStartProcess);
 }
 
 int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &bundleName, int32_t &uid)
@@ -6461,6 +6485,10 @@ int32_t AppMgrServiceInner::StartChildProcess(const pid_t callingPid, pid_t &chi
     if (callingPid <= 0 || srcEntry.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid callingPid:%{public}d srcEntry:%{private}s", callingPid, srcEntry.c_str());
         return ERR_INVALID_VALUE;
+    }
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(IPCSkeleton::GetCallingUid()))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
     }
     CHECK_POINTER_AND_RETURN_VALUE(appRunningManager_, ERR_NO_INIT);
     auto appRecord = GetAppRunningRecordByPid(callingPid);
@@ -7332,6 +7360,10 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     int32_t errCode = StartChildProcessPreCheck(hostPid, CHILD_PROCESS_TYPE_NATIVE);
     if (errCode != ERR_OK) {
         return errCode;
+    }
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(IPCSkeleton::GetCallingUid()))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
     }
 
     auto appRecord = GetAppRunningRecordByPid(hostPid);
