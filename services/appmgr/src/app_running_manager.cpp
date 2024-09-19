@@ -667,16 +667,8 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
                 appRecord->GetBundleName().c_str());
-            if (clearMissionFlag && appMgrServiceInner && appRecord->GetPriorityObject()) {
-                int32_t pid = appRecord->GetPriorityObject()->GetPid();
-                int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
-                auto notifyAppPreCache = [pid, userId, inner = appMgrServiceInner] () {
-                    if (inner == nullptr) {
-                        return;
-                    }
-                    inner->NotifyAppPreCache(pid, userId);
-                };
-                appRecord->PostTask("NotifyAppPreCache", 0, notifyAppPreCache);
+            if (clearMissionFlag) {
+                NotifyAppPreCache(appRecord, appMgrServiceInner);
             }
             return;
         }
@@ -688,6 +680,24 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             appRecord->PostTask("DELAY_KILL_PROCESS", delayTime, killProcess);
         }
     }
+}
+
+void AppRunningManager::NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
+    const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner)
+{
+    if (appMgrServiceInner == nullptr || appRecord == nullptr ||
+        appRecord->GetPriorityObject() == nullptr) {
+        return;
+    }
+    int32_t pid = appRecord->GetPriorityObject()->GetPid();
+    int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
+    auto notifyAppPreCache = [pid, userId, inner = appMgrServiceInner]() {
+        if (inner == nullptr) {
+            return;
+        }
+        inner->NotifyAppPreCache(pid, userId);
+    };
+    appRecord->PostTask("NotifyAppPreCache", 0, notifyAppPreCache);
 }
 
 void AppRunningManager::GetRunningProcessInfoByToken(
