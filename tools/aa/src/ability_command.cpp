@@ -158,7 +158,6 @@ ErrCode AbilityManagerShellCommand::CreateCommandMap()
 {
     commandMap_ = {
         {"help", [this]() { return this->RunAsHelpCommand(); }},
-        {"screen", [this]() { return this->RunAsScreenCommand(); }},
         {"start", [this]() { return this->RunAsStartAbility(); }},
         {"stop-service", [this]() { return this->RunAsStopService(); }},
         {"dump", [this]() { return this->RunAsDumpsysCommand(); }},
@@ -170,9 +169,6 @@ ErrCode AbilityManagerShellCommand::CreateCommandMap()
         {"appdebug", [this]() { return this->RunAsAppDebugDebugCommand(); }},
 #ifdef ABILITY_COMMAND_FOR_TEST
         {"force-timeout", [this]() { return this->RunForceTimeoutForTest(); }},
-        {"block-ability", [this]() { return this->RunAsBlockAbilityCommand(); }},
-        {"block-ams-service", [this]() { return this->RunAsBlockAmsServiceCommand(); }},
-        {"block-app-service", [this]() { return this->RunAsBlockAppServiceCommand(); }},
 #endif
 #ifdef ABILITY_FAULT_AND_EXIT_TEST
         {"forceexitapp", [this]() { return this->RunAsForceExitAppCommand(); }},
@@ -218,6 +214,7 @@ ErrCode AbilityManagerShellCommand::CreateMessageMap()
     messageMap_[ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE] = "error: unlock screen failed in developer mode.";
     messageMap_[ERR_NOT_SUPPORTED_PRODUCT_TYPE] = "error: not supported in the current product type.";
     messageMap_[ERR_NOT_IN_APP_PROVISION_MODE] = "error: not supported in non-app-provision mode.";
+    messageMap_[ERR_NOT_DEBUG_APP] = "error: not debug app.";
     return OHOS::ERR_OK;
 }
 
@@ -231,108 +228,6 @@ ErrCode AbilityManagerShellCommand::RunAsHelpCommand()
     resultReceiver_.append(HELP_MSG);
 
     return OHOS::ERR_OK;
-}
-
-void AbilityManagerShellCommand::HandleInvalidScreenOptions(int& result)
-{
-    switch (optopt) {
-        case 'p': {
-            // 'aa screen -p' with no argument
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' with no argument.", cmd_.c_str());
-
-            resultReceiver_.append("error: option ");
-            resultReceiver_.append("requires a value.\n");
-
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-        case 0: {
-            // 'aa screen' with an unknown option: aa screen --x
-            // 'aa screen' with an unknown option: aa screen --xxx
-            std::string unknownOption = "";
-            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa screen' with an unknown option.");
-
-            resultReceiver_.append(unknownOptionMsg);
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-        default: {
-            // 'aa screen' with an unknown option: aa screen -x
-            // 'aa screen' with an unknown option: aa screen -xxx
-            std::string unknownOption = "";
-            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa screen' with an unknown option.");
-
-            resultReceiver_.append(unknownOptionMsg);
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-    }
-}
-
-ErrCode AbilityManagerShellCommand::RunAsScreenCommand()
-{
-    TAG_LOGI(AAFwkTag::AA_TOOL, "enter");
-
-    int result = OHOS::ERR_OK;
-
-    int option = -1;
-    int counter = 0;
-
-    while (true) {
-        counter++;
-
-        option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
-
-        TAG_LOGI(
-            AAFwkTag::AA_TOOL, "option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
-
-        if (optind < 0 || optind > argc_) {
-            return OHOS::ERR_INVALID_VALUE;
-        }
-
-        if (option == -1) {
-            // When scanning the first argument
-            if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
-                // 'aa screen' with no option: aa screen
-                // 'aa screen' with a wrong argument: aa screen xxx
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' %{public}s.", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
-                resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
-                result = OHOS::ERR_INVALID_VALUE;
-            }
-            break;
-        }
-
-        if (option == '?') {
-            HandleInvalidScreenOptions(result);
-            break;
-        }
-
-        switch (option) {
-            case 'h': {
-                // 'aa screen -h'
-                // 'aa screen --help'
-                result = OHOS::ERR_INVALID_VALUE;
-                break;
-            }
-            case 0: {
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
-    if (result != OHOS::ERR_OK) {
-        resultReceiver_.append(HELP_MSG_SCREEN);
-        result = OHOS::ERR_INVALID_VALUE;
-    }
-
-    return result;
 }
 
 ErrCode AbilityManagerShellCommand::RunAsStartAbility()
@@ -355,7 +250,7 @@ ErrCode AbilityManagerShellCommand::RunAsStartAbility()
             TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_START_ABILITY_OK.c_str());
             resultReceiver_ = STRING_START_ABILITY_OK + "\n";
         } else {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_START_ABILITY_NG.c_str(), result);
+            TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_START_ABILITY_NG.c_str(), result);
             if (result != START_ABILITY_WAITING) {
                 resultReceiver_ = STRING_START_ABILITY_NG + "\n";
             }
@@ -383,7 +278,7 @@ ErrCode AbilityManagerShellCommand::RunAsStopService()
             resultReceiver_ = STRING_STOP_SERVICE_ABILITY_OK + "\n";
         } else {
             TAG_LOGI(
-                AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_STOP_SERVICE_ABILITY_NG.c_str(), result);
+                AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_STOP_SERVICE_ABILITY_NG.c_str(), result);
             resultReceiver_ = STRING_STOP_SERVICE_ABILITY_NG + "\n";
 
             resultReceiver_.append(GetMessageFromCode(result));
@@ -583,7 +478,7 @@ ErrCode AbilityManagerShellCommand::RunAsDumpsysCommand()
             }
             case '?': {
                 if (!isfirstCommand) {
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' with an unknown option.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' option unknown", cmd_.c_str());
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
                     resultReceiver_.append(unknownOptionMsg);
@@ -594,7 +489,7 @@ ErrCode AbilityManagerShellCommand::RunAsDumpsysCommand()
                 break;
             }
             default: {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' with an unknown option.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' option unknown", cmd_.c_str());
                 std::string unknownOption = "";
                 std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
                 resultReceiver_.append(unknownOptionMsg);
@@ -621,7 +516,7 @@ ErrCode AbilityManagerShellCommand::RunAsDumpsysCommand()
                 resultReceiver_ += it + "\n";
             }
         } else {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "failed to dump state.");
+            TAG_LOGI(AAFwkTag::AA_TOOL, "dump state failed");
         }
     }
     return result;
@@ -640,30 +535,30 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
     auto killReason = Reason::REASON_UNKNOWN;
     pid_t pid = 0;
     for (auto index = INDEX_OFFSET; index < argc_; ++index) {
-        TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s.", index, argv_[index]);
+        TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
         std::string opt = argv_[index];
         if (opt == "-p") {
             index++;
             if (index <= argc_) {
-                TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s.", index, argv_[index]);
+                TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
                 std::string inputPid = argv_[index];
                 pid = ConvertPid(inputPid);
             }
         } else if (opt == "-r") {
             index++;
             if (index <= argc_) {
-                TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s.", index, argv_[index]);
+                TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
                 std::string inputReason = argv_[index];
                 killReason = CovertExitReason(inputReason);
             }
         }
     }
 
-    TAG_LOGI(AAFwkTag::AA_TOOL, "pid %{public}d, reason %{public}d.", pid, killReason);
+    TAG_LOGI(AAFwkTag::AA_TOOL, "pid %{public}d, reason %{public}d", pid, killReason);
     if (pid != 0 && killReason != Reason::REASON_UNKNOWN) {
         ExitReason exitReason = {killReason, "aa force-stop"};
         if (AbilityManagerClient::GetInstance()->RecordProcessExitReason(pid, exitReason) != ERR_OK) {
-            TAG_LOGE(AAFwkTag::AA_TOOL, "bundle %{public}s record reason %{public}d failed.",
+            TAG_LOGE(AAFwkTag::AA_TOOL, "bundle %{public}s record reason %{public}d failed",
                 bundleName.c_str(), killReason);
         }
     }
@@ -674,7 +569,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
         TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_FORCE_STOP_OK.c_str());
         resultReceiver_ = STRING_FORCE_STOP_OK + "\n";
     } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_FORCE_STOP_NG.c_str(), result);
+        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_FORCE_STOP_NG.c_str(), result);
         resultReceiver_ = STRING_FORCE_STOP_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
     }
@@ -714,7 +609,7 @@ pid_t AbilityManagerShellCommand::ConvertPid(std::string& inputPid)
     try {
         pid = static_cast<pid_t>(std::stoi(inputPid));
     } catch (...) {
-        TAG_LOGW(AAFwkTag::AA_TOOL, "pid stoi(%{public}s) failed.", inputPid.c_str());
+        TAG_LOGW(AAFwkTag::AA_TOOL, "pid stoi(%{public}s) failed", inputPid.c_str());
     }
     return pid;
 }
@@ -735,7 +630,7 @@ ErrCode AbilityManagerShellCommand::RunAsAttachDebugCommand()
         return result;
     }
 
-    TAG_LOGD(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_ATTACH_APP_DEBUG_NG.c_str(), result);
+    TAG_LOGD(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_ATTACH_APP_DEBUG_NG.c_str(), result);
     resultReceiver_.append(STRING_ATTACH_APP_DEBUG_NG + "\n");
     return result;
 }
@@ -756,7 +651,7 @@ ErrCode AbilityManagerShellCommand::RunAsDetachDebugCommand()
         return result;
     }
 
-    TAG_LOGD(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_DETACH_APP_DEBUG_NG.c_str(), result);
+    TAG_LOGD(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_DETACH_APP_DEBUG_NG.c_str(), result);
     resultReceiver_.append(STRING_DETACH_APP_DEBUG_NG + "\n");
     return result;
 }
@@ -766,26 +661,26 @@ bool AbilityManagerShellCommand::SwitchOptionForAppDebug(
 {
     switch (option) {
         case 'h': { // 'aa appdebug -h' or 'aa appdebug --help'
-            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -h' help.", cmd_.c_str());
+            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -h' help", cmd_.c_str());
             return true;
         }
         case 'b': { // 'aa appdebug -b bundlename'
-            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -b' bundle name.", cmd_.c_str());
+            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -b' bundle name", cmd_.c_str());
             bundleName = optarg;
             return false;
         }
         case 'p': { // 'aa appdebug -p persist'
-            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -p' persist.", cmd_.c_str());
+            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -p' persist", cmd_.c_str());
             isPersist = true;
             return false;
         }
         case 'c': { // 'aa appdebug -c cancel'
-            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -c' cancel.", cmd_.c_str());
+            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -c' cancel", cmd_.c_str());
             isCancel = true;
             return true;
         }
         case 'g': { // 'aa appdebug -g get'
-            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -g' get.", cmd_.c_str());
+            TAG_LOGD(AAFwkTag::AA_TOOL, "'aa %{public}s -g' get", cmd_.c_str());
             isGet = true;
             return true;
         }
@@ -822,7 +717,7 @@ bool AbilityManagerShellCommand::ParseAppDebugParameter(
             switch (optopt) {
                 case 'b': {
                     // 'aa appdebug -b' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -b' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -b' no arg", cmd_.c_str());
                     resultReceiver_.append("error: option requires a valid value.\n");
                     return false;
                 }
@@ -830,7 +725,7 @@ bool AbilityManagerShellCommand::ParseAppDebugParameter(
                     // 'aa appdebug' with an unknown option: aa appdebug -x
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa appdebug' with an unknown option.");
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa appdebug' option unknown");
                     resultReceiver_.append(unknownOptionMsg);
                     return false;
                 }
@@ -877,7 +772,7 @@ ErrCode AbilityManagerShellCommand::RunAsAppDebugDebugCommand()
     }
 
     if (result != OHOS::ERR_OK) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result is %{public}d", STRING_APP_DEBUG_NG.c_str(), result);
+        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_APP_DEBUG_NG.c_str(), result);
         resultReceiver_ = STRING_APP_DEBUG_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
         return result;
@@ -904,7 +799,7 @@ ErrCode AbilityManagerShellCommand::RunAsProcessCommand()
             resultReceiver_ = STRING_START_NATIVE_PROCESS_OK;
         } else {
             TAG_LOGI(
-                AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_START_NATIVE_PROCESS_NG.c_str(), result);
+                AAFwkTag::AA_TOOL, "%{public}s result:%{public}d", STRING_START_NATIVE_PROCESS_NG.c_str(), result);
             resultReceiver_ = STRING_START_NATIVE_PROCESS_NG;
         }
     } else {
@@ -917,15 +812,15 @@ ErrCode AbilityManagerShellCommand::RunAsProcessCommand()
 
 bool AbilityManagerShellCommand::MatchOrderString(const std::regex &regexScript, const std::string &orderCmd)
 {
-    TAG_LOGD(AAFwkTag::AA_TOOL, "order string is %{public}s", orderCmd.c_str());
+    TAG_LOGD(AAFwkTag::AA_TOOL, "orderCmd: %{public}s", orderCmd.c_str());
     if (orderCmd.empty()) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "input param order string is empty");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "empty orderCmd");
         return false;
     }
 
     std::match_results<std::string::const_iterator> matchResults;
     if (!std::regex_match(orderCmd, matchResults, regexScript)) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "the order not match");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "order mismatch");
         return false;
     }
 
@@ -936,12 +831,12 @@ bool AbilityManagerShellCommand::CheckPerfCmdString(
     const char* optarg, const size_t paramLength, std::string &perfCmd)
 {
     if (optarg == nullptr) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "input param optarg is nullptr");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "null optarg");
         return false;
     }
 
     if (strlen(optarg) >= paramLength) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "debuggablePipe aa start -p param length must be less than 1024.");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "debuggablePipe aa start -p param length must <1024");
         return false;
     }
 
@@ -952,10 +847,10 @@ bool AbilityManagerShellCommand::CheckPerfCmdString(
         return true;
     }
 
-    TAG_LOGD(AAFwkTag::AA_TOOL, "the command not match");
+    TAG_LOGD(AAFwkTag::AA_TOOL, "command mismatch");
     const std::regex regexProfileType(R"(^\s*(profile)\s+(nativeperf|jsperf)(\s+.*|$))");
     if (!MatchOrderString(regexProfileType, perfCmd)) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "the command is invalid");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "invalid command");
         return false;
     }
 
@@ -963,7 +858,7 @@ bool AbilityManagerShellCommand::CheckPerfCmdString(
     if (findPos != std::string::npos) {
         const std::regex regexCmd(R"(^jsperf($|\s+($|((5000|([1-9]|[1-4]\d)\d\d)|)\s*($|nativeperf.*))))");
         if (!MatchOrderString(regexCmd, perfCmd.substr(findPos, perfCmd.length() - findPos))) {
-            TAG_LOGE(AAFwkTag::AA_TOOL, "the order is invalid");
+            TAG_LOGE(AAFwkTag::AA_TOOL, "invalid order");
             return false;
         }
     }
@@ -1105,7 +1000,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
             switch (optopt) {
                 case 'a': {
                     // 'aa process -a' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -a' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -a' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1115,7 +1010,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                 }
                 case 'b': {
                     // 'aa process -b' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -b' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -b' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1125,7 +1020,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                 }
                 case 'm': {
                     // 'aa process -m' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -m' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -m' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1135,7 +1030,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                 }
                 case 'p': {
                     // 'aa process -p' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1145,7 +1040,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                 }
                 case 'D': {
                     // 'aa process -D' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -D' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -D' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1159,7 +1054,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
 
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' with an unknown option.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
 
                     resultReceiver_.append(unknownOptionMsg);
                     result = OHOS::ERR_INVALID_VALUE;
@@ -1171,7 +1066,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
 
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' with an unknown option.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
 
                     resultReceiver_.append(unknownOptionMsg);
                     result = OHOS::ERR_INVALID_VALUE;
@@ -1219,7 +1114,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                 // 'aa process -D xxx'
                 // save debug cmd
                 if (!isPerf && strlen(optarg) < PARAM_LENGTH) {
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "debug cmd.");
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "debug cmd");
                     debugCmd = optarg;
                 }
                 break;
@@ -1242,13 +1137,13 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
     if (result == OHOS::ERR_OK) {
         if (perfCmd.empty() && debugCmd.empty()) {
             TAG_LOGI(AAFwkTag::AA_TOOL,
-                "debuggablePipe aa process must contains -p or -D and param length must be less than 1024.");
+                "debuggablePipe aa process must contains -p or -D and param length must <1024");
             return OHOS::ERR_INVALID_VALUE;
         }
 
         if (abilityName.size() == 0 || bundleName.size() == 0) {
             // 'aa process -a <ability-name> -b <bundle-name> [-D]'
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' without enough options.", cmd_.c_str());
+            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' without enough options", cmd_.c_str());
 
             if (abilityName.size() == 0) {
                 resultReceiver_.append(HELP_MSG_NO_ABILITY_NAME_OPTION + "\n");
@@ -1339,7 +1234,7 @@ ErrCode AbilityManagerShellCommand::RunForceTimeoutForTest()
 
     ErrCode result = OHOS::ERR_OK;
     if (argList_.size() == NUMBER_ONE && argList_[0] == HELP_MSG_FORCE_TIMEOUT_CLEAN) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "clear ability timeout flags.");
+        TAG_LOGI(AAFwkTag::AA_TOOL, "clear ability timeout flags");
         result = AbilityManagerClient::GetInstance()->ForceTimeoutForTest(argList_[0], "");
     } else if (argList_.size() == NUMBER_TWO) {
         TAG_LOGI(AAFwkTag::AA_TOOL, "Ability name : %{public}s, state: %{public}s", argList_[0].c_str(),
@@ -1353,7 +1248,7 @@ ErrCode AbilityManagerShellCommand::RunForceTimeoutForTest()
         TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_FORCE_TIMEOUT_OK.c_str());
         resultReceiver_ = STRING_FORCE_TIMEOUT_OK + "\n";
     } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_FORCE_TIMEOUT_NG.c_str(), result);
+        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_FORCE_TIMEOUT_NG.c_str(), result);
         resultReceiver_ = STRING_FORCE_TIMEOUT_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
     }
@@ -1434,7 +1329,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case 'd': {
                     // 'aa start -d' with no argument
                     // 'aa stop-service -d' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -d' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -d' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1445,7 +1340,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case 'a': {
                     // 'aa start -a' with no argument
                     // 'aa stop-service -a' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -a' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -a' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1456,7 +1351,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case 'b': {
                     // 'aa start -b' with no argument
                     // 'aa stop-service -b' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -b' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -b' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1466,7 +1361,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case 'e': {
                     // 'aa start -e' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -e with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -e no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1476,7 +1371,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case 't': {
                     // 'aa start -t' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -t with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -t no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1487,7 +1382,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case 's': {
                     // 'aa start -s' with no argument
                     // 'aa stop-service -s' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -s' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -s' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append(argv_[optind - 1]);
@@ -1499,7 +1394,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case 'm': {
                     // 'aa start -m' with no argument
                     // 'aa stop-service -m' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -m' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -m' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1510,7 +1405,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 case 'p': {
                     // 'aa start -p' with no argument
                     // 'aa stop-service -p' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1520,7 +1415,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_PARAMETER_INTEGER: {
                     // 'aa start --pi' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --pi' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --pi' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1531,7 +1426,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_PARAMETER_STRING: {
                     // 'aa start --ps' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --ps' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --ps' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1542,7 +1437,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_PARAMETER_BOOL: {
                     // 'aa start --pb' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -pb' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -pb' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1553,7 +1448,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_PARAMETER_NULL_STRING: {
                     // 'aa start --psn' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --psn' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --psn' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1564,7 +1459,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_WINDOW_LEFT: {
                     // 'aa start --wl' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wl' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wl' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1575,7 +1470,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_WINDOW_TOP: {
                     // 'aa start --wt' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wt' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wt' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1586,7 +1481,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_WINDOW_HEIGHT: {
                     // 'aa start --wh' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wh' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wh' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1597,7 +1492,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_WINDOW_WIDTH: {
                     // 'aa start --ww' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --ww' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --ww' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1609,7 +1504,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                 case 'A': {
                     // 'aa start -A' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -A' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -A' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1620,7 +1515,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case 'U': {
                     // 'aa start -U' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -U' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -U' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1637,7 +1532,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
 
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' with an unknown option.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
 
                     resultReceiver_.append(unknownOptionMsg);
                     result = OHOS::ERR_INVALID_VALUE;
@@ -1651,7 +1546,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     std::string unknownOption = "";
                     std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
 
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' with an unknown option.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
 
                     resultReceiver_.append(unknownOptionMsg);
                     result = OHOS::ERR_INVALID_VALUE;
@@ -1730,7 +1625,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                 // save module name
                 if (!CheckPerfCmdString(optarg, PARAM_LENGTH, perfCmd)) {
-                    TAG_LOGE(AAFwkTag::AA_TOOL, "input perfCmd is invalid %{public}s", perfCmd.c_str());
+                    TAG_LOGE(AAFwkTag::AA_TOOL, "input perfCmd invalid %{public}s", perfCmd.c_str());
                     result = OHOS::ERR_INVALID_VALUE;
                 }
                 break;
@@ -1920,7 +1815,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
             // 'aa start [-d <device-id>] -a <ability-name> -b <bundle-name> [-D]'
             // 'aa stop-service [-d <device-id>] -a <ability-name> -b <bundle-name>'
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' without enough options.", cmd_.c_str());
+            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' without enough options", cmd_.c_str());
 
             resultReceiver_.append(HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n");
             result = OHOS::ERR_INVALID_VALUE;
@@ -1993,7 +1888,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
 ErrCode AbilityManagerShellCommand::RunAsTestCommand()
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "enter");
+    TAG_LOGD(AAFwkTag::AA_TOOL, "enter");
     std::map<std::string, std::string> params;
 
     for (int i = USER_TEST_COMMAND_START_INDEX; i < argc_; i++) {
@@ -2042,7 +1937,7 @@ ErrCode AbilityManagerShellCommand::RunAsTestCommand()
 
 bool AbilityManagerShellCommand::IsTestCommandIntegrity(const std::map<std::string, std::string>& params)
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "enter");
+    TAG_LOGD(AAFwkTag::AA_TOOL, "enter");
 
     std::vector<std::string> opts = { "-b", "-s unittest" };
     for (auto opt : opts) {
@@ -2064,7 +1959,7 @@ ErrCode AbilityManagerShellCommand::TestCommandError(const std::string& info)
 
 ErrCode AbilityManagerShellCommand::StartUserTest(const std::map<std::string, std::string>& params)
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "enter");
+    TAG_LOGD(AAFwkTag::AA_TOOL, "enter");
 
     Want want;
     for (auto param : params) {
@@ -2085,7 +1980,7 @@ ErrCode AbilityManagerShellCommand::StartUserTest(const std::map<std::string, st
 
     int result = AbilityManagerClient::GetInstance()->StartUserTest(want, observer->AsObject());
     if (result != OHOS::ERR_OK) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_START_USER_TEST_NG.c_str(), result);
+        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_START_USER_TEST_NG.c_str(), result);
         resultReceiver_ = STRING_START_USER_TEST_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
         return result;
@@ -2114,7 +2009,7 @@ sptr<IAbilityManager> AbilityManagerShellCommand::GetAbilityManagerService()
 {
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "Fail to get registry.");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "Get registry failed");
         return nullptr;
     }
     sptr<IRemoteObject> remoteObject = systemManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
@@ -2129,7 +2024,7 @@ ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithUnknownOption()
             break;
         }
         case 'p': {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa ApplicationNotResponding -p' with no argument.");
+            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa ApplicationNotResponding -p' no arg");
             resultReceiver_.append("error: option -p ");
             resultReceiver_.append("' requires a value.\n");
             break;
@@ -2137,7 +2032,7 @@ ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithUnknownOption()
         default: {
             std::string unknownOption;
             std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa ApplicationNotResponding' with an unknown option.");
+            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa ApplicationNotResponding' opt unknown");
             resultReceiver_.append(unknownOptionMsg);
             break;
         }
@@ -2154,70 +2049,17 @@ ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithOption(int32_t 
             break;
         }
         case 'p': {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa %{public}s'  -p process.", cmd_.c_str());
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa optarg =  %{public}s'.", optarg);
+            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa %{public}s'  -p process", cmd_.c_str());
+            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa optarg:  %{public}s'", optarg);
             pid = optarg;
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa pid =  %{public}s'.", pid.c_str());
+            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa pid:  %{public}s'", pid.c_str());
             break;
         }
         default: {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' with an unknown option.", cmd_.c_str());
+            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' option unknown", cmd_.c_str());
             result = OHOS::ERR_INVALID_VALUE;
             break;
         }
-    }
-    return result;
-}
-
-ErrCode AbilityManagerShellCommand::RunAsBlockAbilityCommand()
-{
-    TAG_LOGI(AAFwkTag::AA_TOOL, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
-    ErrCode result = OHOS::ERR_OK;
-    if (argList_.size() > 0) {
-        result = AbilityManagerClient::GetInstance()->BlockAbility(atoi(argList_[0].c_str()));
-    } else {
-        result = OHOS::ERR_INVALID_VALUE;
-    }
-
-    if (result == OHOS::ERR_OK) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_BLOCK_ABILITY_OK.c_str());
-        resultReceiver_ = STRING_BLOCK_ABILITY_OK + "\n";
-    } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_BLOCK_ABILITY_NG.c_str(), result);
-        resultReceiver_ = STRING_BLOCK_ABILITY_NG + "\n";
-        resultReceiver_.append(GetMessageFromCode(result));
-    }
-    return result;
-}
-
-ErrCode AbilityManagerShellCommand::RunAsBlockAmsServiceCommand()
-{
-    TAG_LOGI(AAFwkTag::AA_TOOL, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
-    ErrCode result = OHOS::ERR_OK;
-    result = AbilityManagerClient::GetInstance()->BlockAmsService();
-    if (result == OHOS::ERR_OK) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_BLOCK_AMS_SERVICE_OK.c_str());
-        resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";
-    } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
-        resultReceiver_ = STRING_BLOCK_AMS_SERVICE_NG + "\n";
-        resultReceiver_.append(GetMessageFromCode(result));
-    }
-    return result;
-}
-
-ErrCode AbilityManagerShellCommand::RunAsBlockAppServiceCommand()
-{
-    TAG_LOGI(AAFwkTag::AA_TOOL, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
-    ErrCode result = OHOS::ERR_OK;
-    result = AbilityManagerClient::GetInstance()->BlockAppService();
-    if (result == OHOS::ERR_OK) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s", STRING_BLOCK_APP_SERVICE_OK.c_str());
-        resultReceiver_ = STRING_BLOCK_APP_SERVICE_OK + "\n";
-    } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_BLOCK_APP_SERVICE_NG.c_str(), result);
-        resultReceiver_ = STRING_BLOCK_APP_SERVICE_NG + "\n";
-        resultReceiver_.append(GetMessageFromCode(result));
     }
     return result;
 }
@@ -2284,20 +2126,20 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
 
         switch (option) {
             case 'h': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -h' with no argument.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -h' no arg", cmd_.c_str());
                 // 'aa forceexitapp -h'
                 // 'aa forceexitapp --help'
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
             case 'p': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' pid.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' pid", cmd_.c_str());
                 // 'aa forceexitapp -p pid'
                 pid = optarg;
                 break;
             }
             case 'r': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -r' reason.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -r' reason", cmd_.c_str());
                 // 'aa forceexitapp -r reason'
                 reason = optarg;
                 break;
@@ -2305,7 +2147,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
             case '?': {
                 std::string unknownOption = "";
                 std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa notifyappfault' with an unknown option.");
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa notifyappfault' option unknown");
                 resultReceiver_.append(unknownOptionMsg);
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -2317,7 +2159,6 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
     }
 
     if (result != OHOS::ERR_OK) {
-        resultReceiver_.append(HELP_MSG_SCREEN);
         result = OHOS::ERR_INVALID_VALUE;
     }
 
@@ -2326,7 +2167,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
     if (result == OHOS::ERR_OK) {
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";
     } else {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
+        TAG_LOGI(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
     }
@@ -2390,38 +2231,38 @@ ErrCode AbilityManagerShellCommand::RunAsNotifyAppFaultCommand()
 
         switch (option) {
             case 'h': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -h' with no argument.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -h' no arg", cmd_.c_str());
                 // 'aa notifyappfault -h'
                 // 'aa notifyappfault --help'
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
             }
             case 'n': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -n' errorName.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -n' errorName", cmd_.c_str());
                 // 'aa notifyappfault -n errorName'
                 errorName = optarg;
                 break;
             }
             case 'm': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -m' errorMessage.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -m' errorMessage", cmd_.c_str());
                 // 'aa notifyappfault -m errorMessage'
                 errorMessage = optarg;
                 break;
             }
             case 's': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -s' errorStack.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -s' errorStack", cmd_.c_str());
                 // 'aa notifyappfault -s errorStack'
                 errorStack = optarg;
                 break;
             }
             case 't': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -t' faultType.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -t' faultType", cmd_.c_str());
                 // 'aa notifyappfault -t faultType'
                 faultType = optarg;
                 break;
             }
             case 'p': {
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' pid.", cmd_.c_str());
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -p' pid", cmd_.c_str());
                 // 'aa notifyappfault -p pid'
                 pid = optarg;
                 break;
@@ -2429,7 +2270,7 @@ ErrCode AbilityManagerShellCommand::RunAsNotifyAppFaultCommand()
             case '?': {
                 std::string unknownOption = "";
                 std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa notifyappfault' with an unknown option.");
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa notifyappfault' option unknown");
                 resultReceiver_.append(unknownOptionMsg);
                 result = OHOS::ERR_INVALID_VALUE;
                 break;
@@ -2441,7 +2282,6 @@ ErrCode AbilityManagerShellCommand::RunAsNotifyAppFaultCommand()
     }
 
     if (result != OHOS::ERR_OK) {
-        resultReceiver_.append(HELP_MSG_SCREEN);
         result = OHOS::ERR_INVALID_VALUE;
     }
 

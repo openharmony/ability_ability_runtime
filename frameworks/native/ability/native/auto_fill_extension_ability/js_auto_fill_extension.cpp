@@ -117,6 +117,10 @@ JsAutoFillExtension::~JsAutoFillExtension()
         jsRuntime_.FreeNativeReference(std::move(item.second));
     }
     contentSessions_.clear();
+
+    for (auto &callback : callbacks_) {
+        jsRuntime_.FreeNativeReference(std::move(callback.second));
+    }
     callbacks_.clear();
 }
 
@@ -205,7 +209,7 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
         nullptr, nullptr);
 }
 
-void JsAutoFillExtension::OnStart(const AAFwk::Want &want)
+void JsAutoFillExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     Extension::OnStart(want);
@@ -493,8 +497,13 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
         option->SetParentId(sessionInfo->hostWindowId);
         option->SetRealParentId(sessionInfo->realHostWindowId);
+        option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
-        auto uiWindow = Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
+        sptr<Rosen::Window> uiWindow;
+        {
+            HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
+            uiWindow = Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
+        }
         if (uiWindow == nullptr) {
             TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Create uiWindow error");
             return false;
@@ -542,7 +551,10 @@ void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<A
     auto obj = sessionInfo->sessionToken;
     auto& uiWindow = uiWindowMap_[obj];
     if (uiWindow) {
-        uiWindow->Show();
+        {
+            HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::show");
+            uiWindow->Show();
+        }
         TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "uiWindow show");
         foregroundWindows_.emplace(obj);
 

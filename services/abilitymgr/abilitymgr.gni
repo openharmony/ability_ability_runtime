@@ -35,7 +35,7 @@ abilityms_files = [
   "src/connection_record.cpp",
   "src/data_ability_caller_recipient.cpp",
   "src/data_ability_manager.cpp",
-  "src/data_ability_record.cpp",
+  "src/data_ability/data_ability_record.cpp",
   "src/dialog_session/dialog_session_manager.cpp",
   "src/lifecycle_deal.cpp",
   "src/ability_running_info.cpp",
@@ -54,8 +54,6 @@ abilityms_files = [
   "src/insight_intent_utils.cpp",
   "src/insight_intent_profile.cpp",
   "src/recovery_info_timer.cpp",
-
-  # interceptor
   "src/interceptor/ability_interceptor_executer.cpp",
   "src/interceptor/ability_jump_interceptor.cpp",
   "src/interceptor/control_interceptor.cpp",
@@ -65,7 +63,6 @@ abilityms_files = [
   "src/interceptor/extension_control_interceptor.cpp",
   "src/interceptor/screen_unlock_interceptor.cpp",
   "src/interceptor/start_other_app_interceptor.cpp",
-
   "src/uri_utils.cpp",
   "src/window_focus_changed_listener.cpp",
 
@@ -95,7 +92,6 @@ abilityms_files = [
   "src/scene_board/status_bar_delegate_manager.cpp",
   "src/scene_board/ui_ability_lifecycle_manager.cpp",
   "src/deeplink_reserve/deeplink_reserve_config.cpp",
-  "src/app_recovery/default_recovery_config.cpp",
 
   #connection observer
   "src/connection_observer_controller.cpp",
@@ -132,6 +128,7 @@ abilityms_files = [
 
   #utils
   "src/utils/window_options_utils.cpp",
+  "src/utils/want_utils.cpp",
   "src/utils/state_utils.cpp",
   "src/utils/extension_permissions_util.cpp",
   "src/utils/app_mgr_util.cpp",

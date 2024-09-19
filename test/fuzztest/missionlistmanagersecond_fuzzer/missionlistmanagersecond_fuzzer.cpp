@@ -174,9 +174,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     missionListManager->GetAllForegroundAbilities(foregroundList);
     missionListManager->GetForegroundAbilities(missionList, foregroundList);
     missionListManager->IsExcludeFromMissions(mission);
-#ifdef ABILITY_COMMAND_FOR_TEST
-    missionListManager->BlockAbility(int32Param);
-#endif
     std::vector<sptr<IRemoteObject>> tokens;
     missionListManager->SetMissionANRStateByTokens(tokens);
     missionListManager->listenerController_ = nullptr;

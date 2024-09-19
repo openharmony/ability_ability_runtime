@@ -32,22 +32,22 @@ void AtomicServiceStatusCallbackProxy::OnInstallFinished(int resultCode, const W
     MessageOption option;
 
     if (!data.WriteInterfaceToken(IAtomicServiceStatusCallback::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token failed");
         return;
     }
 
     if (!data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write resultCode failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resultCode failed");
         return;
     }
 
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write want failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want failed");
         return;
     }
 
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write userId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId failed");
         return;
     }
 
@@ -66,22 +66,22 @@ void AtomicServiceStatusCallbackProxy::OnRemoteInstallFinished(int resultCode, c
     MessageOption option;
 
     if (!data.WriteInterfaceToken(IAtomicServiceStatusCallback::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token failed");
         return;
     }
 
     if (!data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write resultCode failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resultCode failed");
         return;
     }
 
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write want error.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write want error");
         return;
     }
 
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write userId failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId failed");
         return;
     }
 
@@ -97,13 +97,13 @@ int32_t AtomicServiceStatusCallbackProxy::SendTransactCmd(uint32_t code, Message
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote");
         return ERR_NULL_OBJECT;
     }
 
     int32_t ret = remote->SendRequest(code, data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "SendRequest failed. code is %{public}d, ret is %{public}d.", code, ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sendRequest failed, code: %{public}d, ret: %{public}d", code, ret);
         return ret;
     }
     return NO_ERROR;

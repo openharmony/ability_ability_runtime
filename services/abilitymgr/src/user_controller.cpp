@@ -81,27 +81,34 @@ void UserController::ClearAbilityUserItems(int32_t userId)
     }
 }
 
-void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool isForeground)
+void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback)
 {
     if (userId < 0 || userId == USER_ID_NO_HEAD) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser userId is invalid:%{public}d", userId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUserId invalid:%{public}d", userId);
         callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
         return;
     }
 
     if (IsCurrentUser(userId)) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "StartUser user is already current:%{public}d", userId);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "StartUser current:%{public}d", userId);
         callback->OnStartUserDone(userId, ERR_OK);
         return;
     }
 
+    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    if (!appScheduler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appScheduler");
+        return;
+    }
+    appScheduler->SetEnableStartProcessFlagByUserId(userId, true);
+
     if (!IsExistOsAccount(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser not exist such account:%{public}d", userId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null StartUser account:%{public}d", userId);
         callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
         return;
     }
 
-    if (isForeground && GetCurrentUserId() != USER_ID_NO_HEAD && !Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+    if (GetCurrentUserId() != USER_ID_NO_HEAD && !Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         // start freezing screen
         SetFreezingNewUserId(userId);
         DelayedSingleton<AbilityManagerService>::GetInstance()->StartFreezingScreen();
@@ -111,15 +118,13 @@ void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, boo
     auto userItem = GetOrCreateUserItem(userId);
     auto state = userItem->GetState();
     if (state == STATE_STOPPING || state == STATE_SHUTDOWN) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser user is stop now, userId:%{public}d", userId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser user stop, userId:%{public}d", userId);
         callback->OnStartUserDone(userId, ERR_DEAD_OBJECT);
         return;
     }
 
-    if (isForeground) {
-        SetCurrentUserId(userId);
-        // notify wms switching now
-    }
+    SetCurrentUserId(userId);
+    // notify wms switching now
 
     bool needStart = false;
     if (state == STATE_BOOTING) {
@@ -128,36 +133,32 @@ void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, boo
         SendSystemUserStart(userId);
     }
 
-    if (isForeground) {
-        SendSystemUserCurrent(oldUserId, userId);
-        SendReportUserSwitch(oldUserId, userId, userItem);
-        SendUserSwitchTimeout(oldUserId, userId, userItem);
-    }
+    SendSystemUserCurrent(oldUserId, userId);
+    SendReportUserSwitch(oldUserId, userId, userItem);
+    SendUserSwitchTimeout(oldUserId, userId, userItem);
 
     if (needStart) {
         BroadcastUserStarted(userId);
     }
 
     UserBootDone(userItem);
-    if (isForeground) {
-        MoveUserToForeground(oldUserId, userId, callback);
-    }
+    MoveUserToForeground(oldUserId, userId, callback);
 }
 
 int32_t UserController::StopUser(int32_t userId)
 {
     if (userId < 0 || userId == USER_ID_NO_HEAD || userId == USER_ID_DEFAULT) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId is invalid:%{public}d", userId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId invalid:%{public}d", userId);
         return -1;
     }
 
     if (IsCurrentUser(userId)) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "user is already current:%{public}d", userId);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "user current:%{public}d", userId);
         return 0;
     }
 
     if (!IsExistOsAccount(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not exist such account:%{public}d", userId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null account:%{public}d", userId);
         return -1;
     }
 
@@ -165,21 +166,21 @@ int32_t UserController::StopUser(int32_t userId)
 
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
     if (!appScheduler) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appScheduler is null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appScheduler");
         return -1;
     }
     appScheduler->KillProcessesByUserId(userId);
 
     auto abilityManagerService = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!abilityManagerService) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManagerService is null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManagerService null");
         return -1;
     }
 
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto missionListWrap = abilityManagerService->GetMissionListWrap();
         if (!missionListWrap) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListWrap is null");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListWrap null");
             return -1;
         }
         missionListWrap->RemoveUserDir(userId);
@@ -194,16 +195,16 @@ int32_t UserController::StopUser(int32_t userId)
 int32_t UserController::LogoutUser(int32_t userId)
 {
     if (userId < 0 || userId == USER_ID_NO_HEAD) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId is invalid:%{public}d", userId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId invalid:%{public}d", userId);
         return INVALID_USERID_VALUE;
     }
     if (!IsExistOsAccount(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not exist such account:%{public}d", userId);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null account:%{public}d", userId);
         return INVALID_USERID_VALUE;
     }
     auto abilityManagerService = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!abilityManagerService) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManagerService is null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityManagerService");
         return -1;
     }
     abilityManagerService->RemoveLauncherDeathRecipient(userId);
@@ -213,14 +214,15 @@ int32_t UserController::LogoutUser(int32_t userId)
     }
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
     if (!appScheduler) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appScheduler is null");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appScheduler");
         return INVALID_USERID_VALUE;
     }
     abilityManagerService->ClearUserData(userId);
-    appScheduler->KillProcessesByUserId(userId);
+    appScheduler->SetEnableStartProcessFlagByUserId(userId, false);
     if (IsCurrentUser(userId)) {
         SetCurrentUserId(0);
     }
+    appScheduler->KillProcessesByUserId(userId);
     ClearAbilityUserItems(userId);
     return 0;
 }
@@ -248,7 +250,7 @@ bool UserController::IsCurrentUser(int32_t userId)
     if (oldUserId == userId) {
         auto userItem = GetUserItem(userId);
         if (userItem) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "IsCurrentUser userId is already current:%{public}d", userId);
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "IsCurrentUserId current:%{public}d", userId);
             return true;
         }
     }

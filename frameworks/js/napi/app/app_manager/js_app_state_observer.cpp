@@ -204,7 +204,7 @@ void JSAppStateObserver::HandleOnProcessDied(const ProcessData &processData)
 void JSAppStateObserver::CallJsFunction(
     napi_value value, const char *methodName, napi_value* argv, size_t argc)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "CallJsFunction start, method:%{public}s", methodName);
+    TAG_LOGD(AAFwkTag::APPMGR, "method:%{public}s", methodName);
     if (value == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null value");
         return;

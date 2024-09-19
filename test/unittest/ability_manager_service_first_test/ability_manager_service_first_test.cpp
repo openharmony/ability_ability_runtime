@@ -996,7 +996,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_002, TestSize.Leve
     want.SetElement(element);
     auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
     abilityRecord->appIndex_ = -1;
-    abilityRecord->applicationInfo_.bundleName = "com.ix.hiservcie";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, abilityRecord->GetToken(), -1, ExtensionAbilityType::SERVICE),
         CHECK_PERMISSION_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StopExtensionAbility_002 end");
@@ -1017,7 +1017,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_003, TestSize.Leve
     want.SetElement(element);
     auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
     abilityRecord->appIndex_ = -1;
-    abilityRecord->applicationInfo_.bundleName = "com.ix.hiservcie";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     MyFlag::flag_ = 1;
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, abilityRecord->GetToken(), -1, ExtensionAbilityType::SERVICE),
         RESOLVE_ABILITY_ERR);
@@ -1040,7 +1040,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_004, TestSize.Leve
     want.SetElement(element);
     auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
     abilityRecord->appIndex_ = -1;
-    abilityRecord->applicationInfo_.bundleName = "com.ix.hiservcie";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     MyFlag::flag_ = 1;
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, nullptr, -1, ExtensionAbilityType::SERVICE),
         RESOLVE_ABILITY_ERR);
@@ -1063,7 +1063,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_005, TestSize.Leve
     want.SetElement(element);
     auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
     abilityRecord->appIndex_ = -1;
-    abilityRecord->applicationInfo_.bundleName = "com.ix.hiservcie";
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     MyFlag::flag_ = 1;
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, abilityRecord->GetToken(), -1, ExtensionAbilityType::SERVICE),
         RESOLVE_ABILITY_ERR);
@@ -1952,19 +1952,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, UninstallAppInner_0300, TestSize.Level1
 }
 
 /**
- * @tc.name: AbilityManagerServiceFirstTest_GetBundleManager_0100
- * @tc.desc: Test the state of GetBundleManager
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceFirstTest, GetBundleManager_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GetBundleManager_0100 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs->GetBundleManager(), nullptr);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GetBundleManager_0100 end");
-}
-
-/**
  * @tc.name: AbilityManagerServiceFirstTest_PreLoadAppDataAbilities_0100
  * @tc.desc: Test the state of PreLoadAppDataAbilities
  * @tc.type: FUNC
@@ -1997,7 +1984,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, PreLoadAppDataAbilitiesTask_0100, TestS
     auto manager = std::make_shared<DataAbilityManager>();
     abilityMs->subManagersHelper_->dataAbilityManagers_.emplace(USER_ID_U100, manager);
     abilityMs->PreLoadAppDataAbilitiesTask("test", USER_ID_U100);
-    EXPECT_NE(abilityMs->bundleMgrHelper_, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest PreLoadAppDataAbilitiesTask_0100 end");
 }
 
@@ -2212,7 +2198,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckPermissionForUIService_0001, TestS
     Want want {};
     AbilityRequest abilityRequest;
 
-    int ret = abilityMs->CheckPermissionForUIService(want, abilityRequest);
+    int ret = abilityMs->CheckPermissionForUIService(AppExecFwk::ExtensionAbilityType::SERVICE, want, abilityRequest);
     EXPECT_EQ(ret, ERR_OK);
 }
 

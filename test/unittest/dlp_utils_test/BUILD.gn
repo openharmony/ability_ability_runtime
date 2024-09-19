@@ -38,6 +38,7 @@ ohos_unittest("dlp_utils_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
   ]
   cflags_cc = []
   if (os_dlp_part_enabled) {

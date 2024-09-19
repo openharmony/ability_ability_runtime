@@ -456,78 +456,6 @@ HWTEST_F(AppSchedulerTest, AppScheduler_oprator_013, TestSize.Level1)
 
 /*
  * Feature: AppScheduler
- * Function: AbilityBehaviorAnalysis
- * SubFunction: NA
- * FunctionPoints: AppScheduler AbilityBehaviorAnalysis
- * EnvConditions:NA
- * CaseDescription: Verify appmgrclient_ Is not nullptr causes AbilityBehaviorAnalysis to success
- */
-HWTEST_F(AppSchedulerTest, AppScheduler_oprator_014, TestSize.Level1)
-{
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::make_unique<AppExecFwk::AppMgrClient>();
-
-    std::string deviceName = "device";
-    std::string abilityName = "FirstAbility";
-    std::string appName = "FirstApp";
-    std::string bundleName = "com.ix.First";
-    auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
-    auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
-    auto token = record->GetToken();
-    ASSERT_NE(token, nullptr);
-    const int32_t visibility = 1;
-    const int32_t perceptibility = 1;
-    const int32_t connectionState = 1;
-
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, nullptr, visibility, perceptibility, connectionState);
-
-    auto pretoken = record->GetToken();
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, pretoken, visibility, perceptibility, connectionState);
-
-    const int32_t visibility_1 = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, token, visibility_1, perceptibility, connectionState);
-
-    const int32_t perceptibility_1 = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, token, visibility_1, perceptibility_1, connectionState);
-
-    const int32_t connectionState_1 = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, token, visibility_1, perceptibility_1, connectionState_1);
-}
-
-/*
- * Feature: AppScheduler
- * Function: AbilityBehaviorAnalysis
- * SubFunction: NA
- * FunctionPoints: AppScheduler AbilityBehaviorAnalysis
- * EnvConditions:NA
- * CaseDescription: Verify appmgrclient_ Is nullptr causes AbilityBehaviorAnalysis to fail
- */
-HWTEST_F(AppSchedulerTest, AppScheduler_oprator_015, TestSize.Level1)
-{
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
-
-    std::string deviceName = "device";
-    std::string abilityName = "FirstAbility";
-    std::string appName = "FirstApp";
-    std::string bundleName = "com.ix.First";
-    auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
-    auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
-    auto token = record->GetToken();
-    ASSERT_NE(token, nullptr);
-    const int32_t visibility = 0;
-    const int32_t perceptibility = 1;
-    const int32_t connectionState = 1;
-
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, nullptr, visibility, perceptibility, connectionState);
-}
-
-/*
- * Feature: AppScheduler
  * Function: KillProcessByAbilityToken
  * SubFunction: NA
  * FunctionPoints: AppScheduler KillProcessByAbilityToken
@@ -973,7 +901,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_FinishUserTest_002, TestSize.Level1)
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_UpdateConfiguration_001, TestSize.Level1)
 {
-    EXPECT_CALL(*clientMock_, UpdateConfiguration(_)).Times(1)
+    EXPECT_CALL(*clientMock_, UpdateConfiguration(_, _)).Times(1)
         .WillOnce(Return(AppMgrResultCode::RESULT_OK));
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     AppExecFwk::Configuration config;
@@ -991,7 +919,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_UpdateConfiguration_001, TestSize.Level1
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_UpdateConfiguration_002, TestSize.Level1)
 {
-    EXPECT_CALL(*clientMock_, UpdateConfiguration(_)).Times(1)
+    EXPECT_CALL(*clientMock_, UpdateConfiguration(_, _)).Times(1)
         .WillOnce(Return(AppMgrResultCode::ERROR_SERVICE_NOT_READY));
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     AppExecFwk::Configuration config;
@@ -1074,50 +1002,6 @@ HWTEST_F(AppSchedulerTest, AppScheduler_GetAbilityRecordsByProcessID_002, TestSi
     clientMock_.reset();
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_.reset();
 }
-
-/*
- * Feature: AppScheduler
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AppScheduler BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify BlockAppService
- */
-#ifdef ABILITY_COMMAND_FOR_TEST
-HWTEST_F(AppSchedulerTest, AppScheduler_BlockAppService_001, TestSize.Level1)
-{
-    clientMock_ = std::make_unique<AppMgrClientMock>();
-    EXPECT_CALL(*clientMock_, BlockAppService()).Times(1)
-        .WillOnce(Return(AppMgrResultCode::ERROR_SERVICE_NOT_READY));
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
-    int res = DelayedSingleton<AppScheduler>::GetInstance()->BlockAppService();
-    EXPECT_EQ(res, INNER_ERR);
-    clientMock_.reset();
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_.reset();
-}
-#endif
-
-/*
- * Feature: AppScheduler
- * Function: BlockAppService
- * SubFunction: NA
- * FunctionPoints: AppScheduler BlockAppService
- * EnvConditions: NA
- * CaseDescription: Verify BlockAppService
- */
-#ifdef ABILITY_COMMAND_FOR_TEST
-HWTEST_F(AppSchedulerTest, AppScheduler_BlockAppService_002, TestSize.Level1)
-{
-    clientMock_ = std::make_unique<AppMgrClientMock>();
-    EXPECT_CALL(*clientMock_, BlockAppService()).Times(1)
-        .WillOnce(Return(AppMgrResultCode::ERROR_SERVICE_NOT_READY));
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
-    int res = DelayedSingleton<AppScheduler>::GetInstance()->BlockAppService();
-    EXPECT_EQ(res, INNER_ERR);
-    clientMock_.reset();
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_.reset();
-}
-#endif
 
 /**
  * @tc.name: SetCurrentUserId_001

@@ -48,13 +48,13 @@ void AmsMgrStub::CreateMemberFuncMap() {}
 int AmsMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (code != static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "AmsMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code,
+        TAG_LOGI(AAFwkTag::APPMGR, "OnReceived, code: %{public}u, flags: %{public}d", code,
             option.GetFlags());
     }
     std::u16string descriptor = AmsMgrStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::APPMGR, "local descriptor is unequal to remote");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid descriptor");
         return ERR_INVALID_STATE;
     }
     return OnRemoteRequestInner(code, data, reply, option);
@@ -97,8 +97,6 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data
             return HandleUpdateExtensionState(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::REGISTER_APP_STATE_CALLBACK):
             return HandleRegisterAppStateCallback(data, reply);
-        case static_cast<uint32_t>(IAmsMgr::Message::ABILITY_BEHAVIOR_ANALYSIS):
-            return HandleAbilityBehaviorAnalysis(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PEOCESS_BY_ABILITY_TOKEN):
             return HandleKillProcessByAbilityToken(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_BY_USERID):
@@ -139,6 +137,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &dat
             return HandleUpdateApplicationInfoInstalled(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::SET_CURRENT_USER_ID):
             return HandleSetCurrentUserId(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::ENABLE_START_PROCESS_FLAG_BY_USER_ID):
+            return HandleSetEnableStartProcessFlagByUserId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID):
             return HandleGetBundleNameByPid(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::REGISTER_APP_DEBUG_LISTENER):
@@ -213,6 +213,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleKillProcessesByAccessTokenId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_ATTACHED):
             return HandleIsProcessAttached(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_APP_KILLING):
+            return HandleIsAppKilling(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -285,22 +287,6 @@ ErrCode AmsMgrStub::HandleRegisterAppStateCallback(MessageParcel &data, MessageP
     return NO_ERROR;
 }
 
-ErrCode AmsMgrStub::HandleAbilityBehaviorAnalysis(MessageParcel &data, MessageParcel &reply)
-{
-    HITRACE_METER(HITRACE_TAG_APP);
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    sptr<IRemoteObject> preToke = nullptr;
-    if (data.ReadBool()) {
-        preToke = data.ReadRemoteObject();
-    }
-    int32_t visibility = data.ReadInt32();
-    int32_t perceptibility = data.ReadInt32();
-    int32_t connectionState = data.ReadInt32();
-
-    AbilityBehaviorAnalysis(token, preToke, visibility, perceptibility, connectionState);
-    return NO_ERROR;
-}
-
 ErrCode AmsMgrStub::HandleKillProcessByAbilityToken(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
@@ -324,7 +310,7 @@ ErrCode AmsMgrStub::HandleKillProcessesByPids(MessageParcel &data, MessageParcel
     HITRACE_METER(HITRACE_TAG_APP);
     auto size = data.ReadUint32();
     if (size == 0 || size > MAX_KILL_PROCESS_PID_COUNT) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size");
         return ERR_INVALID_VALUE;
     }
     std::vector<int32_t> pids;
@@ -550,6 +536,14 @@ int32_t AmsMgrStub::HandleSetCurrentUserId(MessageParcel &data, MessageParcel &r
     return NO_ERROR;
 }
 
+int32_t AmsMgrStub::HandleSetEnableStartProcessFlagByUserId(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = data.ReadInt32();
+    bool enableStartProcess = data.ReadBool();
+    SetEnableStartProcessFlagByUserId(userId, enableStartProcess);
+    return NO_ERROR;
+}
+
 int32_t AmsMgrStub::HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply)
 {
     int32_t pid = data.ReadInt32();
@@ -708,7 +702,8 @@ int32_t AmsMgrStub::HandleSetKeepAliveEnableState(MessageParcel &data, MessagePa
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto bundleName = data.ReadString();
     auto enable = data.ReadBool();
-    SetKeepAliveEnableState(bundleName, enable);
+    auto uid = data.ReadInt32();
+    SetKeepAliveEnableState(bundleName, enable, uid);
     return NO_ERROR;
 }
 
@@ -843,6 +838,18 @@ int32_t AmsMgrStub::HandleIsProcessAttached(MessageParcel &data, MessageParcel &
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     auto isAttached = IsProcessAttached(token);
     if (!reply.WriteBool(isAttached)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsAppKilling(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto isAppKilling = IsAppKilling(token);
+    if (!reply.WriteBool(isAppKilling)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
     }

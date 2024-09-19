@@ -27,7 +27,7 @@ namespace OHOS {
 namespace AbilityDelegatorJs {
 using namespace OHOS::AbilityRuntime;
 namespace {
-static thread_local std::unique_ptr<NativeReference> reference;
+thread_local std::unique_ptr<NativeReference> reference;
 
 class JsAbilityDelegatorRegistry {
 public:

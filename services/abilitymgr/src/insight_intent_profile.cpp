@@ -81,14 +81,12 @@ struct InsightIntentProfileInfoVec {
 void from_json(const nlohmann::json &jsonObject, UIAbilityProfileInfo &info)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ABILITY,
         info.abilityName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
     AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_EXECUTE_MODE,
@@ -102,85 +100,69 @@ void from_json(const nlohmann::json &jsonObject, UIAbilityProfileInfo &info)
 void from_json(const nlohmann::json &jsonObject, UIExtensionProfileInfo &info)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ABILITY,
         info.abilityName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
 }
 
 void from_json(const nlohmann::json &jsonObject, ServiceExtensionProfileInfo &info)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ABILITY,
         info.abilityName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
 }
 
 void from_json(const nlohmann::json &jsonObject, FormProfileInfo &info)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ABILITY,
         info.abilityName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_FORM_NAME,
         info.formName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
 }
 
 void from_json(const nlohmann::json &jsonObject, InsightIntentProfileInfo &insightIntentInfo)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_NAME,
         insightIntentInfo.intentName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_DOMAIN,
         insightIntentInfo.intentDomain,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_VERSION,
         insightIntentInfo.intentVersion,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_SRC_ENTRY,
         insightIntentInfo.srcEntry,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
     AppExecFwk::GetValueIfFindKey<UIAbilityProfileInfo>(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_UI_ABILITY,
@@ -231,7 +213,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentProfileInfoVec &in
 bool TransformToInsightIntentInfo(const InsightIntentProfileInfo &insightIntent, InsightIntentInfo &info)
 {
     if (insightIntent.intentName.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "Intent name is empty");
+        TAG_LOGE(AAFwkTag::INTENT, "empty intentName");
         return false;
     }
 
@@ -278,7 +260,7 @@ bool InsightIntentProfile::TransformTo(const std::string &profileStr, std::vecto
     TAG_LOGD(AAFwkTag::INTENT, "called");
     auto jsonObject = nlohmann::json::parse(profileStr, nullptr, false);
     if (jsonObject.is_discarded()) {
-        TAG_LOGE(AAFwkTag::INTENT, "jsonObject is discarded");
+        TAG_LOGE(AAFwkTag::INTENT, "discarded jsonObject");
         return false;
     }
 
@@ -288,7 +270,7 @@ bool InsightIntentProfile::TransformTo(const std::string &profileStr, std::vecto
         g_parseResult = ERR_OK;
         profileInfos = jsonObject.get<InsightIntentProfileInfoVec>();
         if (g_parseResult != ERR_OK) {
-            TAG_LOGE(AAFwkTag::INTENT, "g_parseResult is %{public}d", g_parseResult);
+            TAG_LOGE(AAFwkTag::INTENT, "g_parseResult :%{public}d", g_parseResult);
             int32_t ret = g_parseResult;
             // need recover parse result to ERR_OK
             g_parseResult = ERR_OK;

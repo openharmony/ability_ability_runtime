@@ -66,22 +66,22 @@ ErrCode AbilityAutoStartupClient::Connect()
     }
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Get registry failed");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null systemManager");
         return GET_ABILITY_SERVICE_FAILED;
     }
     sptr<IRemoteObject> remoteObj = systemManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     if (remoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Connect AbilityManagerService failed");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null remoteObj");
         return GET_ABILITY_SERVICE_FAILED;
     }
 
     deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new AbilityMgrDeathRecipient());
     if (deathRecipient_ == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Create AbilityMgrDeathRecipient failed");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null deathRecipient");
         return GET_ABILITY_SERVICE_FAILED;
     }
     if ((remoteObj->IsProxyObject()) && (!remoteObj->AddDeathRecipient(deathRecipient_))) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Add death recipient to AbilityManagerService failed");
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "AddDeathRecipient fail");
         return GET_ABILITY_SERVICE_FAILED;
     }
 
@@ -116,7 +116,7 @@ ErrCode AbilityAutoStartupClient::QueryAllAutoStartupApplications(std::vector<Au
 
 void AbilityAutoStartupClient::AbilityMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    TAG_LOGI(AAFwkTag::AUTO_STARTUP, "Handle remote died");
+    TAG_LOGI(AAFwkTag::AUTO_STARTUP, "remote died");
     AbilityAutoStartupClient::GetInstance()->ResetProxy(remote);
 }
 

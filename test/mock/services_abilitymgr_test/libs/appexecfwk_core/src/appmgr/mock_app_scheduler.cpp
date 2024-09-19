@@ -68,12 +68,6 @@ void AppScheduler::MoveToBackground(const sptr<IRemoteObject>& token)
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::MoveToBackground()");
 }
 
-void AppScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& preToken,
-    const int32_t visibility, const int32_t perceptibility, const int32_t connectionState)
-{
-    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::AbilityBehaviorAnalysis()");
-}
-
 void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject>& token)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::KillProcessByAbilityToken()");

@@ -30,6 +30,7 @@ namespace AAFwk {
 namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
+constexpr const char* NET_WORK_ID_MARK = "?networkid=";
 }
 
 std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::ConnectManagerHelper()
@@ -123,7 +124,7 @@ bool UPMSUtils::IsFoundationCall()
     TAG_LOGD(AAFwkTag::ABILITYMGR, "callerTokenId is %{public}u", callerTokenId);
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Is not native call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "not native call");
         return false;
     }
     Security::AccessToken::NativeTokenInfo nativeInfo;
@@ -225,7 +226,7 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
     TAG_LOGD(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d", bundleName.c_str(), appIndex);
     auto bms = ConnectManagerHelper();
     if (bms == nullptr) {
-        TAG_LOGW(AAFwkTag::URIPERMMGR, "The bundleMgrHelper null");
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "null bms");
         return GET_BUNDLE_MANAGER_SERVICE_FAILED;
     }
     AppExecFwk::BundleInfo bundleInfo;
@@ -254,6 +255,11 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
     }
     tokenId = bundleInfo.applicationInfo.accessTokenId;
     return ERR_OK;
+}
+
+bool UPMSUtils::IsDocsCloudUri(Uri &uri)
+{
+    return (uri.GetAuthority() == "docs" && uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
 }
 
 std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::bundleMgrHelper_ = nullptr;

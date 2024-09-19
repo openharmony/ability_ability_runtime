@@ -286,6 +286,23 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Leve
 }
 
 /**
+ * @tc.name: AppMgrClient_GetAllChildrenProcesses_001
+ * @tc.desc: get all children processes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllChildrenProcesses_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllChildrenProcesses_001 start");
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    std::vector<ChildProcessInfo> info;
+    auto result = appMgrClient->GetAllChildrenProcesses(info);
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    TAG_LOGI(AAFwkTag::TEST, "GetAllChildrenProcesses_001 end");
+}
+
+/**
  * @tc.name: AppMgrClient_GetRenderProcessTerminationStatus_001
  * @tc.desc: can not get render process termination status with error pid.
  * @tc.type: FUNC
@@ -604,25 +621,6 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartRenderProcess_001, TestSize.Level0)
     int ret = appMgrClient->StartRenderProcess(renderParam, INIT_VALUE, ERROR_PID, INIT_VALUE, renderPid);
     EXPECT_EQ(ret, ERROR_STATE);
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-/**
- * @tc.name: AppMgrClient_BlockAppService_001
- * @tc.desc: block app service.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_BlockAppService_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-
-    auto result = appMgrClient->ConnectAppMgrService();
-    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
-
-    int ret = appMgrClient->BlockAppService();
-    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
-}
-#endif
 
 /**
  * @tc.name: AppMgrClient_SetCurrentUserId_001
@@ -1366,7 +1364,7 @@ HWTEST_F(AppMgrClientTest, SetKeepAliveEnableState_001, TestSize.Level0)
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::string bundleName = "com.ix.First.Test";
     bool enable = false;
-    appMgrClient->SetKeepAliveEnableState(bundleName, enable);
+    appMgrClient->SetKeepAliveEnableState(bundleName, enable, 0);
     EXPECT_NE(appMgrClient, nullptr);
 }
 

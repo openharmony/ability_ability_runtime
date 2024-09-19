@@ -60,13 +60,6 @@ AppMgrResultCode AppMgrClient::RegisterAppStateCallback(const sptr<IAppStateCall
     return AppMgrResultCode::RESULT_OK;
 }
 
-AppMgrResultCode AppMgrClient::AbilityBehaviorAnalysis(const sptr<IRemoteObject>& token,
-    const sptr<IRemoteObject>& preToken, const int32_t visibility, const int32_t perceptibility,
-    const int32_t connectionState)
-{
-    return AppMgrResultCode::RESULT_OK;
-}
-
 AppMgrResultCode AppMgrClient::KillProcessByAbilityToken(const sptr<IRemoteObject>& token)
 {
     return AppMgrResultCode::RESULT_OK;
@@ -78,7 +71,7 @@ AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId)
 }
 
 AppMgrResultCode AppMgrClient::KillApplication(
-    const std::string& bundleName, const bool clearpagestack = false)
+    const std::string& bundleName, const bool clearPageStack = false)
 {
     return AppMgrResultCode::RESULT_OK;
 }

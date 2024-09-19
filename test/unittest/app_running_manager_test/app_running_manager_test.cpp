@@ -227,6 +227,22 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAppRunningRecordByChildProc
 }
 
 /**
+ * @tc.name: AppRunningManager_IsChildProcessReachLimit_0100
+ * @tc.desc: Test IsChildProcessReachLimit works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_IsChildProcessReachLimit_0100, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "AppRunningManager_IsChildProcessReachLimit_0100 called.");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    appRunningManager->IsChildProcessReachLimit(1);
+    auto record = appRunningManager->GetAppRunningRecordByChildProcessPid(123);
+    EXPECT_EQ(record, nullptr);
+}
+
+/**
  * @tc.name: AppRunningManager_UpdateConfiguration_0100
  * @tc.desc: Test UpdateConfiguration works
  * @tc.type: FUNC
@@ -686,6 +702,52 @@ HWTEST_F(AppRunningManagerTest, IsAppProcessesAllCached_0100, TestSize.Level1)
 
     appRunningManager->appRunningRecordMap_.insert(make_pair(recordId2, appRunningRecord2));
     EXPECT_EQ(appRunningManager->IsAppProcessesAllCached(appInfo->bundleName, appInfo->uid, cachedSet), false);
+}
+
+/**
+ * @tc.name: CheckAppCloneRunningRecordIsExistByBundleName_0100
+ * @tc.desc: MultiProcess application cache check test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, CheckAppCloneRunningRecordIsExistByBundleName_0100, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+    
+    std::string bundleName = "bundleName";
+    int32_t appCloneIndex = 1;
+    bool isRunning = true;
+    int32_t res = appRunningManager->
+        CheckAppCloneRunningRecordIsExistByBundleName(bundleName, appCloneIndex, isRunning);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: GetAllAppRunningRecordCountByBundleName_0100
+ * @tc.desc: MultiProcess application cache check test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, GetAllAppRunningRecordCountByBundleName_0100, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+    
+    std::string bundleName = "bundleName";
+    EXPECT_EQ(appRunningManager->GetAllAppRunningRecordCountByBundleName(bundleName), 0);
+}
+
+/**
+ * @tc.name: ProcessUpdateApplicationInfoInstalled_0100
+ * @tc.desc: MultiProcess application cache check test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, ProcessUpdateApplicationInfoInstalled_0100, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+    
+    ApplicationInfo appInfo;
+    EXPECT_EQ(appRunningManager->ProcessUpdateApplicationInfoInstalled(appInfo), 0);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -336,7 +336,7 @@ public:
     virtual void NotifyMemoryLevel(int32_t level);
 
     bool IsStageBasedModel() const;
-    
+
     /**
      * @brief Provide operating system ShareData information to the observer
      *
@@ -500,7 +500,6 @@ private:
         STOP,
     } Action;
 
-    std::shared_ptr<AbilityLifecycleCallbacks> abilityLifecycleCallbacks_;
     std::shared_ptr<ApplicationImpl> applicationImpl_;
     std::shared_ptr<ContextDeal> contextDeal_;
     bool hasSaveData_ = false;

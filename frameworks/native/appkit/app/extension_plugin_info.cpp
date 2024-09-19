@@ -164,5 +164,5 @@ bool ExtensionPluginInfo::CheckFileType(const std::string& fileName, const std::
     std::string suffixStr = fileName.substr(position);
     return LowerStr(suffixStr) == extensionName;
 }
-}
-}
+} // namespace AbilityRuntime
+} // namespace OHOS

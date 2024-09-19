@@ -199,6 +199,22 @@ void EventReport::LogStartStandardEvent(const std::string &name, HiSysEventType 
         EVENT_KEY_ABILITY_NUMBER, eventInfo.abilityNumber);
 }
 
+void EventReport::LogStartAbilityByAppLinking(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+{
+    TAG_LOGD(AAFwkTag::DEFAULT, "EventInfo, bundleName: %{public}s, callerBundleName: %{public}s, uri: %{public}s",
+        eventInfo.bundleName.c_str(), eventInfo.callerBundleName.c_str(), eventInfo.uri.c_str());
+    auto ret = HiSysEventWrite(
+        HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
+        EVENT_KEY_URI, eventInfo.uri);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "Write event fail: %{public}s, ret %{public}d", name.c_str(), ret);
+    }
+}
+
 void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -231,6 +247,9 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
             break;
         case EventName::START_STANDARD_ABILITIES:
             LogStartStandardEvent(name, type, eventInfo);
+            break;
+        case EventName::START_ABILITY_BY_APP_LINKING:
+            LogStartAbilityByAppLinking(name, type, eventInfo);
             break;
         default:
             break;
@@ -338,7 +357,7 @@ void EventReport::SendKeyEvent(const EventName &eventName, HiSysEventType type, 
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
         return;
     }
-    TAG_LOGI(AAFwkTag::DEFAULT, "name is %{public}s", name.c_str());
+    TAG_LOGI(AAFwkTag::DEFAULT, "name: %{public}s", name.c_str());
     switch (eventName) {
         case EventName::FA_SHOW_ON_LOCK:
         case EventName::START_PRIVATE_ABILITY:
@@ -409,7 +428,7 @@ void EventReport::SendAppForegroundEvent(const EventName &eventName, const Event
         EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
         EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
     if (ret != 0) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Write event fail: %{public}s, ret %{public}d", name.c_str(), ret);
+        TAG_LOGE(AAFwkTag::DEFAULT, "fail: %{public}s, ret %{public}d", name.c_str(), ret);
     }
 }
 
@@ -432,7 +451,7 @@ void EventReport::SendAppBackgroundEvent(const EventName &eventName, const Event
         EVENT_KEY_BUNDLE_TYPE, eventInfo.bundleType,
         EVENT_KEY_PROCESS_TYPE, eventInfo.processType);
     if (ret != 0) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Write event fail: %{public}s, ret %{public}d", name.c_str(), ret);
+        TAG_LOGE(AAFwkTag::DEFAULT, "fail: %{public}s, ret %{public}d", name.c_str(), ret);
     }
 }
 
@@ -489,7 +508,7 @@ void EventReport::SendProcessStartFailedEvent(const EventName &eventName, const 
         HiSysEventWrite(
             HiSysEvent::Domain::AAFWK,
             name,
-            HiSysEventType::BEHAVIOR,
+            HiSysEventType::FAULT,
             EVENT_KEY_STARTUP_TIME, eventInfo.time,
             EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
             EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName,
@@ -505,7 +524,7 @@ void EventReport::SendProcessStartFailedEvent(const EventName &eventName, const 
         HiSysEventWrite(
             HiSysEvent::Domain::AAFWK,
             name,
-            HiSysEventType::BEHAVIOR,
+            HiSysEventType::FAULT,
             EVENT_KEY_STARTUP_TIME, eventInfo.time,
             EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
             EVENT_KEY_STARTUP_EXTENSION_TYPE, eventInfo.extensionType,
@@ -624,6 +643,23 @@ void EventReport::SendDisconnectServiceEvent(const EventName &eventName, const E
         EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.callerProcessName);
 }
 
+void EventReport::SendStartAbilityOtherExtensionEvent(const EventName &eventName, const EventInfo &eventInfo)
+{
+    std::string name = ConvertEventName(eventName);
+    if (name == INVALID_EVENT_NAME) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
+        return;
+    }
+    HiSysEventWrite(HiSysEvent::Domain::AAFWK,
+        name,
+        HiSysEventType::BEHAVIOR,
+        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
+        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
+        EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType,
+        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+}
+
 std::string EventReport::ConvertEventName(const EventName &eventName)
 {
     const char* eventNames[] = {
@@ -634,9 +670,10 @@ std::string EventReport::ConvertEventName(const EventName &eventName)
         // ability behavior event
         "START_ABILITY", "TERMINATE_ABILITY", "CLOSE_ABILITY",
         "ABILITY_ONFOREGROUND", "ABILITY_ONBACKGROUND", "ABILITY_ONACTIVE", "ABILITY_ONINACTIVE",
+        "START_ABILITY_BY_APP_LINKING",
 
         // serviceExtensionAbility behavior event
-        "START_SERVICE", "STOP_SERVICE", "CONNECT_SERVICE", "DISCONNECT_SERVICE",
+        "START_SERVICE", "STOP_SERVICE", "CONNECT_SERVICE", "DISCONNECT_SERVICE", "START_ABILITY_OTHER_EXTENSION",
 
         // app behavior event
         "APP_ATTACH", "APP_LAUNCH", "APP_FOREGROUND", "APP_BACKGROUND", "APP_TERMINATE",

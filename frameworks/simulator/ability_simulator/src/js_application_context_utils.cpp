@@ -291,7 +291,7 @@ napi_value JsApplicationContextUtils::OnGetApplicationContext(napi_env env, Napi
     napi_value value = CreateJsApplicationContext(env, context_.lock());
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITY_SIM, "invalid systemModule");
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "null systemModule");
         return CreateJsUndefined(env);
     }
     return systemModule->GetNapiValue();

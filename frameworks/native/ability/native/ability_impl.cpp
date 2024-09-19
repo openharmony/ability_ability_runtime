@@ -62,7 +62,6 @@ void AbilityImpl::Init(const std::shared_ptr<OHOSApplication> &application,
 #endif
     ability_->Init(record->GetAbilityInfo(), application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
-    abilityLifecycleCallbacks_ = application;
     TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
@@ -70,8 +69,8 @@ void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 #ifdef SUPPORT_SCREEN
@@ -108,8 +107,8 @@ void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 void AbilityImpl::Stop()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "nullability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "nullability_");
         return;
     }
 
@@ -120,8 +119,8 @@ void AbilityImpl::Stop()
 void AbilityImpl::Stop(bool &isAsyncCallback)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         isAsyncCallback = false;
         return;
     }
@@ -155,8 +154,8 @@ void AbilityImpl::Stop(bool &isAsyncCallback)
 
 void AbilityImpl::StopCallback()
 {
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 #ifdef SUPPORT_SCREEN
@@ -175,8 +174,8 @@ void AbilityImpl::StopCallback()
 void AbilityImpl::Active()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 
@@ -194,8 +193,8 @@ void AbilityImpl::Active()
 void AbilityImpl::Inactive()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 
@@ -229,9 +228,9 @@ bool AbilityImpl::IsStageBasedModel() const
 void AbilityImpl::DispatchSaveAbilityState()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || abilityLifecycleCallbacks_ == nullptr) {
+    if (ability_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY,
-            "null ability_/abilityLifecycleCallbacks_");
+            "null ability_");
         return;
     }
 
@@ -573,7 +572,7 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
                 "%{public}s failed", focuseMode ? "AfterFocused" : "AfterUnFocused");
             return;
         }
-        TAG_LOGI(AAFwkTag::ABILITY, "isStageBasedModel: %{public}d",
+        TAG_LOGI(AAFwkTag::ABILITY, "isStageBasedModel:%{public}d",
             impl->ability_->GetAbilityInfo()->isStageBasedModel);
 
         if (impl->ability_->GetAbilityInfo()->isStageBasedModel) {
@@ -641,7 +640,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
     }
 
     if (needNotifyAMS) {
-        TAG_LOGI(AAFwkTag::ABILITY, "lifecycle: window notify ams");
+        TAG_LOGI(AAFwkTag::ABILITY, "window notify ams");
         PacMap restoreData;
         auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
             AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW, restoreData);
@@ -664,7 +663,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         "; AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
-    TAG_LOGI(AAFwkTag::ABILITY, "lifecycle: window after background");
+    TAG_LOGI(AAFwkTag::ABILITY, "window after background");
     PacMap restoreData;
     auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
         AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);
@@ -730,8 +729,8 @@ void AbilityImpl::Foreground(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 
@@ -761,8 +760,8 @@ void AbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
 void AbilityImpl::Background()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
     ability_->OnLeaveForeground();

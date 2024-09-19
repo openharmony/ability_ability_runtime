@@ -36,6 +36,46 @@ CallContainer::~CallContainer()
     callRecordMap_.clear();
 }
 
+std::shared_ptr<CallRecord> CallContainer::FindCallRecordMap(sptr<IRemoteObject> object) const
+{
+    std::lock_guard lock(callRecordMapLock_);
+    auto record = callRecordMap_.find(object);
+    if (record != callRecordMap_.end()) {
+        return record->second;
+    }
+    return nullptr;
+}
+
+std::shared_ptr<CallRecord> CallContainer::RemoveCallRecordMap(sptr<IRemoteObject> object)
+{
+    std::shared_ptr<CallRecord> result;
+    std::lock_guard lock(callRecordMapLock_);
+    auto record = callRecordMap_.find(object);
+    if (record != callRecordMap_.end()) {
+        result = record->second;
+        callRecordMap_.erase(record);
+    }
+    return result;
+}
+
+void CallContainer::InsertCallRecordMap(sptr<IRemoteObject> object, std::shared_ptr<CallRecord> callRecord)
+{
+    std::lock_guard lock(callRecordMapLock_);
+    callRecordMap_.emplace(object, callRecord);
+}
+
+CallContainer::CallMapType CallContainer::CopyCallRecordMap() const
+{
+    std::lock_guard lock(callRecordMapLock_);
+    return callRecordMap_;
+}
+
+bool CallContainer::EmptyCallRecordMap()
+{
+    std::lock_guard lock(callRecordMapLock_);
+    return callRecordMap_.empty();
+}
+
 void CallContainer::AddCallRecord(const sptr<IAbilityConnection> & connect,
     const std::shared_ptr<CallRecord>& callRecord)
 {
@@ -43,15 +83,14 @@ void CallContainer::AddCallRecord(const sptr<IAbilityConnection> & connect,
     CHECK_POINTER(connect);
     CHECK_POINTER(connect->AsObject());
 
-    auto iter = callRecordMap_.find(connect->AsObject());
-    if (iter != callRecordMap_.end()) {
+    auto record = RemoveCallRecordMap(connect->AsObject());
+    if (record != nullptr) {
         RemoveConnectDeathRecipient(connect);
-        callRecordMap_.erase(callRecordMap_.find(connect->AsObject()));
     }
 
     AddConnectDeathRecipient(connect);
     callRecord->SetConCallBack(connect);
-    callRecordMap_.emplace(connect->AsObject(), callRecord);
+    InsertCallRecordMap(connect->AsObject(), callRecord);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Add call record to callcontainer, target: %{public}s",
         callRecord->GetTargetServiceName().GetURI().c_str());
@@ -62,12 +101,8 @@ std::shared_ptr<CallRecord> CallContainer::GetCallRecord(const sptr<IAbilityConn
     CHECK_POINTER_AND_RETURN(connect, nullptr);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), nullptr);
 
-    auto mapIter = callRecordMap_.find(connect->AsObject());
-    if (mapIter != callRecordMap_.end()) {
-        return mapIter->second;
-    }
-
-    return nullptr;
+    auto record = FindCallRecordMap(connect->AsObject());
+    return record;
 }
 
 bool CallContainer::RemoveCallRecord(const sptr<IAbilityConnection> & connect)
@@ -76,39 +111,30 @@ bool CallContainer::RemoveCallRecord(const sptr<IAbilityConnection> & connect)
     CHECK_POINTER_AND_RETURN(connect, false);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), false);
 
-    auto iter = callRecordMap_.find(connect->AsObject());
-    if (iter != callRecordMap_.end()) {
-        auto callrecord = iter->second;
-        if (callrecord) {
-            callrecord->SchedulerDisconnectDone();
-        }
+    auto record = RemoveCallRecordMap(connect->AsObject());
+    if (record != nullptr) {
+        record->SchedulerDisconnectDone();
         RemoveConnectDeathRecipient(connect);
-        callRecordMap_.erase(callRecordMap_.find(connect->AsObject()));
         TAG_LOGD(AAFwkTag::ABILITYMGR, "remove call record is success.");
         return true;
     }
 
-    if (callRecordMap_.empty()) {
+    if (EmptyCallRecordMap()) {
         // notify soft resouce service.
         TAG_LOGD(AAFwkTag::ABILITYMGR, "this ability has no callrecord.");
     }
 
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "remove call record is not exist.");
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "remove call record not exist");
     return false;
 }
 
 void CallContainer::OnConnectionDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "Call back is died.");
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "call back died");
     auto object = remote.promote();
     CHECK_POINTER(object);
 
-    std::shared_ptr<CallRecord> callRecord = nullptr;
-    auto mapIter = callRecordMap_.find(object);
-    if (mapIter != callRecordMap_.end()) {
-        callRecord = mapIter->second;
-    }
-
+    std::shared_ptr<CallRecord> callRecord = FindCallRecordMap(object);
     auto abilityManagerService = DelayedSingleton<AbilityManagerService>::GetInstance();
     CHECK_POINTER(abilityManagerService);
     auto handler = abilityManagerService->GetTaskHandler();
@@ -122,27 +148,24 @@ void CallContainer::OnConnectionDied(const wptr<IRemoteObject> &remote)
 bool CallContainer::CallRequestDone(const sptr<IRemoteObject> &callStub)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "start");
-
     CHECK_POINTER_AND_RETURN(callStub, false);
-
-    std::for_each(callRecordMap_.begin(),
-        callRecordMap_.end(),
-        [&callStub](CallMapType::reference service) {
-            std::shared_ptr<CallRecord> callRecord = service.second;
-            if (callRecord && callRecord->IsCallState(CallState::REQUESTING)) {
-                callRecord->SetCallStub(callStub);
-                callRecord->SchedulerConnectDone();
-            }
-        });
-
+    CallMapType copyCallRecordMap = CopyCallRecordMap();
+    for (const auto &iter : copyCallRecordMap) {
+        std::shared_ptr<CallRecord> callRecord = iter.second;
+        if (callRecord && callRecord->IsCallState(CallState::REQUESTING)) {
+            callRecord->SetCallStub(callStub);
+            callRecord->SchedulerConnectDone();
+        }
+    }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "end");
     return true;
 }
 
 void CallContainer::Dump(std::vector<std::string> &info) const
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Dump call records.");
-    for (const auto &iter : callRecordMap_) {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "dump call records");
+    CallMapType copyCallRecordMap = CopyCallRecordMap();
+    for (const auto &iter : copyCallRecordMap) {
         auto callRecord = iter.second;
         if (callRecord) {
             callRecord->Dump(info);
@@ -152,7 +175,8 @@ void CallContainer::Dump(std::vector<std::string> &info) const
 
 bool CallContainer::IsNeedToCallRequest() const
 {
-    for (const auto &iter : callRecordMap_) {
+    CallMapType copyCallRecordMap = CopyCallRecordMap();
+    for (const auto &iter : copyCallRecordMap) {
         auto callRecord = iter.second;
         if (callRecord && !callRecord->IsCallState(CallState::REQUESTED)) {
             return true;
@@ -167,7 +191,7 @@ void CallContainer::AddConnectDeathRecipient(const sptr<IAbilityConnection> &con
     CHECK_POINTER(connect->AsObject());
     auto it = deathRecipientMap_.find(connect->AsObject());
     if (it != deathRecipientMap_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "This death recipient has been added.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "death recipient been added");
         return;
     } else {
         std::weak_ptr<CallContainer> thisWeakPtr(shared_from_this());
@@ -179,7 +203,7 @@ void CallContainer::AddConnectDeathRecipient(const sptr<IAbilityConnection> &con
                 }
             });
         if (!connect->AsObject()->AddDeathRecipient(deathRecipient)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "addDeathRecipient failed");
         }
         deathRecipientMap_.emplace(connect->AsObject(), deathRecipient);
     }
@@ -199,7 +223,7 @@ void CallContainer::RemoveConnectDeathRecipient(const sptr<IAbilityConnection> &
 
 bool CallContainer::IsExistConnection(const sptr<IAbilityConnection> &connect)
 {
-    return callRecordMap_.find(connect->AsObject()) != callRecordMap_.end();
+    return FindCallRecordMap(connect->AsObject()) != nullptr;
 }
 }  // namespace AAFwk
 }  // namesspace OHOS

@@ -356,13 +356,6 @@ public:
      */
     void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override;
 
-#ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * @brief Block ability.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int BlockAbility() override;
-#endif
     sptr<IRemoteObject> token_;
     std::shared_ptr<AbilityHandler> abilityHandler_ = nullptr;
     std::shared_ptr<EventRunner> runner_ = nullptr;

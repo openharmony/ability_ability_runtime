@@ -28,6 +28,7 @@
 #include "child_process_info.h"
 #include "child_process_request.h"
 #include "fault_data.h"
+#include "kia_interceptor_interface.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
@@ -178,6 +179,15 @@ public:
     virtual int GetAllRenderProcesses(std::vector<RenderProcessInfo> &info) = 0;
 
     /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info) = 0;
+
+    /**
      * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.
      * Obtains information about application processes that are running on the device.
      *
@@ -324,14 +334,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens) = 0;
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     *  Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int BlockAppService() = 0;
-    #endif
 
     /**
      * Prestart nwebspawn process.
@@ -373,7 +375,7 @@ public:
 
     virtual int32_t GetConfiguration(Configuration& config) = 0;
 
-    virtual int32_t UpdateConfiguration(const Configuration &config) = 0;
+    virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) = 0;
 
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) = 0;
 
@@ -639,6 +641,20 @@ public:
     virtual int32_t UnregisterRenderStateObserver(const sptr<IRenderStateObserver> &observer) = 0;
 
     /**
+     * Register KIA interceptor.
+     * @param interceptor KIA interceptor.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor) = 0;
+
+    /**
+     * Check if the given pid is a KIA process.
+     * @param pid process id.
+     * @return Returns true if it is a KIA process, false otherwise.
+     */
+    virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia) = 0;
+
+    /**
      * Update render state.
      * @param renderPid Render pid.
      * @param state foreground or background state.
@@ -697,6 +713,8 @@ public:
     }
 
     virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
+    
+    virtual int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) = 0;
 
     /**
      * Set application assertion pause state.

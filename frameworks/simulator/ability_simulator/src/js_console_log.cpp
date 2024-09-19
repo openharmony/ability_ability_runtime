@@ -56,7 +56,7 @@ std::string MakeLogContent(napi_env env, napi_callback_info info)
 
         auto buff = new (std::nothrow) char[bufferLen + 1];
         if (buff == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITY_SIM, "allocate buffer failed, size = %zu", bufferLen + 1);
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "failed, size=%zu", bufferLen + 1);
             break;
         }
 
