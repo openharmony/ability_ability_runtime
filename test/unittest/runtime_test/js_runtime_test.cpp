@@ -28,6 +28,7 @@
 #include "mock_js_runtime.h"
 #include "mock_jsnapi.h"
 #include "hilog_tag_wrapper.h"
+#include "js_runtime_lite.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1285,7 +1286,7 @@ HWTEST_F(JsRuntimeTest, GetPkgContextInfoListMap_0100, TestSize.Level0)
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
     std::map<std::string, std::vector<std::vector<std::string>>> ret;
     std::map<std::string, std::string> pkgAliasMap;
-    jsRuntime->GetPkgContextInfoListMap(modulePkgContentMap, ret, pkgAliasMap);
+    JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(modulePkgContentMap, ret, pkgAliasMap);
     std::string expectString = "library:packageName:library:bundleName:";
     expectString += "com.xxx.xxxx:moduleName:library:version:1.0.0:entryPath::isSO:false:";
     auto it = ret.find("entry");
@@ -1323,7 +1324,7 @@ HWTEST_F(JsRuntimeTest, GetPkgContextInfoListMap_0200, TestSize.Level0)
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
     std::map<std::string, std::vector<std::vector<std::string>>> ret;
     std::map<std::string, std::string> pkgAliasMap;
-    jsRuntime->GetPkgContextInfoListMap(modulePkgContentMap, ret, pkgAliasMap);
+    JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(modulePkgContentMap, ret, pkgAliasMap);
     std::string expectString = "library:packageName:library:bundleName:";
     expectString += "com.xxx.xxxx:moduleName:library:version:1.0.0:entryPath::isSO:false:";
     auto it = ret.find("entry");
@@ -1351,18 +1352,6 @@ HWTEST_F(JsRuntimeTest, CreateJsEnv_0100, TestSize.Level1)
     auto jsRuntime = std::make_unique<JsRuntime>();
     auto ret = jsRuntime->CreateJsEnv(options_);
     EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: GetChildOptions_0100
- * @tc.desc: JsRuntime test for GetChildOptions.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, GetChildOptions_0100, TestSize.Level1)
-{
-    auto jsRuntime = std::make_unique<JsRuntime>();
-    jsRuntime->GetChildOptions();
-    EXPECT_TRUE(jsRuntime != nullptr);
 }
 
 /**
