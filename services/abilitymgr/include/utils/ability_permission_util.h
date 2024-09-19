@@ -41,6 +41,8 @@ public:
     int32_t CheckMultiInstanceAndAppClone(Want &want, int32_t userId, int32_t appIndex,
         sptr<IRemoteObject> callerToken);
 
+    int32_t CheckMultiInstanceKeyForConnect(const AbilityRequest &abilityRequest);
+
 private:
     AbilityPermissionUtil() = default;
     ~AbilityPermissionUtil() = default;

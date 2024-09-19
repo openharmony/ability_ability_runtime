@@ -23,6 +23,7 @@
 #include "hitrace_meter.h"
 #include "insight_intent_execute_param.h"
 #include "ipc_skeleton.h"
+#include "multi_instance_utils.h"
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "start_ability_utils.h"
@@ -194,6 +195,35 @@ int32_t AbilityPermissionUtil::UpdateInstanceKey(Want &want, const std::string &
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid instanceKey");
     return ERR_INVALID_APP_INSTANCE_KEY;
+}
+
+int32_t AbilityPermissionUtil::CheckMultiInstanceKeyForConnect(const AbilityRequest &abilityRequest)
+{
+    auto instanceKey = MultiInstanceUtils::GetInstanceKey(abilityRequest.want);
+    if (instanceKey.empty()) {
+        return ERR_OK;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "instanceKey:%{public}s", instanceKey.c_str());
+    if (!AppUtils::GetInstance().IsSupportMultiInstance()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not support multi-instance");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    if (!MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not multi-instance app");
+        return ERR_MULTI_INSTANCE_NOT_SUPPORTED;
+    }
+    if (MultiInstanceUtils::IsDefaultInstanceKey(instanceKey)) {
+        return ERR_OK;
+    }
+    if (!MultiInstanceUtils::IsSupportedExtensionType(abilityRequest.abilityInfo.extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid extension type");
+        return ERR_INVALID_EXTENSION_TYPE;
+    }
+    if (!MultiInstanceUtils::IsInstanceKeyExist(abilityRequest.want.GetBundle(), instanceKey)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "key not found");
+        return ERR_INVALID_APP_INSTANCE_KEY;
+    }
+    return ERR_OK;
 }
 } // AAFwk
 } // OHOS
