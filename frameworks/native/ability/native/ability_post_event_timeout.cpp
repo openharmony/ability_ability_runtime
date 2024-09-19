@@ -46,7 +46,14 @@ void AbilityPostEventTimeout::TimingBegin(int64_t delaytime)
         return;
     }
 
-    auto task = [timeOutTask = shared_from_this()]() { timeOutTask->TimeOutProc(); };
+    auto task = [weak = weak_from_this()]() {
+        auto timeoutTask = weak.lock();
+        if (timeoutTask == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "timeout nullptr");
+            return;
+        }
+        timeoutTask->TimeOutProc();
+    };
     handler_->PostTask(task, task_, delaytime);
 }
 void AbilityPostEventTimeout::TimeEnd()

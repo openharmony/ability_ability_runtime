@@ -81,6 +81,7 @@ enum class EventName {
     STOP_SERVICE,
     CONNECT_SERVICE,
     DISCONNECT_SERVICE,
+    START_ABILITY_OTHER_EXTENSION,
 
     // app behavior event
     APP_ATTACH,
@@ -126,6 +127,7 @@ public:
     static void SendStopServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendConnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendDisconnectServiceEvent(const EventName &eventName, const EventInfo &eventInfo);
+    static void SendStartAbilityOtherExtensionEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendGrantUriPermissionEvent(const EventName &eventName, const EventInfo &eventInfo);
 
 private:

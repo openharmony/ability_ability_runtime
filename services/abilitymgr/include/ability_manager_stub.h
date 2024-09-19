@@ -70,6 +70,7 @@ public:
 private:
     int TerminateAbilityInner(MessageParcel &data, MessageParcel &reply);
     int BackToCallerInner(MessageParcel &data, MessageParcel &reply);
+    int32_t TerminateUIServiceExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
     int TerminateUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
     int CloseUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int SendResultToAbilityInner(MessageParcel &data, MessageParcel &reply);

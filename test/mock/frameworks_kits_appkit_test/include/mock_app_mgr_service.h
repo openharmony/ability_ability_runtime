@@ -88,6 +88,8 @@ public:
         const sptr<IRemoteObject> &callback));
     MOCK_METHOD2(GetSupportedProcessCachePids, int32_t(const std::string &bundleName,
         std::vector<int32_t> &pidList));
+    MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
+    MOCK_METHOD2(CheckIsKiaProcess, int32_t(pid_t pid, bool &isKia));
 
     void AttachApplication(const sptr<IRemoteObject>& app)
     {

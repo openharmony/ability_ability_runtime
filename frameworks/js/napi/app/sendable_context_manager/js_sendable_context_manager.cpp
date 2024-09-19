@@ -104,7 +104,24 @@ napi_value CreateJsBaseContextFromSendable(napi_env env, void* wrapped)
         return nullptr;
     }
 
-    return systemModule->GetNapiValue();
+    napi_value object = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, object, napi_object)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "check type failed");
+        return nullptr;
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<Context>(contextPtr);
+    auto status = napi_wrap(env, object, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr context");
+            delete static_cast<std::weak_ptr<Context> *>(data);
+        }, nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap context failed: %{public}d", status);
+        return nullptr;
+    }
+
+    return object;
 }
 
 napi_value CreateJsApplicationContextFromSendable(napi_env env, void* wrapped)
@@ -136,7 +153,24 @@ napi_value CreateJsApplicationContextFromSendable(napi_env env, void* wrapped)
         return nullptr;
     }
 
-    return systemModule->GetNapiValue();
+    napi_value object = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, object, napi_object)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "check type failed");
+        return nullptr;
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
+    auto status = napi_wrap(env, object, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr application context");
+            delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
+        }, nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap application context failed: %{public}d", status);
+        return nullptr;
+    }
+
+    return object;
 }
 
 napi_value CreateJsAbilityStageContextFromSendable(napi_env env, void* wrapped)
@@ -168,7 +202,24 @@ napi_value CreateJsAbilityStageContextFromSendable(napi_env env, void* wrapped)
         return nullptr;
     }
 
-    return systemModule->GetNapiValue();
+    napi_value object = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, object, napi_object)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "check type failed");
+        return nullptr;
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(abilitystageContext);
+    auto status = napi_wrap(env, object, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr ability stage context");
+            delete static_cast<std::weak_ptr<AbilityStageContext> *>(data);
+        }, nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap ability stage context failed: %{public}d", status);
+        return nullptr;
+    }
+
+    return object;
 }
 
 napi_value CreateJsUIAbilityContextFromSendable(napi_env env, void* wrapped)
@@ -200,7 +251,24 @@ napi_value CreateJsUIAbilityContextFromSendable(napi_env env, void* wrapped)
         return nullptr;
     }
 
-    return systemModule->GetNapiValue();
+    napi_value object = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, object, napi_object)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "check type failed");
+        return nullptr;
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(uiAbilityContext);
+    auto status = napi_wrap(env, object, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr ui ability context");
+            delete static_cast<std::weak_ptr<AbilityContext> *>(data);
+        }, nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap ui ability context failed: %{public}d", status);
+        return nullptr;
+    }
+
+    return object;
 }
 
 class JsSendableContextManager {
