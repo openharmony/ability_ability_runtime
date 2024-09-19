@@ -2678,7 +2678,7 @@ int AbilityManagerService::RequestModalUIExtensionInner(Want want)
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Window Modal System Create UIExtension is called!");
     want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
     auto connection = std::make_shared<Rosen::ModalSystemUiExtension>();
-    return connection->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
+    return IN_PROCESS_CALL(connection->CreateModalUIExtension(want)) ? ERR_OK : INNER_ERR;
 }
 
 int AbilityManagerService::ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow)
@@ -2950,10 +2950,6 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     std::string extensionTypeStr = extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY);
     AppExecFwk::ExtensionAbilityType extensionType = extensionTypeStr.empty() ?
         AppExecFwk::ExtensionAbilityType::UI : AppExecFwk::ConvertToExtensionAbilityType(extensionTypeStr);
-    if (extensionType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Input extension ability type is invalid.");
-        return ERR_INVALID_VALUE;
-    }
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, userId);
     eventInfo.extensionType = static_cast<int32_t>(extensionType);
 

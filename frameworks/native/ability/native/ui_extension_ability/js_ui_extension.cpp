@@ -66,28 +66,14 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid context");
         return nullptr;
     }
-    auto screenModePtr = reinterpret_cast<std::weak_ptr<int32_t> *>(extValue)->lock();
-    if (screenModePtr == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid screenModePtr");
+    napi_value object = JsUIExtensionContext::CreateJsUIExtensionContext(env, ptr);
+    auto contextRef = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
+        &object, 1);
+    if (contextRef == nullptr) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "Failed to load module");
         return nullptr;
     }
-    napi_value contextObj = nullptr;
-    if (*screenModePtr == AAFwk::IDLE_SCREEN_MODE) {
-        auto uiExtObject = JsUIExtensionContext::CreateJsUIExtensionContext(env, ptr);
-        CHECK_POINTER_AND_RETURN(uiExtObject, nullptr);
-        auto contextRef = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
-            &uiExtObject, 1);
-        CHECK_POINTER_AND_RETURN(contextRef, nullptr);
-        contextObj = contextRef->GetNapiValue();
-    } else {
-        auto emUIObject = JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(env,
-            nullptr, ptr, *screenModePtr);
-        CHECK_POINTER_AND_RETURN(emUIObject, nullptr);
-        auto contextRef = JsRuntime::LoadSystemModuleByEngine(env, "application.EmbeddableUIAbilityContext",
-            &emUIObject, 1);
-        CHECK_POINTER_AND_RETURN(contextRef, nullptr);
-        contextObj = contextRef->GetNapiValue();
-    }
+    auto contextObj = contextRef->GetNapiValue();
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "load context error");
         return nullptr;
