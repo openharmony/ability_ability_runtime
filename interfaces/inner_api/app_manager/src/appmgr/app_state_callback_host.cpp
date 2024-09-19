@@ -72,7 +72,7 @@ void AppStateCallbackHost::OnAppStateChanged(const AppProcessData &)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
-void AppStateCallbackHost::NotifyAppPreCache(int32_t pid)
+void AppStateCallbackHost::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
@@ -176,6 +176,11 @@ int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, Messa
         TAG_LOGE(AAFwkTag::APPMGR, "pid is illegal");
         return ERR_INVALID_VALUE;
     }
+    int32_t userId = data.ReadInt32();
+    if (userId < 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "userId is illegal");
+        return ERR_INVALID_VALUE;
+    }    
     NotifyAppPreCache(pid);
     return NO_ERROR;
 }

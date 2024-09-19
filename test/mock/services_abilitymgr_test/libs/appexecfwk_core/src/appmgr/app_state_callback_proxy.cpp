@@ -35,7 +35,7 @@ void AppStateCallbackProxy::OnAbilityRequestDone(const sptr<IRemoteObject>& toke
 void AppStateCallbackProxy::OnAppStateChanged(const AppProcessData& appProcessData)
 {}
 
-void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid)
+void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid, int32_t userId)
 {}
 
 void AppStateCallbackProxy::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)

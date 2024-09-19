@@ -72,8 +72,9 @@ public:
     /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.
+     * @param userId userId Designation User ID.
      */
-    virtual void NotifyAppPreCache(int32_t pid) {}
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
 
     enum class Message {
         TRANSACT_ON_APP_STATE_CHANGED = 0,

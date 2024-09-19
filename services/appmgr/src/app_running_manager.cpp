@@ -668,7 +668,15 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
                 appRecord->GetBundleName().c_str());
             if (clearMissionFlag && appMgrServiceInner && appRecord->GetPriorityObject()) {
-                appMgrServiceInner->NotifyAppPreCache(appRecord->GetPriorityObject()->GetPid());
+                int32_t pid = appRecord->GetPriorityObject()->GetPid();
+                int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
+                auto notifyAppPreCache = [pid, userId, inner = appMgrServiceInner] () {
+                    if (inner == nullptr) {
+                        return;
+                    }
+                    inner->NotifyAppPreCache(pid, userId);
+                };
+                appRecord->PostTask("NotifyAppPreCache", 0, notifyAppPreCache);
             }
             return;
         }
