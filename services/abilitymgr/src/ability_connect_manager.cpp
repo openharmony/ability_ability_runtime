@@ -1191,6 +1191,7 @@ void AbilityConnectManager::CompleteCommandAbility(std::shared_ptr<AbilityRecord
     // manage queued request
     CompleteStartServiceReq(abilityRecord->GetURI());
     if (abilityRecord->NeedConnectAfterCommand()) {
+        abilityRecord->UpdateConnectWant();
         ConnectAbility(abilityRecord);
     }
 }
