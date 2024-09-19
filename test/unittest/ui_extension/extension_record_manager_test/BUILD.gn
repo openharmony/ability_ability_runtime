@@ -46,6 +46,7 @@ ohos_unittest("extension_record_manager_test") {
     "${ability_runtime_services_path}/abilitymgr/src/preload_uiext_state_observer.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record_factory.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/multi_instance_utils.cpp",
     "${ability_runtime_services_path}/common/src/app_utils.cpp",
     "${ability_runtime_services_path}/common/src/json_utils.cpp",
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",

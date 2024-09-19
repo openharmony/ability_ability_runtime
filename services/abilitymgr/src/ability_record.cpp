@@ -31,6 +31,7 @@
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
+#include "multi_instance_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
 #include "res_sched_util.h"
@@ -3588,7 +3589,9 @@ std::string AbilityRecord::GetURI() const
 {
     if (uri_.empty()) {
         auto bundleName = abilityInfo_.bundleName;
-        if (AbilityRuntime::StartupUtil::IsSupportAppClone(abilityInfo_.extensionAbilityType)) {
+        if (MultiInstanceUtils::IsMultiInstanceApp(abilityInfo_.applicationInfo)) {
+            bundleName = bundleName + '-' + GetInstanceKey();
+        } else if (AbilityRuntime::StartupUtil::IsSupportAppClone(abilityInfo_.extensionAbilityType)) {
             if (appIndex_ > 0) {
                 bundleName = std::to_string(appIndex_) + bundleName;
             }
