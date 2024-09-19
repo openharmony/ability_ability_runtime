@@ -35,6 +35,7 @@ ohos_unittest("ability_manager_service_sixth_test") {
 
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
+    "${ability_runtime_test_path}/mock/task_handler_wrap_mock/src/mock_task_handler_wrap.cpp",
     "ability_manager_service_sixth_test.cpp",
   ]
 
