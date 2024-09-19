@@ -33,11 +33,11 @@ public:
 
     /**
      * @brief Unregister application state change callback.
-     * @param cjCallback, if cjCallback is nullptr, delete all register cjCallback.
-     *                    or if cjCallback is specified, delete prescribed cjCallback.
+     * @param callbackId, if callbackId is negative, delete all register cjCallback.
+     *                    or if callbackId is positive, delete prescribed cjCallback.
      * @return Returns true on unregister success, others return false.
      */
-    // bool UnRegister(std::function<void(void)> cjCallback = nullptr);
+    bool UnRegister(int32_t callbackId);
     bool IsEmpty() const;
 private:
     std::map<int32_t, std::function<void(void)>> foregroundCallbacks_;

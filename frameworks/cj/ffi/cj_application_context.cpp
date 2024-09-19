@@ -467,7 +467,8 @@ int32_t CJApplicationContext::OnOnApplicationStateChange(void (*foregroundCallba
             CJLambda::Create(backgroundCallback));
     }
     applicationStateCallback_ = std::make_shared<CjApplicationStateChangeCallback>();
-    int32_t callbackId = applicationStateCallback_->Register(CJLambda::Create(foregroundCallback), CJLambda::Create(backgroundCallback));
+    int32_t callbackId = applicationStateCallback_->Register(CJLambda::Create(foregroundCallback),
+        CJLambda::Create(backgroundCallback));
     context->RegisterApplicationStateChangeCallback(applicationStateCallback_);
     return callbackId;
 }
@@ -515,6 +516,31 @@ void CJApplicationContext::OnOffAbilityLifecycle(int32_t callbackId, int32_t *er
         TAG_LOGE(AAFwkTag::CONTEXT, "call UnRegister failed");
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
+    }
+}
+
+void CJApplicationContext::OnOffApplicationStateChange(int32_t callbackId, int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    std::lock_guard<std::mutex> lock(applicationStateCallbackLock_);
+    if (applicationStateCallback_ == nullptr) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "env_callback is not nullptr.");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnOffApplicationStateChange begin");
+    if (!applicationStateCallback_->UnRegister(callbackId)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "call UnRegister failed");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    if (applicationStateCallback_->IsEmpty()) {
+        applicationStateCallback_.reset();
     }
 }
 
@@ -596,6 +622,9 @@ void FfiCJApplicationContextOnOff(int64_t id, const char* type, int32_t callback
     }
     if (typeString == "abilityLifecycle") {
         return context->OnOffAbilityLifecycle(callbackId, errCode);
+    }
+    if (typeString == "applicationStateChange") {
+        return context->OnOffApplicationStateChange(callbackId, errCode);
     }
     TAG_LOGE(AAFwkTag::CONTEXT, "off function type not match");
     *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
