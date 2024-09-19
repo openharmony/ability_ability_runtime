@@ -3137,7 +3137,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_004, TestSize.Level
     abilityRecord->GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 500);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3156,7 +3156,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_005, TestSize.Level
     abilityRecord->GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 500);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
