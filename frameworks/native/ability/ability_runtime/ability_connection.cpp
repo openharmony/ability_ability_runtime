@@ -29,7 +29,9 @@ constexpr int32_t DIED = -1;
 void AbilityConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode)
 {
-    TAG_LOGD(AAFwkTag::CONNECTION, "called");
+    TAG_LOGI(AAFwkTag::CONNECTION,
+        "OnAbilityConnectDone, bundleName:%{public}s, abilityName:%{public}s, resultCode:%{public}d",
+        element.GetBundleName().c_str(), element.GetAbilityName().c_str(), resultCode);
     mutex_.lock();
     if (abilityConnectCallbackList_.empty()) {
         TAG_LOGD(AAFwkTag::CONNECTION, "empty abilityConnectCallbackList");
@@ -54,13 +56,13 @@ void AbilityConnection::OnAbilityConnectDone(
         (*item)->OnAbilityConnectDone(element, remoteObject, resultCode);
         item++;
     }
-    TAG_LOGD(AAFwkTag::CONNECTION, "end, bundleName:%{public}s, abilityName:%{public}s",
-        element.GetBundleName().c_str(), element.GetAbilityName().c_str());
 }
 
 void AbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
 {
-    TAG_LOGD(AAFwkTag::CONNECTION, "resultCode:%{public}d", resultCode);
+    TAG_LOGI(AAFwkTag::CONNECTION,
+        "OnAbilityDisconnectDone, bundleName:%{public}s, abilityName:%{public}s, resultCode:%{public}d",
+        element.GetBundleName().c_str(), element.GetAbilityName().c_str(), resultCode);
     mutex_.lock();
     SetConnectionState(CONNECTION_STATE_DISCONNECTED);
     if (abilityConnectCallbackList_.empty()) {
