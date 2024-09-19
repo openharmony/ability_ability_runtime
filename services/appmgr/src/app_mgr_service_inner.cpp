@@ -3790,7 +3790,9 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
     appRecord->SetEventHandler(eventHandler_);
     std::vector<HapModuleInfo> hapModuleInfos;
     for (auto &iter : info.hapModuleInfos) {
-        if (IsMainProcess(appInfo, iter)) {
+        std::string keepAliveName = (appInfo->process.empty())?(appInfo->bundleName):(appInfo->process);
+        std::string moduleProcessName = (iter.process.empty())?(appInfo->bundleName):(iter.process);
+        if (keepAliveName == moduleProcessName) {
             hapModuleInfos.emplace_back(iter);
         }
     }
