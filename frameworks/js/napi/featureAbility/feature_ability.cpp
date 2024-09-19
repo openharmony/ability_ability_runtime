@@ -47,6 +47,14 @@ CallbackInfo g_aceCallbackInfo;
 const int PARA_SIZE_IS_ONE = 1;
 const int PARA_SIZE_IS_TWO = 2;
 
+/**
+ * @brief FeatureAbility NAPI module registration.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param exports An empty object via the exports parameter as a convenience.
+ *
+ * @return The return value from Init is treated as the exports object for the module.
+ */
 napi_value FeatureAbilityInit(napi_env env, napi_value exports)
 {
     TAG_LOGD(AAFwkTag::FA, "called");
@@ -431,6 +439,14 @@ napi_value JsFeatureAbility::OnGetWindow(napi_env env, napi_callback_info info)
 }
 #endif
 
+/**
+ * @brief FeatureAbility NAPI method : setResult.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param info The callback info passed into the callback function.
+ *
+ * @return The return value from NAPI C++ to JS for the module.
+ */
 napi_value NAPI_SetResult(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
@@ -453,6 +469,14 @@ napi_value NAPI_SetResult(napi_env env, napi_callback_info info)
     return ret;
 }
 
+/**
+ * @brief SetResult processing function.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param asyncCallbackInfo Process data asynchronously.
+ *
+ * @return Return JS data successfully, otherwise return nullptr.
+ */
 napi_value SetResultWrap(napi_env env, napi_callback_info info, AsyncCallbackInfo *asyncCallbackInfo)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
@@ -729,6 +753,15 @@ bool InnerUnwrapWant(napi_env env, napi_value args, Want &want)
     return UnwrapWant(env, jsWant, want);
 }
 
+/**
+ * @brief Parse the parameters.
+ *
+ * @param param Indicates the parameters saved the parse result.
+ * @param env The environment that the Node-API call is invoked under.
+ * @param args Indicates the arguments passed into the callback.
+ *
+ * @return The return value from NAPI C++ to JS for the module.
+ */
 napi_value UnwrapForResultParam(CallAbilityParam &param, napi_env env, napi_value args)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
@@ -765,6 +798,15 @@ napi_value UnwrapForResultParam(CallAbilityParam &param, napi_env env, napi_valu
     return result;
 }
 
+/**
+ * @brief Parse the abilityResult parameters.
+ *
+ * @param param Indicates the want parameters saved the parse result.
+ * @param env The environment that the Node-API call is invoked under.
+ * @param args Indicates the arguments passed into the callback.
+ *
+ * @return The return value from NAPI C++ to JS for the module.
+ */
 napi_value UnwrapAbilityResult(CallAbilityParam &param, napi_env env, napi_value args)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
@@ -1198,7 +1240,7 @@ void CreateContinueAsyncWork(napi_env env, napi_value &resourceName, AsyncCallba
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             TAG_LOGI(AAFwkTag::FA, "worker pool thread execute");
-            AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
+            AsyncCallbackInfo *asyncCallbackInfo = (AsyncCallbackInfo *)data;
             if (asyncCallbackInfo->ability != nullptr) {
                 asyncCallbackInfo->ability->ContinueAbility(asyncCallbackInfo->optionInfo.deviceId);
             } else {
@@ -1208,7 +1250,7 @@ void CreateContinueAsyncWork(napi_env env, napi_value &resourceName, AsyncCallba
         },
         [](napi_env env, napi_status status, void *data) {
             TAG_LOGI(AAFwkTag::FA, "main event thread end");
-            AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
+            AsyncCallbackInfo *asyncCallbackInfo = (AsyncCallbackInfo *)data;
             napi_value callback = nullptr;
             napi_value undefined = nullptr;
             napi_value result[ARGS_TWO] = {nullptr};

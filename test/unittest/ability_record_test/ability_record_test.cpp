@@ -2911,7 +2911,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetRestartCount_001, TestSize.Level1)
     EXPECT_EQ(result, restartCount);
 }
 
-
 /*
  * Feature: AbilityRecord
  * Function: LoadAbility
@@ -2973,11 +2972,11 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_005, TestSize.Leve
 
 /*
  * Feature: AbilityRecord
- * Function: ForegroundUIExtensionAbility
- * SubFunction: ForegroundUIExtensionAbility
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundUIExtensionAbility
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
  */
 HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1)
 {
@@ -3061,6 +3060,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_PrepareTerminateAbility_002, TestSize.
     EXPECT_NE(abilityRecord_, nullptr);
 }
 
+
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3078,7 +3078,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_001, TestSize.Level
     abilityRecord->GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 1);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3097,7 +3097,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_002, TestSize.Level
     abilityRecord->GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 1);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3117,7 +3117,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_003, TestSize.Level
     abilityRecord->GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 2);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3175,7 +3175,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_001, TestSize.L
     auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
     EXPECT_EQ(permissionUris.size(), 0);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3195,7 +3195,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_002, TestSize.L
     EXPECT_EQ(permissionUris.size(), 0);
     EXPECT_EQ(want.GetUriString(), "");
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3215,7 +3215,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_003, TestSize.L
     EXPECT_EQ(permissionUris.size(), 0);
     EXPECT_EQ(want.GetUriString(), uri);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3235,7 +3235,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_004, TestSize.L
     EXPECT_EQ(permissionUris.size(), 1);
     EXPECT_EQ(want.GetUriString(), uri);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
@@ -3257,7 +3257,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_005, TestSize.L
     auto paramStramUris = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
     EXPECT_EQ(paramStramUris.size(), 1);
 }
-
+ 
 /*
  * Feature: AbilityRecord
  * Function: GetUriListFromWant
