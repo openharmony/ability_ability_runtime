@@ -398,6 +398,14 @@ public:
         const Want *resultWant, int64_t callerRequestCode);
 
     /**
+     * TerminateUIServiceExtensionAbility with token.
+     *
+     * @param token Ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode TerminateUIServiceExtensionAbility(sptr<IRemoteObject> token);
+
+    /**
      * TerminateUIExtensionAbility with want, return want from ability manager service.
      *
      * @param extensionSessionInfo the extension session info of the ability to terminate.
@@ -504,6 +512,20 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * ConnectUIServiceExtesnionAbility, connect session with uiService ability.
+     *
+     * @param want, Special want for uiService type's ability.
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectUIServiceExtesnionAbility(
+        const Want &want,
+        sptr<IAbilityConnection> connect,
+        sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
      * Connect data share extension ability.
      *
      * @param want, special want for the data share extension ability.
@@ -600,7 +622,7 @@ public:
      * @param clearPageStack.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode KillProcess(const std::string &bundleName, const bool clearpagestack = false);
+    ErrCode KillProcess(const std::string &bundleName, const bool clearPageStack = false);
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -1141,30 +1163,6 @@ public:
      */
     virtual int SetAbilityController(sptr<AppExecFwk::IAbilityController> abilityController,
         bool imAStabilityTest);
-
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    /**
-     * Block ability manager service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode BlockAmsService();
-
-    /**
-     * Block ability.
-     *
-     * @param abilityRecordId The Ability Record Id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode BlockAbility(int32_t abilityRecordId);
-
-    /**
-     * Block app service.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode BlockAppService();
-    #endif
 
     /**
      * Free install ability from remote DMS.

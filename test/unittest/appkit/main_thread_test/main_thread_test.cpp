@@ -123,11 +123,6 @@ class MockAppMgrStub : public AppMgrStub {
         return nullptr;
     }
 
-    int32_t ClearUpApplicationData(const std::string &bundleName, const int32_t userId) override
-    {
-        return 0;
-    }
-
     int GetAllRunningProcesses(std::vector<RunningProcessInfo> &info) override
     {
         return 0;
@@ -184,13 +179,6 @@ class MockAppMgrStub : public AppMgrStub {
         return 0;
     }
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
-    int BlockAppService() override
-    {
-        return 0;
-    }
-    #endif
-
     int PreStartNWebSpawnProcess() override
     {
         return 0;
@@ -215,7 +203,7 @@ class MockAppMgrStub : public AppMgrStub {
         return 0;
     }
 
-    int32_t UpdateConfiguration(const Configuration &config) override
+    int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override
     {
         return 0;
     }
@@ -268,6 +256,16 @@ class MockAppMgrStub : public AppMgrStub {
     bool IsFinalAppProcess() override
     {
         return true;
+    }
+
+    int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor) override
+    {
+        return 0;
+    }
+
+    int32_t CheckIsKiaProcess(pid_t pid, bool &isKia) override
+    {
+        return 0;
     }
 };
 
@@ -830,7 +828,7 @@ HWTEST_F(MainThreadTest, CheckForHandleLaunchApplication_0200, TestSize.Level1)
     ProcessInfo processInfo("test", 1);
     appLaunchData.SetApplicationInfo(appInfo);
     appLaunchData.SetProcessInfo(processInfo);
-    EXPECT_FALSE(mainThread_->CheckForHandleLaunchApplication(appLaunchData));
+    EXPECT_TRUE(mainThread_->CheckForHandleLaunchApplication(appLaunchData));
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
@@ -1506,6 +1504,7 @@ HWTEST_F(MainThreadTest, HandleScheduleAcceptWant_0400, TestSize.Level1)
  */
 HWTEST_F(MainThreadTest, HandleScheduleAcceptWant_0500, TestSize.Level1)
 {
+    Want want;
     std::string moduleName = "entry";
     std::string loadPath = "test";
     std::string bundleName = "com.ohos.demo";
@@ -1514,6 +1513,8 @@ HWTEST_F(MainThreadTest, HandleScheduleAcceptWant_0500, TestSize.Level1)
     int32_t appType = 0;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
         bundleName, moduleName, loadPath, overlayPaths, *resConfig, appType));
+    mainThread_->HandleScheduleAcceptWant(want, moduleName);
+    ASSERT_NE(mainThread_, nullptr);
 }
 
 #ifdef ABILITY_LIBRARY_LOADER
@@ -1750,7 +1751,7 @@ HWTEST_F(MainThreadTest, HandleLaunchApplication_0500, TestSize.Level1)
     EXPECT_EQ(launchData.GetPerfCmd(), perfCmd);
 
     // check JIT enabled
-    launchData.SetJITEnabled(true)
+    launchData.SetJITEnabled(true);
     EXPECT_EQ(launchData.IsJITEnabled(), true);
 
     // check debug app

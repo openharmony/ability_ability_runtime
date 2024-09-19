@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include "mock_page_ability.h"
-#include "mock_ability_lifecycle_callbacks.h"
 #include "mock_ability_token.h"
 #define private public
 #define protected public
@@ -571,8 +570,6 @@ HWTEST_F(PageAbilityImplTest, AaFwk_PageAbilityImpl_DispatchSaveAbilityState_010
 
     std::shared_ptr<Ability> ability = std::make_shared<MockPageAbility>();
 
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback = std::make_shared<MockAbilityLifecycleCallbacks>();
-    application->RegisterAbilityLifecycleCallbacks(callback);
     pageAbilityImpl_->Init(application, record, ability, handler, token);
     pageAbilityImpl_->DispatchSaveAbilityState();
 

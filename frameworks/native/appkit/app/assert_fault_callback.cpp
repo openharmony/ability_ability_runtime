@@ -24,6 +24,7 @@ AssertFaultCallback::AssertFaultCallback(const std::weak_ptr<AssertFaultTaskThre
     assertFaultThread_ = assertFaultThread;
     status_ = AAFwk::UserStatus::ASSERT_TERMINATE;
 }
+
 int32_t AssertFaultCallback::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {

@@ -35,7 +35,7 @@ void InsightIntentExecuteRecipient::OnRemoteDied(const wptr<OHOS::IRemoteObject>
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentExecuteRecipient OnRemoteDied, %{public}" PRIu64, intentId_);
     auto object = remote.promote();
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "null remote object");
+        TAG_LOGE(AAFwkTag::INTENT, "null object");
         return;
     }
     DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->RemoteDied(intentId_);
@@ -87,9 +87,11 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     if (result != ERR_OK) {
         return result;
     }
-    auto srcEntry = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName.GetBundleName(),
-        elementName.GetModuleName(), want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME));
-    if (srcEntry.empty()) {
+
+    std::string srcEntry;
+    auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName,
+        want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME), executeMode, srcEntry);
+    if (ret != ERR_OK || srcEntry.empty()) {
         TAG_LOGE(AAFwkTag::INTENT, "empty srcEntry");
         return ERR_INVALID_VALUE;
     }
@@ -144,19 +146,19 @@ int32_t InsightIntentExecuteManager::ExecuteIntentDone(uint64_t intentId, int32_
 
     std::shared_ptr<InsightIntentExecuteRecord> record = findResult->second;
     if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "intent record is null, id: %{public}" PRIu64, intentId);
+        TAG_LOGE(AAFwkTag::INTENT, "null record, id: %{public}" PRIu64, intentId);
         return ERR_INVALID_VALUE;
     }
 
     TAG_LOGD(AAFwkTag::INTENT, "callback start, id:%{public}" PRIu64, intentId);
     if (record->state != InsightIntentExecuteState::EXECUTING) {
-        TAG_LOGW(AAFwkTag::INTENT, "Insight intent execute state is not EXECUTING, id:%{public}" PRIu64, intentId);
+        TAG_LOGW(AAFwkTag::INTENT, "insight intent execute state is not EXECUTING, id:%{public}" PRIu64, intentId);
         return ERR_INVALID_OPERATION;
     }
     record->state = InsightIntentExecuteState::EXECUTE_DONE;
     sptr<IInsightIntentExecuteCallback> remoteCallback = iface_cast<IInsightIntentExecuteCallback>(record->callerToken);
     if (remoteCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Failed to get IIntentExecuteCallback");
+        TAG_LOGE(AAFwkTag::INTENT, "intentExecuteCallback empty");
         return ERR_INVALID_VALUE;
     }
     remoteCallback->OnExecuteDone(record->key, resultCode, result);
@@ -177,7 +179,7 @@ int32_t InsightIntentExecuteManager::RemoteDied(uint64_t intentId)
         return ERR_INVALID_VALUE;
     }
     if (result->second == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "intent record is null, id: %{public}" PRIu64, intentId);
+        TAG_LOGE(AAFwkTag::INTENT, "null intent record , id: %{public}" PRIu64, intentId);
         return ERR_INVALID_VALUE;
     }
     result->second->callerToken = nullptr;
@@ -194,7 +196,7 @@ int32_t InsightIntentExecuteManager::GetBundleName(uint64_t intentId, std::strin
         return ERR_INVALID_VALUE;
     }
     if (result->second == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "intent record is null, id: %{public}" PRIu64, intentId);
+        TAG_LOGE(AAFwkTag::INTENT, "null intent record,id: %{public}" PRIu64, intentId);
         return ERR_INVALID_VALUE;
     }
     bundleName = result->second->bundleName;
@@ -219,18 +221,20 @@ int32_t InsightIntentExecuteManager::GenerateWant(
         }
     }
 
-    auto srcEntry = AbilityRuntime::InsightIntentUtils::GetSrcEntry(param->bundleName_, param->moduleName_,
-        param->insightIntentName_);
+    std::string srcEntry;
+    auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(want.GetElement(), param->insightIntentName_,
+        static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry);
     if (!srcEntry.empty()) {
         want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
-    } else if (param->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) {
-        TAG_LOGI(AAFwkTag::INTENT, "Insight intent srcEntry invalid, may need free install on demand");
+    } else if (ret == ERR_INSIGHT_INTENT_GET_PROFILE_FAILED &&
+        param->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) {
+        TAG_LOGI(AAFwkTag::INTENT, "insight intent srcEntry invalid, try free install ondemand");
         std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count());
         want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
         want.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
     } else {
-        TAG_LOGE(AAFwkTag::INTENT, "Insight intent srcEntry invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "insight intent srcEntry invalid");
         return ERR_INVALID_VALUE;
     }
 
@@ -264,14 +268,14 @@ int32_t InsightIntentExecuteManager::CheckCallerPermission()
 {
     bool isSystemAppCall = PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI();
     if (!isSystemAppCall) {
-        TAG_LOGE(AAFwkTag::INTENT, "The caller is not system-app, can not use system-api");
+        TAG_LOGE(AAFwkTag::INTENT, "system-api cannot use");
         return ERR_NOT_SYSTEM_APP;
     }
 
     bool isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
         EXECUTE_INSIGHT_INTENT_PERMISSION);
     if (!isCallingPerm) {
-        TAG_LOGE(AAFwkTag::INTENT, "Permission %{public}s verification failed", EXECUTE_INSIGHT_INTENT_PERMISSION);
+        TAG_LOGE(AAFwkTag::INTENT, "permission %{public}s verification failed", EXECUTE_INSIGHT_INTENT_PERMISSION);
         return ERR_PERMISSION_DENIED;
     }
     return ERR_OK;

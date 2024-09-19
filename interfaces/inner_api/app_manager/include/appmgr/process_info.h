@@ -21,6 +21,7 @@
 
 #include "nocopyable.h"
 #include "parcel.h"
+#include "app_mgr_constants.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -72,9 +73,24 @@ public:
      */
     static ProcessInfo *Unmarshalling(Parcel &parcel);
 
+    /**
+     * @brief Set process type
+     *
+     * @param ProcessType process type.
+     */
+    void SetProcessType(const ProcessType &processType);
+
+    /**
+     * @brief Obtains type of the process.
+     *
+     * @return Returns process type.
+     */
+    ProcessType GetProcessType() const;
+
 private:
     std::string processName_;
     pid_t pid_ = 0;
+    ProcessType processType_ = ProcessType::NORMAL;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

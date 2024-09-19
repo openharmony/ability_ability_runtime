@@ -60,22 +60,6 @@ void IdleTimeTest::TearDown(void)
 {}
 
 /**
- * @tc.number: Preload_0100
- * @tc.name: Preload
- * @tc.desc: Test whether Preload and are called normally.
- */
-HWTEST_F(IdleTimeTest, Preload_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "IdleTimeTest Preload_0100 start";
-
-    int64_t time = 0;
-    time = idleTime_->GetSysTimeNs();
-    EXPECT_NE(time, 0);
-
-    GTEST_LOG_(INFO) << "IdleTimeTest Preload_0100 end";
-}
-
-/**
  * @tc.number: InitVSyncReceiver_0100
  * @tc.name: InitVSyncReceiver
  * @tc.desc: Test whether InitVSyncReceiver and are called normally.

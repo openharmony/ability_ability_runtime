@@ -78,6 +78,7 @@ private:
     int32_t HandleGetProcessRunningInfosByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessRunningInformation(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllRenderProcesses(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetAllChildrenProcesses(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAddAbilityStageDone(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyMemoryLevel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyProcMemoryLevel(MessageParcel &data, MessageParcel &reply);
@@ -105,9 +106,6 @@ private:
     int32_t HandleDumpJsHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetRunningMultiAppInfoByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsAppRunning(MessageParcel &data, MessageParcel &reply);
-#ifdef ABILITY_COMMAND_FOR_TEST
-    int32_t HandleBlockAppServiceDone(MessageParcel &data, MessageParcel &reply);
-#endif
     int32_t HandleGetAppRunningStateByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel &reply);
@@ -137,9 +135,11 @@ private:
     int32_t HandleGetChildProcessInfoForSelf(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachChildProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleExitChildProcessSafely(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleClearUpApplicationDataBySelf(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleClearUpApplicationDataBySelf(MessageParcel &data, MessageParcel& reply);
     int32_t HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterKiaInterceptor(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCheckIsKiaProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateRenderState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSignRestartAppFlag(MessageParcel &data, MessageParcel &reply);
@@ -147,11 +147,12 @@ private:
     int32_t HandleGetAllUIExtensionRootHostPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllUIExtensionProviderPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyMemorySizeStateChanged(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleSetAppAssertionPauseState(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel& reply);
     int32_t HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSaveBrowserChannel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleCheckCallingIsUserTestMode(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleStartNativeChildProcess(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartNativeChildProcess(MessageParcel &data, MessageParcel& reply);
     int32_t HandleNotifyProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRestartResidentProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);

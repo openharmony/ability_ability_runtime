@@ -74,6 +74,8 @@ static int32_t ErrorCodeReturn(int32_t code)
             return CONTINUE_ALREADY_IN_PROGRESS;
         case MISSION_FOR_CONTINUING_IS_NOT_ALIVE:
             return MISSION_FOR_CONTINUING_IS_NOT_ALIVE;
+        case ERR_NOT_SYSTEM_APP:
+            return NOT_SYSTEM_APP;
         default:
             return SYSTEM_WORK_ABNORMALLY;
     };
@@ -101,11 +103,22 @@ static std::string ErrorMessageReturn(int32_t code)
         case OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET:
             return std::string("The operation device must be the device where the "
                 "application to be continued is currently located or the target device.");
+        case ERR_CONTINUE_ALREADY_IN_PROGRESS:
         case CONTINUE_ALREADY_IN_PROGRESS:
             return std::string("the local continuation task is already in progress.");
         case MISSION_FOR_CONTINUING_IS_NOT_ALIVE:
             return std::string("the mission for continuing is not alive, "
                 "try again after restart this mission.");
+        case ERR_GET_MISSION_INFO_OF_BUNDLE_NAME:
+            return std::string("Failed to get the missionInfo of the specified bundle name.");
+        case ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE:
+            return std::string("bind error due to the remote device hotspot enable, try again after disable "
+                "the remote device hotspot.");
+        case ERR_BIND_REMOTE_IN_BUSY_LINK:
+            return std::string("the remote device has been linked with other devices, try again when "
+                "the remote device is idle.");
+        case NOT_SYSTEM_APP:
+            return std::string("The app is not system-app.");
         default:
             return std::string("the system ability work abnormally.");
     };
@@ -965,11 +978,6 @@ napi_value NAPI_ContinueState(napi_env env)
     return continueState;
 }
 
-void NAPIMissionContinue::SetEnv(const napi_env &env)
-{
-    env_ = env;
-}
-
 NAPIRemoteMissionListener::~NAPIRemoteMissionListener()
 {
     if (env_ == nullptr) {
@@ -988,8 +996,6 @@ NAPIRemoteMissionListener::~NAPIRemoteMissionListener()
         notifyNetDisconnectRef_ = nullptr;
     }
 }
-
-NAPIRemoteOnListener::~NAPIRemoteOnListener() {}
 
 void NAPIRemoteMissionListener::SetEnv(const napi_env &env)
 {
@@ -2131,26 +2137,6 @@ void NAPIMissionContinue::OnContinueDone(int32_t result)
         delete work;
     }
     TAG_LOGI(AAFwkTag::MISSION, "end");
-}
-
-void NAPIMissionContinue::SetContinueAbilityEnv(const napi_env &env)
-{
-    env_ = env;
-}
-
-void NAPIMissionContinue::SetContinueAbilityCBRef(const napi_ref &ref)
-{
-    onContinueDoneRef_ = ref;
-}
-
-void NAPIMissionContinue::SetContinueAbilityHasBundleName(bool hasBundleName)
-{
-    onContinueDoneHasBundleName_ = hasBundleName;
-}
-
-void NAPIMissionContinue::SetContinueAbilityPromiseRef(const napi_deferred &promiseDeferred)
-{
-    promiseDeferred_ = promiseDeferred;
 }
 
 napi_value DistributedMissionManagerExport(napi_env env, napi_value exports)

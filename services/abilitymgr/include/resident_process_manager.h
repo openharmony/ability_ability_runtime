@@ -16,12 +16,33 @@
 #ifndef OHOS_ABILITY_RUNTIME_RESIDENT_PROCESS_MANAGER_H
 #define OHOS_ABILITY_RUNTIME_RESIDENT_PROCESS_MANAGER_H
 
+#include <list>
+#include <mutex>
+
 #include "app_scheduler.h"
 #include "bundle_info.h"
 #include "singleton.h"
 
 namespace OHOS {
 namespace AAFwk {
+struct ResidentAbilityInfo {
+    std::string bundleName;
+    std::string abilityName;
+    int32_t userId = 0;
+    int32_t residentId = -1;
+};
+
+class ResidentAbilityInfoGuard {
+public:
+    ResidentAbilityInfoGuard() = default;
+    ~ResidentAbilityInfoGuard();
+    ResidentAbilityInfoGuard(ResidentAbilityInfoGuard &) = delete;
+    void operator=(ResidentAbilityInfoGuard &) = delete;
+    ResidentAbilityInfoGuard(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+    void SetResidentAbilityInfo(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+private:
+    int32_t residentId_ = -1;
+};
 /**
  * @class ResidentProcessManager
  * ResidentProcessManager
@@ -46,12 +67,26 @@ public:
      */
     int32_t SetResidentProcessEnabled(const std::string &bundleName, const std::string &callerName, bool updateEnable);
     void StartResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos);
-    void StartResidentProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos);
+    void StartResidentProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
     void OnAppStateChanged(const AppInfo &info);
+    int32_t PutResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+    bool IsResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+    void RemoveResidentAbility(int32_t residentId);
+    bool GetResidentBundleInfosForUser(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
+    void StartFailedResidentAbilities();
 private:
     bool CheckMainElement(const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &processName,
-        std::string &mainElement, std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex);
+        std::string &mainElement, std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex, int32_t userId = 0);
     void UpdateResidentProcessesStatus(const std::string &bundleName, bool localEnable, bool updateEnable);
+    void AddFailedResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+
+    std::mutex residentAbilityInfoMutex_;
+    std::list<ResidentAbilityInfo> residentAbilityInfos_;
+    int32_t residentId_ = 0;
+
+    std::mutex failedResidentAbilityInfoMutex_;
+    std::list<ResidentAbilityInfo> failedResidentAbilityInfos_;
+    std::atomic_bool unlockedAfterBoot_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

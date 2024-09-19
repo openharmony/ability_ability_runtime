@@ -34,7 +34,7 @@ bool RestartAppManager::IsRestartAppFrequent(const RestartAppKeyType &key, time_
     constexpr int64_t MIN_RESTART_TIME = 10;
     auto it = restartAppHistory_.find(key);
     if ((it != restartAppHistory_.end()) && (it->second + MIN_RESTART_TIME > time)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Restart too frequently. Try again at least 10s later.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "restart too frequently. try again at least 10s later");
         return true;
     }
     return false;
@@ -57,7 +57,7 @@ bool RestartAppManager::IsForegroundToRestartApp() const
     if (processInfo.isFocused || processInfo.isAbilityForegrounding) {
         return true;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "IsForegroundToRestartApp, app stae is not foreground.");
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "IsForegroundToRestartApp, state not foreground");
     return false;
 }
 }  // namespace AAFwk

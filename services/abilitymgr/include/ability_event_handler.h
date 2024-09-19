@@ -41,10 +41,10 @@ public:
     void ProcessEvent(const EventWrap &event) override;
 
 private:
-    void ProcessLoadTimeOut(const EventWrap &event);
+    void ProcessLoadTimeOut(const EventWrap &event, bool isHalf = false);
     void ProcessActiveTimeOut(int64_t abilityRecordId);
     void ProcessInactiveTimeOut(int64_t abilityRecordId);
-    void ProcessForegroundTimeOut(const EventWrap &event);
+    void ProcessForegroundTimeOut(const EventWrap &event, bool isHalf = false);
     void ProcessShareDataTimeOut(int64_t uniqueId);
 private:
     std::weak_ptr<AbilityManagerService> server_;

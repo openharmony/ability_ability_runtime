@@ -63,7 +63,7 @@ void DataAbilityObserverProxy::OnChangeExt(const ChangeInfo &changeInfo)
     }
 
     if (!ChangeInfo::Marshalling(changeInfo, data)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "changeInfo marshalling failed");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "changeInfo marshalling fail");
         return;
     }
 
@@ -106,7 +106,7 @@ int32_t DataAbilityObserverProxy::SendTransactCmd(uint32_t code, MessageParcel &
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "null remote ");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null remote");
         return ERR_NULL_OBJECT;
     }
 

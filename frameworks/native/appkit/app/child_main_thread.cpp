@@ -14,12 +14,16 @@
  */
 
 #include "child_main_thread.h"
+
 #include <unistd.h>
+
+#include "bundle_mgr_helper.h"
 #include "bundle_mgr_proxy.h"
 #include "child_process_manager.h"
 #include "constants.h"
 #include "hilog_tag_wrapper.h"
 #include "js_runtime.h"
+#include "native_lib_util.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 
@@ -70,6 +74,7 @@ void ChildMainThread::Start(const std::map<std::string, int32_t> &fds)
     ret = runner->Run();
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "ChildMainThread runner->Run failed ret = %{public}d", ret);
+        return;
     }
 
     TAG_LOGD(AAFwkTag::APPKIT, "ChildMainThread end");
@@ -78,7 +83,13 @@ void ChildMainThread::Start(const std::map<std::string, int32_t> &fds)
 int32_t ChildMainThread::GetChildProcessInfo(ChildProcessInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    auto object = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(APP_MGR_SERVICE_ID);
+    auto sysMgr = DelayedSingleton<SysMrgClient>::GetInstance();
+    if (sysMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "sys mgr invalid");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto object = sysMgr->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed to get app manager service");
         return ERR_INVALID_VALUE;
@@ -93,7 +104,7 @@ int32_t ChildMainThread::GetChildProcessInfo(ChildProcessInfo &info)
 
 void ChildMainThread::SetFds(const std::map<std::string, int32_t> &fds)
 {
-    if (!processArgs_) {
+    if (processArgs_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "processArgs_ is nullptr");
         return;
     }
@@ -108,6 +119,7 @@ bool ChildMainThread::Init(const std::shared_ptr<EventRunner> &runner, const Chi
         return false;
     }
     processInfo_ = std::make_shared<ChildProcessInfo>(processInfo);
+    processArgs_->entryParams = processInfo.entryParams;
     mainHandler_ = std::make_shared<EventHandler>(runner);
     BundleInfo bundleInfo;
     if (!ChildProcessManager::GetInstance().GetBundleInfo(bundleInfo)) {
@@ -141,14 +153,14 @@ bool ChildMainThread::Attach()
     return true;
 }
 
-bool ChildMainThread::ScheduleLoadJs()
+bool ChildMainThread::ScheduleLoadChild()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "called");
+    TAG_LOGI(AAFwkTag::APPKIT, "ScheduleLoadChild called.");
     if (mainHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "mainHandler_ is null");
         return false;
     }
-    if (!processInfo_) {
+    if (processInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "processInfo is nullptr");
         return false;
     }
@@ -157,17 +169,19 @@ bool ChildMainThread::ScheduleLoadJs()
     auto task = [weak, childProcessType]() {
         auto childMainThread = weak.promote();
         if (childMainThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "childMainThread is nullptr, ScheduleLoadJs failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "childMainThread is nullptr, ScheduleLoadChild failed.");
             return;
         }
         if (childProcessType == CHILD_PROCESS_TYPE_ARK) {
             childMainThread->HandleLoadArkTs();
+        } else if (childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS) {
+            childMainThread->HandleLoadNative();
         } else {
             childMainThread->HandleLoadJs();
         }
     };
     if (!mainHandler_->PostTask(task, "ChildMainThread::HandleLoadJs")) {
-        TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "ChildMainThread::ScheduleLoadChild PostTask task failed.");
         return false;
     }
     return true;
@@ -176,7 +190,7 @@ bool ChildMainThread::ScheduleLoadJs()
 void ChildMainThread::HandleLoadJs()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    if (!processInfo_ || !bundleInfo_) {
+    if (processInfo_ == nullptr || bundleInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "processInfo or bundleInfo_ is null");
         return;
     }
@@ -241,18 +255,43 @@ void ChildMainThread::HandleLoadArkTs()
         processInfo_->processName.c_str(), processInfo_->isDebugApp, processInfo_->isStartWithNative);
     runtime_->StartDebugMode(debugOption);
 
-    processArgs_->entryParams = processInfo_->entryParams;
     childProcessManager.LoadJsFile(srcEntry, hapModuleInfo, runtime_, processArgs_);
+}
+
+void ChildMainThread::HandleLoadNative()
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "HandleLoadNative called.");
+    if (!processInfo_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "processInfo_ is null.");
+        return;
+    }
+    if (!processArgs_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "processArgs_ is nullptr.");
+        return;
+    }
+    ChildProcessManager &childProcessMgr = ChildProcessManager::GetInstance();
+    childProcessMgr.LoadNativeLibWithArgs(nativeLibModuleName_, processInfo_->srcEntry, processInfo_->entryFunc,
+        processArgs_);
+    TAG_LOGD(AAFwkTag::APPKIT, "HandleLoadNative end.");
+    ExitProcessSafely();
 }
 
 void ChildMainThread::InitNativeLib(const BundleInfo &bundleInfo)
 {
+    HspList hspList;
+    ErrCode ret = DelayedSingleton<BundleMgrHelper>::GetInstance()->GetBaseSharedBundleInfos(bundleInfo.name, hspList,
+        AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get base shared bundle infos failed: %{public}d", ret);
+    }
+
     AppLibPathMap appLibPaths {};
-    GetNativeLibPath(bundleInfo, appLibPaths);
+    GetNativeLibPath(bundleInfo, hspList, appLibPaths);
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
     TAG_LOGD(AAFwkTag::APPKIT, "the application isSystemApp: %{public}d", isSystemApp);
 
-    if (processInfo_->childProcessType != CHILD_PROCESS_TYPE_NATIVE) {
+    if (processInfo_->childProcessType != CHILD_PROCESS_TYPE_NATIVE &&
+        processInfo_->childProcessType != CHILD_PROCESS_TYPE_NATIVE_ARGS) {
         AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
     } else {
         UpdateNativeChildLibModuleName(appLibPaths, isSystemApp);
@@ -363,7 +402,6 @@ void ChildMainThread::UpdateNativeChildLibModuleName(const AppLibPathMap &appLib
             if (!nativeLibPath.empty() && nativeLibPath.back() != '/') {
                 nativeLibPath += '/';
             }
-            
             nativeLibPath += processInfo_->srcEntry;
             if (access(nativeLibPath.c_str(), F_OK) == 0) {
                 nativeLibModuleName_ = libPathPair.first;
@@ -378,7 +416,8 @@ void ChildMainThread::UpdateNativeChildLibModuleName(const AppLibPathMap &appLib
         processInfo_->srcEntry.c_str());
 }
 
-void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, AppLibPathMap &appLibPaths)
+void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList,
+    AppLibPathMap &appLibPaths)
 {
     std::string nativeLibraryPath = bundleInfo.applicationInfo.nativeLibraryPath;
     if (!nativeLibraryPath.empty()) {
@@ -397,39 +436,12 @@ void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, AppLibPathM
             hapInfo.moduleName.c_str(), hapInfo.isLibIsolated, hapInfo.compressNativeLibs);
         GetHapSoPath(hapInfo, appLibPaths, hapInfo.hapPath.find(ABS_CODE_PATH));
     }
-}
 
-void ChildMainThread::GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp)
-{
-    if (hapInfo.nativeLibraryPath.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Lib path of %{public}s is empty, lib isn't isolated or compressed",
-            hapInfo.moduleName.c_str());
-        return;
+    for (auto &hspInfo : hspList) {
+        TAG_LOGD(AAFwkTag::APPKIT, "bundle:%s, module:%s, nativeLibraryPath:%s", hspInfo.bundleName.c_str(),
+            hspInfo.moduleName.c_str(), hspInfo.nativeLibraryPath.c_str());
+        GetHspNativeLibPath(hspInfo, appLibPaths, hspInfo.hapPath.find(ABS_CODE_PATH) != 0u);
     }
-
-    std::string appLibPathKey = hapInfo.bundleName + "/" + hapInfo.moduleName;
-    std::string libPath = LOCAL_CODE_PATH;
-    if (!hapInfo.compressNativeLibs) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Lib of %{public}s will not be extracted from hap", hapInfo.moduleName.c_str());
-        libPath = GetLibPath(hapInfo.hapPath, isPreInstallApp);
-    }
-
-    libPath += (libPath.back() == '/') ? hapInfo.nativeLibraryPath : "/" + hapInfo.nativeLibraryPath;
-    TAG_LOGI(
-        AAFwkTag::APPKIT, "appLibPathKey: %{private}s, lib path: %{private}s", appLibPathKey.c_str(), libPath.c_str());
-    appLibPaths[appLibPathKey].emplace_back(libPath);
-}
-
-std::string ChildMainThread::GetLibPath(const std::string &hapPath, bool isPreInstallApp)
-{
-    std::string libPath = LOCAL_CODE_PATH;
-    if (isPreInstallApp) {
-        auto pos = hapPath.rfind("/");
-        if (pos != std::string::npos) {
-            libPath = hapPath.substr(0, pos);
-        }
-    }
-    return libPath;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -26,18 +26,18 @@ const std::string TASK_ON_REMOTE_DIED = "OnRemoteDiedTask";
 void AppDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "remote is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null remote");
         return;
     }
 
     auto handler = handler_.lock();
     if (!handler) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
     auto serviceInner = appMgrServiceInner_.lock();
     if (!serviceInner) {
-        TAG_LOGE(AAFwkTag::APPMGR, "serviceInner is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "null serviceInner");
         return;
     }
 

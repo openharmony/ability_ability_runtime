@@ -127,6 +127,13 @@ JsUIServiceExtension::~JsUIServiceExtension()
 
     jsRuntime_.FreeNativeReference(std::move(jsObj_));
     jsRuntime_.FreeNativeReference(std::move(shellContextRef_));
+
+    for (auto& item : hostProxyMap_) {
+        auto &jsProxyObject = item.second;
+        if (jsProxyObject != nullptr) {
+            jsRuntime_.FreeNativeReference(std::move(jsProxyObject));
+        }
+    }
 }
 
 void JsUIServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -246,6 +253,10 @@ void JsUIServiceExtension::OnStart(const AAFwk::Want &want)
         JsExtensionContext::ConfigurationUpdated(env, shellContextRef_, context->GetConfiguration());
     }
 
+    if (want.HasParameter(WANT_PARAMS_HOST_WINDOW_ID_KEY)) {
+        hostWindowIdInStart_ = want.GetIntParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
+    }
+
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
     napi_value argv[] = {napiWant};
     CallObjectMethod("onCreate", argv, ARGC_ONE);
@@ -312,10 +323,15 @@ sptr<IRemoteObject> JsUIServiceExtension::OnConnect(const AAFwk::Want &want,
         return nullptr;
     }
     napi_value jsHostProxy = reinterpret_cast<NativeReference*>(hostProxyNref)->GetNapiValue();
-    hostProxyMap_[hostProxy] = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(hostProxyNref));
-
     napi_value argv[] = {napiWant, jsHostProxy};
     CallObjectMethod("onConnect", argv, ARGC_TWO);
+    bool ret = CreateWindowIfNeeded();
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "create window failed");
+        delete reinterpret_cast<NativeReference*>(hostProxyNref);
+        return nullptr;
+    }
+    hostProxyMap_[hostProxy] = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(hostProxyNref));
     return stubObject;
 }
 
@@ -370,34 +386,43 @@ void JsUIServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int 
     napi_value argv[] = {napiWant, napiStartId};
     CallObjectMethod("onRequest", argv, ARGC_TWO);
 
-#ifdef SUPPORT_GRAPHICS
-    auto context = GetContext();
-    if (firstRequest_ && context != nullptr) {
-        int32_t hostWindowId = 0;
-        if (want.HasParameter(WANT_PARAMS_HOST_WINDOW_ID_KEY)) {
-            hostWindowId = want.GetIntParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
-        }
-
-        TAG_LOGI(AAFwkTag::UISERVC_EXT, "try create window hostWindowId %{public}d", hostWindowId);
-        auto extensionWindowConfig = std::make_shared<Rosen::ExtensionWindowConfig>();
-        OnSceneWillCreated(extensionWindowConfig);
-        auto option = GetWindowOption(want, extensionWindowConfig, hostWindowId);
-        sptr<Rosen::Window> extensionWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
-        if (extensionWindow != nullptr) {
-            OnSceneDidCreated(extensionWindow);
-            context->SetWindow(extensionWindow);
-            AbilityWindowConfigTransition(option, extensionWindowConfig);
-        } else {
-            TAG_LOGE(AAFwkTag::UISERVC_EXT, "extensionWindow is nullptr");
-        }
-        firstRequest_ = false;
-    }
-#endif
-    TAG_LOGD(AAFwkTag::UISERVC_EXT, "ok");
+    CreateWindowIfNeeded();
 }
 
-void JsUIServiceExtension::AbilityWindowConfigTransition(sptr<Rosen::WindowOption>& option,
-    const std::shared_ptr<Rosen::ExtensionWindowConfig>& extensionWindowConfig)
+bool JsUIServiceExtension::CreateWindowIfNeeded()
+{
+#ifdef SUPPORT_GRAPHICS
+    if (firstRequest_ == false) {
+        return true;
+    }
+    firstRequest_ = false;
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "context null");
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::UISERVC_EXT, "create window hostWindowId %{public}d", hostWindowIdInStart_);
+    auto extensionWindowConfig = std::make_shared<Rosen::ExtensionWindowConfig>();
+    OnSceneWillCreated(extensionWindowConfig);
+    auto option = GetWindowOption(extensionWindowConfig, hostWindowIdInStart_);
+    sptr<Rosen::Window> extensionWindow = nullptr;
+    if (option != nullptr) {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
+        extensionWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
+    }
+    if (extensionWindow == nullptr) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "extensionWindow is null");
+        context->TerminateSelf();
+        return false;
+    }
+    OnSceneDidCreated(extensionWindow);
+    context->SetWindow(extensionWindow);
+    AbilityWindowConfigTransition(option, extensionWindow->GetWindowId());
+#endif
+    return true;
+}
+
+void JsUIServiceExtension::AbilityWindowConfigTransition(sptr<Rosen::WindowOption>& option, uint32_t windowId)
 {
     auto context = GetContext();
     if (context == nullptr) {
@@ -413,12 +438,8 @@ void JsUIServiceExtension::AbilityWindowConfigTransition(sptr<Rosen::WindowOptio
     if (option != nullptr) {
         windowConfig.windowType = static_cast<int32_t>(option->GetWindowType());
     }
-    if (extensionWindowConfig != nullptr) {
-        windowConfig.posx = extensionWindowConfig->windowRect.posX_;
-        windowConfig.posy = extensionWindowConfig->windowRect.posY_;
-        windowConfig.width = extensionWindowConfig->windowRect.width_;
-        windowConfig.height = extensionWindowConfig->windowRect.height_;
-    }
+    windowConfig.windowId = windowId;
+
     AAFwk::AbilityManagerClient::GetInstance()->AbilityWindowConfigTransitionDone(token, windowConfig);
 }
 
@@ -514,7 +535,13 @@ napi_value JsUIServiceExtension::CallObjectMethod(const char* name, napi_value c
     }
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "CallFunction(%{public}s) ok", name);
     napi_value result = nullptr;
+
+    TryCatch tryCatch(env);
     napi_call_function(env, obj, method, argc, argv, &result);
+    if (tryCatch.HasCaught()) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "HandleUncaughtException");
+        reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();
+    }
     return result;
 }
 

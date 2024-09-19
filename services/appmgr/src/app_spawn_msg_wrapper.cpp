@@ -85,11 +85,11 @@ bool AppSpawnMsgWrapper::AssembleMsg(const AppSpawnStartMsg &startMsg)
     size_t msgSize = sizeof(AppSpawnMsg) + 1;
     msg_ = static_cast<AppSpawnMsg *>(malloc(msgSize));
     if (msg_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to malloc!");
+        TAG_LOGE(AAFwkTag::APPMGR, "malloc fail");
         return false;
     }
     if (memset_s(msg_, msgSize, 0, msgSize) != EOK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to memset!");
+        TAG_LOGE(AAFwkTag::APPMGR, "memset fail");
         return false;
     }
     msg_->code = static_cast<AppSpawn::ClientSocket::AppOperateCode>(startMsg.code);
@@ -103,7 +103,7 @@ bool AppSpawnMsgWrapper::AssembleMsg(const AppSpawnStartMsg &startMsg)
         msg_->allowInternet = startMsg.allowInternet;
         msg_->mountPermissionFlags = startMsg.mountPermissionFlags;
         if (strcpy_s(msg_->ownerId, sizeof(msg_->ownerId), startMsg.ownerId.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to transform ownerId!");
+            TAG_LOGE(AAFwkTag::APPMGR, "transform ownerId fail");
             return false;
         }
         for (uint32_t i = 0; i < startMsg.gids.size(); ++i) {
@@ -113,25 +113,25 @@ bool AppSpawnMsgWrapper::AssembleMsg(const AppSpawnStartMsg &startMsg)
             msg_->gidTable[i] = startMsg.dataGroupInfoList[i - startMsg.gids.size()].gid;
         }
         if (strcpy_s(msg_->processName, sizeof(msg_->processName), startMsg.procName.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to transform procName!");
+            TAG_LOGE(AAFwkTag::APPMGR, "transform procName fail");
             return false;
         }
         if (strcpy_s(msg_->soPath, sizeof(msg_->soPath), startMsg.soPath.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to transform soPath!");
+            TAG_LOGE(AAFwkTag::APPMGR, "transform soPath fail");
             return false;
         }
         msg_->accessTokenId = startMsg.accessTokenId;
         if (strcpy_s(msg_->apl, sizeof(msg_->apl), startMsg.apl.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to transform apl!");
+            TAG_LOGE(AAFwkTag::APPMGR, "transform apl fail");
             return false;
         }
         if (strcpy_s(msg_->bundleName, sizeof(msg_->bundleName), startMsg.bundleName.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to transform bundleName!");
+            TAG_LOGE(AAFwkTag::APPMGR, "transform bundleName fail");
             return false;
         }
 
         if (strcpy_s(msg_->renderCmd, sizeof(msg_->renderCmd), startMsg.renderParam.c_str()) != EOK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed to transform renderCmd!");
+            TAG_LOGE(AAFwkTag::APPMGR, "transform renderCmd fail");
             return false;
         }
         msg_->flags = startMsg.flags;
@@ -194,7 +194,7 @@ bool AppSpawnMsgWrapper::VerifyMsg(const AppSpawnStartMsg &startMsg) const
         }
 
         if (startMsg.gids.size() > AppSpawn::ClientSocket::MAX_GIDS) {
-            TAG_LOGE(AAFwkTag::APPMGR, "too many app gids!");
+            TAG_LOGE(AAFwkTag::APPMGR, "many app gids");
             return false;
         }
 
@@ -206,16 +206,16 @@ bool AppSpawnMsgWrapper::VerifyMsg(const AppSpawnStartMsg &startMsg) const
         }
 
         if (startMsg.procName.empty() || startMsg.procName.size() >= AppSpawn::ClientSocket::LEN_PROC_NAME) {
-            TAG_LOGE(AAFwkTag::APPMGR, "invalid procName!");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid procName");
             return false;
         }
     } else if (startMsg.code == AppSpawn::ClientSocket::AppOperateCode::GET_RENDER_TERMINATION_STATUS) {
         if (startMsg.pid < 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "invalid pid!");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid pid");
             return false;
         }
     } else {
-        TAG_LOGE(AAFwkTag::APPMGR, "invalid code!");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid code");
         return false;
     }
 

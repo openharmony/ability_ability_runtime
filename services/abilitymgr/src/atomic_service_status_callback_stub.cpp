@@ -27,7 +27,7 @@ int AtomicServiceStatusCallbackStub::OnInstallFinishedInner(MessageParcel &data,
     auto resultCode = data.ReadInt32();
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AtomicServiceStatusCallbackStub want is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
         return ERR_INVALID_VALUE;
     }
 
@@ -41,7 +41,7 @@ int AtomicServiceStatusCallbackStub::OnRemoteInstallFinishedInner(MessageParcel 
     auto resultCode = data.ReadInt32();
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AtomicServiceStatusCallbackStub want is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
         return ERR_INVALID_VALUE;
     }
 
@@ -57,7 +57,7 @@ int AtomicServiceStatusCallbackStub::OnRemoteRequest(
     std::u16string descriptor = AtomicServiceStatusCallbackStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Local descriptor is not equal to remote");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "descriptor not equal to remote");
         return ERR_INVALID_STATE;
     }
 

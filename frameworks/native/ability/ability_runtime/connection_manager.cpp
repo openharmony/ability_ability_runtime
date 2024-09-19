@@ -45,8 +45,14 @@ ErrCode ConnectionManager::ConnectAbilityWithAccount(const sptr<IRemoteObject>& 
     return ConnectAbilityInner(connectCaller, want, accountId, connectCallback);
 }
 
+ErrCode ConnectionManager::ConnectUIServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
+    const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback)
+{
+    return ConnectAbilityInner(connectCaller, want, AAFwk::DEFAULT_INVAL_VALUE, connectCallback, true);
+}
+
 ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connectCaller,
-    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback)
+    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback, bool isUIService)
 {
     if (connectCaller == nullptr || connectCallback == nullptr) {
         TAG_LOGE(AAFwkTag::CONNECTION, "null connectCaller or connectCallback");
@@ -65,11 +71,16 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
             break;
         }
     }
-    TAG_LOGD(AAFwkTag::CONNECTION, "abilityConnectionsSize: %{public}zu", abilityConnections_.size());
     if (connectionIter != abilityConnections_.end()) {
         std::vector<sptr<AbilityConnectCallback>>& callbacks = connectionIter->second;
         callbacks.push_back(connectCallback);
         abilityConnection = connectionIter->first.abilityConnection;
+        if (!abilityConnection) {
+            TAG_LOGE(AAFwkTag::CONNECTION, "AbilityConnection not exist");
+            return AAFwk::ERR_INVALID_CALLER;
+        }
+        TAG_LOGI(AAFwkTag::CONNECTION, "abilityConnectionsSize: %{public}zu, ConnectionState: %{public}d",
+            abilityConnections_.size(), abilityConnection->GetConnectionState());
         abilityConnection->AddConnectCallback(connectCallback);
         TAG_LOGD(AAFwkTag::CONNECTION, "abilityConnection exist, callbackSize:%{public}zu", callbacks.size());
         if (abilityConnection->GetConnectionState() == CONNECTION_STATE_CONNECTED) {
@@ -81,10 +92,10 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
         } else {
             TAG_LOGE(AAFwkTag::CONNECTION, "AbilityConnection disconnected, erase it and reconnect");
             abilityConnections_.erase(connectionIter);
-            return CreateConnection(connectCaller, want, accountId, connectCallback);
+            return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService);
         }
     } else {
-        return CreateConnection(connectCaller, want, accountId, connectCallback);
+        return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService);
     }
 }
 
@@ -124,7 +135,7 @@ bool ConnectionManager::MatchConnection(
 }
 
 ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCaller,
-    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback)
+    const AAFwk::Want& want, int accountId, const sptr<AbilityConnectCallback>& connectCallback, bool isUIService)
 {
     TAG_LOGD(AAFwkTag::CONNECTION, "called");
     sptr<AbilityConnection> abilityConnection = new AbilityConnection();
@@ -134,8 +145,14 @@ ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCa
     }
     abilityConnection->AddConnectCallback(connectCallback);
     abilityConnection->SetConnectionState(CONNECTION_STATE_CONNECTING);
-    ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
-        want, abilityConnection, connectCaller, accountId);
+    ErrCode ret = ERR_OK;
+    if (isUIService) {
+        ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectUIServiceExtesnionAbility(
+            want, abilityConnection, connectCaller, accountId);
+    } else {
+        ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
+            want, abilityConnection, connectCaller, accountId);
+    }
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     if (ret == ERR_OK) {
         ConnectionInfo connectionInfo(connectCaller, want.GetOperation(), abilityConnection, accountId);

@@ -37,6 +37,22 @@
 namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
+namespace {
+#ifdef __aarch64__
+constexpr uint32_t OBJECT_MASK = 0xffffffff;
+#else
+constexpr uint32_t OBJECT_MASK = 0xffffff;
+#endif
+
+uint32_t ConvertAddr(const void *ptr)
+{
+    if (ptr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ptr is null");
+        return 0;
+    }
+    return static_cast<uint32_t>((reinterpret_cast<uintptr_t>(ptr)) & OBJECT_MASK);
+}
+}
 
 AppMgrStub::AppMgrStub() {}
 
@@ -179,10 +195,6 @@ int32_t AppMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
     MessageParcel &reply, MessageOption &option)
 {
     switch (static_cast<uint32_t>(code)) {
-    #ifdef ABILITY_COMMAND_FOR_TEST
-        case AppMgrInterfaceCode::BLOCK_APP_SERVICE:
-            return HandleBlockAppServiceDone(data, reply);
-    #endif
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_RUNNING_STATE):
             return HandleGetAppRunningStateByBundleName(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_LOAD_REPAIR_PATCH):
@@ -317,6 +329,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleNotifyMemorySizeStateChanged(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE_SELF):
             return HandleSetSupportedProcessCacheSelf(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE):
+            return HandleSetSupportedProcessCache(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_BUNDLE_TYPE):
             return HandleGetRunningProcessesByBundleType(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF):
@@ -337,6 +351,12 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleRestartResidentProcessDependedOnWeb(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS):
             return HandleGetSupportedProcessCachePids(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_CHILDREN_PROCESSES):
+            return HandleGetAllChildrenProcesses(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_KIA_INTERCEPTOR):
+            return HandleRegisterKiaInterceptor(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::CHECK_IS_KIA_PROCESS):
+            return HandleCheckIsKiaProcess(data, reply);
     }
     return INVALID_FD;
 }
@@ -347,6 +367,12 @@ int32_t AppMgrStub::HandleAttachApplication(MessageParcel &data, MessageParcel &
     sptr<IRemoteObject> client = data.ReadRemoteObject();
     if (client == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "remote object null");
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "remote: %{public}u", ConvertAddr(client.GetRefPtr()));
+    IPCObjectProxy *proxy = reinterpret_cast<IPCObjectProxy *>(client.GetRefPtr());
+    if (proxy != nullptr) {
+        int32_t pid = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
+        TAG_LOGI(AAFwkTag::APPMGR, "handle:%{public}u, callingPid:%{public}d", proxy->GetHandle(), pid);
     }
     AttachApplication(client);
     return NO_ERROR;
@@ -516,6 +542,25 @@ int32_t AppMgrStub::HandleGetAllRenderProcesses(MessageParcel &data, MessageParc
         }
     }
     if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAllChildrenProcesses(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::vector<ChildProcessInfo> info;
+    auto result = GetAllChildrenProcesses(info);
+    reply.WriteInt32(info.size());
+    for (auto &it : info) {
+        if (!reply.WriteParcelable(&it)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write ChildProcessInfo faild, child pid=%{public}d", it.pid);
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result faild");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -888,7 +933,8 @@ int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read configuration error");
         return ERR_INVALID_VALUE;
     }
-    int32_t ret = UpdateConfiguration(*config);
+    int32_t userId = data.ReadInt32();
+    int32_t ret = UpdateConfiguration(*config, userId);
     if (!reply.WriteInt32(ret)) {
         return ERR_INVALID_VALUE;
     }
@@ -933,16 +979,6 @@ int32_t AppMgrStub::HandleUnregisterConfigurationObserver(MessageParcel &data, M
     reply.WriteInt32(result);
     return NO_ERROR;
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-int32_t AppMgrStub::HandleBlockAppServiceDone(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s", __func__);
-    int32_t result = BlockAppService();
-    reply.WriteInt32(result);
-    return result;
-}
-#endif
 
 int32_t AppMgrStub::HandleGetAppRunningStateByBundleName(MessageParcel &data, MessageParcel &reply)
 {
@@ -1078,7 +1114,7 @@ int32_t AppMgrStub::HandleGetRunningProcessInfoByPid(MessageParcel &data, Messag
     auto pid = static_cast<pid_t>(data.ReadInt32());
     auto result = GetRunningProcessInfoByPid(pid, processInfo);
     if (reply.WriteParcelable(&processInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "process info write failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "failed");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(result)) {
@@ -1507,6 +1543,19 @@ int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, Mess
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    bool isSupport = data.ReadBool();
+    int32_t pid = data.ReadInt32();
+    auto ret = SetSupportedProcessCache(pid, isSupport);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -1595,6 +1644,34 @@ int32_t AppMgrStub::HandleGetSupportedProcessCachePids(MessageParcel &data, Mess
 int32_t AppMgrStub::GetSupportedProcessCachePids(const std::string &bundleName,
     std::vector<int32_t> &pidList)
 {
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterKiaInterceptor(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    sptr<IKiaInterceptor> interceptor = iface_cast<IKiaInterceptor>(data.ReadRemoteObject());
+    if (interceptor == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "interceptor is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+
+    reply.WriteInt32(RegisterKiaInterceptor(interceptor));
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleCheckIsKiaProcess(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    int pid = data.ReadInt32();
+    bool isKia = false;
+    int result = CheckIsKiaProcess(pid, isKia);
+    reply.WriteInt32(result);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed,result=%{public}d.", result);
+        return result;
+    }
+    reply.WriteBool(isKia);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

@@ -31,9 +31,10 @@ config("abilityms_exception_config") {
 config("abilityms_config") {
   include_dirs = [
     "include/",
+    "include/data_ability",
+    "include/dialog_session/",
     "include/rdb/",
     "include/screen_lock/",
-    "include/dialog_session/",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_innerkits_path}/app_manager/include",
@@ -129,7 +130,6 @@ ohos_shared_library("abilityms") {
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
-    "${ability_runtime_services_path}/common:file_monitor",
     "${ability_runtime_services_path}/common:perm_verification",
     "${ability_runtime_services_path}/common:res_sched_util",
     "${ability_runtime_services_path}/common:task_handler_wrap",
@@ -240,6 +240,7 @@ ohos_shared_library("wantagent_manager") {
   }
   branch_protector_ret = "pac_ret"
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/data_ability/include",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
@@ -305,12 +306,6 @@ ohos_prebuilt_etc("ams_extension_config.json") {
   part_name = "ability_runtime"
 }
 
-ohos_prebuilt_etc("default_recovery_config.json") {
-  source = "resource/default_recovery_config.json"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
 ohos_prebuilt_etc("start_ability_without_caller_token.json") {
   source = "resource/start_ability_without_caller_token.json"
   subsystem_name = "ability"
@@ -337,6 +332,7 @@ ohos_shared_library("mission_list") {
     "${ability_runtime_innerkits_path}/session_handler/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
+    "${ability_runtime_services_path}/abilitymgr/data_ability/include",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_services_path}/appdfr/include",
@@ -462,7 +458,6 @@ group("ams_service_config") {
   deps = [
     ":ams_service_config.json",
     ":deeplink_reserve_config.json",
-    ":default_recovery_config.json",
     ":start_ability_without_caller_token.json",
     ":uiextension_picker_config.json",
   ]

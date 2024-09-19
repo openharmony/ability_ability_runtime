@@ -58,7 +58,6 @@ HWTEST_F(AbilityConnectCallbackRecipientTest, AbilityConnectCallbackRecipientTes
     std::shared_ptr<AbilityConnectCallbackRecipient> recipient =
         std::make_shared<AbilityConnectCallbackRecipient>(handler);
     recipient->OnRemoteDied(remote);
-
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(recipient != nullptr);
     GTEST_LOG_(INFO) << "AbilityConnectCallbackRecipientTest_001 end";
 }

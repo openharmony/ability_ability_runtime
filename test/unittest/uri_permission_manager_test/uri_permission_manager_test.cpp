@@ -340,7 +340,7 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivil
     uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     std::string bundleName = "com.example.test1001";
     int32_t appIndex = 0;
-    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex);
+    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex, 0, -1);
     EXPECT_EQ(res, ERR_URI_LIST_OUT_OF_RANGE);
 }
 
@@ -359,7 +359,7 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivil
     uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     std::string bundleName = "com.example.test1001";
     int32_t appIndex = 0;
-    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex);
+    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex, 0, -1);
     EXPECT_EQ(res, ERR_URI_LIST_OUT_OF_RANGE);
 }
 
@@ -378,7 +378,7 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermissionPrivil
     uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     std::string bundleName = "com.example.test1001";
     int32_t appIndex = 0;
-    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex);
+    auto res = upmc.GrantUriPermissionPrivileged(uriVec, flag, bundleName, appIndex, 0, -1);
     EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
 }
 }  // namespace AAFwk

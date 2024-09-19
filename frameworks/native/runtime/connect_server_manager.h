@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,11 +23,11 @@ using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 using DebuggerInfo = std::unordered_map<int, std::pair<void*, const DebuggerPostTask>>;
 using InstanceMap = std::unordered_map<int32_t, std::string>;
 #ifdef APP_USE_ARM
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib/platformsdk/libark_inspector.z.so";
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
 #elif defined(APP_USE_X86_64)
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/platformsdk/libark_inspector.z.so";
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
 #else
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/platformsdk/libark_inspector.z.so";
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
 #endif
 namespace OHOS::AbilityRuntime {
 class ConnectServerManager final {
@@ -55,6 +55,9 @@ public:
     DebuggerPostTask GetDebuggerPostTask(int32_t tid);
     void SetSwitchCallback(int32_t instanceId);
     void SetProfilerCallBack();
+    bool SetRecordCallback(const std::function<void(void)> &startRecordFunc,
+        const std::function<void(void)> &stopRecordFunc);
+    void SetRecordResults(const std::string &jsonArrayStr);
 
 private:
     ConnectServerManager() = default;

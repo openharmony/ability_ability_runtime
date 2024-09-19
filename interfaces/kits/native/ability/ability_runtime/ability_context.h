@@ -202,6 +202,16 @@ public:
                                 const sptr<AbilityConnectCallback> &connectCallback) = 0;
 
     /**
+    * @brief Connects the current ability to an uiService ability using the AbilityInfo.AbilityType.SERVICE template.
+    *
+    * @param want Indicates the want containing information about the ability to connect
+    * @param connectCallback Indicates the callback object when the target ability is connected.
+    * @return True means success and false means failure
+    */
+    virtual ErrCode ConnectUIServiceExtensionAbility(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback) = 0;
+
+    /**
     * @brief Disconnects the current ability from an ability
     *
     * @param want Indicates the want containing information about the ability to disconnect

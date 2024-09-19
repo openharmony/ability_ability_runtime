@@ -99,7 +99,7 @@ void from_json(const nlohmann::json &jsonObject, PreloadItem &preloadItem)
         parseResult,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "read PreloadItem from database error:%{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "read PreloadItem error:%{public}d", parseResult);
     }
 }
 
@@ -606,7 +606,7 @@ void from_json(const nlohmann::json &jsonObject, HapModuleInfo &hapModuleInfo)
         parseResult,
         ArrayType::STRING);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "HapModuleInfo from_json error:%{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "HapModuleInfo error:%{public}d", parseResult);
     }
 }
 }  // namespace AppExecFwk

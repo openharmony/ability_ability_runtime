@@ -58,6 +58,7 @@
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
+#include "kia_interceptor_interface.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "remote_client_manager.h"
@@ -75,17 +76,28 @@ struct LoadParam;
 }
 namespace Rosen {
 class WindowVisibilityInfo;
+class WindowPidVisibilityInfo;
 class FocusChangeInfo;
 }
 namespace AppExecFwk {
 using OHOS::AAFwk::Want;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
+class WindowPidVisibilityChangedListener;
 using LoadAbilityTaskFunc = std::function<void()>;
 constexpr int32_t BASE_USER_RANGE = 200000;
 
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
 public:
+    struct ConfigurationObserverWithUserId {
+        sptr<IConfigurationObserver> observer;
+        int32_t userId = -1;
+    };
+    struct AppStateCallbackWithUserId {
+        sptr<IAppStateCallback> callback;
+        int32_t userId = -1;
+    };
+
     AppMgrServiceInner();
     virtual ~AppMgrServiceInner();
 
@@ -154,19 +166,6 @@ public:
      */
     virtual void RegisterAppStateCallback(const sptr<IAppStateCallback> &callback);
     void RemoveDeadAppStateCallback(const wptr<IRemoteObject> &remote);
-
-    /**
-     * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return
-     */
-    virtual void AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState);
 
     /**
      * KillProcessByAbilityToken, kill the process by ability token.
@@ -262,7 +261,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearpagestack = false);
+    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = false);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -292,7 +291,7 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
 
-    virtual int32_t KillApplicationSelf(const bool clearpagestack = false);
+    virtual int32_t KillApplicationSelf(const bool clearPageStack = false);
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -304,7 +303,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const bool clearpagestack = false);
+        const bool clearPageStack = false);
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -389,6 +388,15 @@ public:
     virtual int32_t GetAllRenderProcesses(std::vector<RenderProcessInfo> &info);
 
     /**
+     * GetAllChildrenProcesses, call GetAllChildrenProcesses() through proxy project.
+     * Obtains information about children processes that are running on the device.
+     *
+     * @param info, child process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllChildrenProcesses(std::vector<ChildProcessInfo> &info);
+
+    /**
      * NotifyMemoryLevel, Notify applications background the current memory level.
      *
      * @param level, current memory level.
@@ -465,7 +473,8 @@ public:
         const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want,
-        int32_t abilityRecordId);
+        int32_t abilityRecordId,
+        bool isKia = false);
 
     /**
      * OnStop, Application management service stopped.
@@ -619,7 +628,7 @@ public:
      * @param config, System environment change parameters.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UpdateConfiguration(const Configuration &config);
+    int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
     int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
 
@@ -771,6 +780,11 @@ public:
      */
     void HandleWindowVisibilityChanged(
             const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
+
+    /**
+     * Handle window pid visibility changed.
+     */
+    void HandleWindowPidVisibilityChanged(const sptr<OHOS::Rosen::WindowPidVisibilityInfo>& windowPidVisibilityInfo);
 #endif //SUPPORT_SCREEN
     /**
      * Set the current userId, only used by abilityMgr.
@@ -780,6 +794,14 @@ public:
      * @return
      */
     void SetCurrentUserId(const int32_t userId);
+
+    /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
@@ -802,6 +824,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t NotifyAppFault(const FaultData &faultData);
+
+    /**
+     * Transformed Notify Fault Data
+     *
+     * @param faultData Transformed the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+
+    int32_t TransformedNotifyAppFault(const AppFaultDataBySA &faultData);
 
     /**
      * Notify Fault Data By SA
@@ -862,6 +893,16 @@ public:
      * Free window visibility changed listener.
      */
     void FreeWindowVisibilityChangedListener();
+
+    /**
+     * Init window pid visibility changed listener.
+     */
+    void InitWindowPidVisibilityChangedListener();
+
+    /**
+     * Free window pid visibility changed listener.
+     */
+    void FreeWindowPidVisibilityChangedListener();
 
     /*
      * @brief Notify NativeEngine GC of status change.
@@ -996,12 +1037,12 @@ public:
     /**
      * Start child process, called by ChildProcessManager.
      *
-     * @param hostPid Host process pid.
+     * @param callingPid Calling process pid.
      * @param childPid Created child process pid.
      * @param request Child process start request params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartChildProcess(const pid_t hostPid, pid_t &childPid, const ChildProcessRequest &request);
+    virtual int32_t StartChildProcess(const pid_t callingPid, pid_t &childPid, const ChildProcessRequest &request);
 
     /**
      * Get child process record for self.
@@ -1073,7 +1114,7 @@ public:
 
     void SetAppAssertionPauseState(bool flag);
 
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -1096,6 +1137,8 @@ public:
     virtual int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
+
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
 
@@ -1143,6 +1186,8 @@ public:
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
+    bool IsAppKilling(sptr<IRemoteObject> token) const;
+
     /**
      * Get pids of processes which belong to specific bundle name and support process cache feature.
      *
@@ -1151,6 +1196,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList);
+
+    virtual int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor);
+
+    virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1237,7 +1286,7 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearpagestack = false);
+        const bool clearPageStack = false);
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1305,6 +1354,8 @@ private:
 
     void GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<RenderProcessInfo> &info);
 
+    void GetChildrenProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<ChildProcessInfo> &info);
+
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
 
@@ -1330,13 +1381,15 @@ private:
     void ApplicationTerminatedSendProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    int32_t StartChildProcessPreCheck(const pid_t callingPid);
+    int32_t StartChildProcessPreCheck(pid_t callingPid, int32_t childProcessType);
 
     int32_t StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args);
+        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args,
+        const ChildProcessOptions &options);
 
     int32_t GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
+        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info,
+        bool isCallFromGetChildrenProcesses = false);
 
     void OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
 
@@ -1345,6 +1398,9 @@ private:
     void KillAttachedChildProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void PresetMaxChildProcess(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &maxChildProcess);
+
+    void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
 private:
     /**
@@ -1365,7 +1421,7 @@ private:
     bool CheckGetRunningInfoPermission() const;
 
     int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearpagestack = false);
+        const std::string &bundleName, const bool clearPageStack = false);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -1489,7 +1545,7 @@ private:
     void SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void InitAppWaitingDebugList();
-    void HandleConfigurationChange(const Configuration &config);
+    void HandleConfigurationChange(const Configuration &config, const int32_t userId = -1);
     bool CheckIsThreadInFoundation(pid_t pid);
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
     int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
@@ -1504,8 +1560,14 @@ private:
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
+    void DealMultiUserConfig(const Configuration &config, const int32_t userId);
+    bool CheckIsDebugApp(const std::string &bundleName);
+    int32_t MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,
+        bool &isWatermarkEnabled, bool &isFileUri, std::string &processName);
+    int32_t ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
+        const std::string& watermarkBusinessName, bool isWatermarkEnabled);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
-    std::vector<sptr<IAppStateCallback>> appStateCallbacks_;
+    std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
     std::shared_ptr<AppRunningManager> appRunningManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
@@ -1518,10 +1580,12 @@ private:
     ffrt::mutex browserHostLock_;
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     ffrt::mutex configurationObserverLock_;
-    std::vector<sptr<IConfigurationObserver>> configurationObservers_;
+    std::vector<ConfigurationObserverWithUserId> configurationObservers_;
+
 #ifdef SUPPORT_SCREEN
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
+    sptr<WindowPidVisibilityChangedListener> windowPidVisibilityChangedListener_;
 #endif //SUPPORT_SCREEN
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
@@ -1536,7 +1600,7 @@ private:
     sptr<IAbilityDebugResponse> abilityDebugResponse_;
     std::shared_ptr<AppDebugManager> appDebugManager_;
     ffrt::mutex killpedProcessMapLock_;
-    mutable std::map<int64_t, std::string> killedPorcessMap_;
+    mutable std::map<int64_t, std::string> killedProcessMap_;
     ffrt::mutex startChildProcessLock_;
     std::vector<std::string> serviceExtensionWhiteList_;
     std::shared_ptr<AbilityRuntime::AppRunningStatusModule> appRunningStatusModule_;
@@ -1548,6 +1612,8 @@ private:
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
+    sptr<IKiaInterceptor> kiaInterceptor_;
+    std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
