@@ -1186,7 +1186,7 @@ public:
 
     bool IsAppKilling(sptr<IRemoteObject> token) const;
 
-    void NotifyAppPreCache(int32_t pid);
+    void NotifyAppPreCache(int32_t pid, int32_t userId);
 
     /**
      * Get pids of processes which belong to specific bundle name and support process cache feature.

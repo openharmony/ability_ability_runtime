@@ -10820,9 +10820,9 @@ void AbilityManagerService::NotifyStartResidentProcess(std::vector<AppExecFwk::B
     }
 }
 
-void AbilityManagerService::NotifyAppPreCache(int32_t pid)
+void AbilityManagerService::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
-    ForceTerminateSerivceExtensionByPid(pid);
+    ForceTerminateSerivceExtensionByPid(pid, userId);
 }
 
 void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
@@ -12052,12 +12052,12 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
     return errCode;
 }
 
-void AbilityManagerService::ForceTerminateSerivceExtensionByPid(int32_t pid)
+void AbilityManagerService::ForceTerminateSerivceExtensionByPid(int32_t pid, int32_t userId)
 {
     std::vector<sptr<IRemoteObject>> tokens;
     IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->GetAbilityRecordsByProcessID(
         pid, tokens));
-    auto connectManager = GetCurrentConnectManager();
+    auto connectManager = GetConnectManagerByUserId(userId);
     if (connectManager) {
         for (const auto& token : tokens) {
             auto abilityRecord = Token::GetAbilityRecordByToken(token);

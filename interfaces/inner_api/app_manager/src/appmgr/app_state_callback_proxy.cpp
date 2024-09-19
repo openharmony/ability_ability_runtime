@@ -166,7 +166,7 @@ void AppStateCallbackProxy::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
     }
 }
 
-void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid)
+void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -178,6 +178,11 @@ void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid)
 
     if (!data.WriteInt32(pid)) {
         TAG_LOGE(AAFwkTag::APPMGR, "write pid failed.");
+        return;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write userId failed.");
         return;
     }
 
