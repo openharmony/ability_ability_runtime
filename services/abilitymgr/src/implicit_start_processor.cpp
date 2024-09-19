@@ -245,6 +245,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         ret = abilityMgr->ImplicitStartAbilityAsCaller(request.want, request.callerToken, nullptr);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
+        int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
+            static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
+        AddIdentity(tokenId, identity);
         return ret;
     }
 
@@ -722,12 +725,6 @@ bool ImplicitStartProcessor::FilterAbilityList(const Want &want, std::vector<App
 {
     ErmsCallerInfo callerInfo;
     GetEcologicalCallerInfo(want, callerInfo, userId);
-    int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->
-        EvaluateResolveInfos(want, callerInfo, 0, abilityInfos, extensionInfos));
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to evaluate resolve infos from erms.");
-        return false;
-    }
     return true;
 }
 
