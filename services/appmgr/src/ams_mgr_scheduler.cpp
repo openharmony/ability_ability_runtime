@@ -90,7 +90,7 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
 
     // cache other application load ability task before scene board attach
     if (!amsMgrServiceInner_->GetSceneBoardAttachFlag() && abilityInfo->bundleName != SCENE_BOARD_BUNDLE_NAME) {
-        amsMgrServiceInner_->CacheLoadAbilityTask(loadAbilityFunc);
+        amsMgrServiceInner_->CacheLoadAbilityTask(std::move(loadAbilityFunc));
         return;
     }
     if (abilityInfo->bundleName == SCENE_BOARD_BUNDLE_NAME && abilityInfo->name == SCENEBOARD_ABILITY_NAME) {

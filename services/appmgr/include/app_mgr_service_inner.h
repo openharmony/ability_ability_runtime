@@ -1159,7 +1159,7 @@ public:
 
     void SetSceneBoardAttachFlag(bool flag);
 
-    void CacheLoadAbilityTask(const LoadAbilityTaskFunc& func);
+    void CacheLoadAbilityTask(const LoadAbilityTaskFunc&& func);
 
     void SubmitCacheLoadAbilityTask();
     /**

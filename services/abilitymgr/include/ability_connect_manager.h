@@ -69,7 +69,7 @@ public:
      * @param abilityRequest, the request of the service ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int StartAbility(const AbilityRequest &abilityRequest);
+    int32_t StartAbility(const AbilityRequest &abilityRequest);
 
     /**
      * TerminateAbility with token and result want.
@@ -97,7 +97,7 @@ public:
      * @param connectInfo the connect info.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int ConnectAbilityLocked(const AbilityRequest &abilityRequest, const sptr<IAbilityConnection> &connect,
+    int32_t ConnectAbilityLocked(const AbilityRequest &abilityRequest, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, sptr<SessionInfo> sessionInfo = nullptr,
         sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr);
 
@@ -340,7 +340,7 @@ private:
      * @param abilityRequest, the request of the service ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int StartAbilityLocked(const AbilityRequest &abilityRequest);
+    int32_t StartAbilityLocked(const AbilityRequest &abilityRequest);
 
     /**
      * TerminateAbilityLocked with token and result want.
