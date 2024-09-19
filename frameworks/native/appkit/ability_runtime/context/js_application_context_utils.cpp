@@ -1464,6 +1464,13 @@ napi_value JsApplicationContextUtils::OnGetApplicationContext(napi_env env, Napi
         return CreateJsUndefined(env);
     }
 
+    if (!applicationContext->GetApplicationInfoUpdateFlag()) {
+        auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetGlobalObject(env);
+        if (appContextObj != nullptr) {
+            return appContextObj->GetNapiValue();
+        }
+    }
+
     napi_value value = CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
