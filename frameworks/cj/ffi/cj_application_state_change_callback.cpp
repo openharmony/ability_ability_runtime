@@ -30,7 +30,7 @@ void CjApplicationStateChangeCallback::NotifyApplicationForeground()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "MethodName = onApplicationForeground");
     for (auto &callback : foregroundCallbacks_) {
-        if (!callback.second) {
+        if (callback.second) {
             callback.second();
         }
     }
@@ -40,7 +40,7 @@ void CjApplicationStateChangeCallback::NotifyApplicationBackground()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "MethodName = onApplicationBackground");
     for (auto &callback : backgroundCallbacks_) {
-        if (!callback.second) {
+        if (callback.second) {
             callback.second();
         }
     }
@@ -60,34 +60,22 @@ int32_t CjApplicationStateChangeCallback::Register(std::function<void(void)> for
     return callbackId;
 }
 
-// bool CjApplicationStateChangeCallback::UnRegister(napi_value jsCallback)
-// {
-//     if (jsCallback == nullptr) {
-//         TAG_LOGI(AAFwkTag::APPKIT, "jsCallback is nullptr, delete all callback");
-//         callbacks_.clear();
-//         return true;
-//     }
-
-//     for (auto &callback : callbacks_) {
-//         if (!callback) {
-//             TAG_LOGE(AAFwkTag::APPKIT, "Invalid jsCallback");
-//             continue;
-//         }
-
-//         napi_value value = callback->GetNapiValue();
-//         if (value == nullptr) {
-//             TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
-//             continue;
-//         }
-
-//         bool isEqual = false;
-//         napi_strict_equals(env_, value, jsCallback, &isEqual);
-//         if (isEqual) {
-//             return callbacks_.erase(callback) == 1;
-//         }
-//     }
-//     return false;
-// }
+bool CjApplicationStateChangeCallback::UnRegister(int32_t callbackId)
+{
+    if (callbackId < 0) {
+        TAG_LOGI(AAFwkTag::APPKIT, "delete all callback");
+        foregroundCallbacks_.clear();
+        backgroundCallbacks_.clear();
+        return true;
+    }
+    auto it = foregroundCallbacks_.find(callbackId);
+    if (it == foregroundCallbacks_.end()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacks_", callbackId);
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "callbacks_.callbackId : %{public}d", it->first);
+    return foregroundCallbacks_.erase(callbackId) == 1 && backgroundCallbacks_.erase(callbackId) == 1;
+}
 
 bool CjApplicationStateChangeCallback::IsEmpty() const
 {

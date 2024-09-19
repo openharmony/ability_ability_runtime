@@ -72,6 +72,7 @@ public:
         void (*backgroundCallback)(void), int32_t *errCode);
     void OnOffEnvironment(int32_t callbackId, int32_t *errCode);
     void OnOffAbilityLifecycle(int32_t callbackId, int32_t *errCode);
+    void OnOffApplicationStateChange(int32_t callbackId, int32_t *errCode);
     static CJApplicationContext* GetCJApplicationContext(
         std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext);
 private:
