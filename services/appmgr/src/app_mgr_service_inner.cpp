@@ -731,7 +731,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     if (!specifiedProcessFlag.empty()) {
         appRecord->SetSpecifiedProcessFlag(specifiedProcessFlag);
     }
-    if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
+    if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, processName)) {
         appRecord->SetEmptyKeepAliveAppState(false);
         appRecord->SetMainProcess(false);
         TAG_LOGI(AAFwkTag::APPMGR, "The process %{public}s will not keepalive", hapModuleInfo.process.c_str());
@@ -785,20 +785,17 @@ std::string AppMgrServiceInner::GetSpecifiedProcessFlag(std::shared_ptr<AbilityI
 }
 
 bool AppMgrServiceInner::IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo,
-    const HapModuleInfo &hapModuleInfo) const
+    const std::string &processName) const
 {
     if (!appInfo) {
         return true;
     }
-    if (hapModuleInfo.process.empty()) {
-        return true;
-    }
     if (!appInfo->process.empty()) {
-        if (hapModuleInfo.process == appInfo->process) {
+        if (processName == appInfo->process) {
             return true;
         }
     } else {
-        if (hapModuleInfo.process == appInfo->bundleName) {
+        if (processName == appInfo->bundleName) {
             return true;
         }
     }
@@ -4014,7 +4011,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             TAG_LOGE(AAFwkTag::APPMGR, "start process [%{public}s] failed!", processName.c_str());
             return;
         }
-        if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
+        if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, processName)) {
             appRecord->SetEmptyKeepAliveAppState(false);
             appRecord->SetMainProcess(false);
             TAG_LOGD(AAFwkTag::APPMGR, "The process %{public}s will not keepalive", hapModuleInfo.process.c_str());
