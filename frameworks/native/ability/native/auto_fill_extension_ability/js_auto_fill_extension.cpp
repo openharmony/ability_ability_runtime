@@ -117,6 +117,10 @@ JsAutoFillExtension::~JsAutoFillExtension()
         jsRuntime_.FreeNativeReference(std::move(item.second));
     }
     contentSessions_.clear();
+
+    for (auto &callback : callbacks_) {
+        jsRuntime_.FreeNativeReference(std::move(callback.second));
+    }
     callbacks_.clear();
 }
 

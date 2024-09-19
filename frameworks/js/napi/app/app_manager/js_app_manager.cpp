@@ -443,7 +443,6 @@ private:
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessWithAccount",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
-        TAG_LOGD(AAFwkTag::APPMGR, "end");
     }
 
     napi_value OnGetAppMemorySize(napi_env env, const size_t argc, napi_value* argv)

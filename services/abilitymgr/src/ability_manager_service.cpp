@@ -6698,13 +6698,8 @@ void AbilityManagerService::RetryStartAutoStartupApps(
     TAG_LOGD(AAFwkTag::ABILITYMGR,
         "RetryCount: %{public}d, failedList.size:%{public}zu", retryCount, failedList.size());
     if (!failedList.empty() && retryCount > 0) {
-        auto retryStartAutoStartupAppsTask = [aams = weak_from_this(), list = failedList, retryCount]() {
-            auto obj = aams.lock();
-            if (obj == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "Retry start auto startup app error, obj is nullptr");
-                return;
-            }
-            obj->RetryStartAutoStartupApps(list, retryCount - 1);
+        auto retryStartAutoStartupAppsTask = [aams = shared_from_this(), list = failedList, retryCount]() {
+            aams->RetryStartAutoStartupApps(list, retryCount - 1);
         };
         constexpr int delaytime = 2000;
         taskHandler_->SubmitTask(retryStartAutoStartupAppsTask, "RetryStartAutoStartupApps", delaytime);
@@ -10771,7 +10766,12 @@ int32_t AbilityManagerService::NotifyDebugAssertResult(uint64_t assertFaultSessi
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verification instance is nullptr.");
         return ERR_INVALID_VALUE;
     }
-    if (!permissionSA->VerifyCallingPermission(PermissionConstants::PERMISSION_NOTIFY_DEBUG_ASSERT_RESULT)) {
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    std::string bundleName;
+    int32_t uid;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(pid, bundleName, uid);
+    if (!permissionSA->VerifyCallingPermission(PermissionConstants::PERMISSION_NOTIFY_DEBUG_ASSERT_RESULT)
+        &&bundleName != BUNDLE_NAME_DIALOG) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission %{public}s verification failed.",
             PermissionConstants::PERMISSION_NOTIFY_DEBUG_ASSERT_RESULT);
         return ERR_PERMISSION_DENIED;
