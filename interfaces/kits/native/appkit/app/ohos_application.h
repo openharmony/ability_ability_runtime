@@ -21,23 +21,20 @@
 #include <list>
 #include <memory>
 
-#include "ability_lifecycle_callbacks.h"
 #include "ability_stage.h"
 #include "app_context.h"
 #include "context.h"
-#include "element_callback.h"
+#include "application_configuration_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 class Runtime;
 } // namespace AbilityRuntime
 namespace AppExecFwk {
-class ElementsCallback;
 class ApplicationImpl;
 class Configuration;
 class AbilityRecordMgr;
-class OHOSApplication : public AppContext,
-                        public AbilityLifecycleCallbacks {
+class OHOSApplication : public AppContext {
 public:
     OHOSApplication();
     virtual ~OHOSApplication();
@@ -73,109 +70,12 @@ public:
 
     /**
      *
-     * @brief Register AbilityLifecycleCallbacks with OHOSApplication
-     *
-     * @param callBack callBack When the life cycle of the ability in the application changes,
-     */
-    void RegisterAbilityLifecycleCallbacks(const std::shared_ptr<AbilityLifecycleCallbacks> &callBack);
-
-    /**
-     *
-     * @brief Unregister AbilityLifecycleCallbacks with OHOSApplication
-     *
-     * @param callBack RegisterAbilityLifecycleCallbacks`s callBack
-     */
-    void UnregisterAbilityLifecycleCallbacks(const std::shared_ptr<AbilityLifecycleCallbacks> &callBack);
-
-    /**
-     *
-     * @brief Will be called when the given ability calls Ability->onStart
-     *
-     * @param Ability Indicates the ability object that calls the onStart() method.
-     */
-    void OnAbilityStart(const std::shared_ptr<AbilityRuntime::UIAbility> &ability);
-
-    /**
-     *
-     * @brief Will be called when the given ability calls Ability->onInactive
-     *
-     * @param Ability Indicates the Ability object that calls the onInactive() method.
-     */
-    void OnAbilityInactive(const std::shared_ptr<AbilityRuntime::UIAbility> &ability);
-
-    /**
-     *
-     * @brief Will be called when the given ability calls Ability->onBackground
-     *
-     * @param Ability Indicates the Ability object that calls the onBackground() method.
-     */
-    void OnAbilityBackground(const std::shared_ptr<AbilityRuntime::UIAbility> &ability);
-
-    /**
-     *
-     * @brief Will be called when the given ability calls Ability->onForeground
-     *
-     * @param Ability Indicates the Ability object that calls the onForeground() method.
-     */
-    void OnAbilityForeground(const std::shared_ptr<AbilityRuntime::UIAbility> &ability);
-
-    /**
-     *
-     * @brief Will be called when the given ability calls Ability->onActive
-     *
-     * @param Ability Indicates the Ability object that calls the onActive() method.
-     */
-    void OnAbilityActive(const std::shared_ptr<AbilityRuntime::UIAbility> &ability);
-
-    /**
-     *
-     * @brief Will be called when the given ability calls Ability->onStop
-     *
-     * @param Ability Indicates the Ability object that calls the onStop() method.
-     */
-    void OnAbilityStop(const std::shared_ptr<AbilityRuntime::UIAbility> &ability);
-
-    /**
-     *
-     * Called when Ability#onSaveAbilityState(PacMap) was called on an ability.
-     *
-     * @param outState Indicates the PacMap object passed to Ability#onSaveAbilityState(PacMap)
-     * for storing user data and states. This parameter cannot be null.
-     */
-    void DispatchAbilitySavedState(const PacMap &outState);
-
-    /**
-     *
-     * @brief Called when an ability calls Ability#onSaveAbilityState(PacMap).
-     * You can implement your own logic in this method.
-     * @param outState IIndicates the {@link PacMap} object passed to the onSaveAbilityState() callback.
-     *
-     */
-    void OnAbilitySaveState(const PacMap &outState);
-
-    /**
-     *
-     * @brief Register ElementsCallback with OHOSApplication
-     *
-     * @param callBack callBack when the system configuration of the device changes.
-     */
-    void RegisterElementsCallbacks(const std::shared_ptr<ElementsCallback> &callback);
-
-    /**
-     *
-     * @brief Unregister ElementsCallback with OHOSApplication
-     *
-     * @param callback RegisterElementsCallbacks`s callback
-     */
-    void UnregisterElementsCallbacks(const std::shared_ptr<ElementsCallback> &callback);
-
-    /**
-     *
      * @brief Will be Called when the system configuration of the device changes.
      *
      * @param config Indicates the new Configuration object.
      */
-    virtual void OnConfigurationUpdated(Configuration config);
+    virtual void OnConfigurationUpdated(Configuration config,
+        AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::System);
 
     /**
      *
@@ -282,7 +182,7 @@ public:
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName, std::string &flag);
 
-    virtual std::shared_ptr<Configuration> GetConfiguration();
+    virtual std::shared_ptr<Configuration> GetConfiguration() const;
 
     void GetExtensionNameByType(int32_t type, std::string &name)
     {
@@ -319,11 +219,9 @@ public:
 
 private:
     void UpdateAppContextResMgr(const Configuration &config);
-    bool isUpdateColor(Configuration &config, std::string colorMode, std::string globalColorMode,
-        std::string globalColorModeIsSetBySa, std::string colorModeIsSetByApp, std::string colorModeIsSetBySa);
-    bool isUpdateFontSize(Configuration &config);
-    bool isUpdateLanguage(Configuration &config, const std::string language,
-        const std::string languageIsSetByApp, const std::string globalLanguageIsSetByApp);
+    bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
+    bool isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level);
+    bool IsUpdateLanguageNeeded(Configuration &config, AbilityRuntime::SetLevel level);
     const std::function<void()> CreateAutoStartupCallback(
         const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
         const std::shared_ptr<AbilityLocalRecord> abilityRecord,
@@ -331,8 +229,6 @@ private:
     bool IsMainProcess(const std::string &bundleName, const std::string &process);
 
 private:
-    std::list<std::shared_ptr<AbilityLifecycleCallbacks>> abilityLifecycleCallbacks_;
-    std::list<std::shared_ptr<ElementsCallback>> elementsCallbacks_;
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
     std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext_ = nullptr;
     std::unordered_map<std::string, std::shared_ptr<AbilityRuntime::AbilityStage>> abilityStages_;

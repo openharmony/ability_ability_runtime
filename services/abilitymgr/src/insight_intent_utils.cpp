@@ -15,6 +15,7 @@
 
 #include "insight_intent_utils.h"
 
+#include "ability_manager_errors.h"
 #include "bundle_mgr_helper.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
@@ -23,19 +24,48 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-std::string InsightIntentUtils::GetSrcEntry(const std::string &bundleName, const std::string &moduleName,
-    const std::string &intentName)
+namespace {
+bool CheckAbilityName(const InsightIntentInfo &info, const std::string &abilityName,
+    const AppExecFwk::ExecuteMode &executeMode)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "Get srcEntry, bundleName: %{public}s, moduleName: %{public}s, intentName: %{public}s.",
-        bundleName.c_str(), moduleName.c_str(), intentName.c_str());
-    if (bundleName.empty() || moduleName.empty() || intentName.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "bundleName or moduleName or intentName empty");
-        return std::string("");
+    bool matched = false;
+    switch (executeMode) {
+        case AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND:
+        case AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND:
+            matched = info.uiAbilityIntentInfo.abilityName == abilityName;
+            break;
+        case AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY:
+            matched = info.uiExtensionIntentInfo.abilityName == abilityName;
+            break;
+        case AppExecFwk::ExecuteMode::SERVICE_EXTENSION_ABILITY:
+            matched = info.serviceExtensionIntentInfo.abilityName == abilityName;
+            break;
+        default:
+            break;
+    }
+    if (!matched) {
+        TAG_LOGW(AAFwkTag::INTENT, "ability name mismatch");
+    }
+    return matched;
+}
+} // namespace
+
+uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
+    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "get srcEntry, elementName: %{public}s, intentName: %{public}s, mode: %{public}d",
+        elementName.GetURI().c_str(), intentName.c_str(), executeMode);
+    auto bundleName = elementName.GetBundleName();
+    auto moduleName = elementName.GetModuleName();
+    auto abilityName = elementName.GetAbilityName();
+    if (bundleName.empty() || moduleName.empty() || abilityName.empty() || intentName.empty()) {
+        TAG_LOGE(AAFwkTag::INTENT, "input param empty");
+        return ERR_INVALID_VALUE;
     }
 
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        return std::string("");
+        return ERR_NULL_OBJECT;
     }
 
     // Get json profile firstly
@@ -44,25 +74,27 @@ std::string InsightIntentUtils::GetSrcEntry(const std::string &bundleName, const
         profile, AppExecFwk::OsAccountManagerWrapper::GetCurrentActiveAccountId()));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "failed code: %{public}d", ret);
-        return std::string("");
+        return AAFwk::ERR_INSIGHT_INTENT_GET_PROFILE_FAILED;
     }
 
     // Transform json string
     std::vector<InsightIntentInfo> infos;
     if (!InsightIntentProfile::TransformTo(profile, infos)) {
         TAG_LOGE(AAFwkTag::INTENT, "transform profile failed");
-        return std::string("");
+        return ERR_INVALID_VALUE;
     }
 
     // Get srcEntry when intentName matched
-    std::string srcEntry("");
     for (const auto &info: infos) {
-        if (info.intentName == intentName) {
+        if (info.intentName == intentName && CheckAbilityName(info, abilityName, executeMode)) {
             srcEntry = info.srcEntry;
+            TAG_LOGD(AAFwkTag::INTENT, "srcEntry: %{public}s", srcEntry.c_str());
+            return ERR_OK;
         }
     }
-    TAG_LOGD(AAFwkTag::INTENT, "srcEntry: %{public}s", srcEntry.c_str());
-    return srcEntry;
+
+    TAG_LOGE(AAFwkTag::INTENT, "get srcEntry failed");
+    return AAFwk::ERR_INSIGHT_INTENT_START_INVALID_COMPONENT;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

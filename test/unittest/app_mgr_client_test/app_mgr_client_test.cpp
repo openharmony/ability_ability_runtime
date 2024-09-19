@@ -1364,7 +1364,7 @@ HWTEST_F(AppMgrClientTest, SetKeepAliveEnableState_001, TestSize.Level0)
     auto appMgrClient = std::make_unique<AppMgrClient>();
     std::string bundleName = "com.ix.First.Test";
     bool enable = false;
-    appMgrClient->SetKeepAliveEnableState(bundleName, enable);
+    appMgrClient->SetKeepAliveEnableState(bundleName, enable, 0);
     EXPECT_NE(appMgrClient, nullptr);
 }
 

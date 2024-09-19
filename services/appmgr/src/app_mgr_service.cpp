@@ -1622,5 +1622,25 @@ int32_t AppMgrService::GetSupportedProcessCachePids(const std::string &bundleNam
     }
     return appMgrServiceInner_->GetSupportedProcessCachePids(bundleName, pidList);
 }
+
+int32_t AppMgrService::RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return appMgrServiceInner_->RegisterKiaInterceptor(interceptor);
+}
+
+int32_t AppMgrService::CheckIsKiaProcess(pid_t pid, bool &isKia)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return appMgrServiceInner_->CheckIsKiaProcess(pid, isKia);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

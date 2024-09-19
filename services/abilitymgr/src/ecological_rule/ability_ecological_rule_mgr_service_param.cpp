@@ -178,6 +178,11 @@ bool AbilityCallerInfo::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write userId failed");
         return false;
     }
+
+    if (!parcel.WriteInt32(targetApplicationReservedFlag)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetApplicationReservedFlag failed");
+        return false;
+    }
     return true;
 }
 

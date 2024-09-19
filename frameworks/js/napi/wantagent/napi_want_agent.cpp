@@ -171,6 +171,10 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
     napi_value value = dataWorkerData->nativeRef->GetNapiValue();
     napi_value callback = dataWorkerData->nativeRef->GetNapiValue();
     napi_call_function(dataWorkerData->env, value, callback, ARGC_TWO, args, nullptr);
+    if (dataWorkerData->wantAgent != nullptr) {
+        delete dataWorkerData->wantAgent;
+        dataWorkerData->wantAgent = nullptr;
+    }
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;

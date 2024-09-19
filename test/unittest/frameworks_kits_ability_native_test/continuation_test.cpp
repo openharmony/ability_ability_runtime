@@ -27,7 +27,6 @@
 #include "continuation_handler.h"
 #include "data_ability_predicates.h"
 #include "mock_ability_connect_callback.h"
-#include "mock_ability_lifecycle_callbacks.h"
 #include "mock_ability_token.h"
 #include "mock_continuation_ability.h"
 #include "mock_reverse_continuation_scheduler_replica_stub.h"

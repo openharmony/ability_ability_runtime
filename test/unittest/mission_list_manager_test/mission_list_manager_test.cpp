@@ -1754,7 +1754,7 @@ HWTEST_F(MissionListManagerTest, OnAppStateChanged_001, TestSize.Level1)
     AppInfo info;
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     std::string processName = "processName";
-    abilityRecord->applicationInfo_.bundleName = processName;
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = processName;
     info.state = AppState::END;
     info.processName = processName;
     missionListManager->terminateAbilityList_.push_back(nullptr);
@@ -1779,7 +1779,7 @@ HWTEST_F(MissionListManagerTest, OnAppStateChanged_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord2 = InitAbilityRecord();
     std::string processName = "processName";
     abilityRecord1->abilityInfo_.process = processName;
-    abilityRecord2->applicationInfo_.bundleName = processName;
+    abilityRecord2->abilityInfo_.applicationInfo.bundleName = processName;
     std::shared_ptr<Mission> mission1 = std::make_shared<Mission>(1, abilityRecord1, "missionName");
     std::shared_ptr<Mission> mission2 = std::make_shared<Mission>(2, abilityRecord2, "missionName");
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
@@ -5467,7 +5467,7 @@ HWTEST_F(MissionListManagerTest, OnAcceptWantResponse_008, TestSize.Level1)
     want.SetElementName(bundleName, abilityName);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->abilityInfo_.name = abilityName;
-    abilityRecord->applicationInfo_.bundleName = bundleName;
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = bundleName;
     abilityRecord->SetSpecifiedFlag(flag);
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(1, abilityRecord);
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
@@ -5521,7 +5521,7 @@ HWTEST_F(MissionListManagerTest, GetMissionBySpecifiedFlag_006, TestSize.Level1)
     want.SetElementName(bundleName, abilityName);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->abilityInfo_.name = abilityName;
-    abilityRecord->applicationInfo_.bundleName = bundleName;
+    abilityRecord->abilityInfo_.applicationInfo.bundleName = bundleName;
     abilityRecord->SetSpecifiedFlag(flag);
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(1, abilityRecord);
     std::shared_ptr<MissionList> missionList2 = std::make_shared<MissionList>();

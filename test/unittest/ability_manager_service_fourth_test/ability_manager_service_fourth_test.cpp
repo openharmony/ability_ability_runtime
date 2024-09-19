@@ -820,7 +820,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckExtensionCallPermission_001, Test
     Want want;
     AbilityRequest abilityRequest;
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    auto ret = abilityMs_->CheckExtensionCallPermission(want, abilityRequest);
+    auto ret = abilityMs_->CheckExtensionCallPermission(want, abilityRequest, 0);
     EXPECT_NE(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckExtensionCallPermission_001 end");
 }

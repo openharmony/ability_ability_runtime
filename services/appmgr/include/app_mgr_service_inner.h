@@ -58,6 +58,7 @@
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
+#include "kia_interceptor_interface.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "remote_client_manager.h"
@@ -472,7 +473,8 @@ public:
         const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want,
-        int32_t abilityRecordId);
+        int32_t abilityRecordId,
+        bool isKia = false);
 
     /**
      * OnStop, Application management service stopped.
@@ -793,6 +795,14 @@ public:
      */
     void SetCurrentUserId(const int32_t userId);
 
+    /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
 #endif
@@ -814,6 +824,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t NotifyAppFault(const FaultData &faultData);
+
+    /**
+     * Transformed Notify Fault Data
+     *
+     * @param faultData Transformed the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+
+    int32_t TransformedNotifyAppFault(const AppFaultDataBySA &faultData);
 
     /**
      * Notify Fault Data By SA
@@ -1095,7 +1114,7 @@ public:
 
     void SetAppAssertionPauseState(bool flag);
 
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -1118,7 +1137,7 @@ public:
     virtual int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
-    
+
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
@@ -1177,6 +1196,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList);
+
+    virtual int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor);
+
+    virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1539,6 +1562,10 @@ private:
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
     void DealMultiUserConfig(const Configuration &config, const int32_t userId);
     bool CheckIsDebugApp(const std::string &bundleName);
+    int32_t MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,
+        bool &isWatermarkEnabled, bool &isFileUri, std::string &processName);
+    int32_t ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
+        const std::string& watermarkBusinessName, bool isWatermarkEnabled);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
@@ -1585,7 +1612,7 @@ private:
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
-    
+    sptr<IKiaInterceptor> kiaInterceptor_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk

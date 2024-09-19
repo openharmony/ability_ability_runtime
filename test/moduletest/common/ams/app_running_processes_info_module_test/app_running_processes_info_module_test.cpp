@@ -24,7 +24,7 @@
 #define private public
 #include "app_mgr_service_inner.h"
 #undef private
-#include "mock_application.h"
+#include "mock_application_proxy.h"
 #include "ability_info.h"
 #include "application_info.h"
 #include "mock_bundle_manager.h"
@@ -68,11 +68,11 @@ protected:
         return "";
     }
 
-    void CheckLaunchApplication(const sptr<MockApplication>& mockApplication, const unsigned long index,
+    void CheckLaunchApplication(const sptr<MockApplicationProxy>& mockApplication, const unsigned long index,
         std::shared_ptr<AppRunningRecord> record, const std::string& testPoint) const
     {
         EXPECT_TRUE(record != nullptr) << "record is nullptr!";
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+        sptr<IAppScheduler> client = mockApplication;
         record->SetApplicationClient(client);
 
         std::string applicationName(GetTestAppName(index));
@@ -88,7 +88,7 @@ protected:
 
         EXPECT_CALL(*mockApplication, ScheduleLaunchApplication(_, _))
             .Times(1)
-            .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplication::LaunchApplication));
+            .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplicationProxy::LaunchApplication));
         Configuration config;
         record->LaunchApplication(config);
         mockApplication->Wait();
@@ -208,13 +208,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_001, TestSize.Level
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
     // LaunchApplication
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_001";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -267,13 +268,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_002, TestSize.Level
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
     // LaunchApplication
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_001";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -328,13 +330,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_003, TestSize.Level
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
     // LaunchApplication
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_001";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -405,13 +408,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_004, TestSize.Level
 
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_001";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -466,13 +470,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_005, TestSize.Level
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
     // LaunchApplication
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_005";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -525,13 +530,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_006, TestSize.Level
 
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_006";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();

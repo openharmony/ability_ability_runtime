@@ -30,11 +30,8 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 static const std::string MARK_SYMBOL{ "_useless" };
-static const std::string CONTEXT_DATA_APP{ "/data/app/" };
-static const std::vector<std::string> CONTEXT_ELS{ "el1", "el2", "el3", "el4" };
 static const std::string PATH_SEPARATOR = { "/" };
 static const char FILE_SEPARATOR_CHAR = '/';
-static const std::string CONTEXT_BASE{ "/base/" };
 static const std::string MARK_TEMP_DIR{ "temp_useless" };
 static const std::string CONTEXT_HAPS{ "/haps" };
 
@@ -44,6 +41,9 @@ static const int PATH_MAX_SIZE = 256;
 const mode_t MODE = 0777;
 static const int RESULT_OK = 0;
 static const int RESULT_ERR = -1;
+
+static const char TASK_NAME[] = "ApplicationCleaner::ClearTempData";
+static constexpr uint64_t DELAY = 5000000; //5s
 } // namespace
 void ApplicationCleaner::RenameTempData()
 {
@@ -98,7 +98,10 @@ void ApplicationCleaner::ClearTempData()
             }
         }
     };
-    ffrt::submit(cleanTemp);
+    ffrt::task_attr attr;
+    attr.name(TASK_NAME);
+    attr.delay(DELAY); // Delay by five seconds
+    ffrt::submit(std::move(cleanTemp), attr);
 }
 
 int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
@@ -116,6 +119,7 @@ int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
 
     int userId = -1;
     if (instance->GetOsAccountLocalIdFromProcess(userId) != RESULT_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get account failed");
         return RESULT_ERR;
     }
 

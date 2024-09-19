@@ -24,7 +24,7 @@
 #include "native_engine/native_engine.h"
 #include "ohos_application.h"
 #include "session_info.h"
-#include "ui_extension_base_impl.h"
+#include "ui_extension_base.h"
 #include "ui_extension_context.h"
 #include "ui_extension_window_command.h"
 #include "want.h"
@@ -101,11 +101,11 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnStop() override;
-    virtual void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback);
+    void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) override;
     /**
      * @brief The callback of OnStop.
      */
-    virtual void OnStopCallBack();
+    void OnStopCallBack() override;
 
     /**
      * @brief Called when the system configuration is updated.
