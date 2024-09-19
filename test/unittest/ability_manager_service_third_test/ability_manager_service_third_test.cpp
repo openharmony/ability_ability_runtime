@@ -61,8 +61,8 @@ public:
 
     AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
         const std::string& appName, const std::string& bundleName, const std::string& moduleName);
-public:
 
+public:
     AbilityRequest abilityRequest_{};
     Want want_{};
 };

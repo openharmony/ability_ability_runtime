@@ -298,7 +298,7 @@ void AutoFillManager::HandleTimeOut(uint32_t eventId)
 
 bool AutoFillManager::IsNeedToCreatePopupWindow(const AbilityBase::AutoFillType &autoFillType)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called.");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
     if (autoFillType == AbilityBase::AutoFillType::PASSWORD ||
         autoFillType == AbilityBase::AutoFillType::USER_NAME ||
         autoFillType == AbilityBase::AutoFillType::NEW_PASSWORD) {

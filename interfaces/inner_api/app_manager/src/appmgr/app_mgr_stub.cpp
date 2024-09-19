@@ -1493,7 +1493,6 @@ int32_t AppMgrStub::HandleNotifyMemorySizeStateChanged(MessageParcel &data, Mess
     }
     return NO_ERROR;
 }
-
 int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -1533,7 +1532,7 @@ int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, Messag
 
 int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
     std::string libName = data.ReadString();
     int32_t childCount = data.ReadInt32();
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
@@ -1545,5 +1544,6 @@ int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessagePa
 
     return NO_ERROR;
 }
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

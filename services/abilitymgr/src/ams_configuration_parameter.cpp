@@ -229,7 +229,7 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
         }
     }
 
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "read ams config success");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "read ams config success!");
     return READ_OK;
 }
 
