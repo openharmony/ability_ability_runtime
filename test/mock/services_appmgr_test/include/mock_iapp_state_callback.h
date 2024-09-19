@@ -34,6 +34,7 @@ public:
     MOCK_METHOD1(OnAppStateChanged, void(const AppProcessData&));
     MOCK_METHOD2(OnAbilityRequestDone, void(const sptr<IRemoteObject>&, const AbilityState));
     MOCK_METHOD1(NotifyStartResidentProcess, void(std::vector<AppExecFwk::BundleInfo>&));
+    MOCK_METHOD2(NotifyAppPreCache, void(int32_t, int32_t));
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

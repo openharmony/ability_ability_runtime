@@ -357,6 +357,8 @@ private:
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
+        const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
 
 private:
     std::mutex runningRecordMapMutex_;
