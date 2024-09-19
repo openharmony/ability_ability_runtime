@@ -32,6 +32,7 @@ ohos_fuzztest("AbilityMgrAppExitReasonHelperFuzzTest") {
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/abilitymgr/include/scene_board",
+    "${ability_runtime_services_path}/abilitymgr/include/mission",
   ]
   cflags = [
     "-g",
