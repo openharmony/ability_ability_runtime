@@ -180,8 +180,8 @@ int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, Messa
     if (userId < 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "userId is illegal");
         return ERR_INVALID_VALUE;
-    }    
-    NotifyAppPreCache(pid);
+    }
+    NotifyAppPreCache(pid, userId);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk
