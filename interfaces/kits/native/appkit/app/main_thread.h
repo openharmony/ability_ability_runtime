@@ -425,7 +425,6 @@ private:
      *
      */
     void HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCacheProcess = false);
-    void AfterCleanAbilityGC();
 
     /**
      *
