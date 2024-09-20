@@ -114,10 +114,10 @@ private:
     static napi_value RejectCbCpp(napi_env env, napi_callback_info info);
 
     static void ReplyFailed(InsightIntentExecutorAsyncCallback* callback,
-        InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_INTERNAL_ERROR);
+        InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED);
     static void ReplySucceeded(InsightIntentExecutorAsyncCallback* callback,
         std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp);
-    void ReplyFailedInner(InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_INTERNAL_ERROR);
+    void ReplyFailedInner(InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED);
     void ReplySucceededInner(std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp);
     bool ExecuteIntentCheckError();
 
