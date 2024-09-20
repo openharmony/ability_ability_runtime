@@ -499,6 +499,14 @@ public:
     void SetCurrentUserId(const int32_t userId);
 
     /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
+
+    /**
      * Get bundleName by pid.
      *
      * @param pid process id.
@@ -628,7 +636,7 @@ public:
      * @param bundleName The application bundle name.
      * @param enable The current updated enable status.
      */
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     /**
      * Register application or process state observer.

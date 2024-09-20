@@ -120,10 +120,11 @@ int ConnectionRecord::DisconnectAbility()
             TAG_LOGI(AAFwkTag::CONNECTION, "Disconnect UIServiceExtension ability, set correct want");
             targetService_->DisconnectAbilityWithWant(GetConnectWant());
         } else {
+            TAG_LOGI(AAFwkTag::CONNECTION, "DisconnectAbility called");
             targetService_->DisconnectAbility();
         }
     } else {
-        TAG_LOGD(AAFwkTag::CONNECTION,
+        TAG_LOGI(AAFwkTag::CONNECTION,
             "current connection count: %{public}zu, no need disconnect, just remove", connectNums);
         targetService_->RemoveConnectRecordFromList(shared_from_this());
         SetConnectState(ConnectionState::DISCONNECTED);

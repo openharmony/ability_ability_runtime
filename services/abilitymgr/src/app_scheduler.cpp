@@ -228,6 +228,13 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     callback->OnAppRemoteDied(abilityTokens);
 }
 
+void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->NotifyAppPreCache(pid, userId);
+}
+
 int AppScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
@@ -490,6 +497,12 @@ void AppScheduler::SetCurrentUserId(const int32_t userId)
 {
     CHECK_POINTER(appMgrClient_);
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetCurrentUserId(userId));
+}
+
+void AppScheduler::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    CHECK_POINTER(appMgrClient_);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetEnableStartProcessFlagByUserId(userId, enableStartProcess));
 }
 
 int32_t AppScheduler::NotifyFault(const AppExecFwk::FaultData &faultData)

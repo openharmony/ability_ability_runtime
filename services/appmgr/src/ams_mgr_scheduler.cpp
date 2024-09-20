@@ -463,6 +463,18 @@ void AmsMgrScheduler::SetCurrentUserId(const int32_t userId)
     amsMgrServiceInner_->SetCurrentUserId(userId);
 }
 
+void AmsMgrScheduler::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    if (!IsReady()) {
+        return;
+    }
+    if (amsMgrServiceInner_->VerifyRequestPermission() != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return;
+    }
+    amsMgrServiceInner_->SetEnableStartProcessFlagByUserId(userId, enableStartProcess);
+}
+
 int32_t AmsMgrScheduler::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
 {
     if (!IsReady()) {
@@ -578,13 +590,13 @@ bool AmsMgrScheduler::IsAttachDebug(const std::string &bundleName)
     return amsMgrServiceInner_->IsAttachDebug(bundleName);
 }
 
-void AmsMgrScheduler::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
+void AmsMgrScheduler::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return;
     }
-    amsMgrServiceInner_->SetKeepAliveEnableState(bundleName, enable);
+    amsMgrServiceInner_->SetKeepAliveEnableState(bundleName, enable, uid);
 }
 
 void AmsMgrScheduler::ClearProcessByToken(sptr<IRemoteObject> token)

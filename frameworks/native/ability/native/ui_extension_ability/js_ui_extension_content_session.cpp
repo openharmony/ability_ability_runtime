@@ -134,10 +134,8 @@ JsUIExtensionContentSession::JsUIExtensionContentSession(
     : sessionInfo_(sessionInfo), uiWindow_(uiWindow), context_(context)
 {
     listener_ = std::make_shared<UISessionAbilityResultListener>();
-    if (abilityResultListeners == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "abilityResultListeners is nullptr");
-    } else if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo is nullptr");
+    if (abilityResultListeners == nullptr || sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "params is nullptr");
     } else {
         abilityResultListeners->AddListener(sessionInfo->uiExtensionComponentId, listener_);
     }

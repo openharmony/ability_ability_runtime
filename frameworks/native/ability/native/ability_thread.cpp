@@ -41,11 +41,11 @@ void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &ap
 
     sptr<AbilityThread> thread = nullptr;
     if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
-        thread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+        thread = sptr<AbilityRuntime::UIAbilityThread>::MakeSptr();
     } else if (abilityInfo->type == AbilityType::EXTENSION) {
-        thread = new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+        thread = sptr<AbilityRuntime::ExtensionAbilityThread>::MakeSptr();
     } else {
-        thread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
+        thread = sptr<AbilityRuntime::FAAbilityThread>::MakeSptr();
     }
     if (thread == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "null thread");
@@ -74,11 +74,11 @@ void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &ap
 
     sptr<AbilityThread> thread = nullptr;
     if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
-        thread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+        thread = sptr<AbilityRuntime::UIAbilityThread>::MakeSptr();
     } else if (abilityInfo->type == AbilityType::EXTENSION) {
-        thread = new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+        thread = sptr<AbilityRuntime::ExtensionAbilityThread>::MakeSptr();
     } else {
-        thread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
+        thread = sptr<AbilityRuntime::FAAbilityThread>::MakeSptr();
     }
     if (thread == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "null thread");

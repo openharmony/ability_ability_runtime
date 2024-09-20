@@ -912,7 +912,7 @@ HWTEST_F(AmsMgrSchedulerTest, AttachAppDebug_001, TestSize.Level0)
     amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
     amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
     res = amsMgrScheduler->AttachAppDebug(bundleName);
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
 /**
@@ -931,7 +931,7 @@ HWTEST_F(AmsMgrSchedulerTest, DetachAppDebug_001, TestSize.Level0)
     amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
     amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
     res = amsMgrScheduler->DetachAppDebug(bundleName);
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
 /**

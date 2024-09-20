@@ -72,7 +72,6 @@ private:
 
     ChildProcessManagerErrorCode PreCheck();
     ChildProcessManagerErrorCode PreCheck(int32_t childProcessType);
-    ChildProcessManagerErrorCode PreCheckNativeProcess();
     void RegisterSignal();
     void HandleChildProcessBySelfFork(const std::string &srcEntry, const AppExecFwk::BundleInfo &bundleInfo);
     bool HasChildProcessRecord();

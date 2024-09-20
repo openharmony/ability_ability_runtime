@@ -58,20 +58,20 @@ bool StartAbilityUtils::GetApplicationInfo(const std::string &bundleName, int32_
     if (StartAbilityUtils::startAbilityInfo &&
         StartAbilityUtils::startAbilityInfo->GetAppBundleName() == bundleName) {
         appInfo = StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo;
-    } else {
-        if (bundleName.empty()) {
-            return false;
-        }
-        auto bms = AbilityUtil::GetBundleManagerHelper();
-        CHECK_POINTER_AND_RETURN(bms, false);
-        bool result = IN_PROCESS_CALL(
-            bms->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO,
-                userId, appInfo)
-        );
-        if (!result) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "failed: %{public}s", bundleName.c_str());
-            return false;
-        }
+        return true;
+    }
+    if (bundleName.empty()) {
+        return false;
+    }
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bms, false);
+    bool result = IN_PROCESS_CALL(
+        bms->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO,
+            userId, appInfo)
+    );
+    if (!result) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "failed: %{public}s", bundleName.c_str());
+        return false;
     }
     return true;
 }

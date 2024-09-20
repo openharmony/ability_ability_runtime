@@ -27,6 +27,7 @@
 #include "napi_common_want.h"
 #include "ohos_application.h"
 #include "startup_manager.h"
+#include "hitrace_meter.h"
 #include <algorithm>
 #include <cstring>
 #include <exception>
@@ -195,6 +196,7 @@ void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
         TAG_LOGE(AAFwkTag::APPKIT, "Failed to get 'onCreate' from AbilityStage object");
         return;
     }
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     napi_call_function(env, obj, methodOnCreate, 0, nullptr, nullptr);
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
@@ -634,6 +636,7 @@ napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const *
     }
 
     napi_value result = nullptr;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     napi_call_function(env, obj, method, argc, argv, &result);
     return result;
 }

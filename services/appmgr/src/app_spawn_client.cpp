@@ -312,15 +312,6 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         }
     }
 
-    if (!startMsg.extensionSandboxPath.empty()) {
-        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_EXTENSION,
-            startMsg.extensionSandboxPath.c_str());
-        if (ret) {
-            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
-            return ret;
-        }
-    }
-
     if (!startMsg.processType.empty()) {
         ret = AppSpawnReqMsgAddExtInfo(reqHandle, MSG_EXT_NAME_PROCESS_TYPE,
             reinterpret_cast<const uint8_t*>(startMsg.processType.c_str()), startMsg.processType.size());
@@ -338,6 +329,15 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         return ret;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "Send maxChildProcess %{public}s success", maxChildProcessStr.c_str());
+
+    if (!startMsg.extensionSandboxPath.empty()) {
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_EXTENSION,
+            startMsg.extensionSandboxPath.c_str());
+        if (ret) {
+            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
+            return ret;
+        }
+    }
 
     if (!startMsg.fds.empty()) {
         ret = SetExtMsgFds(reqHandle, startMsg.fds);

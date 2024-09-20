@@ -45,6 +45,7 @@ ohos_shared_library("actionextensionability_napi") {
   external_deps = [
     "napi:ace_napi",
     "ets_runtime:libark_jsruntime",
+    "runtime_core:libarkfile_static",
     ]
 
   relative_install_dir = "module/app/ability"

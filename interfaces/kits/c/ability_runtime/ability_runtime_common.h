@@ -51,6 +51,8 @@ typedef enum {
     ABILITY_RUNTIME_ERROR_CODE_NO_ERROR = 0,
     /** @error Invalid parameters. */
     ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID = 401,
+    /** @error The context does not exist. */
+    ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST = 16000011,
 } AbilityRuntime_ErrorCode;
 
 #ifdef __cplusplus
@@ -58,4 +60,4 @@ typedef enum {
 #endif
 
 /** @} */
-#endif //ABILITY_RUNTIME_COMMON_H
+#endif // ABILITY_RUNTIME_COMMON_H
