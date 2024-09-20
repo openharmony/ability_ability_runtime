@@ -2445,6 +2445,13 @@ int32_t UIAbilityLifecycleManager::DoProcessAttachment(std::shared_ptr<AbilityRe
     return statusBarDelegateManager->DoProcessAttachment(abilityRecord);
 }
 
+int32_t UIAbilityLifecycleManager::DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    auto statusBarDelegateManager = GetStatusBarDelegateManager();
+    CHECK_POINTER_AND_RETURN(statusBarDelegateManager, ERR_INVALID_VALUE);
+    return statusBarDelegateManager->DoCallerProcessAttachment(abilityRecord);
+}
+
 int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<int32_t>& pids)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -2516,11 +2523,20 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     }
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
+
+    if (!IsCallerInStatusBar() && (sessionInfo->processOptions != nullptr &&
+        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
+        return ERR_CAN_NOT_SHOW_HIDE;
+    }
     if (sessionInfo->processOptions == nullptr ||
         (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
         !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "process options check failed");
-        return ERR_START_OPTIONS_CHECK_FAILED;
+        auto ret = DoCallerProcessAttachment(abilityRecord);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
+            return ERR_CAN_NOT_SHOW_HIDE;
+        }
     }
     auto callerSessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(callerSessionInfo, ERR_INVALID_VALUE);
@@ -2541,11 +2557,6 @@ int UIAbilityLifecycleManager::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> 
     }
     std::shared_ptr<AbilityRecord> uiAbilityRecord = iter->second;
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
-    auto state = uiAbilityRecord->GetAbilityVisibilityState();
-    if (state == AbilityVisibilityState::UNSPECIFIED || state == AbilityVisibilityState::INITIAL) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability visibility check failed");
-        return ERR_NATIVE_ABILITY_STATE_CHECK_FAILED;
-    }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "change ability visibility: %{public}d", isShow);
     if (isShow) {
         uiAbilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_SHOW);
