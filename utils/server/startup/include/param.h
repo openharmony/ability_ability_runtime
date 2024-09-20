@@ -38,10 +38,11 @@ struct LoadParam : public Parcelable {
     static LoadParam *Unmarshalling(Parcel &parcel);
     bool ReadFromParcel(Parcel &parcel);
 
-    int32_t abilityRecordId = 0;
+    int32_t abilityRecordId = -1;
     bool isShellCall = false;
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> preToken = nullptr;
+    std::string instanceKey = "";
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

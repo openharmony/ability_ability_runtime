@@ -175,7 +175,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::string jsonStr(data, size);
     BundleInfo bundleInfo;
-    manager->CreateAppRunningRecord(appInfo, jsonStr, bundleInfo);
+    manager->CreateAppRunningRecord(appInfo, jsonStr, bundleInfo, "");
     int uid = static_cast<int>(GetU32Data(data));
     manager->CheckAppRunningRecordIsExist(jsonStr, jsonStr, uid, bundleInfo, jsonStr);
     manager->CheckAppRunningRecordIsExistByBundleName(jsonStr);

@@ -139,7 +139,7 @@ public:
      */
     int LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
         const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-        const Want &want, int32_t abilityRecordId);
+        const Want &want, int32_t abilityRecordId, const std::string &instanceKey);
 
     /**
      * terminate ability with token.
