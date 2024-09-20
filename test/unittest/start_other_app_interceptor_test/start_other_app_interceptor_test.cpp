@@ -203,7 +203,9 @@ HWTEST_F(StartOtherAppInterceptorTest, DoProcess_001, TestSize.Level1)
 {
     auto interceptor = std::make_shared<StartOtherAppInterceptor>();
     Want want;
-    AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr);
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr,
+        shouldBlockFunc);
     int32_t res = interceptor->DoProcess(param);
     EXPECT_EQ(res, ERR_OK);
 }
@@ -217,7 +219,9 @@ HWTEST_F(StartOtherAppInterceptorTest, DoProcess_002, TestSize.Level1)
 {
     auto interceptor = std::make_shared<StartOtherAppInterceptor>();
     Want want;
-    AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr);
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr,
+        shouldBlockFunc);
     int32_t res = interceptor->DoProcess(param);
     EXPECT_EQ(res, ERR_OK);
 }

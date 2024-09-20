@@ -110,7 +110,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     }
     
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(
-        *want, intParam, int32Param, boolParam, nullptr);
+        *want, intParam, int32Param, boolParam, nullptr, nullptr);
     abilityInterceptorExecuter->DoProcess(interceptorParam);
 
     // fuzz for AbilityRunningInfo
