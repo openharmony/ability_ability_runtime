@@ -528,10 +528,6 @@ int32_t AmsMgrScheduler::AttachAppDebug(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
         return ERR_INVALID_OPERATION;
     }
-    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_NAME)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "caller is not foundation");
-        return ERR_INVALID_OPERATION;
-    }
     return amsMgrServiceInner_->AttachAppDebug(bundleName);
 }
 
@@ -539,10 +535,6 @@ int32_t AmsMgrScheduler::DetachAppDebug(const std::string &bundleName)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
-        return ERR_INVALID_OPERATION;
-    }
-    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_NAME)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "caller is not foundation");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->DetachAppDebug(bundleName);

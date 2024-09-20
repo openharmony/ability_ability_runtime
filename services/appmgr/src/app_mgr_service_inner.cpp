@@ -2158,16 +2158,6 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (want != nullptr && (want->GetBoolParam(DEBUG_APP, false) || want->GetBoolParam(NATIVE_DEBUG, false))) {
-        if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Developer Mode is false.");
-            return nullptr;
-        }
-        if (appInfo != nullptr && appInfo->appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-            TAG_LOGE(AAFwkTag::APPMGR, "release app not support debug");
-            return nullptr;
-        }
-    }
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager nullptr!");
         return nullptr;
