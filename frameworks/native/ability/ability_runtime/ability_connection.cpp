@@ -90,6 +90,7 @@ void AbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& e
         (*item)->OnAbilityDisconnectDone(element, resultCode);
         item++;
     }
+    SetRemoteObject(nullptr);
     TAG_LOGD(AAFwkTag::CONNECTION, "bundleName:%{public}s, abilityName:%{public}s",
         element.GetBundleName().c_str(), element.GetAbilityName().c_str());
 }
