@@ -2285,6 +2285,8 @@ private:
     
     void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
         const Want& want, uint32_t specifyTokenId);
+    
+    void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
