@@ -2286,6 +2286,20 @@ private:
     void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
         const Want& want, uint32_t specifyTokenId);
 
+    /**
+     * @brief Check debug app in developer mode.
+     * @param applicationInfo. The application info.
+     * @return Returns ture or false.
+     */
+    bool CheckDebugAppNotInDeveloperMode(const AppExecFwk::ApplicationInfo &applicationInfo);
+
+    /**
+     * @brief Prompt user that developer mode has not been turned on.
+     * @param bundleName. The bundleName of the blocked hap.
+     * @param abilityName. The abilityName of the blocked hap.
+     */
+    void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 

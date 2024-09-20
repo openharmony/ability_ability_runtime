@@ -47,6 +47,7 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "mock_session_manager_service.h"
+#include "modal_system_dialog/modal_system_dialog_ui_extension.h"
 #include "modal_system_ui_extension.h"
 #include "os_account_manager_wrapper.h"
 #include "permission_constants.h"
@@ -73,6 +74,7 @@
 #include "utils/ability_permission_util.h"
 #include "utils/dump_utils.h"
 #include "utils/extension_permissions_util.h"
+#include "utils/modal_system_dialog_util.h"
 #include "utils/window_options_utils.h"
 #include "utils/want_utils.h"
 #ifdef SUPPORT_GRAPHICS
@@ -6128,6 +6130,14 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
         request.startRecent = true;
     }
 
+    if (ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(request.abilityInfo.applicationInfo)) {
+        if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+            ModalSystemDialogUtil::ShowDeveloperModeDialog(request.abilityInfo.bundleName, request.abilityInfo.name);
+        }
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not developer mode");
+        return ERR_NOT_DEVELOPER_MODE;
+    }
+
     return ERR_OK;
 }
 
@@ -6155,7 +6165,10 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
     if (abilityInfo->status != ERR_OK) {
         return abilityInfo->status;
     }
-
+    if (ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(abilityInfo->abilityInfo.applicationInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not developer mode");
+        return ERR_NOT_DEVELOPER_MODE;
+    }
     auto result = InitialAbilityRequest(request, *abilityInfo);
     return result;
 }
