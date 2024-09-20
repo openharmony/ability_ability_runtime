@@ -64,7 +64,8 @@ void AppRunningManager::initConfig(const Configuration &config)
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
-    const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo)
+    const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo,
+    const std::string &instanceKey)
 {
     if (!appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
@@ -96,6 +97,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     appRecord->SetSignCode(signCode);
     appRecord->SetJointUserId(bundleInfo.jointUserId);
     appRecord->SetAppIdentifier(bundleInfo.signatureInfo.appIdentifier);
+    appRecord->SetInstanceKey(instanceKey);
     {
         std::lock_guard guard(runningRecordMapMutex_);
         appRunningRecordMap_.emplace(recordId, appRecord);
@@ -109,7 +111,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
     const std::string &processName, const int uid, const BundleInfo &bundleInfo,
-    const std::string &specifiedProcessFlag, bool *isProCache)
+    const std::string &specifiedProcessFlag, bool *isProCache, const std::string &instanceKey)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -136,7 +138,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     }
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
-        if (appRecord && appRecord->GetProcessName() == processName &&
+        if (appRecord && appRecord->GetProcessName() == processName && appRecord->GetInstanceKey() == instanceKey &&
             (specifiedProcessFlag.empty() || appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
             !(appRecord->IsUserRequestCleaning())) {

@@ -90,6 +90,10 @@ constexpr const char* ERROR_MSG_EXTENSION_START_THIRD_PARTY_APP_CONTROLLED =
 constexpr const char* ERROR_MSG_EXTENSION_START_SERVICE_CONTROLLED = "The extension can not start the service.";
 constexpr const char* ERROR_MSG_FREE_INSTALL_TASK_NOT_EXIST = "The target free install task does not exist.";
 constexpr const char* ERROR_MSG_MULTI_INSTANCE_NOT_SUPPORTED = "Multi-instance is not supported.";
+constexpr const char* ERROR_MSG_INVALID_APP_INSTANCE_KEY = "The app instance key does not exist.";
+constexpr const char* ERROR_MSG_UPPER_LIMIT = "The number of app instances reaches the limit.";
+constexpr const char* ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT = "The APP_INSTANCE_KEY cannot be specified.";
+constexpr const char* ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT = "Creating a new instance is not supported.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -152,7 +156,11 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_EXTENSION_START_SERVICE_CONTROLLED, ERROR_MSG_EXTENSION_START_SERVICE_CONTROLLED},
     { AbilityErrorCode::ERROR_CODE_BUNDLE_NAME_INVALID, ERROR_MSG_TARGET_BUNDLE_NOT_EXIST},
     { AbilityErrorCode::ERROR_CODE_FREE_INSTALL_TASK_NOT_EXIST, ERROR_MSG_FREE_INSTALL_TASK_NOT_EXIST },
-    { AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED, ERROR_MSG_MULTI_INSTANCE_NOT_SUPPORTED }
+    { AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED, ERROR_MSG_MULTI_INSTANCE_NOT_SUPPORTED },
+    { AbilityErrorCode::ERROR_CODE_INVALID_APP_INSTANCE_KEY, ERROR_MSG_INVALID_APP_INSTANCE_KEY },
+    { AbilityErrorCode::ERROR_CODE_UPPER_LIMIT, ERROR_MSG_UPPER_LIMIT },
+    { AbilityErrorCode::ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT, ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT },
+    { AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT, ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT },
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -218,6 +226,11 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_BUNDLE_NAME_INVALID},
     {ERR_FREE_INSTALL_TASK_NOT_EXIST, AbilityErrorCode::ERROR_CODE_FREE_INSTALL_TASK_NOT_EXIST},
     {ERR_MULTI_INSTANCE_NOT_SUPPORTED, AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED},
+    {ERR_NOT_SUPPORT_APP_CLONE, AbilityErrorCode::ERROR_NOT_APP_CLONE},
+    {ERR_INVALID_APP_INSTANCE_KEY, AbilityErrorCode::ERROR_CODE_INVALID_APP_INSTANCE_KEY},
+    {ERR_UPPER_LIMIT, AbilityErrorCode::ERROR_CODE_UPPER_LIMIT},
+    {ERR_APP_INSTANCE_KEY_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT},
+    {ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT},
 };
 }
 
