@@ -82,7 +82,7 @@ void DataAbilityHelperImpl::AddDataAbilityDeathRecipient(const sptr<IRemoteObjec
     if (callerDeathRecipient_ == nullptr) {
         std::weak_ptr<DataAbilityHelperImpl> thisWeakPtr(shared_from_this());
         callerDeathRecipient_ =
-            new DataAbilityDeathRecipient([thisWeakPtr](const wptr<IRemoteObject> &remote) {
+            new (std::nothrow) DataAbilityDeathRecipient([thisWeakPtr](const wptr<IRemoteObject> &remote) {
                 auto DataAbilityHelperImpl = thisWeakPtr.lock();
                 if (DataAbilityHelperImpl) {
                     DataAbilityHelperImpl->OnSchedulerDied(remote);
@@ -105,13 +105,6 @@ void DataAbilityHelperImpl::OnSchedulerDied(const wptr<IRemoteObject> &remote)
     uri_ = nullptr;
 }
 
-/**
- * @brief Creates a DataAbilityHelperImpl instance without specifying the Uri based on the given Context.
- *
- * @param context Indicates the Context object on OHOS.
- *
- * @return Returns the created DataAbilityHelperImpl instance where Uri is not specified.
- */
 std::shared_ptr<DataAbilityHelperImpl> DataAbilityHelperImpl::Creator(const std::shared_ptr<Context> &context)
 {
     if (context == nullptr) {

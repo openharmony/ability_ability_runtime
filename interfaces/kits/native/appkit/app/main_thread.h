@@ -657,7 +657,6 @@ private:
     MainThreadState mainThreadState_ = MainThreadState::INIT;
     sptr<IAppMgr> appMgr_ = nullptr;  // appMgrService Handler
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
-    std::string aceApplicationName_ = "AceApplication";
     std::string pathSeparator_ = "/";
     std::string abilityLibraryType_ = ".so";
     static std::weak_ptr<OHOSApplication> applicationForDump_;

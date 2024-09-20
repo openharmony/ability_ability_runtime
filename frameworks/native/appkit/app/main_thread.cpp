@@ -795,15 +795,12 @@ void MainThread::ScheduleConfigurationUpdated(const Configuration &config)
 
 bool MainThread::CheckLaunchApplicationParam(const AppLaunchData &appLaunchData) const
 {
-    ApplicationInfo appInfo = appLaunchData.GetApplicationInfo();
-    ProcessInfo processInfo = appLaunchData.GetProcessInfo();
-
-    if (appInfo.name.empty()) {
+    if (appLaunchData.GetApplicationInfo().name.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "applicationName is empty");
         return false;
     }
 
-    if (processInfo.GetProcessName().empty()) {
+    if (appLaunchData.GetProcessInfo().GetProcessName().empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "processName is empty");
         return false;
     }
@@ -908,7 +905,7 @@ void MainThread::HandleProcessSecurityExit()
         TAG_LOGE(AAFwkTag::APPKIT, "application_ is null");
         return;
     }
-    std::vector<sptr<IRemoteObject>> tokens = (abilityRecordMgr_->GetAllTokens());
+    std::vector<sptr<IRemoteObject>> tokens = abilityRecordMgr_->GetAllTokens();
 
     for (auto iter = tokens.begin(); iter != tokens.end(); ++iter) {
         HandleCleanAbilityLocal(*iter);
@@ -1048,7 +1045,7 @@ void MainThread::OnStartAbility(const std::string &bundleName,
         if (res != ERR_OK) {
             TAG_LOGW(AAFwkTag::APPKIT, "getOverlayPath failed");
         }
-        if (overlayModuleInfos_.size() == 0) {
+        if (overlayModuleInfos_.empty()) {
             if (!resourceManager->AddResource(loadPath.c_str())) {
                 TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
             }
@@ -1162,7 +1159,7 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
     }
 
     // 2.add/remove overlay hapPath
-    if (loadPath.empty() || overlayModuleInfos.size() == 0) {
+    if (loadPath.empty() || overlayModuleInfos.empty()) {
         TAG_LOGW(AAFwkTag::APPKIT, "There is not any hapPath in overlayModuleInfo");
     } else {
         if (isEnable) {
@@ -1190,12 +1187,8 @@ bool IsNeedLoadLibrary(const std::string &bundleName)
         "com.ohos.formrenderservice"
     };
 
-    for (const auto &item : needLoadLibraryBundleNames) {
-        if (item == bundleName) {
-            return true;
-        }
-    }
-    return false;
+    return std::find(needLoadLibraryBundleNames.begin(), needLoadLibraryBundleNames.end(), bundleName)
+        != needLoadLibraryBundleNames.end();
 }
 
 bool GetBundleForLaunchApplication(std::shared_ptr<BundleMgrHelper> bundleMgrHelper, const std::string &bundleName,
