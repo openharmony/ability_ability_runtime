@@ -360,7 +360,7 @@ bool ExtensionRecordManager::IsPreloadExtensionRecord(const AAFwk::AbilityReques
 }
 
 bool ExtensionRecordManager::RemovePreloadUIExtensionRecordById(
-    const std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey,
+    const std::tuple<std::string, std::string, std::string, std::string> &extensionRecordMapKey,
     int32_t extensionRecordId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
