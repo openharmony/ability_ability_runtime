@@ -28,6 +28,7 @@
 #include "mock_native_token.h"
 #include "mock_permission_verification.h"
 #include "mock_sa_call.h"
+#include "param.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -185,8 +186,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityN
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.isStageBasedModel = true;
     hapModuleInfo.process = "testMainProcess";
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     ASSERT_NE(appRecord, nullptr);
     appRecord->SetEmptyKeepAliveAppState(true);
     appRecord->SetMainProcess(true);
@@ -212,8 +216,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityN
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.isStageBasedModel = true;
     hapModuleInfo.process = TEST_PROCESS_NAME;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     ASSERT_NE(appRecord, nullptr);
     appRecord->SetEmptyKeepAliveAppState(true);
 
@@ -250,8 +257,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ForceKillApp
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     const BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     appRecord->GetPriorityObject()->SetPid(1); // kill Init process
     auto ret = appMgrServiceInner->ForceKillApplicationInner(TEST_BUNDLE_NAME, DEFAULT_INVAL_VALUE, appIndex);
     EXPECT_EQ(ret, ERR_OK);
@@ -270,8 +280,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ForceKillApp
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     const BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     appRecord->GetPriorityObject()->SetPid(INT_MAX);
 
     // kill not exist pid, expect ERR_KILL_PROCESS_NOT_EXIST
@@ -326,8 +339,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillProcesse
     HapModuleInfo hapModuleInfo;
     const int32_t accessTokenId = 123; // 123 means tokenid
     applicationInfo_->accessTokenId = accessTokenId;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     appRecord->SetSpawned();
     appRecord->GetPriorityObject()->SetPid(INT_MAX);
     auto ret = appMgrServiceInner->KillProcessesByAccessTokenId(accessTokenId);
@@ -351,8 +367,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillProcesse
     HapModuleInfo hapModuleInfo;
     const int32_t accessTokenId = 123;
     applicationInfo_->accessTokenId = accessTokenId;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     appRecord->SetSpawned();
     appRecord->GetPriorityObject()->SetPid(1);
     auto ret = appMgrServiceInner->KillProcessesByAccessTokenId(accessTokenId);
@@ -405,8 +424,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetAllChildr
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     ChildProcessRequest request;
     auto record1 = std::make_shared<ChildProcessRecord>(IPCSkeleton::GetCallingPid(), request, appRecord);
     appRecord->AddChildProcessRecord(1, record1);
@@ -432,8 +454,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetAllChildr
     HapModuleInfo hapModuleInfo;
     const int32_t accessTokenId = 123; // 123 means tokenid
     applicationInfo_->accessTokenId = accessTokenId;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     ChildProcessRequest request;
     auto record1 = std::make_shared<ChildProcessRecord>(IPCSkeleton::GetCallingPid(), request, appRecord);
     appRecord->AddChildProcessRecord(1, record1);
@@ -507,8 +532,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyAppFau
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     appRecord->GetPriorityObject()->SetPid(1);
     appRecord->SetState(ApplicationState::APP_STATE_TERMINATED);
 
@@ -544,8 +572,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_BuildEventIn
 
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
-    appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
 
     AAFwk::EventInfo eventInfo {.bundleName = applicationInfo_->name,
         .versionName = applicationInfo_->versionName,
@@ -575,8 +606,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_UpdateRender
 
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
-    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     appRecord->GetPriorityObject()->SetPid(1);
     ret = appMgrServiceInner->UpdateRenderState(INT_MAX, 0);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -609,8 +643,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemMgr
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
-    appRecord = appMgrServiceInner->CreateAppRunningRecord(token_, preToken_, applicationInfo_, abilityInfo_,
-        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, 1, false);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
 
     ret = appMgrServiceInner->NotifyMemMgrPriorityChanged(appRecord);
     EXPECT_FALSE(ret); // stub err

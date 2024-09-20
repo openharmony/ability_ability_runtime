@@ -43,7 +43,7 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback>& callback)
 
 int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
     const AppExecFwk::AbilityInfo& abilityInfo, const AppExecFwk::ApplicationInfo& applicationInfo,
-    const AAFwk::Want& want, int32_t abilityRecordId)
+    const AAFwk::Want& want, int32_t abilityRecordId, const std::string &instanceKey)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::LoadAbility()");
     if (applicationInfo.bundleName.find("com.ix.First.Test") != std::string::npos) {

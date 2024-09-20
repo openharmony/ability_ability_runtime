@@ -3546,5 +3546,20 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_006, TestSize.L
     EXPECT_EQ(paramStramUris.size(), 1);
 }
 
+/*
+ * Feature: AbilityRecord
+ * Function: GetInstanceKey
+ * SubFunction: GetInstanceKey
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetInstanceKey
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetInstanceKey_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    auto instanceKey = abilityRecord->GetInstanceKey();
+    EXPECT_EQ(instanceKey, "");
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS
