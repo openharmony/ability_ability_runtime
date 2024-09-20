@@ -28,6 +28,16 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
 
 bool UnwrapStartOptionsAndWant(napi_env env, napi_value param, AAFwk::StartOptions &startOptions, AAFwk::Want &want);
 
+#ifdef SUPPORT_GRAPHICS
+bool UnwrapPixelMapByPropertyName(
+    napi_env env, const char *propertyName, std::shared_ptr<Media::PixelMap> &value);
+
+bool UnwrapPixelMapFromJS(napi_env env, napi_value param, std::shared_ptr<Media::PixelMap> &value);
+
+bool UnwrapStartWindowOption(napi_env env, napi_value param,
+    std::shared_ptr<AAFwk::StartWindowOption> &tartWindowOption);
+
+#endif
 EXTERN_C_END
 }  // namespace AppExecFwk
 }  // namespace OHOS
