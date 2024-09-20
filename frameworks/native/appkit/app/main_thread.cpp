@@ -2109,7 +2109,6 @@ void MainThread::HandleCleanAbilityLocal(const sptr<IRemoteObject> &token)
         TAG_LOGW(AAFwkTag::APPKIT, "runner not found");
     }
 #endif
-    AfterCleanAbilityGC();
 }
 
 /**
@@ -2158,18 +2157,8 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
     }
 #endif
     appMgr_->AbilityCleaned(token);
-    AfterCleanAbilityGC();
     TAG_LOGD(AAFwkTag::APPKIT, "end. app: %{public}s, ability: %{public}s.",
         applicationInfo_->name.c_str(), abilityInfo->name.c_str());
-}
-
-void MainThread::AfterCleanAbilityGC()
-{
-    bool appBackground = applicationImpl_ ?
-        applicationImpl_->GetState() != ApplicationImpl::APP_STATE_FOREGROUND : false;
-    if (appBackground) {
-        ForceFullGC();
-    }
 }
 
 /**
