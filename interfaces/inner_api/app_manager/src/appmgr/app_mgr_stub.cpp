@@ -1532,7 +1532,7 @@ int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, Messag
 
 int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     std::string libName = data.ReadString();
     int32_t childCount = data.ReadInt32();
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
