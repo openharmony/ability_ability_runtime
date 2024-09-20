@@ -1504,7 +1504,6 @@ private:
     void CheckCleanAbilityByUserRequest(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityRunningRecord> &abilityRecord, const AbilityState state);
     void GetPidsByAccessTokenId(const uint32_t accessTokenId, std::vector<pid_t> &pids);
-    bool CheckIsDebugApp(const std::string &bundleName);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
