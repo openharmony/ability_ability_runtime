@@ -3520,6 +3520,8 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
         return ERR_WRONG_INTERFACE_CALL;
     }
 
+    SetMinimizedDuringFreeInstall(sessionInfo);
+
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::ABILITYMGR,
@@ -3754,6 +3756,51 @@ int AbilityManagerService::MinimizeUIExtensionAbility(const sptr<SessionInfo> &e
     return ERR_OK;
 }
 
+void AbilityManagerService::SetMinimizedDuringFreeInstall(const sptr<SessionInfo> &sessionInfo)
+{
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo null");
+        return;
+    }
+
+    if (!(sessionInfo->want).HasParameter(KEY_SESSION_ID)) {
+        return;
+    }
+
+    std::string sessionId = (sessionInfo->want).GetStringParam(KEY_SESSION_ID);
+    if (sessionId.empty()) {
+        return;
+    }
+
+    if (freeInstallManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "freeInstallManager_ null");
+        return;
+    }
+    FreeInstallInfo taskInfo;
+    if (!freeInstallManager_->GetFreeInstallTaskInfo(sessionId, taskInfo)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "free install task with sessionId=%{public}s does not exist",
+            sessionId.c_str());
+        return;
+    }
+
+    if (taskInfo.isFreeInstallFinished) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "free install task finished");
+        return;
+    }
+
+    {
+        std::lock_guard<ffrt::mutex> guard(preStartSessionMapLock_);
+        preStartSessionMap_.insert(std::make_pair(sessionId, sessionInfo));
+        auto it = preStartSessionMap_.find(sessionId);
+        if (it == preStartSessionMap_.end()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "session info with sessionId=%{public}s does not exist",
+                sessionId.c_str());
+            return;
+        }
+        it->second->isMinimizedDuringFreeInstall = true;
+    }
+}
+
 int AbilityManagerService::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser,
     uint32_t sceneFlag)
 {
@@ -3768,6 +3815,8 @@ int AbilityManagerService::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessi
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard, no allowed");
         return ERR_WRONG_INTERFACE_CALL;
     }
+
+    SetMinimizedDuringFreeInstall(sessionInfo);
 
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
@@ -11801,6 +11850,12 @@ int32_t AbilityManagerService::StartUIAbilityByPreInstall(const FreeInstallInfo 
         (sessionInfo->want).SetElement(want.GetElement());
     }
 
+    if (sessionInfo == nullptr || sessionInfo->isMinimizedDuringFreeInstall) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo is nullptr or ability is already minimized");
+        RemovePreStartSession(sessionId);
+        return ERR_INVALID_VALUE;
+    }
+
     int errCode = ERR_OK;
     bool isColdStart = true;
     if ((errCode = StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, 0, isColdStart)) != ERR_OK) {
@@ -12016,6 +12071,8 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
         TAG_LOGE(AAFwkTag::ABILITYMGR, "only support sceneboard call");
         return ERR_WRONG_INTERFACE_CALL;
     }
+
+    SetMinimizedDuringFreeInstall(sessionInfo);
 
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
