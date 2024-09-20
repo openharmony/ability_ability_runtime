@@ -25,9 +25,16 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-const int32_t MAX_CLONE_APP_NUM = 128;
+constexpr int32_t MAX_CLONE_APP_NUM = 128;
+constexpr int32_t MAX_INSTANCE_NUM = 10;
 struct RunningAppClone {
     int32_t appCloneIndex;
+    int32_t uid;
+    std::vector<int32_t> pids;
+};
+
+struct RunningMultiInstanceInfo {
+    std::string instanceKey;
     int32_t uid;
     std::vector<int32_t> pids;
 };
@@ -36,6 +43,7 @@ struct RunningMultiAppInfo : public Parcelable {
     std::string bundleName;
     int32_t mode;
     std::vector<RunningAppClone> runningAppClones;
+    std::vector<RunningMultiInstanceInfo> runningMultiIntanceInfos;
     
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
