@@ -85,7 +85,7 @@ enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 constexpr int32_t BASE_USER_RANGE = 200000;
 constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t INVALID_USER_ID = -1;
-constexpr const char* KEY_SESSION_ID = "com.ohohs.param.sessionId";
+constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 using OHOS::AppExecFwk::IAbilityController;
 class PendingWantManager;
 struct StartAbilityInfo;
@@ -2250,6 +2250,8 @@ private:
 
     void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
         const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
+    
+    void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
