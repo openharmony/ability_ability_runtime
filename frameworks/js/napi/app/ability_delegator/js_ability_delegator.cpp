@@ -773,7 +773,7 @@ napi_value JSAbilityDelegator::OnGetCurrentTopAbility(napi_env env, NapiCallback
         return ThrowJsError(env, INCORRECT_PARAMETERS, "Parse callback failed, callback must be function");
     }
 
-    NapiAsyncTask::CompleteCallback complete = [this](napi_env env, NapiAsyncTask &task, int32_t status) {
+    NapiAsyncTask::CompleteCallback complete = [](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "complete called");
         auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
         if (!delegator) {

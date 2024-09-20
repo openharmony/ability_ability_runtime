@@ -287,16 +287,16 @@ HWTEST_F(AppkitNativeModuleTestThird, App_CleanAbility_0500, Function | MediumTe
 }
 
 /**
- * @tc.number: App_ElementsCallbacks_0100
- * @tc.name: Application ElementsCallbacks
+ * @tc.number: App_TerminateApplication_0100
+ * @tc.name: Application functions
  * @tc.desc: Mock application Mock appmgr and register it into the systemmanager.
  *           The Appfwk has started successfully.
  *           The Appfwk has started successfully.
- *           Verifying whether ElementsCallbacks registration, unregister, and its observer mechanism are valid.
+ *           Verifying registration, unregister, and its observer mechanism are valid.
  */
-HWTEST_F(AppkitNativeModuleTestThird, App_ElementsCallbacks_0100, Function | MediumTest | Level2)
+HWTEST_F(AppkitNativeModuleTestThird, App_TerminateApplication_0100, Function | MediumTest | Level2)
 {
-    GTEST_LOG_(INFO) << "App_ElementsCallbacks_0100 start";
+    GTEST_LOG_(INFO) << "App_TerminateApplication_0100 start";
     OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->RegisterSystemAbility(APP_MGR_SERVICE_ID, AppMgrObject_);
     runner_->Run();
 
@@ -324,24 +324,24 @@ HWTEST_F(AppkitNativeModuleTestThird, App_ElementsCallbacks_0100, Function | Med
 
     runner_->Stop();
     OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->UnregisterSystemAbility(APP_MGR_SERVICE_ID);
-    GTEST_LOG_(INFO) << "App_ElementsCallbacks_0100 end";
+    GTEST_LOG_(INFO) << "App_TerminateApplication_0100 end";
 }
 
 /**
- * @tc.number: App_AbilityLifecycleCallbacks_0100
- * @tc.name: Application AbilityLifecycleCallbacks
+ * @tc.number: App_LaunchApplication_0100
+ * @tc.name: Application functions
  * @tc.desc: Mock ability
  *           Mock application
  *           Mock appmgr and register it into the systemmanager.
  *           The Appfwk has started successfully.
  *           The application has been launched successfully.
  *           The ability has been launched successfully.
- *           Verifying whether AbilityLifecycleCallbacks registration, unregister, and its observer mechanism are
+ *           Verifying registration, unregister, and its observer mechanism are
  valid.
  */
-HWTEST_F(AppkitNativeModuleTestThird, App_AbilityLifecycleCallbacks_0100, Function | MediumTest | Level2)
+HWTEST_F(AppkitNativeModuleTestThird, App_LaunchApplication_0100, Function | MediumTest | Level2)
 {
-    GTEST_LOG_(INFO) << "App_AbilityLifecycleCallbacks_0100 start";
+    GTEST_LOG_(INFO) << "App_LaunchApplication_0100 start";
     OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->RegisterSystemAbility(APP_MGR_SERVICE_ID, AppMgrObject_);
     runner_->Run();
 
@@ -358,7 +358,7 @@ HWTEST_F(AppkitNativeModuleTestThird, App_AbilityLifecycleCallbacks_0100, Functi
 
     runner_->Stop();
     OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->UnregisterSystemAbility(APP_MGR_SERVICE_ID);
-    GTEST_LOG_(INFO) << "App_AbilityLifecycleCallbacks_0100 end";
+    GTEST_LOG_(INFO) << "App_LaunchApplication_0100 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

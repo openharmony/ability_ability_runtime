@@ -185,6 +185,7 @@ ohos_shared_library("appkit_native") {
     "ffrt:libffrt",
     "graphic_2d:2d_graphics",
     "graphic_2d:libcomposer",
+    "graphic_2d:librender_service_base",
     "graphic_2d:EGL",
     "hicollie:libhicollie",
     "hilog:libhilog",
@@ -272,6 +273,8 @@ ohos_shared_library("appkit_native") {
 
 # build so
 ohos_shared_library("app_context") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
@@ -346,6 +349,8 @@ ohos_shared_library("app_context") {
 
 # build so
 ohos_shared_library("app_context_utils") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_napi_path}/ability_auto_startup_callback",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
@@ -412,6 +417,8 @@ ohos_shared_library("app_context_utils") {
 
 # build so
 ohos_shared_library("appkit_delegator") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
@@ -498,6 +505,8 @@ config("application_context_manager_config") {
 }
 
 ohos_shared_library("appkit_manager_helper") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
@@ -542,6 +551,8 @@ ohos_shared_library("appkit_manager_helper") {
 }
 
 ohos_shared_library("application_context_manager") {
+  branch_protector_ret = "pac_ret"
+
   sources = [ "${ability_runtime_native_path}/appkit/ability_runtime/context/application_context_manager.cpp" ]
 
   cflags = []

@@ -26,6 +26,8 @@ config("error_utils_config") {
 }
 
 ohos_shared_library("ability_runtime_error_util") {
+  branch_protector_ret = "pac_ret"
+
   sources = [ "src/ability_runtime_error_util.cpp" ]
 
   public_configs = [ ":error_utils_config" ]

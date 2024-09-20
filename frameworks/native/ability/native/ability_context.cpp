@@ -95,11 +95,15 @@ ErrCode AbilityContext::TerminateAbility()
                     TAG_LOGE(AAFwkTag::CONTEXT, "null sessionToken");
                     return ERR_INVALID_VALUE;
                 }
-                sptr<AAFwk::SessionInfo> sessionInfo = new AAFwk::SessionInfo();
+                sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
                 sessionInfo->want = resultWant_;
                 sessionInfo->resultCode = resultCode_;
                 TAG_LOGI(AAFwkTag::CONTEXT, "resultCode: %{public}d", sessionInfo->resultCode);
                 auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
+                if (ifaceSessionToken == nullptr) {
+                    TAG_LOGE(AAFwkTag::CONTEXT, "null sessionToken");
+                    return ERR_INVALID_VALUE;
+                }
                 auto err = ifaceSessionToken->TerminateSession(sessionInfo);
                 TAG_LOGI(AAFwkTag::CONTEXT, "ret: %{public}d", err);
                 return static_cast<int32_t>(err);
@@ -297,7 +301,7 @@ void AbilityContext::RequestPermissionsFromUser(std::vector<std::string> &permis
     want.SetParam(PERMISSION_KEY, permissions);
     want.SetParam(STATE_KEY, permissionsState);
     want.SetParam(TOKEN_KEY, token_);
-    sptr<IRemoteObject> remoteObject = new AbilityRuntime::AuthorizationResult(std::move(task));
+    sptr<IRemoteObject> remoteObject = sptr<AbilityRuntime::AuthorizationResult>::MakeSptr(std::move(task));
     want.SetParam(CALLBACK_KEY, remoteObject);
     StartAbility(want, -1);
     TAG_LOGD(AAFwkTag::CONTEXT, "end");

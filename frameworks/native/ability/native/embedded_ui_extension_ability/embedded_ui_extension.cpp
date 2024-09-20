@@ -26,7 +26,7 @@ EmbeddedUIExtension *EmbeddedUIExtension::Create(const std::unique_ptr<Runtime> 
 {
     TAG_LOGD(AAFwkTag::EMBEDDED_EXT, "called");
     if (runtime == nullptr) {
-        return new EmbeddedUIExtension();
+        return new (std::nothrow) EmbeddedUIExtension();
     }
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:

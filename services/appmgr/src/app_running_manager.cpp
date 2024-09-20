@@ -95,6 +95,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     appRecord->SetKeepAliveBundle(bundleInfo.isKeepAlive);
     appRecord->SetSignCode(signCode);
     appRecord->SetJointUserId(bundleInfo.jointUserId);
+    appRecord->SetAppIdentifier(bundleInfo.signatureInfo.appIdentifier);
     {
         std::lock_guard guard(runningRecordMapMutex_);
         appRunningRecordMap_.emplace(recordId, appRecord);
@@ -555,21 +556,15 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
     }
 
     std::shared_ptr<AbilityRunningRecord> abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
-    bool isSCB = false;
     bool isPage = false;
     if (abilityRecord) {
         abilityRecord->SetTerminating();
-        isSCB = abilityRecord->IsSceneBoard();
-        if (isSCB && appRecord->GetPriorityObject() && serviceInner != nullptr) {
-            pid_t pid = appRecord->GetPriorityObject()->GetPid();
-            (void)serviceInner->KillProcessByPid(pid, "AttachTimeoutKillSCB");
-        }
         if (abilityRecord->GetAbilityInfo() != nullptr) {
             isPage = (abilityRecord->GetAbilityInfo()->type == AbilityType::PAGE);
         }
     }
 
-    if ((isSCB || isPage || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
+    if ((isPage || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
         appRecord->SetTerminating();
     }
@@ -669,8 +664,12 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
+            cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
                 appRecord->GetBundleName().c_str());
+            if (clearMissionFlag) {
+                NotifyAppPreCache(appRecord, appMgrServiceInner);
+            }
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
@@ -678,9 +677,28 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
             auto delayTime = appRecord->ExtensionAbilityRecordExists() ?
                 AMSEventHandler::DELAY_KILL_EXTENSION_PROCESS_TIMEOUT : AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT;
-            appRecord->PostTask("DELAY_KILL_PROCESS", delayTime, killProcess);
+            std::string taskName = std::string("DELAY_KILL_PROCESS_") + std::to_string(appRecord->GetRecordId());
+            appRecord->PostTask(taskName, delayTime, killProcess);
         }
     }
+}
+
+void AppRunningManager::NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
+    const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner)
+{
+    if (appMgrServiceInner == nullptr || appRecord == nullptr ||
+        appRecord->GetPriorityObject() == nullptr) {
+        return;
+    }
+    int32_t pid = appRecord->GetPriorityObject()->GetPid();
+    int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
+    auto notifyAppPreCache = [pid, userId, inner = appMgrServiceInner]() {
+        if (inner == nullptr) {
+            return;
+        }
+        inner->NotifyAppPreCache(pid, userId);
+    };
+    appRecord->PostTask("NotifyAppPreCache", 0, notifyAppPreCache);
 }
 
 void AppRunningManager::GetRunningProcessInfoByToken(
@@ -1662,6 +1680,17 @@ void AppRunningManager::SetMultiUserConfigurationMgr(
     const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr)
 {
     multiUserConfigurationMgr_ = multiUserConfigurationMgr;
+}
+
+int32_t AppRunningManager::CheckIsKiaProcess(pid_t pid, bool &isKia)
+{
+    auto appRunningRecord = GetAppRunningRecordByPid(pid);
+    if (appRunningRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningRecord is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    isKia = appRunningRecord->GetIsKia();
+    return ERR_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

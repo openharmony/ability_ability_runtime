@@ -53,12 +53,12 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetCacheDir(
     const auto appContext = Context::GetApplicationContext();
     if (appContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string cacheDir = appContext->GetCacheDir();
     if (cacheDir.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "cacheDir is empty");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     return WriteStringToBuffer(cacheDir, buffer, bufferSize, writeLength);
 }
@@ -74,7 +74,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetAreaMode(Ability
     const auto appContext = Context::GetApplicationContext();
     if (appContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     int32_t area = appContext->GetArea();
     *areaMode = static_cast<AbilityRuntime_AreaMode>(area);
@@ -97,12 +97,12 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetBundleName(
     const auto appContext = Context::GetApplicationContext();
     if (appContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     const std::string bundleName = appContext->GetBundleName();
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "bundleName is empty");
-        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     return WriteStringToBuffer(bundleName, buffer, bufferSize, writeLength);
 }

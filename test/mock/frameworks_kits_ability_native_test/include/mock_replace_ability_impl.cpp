@@ -59,7 +59,6 @@ void AbilityImpl::Init(const std::shared_ptr<OHOSApplication> &application,
     ability_ = ability;
     ability_->Init(record->GetAbilityInfo(), application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
-    abilityLifecycleCallbacks_ = application;
     TAG_LOGI(AAFwkTag::TEST, "AbilityImpl::init end");
 }
 

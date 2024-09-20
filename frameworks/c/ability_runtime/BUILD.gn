@@ -52,6 +52,7 @@ ohos_shared_library("ability_runtime") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
   ]
 
   output_extension = "so"

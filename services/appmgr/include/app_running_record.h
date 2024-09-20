@@ -559,6 +559,9 @@ public:
 
     const std::list<std::shared_ptr<ApplicationInfo>> GetAppInfoList();
 
+    void SetAppIdentifier(const std::string &appIdentifier);
+    const std::string &GetAppIdentifier() const;
+
     inline const std::shared_ptr<ApplicationInfo> GetApplicationInfo()
     {
         return appInfo_;
@@ -677,6 +680,7 @@ public:
 
     int32_t NotifyAppFault(const FaultData &faultData);
 #ifdef SUPPORT_SCREEN
+    void ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisibilityInfo> &info);
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
 #endif //SUPPORT_SCREEN
     bool IsAbilitytiesBackground();
@@ -793,6 +797,9 @@ public:
     void SetAttachedToStatusBar(bool isAttached);
     bool IsAttachedToStatusBar();
 
+    bool SetEnableProcessCache(bool enable);
+    bool GetEnableProcessCache();
+
     void ScheduleCacheProcess();
 
     void SetBrowserHost(sptr<IRemoteObject> browser);
@@ -846,6 +853,16 @@ public:
     // records whether uiability has launched before.
     void SetUIAbilityLaunched(bool hasLaunched);
     bool HasUIAbilityLaunched();
+
+    inline void SetIsKia(bool isKia)
+    {
+        isKia_ = isKia;
+    }
+
+    inline bool GetIsKia() const
+    {
+        return isKia_;
+    }
 
 private:
     /**
@@ -936,6 +953,7 @@ private:
     bool isLauncherApp_;
     std::string mainAppName_;
     int restartResidentProcCount_ = 0;
+    std::string appIdentifier_;
 
     mutable std::mutex specifiedMutex_;
     int32_t specifiedRequestId_ = -1;
@@ -991,6 +1009,7 @@ private:
     bool isErrorInfoEnhance_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
+    bool enableProcessCache_ = false;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     bool processCacheBlocked = false; // temporarily block process cache feature
     sptr<IRemoteObject> browserHost_;
@@ -1001,6 +1020,7 @@ private:
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
+    bool isKia_ = false;
 };
 
 }  // namespace AppExecFwk

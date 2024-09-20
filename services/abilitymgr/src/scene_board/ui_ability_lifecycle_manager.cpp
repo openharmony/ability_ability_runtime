@@ -19,6 +19,8 @@
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "app_utils.h"
+#include "ffrt.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
 #include "permission_constants.h"
 #include "process_options.h"
@@ -36,7 +38,6 @@ using AbilityRuntime::FreezeUtil;
 namespace AAFwk {
 namespace {
 constexpr const char* SEPARATOR = ":";
-constexpr int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 constexpr const char* PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
 constexpr const char* DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 constexpr const char* DMS_MISSION_ID = "dmsMissionId";
@@ -95,7 +96,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
         if (sessionInfo->isNewWant) {
             uiAbilityRecord->SetWant(abilityRequest.want);
-            uiAbilityRecord->GetSessionInfo()->want.CloseAllFd();
+            uiAbilityRecord->GetSessionInfo()->want.RemoveAllFd();
         } else {
             sessionInfo->want.CloseAllFd();
         }
@@ -362,7 +363,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
     TAG_LOGI(
         AAFwkTag::ABILITYMGR, "Reused sessionId: %{public}d, userId: %{public}d.", sessionInfo->persistentId, userId_);
     int ret = NotifySCBPendingActivation(sessionInfo, abilityRequest);
-    sessionInfo->want.CloseAllFd();
+    sessionInfo->want.RemoveAllFd();
     return ret;
 }
 
@@ -944,6 +945,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
         sessionInfo->state = CallToState::FOREGROUND;
     } else {
         sessionInfo->state = CallToState::BACKGROUND;
+        sessionInfo->needClearInNotShowRecent = true;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Notify scb's abilityId is %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
     tmpAbilityMap_.emplace(uiAbilityRecord->GetAbilityRecordId(), uiAbilityRecord);
@@ -1025,13 +1027,15 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
         auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
         CheckCallerFromBackground(abilityRecord, sessionInfo);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by callerSession.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
+            sessionInfo->want.GetElement().GetAbilityName().c_str());
         return static_cast<int>(callerSession->PendingSessionActivation(sessionInfo));
     }
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
     CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
     sessionInfo->canStartAbilityFromBackground = true;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by rootSceneSession");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s",
+        sessionInfo->want.GetElement().GetAbilityName().c_str());
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
 }
 
@@ -2044,20 +2048,14 @@ bool UIAbilityLifecycleManager::PrepareTerminateAbility(const std::shared_ptr<Ab
         return false;
     }
     // execute onPrepareToTerminate util timeout
-    auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    if (taskHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get AbilityTaskHandler failed");
-        return false;
-    }
     auto promise = std::make_shared<std::promise<bool>>();
     auto future = promise->get_future();
     auto task = [promise, abilityRecord]() {
         promise->set_value(abilityRecord->PrepareTerminateAbility());
     };
-    taskHandler->SubmitTask(task);
-    int prepareTerminateTimeout =
-        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * PREPARE_TERMINATE_TIMEOUT_MULTIPLE;
-    std::future_status status = future.wait_for(std::chrono::milliseconds(prepareTerminateTimeout));
+    ffrt::submit(task);
+    std::future_status status = future.wait_for(std::chrono::milliseconds(
+        GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME));
     if (status == std::future_status::timeout) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "onPrepareToTerminate timeout");
         return false;
@@ -2651,8 +2649,8 @@ int32_t UIAbilityLifecycleManager::CleanUIAbility(
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
     if (forceKillProcess) {
-        std::lock_guard guard(sessionLock_);
         std::string element = abilityRecord->GetElementName().GetURI();
         if (DelayedSingleton<AppScheduler>::GetInstance()->CleanAbilityByUserRequest(abilityRecord->GetToken())) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s success", element.c_str());

@@ -94,6 +94,8 @@ public:
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
+
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 };
 
@@ -361,6 +363,14 @@ public:
     void SetCurrentUserId(int32_t userId);
 
     /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
+
+    /**
      * Get bundleName by pid.
      *
      * @param pid process id.
@@ -492,6 +502,8 @@ protected:
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+    
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
 private:
     std::mutex lock_;

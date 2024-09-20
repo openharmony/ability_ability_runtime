@@ -54,7 +54,7 @@ public:
     bool IsLaunchEmbededUIAbility();
     bool IsSupportNativeChildProcess();
     bool IsAllowResidentInExtremeMemory(const std::string& bundleName, const std::string& abilityName = "");
-    bool IsAllowNativeChildProcess(const std::string& bundleName);
+    bool IsAllowNativeChildProcess(const std::string &appIdentifier);
     int32_t GetLimitMaximumExtensionsPerProc();
     int32_t GetLimitMaximumExtensionsPerDevice();
     std::string GetCacheExtensionTypeList();

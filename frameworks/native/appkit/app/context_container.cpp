@@ -237,7 +237,7 @@ std::string ContextContainer::GetProcessName()
     return (processInfo_ != nullptr) ? processInfo_->GetProcessName() : "";
 }
 
-std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundleName, int flag, int accountId)
+std::shared_ptr<Context> ContextContainer::CreateBundleContext(const std::string &bundleName, int flag, int accountId)
 {
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "The bundleName is empty");
@@ -328,6 +328,10 @@ void ContextContainer::LoadResources(BundleInfo &bundleInfo,
 {
     TAG_LOGD(AAFwkTag::APPKIT, "hapModuleInfos count: %{public}zu",
         bundleInfo.hapModuleInfos.size());
+    if (resConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "resConfig is nullptr");
+        return;
+    }
     std::regex pattern(AbilityBase::Constants::ABS_CODE_PATH);
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         std::string loadPath;
