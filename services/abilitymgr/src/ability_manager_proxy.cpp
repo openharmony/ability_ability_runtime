@@ -5588,5 +5588,28 @@ int32_t AbilityManagerProxy::TerminateMission(int32_t missionId)
 
     return reply.ReadInt32();
 }
+
+int32_t AbilityManagerProxy::BlockAllAppStart(bool flag)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteBool(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag failed.");
+        return INNER_ERR;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::BLOCK_ALL_APP_START,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
 } // namespace AAFwk
 } // namespace OHOS
