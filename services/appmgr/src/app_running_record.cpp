@@ -484,6 +484,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetUId(mainUid_);
     launchData.SetUserTestInfo(userTestRecord_);
     launchData.SetAppIndex(appIndex_);
+    launchData.SetInstanceKey(instanceKey_);
     launchData.SetDebugApp(isDebugApp_);
     launchData.SetPerfCmd(perfCmd_);
     launchData.SetErrorInfoEnhance(isErrorInfoEnhance_);
@@ -1845,6 +1846,11 @@ void AppRunningRecord::SetAppIndex(const int32_t appIndex)
     appIndex_ = appIndex;
 }
 
+void AppRunningRecord::SetInstanceKey(const std::string& instanceKey)
+{
+    instanceKey_ = instanceKey;
+}
+
 void AppRunningRecord::GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode)
 {
     auto abilitiesMap = GetAbilities();
@@ -1875,6 +1881,11 @@ void AppRunningRecord::GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool
 int32_t AppRunningRecord::GetAppIndex() const
 {
     return appIndex_;
+}
+
+std::string AppRunningRecord::GetInstanceKey() const
+{
+    return instanceKey_;
 }
 
 void AppRunningRecord::SetSecurityFlag(bool securityFlag)
