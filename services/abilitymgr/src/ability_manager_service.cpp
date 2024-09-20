@@ -1111,9 +1111,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Generate ability request local error.");
         return result;
     }
-    if (!UriUtils::GetInstance().CheckNonImplicitShareFileUri(abilityRequest)) {
-        return ERR_SHARE_FILE_URI_NON_IMPLICITLY;
-    }
 
     if (specifyTokenId > 0 && callerToken != nullptr) { // for sa specify tokenId and caller token
         UpdateCallerInfoFromToken(abilityRequest.want, callerToken);
@@ -1717,9 +1714,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         eventInfo.errCode = result;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
-    }
-    if (!UriUtils::GetInstance().CheckNonImplicitShareFileUri(abilityRequest)) {
-        return ERR_SHARE_FILE_URI_NON_IMPLICITLY;
     }
 
     if (!isStartAsCaller) {
@@ -3036,9 +3030,6 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
-    if (!UriUtils::GetInstance().CheckNonImplicitShareFileUri(abilityRequest)) {
-        return ERR_SHARE_FILE_URI_NON_IMPLICITLY;
-    }
     abilityRequest.extensionType = abilityRequest.abilityInfo.extensionAbilityType;
 
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -3953,9 +3944,6 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Generate ability request error.");
         return result;
-    }
-    if (!UriUtils::GetInstance().CheckNonImplicitShareFileUri(abilityRequest)) {
-        return ERR_SHARE_FILE_URI_NON_IMPLICITLY;
     }
 
     if (abilityRequest.abilityInfo.isStageBasedModel) {
@@ -11549,9 +11537,6 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Generate ability request local error.");
         return result;
-    }
-    if (!UriUtils::GetInstance().CheckNonImplicitShareFileUri(abilityRequest)) {
-        return ERR_SHARE_FILE_URI_NON_IMPLICITLY;
     }
 
     if (specifyTokenId > 0 && callerToken != nullptr) { // for sa specify tokenId and caller token
