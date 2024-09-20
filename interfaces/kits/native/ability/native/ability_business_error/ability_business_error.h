@@ -162,8 +162,20 @@ enum class AbilityErrorCode {
     // Not support back to caller.
     ERROR_CODE_NOT_SUPPROT_BACK_TO_CALLER = 16000075,
 
+    // invalid app instance key.
+    ERROR_CODE_INVALID_APP_INSTANCE_KEY = 16000076,
+
+    // upper limit.
+    ERROR_CODE_UPPER_LIMIT = 16000077,
+
     // The multi-instance is not supported.
     ERROR_MULTI_INSTANCE_NOT_SUPPORTED = 16000078,
+
+    // APP_INSTANCE_KEY cannot be specified.
+    ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT = 16000079,
+
+    // Not support to create a new instance.
+    ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT = 16000080,
 
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,

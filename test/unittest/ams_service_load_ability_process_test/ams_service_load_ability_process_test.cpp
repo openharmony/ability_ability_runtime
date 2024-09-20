@@ -1215,8 +1215,10 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token;
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        token, nullptr, appInfo, abilityInfo, GetTestAppName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestAppName(), bundleInfo, hapModuleInfo, nullptr);
 
     service_->StartProcess(abilityInfo->applicationName,
         GetTestAppName(),
@@ -1265,8 +1267,10 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess002, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token;
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        token, nullptr, appInfo, abilityInfo, GetTestAppName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestAppName(), bundleInfo, hapModuleInfo, nullptr);
 
     service_->SetAppSpawnClient(nullptr);
     service_->StartProcess(abilityInfo->applicationName,
@@ -1310,8 +1314,10 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess003, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token;
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        token, nullptr, appInfo, abilityInfo, GetTestAppName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestAppName(), bundleInfo, hapModuleInfo, nullptr);
 
     service_->StartProcess(abilityInfo->applicationName,
         GetTestAppName(),
@@ -1361,8 +1367,10 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess004, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token;
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        token, nullptr, appInfo, abilityInfo, GetTestAppName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestAppName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_NE(record, nullptr);
     CHECK_POINTER_IS_NULLPTR(record);

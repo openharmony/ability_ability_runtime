@@ -476,15 +476,13 @@ public:
     int32_t StartNativeProcessForDebugger(const AAFwk::Want &want);
 
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
-        sptr<IRemoteObject> token,
-        sptr<IRemoteObject> preToken,
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
         std::shared_ptr<ApplicationInfo> appInfo,
         std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &processName,
         const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want,
-        int32_t abilityRecordId,
         bool isKia = false);
 
     /**
