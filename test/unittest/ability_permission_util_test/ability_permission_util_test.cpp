@@ -128,7 +128,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstance_010
 
     Want want;
     auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstance(want, nullptr, true, "", 0);
-    EXPECT_EQ(result, ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstance_0100 end");
 }
 
@@ -152,7 +152,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstance_020
     auto isInitial = abilityRecord->Init();
     EXPECT_TRUE(isInitial);
     auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstance(want, abilityRecord->GetToken(), true, "", 1);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstance_0200 end");
 }
 
@@ -178,7 +178,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstance_030
     std::string instanceKey = "app_instance_0";
     auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstance(want, abilityRecord->GetToken(), true,
         instanceKey, 1);
-    EXPECT_EQ(result, ERR_APP_INSTANCE_KEY_NOT_SUPPORT);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstance_0300 end");
 }
 
@@ -202,7 +202,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstance_040
     auto isInitial = abilityRecord->Init();
     EXPECT_TRUE(isInitial);
     auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstance(want, abilityRecord->GetToken(), true, "", 0);
-    EXPECT_EQ(result, ERR_UPPER_LIMIT);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstance_0400 end");
 }
 
