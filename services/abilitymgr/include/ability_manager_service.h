@@ -2287,6 +2287,8 @@ private:
     
     void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
         const Want& want, uint32_t specifyTokenId);
+    
+    void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
     /**
      * @brief Check debug app in developer mode.
