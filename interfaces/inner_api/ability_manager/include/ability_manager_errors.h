@@ -646,6 +646,11 @@ enum {
      */
     ERR_INVALID_EXTENSION_TYPE = 2097277,
 
+    /*
+     * Result (2097278) for replying failed while executing insight intent.
+     */
+    ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED = 2097278,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
