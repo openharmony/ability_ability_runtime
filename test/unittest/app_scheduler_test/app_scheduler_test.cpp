@@ -231,7 +231,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_oprator_004, TestSize.Level1)
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
     EXPECT_NE((int)ERR_OK,
         DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-            token, pretoken, record->GetAbilityInfo(), record->GetApplicationInfo(), record->GetWant(), 0));
+            token, pretoken, record->GetAbilityInfo(), record->GetApplicationInfo(), record->GetWant(), 0, ""));
 }
 
 /*
@@ -253,7 +253,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_LoadAbility_001, TestSize.Level1)
     Want want;
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     int res = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token, preToken, abilityInfo, applicationInfo, want, 0);
+        token, preToken, abilityInfo, applicationInfo, want, 0, "");
     EXPECT_EQ(res, INNER_ERR);
 }
 
