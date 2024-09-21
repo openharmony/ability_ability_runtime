@@ -306,10 +306,27 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     }
 }
 
+[[maybe_unused]] static void RemoveInstanceKey(Want &want)
+{
+    want.RemoveParam(Want::APP_INSTANCE_KEY);
+    want.RemoveParam(Want::CREATE_APP_INSTANCE_KEY);
+}
+
 [[maybe_unused]] static void RemoveWantKey(Want &want)
 {
     RemoveShowModeKey(want);
     RemoveWindowModeKey(want);
+}
+
+[[maybe_unused]] static int32_t CheckInstanceKey(const Want &want)
+{
+    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
+    auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
+    if (!instanceKey.empty() || isCreating) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not support multi-instance");
+        return ERR_MULTI_INSTANCE_NOT_SUPPORTED;
+    }
+    return ERR_OK;
 }
 
 [[maybe_unused]] static void WantSetParameterWindowMode(Want &want, int32_t windowMode)

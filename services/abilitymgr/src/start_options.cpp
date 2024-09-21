@@ -36,7 +36,7 @@ StartOptions::StartOptions(const StartOptions &other)
     windowHeightUsed_ = other.windowHeightUsed_;
     processOptions = other.processOptions;
     windowFocused_ = other.windowFocused_;
-    startWindowOption = others.startWindowOption;
+    startWindowOption = other.startWindowOption;
 }
 
 StartOptions &StartOptions::operator=(const StartOptions &other)

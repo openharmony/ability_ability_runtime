@@ -39,6 +39,19 @@ bool RunningMultiAppInfo::ReadFromParcel(Parcel &parcel)
         parcel.ReadInt32Vector(&clone.pids);
         runningAppClones.emplace_back(clone);
     }
+
+    int32_t runningMultiIntanceInfosSize;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningMultiIntanceInfosSize);
+    if (runningMultiIntanceInfosSize > MAX_INSTANCE_NUM) {
+        return false;
+    }
+    for (auto i = 0; i < runningMultiIntanceInfosSize; i++) {
+        RunningMultiInstanceInfo instanceInfo;
+        instanceInfo.instanceKey = Str16ToStr8(parcel.ReadString16());
+        instanceInfo.uid = parcel.ReadInt32();
+        parcel.ReadInt32Vector(&instanceInfo.pids);
+        runningMultiIntanceInfos.emplace_back(instanceInfo);
+    }
     return true;
 }
 
@@ -66,6 +79,18 @@ bool RunningMultiAppInfo::Marshalling(Parcel &parcel) const
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, clone.uid);
         if (!parcel.WriteInt32Vector(clone.pids)) {
             TAG_LOGE(AAFwkTag::APPMGR, "write runningAppClones failed.");
+            return false;
+        }
+    }
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningMultiIntanceInfos.size());
+    if (runningMultiIntanceInfos.size() > MAX_INSTANCE_NUM) {
+        return false;
+    }
+    for (auto &instanceInfo : runningMultiIntanceInfos) {
+        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(instanceInfo.instanceKey));
+        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, instanceInfo.uid);
+        if (!parcel.WriteInt32Vector(instanceInfo.pids)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "write runningMultiIntanceInfos failed.");
             return false;
         }
     }

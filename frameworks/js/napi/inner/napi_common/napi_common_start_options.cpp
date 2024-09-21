@@ -22,7 +22,7 @@
 #include "process_options.h"
 #include "start_window_option.h"
 #ifdef SUPPORT_GRAPHICS
-#include "pixed_map_napi.h"
+#include "pixel_map_napi.h"
 #endif
 
 namespace OHOS {
