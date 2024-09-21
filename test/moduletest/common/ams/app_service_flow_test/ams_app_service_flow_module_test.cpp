@@ -29,6 +29,7 @@
 #include "mock_ability_token.h"
 #include "mock_app_scheduler.h"
 #include "mock_app_spawn_client.h"
+#include "param.h"
 
 using namespace testing::ext;
 using testing::_;
@@ -135,8 +136,10 @@ TestApplicationPreRunningRecord AmsAppServiceFlowModuleTest::TestCreateApplicati
     auto appRecord = serviceInner_->appRunningManager_->CheckAppRunningRecordIsExist(
         appInfo->name, appName, appInfo->uid, bundleInfo);
     if (!appRecord) {
+        auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+        loadParam->token = token;
         appRecord = serviceInner_->CreateAppRunningRecord(
-            token, nullptr, appInfo, abilityInfo, appName, bundleInfo, hapModuleInfo, nullptr, 0);
+            loadParam, appInfo, abilityInfo, appName, bundleInfo, hapModuleInfo, nullptr);
         appRecord->GetPriorityObject()->SetPid(TestApplicationPreRunningRecord::g_pid++);
     } else {
         serviceInner_->StartAbility(token, nullptr, abilityInfo, appRecord, hapModuleInfo, nullptr, 0);

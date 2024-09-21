@@ -219,6 +219,9 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->SetAppIndex(appIndex);
     abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
     abilityRecord->sessionInfo_ = abilityRequest.sessionInfo;
+    if (abilityRequest.sessionInfo != nullptr) {
+        abilityRecord->instanceKey_ = abilityRequest.sessionInfo->instanceKey;
+    }
     if (!abilityRecord->Init()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed init");
         return nullptr;
@@ -331,7 +334,7 @@ int AbilityRecord::LoadAbility()
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token_, callerToken_, abilityInfo_, abilityInfo_.applicationInfo, want_, recordId_);
+        token_, callerToken_, abilityInfo_, abilityInfo_.applicationInfo, want_, recordId_, instanceKey_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
     SetLoadState(AbilityLoadState::LOADING);
 

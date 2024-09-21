@@ -105,6 +105,7 @@ private:
     int32_t HandleDumpHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDumpJsHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetRunningMultiAppInfoByBundleName(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetAllRunningInstanceKeysByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsAppRunning(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAppRunningStateByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);

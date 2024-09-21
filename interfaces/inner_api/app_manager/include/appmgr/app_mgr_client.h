@@ -235,6 +235,17 @@ public:
     virtual AppMgrResultCode GetProcessRunningInformation(RunningProcessInfo &info);
 
     /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running isntance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual AppMgrResultCode GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys);
+
+    /**
      * GetAllRenderProcesses, call GetAllRenderProcesses() through proxy project.
      * Obtains information about render processes that are running on the device.
      *
