@@ -88,7 +88,7 @@ bool UnwrapPixelMapByPropertyName(
 #endif
 
 bool UnwrapStartWindowOption(napi_env env, napi_value param,
-    std::shared_ptr<AAFwk::StartWindowOption> &tartWindowOption)
+    std::shared_ptr<AAFwk::StartWindowOption> &startWindowOption)
 {
     auto option = std::make_shared<AAFwk::StartWindowOption>();
     std::string startWindowBackgroundColor;
@@ -116,7 +116,7 @@ bool UnwrapStartWindowOption(napi_env env, napi_value param,
         option->hasStartWindow = true;
     }
 #endif
-    StartWindowOption = option;
+    startWindowOption = option;
     return true;
 }
 
