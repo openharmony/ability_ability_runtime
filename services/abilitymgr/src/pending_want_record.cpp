@@ -21,6 +21,8 @@
 
 namespace OHOS {
 namespace AAFwk {
+std::string APP_MULTI_INSTANCE{ "ohos.extra.param.key.appInstance" };
+
 PendingWantRecord::PendingWantRecord()
 {}
 
@@ -149,7 +151,7 @@ void PendingWantRecord::BuildSendWant(SenderInfo &senderInfo, Want &want)
     if (!wantParams.HasParam("ohos.extra.param.key.appCloneIndex")) {
         wantParams.SetParam("ohos.extra.param.key.appCloneIndex", Integer::Box(key_->GetAppIndex()));
     }
-    
+    CheckAppInstanceKey(wantParams);
     want.SetParams(wantParams);
 }
 
@@ -180,6 +182,47 @@ void PendingWantRecord::SetCallerUid(const int32_t callerUid)
 std::list<sptr<IWantReceiver>> PendingWantRecord::GetCancelCallbacks()
 {
     return mCancelCallbacks_;
+}
+
+void PendingWantRecord::CheckAppInstanceKey(WantParams &wantParams)
+{
+    if (key_ == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "pending want key is null");
+        return;
+    }
+
+    auto currType = key_->GetType();
+    if (!(static_cast<int32_t>(OperationType::START_ABILITY) == currType ||
+        static_cast<int32_t>(OperationType::START_ABILITIES) == currType)) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "want agent type mismatch");
+        return;
+    }
+
+    auto appKey = wantParams.GetStringParam(APP_MULTI_INSTANCE);
+    if (appKey.empty()) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "want params non-existent app instance value");
+        return;
+    }
+
+    auto pendingWantManager = pendingWantManager_.lock();
+    if (pendingWantManager == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "pending want manager is null");
+        return;
+    }
+
+    std::vector<std::string> appKeyVec;
+    auto result = pendingWantManager->GetAllRunningInstanceKeysByBundleName(key_->GetBundleName(), appKeyVec);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "get app key error");
+        return;
+    }
+
+    auto find = std::find(appKeyVec.begin(), appKeyVec.end(), appKey);
+    if (find == appKeyVec.end()) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "%{public}s non-existent instance key %{public}s",
+            key_->GetBundleName().c_str(), appKey.c_str());
+        wantParams.Remove(APP_MULTI_INSTANCE);
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
