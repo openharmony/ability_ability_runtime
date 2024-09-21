@@ -560,8 +560,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     if (abilityInfo->type == AbilityType::PAGE) {
         AbilityRuntime::FreezeUtil::LifecycleFlow flow = {loadParam->token,
             AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
-        auto entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-            "; AppMgrServiceInner::LoadAbility; the load lifecycle.";
+        std::string entry = "AppMgrServiceInner::LoadAbility; the load lifecycle.";
         AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
 
@@ -591,7 +590,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     MakeProcessName(abilityInfo, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag, processName);
     TAG_LOGI(AAFwkTag::APPMGR, "%{public}s name:%{public}s-%{public}s processName = %{public}s",
         __func__, abilityInfo->bundleName.c_str(), abilityInfo->name.c_str(), processName.c_str());
- 
+
     bool isKia = false;
     std::string watermarkBusinessName;
     bool isWatermarkEnabled = false;

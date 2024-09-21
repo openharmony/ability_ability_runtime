@@ -151,9 +151,9 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_004, TestSize.Level1)
         .bundleName = "",
         .msg = "Test",
     };
-    auto flow = std::make_unique<FreezeUtil::LifecycleFlow>();
-    flow->state = AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND;
-    ret = appfreezeManager->LifecycleTimeoutHandle(info3, std::move(flow));
+    FreezeUtil::LifecycleFlow flow;
+    flow.state = AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND;
+    ret = appfreezeManager->LifecycleTimeoutHandle(info3, flow);
     EXPECT_EQ(ret, 0);
 }
 

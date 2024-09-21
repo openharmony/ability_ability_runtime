@@ -715,8 +715,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
         tmpWatchdog = nullptr;
     }
     FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; MainThread::ScheduleLaunchAbility; the load lifecycle.";
+    std::string entry = "MainThread::ScheduleLaunchAbility; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     wptr<MainThread> weak = this;
@@ -2016,8 +2015,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     auto abilityToken = abilityRecord->GetToken();
     CHECK_POINTER_LOG(abilityToken, "abilityRecord->GetToken failed");
     FreezeUtil::LifecycleFlow flow = { abilityToken, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; MainThread::HandleLaunchAbility; the load lifecycle.";
+    std::string entry = "MainThread::HandleLaunchAbility; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     abilityRecordMgr_->SetToken(abilityToken);

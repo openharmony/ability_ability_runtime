@@ -623,8 +623,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle";
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     bool needNotifyAMS = false;
@@ -659,8 +658,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     TAG_LOGI(AAFwkTag::ABILITY, "window after background");
