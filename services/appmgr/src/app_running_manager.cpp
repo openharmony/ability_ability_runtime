@@ -29,14 +29,14 @@
 #include "perf_profile.h"
 #include "parameters.h"
 #include "quick_fix_callback_with_record.h"
-#include <cstddef>
 #include "scene_board_judgement.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
+#include "window_visibility_info.h"
 #include "cache_process_manager.h"
 #include "res_sched_util.h"
 #include "ui_extension_utils.h"
-#include "window_visibility_info.h"
+
 namespace OHOS {
 namespace AppExecFwk {
 namespace {

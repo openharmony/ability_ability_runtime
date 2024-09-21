@@ -1372,7 +1372,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     application_->SetApplicationContext(applicationContext);
 
 #ifdef SUPPORT_GRAPHICS
-    TAG_LOGD(AAFwkTag::APPKIT, "HandleLaunchApplication cacheDir: %{public}s", applicationContext->GetCacheDir().c_str());
+    TAG_LOGD(
+        AAFwkTag::APPKIT, "HandleLaunchApplication cacheDir: %{public}s", applicationContext->GetCacheDir().c_str());
     OHOS::EglSetCacheDir(applicationContext->GetCacheDir());
 #endif
 
