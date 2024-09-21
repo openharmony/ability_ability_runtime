@@ -129,7 +129,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level1)
     std::string processName = "test_processName";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_002 end");
@@ -151,7 +151,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level1)
     std::string processName = "test_processName";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
@@ -179,7 +179,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level1)
     std::string processName = "test_processName";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
@@ -210,7 +210,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level1)
     std::string processName = "test_processName";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
@@ -242,7 +242,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level1)
     std::string processName = "test_processName";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
@@ -275,7 +275,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level1)
     std::string processName = "test_processName";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
@@ -319,7 +319,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_008, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     applicationInfo_->bundleName = "";
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
@@ -378,7 +378,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_002, TestSize.Level
     BundleInfo bundleInfo;
     std::string processName = "test_processName";
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_TRUE(
         appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED, 0));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_002 end");
@@ -401,7 +401,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_003, TestSize.Level
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     applicationInfo_->bundleName = "testBundleName";
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
@@ -530,7 +530,7 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level0)
     std::string bundleName = "test_bundleName";
     sptr<IRemoteObject> token = new MockAbilityToken();
     std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     pid_t hostPid = 1;
     std::string renderParam = "test_render_param";
