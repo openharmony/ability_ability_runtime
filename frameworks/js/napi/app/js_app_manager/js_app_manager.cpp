@@ -564,25 +564,24 @@ private:
     napi_value OnOffForeground(napi_env env, size_t argc, napi_value *argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
-        if (argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
-        if (argc == ARGC_TWO && !AppExecFwk::IsTypeForNapiValue(env, argv[INDEX_ONE], napi_object)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Invalid param.");
-            ThrowInvalidParamError(env, "Parse param observer failed, must be a AppForegroundStateObserver.");
-            return CreateJsUndefined(env);
-        }
         if (observerForeground_ == nullptr || appManager_ == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "Observer or appManager nullptr.");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
-
+        if (argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Not enough params when off.");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
         if (argc == ARGC_ONE) {
             observerForeground_->RemoveAllJsObserverObjects();
         } else if (argc == ARGC_TWO) {
+            if (!AppExecFwk::IsTypeForNapiValue(env, argv[INDEX_ONE], napi_object)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "Invalid param.");
+                ThrowInvalidParamError(env, "Parse param observer failed, must be a AppForegroundStateObserver.");
+                return CreateJsUndefined(env);
+            }
             observerForeground_->RemoveJsObserverObject(argv[INDEX_ONE]);
         }
         if (observerForeground_->IsEmpty()) {
