@@ -2577,7 +2577,6 @@ int32_t UIAbilityLifecycleManager::CleanUIAbility(const std::shared_ptr<AbilityR
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "can not force kill when user request clean ability, schedule lifecycle:%{public}s", element.c_str());
     }
-
     return CloseUIAbilityInner(abilityRecord, -1, nullptr, true);
 }
 
