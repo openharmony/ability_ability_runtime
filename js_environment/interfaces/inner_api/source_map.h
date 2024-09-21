@@ -89,10 +89,11 @@ private:
     void ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo);
     std::vector<std::string> HandleMappings(const std::string& mapping);
     bool VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans);
-    MappingInfo Find(int32_t row, int32_t col, const SourceMapData& targetMap);
+    MappingInfo Find(int32_t row, int32_t col, const SourceMapData& targetMap, const std::string& key);
     void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
     std::string GetRelativePath(const std::string& sources);
-    std::string GetSourceInfo(const std::string& line, const std::string& column, const SourceMapData& targetMap);
+    std::string GetSourceInfo(const std::string& line, const std::string& column,
+                              const SourceMapData& targetMap, const std::string& key);
 
 private:
     bool isModular_ = true;
