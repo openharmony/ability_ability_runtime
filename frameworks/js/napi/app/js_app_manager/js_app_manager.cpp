@@ -470,23 +470,6 @@ private:
         return CreateJsUndefined(env);
     }
 #endif
-    static void OnOffOldInner(sptr<OHOS::AppExecFwk::IAppMgr> appManager, sptr<JSAppStateObserver> observer,
-        int64_t observerId, napi_env env, NapiAsyncTask *task)
-    {
-        if (observer == nullptr || appManager == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "null observer or appManager");
-            task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-            return;
-        }
-        int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
-        if (ret == 0 && observer->RemoveJsObserverObject(observerId)) {
-            task->ResolveWithNoError(env, CreateJsUndefined(env));
-            TAG_LOGD(AAFwkTag::APPMGR, "success size:%{public}zu", observer->GetJsObserverMapSize());
-        } else {
-            TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
-            task->Reject(env, CreateJsErrorByNativeErr(env, ret));
-        }
-    }
 
     napi_value OnOffOld(napi_env env, size_t argc, napi_value* argv)
     {
@@ -516,20 +499,29 @@ private:
         }
         TAG_LOGD(AAFwkTag::APPMGR, "find observer exist observer:%{public}d", static_cast<int32_t>(observerId));
 
+        NapiAsyncTask::CompleteCallback complete =
+            [appManager = appManager_, observer = observer_, observerId](
+                napi_env env, NapiAsyncTask& task, int32_t status) {
+                if (observer == nullptr || appManager == nullptr) {
+                    TAG_LOGE(AAFwkTag::APPMGR, "observer or appManager nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
+                if (ret == 0 && observer->RemoveJsObserverObject(observerId)) {
+                    task.ResolveWithNoError(env, CreateJsUndefined(env));
+                    TAG_LOGD(AAFwkTag::APPMGR, "success size:%{public}zu",
+                        observer->GetJsObserverMapSize());
+                } else {
+                    TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
+                    task.Reject(env, CreateJsErrorByNativeErr(env, ret));
+                }
+            };
+
         napi_value lastParam = (argc > ARGC_TWO) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [appManager = appManager_, observer = observer_, observerId,
-            env, task = napiAsyncTask.get()]() {
-            OnOffOldInner(appManager, observer, observerId, env, task);
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::Schedule("JSAppManager::OnUnregisterApplicationStateObserver",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
@@ -607,66 +599,54 @@ private:
     napi_value OnGetForegroundApplications(napi_env env, size_t argc, napi_value *argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
+        NapiAsyncTask::CompleteCallback complete =
+            [appManager = appManager_](napi_env env, NapiAsyncTask& task, int32_t status) {
+                if (appManager == nullptr) {
+                    TAG_LOGE(AAFwkTag::APPMGR, "appManager nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                std::vector<AppExecFwk::AppStateData> list;
+                int32_t ret = appManager->GetForegroundApplications(list);
+                if (ret == 0) {
+                    TAG_LOGD(AAFwkTag::APPMGR, "success.");
+                    task.ResolveWithNoError(env, CreateJsAppStateDataArray(env, list));
+                } else {
+                    TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
+                }
+            };
 
         napi_value lastParam = (argc > ARGC_ZERO) ? argv[INDEX_ZERO] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [appManager = appManager_, env, task = napiAsyncTask.get()]() {
-            if (appManager == nullptr) {
-                TAG_LOGE(AAFwkTag::APPMGR, "appManager nullptr");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
-                return;
-            }
-            std::vector<AppExecFwk::AppStateData> list;
-            int32_t ret = appManager->GetForegroundApplications(list);
-            if (ret == 0) {
-                TAG_LOGD(AAFwkTag::APPMGR, "success.");
-                task->ResolveWithNoError(env, CreateJsAppStateDataArray(env, list));
-            } else {
-                TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
-                task->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
-            }
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::Schedule("JSAppManager::OnGetForegroundApplications",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
     napi_value OnGetRunningProcessInformation(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
+        NapiAsyncTask::CompleteCallback complete =
+            [appManager = appManager_](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (appManager == nullptr) {
+                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                std::vector<AppExecFwk::RunningProcessInfo> infos;
+                auto ret = appManager->GetAllRunningProcesses(infos);
+                if (ret == 0) {
+                    task.ResolveWithNoError(env, CreateJsRunningProcessInfoArray(env, infos));
+                } else {
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
+                }
+            };
 
         napi_value lastParam = (argc > ARGC_ZERO) ? argv[INDEX_ZERO] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [appManager = appManager_, env, task = napiAsyncTask.get()]() {
-            if (appManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
-                return;
-            }
-            std::vector<AppExecFwk::RunningProcessInfo> infos;
-            auto ret = appManager->GetAllRunningProcesses(infos);
-            if (ret == 0) {
-                task->ResolveWithNoError(env, CreateJsRunningProcessInfoArray(env, infos));
-            } else {
-                task->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
-            }
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::Schedule("JSAppManager::OnGetRunningProcessInformation",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
@@ -735,78 +715,52 @@ private:
             ThrowInvalidParamError(env, "Parse param bundleType failed, must not be less then zero.");
             return CreateJsUndefined(env);
         }
+        NapiAsyncTask::CompleteCallback complete =
+            [appManager = appManager_, bundleType](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (appManager == nullptr) {
+                    TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                std::vector<AppExecFwk::RunningProcessInfo> infos;
+                auto ret = appManager->GetRunningProcessesByBundleType(
+                    static_cast<AppExecFwk::BundleType>(bundleType), infos);
+                if (ret == 0) {
+                    task.ResolveWithNoError(env, CreateJsRunningProcessInfoArray(env, infos));
+                } else {
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
+                }
+            };
 
         napi_value lastParam = (argc > ARGC_ONE) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [appManager = appManager_, bundleType, env, task = napiAsyncTask.get()]() {
-            if (appManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
-                return;
-            }
-            std::vector<AppExecFwk::RunningProcessInfo> infos;
-            auto ret = appManager->GetRunningProcessesByBundleType(
-                static_cast<AppExecFwk::BundleType>(bundleType), infos);
-            if (ret == 0) {
-                task->ResolveWithNoError(env, CreateJsRunningProcessInfoArray(env, infos));
-            } else {
-                task->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
-            }
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::Schedule("JSAppManager::OnGetRunningProcessInformationByBundleType",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
     napi_value OnIsRunningInStabilityTest(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
+        NapiAsyncTask::CompleteCallback complete =
+            [abilityManager = abilityManager_](napi_env env, NapiAsyncTask& task, int32_t status) {
+                if (abilityManager == nullptr) {
+                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                bool ret = abilityManager->IsRunningInStabilityTest();
+                TAG_LOGD(AAFwkTag::APPMGR, "result:%{public}d", ret);
+                task.ResolveWithNoError(env, CreateJsValue(env, ret));
+            };
+
         napi_value lastParam = (argc > ARGC_ZERO) ? argv[INDEX_ZERO] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [abilityManager = abilityManager_, env, task = napiAsyncTask.get()]() {
-            if (abilityManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
-                return;
-            }
-            bool ret = abilityManager->IsRunningInStabilityTest();
-            TAG_LOGD(AAFwkTag::APPMGR, "result:%{public}d", ret);
-            task->ResolveWithNoError(env, CreateJsValue(env, ret));
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::Schedule("JSAppManager::OnIsRunningInStabilityTest",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
-    static void OnKillProcessesByBundleNameInner(std::string bundleName,
-        sptr<OHOS::AAFwk::IAbilityManager> abilityManager, napi_env env, NapiAsyncTask *task)
-    {
-        if (abilityManager == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
-            task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-            return;
-        }
-        auto ret = abilityManager->KillProcess(bundleName);
-        if (ret == 0) {
-            task->ResolveWithNoError(env, CreateJsUndefined(env));
-        } else {
-            task->Reject(env, CreateJsErrorByNativeErr(env, ret, "kill process failed."));
-        }
-    }
     napi_value OnKillProcessesByBundleName(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -821,21 +775,25 @@ private:
             ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
             return CreateJsUndefined(env);
         }
-
+        NapiAsyncTask::CompleteCallback complete =
+            [bundleName, abilityManager = abilityManager_](
+                napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (abilityManager == nullptr) {
+                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                return;
+            }
+            auto ret = abilityManager->KillProcess(bundleName);
+            if (ret == 0) {
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, ret, "kill process failed."));
+            }
+        };
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [bundleName, abilityManager = abilityManager_,
-            env, task = napiAsyncTask.get()]() {
-            OnKillProcessesByBundleNameInner(bundleName, abilityManager, env, task);
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessesByBundleName",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
@@ -899,28 +857,22 @@ private:
             ThrowInvalidParamError(env, "Parse param versionCode failed, must be a number.");
             return CreateJsUndefined(env);
         }
-
-        napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
-        napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [bundleName, versionCode, appManager = appManager_, env, task = napiAsyncTask.get()]() {
+        NapiAsyncTask::CompleteCallback complete =
+            [bundleName, versionCode, appManager = appManager_](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (appManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 return;
             }
             bool ret = appManager->IsSharedBundleRunning(bundleName, versionCode);
             TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
-            task->ResolveWithNoError(env, CreateJsValue(env, ret));
-            delete task;
+            task.ResolveWithNoError(env, CreateJsValue(env, ret));
         };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+
+        napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnIsSharedBundleRunning",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
@@ -944,84 +896,67 @@ private:
             ThrowInvalidParamError(env, "Parse param accountId failed, must be a number.");
             return CreateJsUndefined(env);
         }
-
+        NapiAsyncTask::CompleteCallback complete =
+            [appManager = appManager_, bundleName, accountId](
+                napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
+                    TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr or amsMgr is nullptr.");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                auto ret = appManager->GetAmsMgr()->KillProcessWithAccount(bundleName, accountId);
+                if (ret == 0) {
+                    task.ResolveWithNoError(env, CreateJsUndefined(env));
+                } else {
+                    task.Reject(env, CreateJsErrorByNativeErr(env, ret, "Kill processes failed."));
+                }
+            };
         napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [appManager = appManager_, bundleName, accountId,
-            env, task = napiAsyncTask.get()]() {
-            if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr or amsMgr is nullptr.");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
-                return;
-            }
-            auto ret = appManager->GetAmsMgr()->KillProcessWithAccount(bundleName, accountId);
-            if (ret == 0) {
-                task->ResolveWithNoError(env, CreateJsUndefined(env));
-            } else {
-                task->Reject(env, CreateJsErrorByNativeErr(env, ret, "Kill processes failed."));
-            }
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessWithAccount",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
     napi_value OnGetAppMemorySize(napi_env env, size_t argc, napi_value* argv)
     {
+        NapiAsyncTask::CompleteCallback complete =
+            [abilityManager = abilityManager_](napi_env env, NapiAsyncTask& task, int32_t status) {
+                if (abilityManager == nullptr) {
+                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                int32_t memorySize = abilityManager->GetAppMemorySize();
+                TAG_LOGI(AAFwkTag::APPMGR, "memorySize:%{public}d", memorySize);
+                task.ResolveWithNoError(env, CreateJsValue(env, memorySize));
+            };
+
         napi_value lastParam = (argc > ARGC_ZERO) ? argv[INDEX_ZERO] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [abilityManager = abilityManager_, env, task = napiAsyncTask.get()]() {
-            if (abilityManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
-                return;
-            }
-            int32_t memorySize = abilityManager->GetAppMemorySize();
-            TAG_LOGI(AAFwkTag::APPMGR, "memorySize:%{public}d", memorySize);
-            task->ResolveWithNoError(env, CreateJsValue(env, memorySize));
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnGetAppMemorySize",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
     napi_value OnIsRamConstrainedDevice(napi_env env, size_t argc, napi_value* argv)
     {
+        NapiAsyncTask::CompleteCallback complete =
+            [abilityManager = abilityManager_](napi_env env, NapiAsyncTask& task, int32_t status) {
+                if (abilityManager == nullptr) {
+                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                bool ret = abilityManager->IsRamConstrainedDevice();
+                TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
+                task.ResolveWithNoError(env, CreateJsValue(env, ret));
+            };
+
         napi_value lastParam = (argc > ARGC_ZERO) ? argv[INDEX_ZERO] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [abilityManager = abilityManager_, env, task = napiAsyncTask.get()]() {
-            if (abilityManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
-                return;
-            }
-            bool ret = abilityManager->IsRamConstrainedDevice();
-            TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
-            task->ResolveWithNoError(env, CreateJsValue(env, ret));
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnIsRamConstrainedDevice",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
@@ -1040,49 +975,27 @@ private:
             ThrowInvalidParamError(env, "Parse param pid failed, must be a number.");
             return CreateJsUndefined(env);
         }
+        NapiAsyncTask::CompleteCallback complete =
+            [pid, appManager = appManager_](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (appManager == nullptr) {
+                    TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                int32_t memSize = 0;
+                int32_t ret = appManager->GetProcessMemoryByPid(pid, memSize);
+                if (ret == 0) {
+                    task.ResolveWithNoError(env, CreateJsValue(env, memSize));
+                } else {
+                    task.Reject(env, CreateJsErrorByNativeErr(env, ret));
+                }
+            };
 
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [pid, appManager = appManager_, env, task = napiAsyncTask.get()]() {
-            if (appManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr");
-                task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                delete task;
-                return;
-            }
-            int32_t memSize = 0;
-            int32_t ret = appManager->GetProcessMemoryByPid(pid, memSize);
-            if (ret == 0) {
-                task->ResolveWithNoError(env, CreateJsValue(env, memSize));
-            } else {
-                task->Reject(env, CreateJsErrorByNativeErr(env, ret));
-            }
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnGetProcessMemoryByPid",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
-    }
-
-    static void OnGetRunningProcessInfoByBundleNameInner(std::string bundleName, int userId,
-        sptr<OHOS::AppExecFwk::IAppMgr> appManager, napi_env env, NapiAsyncTask *task)
-    {
-        if (appManager == nullptr) {
-            task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-            return;
-        }
-        std::vector<AppExecFwk::RunningProcessInfo> infos;
-        int32_t ret = appManager->GetRunningProcessInformation(bundleName, userId, infos);
-        if (ret == 0) {
-            task->ResolveWithNoError(env, CreateJsRunningProcessInfoArray(env, infos));
-        } else {
-            task->Reject(env, CreateJsErrorByNativeErr(env, ret));
-        }
     }
 
     napi_value OnGetRunningProcessInfoByBundleName(napi_env env, size_t argc, napi_value* argv)
@@ -1116,20 +1029,24 @@ private:
             ThrowInvalidParamError(env, "The number of param exceeded.");
             return CreateJsUndefined(env);
         }
-
+        NapiAsyncTask::CompleteCallback complete =
+            [bundleName, userId, appManager = appManager_](napi_env env, NapiAsyncTask &task, int32_t status) {
+            if (appManager == nullptr) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                return;
+            }
+            std::vector<AppExecFwk::RunningProcessInfo> infos;
+            int32_t ret = appManager->GetRunningProcessInformation(bundleName, userId, infos);
+            if (ret == 0) {
+                task.ResolveWithNoError(env, CreateJsRunningProcessInfoArray(env, infos));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, ret));
+            }
+        };
         napi_value lastParam = isPromiseType ? nullptr : argv[argc - 1];
         napi_value result = nullptr;
-        std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [bundleName, userId, appManager = appManager_, env, task = napiAsyncTask.get()]() {
-            OnGetRunningProcessInfoByBundleNameInner(bundleName, userId, appManager, env, task);
-            delete task;
-        };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            napiAsyncTask->Reject(env, CreateJsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), "send event failed!"));
-        } else {
-            napiAsyncTask.release();
-        }
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnGetRunningProcessInfoByBundleName",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
 
