@@ -33,11 +33,11 @@ bool UnwrapPixelMapByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, std::shared_ptr<Media::PixelMap> &value);
 
 bool UnwrapPixelMapFromJS(napi_env env, napi_value param, std::shared_ptr<Media::PixelMap> &value);
+#endif
 
 bool UnwrapStartWindowOption(napi_env env, napi_value param,
-    std::shared_ptr<AAFwk::StartWindowOption> &tartWindowOption);
+    std::shared_ptr<AAFwk::StartWindowOption> &startWindowOption);
 
-#endif
 EXTERN_C_END
 }  // namespace AppExecFwk
 }  // namespace OHOS
