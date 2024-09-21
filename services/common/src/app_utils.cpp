@@ -66,6 +66,7 @@ constexpr const char* BROKER_DELEGATE_BUNDLE_NAME = "const.sys.abilityms.broker_
 constexpr const char* COLLABORATOR_BROKER_UID = "const.sys.abilityms.collaborator_broker_uid";
 constexpr const char* COLLABORATOR_BROKER_RESERVE_UID = "const.sys.abilityms.collaborator_broker_reserve_uid";
 constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
+constexpr const char* SUPPORT_MULTI_INSTANCE = "const.abilityms.support_multi_instance";
 }
 
 AppUtils::~AppUtils() {}
@@ -437,6 +438,16 @@ int32_t AppUtils::MaxChildProcess()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "MaxChildProcess: %{public}d", maxChildProcess_.value);
     return maxChildProcess_.value;
+}
+
+bool AppUtils::IsSupportMultiInstance()
+{
+    if (!isSupportMultiInstance_.isLoaded) {
+        isSupportMultiInstance_.value = system::GetBoolParameter(SUPPORT_MULTI_INSTANCE, false);
+        isSupportMultiInstance_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isSupportMultiInstance_.value);
+    return isSupportMultiInstance_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

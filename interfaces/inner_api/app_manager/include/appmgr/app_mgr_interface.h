@@ -159,6 +159,17 @@ public:
         RunningMultiAppInfo &info) = 0;
 
     /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running isntance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys) = 0;
+
+    /**
      * GetRunningProcessesByBundleType, call GetRunningProcessesByBundleType() through proxy project.
      * Obtains information about application processes by bundle type that are running on the device.
      *
