@@ -10742,8 +10742,8 @@ int32_t AbilityManagerService::NotifyDebugAssertResult(uint64_t assertFaultSessi
     std::string bundleName;
     int32_t uid;
     DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(pid, bundleName, uid);
-    if (!permissionSA->VerifyCallingPermission(PermissionConstants::PERMISSION_NOTIFY_DEBUG_ASSERT_RESULT)
-        &&bundleName != BUNDLE_NAME_DIALOG) {
+    if (!permissionSA->VerifyCallingPermission(PermissionConstants::PERMISSION_NOTIFY_DEBUG_ASSERT_RESULT) &&
+        bundleName != BUNDLE_NAME_DIALOG) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission %{public}s verification failed.",
             PermissionConstants::PERMISSION_NOTIFY_DEBUG_ASSERT_RESULT);
         return ERR_PERMISSION_DENIED;
