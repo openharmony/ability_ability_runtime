@@ -213,6 +213,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         ret = abilityMgr->StartAbility(request.want, request.callerToken);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
+        int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
+            static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
+        AddIdentity(tokenId, identity);
         return ret;
     }
 
@@ -245,9 +248,6 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         ret = abilityMgr->ImplicitStartAbilityAsCaller(request.want, request.callerToken, nullptr);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
-        int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
-            static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
-        AddIdentity(tokenId, identity);
         return ret;
     }
 
