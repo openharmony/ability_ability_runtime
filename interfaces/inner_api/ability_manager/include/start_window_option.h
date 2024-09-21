@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_START_WINDOW_OPTIONS_H
-#define OHOS_ABILITY_RUNTIME_START_WINDOW_OPTIONS_H
+#ifndef OHOS_ABILITY_RUNTIME_START_WINDOW_OPTION_H
+#define OHOS_ABILITY_RUNTIME_START_WINDOW_OPTION_H
 
 #include "parcel.h"
 
@@ -41,4 +41,4 @@ public:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_START_WINDOW_OPTIONS_H
+#endif  // OHOS_ABILITY_RUNTIME_START_WINDOW_OPTION_H
