@@ -420,7 +420,7 @@ int32_t CJApplicationContext::OnOnEnvironment(void (*cfgCallback)(CConfiguration
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
     if (envCallback_ != nullptr) {
@@ -439,7 +439,7 @@ int32_t CJApplicationContext::OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
     if (callback_ != nullptr) {
@@ -458,7 +458,7 @@ int32_t CJApplicationContext::OnOnApplicationStateChange(void (*foregroundCallba
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
     std::lock_guard<std::mutex> lock(applicationStateCallbackLock_);
