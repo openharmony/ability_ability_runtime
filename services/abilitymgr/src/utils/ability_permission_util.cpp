@@ -197,7 +197,7 @@ int32_t AbilityPermissionUtil::UpdateInstanceKey(Want &want, const std::string &
     return ERR_INVALID_APP_INSTANCE_KEY;
 }
 
-int32_t AbilityPermissionUtil::CheckMultiInstanceKeyForConnect(const AbilityRequest &abilityRequest)
+int32_t AbilityPermissionUtil::CheckMultiInstanceKeyForExtension(const AbilityRequest &abilityRequest)
 {
     auto instanceKey = MultiInstanceUtils::GetInstanceKey(abilityRequest.want);
     if (instanceKey.empty()) {

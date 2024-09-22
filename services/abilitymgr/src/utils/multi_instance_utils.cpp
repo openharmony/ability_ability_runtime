@@ -20,6 +20,7 @@
 
 #include "ability_util.h"
 #include "app_mgr_util.h"
+#include "scene_board_judgement.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -62,7 +63,13 @@ bool MultiInstanceUtils::IsDefaultInstanceKey(const std::string& key)
 
 bool MultiInstanceUtils::IsMultiInstanceApp(AppExecFwk::ApplicationInfo appInfo)
 {
-    return appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+    if (appInfo.multiAppMode.multiAppModeType != AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
+        return false;
+    }
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return false;
+    }
+    return true;
 }
 
 bool MultiInstanceUtils::IsSupportedExtensionType(AppExecFwk::ExtensionAbilityType type)
