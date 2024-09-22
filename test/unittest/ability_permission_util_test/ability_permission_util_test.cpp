@@ -18,8 +18,8 @@
 #define private public
 #include "ability_record.h"
 #include "utils/ability_permission_util.h"
-#undef private
 #include "app_utils.h"
+#undef private
 #include "hilog_tag_wrapper.h"
 #include "parameters.h"
 
@@ -258,6 +258,58 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_UpdateInstanceKey_0300
     auto result = AbilityPermissionUtil::GetInstance().UpdateInstanceKey(want, originInstanceKey, instanceKeyArray, "");
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_UpdateInstanceKey_0300 end");
+}
+
+/**
+ * @tc.name: AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0100
+ * @tc.desc: CheckMultiInstanceKeyForExtension
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0100 start");
+
+    AbilityRequest abilityRequest;
+    auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0100 end");
+}
+
+/**
+ * @tc.name: AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0200
+ * @tc.desc: CheckMultiInstanceKeyForExtension
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0200 start");
+
+    AbilityRequest abilityRequest;
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, std::string("app_instance_0"));
+    auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0200 end");
+}
+
+/**
+ * @tc.name: AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0300
+ * @tc.desc: CheckMultiInstanceKeyForExtension
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0300 start");
+
+    AbilityRequest abilityRequest;
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, std::string("app_instance_0"));
+    (void)AppUtils::GetInstance().IsSupportMultiInstance();
+    AppUtils::GetInstance().isSupportMultiInstance_.value = true;
+    auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
+    EXPECT_EQ(result, ERR_MULTI_INSTANCE_NOT_SUPPORTED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0300 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

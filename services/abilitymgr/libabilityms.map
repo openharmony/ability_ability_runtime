@@ -62,6 +62,7 @@
       *MissionListenerStub*;
       *MissionListManager*;
       *MissionSnapshot*;
+      *MultiInstanceUtils*;
       *PendingWantKey*;
       *PendingWantManager*;
       *PendingWantRecord*;
