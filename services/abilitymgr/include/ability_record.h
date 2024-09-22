@@ -1097,6 +1097,11 @@ public:
         return instanceKey_;
     }
 
+    void SetInstanceKey(const std::string& key)
+    {
+        instanceKey_ = key;
+    }
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
