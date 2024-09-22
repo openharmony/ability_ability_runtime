@@ -48,6 +48,7 @@ ohos_fuzztest("ExtensionRecordManagerFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/src/preload_uiext_state_observer.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record_factory.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/multi_instance_utils.cpp",
     "${ability_runtime_services_path}/common/src/app_utils.cpp",
     "${ability_runtime_services_path}/common/src/json_utils.cpp",
     "extensionrecordmanager_fuzzer.cpp",
