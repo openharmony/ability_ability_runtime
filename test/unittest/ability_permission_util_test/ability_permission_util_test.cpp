@@ -15,19 +15,31 @@
 
 #include <gtest/gtest.h>
 
+#include "mock_permission_verification.h"
 #define private public
-#include "ability_record.h"
 #include "utils/ability_permission_util.h"
+#include "ability_info.h"
+#include "ability_record.h"
+#include "ability_util.h"
+#include "accesstoken_kit.h"
 #include "app_utils.h"
+#include "ipc_skeleton.h"
+#include "running_process_info.h"
+#include "permission_constants.h"
+#include "permission_verification.h"
 #undef private
 #include "hilog_tag_wrapper.h"
 #include "parameters.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::AppExecFwk;
+using AbilityRequest = OHOS::AAFwk::AbilityRequest;
+using OHOS::AppExecFwk::AbilityType;
+using OHOS::AAFwk::AbilityPermissionUtil;
 
 namespace OHOS {
-namespace AAFwk {
+namespace AbilityRuntime {
 class AbilityPermissionUtilTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -310,6 +322,96 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceKeyF
     auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     EXPECT_EQ(result, ERR_MULTI_INSTANCE_NOT_SUPPORTED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceKeyForExtension_0300 end");
+}
+
+/**
+ * @tc.name: IsDominateScreen_0100
+ * @tc.desc: IsDominateScreen_0100 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0100, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0100 start");
+
+    Want want;
+    bool isPendingWantCaller = true;
+    bool ret = AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0100 end");
+}
+
+/**
+ * @tc.name: IsDominateScreen_0200
+ * @tc.desc: IsDominateScreen_0200 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0200, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0200 start");
+
+    MyFlag::flag_ = 1;
+    Want want;
+    bool isPendingWantCaller = false;
+    bool ret = AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0200 end");
+}
+
+/**
+ * @tc.name: IsDominateScreen_0300
+ * @tc.desc: IsDominateScreen_0300 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0300, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0300 start");
+
+    MyFlag::flag_ = 2;
+    Want want;
+    bool isPendingWantCaller = false;
+    bool ret = AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0300 end");
+}
+
+/**
+ * @tc.name: IsDominateScreen_0400
+ * @tc.desc: IsDominateScreen_0400 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0400, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0400 start");
+
+    MyFlag::flag_ = 3;
+    Want want;
+    bool isPendingWantCaller = false;
+    bool ret = AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0400 end");
+}
+
+/**
+ * @tc.name: IsDominateScreen_0500
+ * @tc.desc: IsDominateScreen_0500 Test
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, IsDominateScreen_0500, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0500 start");
+
+    MyFlag::flag_ = 3;
+    Want want;
+    want.SetParam("ohos.insightIntent.executeParam.name", true);
+    bool isPendingWantCaller = false;
+    bool ret = AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil IsDominateScreen_0500 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
