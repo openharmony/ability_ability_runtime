@@ -2067,7 +2067,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
 
     {
         std::lock_guard<ffrt::mutex> guard(preStartSessionMapLock_);
-        preStartSessionMap_.insert(std::make_pair(sessionId, sessionInfo));
+        preStartSessionMap_[sessionId] = sessionInfo;
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "free install task is still in progress");
@@ -3694,7 +3694,6 @@ void AbilityManagerService::SetMinimizedDuringFreeInstall(const sptr<SessionInfo
 
     {
         std::lock_guard<ffrt::mutex> guard(preStartSessionMapLock_);
-        preStartSessionMap_.insert(std::make_pair(sessionId, sessionInfo));
         auto it = preStartSessionMap_.find(sessionId);
         if (it == preStartSessionMap_.end()) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "session info with sessionId=%{public}s does not exist",
