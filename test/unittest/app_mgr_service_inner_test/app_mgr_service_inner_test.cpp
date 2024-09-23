@@ -3880,16 +3880,13 @@ HWTEST_F(AppMgrServiceInnerTest, IsMainProcess_001, TestSize.Level0)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module123";
     applicationInfo_->process = "";
-    EXPECT_EQ(appMgrServiceInner->IsMainProcess(nullptr, hapModuleInfo), true);
-    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, hapModuleInfo), true);
-    hapModuleInfo.process = "processName1";
-    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, hapModuleInfo), false);
-    hapModuleInfo.process = applicationInfo_->bundleName;
-    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, hapModuleInfo), true);
+    EXPECT_EQ(appMgrServiceInner->IsMainProcess(nullptr, ""), true);
+    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, ""), true);
+    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, "processName1"), false);
+    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, applicationInfo_->bundleName), true);
     applicationInfo_->process = "processName2";
-    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, hapModuleInfo), false);
-    hapModuleInfo.process = "processName2";
-    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, hapModuleInfo), true);
+    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, applicationInfo_->bundleName), false);
+    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, "processName2"), true);
     applicationInfo_->process = "";
 
     TAG_LOGI(AAFwkTag::TEST, "IsMainProcess_001 end");
