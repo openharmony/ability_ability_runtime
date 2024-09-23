@@ -364,7 +364,7 @@ ohos_shared_library("start_window_option") {
 
   sources =
     [ "${ability_runtime_services_path}/abilitymgr/src/start_window_option.cpp" ]
-  
+
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
