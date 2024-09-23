@@ -44,7 +44,7 @@ static const int RESULT_ERR = -1;
 
 static const char TASK_NAME[] = "ApplicationCleaner::ClearTempData";
 static constexpr uint64_t DELAY = 5000000; //5s
-constexpr int64_t ONEHUNDRED_MB = 50 * 1024;
+constexpr int64_t MAX_FILE_SIZE = 50 * 1024;
 } // namespace
 void ApplicationCleaner::RenameTempData()
 {
@@ -97,7 +97,7 @@ void ApplicationCleaner::ClearTempData()
         }
     };
 
-    if (CheckFileSize(rootDir, ONEHUNDRED_MB)) {
+    if (CheckFileSize(rootDir)) {
         ffrt::submit(cleanTemp);
     } else {
         ffrt::task_attr attr;
@@ -107,7 +107,7 @@ void ApplicationCleaner::ClearTempData()
     }
 }
 
-bool ApplicationCleaner::CheckFileSize(const std::vector<std::string> bundlePath, const int64_t maxFileSize)
+bool ApplicationCleaner::CheckFileSize(const std::vector<std::string> &bundlePath)
 {
     int64_t fileSize = 0;
 
@@ -118,12 +118,7 @@ bool ApplicationCleaner::CheckFileSize(const std::vector<std::string> bundlePath
         }
         fileSize += fileInfo.st_size;
     }
-
-    if (fileSize > maxFileSize) {
-        return false;
-}
-
-    return true;
+    return (fileSize <= MAX_FILE_SIZE);
 }
 
 int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
