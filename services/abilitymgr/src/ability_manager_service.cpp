@@ -5222,8 +5222,7 @@ int AbilityManagerService::AttachAbilityThread(
         return dataAbilityManager->AttachAbilityThread(scheduler, token);
     } else {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) + "; AbilityManagerService::AttachAbilityThread;" +
-            " the end of load lifecycle.";
+        std::string entry = "AbilityManagerService::AttachAbilityThread; the end of load lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         int32_t ownerMissionUserId = abilityRecord->GetOwnerMissionUserId();
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -5827,14 +5826,12 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
 
     if (targetState == AbilityState::BACKGROUND) {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::BACKGROUND };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) +
-            "; AbilityManagerService::AbilityTransitionDone; the end of background lifecycle.";
+        std::string entry = "AbilityManagerService::AbilityTransitionDone; the end of background lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     } else if (targetState != AbilityState::INITIAL) {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::FOREGROUND };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) +
-            "; AbilityManagerService::AbilityTransitionDone; the end of foreground lifecycle.";
-        entry += " the end of foreground lifecycle.";
+        std::string entry = "AbilityManagerService::AbilityTransitionDone; the end of foreground lifecycle."
+            " the end of foreground lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
 
@@ -10535,7 +10532,7 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
 
     int32_t appIndex = 0;
     appIndex = !AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex) ? 0 : appIndex;
-    bool isStartupVisibilityHide = 
+    bool isStartupVisibilityHide =
         (startOptions.processOptions->startupVisibility == StartupVisibility::STARTUP_HIDE);
     bool hasStartBackgroundAbilityPermission = PermissionVerification::GetInstance()->
         VerifyStartUIAbilityToHiddenPermission();

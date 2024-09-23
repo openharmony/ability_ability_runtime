@@ -49,6 +49,19 @@ constexpr int64_t MAX_TIME_BUFF = 64; // 64 : for example 2021-05-27-01-01-01
     std::strftime(buffer, sizeof(buffer), format.c_str(), &t);
     return std::string(buffer);
 }
+
+[[maybe_unused]] static std::string DefaultCurrentTimeStr()
+{
+    auto now = std::chrono::system_clock::now();
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    auto timestamp = millis.count();
+    std::time_t tt = static_cast<std::time_t>(timestamp / SEC_TO_MILLISEC);
+    std::tm t{};
+    localtime_r(&tt, &t);
+    char buffer[MAX_TIME_BUFF] = {0};
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &t);
+    return std::string(buffer) + "." + std::to_string(timestamp % SEC_TO_MILLISEC);
+}
 }  // namespace TimeUtil
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_TIME_UTIL_H
