@@ -78,8 +78,8 @@ ohos_shared_library("napi_common") {
     external_deps += [ "image_framework:image" ]
     public_external_deps += [
       "form_fwk:form_manager",
-      "window_manager:libdm",
       "graphic_2d:color_manager",
+      "window_manager:libdm",
     ]
   }
 
