@@ -777,7 +777,7 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0600, TestSize.Level1)
 
     initedCJUIAbility_->OnSceneCreated();
     initedCJUIAbility_->OnSceneRestored();
-    initedCJUIAbility_->OnSceneDestroyed();
+    initedCJUIAbility_->onSceneDestroyed();
 }
 
 HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0700, TestSize.Level1)

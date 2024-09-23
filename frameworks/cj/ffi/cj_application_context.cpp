@@ -90,8 +90,9 @@ void CJApplicationContext::UnregisterAbilityLifecycleCallback(
 
 void CJApplicationContext::DispatchOnAbilityCreate(const int64_t &ability)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::CONTEXT, "ability is null");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
@@ -104,6 +105,7 @@ void CJApplicationContext::DispatchOnAbilityCreate(const int64_t &ability)
 
 void CJApplicationContext::DispatchOnWindowStageCreate(const int64_t &ability, WindowStagePtr windowStage)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability || !windowStage) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ability or windowStage is nullptr");
         return;
@@ -148,6 +150,7 @@ void CJApplicationContext::DispatchWindowStageUnfocus(const int64_t &ability, Wi
 
 void CJApplicationContext::DispatchOnWindowStageDestroy(const int64_t &ability, WindowStagePtr windowStage)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability || !windowStage) {
         TAG_LOGE(AAFwkTag::CONTEXT, "ability or windowStage is nullptr");
         return;
@@ -162,8 +165,9 @@ void CJApplicationContext::DispatchOnWindowStageDestroy(const int64_t &ability, 
 
 void CJApplicationContext::DispatchOnAbilityDestroy(const int64_t &ability)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
@@ -176,8 +180,9 @@ void CJApplicationContext::DispatchOnAbilityDestroy(const int64_t &ability)
 
 void CJApplicationContext::DispatchOnAbilityForeground(const int64_t &ability)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::CONTEXT, "ability is null");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
@@ -190,8 +195,9 @@ void CJApplicationContext::DispatchOnAbilityForeground(const int64_t &ability)
 
 void CJApplicationContext::DispatchOnAbilityBackground(const int64_t &ability)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::CONTEXT, "ability is null");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
@@ -204,8 +210,9 @@ void CJApplicationContext::DispatchOnAbilityBackground(const int64_t &ability)
 
 void CJApplicationContext::DispatchOnAbilityContinue(const int64_t &ability)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
@@ -308,8 +315,9 @@ void CJApplicationContext::DispatchOnAbilityWillBackground(const int64_t &abilit
 
 void CJApplicationContext::DispatchOnNewWant(const int64_t &ability)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
@@ -322,8 +330,9 @@ void CJApplicationContext::DispatchOnNewWant(const int64_t &ability)
 
 void CJApplicationContext::DispatchOnWillNewWant(const int64_t &ability)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
@@ -338,7 +347,7 @@ void CJApplicationContext::DispatchOnAbilityWillContinue(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Dispatch onAbilityWillContinue");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
     }
 
@@ -386,7 +395,7 @@ void CJApplicationContext::DispatchOnAbilityWillSaveState(const int64_t &ability
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Dispatch onAbilityWillSaveState");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
     }
 
@@ -402,7 +411,7 @@ void CJApplicationContext::DispatchOnAbilitySaveState(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "ability is null");
         return;
     }
 
@@ -589,7 +598,7 @@ int32_t FfiCJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds
 {
     auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "onAbilityLifecycle null context");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }

@@ -30,13 +30,6 @@ public:
     void NotifyApplicationForeground() override;
     void NotifyApplicationBackground() override;
     int32_t Register(std::function<void(void)> foregroundCallback, std::function<void(void)> backgroundCallback);
-
-    /**
-     * @brief Unregister application state change callback.
-     * @param callbackId, if callbackId is negative, delete all register cjCallback.
-     *                    or if callbackId is positive, delete prescribed cjCallback.
-     * @return Returns true on unregister success, others return false.
-     */
     bool UnRegister(int32_t callbackId);
     bool IsEmpty() const;
 private:

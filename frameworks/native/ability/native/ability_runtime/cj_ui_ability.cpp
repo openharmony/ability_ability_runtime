@@ -108,6 +108,7 @@ int64_t CJUIAbility::GetCjAbilityId()
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (cjAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
+        return -1;
     }
     return cjAbilityObj_->GetId();
 }
@@ -342,6 +343,7 @@ WindowStagePtr CJUIAbility::GetCjWindowStagePtr()
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (cjWindowStage_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjWindowStage_");
+        return nullptr;
     }
     return reinterpret_cast<WindowStagePtr>(cjWindowStage_.GetRefPtr());
 }
