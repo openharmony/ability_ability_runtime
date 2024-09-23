@@ -39,7 +39,8 @@ public:
     int GetArea();
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo();
     void RegisterAbilityLifecycleCallback(const std::shared_ptr<CjAbilityLifecycleCallback> &abilityLifecycleCallback);
-    void UnregisterAbilityLifecycleCallback(const std::shared_ptr<CjAbilityLifecycleCallback> &abilityLifecycleCallback);
+    void UnregisterAbilityLifecycleCallback(
+        const std::shared_ptr<CjAbilityLifecycleCallback> &abilityLifecycleCallback);
     bool IsAbilityLifecycleCallbackEmpty();
     void DispatchOnAbilityCreate(const int64_t &ability);
     void DispatchOnWindowStageCreate(const int64_t &ability, WindowStagePtr windowStage);
