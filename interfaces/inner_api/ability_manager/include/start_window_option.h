@@ -19,7 +19,6 @@
 #include "parcel.h"
 
 namespace OHOS {
-
 namespace Media {
 class PixelMap;
 }
