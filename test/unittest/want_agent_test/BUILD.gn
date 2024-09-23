@@ -50,12 +50,12 @@ ohos_unittest("want_agent_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_core",
     "ffrt:libffrt",
+    "graphic_2d:color_manager",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
-    "image_framework:image_native",
-    "graphic_2d:color_manager",
   ]
 }
 
