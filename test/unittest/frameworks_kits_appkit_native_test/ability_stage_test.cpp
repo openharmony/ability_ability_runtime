@@ -143,7 +143,7 @@ HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_AddAbility_002, Function | Me
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_AddAbility_002 start";
     sptr<IRemoteObject> token = new (std::nothrow) MockToken();
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_AddAbility_002 111";
-    abilityStage_->AddAbility(token, std::make_shared<AppExecFwk::AbilityLocalRecord>(nullptr, nullptr));
+    abilityStage_->AddAbility(token, std::make_shared<AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0));
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_AddAbility_002 222";
     EXPECT_TRUE(abilityStage_->ContainsAbility());
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_AddAbility_002 end";
@@ -160,7 +160,7 @@ HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_AddAbility_003, Function | Me
 {
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_AddAbility_003 start";
     EXPECT_FALSE(abilityStage_->ContainsAbility());
-    abilityStage_->AddAbility(nullptr, std::make_shared<AppExecFwk::AbilityLocalRecord>(nullptr, nullptr));
+    abilityStage_->AddAbility(nullptr, std::make_shared<AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0));
     EXPECT_FALSE(abilityStage_->ContainsAbility());
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_AddAbility_003 end";
 }
@@ -209,7 +209,7 @@ HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_RemoveAbility_002, Function |
 {
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_RemoveAbility_002 start";
     sptr<IRemoteObject> token = new MockToken();
-    abilityStage_->AddAbility(token, std::make_shared<AppExecFwk::AbilityLocalRecord>(nullptr, nullptr));
+    abilityStage_->AddAbility(token, std::make_shared<AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0));
     EXPECT_TRUE(abilityStage_->ContainsAbility());
     abilityStage_->RemoveAbility(token);
     EXPECT_FALSE(abilityStage_->ContainsAbility());
@@ -241,7 +241,7 @@ HWTEST_F(AbilityStageTest, AppExecFwk_AbilityStage_ContainsAbility_002, Function
 {
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_ContainsAbility_002 start";
     sptr<IRemoteObject> token = new MockToken();
-    abilityStage_->AddAbility(token, std::make_shared<AppExecFwk::AbilityLocalRecord>(nullptr, nullptr));
+    abilityStage_->AddAbility(token, std::make_shared<AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0));
     EXPECT_TRUE(abilityStage_->ContainsAbility());
     GTEST_LOG_(INFO) << "AppExecFwk_AbilityStage_ContainsAbility_002 end";
 }

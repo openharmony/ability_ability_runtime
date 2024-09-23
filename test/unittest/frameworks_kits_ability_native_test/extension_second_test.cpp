@@ -54,7 +54,7 @@ void ExtensionTest::SetUp(void)
 {
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);

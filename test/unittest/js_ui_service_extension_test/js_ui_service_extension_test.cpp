@@ -104,8 +104,7 @@ void JsUIServiceExtensionTest::SetUp()
 
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     info->name = "JsUIServiceExtensionTest";
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();

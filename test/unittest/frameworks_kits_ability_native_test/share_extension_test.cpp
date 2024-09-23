@@ -84,7 +84,7 @@ HWTEST_F(ShareExtensionTest, Share_Extension_0300, Function | MediumTest | Level
     GTEST_LOG_(INFO) << "Share_Extension_0300 start";
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     auto contextImpl = std::make_shared<ContextImpl>();
     auto applicationContext = ApplicationContext::GetInstance();

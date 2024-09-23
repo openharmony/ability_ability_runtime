@@ -98,7 +98,7 @@ HWTEST_F(AutoFillExtensionTest, Init_0100, Function | MediumTest | Level1)
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
     EXPECT_NE(token, nullptr);
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     EXPECT_NE(record, nullptr);
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     EXPECT_NE(application, nullptr);
@@ -108,7 +108,7 @@ HWTEST_F(AutoFillExtensionTest, Init_0100, Function | MediumTest | Level1)
     application->SetApplicationContext(applicationContext);
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     EXPECT_NE(handler, nullptr);
-    
+
     autoFillExtension->Init(record, application, handler, token);
     EXPECT_TRUE(autoFillExtension->context_ != nullptr);
     GTEST_LOG_(INFO) << "Init_0100 end";
@@ -135,7 +135,7 @@ HWTEST_F(AutoFillExtensionTest, CreateAndInitContext_0100, Function | MediumTest
     abilityInfo->bundleName = BUNDLE_NAME;
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
     EXPECT_NE(token, nullptr);
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     EXPECT_NE(record, nullptr);
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     EXPECT_NE(application, nullptr);
@@ -145,7 +145,7 @@ HWTEST_F(AutoFillExtensionTest, CreateAndInitContext_0100, Function | MediumTest
     application->SetApplicationContext(applicationContext);
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     EXPECT_NE(handler, nullptr);
-    
+
     auto context = autoFillExtension->CreateAndInitContext(record, application, handler, token);
     EXPECT_NE(context, nullptr);
 
@@ -157,7 +157,7 @@ HWTEST_F(AutoFillExtensionTest, CreateAndInitContext_0100, Function | MediumTest
     auto resourceManager = appContext->GetResourceManager();
     EXPECT_EQ(context->GetResourceManager(), resourceManager);
     EXPECT_EQ(context->parentContext_, appContext);
-    
+
     EXPECT_EQ(context->GetAbilityInfo(), abilityInfo);
     EXPECT_EQ(context->GetConfiguration(), appContext->GetConfiguration());
 
@@ -193,7 +193,7 @@ HWTEST_F(AutoFillExtensionTest, CreateAndInitContext_0200, Function | MediumTest
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     EXPECT_NE(handler, nullptr);
     std::shared_ptr<AppExecFwk::AbilityLocalRecord> record = nullptr;
-    
+
     auto context = autoFillExtension->CreateAndInitContext(record, application, handler, token);
     EXPECT_NE(context, nullptr);
 
@@ -205,7 +205,7 @@ HWTEST_F(AutoFillExtensionTest, CreateAndInitContext_0200, Function | MediumTest
     auto resourceManager = appContext->GetResourceManager();
     EXPECT_EQ(context->GetResourceManager(), resourceManager);
     EXPECT_EQ(context->parentContext_, appContext);
-    
+
     EXPECT_EQ(context->GetAbilityInfo(), nullptr);
     EXPECT_EQ(context->GetConfiguration(), nullptr);
 
