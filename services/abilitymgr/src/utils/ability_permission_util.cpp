@@ -117,7 +117,7 @@ int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t
     if (isSupportMultiInstance) {
         if (!StartAbilityUtils::GetApplicationInfo(want.GetBundle(), userId, appInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "can't get applicationInfo through bundleName");
-            return RESOLVE_APP_ERR;
+            return RESOLVE_ABILITY_ERR;
         }
         if (appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::UNSPECIFIED) {
             if (!instanceKey.empty() || isCreating || appIndex != 0) {
