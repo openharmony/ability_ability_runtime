@@ -319,10 +319,6 @@ sptr<IAmsMgr> AppMgrService::GetAmsMgr()
 
 int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
 {
-    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The caller is not system-app, can not use system-api");
-        return AAFwk::ERR_NOT_SYSTEM_APP;
-    }
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
