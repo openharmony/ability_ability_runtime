@@ -364,8 +364,6 @@ public:
     bool IsAbilityStarted(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord) override;
 
     void SignRestartAppFlag(const std::string &bundleName) override;
-
-    void SetAnimationFlag(bool IsAnimationEnabled);
 #ifdef SUPPORT_GRAPHICS
 public:
     /**

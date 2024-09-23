@@ -179,8 +179,7 @@ public:
     MOCK_METHOD2(SetMissionLabel, int(const sptr<IRemoteObject>& token, const std::string& label));
     int SetMissionIcon(
         const sptr<IRemoteObject>& token, const std::shared_ptr<OHOS::Media::PixelMap>& icon) override;
-    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
-        bool animationEnabled = true);
+    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler);
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject>& abilityToken) override {}
 #endif
     MOCK_METHOD2(IsValidMissionIds, int32_t(const std::vector<int32_t>&, std::vector<MissionValidResult>&));
@@ -359,8 +358,7 @@ public:
     MOCK_METHOD2(SetMissionLabel, int(const sptr<IRemoteObject>& token, const std::string& label));
     int SetMissionIcon(
         const sptr<IRemoteObject>& token, const std::shared_ptr<OHOS::Media::PixelMap>& icon) override;
-    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
-        bool animationEnabled = true);
+    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler);
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject>& abilityToken) override {}
 #endif
     MOCK_METHOD2(IsValidMissionIds, int32_t(const std::vector<int32_t>&, std::vector<MissionValidResult>&));

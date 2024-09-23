@@ -432,8 +432,7 @@ int MockAbilityDelegatorStub::SetMissionIcon(
     return 0;
 }
 
-int MockAbilityDelegatorStub::RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
-    bool animationEnabled)
+int MockAbilityDelegatorStub::RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler)
 {
     return 0;
 }
@@ -444,8 +443,7 @@ int MockAbilityDelegatorStub2::SetMissionIcon(
     return 0;
 }
 
-int MockAbilityDelegatorStub2::RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
-    bool animationEnabled)
+int MockAbilityDelegatorStub2::RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler)
 {
     return 0;
 }
