@@ -57,7 +57,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceAndA
     std::string deviceType = OHOS::system::GetDeviceType();
     TAG_LOGI(AAFwkTag::TEST, "current deviceType is %{public}s", deviceType.c_str());
     if (deviceType == "2in1") {
-        EXPECT_EQ(result, RESOLVE_APP_ERR);
+        EXPECT_EQ(result, RESOLVE_ABILITY_ERR);
     } else {
         EXPECT_EQ(result, ERR_OK);
     }
@@ -83,7 +83,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceAndA
     std::string deviceType = OHOS::system::GetDeviceType();
     TAG_LOGI(AAFwkTag::TEST, "current deviceType is %{public}s", deviceType.c_str());
     if (deviceType == "2in1") {
-        EXPECT_EQ(result, RESOLVE_APP_ERR);
+        EXPECT_EQ(result, RESOLVE_ABILITY_ERR);
     } else {
         EXPECT_EQ(result, ERR_MULTI_INSTANCE_NOT_SUPPORTED);
     }
@@ -108,7 +108,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceAndA
     std::string deviceType = OHOS::system::GetDeviceType();
     TAG_LOGI(AAFwkTag::TEST, "current deviceType is %{public}s", deviceType.c_str());
     if (deviceType == "2in1") {
-        EXPECT_EQ(result, RESOLVE_APP_ERR);
+        EXPECT_EQ(result, RESOLVE_ABILITY_ERR);
     } else {
         EXPECT_EQ(result, ERR_MULTI_INSTANCE_NOT_SUPPORTED);
     }
