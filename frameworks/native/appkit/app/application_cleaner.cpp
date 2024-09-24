@@ -44,6 +44,11 @@ static const int PATH_MAX_SIZE = 256;
 const mode_t MODE = 0777;
 static const int RESULT_OK = 0;
 static const int RESULT_ERR = -1;
+
+static const char TASK_NAME[] = "ApplicationCleaner::ClearTempData";
+static constexpr uint64_t DELAY = 5000000; //5s
+constexpr int64_t MAX_FILE_SIZE = 50 * 1024;
+
 } // namespace
 void ApplicationCleaner::RenameTempData()
 {
@@ -73,20 +78,17 @@ void ApplicationCleaner::RenameTempData()
 void ApplicationCleaner::ClearTempData()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
-    auto cleanTemp = [self = shared_from_this()]() {
+    std::vector<std::string> rootDir;
+    if (GetRootPath(rootDir) != RESULT_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get root dir error");
+        return;
+    }
+    auto cleanTemp = [self = shared_from_this(), rootDir]() {
         if (self == nullptr || self->context_ == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "Invalid shared pointer");
             return;
         }
-
-        std::vector<std::string> rootDir;
         std::vector<std::string> temps;
-
-        if (self->GetRootPath(rootDir) != RESULT_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Get root dir error");
-            return;
-        }
-
         if (self->GetObsoleteBundleTempPath(rootDir, temps) != RESULT_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "Get bundle temp file list is false");
             return;
@@ -98,7 +100,29 @@ void ApplicationCleaner::ClearTempData()
             }
         }
     };
-    ffrt::submit(cleanTemp);
+
+    if (CheckFileSize(rootDir)) {
+        ffrt::submit(cleanTemp);
+    } else {
+        ffrt::task_attr attr;
+        attr.name(TASK_NAME);
+        attr.delay(DELAY);
+        ffrt::submit(std::move(cleanTemp), attr);
+    }
+}
+
+bool ApplicationCleaner::CheckFileSize(const std::vector<std::string> &bundlePath)
+{
+    int64_t fileSize = 0;
+
+    for (const auto& dir : bundlePath) {
+        struct stat fileInfo = { 0 };
+        if (stat(dir.c_str(), &fileInfo) != 0) {
+            continue;
+        }
+        fileSize += fileInfo.st_size;
+    }
+    return (fileSize <= MAX_FILE_SIZE);
 }
 
 int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
