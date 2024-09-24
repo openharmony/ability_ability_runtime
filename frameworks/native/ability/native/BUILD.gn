@@ -76,7 +76,6 @@ config("ability_public_config") {
   include_dirs = [
     "${ability_runtime_napi_path}/inner/napi_ability_common",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/distributed",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/remote_register_service",
@@ -92,11 +91,7 @@ config("ability_public_config") {
   ]
 
   if (ability_runtime_graphics) {
-    include_dirs += [
-      "${windowmanager_path}/interfaces/kits/napi/window_runtime/window_stage_napi",
-      "${windowmanager_path}/interfaces/innerkits/wm",
-      "${windowmanager_path}/interfaces/innerkits/dm",
-    ]
+    include_dirs += [ "${windowmanager_path}/interfaces/kits/napi/window_runtime/window_stage_napi" ]
     defines = [ "SUPPORT_GRAPHICS" ]
   }
 }
@@ -344,6 +339,7 @@ ohos_shared_library("abilitykit_native") {
     public_external_deps += [
       "form_fwk:form_manager",
       "window_manager:libdm",
+      "window_manager:libdm_lite",
     ]
   }
 
@@ -738,6 +734,7 @@ ohos_shared_library("form_extension_module") {
       "form_fwk:fmskit_provider_client",
       "form_fwk:form_manager",
       "window_manager:libdm",
+      "window_manager:libdm_lite",
     ]
   }
 
@@ -856,6 +853,7 @@ ohos_shared_library("continuation_ipc") {
     public_external_deps += [
       "form_fwk:form_manager",
       "window_manager:libdm",
+      "window_manager:libdm_lite",
     ]
   }
 
@@ -908,6 +906,7 @@ ohos_shared_library("data_ability_helper") {
       "form_fwk:fmskit_provider_client",
       "form_fwk:form_manager",
       "window_manager:libdm",
+      "window_manager:libdm_lite",
     ]
   }
 
@@ -949,6 +948,7 @@ ohos_shared_library("service_extension_module") {
       "form_fwk:fmskit_provider_client",
       "form_fwk:form_manager",
       "window_manager:libdm",
+      "window_manager:libdm_lite",
     ]
   }
 
