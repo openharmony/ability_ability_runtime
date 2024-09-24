@@ -715,8 +715,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
         tmpWatchdog = nullptr;
     }
     FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; MainThread::ScheduleLaunchAbility; the load lifecycle.";
+    std::string entry = "MainThread::ScheduleLaunchAbility; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     wptr<MainThread> weak = this;
@@ -1401,7 +1400,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
         AbilityRuntime::ApplicationContext::GetInstance();
     int32_t appIndex = appLaunchData.GetAppIndex();
+    std::string instanceKey = appLaunchData.GetInstanceKey();
     applicationContext->SetCurrentAppCloneIndex(appIndex);
+    applicationContext->SetCurrentInstanceKey(instanceKey);
     applicationContext->SetCurrentAppMode(static_cast<int32_t>(appInfo.multiAppMode.multiAppModeType));
     applicationContext->AttachContextImpl(contextImpl);
     auto appRunningId = appLaunchData.GetAppRunningUniqueId();
@@ -2014,8 +2015,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     auto abilityToken = abilityRecord->GetToken();
     CHECK_POINTER_LOG(abilityToken, "abilityRecord->GetToken failed");
     FreezeUtil::LifecycleFlow flow = { abilityToken, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; MainThread::HandleLaunchAbility; the load lifecycle.";
+    std::string entry = "MainThread::HandleLaunchAbility; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     abilityRecordMgr_->SetToken(abilityToken);
@@ -2053,6 +2053,15 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
         AbilityThread::AbilityThreadMain(application, abilityRecord, mainHandler_->GetEventRunner(), stageContext);
 #endif
     };
+#ifdef SUPPORT_SCREEN
+    Rosen::DisplayId defaultDisplayId = Rosen::DisplayManager::GetInstance().GetDefaultDisplayId();
+    Rosen::DisplayId displayId = defaultDisplayId;
+    if (abilityRecord->GetWant() != nullptr) {
+        displayId = abilityRecord->GetWant()->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId);
+    }
+    Rosen::DisplayManager::GetInstance().AddDisplayIdFromAms(displayId, abilityRecord->GetToken());
+    TAG_LOGD(AAFwkTag::APPKIT, "add displayId: %{public}" PRIu64, displayId);
+#endif
     bool isAsyncCallback = false;
     std::shared_ptr<AbilityRuntime::Context> stageContext = application_->AddAbilityStage(
         abilityRecord, callback, isAsyncCallback);
@@ -2109,7 +2118,6 @@ void MainThread::HandleCleanAbilityLocal(const sptr<IRemoteObject> &token)
         TAG_LOGW(AAFwkTag::APPKIT, "runner not found");
     }
 #endif
-    AfterCleanAbilityGC();
 }
 
 /**
@@ -2158,18 +2166,8 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
     }
 #endif
     appMgr_->AbilityCleaned(token);
-    AfterCleanAbilityGC();
     TAG_LOGD(AAFwkTag::APPKIT, "end. app: %{public}s, ability: %{public}s.",
         applicationInfo_->name.c_str(), abilityInfo->name.c_str());
-}
-
-void MainThread::AfterCleanAbilityGC()
-{
-    bool appBackground = applicationImpl_ ?
-        applicationImpl_->GetState() != ApplicationImpl::APP_STATE_FOREGROUND : false;
-    if (appBackground) {
-        ForceFullGC();
-    }
 }
 
 /**

@@ -17,5 +17,6 @@ group("unittest") {
   deps = [
     "insight_intent_execute_manager_test:unittest",
     "insight_intent_execute_param_test:unittest",
+    "insight_intent_utils_test:unittest",
   ]
 }

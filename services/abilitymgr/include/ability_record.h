@@ -1092,6 +1092,16 @@ public:
 
     void RemoveConnectWant();
 
+    inline std::string GetInstanceKey() const
+    {
+        return instanceKey_;
+    }
+
+    void SetInstanceKey(const std::string& key)
+    {
+        instanceKey_ = key;
+    }
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
@@ -1317,6 +1327,7 @@ private:
     ffrt::mutex connectWantLock_;
     bool isLaunching_ = true;
     LaunchDebugInfo launchDebugInfo_;
+    std::string instanceKey_ = "";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

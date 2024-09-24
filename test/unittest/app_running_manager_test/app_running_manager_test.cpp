@@ -326,7 +326,7 @@ HWTEST_F(AppRunningManagerTest, RemoveAppRunningRecordById_0100, TestSize.Level1
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::string processName = "test.ProcessName";
     BundleInfo bundleInfo;
-    auto appRecord = appRunningManager->CreateAppRunningRecord(appInfo, processName, bundleInfo);
+    auto appRecord = appRunningManager->CreateAppRunningRecord(appInfo, processName, bundleInfo, "");
     ASSERT_NE(appRecord, nullptr);
 
     int32_t uiExtensionAbilityId = 1000;
@@ -351,7 +351,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningRecord_0100, TestSize.Level1)
         std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
         static std::string processName = "test.ProcessName";
         BundleInfo bundleInfo;
-        auto appRecord = appRunningManager_Record0100->CreateAppRunningRecord(appInfo, processName, bundleInfo);
+        auto appRecord = appRunningManager_Record0100->CreateAppRunningRecord(appInfo, processName, bundleInfo, "");
         ASSERT_NE(appRecord, nullptr);
         processName += "a";
 

@@ -1787,6 +1787,8 @@ public:
 
     int32_t TerminateMission(int32_t missionId) override;
 
+    int32_t BlockAllAppStart(bool flag) override;
+
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         uint32_t sceneFlag, bool &isColdStart);
 
@@ -2285,6 +2287,22 @@ private:
     
     void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
         const Want& want, uint32_t specifyTokenId);
+    
+    void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
+
+    /**
+     * @brief Check debug app in developer mode.
+     * @param applicationInfo. The application info.
+     * @return Returns ture or false.
+     */
+    bool CheckDebugAppNotInDeveloperMode(const AppExecFwk::ApplicationInfo &applicationInfo);
+
+    /**
+     * @brief Prompt user that developer mode has not been turned on.
+     * @param bundleName. The bundleName of the blocked hap.
+     * @param abilityName. The abilityName of the blocked hap.
+     */
+    void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
@@ -2373,6 +2391,9 @@ private:
     void UpdateBackToCallerFlag(const sptr<IRemoteObject> &callerToken, Want &want, int32_t requestCode, bool backFlag);
 
     void SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType);
+
+    bool ShouldBlockAllAppStart();
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
@@ -2402,6 +2423,9 @@ private:
     ffrt::mutex abilityDebugDealLock_;
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
+
+    ffrt::mutex shouldBlockAllAppStartMutex_;
+    bool shouldBlockAllAppStart_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
