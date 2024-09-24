@@ -643,7 +643,8 @@ bool CJUIAbility::GetInsightIntentExecutorInfo(const Want &want,
 }
 #endif
 #endif
-int32_t CJUIAbility::OnContinue(WantParams &wantParams)
+int32_t CJUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
+    const AppExecFwk::AbilityInfo &abilityInfo)
 {
     if (!cjAbilityObj_) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
