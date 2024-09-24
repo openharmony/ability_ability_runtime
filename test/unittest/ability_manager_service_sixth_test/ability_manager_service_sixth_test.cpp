@@ -200,5 +200,21 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartUIAbilityBySCBDefault_001, TestSiz
     EXPECT_EQ(abilityMs->StartUIAbilityBySCBDefault(sessionInfo, sceneFlag, isColdStart), RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUIAbilityBySCBDefault_001 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: TerminateMission
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService TerminateMission
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, TerminateMission_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest TerminateMission_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs, nullptr);
+    int32_t missionId = -1;
+    EXPECT_EQ(abilityMs->TerminateMission(missionId), 1);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest TerminateMission_001 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

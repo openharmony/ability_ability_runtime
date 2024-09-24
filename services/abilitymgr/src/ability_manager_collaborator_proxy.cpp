@@ -337,37 +337,6 @@ int32_t AbilityManagerCollaboratorProxy::NotifyRemoveShellProcess(int32_t pid, i
     return NO_ERROR;
 }
 
-void AbilityManagerCollaboratorProxy::UpdateMissionInfo(InnerMissionInfoDto &info)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
-        return;
-    }
-
-    if (!data.WriteParcelable(&info)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write info fail");
-        return;
-    }
-
-    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::UPDATE_MISSION_INFO, data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
-        return;
-    }
-
-    std::unique_ptr<InnerMissionInfoDto> innerInfo(reply.ReadParcelable<InnerMissionInfoDto>());
-    if (!innerInfo) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get error");
-        return;
-    }
-    info = *innerInfo;
-    return;
-}
-
 void AbilityManagerCollaboratorProxy::UpdateMissionInfo(sptr<SessionInfo> &sessionInfo)
 {
     MessageParcel data;
