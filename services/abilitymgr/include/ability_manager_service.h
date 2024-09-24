@@ -407,7 +407,7 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED) override;
 
     /**
-     * Requset modal UIExtension with want, send want to ability manager service.
+     * Request modal UIExtension with want, send want to ability manager service.
      *
      * @param want, the want contains ability info about caller and called.
      * @return Returns ERR_OK on success, others on failure.
@@ -653,7 +653,7 @@ public:
     /**
      * NotifyCompleteContinuation, notify continuation complete to dms.
      * @param deviceId, source device which start a continuation.
-     * @param sessionId, represent a continuaion.
+     * @param sessionId, represent a continuation.
      * @param isSuccess, continuation result.
      * @return
      */
@@ -1558,7 +1558,7 @@ public:
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.
-     * @param isTerminate the result of ability onPrepareToTermiante.
+     * @param isTerminate the result of ability onPrepareToTerminate.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isTerminate) override;
@@ -1838,8 +1838,17 @@ protected:
 
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
+    /**
+     * @brief Notify abilityms app process pre cache
+     * @param pid process pid.
+     * @param userId userId Designation User ID.
+     */
     void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
+    /**
+     * @brief Notify abilityms app process OnRemoteDied
+     * @param abilityTokens abilities in died process.
+     */
     void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
 private:
@@ -1862,7 +1871,7 @@ private:
      */
     void StartHighestPriorityAbility(int32_t userId, bool isBoot);
     /**
-     * connet bms.
+     * connect bms.
      *
      */
     void ConnectBmsService();
@@ -1928,7 +1937,7 @@ private:
     int StartRemoteAbilityByCall(const Want &want, const sptr<IRemoteObject> &callerToken,
         const sptr<IRemoteObject> &connect);
     int ReleaseRemoteAbility(const sptr<IRemoteObject> &connect, const AppExecFwk::ElementName &element);
-    void ForceTerminateSerivceExtensionByPid(int32_t pid, int32_t userId);
+    void ForceTerminateServiceExtensionByPid(int32_t pid, int32_t userId);
 
     void DumpInner(const std::string &args, std::vector<std::string> &info);
     void DumpMissionInner(const std::string &args, std::vector<std::string> &info);
@@ -2284,16 +2293,16 @@ private:
 
     void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
         const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
-    
+
     void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
         const Want& want, uint32_t specifyTokenId);
-    
+
     void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
     /**
      * @brief Check debug app in developer mode.
      * @param applicationInfo. The application info.
-     * @return Returns ture or false.
+     * @return Returns true or false.
      */
     bool CheckDebugAppNotInDeveloperMode(const AppExecFwk::ApplicationInfo &applicationInfo);
 

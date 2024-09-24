@@ -25,9 +25,20 @@ public:
     explicit StartSpecifiedAbilityResponseProxy(const sptr<IRemoteObject> &impl);
     virtual ~StartSpecifiedAbilityResponseProxy() = default;
 
+    /**
+     * @brief called when the module's onAcceptWant done to notify ability mgr to continue
+     * @param want request param being accepted
+     * @param flag specified flag return by application
+     * @param requestId a number represents a request
+     */
     virtual void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag,
         int32_t requestId) override;
 
+    /**
+     * @brief called when the module's onAcceptWant happens time out
+     * @param want request param
+     * @param requestId a number represents a request
+     */
     virtual void OnTimeoutResponse(const AAFwk::Want &want, int32_t requestId) override;
 
     virtual void OnNewProcessRequestResponse(const AAFwk::Want &want, const std::string &flag,

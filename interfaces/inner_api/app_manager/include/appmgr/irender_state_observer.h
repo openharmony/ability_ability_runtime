@@ -25,6 +25,11 @@ class IRenderStateObserver : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.appexecfwk.IRenderStateObserver");
 
+    /**
+     * Called when one render process's state changes.
+     *
+     * @param renderStateData retrieved state data.
+     */
     virtual void OnRenderStateChanged(const RenderStateData &renderStateData) = 0;
 
     enum {

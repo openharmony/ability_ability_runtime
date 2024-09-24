@@ -650,7 +650,7 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
     }
 
     if (token != sessionInfo->callerToken) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken unequal to top ablity token");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken unequal to top ability token");
         return NOT_TOP_ABILITY;
     }
     AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
@@ -685,7 +685,7 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
     }
 
     if (token != sessionInfo->callerToken) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken unequal to top ablity token");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken unequal to top ability token");
         return NOT_TOP_ABILITY;
     }
     return StartAbility(want, startOptions, callerToken, userId, requestCode);
@@ -10367,7 +10367,7 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId=%{public}d", userId);
     connectManager = GetConnectManagerByUserId(userId);
     if (connectManager) {
-        targetAbility = connectManager->GetUIExtensioBySessionInfo(sessionInfo);
+        targetAbility = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
     } else {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connectManager null, userId:%{public}d", userId);
     }
@@ -10375,7 +10375,7 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
         TAG_LOGD(AAFwkTag::ABILITYMGR, "try to find UIExtension in user0");
         connectManager = GetConnectManagerByUserId(U0_USER_ID);
         if (connectManager) {
-            targetAbility = connectManager->GetUIExtensioBySessionInfo(sessionInfo);
+            targetAbility = connectManager->GetUIExtensionBySessionInfo(sessionInfo);
         } else {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "connectManager null, userId:0");
         }
@@ -10946,7 +10946,7 @@ void AbilityManagerService::NotifyStartResidentProcess(std::vector<AppExecFwk::B
 
 void AbilityManagerService::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
-    ForceTerminateSerivceExtensionByPid(pid, userId);
+    ForceTerminateServiceExtensionByPid(pid, userId);
 }
 
 void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
@@ -12179,7 +12179,7 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
     return errCode;
 }
 
-void AbilityManagerService::ForceTerminateSerivceExtensionByPid(int32_t pid, int32_t userId)
+void AbilityManagerService::ForceTerminateServiceExtensionByPid(int32_t pid, int32_t userId)
 {
     std::vector<sptr<IRemoteObject>> tokens;
     IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->GetAbilityRecordsByProcessID(
@@ -12191,7 +12191,7 @@ void AbilityManagerService::ForceTerminateSerivceExtensionByPid(int32_t pid, int
             if (abilityRecord &&
                 abilityRecord->GetAbilityInfo().extensionAbilityType ==
                 AppExecFwk::ExtensionAbilityType::SERVICE) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "app ForceTerminateSerivceExtensionByPid, pid is %{public}d", pid);
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "app ForceTerminateServiceExtensionByPid, pid is %{public}d", pid);
                 connectManager->TerminateAbility(token);
             }
         }
@@ -12228,7 +12228,7 @@ void AbilityManagerService::SendStartAbilityOtherExtensionEvent(const AppExecFwk
 {
     if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
         abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-        return;        
+        return;
     }
     EventInfo eventInfo;
     eventInfo.bundleName = abilityInfo.bundleName;
