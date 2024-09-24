@@ -1318,6 +1318,16 @@ public:
      */
     virtual int32_t TerminateMission(int32_t missionId) override;
 
+    /**
+     * update associate config list by rss.
+     *
+     * @param configs The rss config info.
+     * @param exportConfigs The rss export config info.
+     * @param flag UPDATE_CONFIG_FLAG_COVER is cover config, UPDATE_CONFIG_FLAG_APPEND is append config.
+     */
+    virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
@@ -1328,6 +1338,8 @@ private:
         MessageOption& option);
     int CheckUISessionParams(MessageParcel &data, const sptr<IRemoteObject> &callerToken,
         const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode);
+    bool UpdateAssociateConfigInner(const std::map<std::string, std::list<std::string>>& configs,
+        MessageParcel& data);
 
 private:
     static inline BrokerDelegator<AbilityManagerProxy> delegator_;
