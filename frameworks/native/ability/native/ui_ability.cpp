@@ -441,7 +441,15 @@ AppExecFwk::AbilityLifecycleExecutor::LifecycleState UIAbility::GetState()
     return static_cast<AppExecFwk::AbilityLifecycleExecutor::LifecycleState>(abilityLifecycleExecutor_->GetState());
 }
 
-int32_t UIAbility::OnContinue(AAFwk::WantParams &wantParams)
+int32_t UIAbility::OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+    const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    return ERR_OK;
+}
+
+int32_t UIAbility::OnContinue(AAFwk::WantParams &wantParams, bool &isAsyncOnContinue,
+    const AppExecFwk::AbilityInfo &abilityInfo)
 {
     return AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
 }
