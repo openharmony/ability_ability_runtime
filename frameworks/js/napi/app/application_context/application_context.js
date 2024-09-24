@@ -161,6 +161,10 @@ class ApplicationContext {
     return this.__context_impl__.setFont(font);
   }
 
+  setFontSizeScale(fontSizeScale) {
+    return this.__context_impl__.setFontSizeScale(fontSizeScale);
+  }
+
   setAutoStartup(info, callback) {
     return this.__context_impl__.setAutoStartup(info, callback);
   }
@@ -195,6 +199,14 @@ class ApplicationContext {
 
   getCurrentAppCloneIndex() {
     return this.__context_impl__.getCurrentAppCloneIndex();
+  }
+
+  getCurrentInstanceKey() {
+    return this.__context_impl__.getCurrentInstanceKey();
+  }
+
+  getAllRunningInstanceKeys() {
+    return this.__context_impl__.getAllRunningInstanceKeys();
   }
   
   set area(mode) {

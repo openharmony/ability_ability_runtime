@@ -397,6 +397,16 @@ int32_t AppMgrService::GetRunningMultiAppInfoByBundleName(const std::string &bun
     return appMgrServiceInner_->GetRunningMultiAppInfoByBundleName(bundleName, info);
 }
 
+
+int32_t AppMgrService::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+}
+
 int32_t AppMgrService::GetRunningProcessesByBundleType(BundleType bundleType,
     std::vector<RunningProcessInfo> &info)
 {
@@ -1621,6 +1631,26 @@ int32_t AppMgrService::GetSupportedProcessCachePids(const std::string &bundleNam
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
     return appMgrServiceInner_->GetSupportedProcessCachePids(bundleName, pidList);
+}
+
+int32_t AppMgrService::RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return appMgrServiceInner_->RegisterKiaInterceptor(interceptor);
+}
+
+int32_t AppMgrService::CheckIsKiaProcess(pid_t pid, bool &isKia)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return appMgrServiceInner_->CheckIsKiaProcess(pid, isKia);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

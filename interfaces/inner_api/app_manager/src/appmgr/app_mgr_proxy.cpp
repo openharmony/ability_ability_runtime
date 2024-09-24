@@ -219,6 +219,25 @@ int32_t AppMgrProxy::GetRunningMultiAppInfoByBundleName(const std::string &bundl
     return result;
 }
 
+int32_t AppMgrProxy::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, String, bundleName);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_BUNDLENAME, data, reply, option);
+    if (!reply.ReadStringVector(&instanceKeys)) {
+        return ERR_INVALID_DATA;
+    }
+    int32_t result = reply.ReadInt32();
+    return result;
+}
+
 int32_t AppMgrProxy::GetRunningProcessesByBundleType(const BundleType bundleType,
     std::vector<RunningProcessInfo> &info)
 {
@@ -1986,6 +2005,54 @@ int32_t AppMgrProxy::GetSupportedProcessCachePids(const std::string &bundleName,
         pidList.push_back(reply.ReadInt32());
     }
     return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor)
+{
+    if (interceptor == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "interceptor is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteRemoteObject(interceptor->AsObject())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write interceptor failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::REGISTER_KIA_INTERCEPTOR, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::CheckIsKiaProcess(pid_t pid, bool &isKia)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write pid failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::CHECK_IS_KIA_PROCESS, data, reply, option);
+    int32_t ret = reply.ReadInt32();
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed,ret=%{public}d.", ret);
+        return ret;
+    }
+    isKia = reply.ReadBool();
+    return ERR_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

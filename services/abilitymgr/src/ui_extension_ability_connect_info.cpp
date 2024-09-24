@@ -34,9 +34,11 @@ UIExtensionAbilityConnectInfo *UIExtensionAbilityConnectInfo::Unmarshalling(Parc
     }
 
     if (!connectInfo->ReadFromParcel(parcel)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read connect info from parcel failed");
         delete connectInfo;
-        connectInfo = nullptr;
+        return nullptr;
     }
+
     return connectInfo;
 }
 

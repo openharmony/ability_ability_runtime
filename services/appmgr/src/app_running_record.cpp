@@ -392,6 +392,16 @@ const std::list<std::shared_ptr<ApplicationInfo>> AppRunningRecord::GetAppInfoLi
     return appInfoList;
 }
 
+void AppRunningRecord::SetAppIdentifier(const std::string &appIdentifier)
+{
+    appIdentifier_ = appIdentifier;
+}
+
+const std::string &AppRunningRecord::GetAppIdentifier() const
+{
+    return appIdentifier_;
+}
+
 const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> AppRunningRecord::GetAbilities()
 {
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilitysMap;
@@ -474,6 +484,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetUId(mainUid_);
     launchData.SetUserTestInfo(userTestRecord_);
     launchData.SetAppIndex(appIndex_);
+    launchData.SetInstanceKey(instanceKey_);
     launchData.SetDebugApp(isDebugApp_);
     launchData.SetPerfCmd(perfCmd_);
     launchData.SetErrorInfoEnhance(isErrorInfoEnhance_);
@@ -482,7 +493,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
 
-    TAG_LOGD(AAFwkTag::APPMGR, "app is %{public}s.", GetName().c_str());
+    TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     appLifeCycleDeal_->LaunchApplication(launchData, config);
 }
 
@@ -636,7 +647,7 @@ void AppRunningRecord::ScheduleTerminate()
 
 void AppRunningRecord::LaunchPendingAbilities()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Launch pending abilities.");
+    TAG_LOGI(AAFwkTag::APPMGR, "Launch pending abilities.");
 
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {
@@ -1214,13 +1225,11 @@ std::list<std::shared_ptr<ModuleRunningRecord>> AppRunningRecord::GetAllModuleRe
 {
     std::list<std::shared_ptr<ModuleRunningRecord>> moduleRecordList;
     std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
-    TAG_LOGD(AAFwkTag::APPMGR, "Begin.");
     for (const auto &item : hapModules_) {
         for (const auto &list : item.second) {
             moduleRecordList.push_back(list);
         }
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "End.");
     return moduleRecordList;
 }
 
@@ -1547,11 +1556,9 @@ bool AppRunningRecord::CanRestartResidentProc()
 void AppRunningRecord::GetBundleNames(std::vector<std::string> &bundleNames)
 {
     std::lock_guard<ffrt::mutex> appInfosLock(appInfosLock_);
-    TAG_LOGD(AAFwkTag::APPMGR, "Begin.");
     for (auto &app : appInfos_) {
         bundleNames.emplace_back(app.first);
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "End.");
 }
 
 void AppRunningRecord::SetUserTestInfo(const std::shared_ptr<UserTestRecord> &record)
@@ -1839,6 +1846,11 @@ void AppRunningRecord::SetAppIndex(const int32_t appIndex)
     appIndex_ = appIndex;
 }
 
+void AppRunningRecord::SetInstanceKey(const std::string& instanceKey)
+{
+    instanceKey_ = instanceKey;
+}
+
 void AppRunningRecord::GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode)
 {
     auto abilitiesMap = GetAbilities();
@@ -1869,6 +1881,11 @@ void AppRunningRecord::GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool
 int32_t AppRunningRecord::GetAppIndex() const
 {
     return appIndex_;
+}
+
+std::string AppRunningRecord::GetInstanceKey() const
+{
+    return instanceKey_;
 }
 
 void AppRunningRecord::SetSecurityFlag(bool securityFlag)
@@ -1981,6 +1998,35 @@ bool AppRunningRecord::IsAbilitytiesBackground()
     return true;
 }
 #ifdef SUPPORT_SCREEN
+
+void AppRunningRecord::ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisibilityInfo> &info)
+{
+    if (info == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null info");
+        return;
+    }
+
+    if (GetPriorityObject() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
+        return;
+    } else {
+        if (info->pid_ != GetPriorityObject()->GetPid()) {
+            return;
+        }
+    }
+    
+    auto iter = windowIds_.find(info->windowId_);
+    if (iter != windowIds_.end() &&
+        info->visibilityState_ == OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        windowIds_.erase(iter);
+        return;
+    }
+    if (iter == windowIds_.end() &&
+        info->visibilityState_ < OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        windowIds_.emplace(info->windowId_);
+    }
+}
+
 void AppRunningRecord::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {
@@ -2358,6 +2404,18 @@ bool AppRunningRecord::SetSupportedProcessCache(bool isSupport)
     TAG_LOGI(AAFwkTag::APPMGR, "call");
     procCacheSupportState_ = isSupport ? SupportProcessCacheState::SUPPORT : SupportProcessCacheState::NOT_SUPPORT;
     return true;
+}
+
+bool AppRunningRecord::SetEnableProcessCache(bool enable)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    enableProcessCache_ = enable;
+    return true;
+}
+
+bool AppRunningRecord::GetEnableProcessCache()
+{
+    return enableProcessCache_;
 }
 
 SupportProcessCacheState AppRunningRecord::GetSupportProcessCacheState()

@@ -56,8 +56,9 @@ public:
      * This function can be called only once in the entire lifecycle of an ui extension.
      *
      * @param Want Indicates the {@link Want} structure containing startup information about the ui extension.
+     * @param sessionInfo The session info of the ability.
      */
-    void OnStart(const AAFwk::Want &want) override;
+    void OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo) override;
 
     /**
      * @brief Called back when ui extension is started.

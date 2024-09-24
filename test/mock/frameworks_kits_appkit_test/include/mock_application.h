@@ -21,30 +21,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-class MockModuleLifecycleCallbacks : public AbilityLifecycleCallbacks {
-public:
-    MockModuleLifecycleCallbacks() = default;
-    virtual ~MockModuleLifecycleCallbacks() = default;
-
-    void OnAbilityStart(const std::shared_ptr<Ability>& ability);
-    void OnAbilityInactive(const std::shared_ptr<Ability>& ability);
-    void OnAbilityBackground(const std::shared_ptr<Ability>& ability);
-    void OnAbilityForeground(const std::shared_ptr<Ability>& ability);
-    void OnAbilityActive(const std::shared_ptr<Ability>& ability);
-    void OnAbilityStop(const std::shared_ptr<Ability>& ability);
-    void OnAbilitySaveState(const PacMap& outState);
-};
-
-class MockModuleElementsCallback : public ElementsCallback {
-public:
-    MockModuleElementsCallback() = default;
-    virtual ~MockModuleElementsCallback() = default;
-
-    virtual void OnConfigurationUpdated(const std::shared_ptr<Ability>& ability, const Configuration& config);
-
-    virtual void OnMemoryLevel(int level);
-};
-
 class MockApplication : public OHOSApplication {
 public:
     MockApplication();
@@ -57,10 +33,8 @@ public:
     virtual void OnStart();
     virtual void OnTerminate();
     virtual int32_t ScheduleChangeAppGcState(int32_t state);
-    
+
 private:
-    std::shared_ptr<ElementsCallback> elementCallBack_ = nullptr;
-    std::shared_ptr<AbilityLifecycleCallbacks> lifecycleCallBack_ = nullptr;
     int level_ = 0;
     std::shared_ptr<Configuration> config_ = nullptr;
 };

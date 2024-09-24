@@ -31,6 +31,7 @@ const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 namespace {
 const int32_t SHELL_START_EXTENSION_FLOOR = 0; // FORM
 const int32_t SHELL_START_EXTENSION_CEIL = 21; // EMBEDDED_UI
+const int32_t TOKEN_ID_BIT_SIZE = 32;
 const std::string FOUNDATION_PROCESS_NAME = "foundation";
 const std::set<std::string> OBSERVER_NATIVE_CALLER = {
     "memmgrservice",
@@ -68,9 +69,17 @@ bool PermissionVerification::VerifyCallingPermission(
 
 bool PermissionVerification::IsSACall() const
 {
-    TAG_LOGD(AAFwkTag::DEFAULT, "called");
     auto callerToken = GetCallingTokenID();
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    return IsSACallByTokenId(callerToken);
+}
+
+bool PermissionVerification::IsSACallByTokenId(uint32_t callerTokenId) const
+{
+    TAG_LOGD(AAFwkTag::DEFAULT, "called");
+    if (callerTokenId == 0) {
+        callerTokenId = GetCallingTokenID();
+    }
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         TAG_LOGD(AAFwkTag::DEFAULT, "verify success");
         return true;
@@ -81,9 +90,17 @@ bool PermissionVerification::IsSACall() const
 
 bool PermissionVerification::IsShellCall() const
 {
-    TAG_LOGD(AAFwkTag::DEFAULT, "called");
     auto callerToken = GetCallingTokenID();
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    return IsShellCallByTokenId(callerToken);
+}
+
+bool PermissionVerification::IsShellCallByTokenId(uint32_t callerTokenId) const
+{
+    TAG_LOGD(AAFwkTag::DEFAULT, "called");
+    if (callerTokenId == 0) {
+        callerTokenId = GetCallingTokenID();
+    }
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
         TAG_LOGD(AAFwkTag::DEFAULT, "verify success");
         return true;
@@ -427,6 +444,26 @@ bool PermissionVerification::IsSystemAppCall() const
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken);
 }
 
+bool PermissionVerification::IsSystemAppCallByTokenId(uint32_t callerTokenId) const
+{
+    if (callerTokenId == 0) {
+        return IsSystemAppCall();
+    }
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
+    if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Not TOKEN_HAP.");
+        return false;
+    }
+    Security::AccessToken::HapTokenInfo hapInfo;
+    auto ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callerTokenId, hapInfo);
+    if (ret != Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "GetHapTokenInfo failed, ret:%{public}d", ret);
+        return false;
+    }
+    uint64_t fullCallerTokenId = (static_cast<uint64_t>(hapInfo.tokenAttr) << TOKEN_ID_BIT_SIZE) + callerTokenId;
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullCallerTokenId);
+}
+
 bool PermissionVerification::VerifyBackgroundCallPermission(const bool isBackgroundCall) const
 {
     return JudgeStartAbilityFromBackground(isBackgroundCall);
@@ -495,6 +532,38 @@ bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
     }
     TAG_LOGW(AAFwkTag::APPMGR, "Permission denied");
     return false;
+}
+
+bool PermissionVerification::VerifyBlockAllAppStartPermission() const
+{
+    if (!IsSACall()) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "not SA call");
+        return false;
+    }
+#ifdef ENABLE_BLOCK_ALL_APP_START
+    if (!VerifyCallingPermission(PermissionConstants::PERMISSION_BLOCK_ALL_APP_START)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "no PERMISSION_BLOCK_ALL_APP_START");
+        return false;
+    }
+#endif
+    TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+    return true;
+}
+
+bool PermissionVerification::VerifyStartUIAbilityToHiddenPermission() const
+{
+    if (!IsSACall()) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "not SA call");
+        return false;
+    }
+#ifdef ENABLE_BLOCK_ALL_APP_START
+    if (!VerifyCallingPermission(PermissionConstants::PERMISSION_START_UIABILITY_TO_HIDDEN)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "no PERMISSION_START_UIABILITY_TO_HIDDEN");
+        return false;
+    }
+#endif
+    TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+    return true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

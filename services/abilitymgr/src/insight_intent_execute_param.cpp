@@ -82,13 +82,20 @@ bool InsightIntentExecuteParam::GenerateFromWant(const AAFwk::Want &want,
         TAG_LOGE(AAFwkTag::INTENT, "empty want");
         return false;
     }
+    uint64_t insightIntentId = 0;
+    try {
+        insightIntentId = std::stoull(wantParams.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_ID));
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::ABILITY, "invalid insight intent ID");
+        return false;
+    }
 
     AppExecFwk::ElementName elementName = want.GetElement();
     executeParam.bundleName_ = elementName.GetBundleName();
     executeParam.moduleName_ = elementName.GetModuleName();
     executeParam.abilityName_ = elementName.GetAbilityName();
     executeParam.insightIntentName_ = wantParams.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME);
-    executeParam.insightIntentId_ = std::stoull(wantParams.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_ID));
+    executeParam.insightIntentId_ = insightIntentId;
     executeParam.executeMode_ = wantParams.GetIntParam(INSIGHT_INTENT_EXECUTE_PARAM_MODE, 0);
 
     auto insightIntentParam = wantParams.GetWantParams(INSIGHT_INTENT_EXECUTE_PARAM_PARAM);
@@ -112,6 +119,9 @@ bool InsightIntentExecuteParam::RemoveInsightIntent(AAFwk::Want &want)
     }
     if (want.HasParameter(INSIGHT_INTENT_EXECUTE_PARAM_PARAM)) {
         want.RemoveParam(INSIGHT_INTENT_EXECUTE_PARAM_PARAM);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_SRC_ENTRY)) {
+        want.RemoveParam(INSIGHT_INTENT_SRC_ENTRY);
     }
     return true;
 }

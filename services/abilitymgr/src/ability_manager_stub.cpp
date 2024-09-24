@@ -543,6 +543,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::PRELOAD_UIEXTENSION_ABILITY) {
         return PreloadUIExtensionAbilityInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::TERMINATE_UI_SERVICE_EXTENSION_ABILITY) {
+        return TerminateUIServiceExtensionAbilityInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -750,6 +753,9 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     }
     if (interfaceCode == AbilityManagerInterfaceCode::TERMINATE_MISSION) {
         return TerminateMissionInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::BLOCK_ALL_APP_START) {
+        return BlockAllAppStartInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -961,6 +967,18 @@ int AbilityManagerStub::BackToCallerInner(MessageParcel &data, MessageParcel &re
     if (resultWant != nullptr) {
         delete resultWant;
     }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::TerminateUIServiceExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = nullptr;
+    if (data.ReadBool()) {
+        token = data.ReadRemoteObject();
+    }
+    
+    int32_t result = TerminateUIServiceExtensionAbility(token);
+    reply.WriteInt32(result);
     return NO_ERROR;
 }
 
@@ -4016,6 +4034,17 @@ int32_t AbilityManagerStub::TerminateMissionInner(MessageParcel &data, MessagePa
     }
     reply.WriteInt32(result);
     return result;
+}
+
+int32_t AbilityManagerStub::BlockAllAppStartInner(MessageParcel &data, MessageParcel &reply)
+{
+    bool flag = data.ReadBool();
+    int32_t result = BlockAllAppStart(flag);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result failed");
+        return IPC_STUB_ERR;
+    }
+    return ERR_OK;
 }
 } // namespace AAFwk
 } // namespace OHOS

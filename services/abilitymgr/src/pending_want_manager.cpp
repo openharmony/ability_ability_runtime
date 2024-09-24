@@ -21,6 +21,7 @@
 #include "hitrace_meter.h"
 #include "permission_constants.h"
 #include "session_manager_lite.h"
+#include "utils/app_mgr_util.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -737,6 +738,23 @@ void PendingWantManager::DumpByRecordId(std::vector<std::string> &info, const st
             }
         }
     }
+}
+
+int32_t PendingWantManager::GetAllRunningInstanceKeysByBundleName(
+    const std::string &bundleName, std::vector<std::string> &appKeyVec)
+{
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "bundle name is empty");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto appMgr = AppMgrUtil::GetAppMgr();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "app mgr is null");
+        return OBJECT_NULL;
+    }
+
+    return appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

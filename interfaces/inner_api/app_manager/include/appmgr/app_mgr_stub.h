@@ -105,6 +105,7 @@ private:
     int32_t HandleDumpHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDumpJsHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetRunningMultiAppInfoByBundleName(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetAllRunningInstanceKeysByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsAppRunning(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAppRunningStateByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
@@ -138,6 +139,8 @@ private:
     int32_t HandleClearUpApplicationDataBySelf(MessageParcel &data, MessageParcel& reply);
     int32_t HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterKiaInterceptor(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCheckIsKiaProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateRenderState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSignRestartAppFlag(MessageParcel &data, MessageParcel &reply);

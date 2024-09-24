@@ -68,15 +68,6 @@ void ResourceConfigHelper::SetThemeId(std::string themeId)
     themeId_ = themeId;
 }
 
-std::string ResourceConfigHelper::GetColorModeIsSetByApp()
-{
-    return colorModeIsSetByApp_;
-}
-void ResourceConfigHelper::SetColorModeIsSetByApp(std::string colorModeIsSetByApp)
-{
-    colorModeIsSetByApp_ = colorModeIsSetByApp;
-}
-
 void ResourceConfigHelper::UpdateResConfig(
     const AppExecFwk::Configuration &configuration, std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
 {
@@ -131,7 +122,7 @@ void ResourceConfigHelper::UpdateResConfig(std::unique_ptr<Global::Resource::Res
     if (!hasPointerDevice_.empty()) {
         resConfig->SetInputDevice(AppExecFwk::ConvertHasPointerDevice(hasPointerDevice_));
     }
-    if (!colorModeIsSetByApp_.empty()) {
+    if (ApplicationConfigurationManager::GetInstance().ColorModeHasSetByApplication()) {
         TAG_LOGD(AAFwkTag::ABILITY, "set app true");
         resConfig->SetAppColorMode(true);
     }

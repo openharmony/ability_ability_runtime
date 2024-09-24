@@ -15,6 +15,7 @@
 
 #include "js_application_context_utils.h"
 
+#include <cstdint>
 #include <map>
 
 #include "ability_business_error.h"
@@ -48,6 +49,7 @@ constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
 constexpr int32_t ERROR_CODE_ONE = 1;
+constexpr double FOUNT_SIZE = 0.0;
 const char* MD_NAME = "JsApplicationContextUtils";
 }  // namespace
 
@@ -498,22 +500,30 @@ napi_value JsApplicationContextUtils::OnGetGroupDir(napi_env env, NapiCallbackIn
     }
 
     TAG_LOGD(AAFwkTag::APPKIT, "Get Group Dir");
-    auto complete = [applicationContext = applicationContext_, groupId]
-        (napi_env env, NapiAsyncTask& task, int32_t status) {
-        auto context = applicationContext.lock();
-        if (!context) {
-            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
-                "applicationContext if already released."));
-            return;
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    auto path = std::make_shared<std::string>("");
+    NapiAsyncTask::ExecuteCallback execute =
+        [applicationContext = applicationContext_, groupId, innerErrCode, path]() {
+            auto context = applicationContext.lock();
+            if (!context) {
+                TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+                *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+                return;
+            }
+            *path = context->GetGroupDir(groupId);
+        };
+    auto complete = [innerErrCode, path](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrCode == ERR_OK) {
+            task.ResolveWithNoError(env, CreateJsValue(env, *path));
+        } else {
+            task.Reject(env, CreateJsError(env, *innerErrCode,
+                "applicationContext if already released"));
         }
-        std::string path = context->GetGroupDir(groupId);
-        task.ResolveWithNoError(env, CreateJsValue(env, path));
     };
-
     napi_value lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplicationContextUtils::OnGetGroupDir",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -602,21 +612,28 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
     }
 
     TAG_LOGD(AAFwkTag::APPKIT, "kill self process");
-    NapiAsyncTask::CompleteCallback complete =
-        [applicationContext = applicationContext_, clearPageStack](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto context = applicationContext.lock();
-            if (!context) {
-                task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
-                    "applicationContext if already released."));
-                return;
-            }
-            context->KillProcessBySelf(clearPageStack);
-            task.ResolveWithNoError(env, CreateJsUndefined(env));
-        };
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute =
+        [applicationContext = applicationContext_, clearPageStack, innerErrCode]() {
+        auto context = applicationContext.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+            *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+            return;
+        }
+        context->KillProcessBySelf(clearPageStack);
+    };
+    NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrCode != ERR_OK) {
+            task.Reject(env, CreateJsError(env, *innerErrCode, "applicationContext is already released."));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
     napi_value lastParam = (info.argc == ARGC_ONE && !hasClearPageStack) ? info.argv[INDEX_ZERO] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplicationContextUtils::OnkillProcessBySelf",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -675,6 +692,44 @@ napi_value JsApplicationContextUtils::OnSetLanguage(napi_env env, NapiCallbackIn
         return CreateJsUndefined(env);
     }
     applicationContext->SetLanguage(language);
+    return CreateJsUndefined(env);
+}
+
+napi_value JsApplicationContextUtils::SetFontSizeScale(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnSetFontSizeScale, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnSetFontSizeScale(napi_env env, NapiCallbackInfo& info)
+{
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
+        return CreateJsUndefined(env);
+    }
+
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext released");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+
+    double fontSizeScale = 1;
+    if (!ConvertFromJsNumber(env, info.argv[INDEX_ZERO], fontSizeScale)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse fontSizeScale failed");
+        ThrowInvalidParamError(env, "Parse fontSizeScale failed, fontSizeScale must be number.");
+        return CreateJsUndefined(env);
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "fontSizeScale: %{public}f", fontSizeScale);
+    if (fontSizeScale < FOUNT_SIZE) {
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid size");
+        ThrowInvalidParamError(env, "Invalid font size.");
+        return CreateJsUndefined(env);
+    }
+
+    applicationContext->SetFontSizeScale(fontSizeScale);
     return CreateJsUndefined(env);
 }
 
@@ -769,21 +824,28 @@ napi_value JsApplicationContextUtils::OnClearUpApplicationData(napi_env env, Nap
         ThrowInvalidParamError(env, "Not enough params.");
         return CreateJsUndefined(env);
     }
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, innerErrCode]() {
+        auto context = applicationContext.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+            *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+            return;
+        }
+        context->ClearUpApplicationData();
+    };
     NapiAsyncTask::CompleteCallback complete =
-        [applicationContext = applicationContext_](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto context = applicationContext.lock();
-            if (!context) {
-                task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
-                    "applicationContext if already released."));
-                return;
+        [applicationContext = applicationContext_, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsError(env, *innerErrCode, "applicationContext if already released."));
             }
-            context->ClearUpApplicationData();
-            task.ResolveWithNoError(env, CreateJsUndefined(env));
-        };
+    };
     napi_value lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsApplicationContextUtils::OnClearUpApplicationData",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -802,26 +864,34 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
         return CreateJsUndefined(env);
     }
     TAG_LOGD(AAFwkTag::APPKIT, "Get Process Info");
-    auto complete = [applicationContext = applicationContext_](napi_env env, NapiAsyncTask& task, int32_t status) {
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    auto processInfo = std::make_shared<AppExecFwk::RunningProcessInfo>();
+    NapiAsyncTask::ExecuteCallback execute = [applicationContext = applicationContext_, innerErrCode, processInfo]() {
         auto context = applicationContext.lock();
         if (!context) {
-            task.Reject(env, CreateJsError(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
+            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+            *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+            return;
+        }
+        *innerErrCode = context->GetProcessRunningInformation(*processInfo);
+    };
+    auto complete = [innerErrCode, processInfo](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrCode == ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST) {
+            task.Reject(env, CreateJsError(env, *innerErrCode,
                 "applicationContext if already released."));
             return;
         }
-        AppExecFwk::RunningProcessInfo processInfo;
-        auto ret = context->GetProcessRunningInformation(processInfo);
-        if (ret == 0) {
+        if (*innerErrCode == ERR_OK) {
             napi_value object = nullptr;
             napi_create_object(env, &object);
-            napi_set_named_property(env, object, "processName", CreateJsValue(env, processInfo.processName_));
-            napi_set_named_property(env, object, "pid", CreateJsValue(env, processInfo.pid_));
-            napi_set_named_property(env, object, "uid", CreateJsValue(env, processInfo.uid_));
-            napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, processInfo.bundleNames));
+            napi_set_named_property(env, object, "processName", CreateJsValue(env, processInfo->processName_));
+            napi_set_named_property(env, object, "pid", CreateJsValue(env, processInfo->pid_));
+            napi_set_named_property(env, object, "uid", CreateJsValue(env, processInfo->uid_));
+            napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, processInfo->bundleNames));
             napi_set_named_property(env, object,
-                "state", CreateJsValue(env, ConvertToJsAppProcessState(processInfo.state_, processInfo.isFocused)));
-            if (processInfo.appCloneIndex != -1) {
-                napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, processInfo.appCloneIndex));
+                "state", CreateJsValue(env, ConvertToJsAppProcessState(processInfo->state_, processInfo->isFocused)));
+            if (processInfo->appCloneIndex != -1) {
+                napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, processInfo->appCloneIndex));
             }
             napi_value array = nullptr;
             napi_create_array_with_length(env, 1, &array);
@@ -838,11 +908,10 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
                 "Get process infos failed."));
         }
     };
-
     napi_value lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsApplicationContextUtils::OnGetRunningProcessInformation",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -867,6 +936,70 @@ napi_value JsApplicationContextUtils::OnGetCurrentAppCloneIndex(napi_env env, Na
     }
     int32_t appIndex = context->GetCurrentAppCloneIndex();
     return CreateJsValue(env, appIndex);
+}
+
+napi_value JsApplicationContextUtils::GetCurrentInstanceKey(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnGetCurrentInstanceKey, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetCurrentInstanceKey(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Get current instance key");
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context is nullptr.");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+    if (context->GetCurrentAppMode() != static_cast<int32_t>(AppExecFwk::MultiAppModeType::MULTI_INSTANCE)) {
+        ThrowError(env, AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED);
+        return CreateJsUndefined(env);
+    }
+    std::string instanceKey = context->GetCurrentInstanceKey();
+    return CreateJsValue(env, instanceKey);
+}
+
+napi_value JsApplicationContextUtils::GetAllRunningInstanceKeys(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnGetAllRunningInstanceKeys, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Get all running instance keys");
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    std::shared_ptr<std::vector<std::string>> instanceKeys;
+    NapiAsyncTask::ExecuteCallback execute =
+        [applicationContext = applicationContext_, innerErrCode, instanceKeys]() {
+        auto context = applicationContext.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+            *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+            return;
+        }
+        if (context->GetCurrentAppMode() != static_cast<int32_t>(AppExecFwk::MultiAppModeType::MULTI_INSTANCE)) {
+            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED);
+            return;
+        }
+        std::string bundleName = context->GetBundleName();
+        *innerErrCode = context->GetAllRunningInstanceKeys(bundleName, *instanceKeys);
+    };
+    auto complete = [applicationContext = applicationContext_, innerErrCode, instanceKeys](
+        napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrCode != ERR_OK) {
+            task.Reject(env, CreateJsError(env, *innerErrCode, "failed to get instance keys."));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateNativeArray(env, *instanceKeys));
+    };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnGetRunningProcessInformation",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
 }
 
 void JsApplicationContextUtils::Finalizer(napi_env env, void *data, void *hint)
@@ -932,6 +1065,7 @@ napi_value JsApplicationContextUtils::OnUnregisterAbilityLifecycleCallback(
         TAG_LOGD(AAFwkTag::APPKIT, "callbackId is %{public}d.", callbackId);
     }
     std::weak_ptr<JsAbilityLifecycleCallback> callbackWeak(callback_);
+
     NapiAsyncTask::CompleteCallback complete = [callbackWeak, callbackId, errCode](
             napi_env env, NapiAsyncTask &task, int32_t status) {
             if (errCode != 0) {
@@ -1394,6 +1528,13 @@ napi_value JsApplicationContextUtils::OnGetApplicationContext(napi_env env, Napi
         return CreateJsUndefined(env);
     }
 
+    if (!applicationContext->GetApplicationInfoUpdateFlag()) {
+        auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetGlobalObject(env);
+        if (appContextObj != nullptr) {
+            return appContextObj->GetNapiValue();
+        }
+    }
+
     napi_value value = CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
@@ -1459,7 +1600,8 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
         napi_set_named_property(env, object, "resourceManager", CreateJsResourceManager(env, resourceManager, context));
     }
 
-    BindNativeApplicationContext(env, object);
+    BindNativeApplicationContextOne(env, object);
+    BindNativeApplicationContextTwo(env, object);
     return object;
 }
 
@@ -1505,7 +1647,7 @@ napi_value JsApplicationContextUtils::OnSetSupportedProcessCacheSelf(napi_env en
     return CreateJsUndefined(env);
 }
 
-void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_value object)
+void JsApplicationContextUtils::BindNativeApplicationContextOne(napi_env env, napi_value object)
 {
     BindNativeProperty(env, object, "cacheDir", JsApplicationContextUtils::GetCacheDir);
     BindNativeProperty(env, object, "tempDir", JsApplicationContextUtils::GetTempDir);
@@ -1542,6 +1684,10 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
     BindNativeFunction(env, object, "setFont", MD_NAME, JsApplicationContextUtils::SetFont);
     BindNativeFunction(env, object, "clearUpApplicationData", MD_NAME,
         JsApplicationContextUtils::ClearUpApplicationData);
+}
+
+void JsApplicationContextUtils::BindNativeApplicationContextTwo(napi_env env, napi_value object)
+{
     BindNativeFunction(env, object, "preloadUIExtensionAbility", MD_NAME,
         JsApplicationContextUtils::PreloadUIExtensionAbility);
     BindNativeFunction(env, object, "getProcessRunningInformation", MD_NAME,
@@ -1550,10 +1696,16 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
         JsApplicationContextUtils::GetRunningProcessInformation);
     BindNativeFunction(env, object, "getCurrentAppCloneIndex", MD_NAME,
         JsApplicationContextUtils::GetCurrentAppCloneIndex);
+    BindNativeFunction(env, object, "getCurrentInstanceKey", MD_NAME,
+        JsApplicationContextUtils::GetCurrentInstanceKey);
+    BindNativeFunction(env, object, "getAllRunningInstanceKeys", MD_NAME,
+        JsApplicationContextUtils::GetAllRunningInstanceKeys);
     BindNativeFunction(env, object, "getGroupDir", MD_NAME, JsApplicationContextUtils::GetGroupDir);
     BindNativeFunction(env, object, "restartApp", MD_NAME, JsApplicationContextUtils::RestartApp);
     BindNativeFunction(env, object, "setSupportedProcessCache", MD_NAME,
         JsApplicationContextUtils::SetSupportedProcessCacheSelf);
+    BindNativeFunction(env, object, "setFontSizeScale", MD_NAME,
+        JsApplicationContextUtils::SetFontSizeScale);
 }
 
 JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(

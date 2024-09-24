@@ -72,7 +72,8 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     Want want;
     bool boolParam = *data % ENABLE;
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
-    AbilityInterceptorParam param(want, intParam, int32Param, boolParam, token);
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param(want, intParam, int32Param, boolParam, token, shouldBlockFunc);
     screenUnlockInterceptor->DoProcess(param);
     return true;
 }

@@ -16,6 +16,7 @@
 #include "freeze_util.h"
 
 #include "hilog_tag_wrapper.h"
+#include "time_util.h"
 
 namespace OHOS::AbilityRuntime {
 FreezeUtil& FreezeUtil::GetInstance()
@@ -26,11 +27,12 @@ FreezeUtil& FreezeUtil::GetInstance()
 
 void FreezeUtil::AddLifecycleEvent(const LifecycleFlow &flow, const std::string &entry)
 {
+    auto newEntry = TimeUtil::DefaultCurrentTimeStr() + "; " + entry;
     std::lock_guard lock(mutex_);
     if (lifecycleFlow_.count(flow)) {
-        lifecycleFlow_[flow] = lifecycleFlow_[flow] + "\n" + entry;
+        lifecycleFlow_[flow] = lifecycleFlow_[flow] + "\n" + newEntry;
     } else {
-        lifecycleFlow_[flow] = entry;
+        lifecycleFlow_[flow] = newEntry;
     }
 }
 

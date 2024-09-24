@@ -25,6 +25,7 @@ const long int UNEXPIRED_TIME = 1860000000;
 bool BundleMgrProxy::GetApplicationInfo(
     const std::string& appName, const ApplicationFlag flag, const int userId, ApplicationInfo& appInfo)
 {
+    GTEST_LOG_(INFO) << " BundleMgrProxy::GetApplicationInfo";
     if (appName.empty()) {
         return false;
     }

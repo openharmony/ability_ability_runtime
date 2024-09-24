@@ -598,6 +598,12 @@ int32_t ApplicationContext::GetProcessRunningInformation(AppExecFwk::RunningProc
     return (contextImpl_ != nullptr) ? contextImpl_->GetProcessRunningInformation(info) : -1;
 }
 
+int32_t ApplicationContext::GetAllRunningInstanceKeys(const std::string& bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetAllRunningInstanceKeys(bundleName, instanceKeys) : -1;
+}
+
 bool ApplicationContext::IsUpdatingConfigurations()
 {
     return (contextImpl_ != nullptr) ? contextImpl_->IsUpdatingConfigurations() : false;
@@ -704,8 +710,6 @@ void ApplicationContext::SetColorMode(int32_t colorMode)
     }
     AppExecFwk::Configuration config;
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, AppExecFwk::GetColorModeStr(colorMode));
-    config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP,
-        AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
     if (appConfigChangeCallback_ != nullptr) {
         appConfigChangeCallback_(config);
     }
@@ -716,8 +720,6 @@ void ApplicationContext::SetLanguage(const std::string &language)
     TAG_LOGD(AAFwkTag::APPKIT, "language:%{public}s", language.c_str());
     AppExecFwk::Configuration config;
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
-    config.AddItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP,
-        AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
     if (appConfigChangeCallback_ != nullptr) {
         appConfigChangeCallback_(config);
     }
@@ -734,6 +736,22 @@ void ApplicationContext::SetFont(const std::string &font)
         appFontCallback_(config);
     }
     #endif
+}
+
+bool ApplicationContext::SetFontSizeScale(double fontSizeScale)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
+        return false;
+    }
+
+    AppExecFwk::Configuration config;
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, std::to_string(fontSizeScale));
+    if (appConfigChangeCallback_ != nullptr) {
+        appConfigChangeCallback_(config);
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "SetFontSizeScale callback ok");
+    return true;
 }
 
 void ApplicationContext::SetMcc(const std::string &mcc)
@@ -814,6 +832,11 @@ int32_t ApplicationContext::GetCurrentAppMode()
     return appMode_;
 }
 
+std::string ApplicationContext::GetCurrentInstanceKey()
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getCurrentInstanceKey is %{public}s", instanceKey_.c_str());
+    return instanceKey_;
+}
 
 void ApplicationContext::SetAppRunningUniqueId(const std::string &appRunningUniqueId)
 {
@@ -840,6 +863,12 @@ void ApplicationContext::SetCurrentAppMode(int32_t appMode)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "setCurrentAppMode is %{public}d", appMode);
     appMode_ = appMode;
+}
+
+void ApplicationContext::SetCurrentInstanceKey(const std::string& instanceKey)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "setCurrentInstanceKey is %{public}s", instanceKey.c_str());
+    instanceKey_ = instanceKey;
 }
 
 void ApplicationContext::ProcessSecurityExit(const AAFwk::ExitReason &exitReason)

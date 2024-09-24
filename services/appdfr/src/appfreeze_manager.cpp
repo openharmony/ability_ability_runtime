@@ -221,7 +221,7 @@ std::string AppfreezeManager::WriteToFile(const std::string& fileName, std::stri
     return stackPath;
 }
 
-int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, std::unique_ptr<FreezeUtil::LifecycleFlow> flow)
+int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::LifecycleFlow flow)
 {
     if (info.typeId != AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT) {
         return -1;
@@ -245,9 +245,9 @@ int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, std::unique_
                                  std::to_string(info.pid) +
                                  "-" + std::to_string(GetMilliseconds());
     faultDataSA.pid = info.pid;
-    if (flow != nullptr && flow->state != AbilityRuntime::FreezeUtil::TimeoutState::UNKNOWN) {
-        faultDataSA.token = flow->token;
-        faultDataSA.state = static_cast<uint32_t>(flow->state);
+    if (flow.state != AbilityRuntime::FreezeUtil::TimeoutState::UNKNOWN) {
+        faultDataSA.token = flow.token;
+        faultDataSA.state = static_cast<uint32_t>(flow.state);
     }
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultDataSA);
     return 0;
@@ -579,7 +579,7 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(int32_t pid)
         }
         return true;
     } else {
-        if (diff < FREEZE_TIME_LIMIT) {
+        if (currentTime > FREEZE_TIME_LIMIT && diff < FREEZE_TIME_LIMIT) {
             return true;
         }
         SetFreezeState(pid, AppFreezeState::APPFREEZE_STATE_FREEZE);

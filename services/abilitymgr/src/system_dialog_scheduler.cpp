@@ -16,8 +16,8 @@
 
 #include "ability_record.h"
 #include "ability_util.h"
-#include "app_gallery_enable_util.h"
 #include "app_utils.h"
+#include "application_util.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
@@ -421,8 +421,7 @@ int SystemDialogScheduler::GetSelectorDialogWantCommon(const std::vector<DialogA
             requestWant.SetParam(CALLER_TOKEN, callerToken);
         }
     }
-    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()
-        && isCallerStageBasedModel) {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && isCallerStageBasedModel) {
         auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
         if (bundleMgrHelper == nullptr) {
             TAG_LOGE(AAFwkTag::DIALOG, "bundleMgrHelper null");

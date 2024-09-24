@@ -58,6 +58,7 @@
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
+#include "kia_interceptor_interface.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "remote_client_manager.h"
@@ -165,19 +166,6 @@ public:
      */
     virtual void RegisterAppStateCallback(const sptr<IAppStateCallback> &callback);
     void RemoveDeadAppStateCallback(const wptr<IRemoteObject> &remote);
-
-    /**
-     * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return
-     */
-    virtual void AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState);
 
     /**
      * KillProcessByAbilityToken, kill the process by ability token.
@@ -362,6 +350,17 @@ public:
         RunningMultiAppInfo &info);
 
     /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running isntance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys);
+
+    /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
      *
      * @param bundleType, the bundle type of the application process
@@ -477,15 +476,14 @@ public:
     int32_t StartNativeProcessForDebugger(const AAFwk::Want &want);
 
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
-        sptr<IRemoteObject> token,
-        sptr<IRemoteObject> preToken,
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
         std::shared_ptr<ApplicationInfo> appInfo,
         std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &processName,
         const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want,
-        int32_t abilityRecordId);
+        bool isKia = false);
 
     /**
      * OnStop, Application management service stopped.
@@ -806,6 +804,14 @@ public:
      */
     void SetCurrentUserId(const int32_t userId);
 
+    /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
 #endif
@@ -827,6 +833,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t NotifyAppFault(const FaultData &faultData);
+
+    /**
+     * Transformed Notify Fault Data
+     *
+     * @param faultData Transformed the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+
+    int32_t TransformedNotifyAppFault(const AppFaultDataBySA &faultData);
 
     /**
      * Notify Fault Data By SA
@@ -1108,7 +1123,7 @@ public:
 
     void SetAppAssertionPauseState(bool flag);
 
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -1131,7 +1146,7 @@ public:
     virtual int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
-    
+
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
@@ -1182,6 +1197,8 @@ public:
 
     bool IsAppKilling(sptr<IRemoteObject> token) const;
 
+    void NotifyAppPreCache(int32_t pid, int32_t userId);
+
     /**
      * Get pids of processes which belong to specific bundle name and support process cache feature.
      *
@@ -1190,6 +1207,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList);
+
+    virtual int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor);
+
+    virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
@@ -1223,7 +1244,7 @@ private:
 
     bool CheckIsolationMode(const HapModuleInfo &hapModuleInfo) const;
 
-    bool IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo) const;
+    bool IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName) const;
 
     /**
      * StartAbility, load the ability that needed to be started(Start on the basis of the original process).
@@ -1470,6 +1491,8 @@ private:
     void GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
         RunningMultiAppInfo &info);
 
+    void GetRunningMultiInstanceKeys(const std::shared_ptr<AppRunningRecord> &appRecord,
+        std::vector<std::string> &instanceKeys);
     /**
      * To Prevent process being killed when ability is starting in an existing process,
      * we need notify memmgr to increase process priority.
@@ -1551,6 +1574,16 @@ private:
     void MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const HapModuleInfo &hapModuleInfo, std::string &processName) const;
     void DealMultiUserConfig(const Configuration &config, const int32_t userId);
+    bool CheckIsDebugApp(const std::string &bundleName);
+    int32_t MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia, std::string &watermarkBusinessName,
+        bool &isWatermarkEnabled, bool &isFileUri, std::string &processName);
+    int32_t ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
+        const std::string& watermarkBusinessName, bool isWatermarkEnabled);
+    bool CheckAppRecordAndPriorityObject(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void GetAppCloneInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
+    void GetMultiInstanceInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
@@ -1597,7 +1630,7 @@ private:
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
-    
+    sptr<IKiaInterceptor> kiaInterceptor_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk

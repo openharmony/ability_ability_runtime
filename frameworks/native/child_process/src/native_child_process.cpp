@@ -41,7 +41,7 @@ const std::map<ChildProcessManagerErrorCode, Ability_NativeChildProcess_ErrCode>
     { ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES, NCP_ERR_MAX_CHILD_PROCESSES_REACHED },
     { ChildProcessManagerErrorCode::ERR_LIB_LOADING_FAILED, NCP_ERR_LIB_LOADING_FAILED },
     { ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED, NCP_ERR_CONNECTION_FAILED },
-    { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW, NCP_ERR_NOT_SUPPORTED },
+    { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW, NCP_ERR_MULTI_PROCESS_DISABLED },
 };
 
 Ability_NativeChildProcess_ErrCode CvtChildProcessManagerErrCode(ChildProcessManagerErrorCode cpmErr)

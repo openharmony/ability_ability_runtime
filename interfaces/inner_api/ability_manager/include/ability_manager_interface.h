@@ -472,6 +472,17 @@ public:
     };
 
     /**
+     * TerminateUIServiceExtensionAbility, terminate the UIServiceExtensionAbility.
+     *
+     * @param token, the token of the ability to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token)
+    {
+        return 0;
+    }
+
+    /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
      *
      * @param extensionSessionInfo the extension session info of the ability to terminate.
@@ -1721,6 +1732,17 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t TerminateMission(int32_t missionId)
+    {
+        return 0;
+    }
+
+    /**
+     * Notify ability manager to set the flag to block all apps from starting.
+     * Needs to apply for ohos.permission.BLOCK_ALL_APP_START.
+     * @param flag, The flag to block all apps from starting
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t BlockAllAppStart(bool flag)
     {
         return 0;
     }
