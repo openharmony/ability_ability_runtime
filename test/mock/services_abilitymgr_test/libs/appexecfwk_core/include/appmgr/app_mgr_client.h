@@ -131,10 +131,10 @@ public:
 
     /**
      * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
-     * Obtains running isntance keys of multi-instance app that are running on the device.
+     * Obtains running instance keys of multi-instance app that are running on the device.
      *
      * @param bundlename, bundle name in Application record.
-     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @param instanceKeys, output instance keys of the multi-instance app.
      * @return ERR_OK ,return back success，others fail.
      */
     virtual AppMgrResultCode GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
