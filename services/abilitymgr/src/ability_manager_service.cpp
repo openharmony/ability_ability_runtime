@@ -884,12 +884,13 @@ void AbilityManagerService::SetReserveInfo(const std::string &linkString, Abilit
     }
 }
 
-int AbilityManagerService::CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest)
+int AbilityManagerService::CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest,
+    uint32_t specifyTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "startExtensionCheck");
-    auto isSACall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    auto isSystemAppCall = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
-    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    auto isSACall = AAFwk::PermissionVerification::GetInstance()->IsSACallByTokenId(specifyTokenId);
+    auto isSystemAppCall = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCallByTokenId(specifyTokenId);
+    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCallByTokenId(specifyTokenId);
     auto isToPermissionMgr = IsTargetPermission(want);
     if (!isSACall && !isSystemAppCall && !isShellCall && !isToPermissionMgr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR,
@@ -960,7 +961,7 @@ int AbilityManagerService::CheckCallPermission(const Want& want, const AppExecFw
         return ERR_WRONG_INTERFACE_CALL;
     }
     if (type == AppExecFwk::AbilityType::EXTENSION) {
-        return CheckExtensionCallPermission(want, abilityRequest);
+        return CheckExtensionCallPermission(want, abilityRequest, specifyTokenId);
     }
     if (type == AppExecFwk::AbilityType::SERVICE) {
         return CheckServiceCallPermission(abilityRequest, abilityInfo);
