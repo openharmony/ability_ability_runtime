@@ -2522,6 +2522,7 @@ void UIAbilityLifecycleManager::SignRestartAppFlag(const std::string &bundleName
 void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) const
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+#ifdef SUPPORT_GRAPHICS
     auto abilityRecord = GetAbilityRecordsById(sessionId);
     if (abilityRecord == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "CompleteFirstFrameDrawing, get AbilityRecord by sessionId failed.");
@@ -2531,6 +2532,7 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) con
     abilityRecord->SetCompleteFirstFrameDrawing(true);
     AppExecFwk::AbilityFirstFrameStateObserverManager::GetInstance().
         HandleOnFirstFrameState(abilityRecord);
+#endif
 }
 
 int UIAbilityLifecycleManager::StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest,
