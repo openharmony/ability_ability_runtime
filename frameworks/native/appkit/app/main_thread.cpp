@@ -1370,7 +1370,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         std::vector<std::string> localPaths;
         ChangeToLocalPath(bundleName, appInfo.moduleSourceDirs, localPaths);
         LoadAbilityLibrary(localPaths);
-        LoadNativeLiabrary(bundleInfo, appInfo.nativeLibraryPath);
+        LoadNativeLibrary(bundleInfo, appInfo.nativeLibraryPath);
 #ifdef SUPPORT_SCREEN
     } else if (Ace::AceForwardCompatibility::PipelineChanged()) {
         std::vector<std::string> localPaths;
@@ -1817,7 +1817,7 @@ void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::st
     }
 }
 
-void MainThread::LoadNativeLiabrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath)
+void MainThread::LoadNativeLibrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath)
 {
     CalcNativeLiabraryEntries(bundleInfo, nativeLibraryPath);
     if (nativeFileEntries_.empty()) {

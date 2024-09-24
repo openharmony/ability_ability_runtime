@@ -20,10 +20,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-class Ability;
-class AbilityHandler;
-class AbilityLocalRecord;
-class AbilityImpl;
 class NewAbilityImpl final : public AbilityImpl {
 public:
     /**
