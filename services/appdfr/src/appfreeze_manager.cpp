@@ -329,7 +329,7 @@ std::map<int, std::set<int>> AppfreezeManager::BinderParser(std::ifstream& fin, 
             continue;
         }
 
-        if (line.find("async") != std::string::npos) {
+        if (line.find("async\t") != std::string::npos) {
             continue;
         }
 
