@@ -56,11 +56,7 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceAndA
     bool isSupportMultiInstance = AppUtils::GetInstance().IsSupportMultiInstance();
     std::string deviceType = OHOS::system::GetDeviceType();
     TAG_LOGI(AAFwkTag::TEST, "current deviceType is %{public}s", deviceType.c_str());
-    if (deviceType == "2in1") {
-        EXPECT_EQ(result, RESOLVE_ABILITY_ERR);
-    } else {
-        EXPECT_EQ(result, ERR_OK);
-    }
+    EXPECT_EQ(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceAndAppClone_0100 end");
 }
@@ -74,7 +70,10 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceAndA
 HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceAndAppClone_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceAndAppClone_0200 start");
+    std::string bundleName = "com.ohos.test";
+    std::string abilityName = "EntryAbility";
     Want want;
+    want.SetElementName(bundleName, abilityName);
     std::string instanceKey = "app_instance_0";
     want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
     auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(want, 100, 0, nullptr);
@@ -100,7 +99,10 @@ HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceAndA
 HWTEST_F(AbilityPermissionUtilTest, AbilityPermissionUtil_CheckMultiInstanceAndAppClone_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil_CheckMultiInstanceAndAppClone_0300 start");
+    std::string bundleName = "com.ohos.test";
+    std::string abilityName = "EntryAbility";
     Want want;
+    want.SetElementName(bundleName, abilityName);
     want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
     auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(want, 100, 0, nullptr);
 
