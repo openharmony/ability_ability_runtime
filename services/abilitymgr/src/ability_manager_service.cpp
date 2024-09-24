@@ -6219,7 +6219,10 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     }
 
     if (ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(request.abilityInfo.applicationInfo)) {
-        if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        // service and extension do not show dialog.
+        if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
+            !(request.abilityInfo.type == AppExecFwk::AbilityType::SERVICE ||
+                request.abilityInfo.type == AppExecFwk::AbilityType::EXTENSION)) {
             ModalSystemDialogUtil::ShowDeveloperModeDialog(request.abilityInfo.bundleName, request.abilityInfo.name);
         }
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not developer mode");
