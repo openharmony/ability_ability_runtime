@@ -63,6 +63,7 @@ HWTEST_F(CjAbilityStageObjectTest, CjAbilityNoInit_001, TestSize.Level0)
 
     int32_t level = 1;
     cjAbilityStageObject->OnMemoryLevel(level);
+    EXPECT_NE(level, 0);
 }
 
 HWTEST_F(CjAbilityStageObjectTest, CjAbilityNoInit_002, TestSize.Level0)
@@ -95,6 +96,7 @@ HWTEST_F(CjAbilityStageObjectTest, CjAbilityNoInit_002, TestSize.Level0)
 
     int32_t level = 1;
     cjAbilityStageObject->OnMemoryLevel(level);
+    EXPECT_NE(level, 0);
 }
 
 }  // namespace AbilityRuntime

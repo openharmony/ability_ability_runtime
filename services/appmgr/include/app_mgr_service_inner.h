@@ -350,6 +350,17 @@ public:
         RunningMultiAppInfo &info);
 
     /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running isntance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys);
+
+    /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
      *
      * @param bundleType, the bundle type of the application process
@@ -465,15 +476,13 @@ public:
     int32_t StartNativeProcessForDebugger(const AAFwk::Want &want);
 
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
-        sptr<IRemoteObject> token,
-        sptr<IRemoteObject> preToken,
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
         std::shared_ptr<ApplicationInfo> appInfo,
         std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &processName,
         const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want,
-        int32_t abilityRecordId,
         bool isKia = false);
 
     /**
@@ -1235,7 +1244,7 @@ private:
 
     bool CheckIsolationMode(const HapModuleInfo &hapModuleInfo) const;
 
-    bool IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo) const;
+    bool IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName) const;
 
     /**
      * StartAbility, load the ability that needed to be started(Start on the basis of the original process).
@@ -1482,6 +1491,8 @@ private:
     void GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
         RunningMultiAppInfo &info);
 
+    void GetRunningMultiInstanceKeys(const std::shared_ptr<AppRunningRecord> &appRecord,
+        std::vector<std::string> &instanceKeys);
     /**
      * To Prevent process being killed when ability is starting in an existing process,
      * we need notify memmgr to increase process priority.
@@ -1568,6 +1579,11 @@ private:
         bool &isWatermarkEnabled, bool &isFileUri, std::string &processName);
     int32_t ProcessKia(bool isKia, std::shared_ptr<AppRunningRecord> appRecord,
         const std::string& watermarkBusinessName, bool isWatermarkEnabled);
+    bool CheckAppRecordAndPriorityObject(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void GetAppCloneInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
+    void GetMultiInstanceInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;

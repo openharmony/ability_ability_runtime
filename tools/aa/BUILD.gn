@@ -66,11 +66,11 @@ ohos_static_library("tools_aa_source_set") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "graphic_2d:2d_graphics",
+    # "graphic_2d:2d_graphics",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "skia:skia_canvaskit",
+    # "skia:skia_canvaskit",
   ]
   public_external_deps = [
     "ability_base:session_info",
@@ -102,13 +102,13 @@ ohos_executable("aa") {
     "ability_base:base",
     "ability_base:configuration",
     "ability_base:session_info",
-    "ability_base:want",
+    # "ability_base:want",
     "c_utils:utils",
-    "graphic_2d:2d_graphics",
+    # "graphic_2d:2d_graphics",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "skia:skia_canvaskit",
+    # "skia:skia_canvaskit",
   ]
 
   symlink_target_name = [ "ability_tool" ]

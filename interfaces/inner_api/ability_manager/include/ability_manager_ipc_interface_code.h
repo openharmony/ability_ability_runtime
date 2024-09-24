@@ -555,6 +555,9 @@ enum class AbilityManagerInterfaceCode {
 
     // ipc id for terminate mission
     TERMINATE_MISSION = 6118,
+
+    // ipc for block all apps from starting
+    BLOCK_ALL_APP_START = 6119,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

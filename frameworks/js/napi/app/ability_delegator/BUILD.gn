@@ -59,7 +59,7 @@ template("delegator") {
       "hitrace:hitrace_meter",
       "napi:ace_napi",
       "ipc:ipc_napi",
-      "resource_management:global_resmgr",
+      # "resource_management:global_resmgr",
     ]
 
     cflags_cc = []

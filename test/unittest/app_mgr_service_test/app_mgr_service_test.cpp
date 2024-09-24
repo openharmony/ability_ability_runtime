@@ -1736,7 +1736,7 @@ HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_002, TestSize.Level0)
     applicationInfo_->name = "hiservcie";
     applicationInfo_->bundleName = "com.ix.hiservcie";
     std::shared_ptr<AppRunningRecord> appRecord =
-        appRunningMgr->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appRunningMgr->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
     appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());

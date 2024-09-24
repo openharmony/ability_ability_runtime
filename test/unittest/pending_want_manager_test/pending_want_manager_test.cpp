@@ -984,5 +984,35 @@ HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_3800, TestSize.Level1)
     bool ret = pendingManager_->CheckWindowState(pid);
     EXPECT_EQ(false, ret);
 }
+
+/*
+ * @tc.number    : PendingWantManagerTest_3900
+ * @tc.name      : PendingWantManager GetAllRunningInstanceKeysByBundleName
+ * @tc.desc      : 1.GetAllRunningInstanceKeysByBundleName.
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_3900, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    std::string bundleName;
+    std::vector<std::string> appKeyVec;
+    int32_t ret = pendingManager_->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/*
+ * @tc.number    : PendingWantManagerTest_4000
+ * @tc.name      : PendingWantManager GetAllRunningInstanceKeysByBundleName
+ * @tc.desc      : 1.GetAllRunningInstanceKeysByBundleName.
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4000, TestSize.Level1)
+{
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    std::string bundleName{ "com.example.test" };
+    std::vector<std::string> appKeyVec;
+    int32_t ret = pendingManager_->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec);
+    EXPECT_NE(ret, ERR_INVALID_VALUE);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

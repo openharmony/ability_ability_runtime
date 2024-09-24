@@ -70,7 +70,9 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     bool boolParam = *data % ENABLE;
     AppExecFwk::ApplicationInfo appInfo;
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
-    AbilityInterceptorParam param = AbilityInterceptorParam(want, intParam, int32Param, boolParam, token);
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, intParam, int32Param, boolParam, token,
+        shouldBlockFunc);
     startOtherAppInterceptor->DoProcess(param);
     startOtherAppInterceptor->CheckNativeCall();
     startOtherAppInterceptor->CheckCallerIsSystemApp();

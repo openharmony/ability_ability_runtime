@@ -2247,16 +2247,16 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
         .bundleName = ability->GetAbilityInfo().bundleName,
     };
     if (state != FreezeUtil::TimeoutState::UNKNOWN) {
-        auto flow = std::make_unique<FreezeUtil::LifecycleFlow>();
+        FreezeUtil::LifecycleFlow flow;
         if (ability->GetToken() != nullptr) {
-            flow->token = ability->GetToken()->AsObject();
-            flow->state = state;
+            flow.token = ability->GetToken()->AsObject();
+            flow.state = state;
         }
-        info.msg = msgContent + "\nserver:\n" + FreezeUtil::GetInstance().GetLifecycleEvent(*flow);
+        info.msg = msgContent + "\nserver:\n" + FreezeUtil::GetInstance().GetLifecycleEvent(flow);
         if (!isHalf) {
-            FreezeUtil::GetInstance().DeleteLifecycleEvent(*flow);
+            FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
         }
-        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, std::move(flow));
+        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
     } else {
         info.msg = msgContent;
         AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info);

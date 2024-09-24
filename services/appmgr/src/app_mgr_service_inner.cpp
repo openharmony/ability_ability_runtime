@@ -358,8 +358,9 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
     MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName);
     TAG_LOGD(AAFwkTag::APPMGR, "processName = %{public}s", processName.c_str());
-    auto mainAppRecord =
-        appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, bundleInfo);
+    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
+    auto mainAppRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid,
+        bundleInfo, "", nullptr, instanceKey);
     if (mainAppRecord != nullptr) {
         TAG_LOGD(AAFwkTag::APPMGR, "main process exists.");
         mainAppRecord->SetScheduleNewProcessRequestState(requestId, want, hapModuleInfo.moduleName);
@@ -475,8 +476,8 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
         NotifyAppRunningStatusEvent(
             bundleInfo.name, appInfo->uid, AbilityRuntime::RunningStatus::APP_RUNNING_START);
     }
-    appRecord = CreateAppRunningRecord(nullptr, nullptr, appInfo, abilityInfo, processName, bundleInfo,
-        hapModuleInfo, want, NO_ABILITY_RECORD_ID);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    appRecord = CreateAppRunningRecord(loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, want);
     if (appRecord != nullptr) {
         appRecord->SetPreloadState(PreloadState::PRELOADING);
         LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
@@ -559,8 +560,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     if (abilityInfo->type == AbilityType::PAGE) {
         AbilityRuntime::FreezeUtil::LifecycleFlow flow = {loadParam->token,
             AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
-        auto entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-            "; AppMgrServiceInner::LoadAbility; the load lifecycle.";
+        std::string entry = "AppMgrServiceInner::LoadAbility; the load lifecycle.";
         AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
 
@@ -590,7 +590,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     MakeProcessName(abilityInfo, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag, processName);
     TAG_LOGI(AAFwkTag::APPMGR, "%{public}s name:%{public}s-%{public}s processName = %{public}s",
         __func__, abilityInfo->bundleName.c_str(), abilityInfo->name.c_str(), processName.c_str());
- 
+
     bool isKia = false;
     std::string watermarkBusinessName;
     bool isWatermarkEnabled = false;
@@ -603,7 +603,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     std::shared_ptr<AppRunningRecord> appRecord;
     bool isProcCache = false;
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
-        processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache);
+        processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey);
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         NotifyMemMgrPriorityChanged(appRecord);
     }
@@ -616,8 +616,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             NotifyAppRunningStatusEvent(
                 bundleInfo.name, appInfo->uid, AbilityRuntime::RunningStatus::APP_RUNNING_START);
         }
-        appRecord = CreateAppRunningRecord(loadParam->token, loadParam->preToken, appInfo, abilityInfo,
-            processName, bundleInfo, hapModuleInfo, want, loadParam->abilityRecordId, isKia);
+        appRecord = CreateAppRunningRecord(loadParam, appInfo, abilityInfo,
+            processName, bundleInfo, hapModuleInfo, want, isKia);
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false, loadParam->token);
         if (ProcessKia(isKia, appRecord, watermarkBusinessName, isWatermarkEnabled) != ERR_OK) {
@@ -858,7 +858,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     if (!specifiedProcessFlag.empty()) {
         appRecord->SetSpecifiedProcessFlag(specifiedProcessFlag);
     }
-    if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
+    if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, processName)) {
         appRecord->SetEmptyKeepAliveAppState(false);
         appRecord->SetMainProcess(false);
         TAG_LOGI(AAFwkTag::APPMGR, "%{public}s will not alive", hapModuleInfo.process.c_str());
@@ -912,20 +912,17 @@ std::string AppMgrServiceInner::GetSpecifiedProcessFlag(std::shared_ptr<AbilityI
 }
 
 bool AppMgrServiceInner::IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo,
-    const HapModuleInfo &hapModuleInfo) const
+    const std::string &processName) const
 {
     if (!appInfo) {
         return true;
     }
-    if (hapModuleInfo.process.empty()) {
-        return true;
-    }
     if (!appInfo->process.empty()) {
-        if (hapModuleInfo.process == appInfo->process) {
+        if (processName == appInfo->process) {
             return true;
         }
     } else {
-        if (hapModuleInfo.process == appInfo->bundleName) {
+        if (processName == appInfo->bundleName) {
             return true;
         }
     }
@@ -1823,8 +1820,140 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundlename null");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+    if (remoteClientManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager_ null");
+        return ERR_INVALID_VALUE;
+    }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
+        return ERR_INVALID_VALUE;
+    }
+    ApplicationInfo appInfo;
+    auto queryRet = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
+        ApplicationFlag::GET_BASIC_APPLICATION_INFO, currentUserId_, appInfo));
+    if (!queryRet) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundle unexist");
+        return AAFwk::ERR_BUNDLE_NOT_EXIST;
+    }
+    if (appInfo.multiAppMode.multiAppModeType != MultiAppModeType::MULTI_INSTANCE) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundle unsupport multi-instance");
+        return AAFwk::ERR_MULTI_INSTANCE_NOT_SUPPORTED;
+    }
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager null");
+        return ERR_INVALID_VALUE;
+    }
+    auto multiAppInfoMap = appRunningManager_->GetAppRunningRecordMap();
+    for (const auto &item : multiAppInfoMap) {
+        const std::shared_ptr<AppRunningRecord> &appRecord = item.second;
+        if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
+            continue;
+        }
+        if (GetUserIdByUid(appRecord->GetUid()) != currentUserId_) {
+            continue;
+        }
+        GetRunningMultiInstanceKeys(appRecord, instanceKeys);
+    }
+    return ERR_OK;
+}
+
 void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
     RunningMultiAppInfo &info)
+{
+    if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
+        GetAppCloneInfo(appRecord, info);
+        return;
+    }
+    if (info.mode == static_cast<int32_t>(MultiAppModeType::MULTI_INSTANCE)) {
+        GetMultiInstanceInfo(appRecord, info);
+    }
+}
+
+bool AppMgrServiceInner::CheckAppRecordAndPriorityObject(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return false;
+    }
+    if (appRecord->GetPriorityObject() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "priorityObject null");
+        return false;
+    }
+    return true;
+}
+
+void AppMgrServiceInner::GetAppCloneInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+    RunningMultiAppInfo &info)
+{
+    if (!CheckAppRecordAndPriorityObject(appRecord)) {
+        return;
+    }
+    auto PriorityObject = appRecord->GetPriorityObject();
+    size_t index = 0;
+    for (; index < info.runningAppClones.size(); index++) {
+        if (info.runningAppClones[index].appCloneIndex == appRecord->GetAppIndex()) {
+            break;
+        }
+    }
+    auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
+    if (index < info.runningAppClones.size()) {
+        info.runningAppClones[index].pids.emplace_back(PriorityObject->GetPid());
+        for (auto it : childProcessRecordMap) {
+            info.runningAppClones[index].pids.emplace_back(it.first);
+        }
+        return;
+    }
+    RunningAppClone cloneInfo;
+    cloneInfo.appCloneIndex = appRecord->GetAppIndex();
+    cloneInfo.uid = appRecord->GetUid();
+    cloneInfo.pids.emplace_back(PriorityObject->GetPid());
+    for (auto it : childProcessRecordMap) {
+        cloneInfo.pids.emplace_back(it.first);
+    }
+    info.runningAppClones.emplace_back(cloneInfo);
+}
+
+void AppMgrServiceInner::GetMultiInstanceInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+    RunningMultiAppInfo &info)
+{
+    if (!CheckAppRecordAndPriorityObject(appRecord)) {
+        return;
+    }
+    auto PriorityObject = appRecord->GetPriorityObject();
+    size_t index = 0;
+    for (; index < info.runningMultiIntanceInfos.size(); index++) {
+        if (info.runningMultiIntanceInfos[index].instanceKey == appRecord->GetInstanceKey()) {
+            break;
+        }
+    }
+    auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
+    if (index < info.runningMultiIntanceInfos.size()) {
+        info.runningMultiIntanceInfos[index].pids.emplace_back(PriorityObject->GetPid());
+        for (auto it : childProcessRecordMap) {
+            info.runningMultiIntanceInfos[index].pids.emplace_back(it.first);
+        }
+        return;
+    }
+    RunningMultiInstanceInfo instanceInfo;
+    instanceInfo.instanceKey = appRecord->GetInstanceKey();
+    instanceInfo.uid = appRecord->GetUid();
+    instanceInfo.pids.emplace_back(PriorityObject->GetPid());
+    for (auto it : childProcessRecordMap) {
+        instanceInfo.pids.emplace_back(it.first);
+    }
+    info.runningMultiIntanceInfos.emplace_back(instanceInfo);
+}
+
+void AppMgrServiceInner::GetRunningMultiInstanceKeys(const std::shared_ptr<AppRunningRecord> &appRecord,
+    std::vector<std::string> &instanceKeys)
 {
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
@@ -1835,30 +1964,13 @@ void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunning
         TAG_LOGE(AAFwkTag::APPMGR, "priorityObject null");
         return;
     }
-    if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
-        size_t index = 0;
-        for (; index < info.runningAppClones.size(); index++) {
-            if (info.runningAppClones[index].appCloneIndex == appRecord->GetAppIndex()) {
-                break;
-            }
-        }
-        auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
-        if (index < info.runningAppClones.size()) {
-            info.runningAppClones[index].pids.emplace_back(PriorityObject->GetPid());
-            for (auto it : childProcessRecordMap) {
-                info.runningAppClones[index].pids.emplace_back(it.first);
-            }
-        } else {
-            RunningAppClone cloneInfo;
-            cloneInfo.appCloneIndex = appRecord->GetAppIndex();
-            cloneInfo.uid = appRecord->GetUid();
-            cloneInfo.pids.emplace_back(PriorityObject->GetPid());
-            for (auto it : childProcessRecordMap) {
-                cloneInfo.pids.emplace_back(it.first);
-            }
-            info.runningAppClones.emplace_back(cloneInfo);
+    size_t index = 0;
+    for (; index < instanceKeys.size(); ++index) {
+        if (instanceKeys[index] == appRecord->GetInstanceKey()) {
+            return;
         }
     }
+    instanceKeys.emplace_back(appRecord->GetInstanceKey());
 }
 
 int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId)
@@ -2225,10 +2337,10 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetAppRunningRecordByPid(c
     return appRunningManager_->GetAppRunningRecordByPid(pid);
 }
 
-std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(sptr<IRemoteObject> token,
-    sptr<IRemoteObject> preToken, std::shared_ptr<ApplicationInfo> appInfo,
+std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
+    std::shared_ptr<AbilityRuntime::LoadParam> loadParam, std::shared_ptr<ApplicationInfo> appInfo,
     std::shared_ptr<AbilityInfo> abilityInfo, const std::string &processName, const BundleInfo &bundleInfo,
-    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId, bool isKia)
+    const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, bool isKia)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (want != nullptr && (want->GetBoolParam(DEBUG_APP, false) || want->GetBoolParam(NATIVE_DEBUG, false))) {
@@ -2237,11 +2349,12 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
             return nullptr;
         }
     }
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager null");
+    if (!appRunningManager_ || loadParam == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager or loadParam null");
         return nullptr;
     }
-    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo);
+    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo,
+        loadParam->instanceKey);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "get appRecord fail");
         return nullptr;
@@ -2252,7 +2365,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
-    appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId);
+    appRecord->AddModule(appInfo, abilityInfo, loadParam->token, hapModuleInfo, want, loadParam->abilityRecordId);
     appRecord->SetIsKia(isKia);
     if (want) {
         appRecord->SetDebugApp(want->GetBoolParam(DEBUG_APP, false));
@@ -3764,7 +3877,7 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         return;
     }
 
-    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info);
+    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info, "");
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "start process [%{public}s] fail", processName.c_str());
         return;
@@ -3789,7 +3902,9 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
     appRecord->SetEventHandler(eventHandler_);
     std::vector<HapModuleInfo> hapModuleInfos;
     for (auto &iter : info.hapModuleInfos) {
-        if (IsMainProcess(appInfo, iter)) {
+        std::string keepAliveName = (appInfo->process.empty())?(appInfo->bundleName):(appInfo->process);
+        std::string moduleProcessName = (iter.process.empty())?(appInfo->bundleName):(iter.process);
+        if (keepAliveName == moduleProcessName) {
             hapModuleInfos.emplace_back(iter);
         }
     }
@@ -4057,7 +4172,7 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
         TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
         return ERR_INVALID_OPERATION;
     }
-    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info);
+    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, info, "");
     CHECK_POINTER_AND_RETURN_VALUE(appRecord, ERR_INVALID_VALUE);
 
     auto isDebug = want.GetBoolParam(DEBUG_APP, false);
@@ -4184,7 +4299,9 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
     hapModules.emplace_back(hapModuleInfo);
 
     std::shared_ptr<AppRunningRecord> appRecord;
-    appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, bundleInfo);
+    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
+    appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, bundleInfo,
+        "", nullptr, instanceKey);
     if (!appRecord) {
         bool appExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(bundleInfo.name);
         bool appMultiUserExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByUid(bundleInfo.uid);
@@ -4193,12 +4310,12 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
                 bundleInfo.name, appInfo->uid, AbilityRuntime::RunningStatus::APP_RUNNING_START);
         }
         // new app record
-        appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo);
+        appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo, instanceKey);
         if (!appRecord) {
             TAG_LOGE(AAFwkTag::APPMGR, "start process [%{public}s] fail", processName.c_str());
             return;
         }
-        if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
+        if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, processName)) {
             appRecord->SetEmptyKeepAliveAppState(false);
             appRecord->SetMainProcess(false);
             TAG_LOGD(AAFwkTag::APPMGR, "The process %{public}s will not keepalive", hapModuleInfo.process.c_str());

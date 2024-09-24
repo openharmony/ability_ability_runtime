@@ -21,7 +21,10 @@ config("freeze_util_config") {
 ohos_shared_library("freeze_util") {
   branch_protector_ret = "pac_ret"
 
-  include_dirs = [ "${ability_runtime_services_path}/common/include" ]
+  include_dirs = [
+    "${ability_runtime_path}/utils/global/time/include",
+    "${ability_runtime_services_path}/common/include",
+  ]
 
   sources = [ "src/freeze_util.cpp" ]
 

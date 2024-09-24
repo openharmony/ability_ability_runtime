@@ -340,16 +340,14 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
 void JsUIAbility::AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
-    auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; JsUIAbility::" + methodName +
-        "; the " + methodName + " begin.";
+    auto entry = std::string("JsUIAbility::") + methodName + "; the " + methodName + " begin.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
 void JsUIAbility::AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
-    auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; JsUIAbility::" + methodName +
-        "; the " + methodName + " end.";
+    auto entry = std::string("JsUIAbility::") + methodName + "; the " + methodName + " end.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
