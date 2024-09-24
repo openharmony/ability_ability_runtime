@@ -223,6 +223,37 @@ private:
         }
     }
 
+    void AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback,
+        napi_value* result, bool isAbilityResult, bool isOpenLink)
+    {
+        // adapter free install async return install and start result
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
+        int ret = 0;
+        if (freeInstallObserver_ == nullptr) {
+            freeInstallObserver_ = new JsFreeInstallObserver(env);
+            auto context = context_.lock();
+            if (!context) {
+                TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
+                return;
+            }
+            ret = context->AddFreeInstallObserver(freeInstallObserver_);
+        }
+
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "AddFreeInstallObserver failed");
+        }
+        std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
+        if (!isOpenLink) {
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "addJsObserver");
+            std::string bundleName = want.GetElement().GetBundleName();
+            std::string abilityName = want.GetElement().GetAbilityName();
+            freeInstallObserver_->AddJsObserverObject(
+                bundleName, abilityName, startTime, callback, result, isAbilityResult);
+        }
+        std::string url = want.GetUriString();
+        freeInstallObserver_->AddJsObserverObject(startTime, url, callback, result, isAbilityResult);
+    }
+
     napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info, bool isStartRecent = false)
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -282,6 +313,48 @@ private:
         return true;
     }
 
+    bool CreateOpenLinkTask(const napi_env &env, const napi_value &lastParam,
+        AAFwk::Want &want, int &requestCode)
+    {
+        want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
+        napi_value result = nullptr;
+        std::unique_ptr<NapiAsyncTask> uasyncTask =
+        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, nullptr, &result);
+        std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
+        RuntimeTask task = [env, asyncTask](int resultCode, const AAFwk::Want& want, bool isInner) {
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "OnOpenLink aysnc callback is begin");
+            HandleScope handleScope(env);
+            napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
+            if (abilityResult == nullptr) {
+                TAG_LOGW(AAFwkTag::SERVICE_EXT, "warp abilityResult error");
+                asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                return;
+            }
+            if (isInner) {
+                asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode));
+                return;
+            }
+            asyncTask->ResolveWithNoError(env, abilityResult);
+        };
+        auto context = context_.lock();
+        if (context == nullptr) {
+            TAG_LOGW(AAFwkTag::SERVICE_EXT, "context is released");
+            return false;
+        }
+        requestCode = context->GenerateCurRequestCode();
+        context->InsertResultCallbackTask(requestCode, std::move(task));
+        return true;
+    }
+
+    void RemoveOpenLinkTask(int requestCode) {
+        auto context = context_.lock();
+        if (context == nullptr) {
+            TAG_LOGW(AAFwkTag::SERVICE_EXT, "context is released");
+            return;
+        }
+        context->RemoveResultCallbackTask(requestCode);
+    }
+
     bool ParseOpenLinkParams(const napi_env &env, const NapiCallbackInfo &info, std::string &linkValue,
         AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
     {
@@ -332,32 +405,59 @@ private:
         }
 
         want.SetUri(linkValue);
+        std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+            system_clock::now().time_since_epoch()).count());
+        want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
+
+        int requestCode = -1;
+        if (CheckTypeForNapiValue(env, info.argv[INDEX_TWO], napi_function)) {
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "completionHandler is used");
+            CreateOpenLinkTask(env, info.argv[INDEX_TWO], want, requestCode);
+        }
+        return OnOpenLinkInner(env, want, requestCode, startTime, linkValue);
+    }
+
+    napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
+        int requestCode, const std::string& startTime, const std::string& url)
+    {
         auto innerErrorCode = std::make_shared<int>(ERR_OK);
 
-        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrorCode]() {
+        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrorCode, requestCode]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
                 *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
-            *innerErrorCode = context->StartAbilityWithAccount(want, -1);
+            *innerErrorCode = context->OpenLink(want, requestCode);
         };
 
-        NapiAsyncTask::CompleteCallback complete = [innerErrorCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        NapiAsyncTask::CompleteCallback complete = [innerErrorCode, requestCode, startTime, url, this](
+            napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrorCode == 0) {
                 TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenLink success");
-                task.ResolveWithNoError(env, CreateJsUndefined(env));
-            } else {
-                TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenLink failed");
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
+                return;
+            } 
+            if (freeInstallObserver_ == nullptr) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "freeInstallObserver_ is nullptr");
+                RemoveOpenLinkTask(requestCode);
+                return;
             }
+            if (*innerErrorCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+                TAG_LOGI(AAFwkTag::SERVICE_EXT, "start ability by default succeeded");
+                freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, ERR_OK);
+                return;
+            }
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenLink failed");
+            freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, *innerErrorCode);
+            RemoveOpenLinkTask(requestCode);
         };
 
         napi_value result = nullptr;
+        AddFreeInstallObserver(env, want, nullptr, &result, false, true);
         NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnOpenLink", env,
-            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-
+            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), nullptr));
+        
         return result;
     }
 
