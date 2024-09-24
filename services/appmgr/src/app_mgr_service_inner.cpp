@@ -160,6 +160,7 @@ constexpr const char* PERMISSION_INTERNET = "ohos.permission.INTERNET";
 constexpr const char* PERMISSION_MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 constexpr const char* PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
 constexpr const char* PERMISSION_TEMP_JIT_ALLOW = "TEMPJITALLOW";
+constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 
 #ifdef WITH_DLP
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
@@ -319,6 +320,8 @@ void AppMgrServiceInner::Init()
     DelayedSingleton<RenderStateObserverManager>::GetInstance()->Init();
     dfxTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("dfx_freeze_task_queue");
     otherTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("other_app_mgr_task_queue");
+    willKillPidsNum_ = 0;
+    delayKillTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("delay_kill_task_queue");
     if (securityModeManager_) {
         securityModeManager_->Init();
     }
@@ -7509,7 +7512,18 @@ bool AppMgrServiceInner::CleanAbilityByUserRequest(const sptr<IRemoteObject> &to
         return false;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "all user request clean ability scheduled to bg, force kill pid:%{public}d", targetPid);
-    KillProcessByPid(targetPid, KILL_REASON_USER_REQUEST);
+    willKillPidsNum_ += 1;
+    int32_t delayTime = willKillPidsNum_ * KILL_PROCESS_BY_USER_INTERVAL;
+    TAG_LOGD(AAFwkTag::APPMGR, "delayTime:%{public}d", delayTime);
+    auto delayKillTask = [targetPid, innerServicerWeak = weak_from_this()]() {
+        auto self = innerServicerWeak.lock();
+        CHECK_POINTER_AND_RETURN_LOG(self, "get AppMgrServiceInner failed");
+        self->KillProcessByPid(targetPid, KILL_REASON_USER_REQUEST);
+        self->DecreaseWillKillPidsNum();
+        TAG_LOGD(AAFwkTag::APPMGR, "pid:%{public}d killed", targetPid);
+    };
+    delayKillTaskHandler_->SubmitTask(delayKillTask, "delayKillUIAbility", delayTime);
+
     return true;
 }
 
