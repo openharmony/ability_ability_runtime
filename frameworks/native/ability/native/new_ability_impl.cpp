@@ -25,13 +25,6 @@ namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
 using AbilityManagerClient = OHOS::AAFwk::AbilityManagerClient;
-/**
- * @brief Handling the life cycle switching of NewAbility.
- *
- * @param want Indicates the structure containing information about the ability.
- * @param targetState The life cycle state to switch to.
- *
- */
 
 void NewAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState,
     sptr<AAFwk::SessionInfo> sessionInfo)
@@ -72,10 +65,10 @@ void NewAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Lif
 
 void NewAbilityImpl::HandleShareData(const int32_t &uniqueId)
 {
-    TAG_LOGI(AAFwkTag::ABILITY, "begin sourceState:%{public}d", lifecycleState_);
     WantParams wantParam;
     int32_t resultCode = Share(wantParam);
-    TAG_LOGI(AAFwkTag::ABILITY, "wantParam size: %{public}d", wantParam.Size());
+    TAG_LOGI(AAFwkTag::ABILITY, "begin sourceState:%{public}d, wantParam size:%{public}d",
+        lifecycleState_, wantParam.Size());
     AbilityManagerClient::GetInstance()->ShareDataDone(token_, resultCode, uniqueId, wantParam);
 }
 
@@ -89,15 +82,6 @@ void NewAbilityImpl::AbilityTransactionCallback(const AbilityLifeCycleState &sta
     }
 }
 
-/**
- * @brief Handling the life cycle switching of NewAbility in switch.
- *
- * @param want Indicates the structure containing information about the ability.
- * @param targetState The life cycle state to switch to.
- *
- * @return return true if need notify ams, otherwise return false.
- *
- */
 bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
