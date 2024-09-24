@@ -932,6 +932,24 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionIsFocused_001, TestSize
 
 /*
  * Feature: AbilityManagerService
+ * Function: NotifySaveAsResult
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService NotifySaveAsResult
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, NotifySaveAsResult_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest NotifySaveAsResult_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+
+    Want want;
+    auto result = abilityMs_->NotifySaveAsResult(want, 0, 0);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest NotifySaveAsResult_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: CheckCollaboratorType
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService CheckCollaboratorType
