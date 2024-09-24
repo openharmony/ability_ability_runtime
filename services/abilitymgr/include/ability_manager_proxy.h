@@ -341,6 +341,14 @@ public:
         const Want *resultWant, int64_t callerRequestCode) override;
 
     /**
+     * TerminateUIServiceExtensionAbility, terminate UIServiceExtensionAbility.
+     *
+     * @param token, the token of the UIServiceExtensionAbility to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token) override;
+
+    /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
      *
      * @param extensionSessionInfo the extension session info of the ability to terminate.
@@ -1179,6 +1187,14 @@ public:
         std::vector<int32_t> &sessionIds) override;
 
     /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @param isAppRecovery True indicates that the app is restarted because of recovery.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
+
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1199,14 +1215,6 @@ public:
      */
     int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
-
-    /**
-     * @brief Restart app self.
-     * @param want The ability type must be UIAbility.
-     * @param isAppRecovery True indicates that the app is restarted because of recovery.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
 
     /**
      * @brief Pop-up launch of full-screen atomic service.
@@ -1330,6 +1338,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t TerminateMission(int32_t missionId) override;
+
+    /**
+     * Notify ability manager to set the flag to block all apps from starting.
+     * Needs to apply for ohos.permission.BLOCK_ALL_APP_START.
+     * @param flag, The flag to block all apps from starting
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t BlockAllAppStart(bool flag) override;
 
 private:
     template <typename T>

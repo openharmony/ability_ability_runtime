@@ -21,14 +21,15 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+using namespace OHOS::AAFwk;
 class MockTaskHandlerWrap : public TaskHandlerWrap {
 public:
-    static std::shared_ptr<TaskHandlerWrap> CreateQueueHandler(const std::string &queueName,
+    static std::shared_ptr<MockTaskHandlerWrap> CreateQueueHandler(const std::string &queueName,
         TaskQoS queueQos = TaskQoS::DEFAULT)
     {
         return std::make_shared<MockTaskHandlerWrap>();
     }
-    static std::shared_ptr<TaskHandlerWrap> GetFfrtHandler()
+    static std::shared_ptr<MockTaskHandlerWrap> GetFfrtHandler()
     {
         return std::make_shared<MockTaskHandlerWrap>();
     }
@@ -37,16 +38,8 @@ public:
     void operator=(MockTaskHandlerWrap &) = delete;
     virtual ~MockTaskHandlerWrap() {}
 
-    MOCK_METHOD1(SubmitTask, TaskHandle(const std::function<void()> &));
-    MOCK_METHOD2(SubmitTask, TaskHandle(const std::function<void()> &task, TaskQoS taskQos));
-
-    MOCK_METHOD1(SubmitTask, bool (const std::string &));
-protected:
-    std::shared_ptr<InnerTaskHandle> SubmitTaskInner(std::function<void()> &&task,
-        const TaskAttribute &taskAttr) override
-    {
-        return nullptr;
-    }
+    MOCK_METHOD2(SubmitTaskInner,
+        std::shared_ptr<InnerTaskHandle>(std::function<void()> &&task, const TaskAttribute &));
     bool CancelTaskInner(const std::shared_ptr<InnerTaskHandle> &taskHandle) override
     {
         return true;
@@ -56,6 +49,7 @@ protected:
     {
         return true;
     }
+    std::shared_ptr<InnerTaskHandle> MockTaskHandler(const std::function<void()> &&, const TaskAttribute &);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

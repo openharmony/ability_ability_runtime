@@ -37,11 +37,11 @@ public:
     MOCK_METHOD2(GetRunningProcessInfoByToken, void((const sptr<IRemoteObject>& token,
         AppExecFwk::RunningProcessInfo& info)));
     MOCK_METHOD1(GetAllRunningProcesses, AppMgrResultCode(std::vector<RunningProcessInfo>& info));
+    MOCK_METHOD2(GetAllRunningInstanceKeysByBundleName, AppMgrResultCode(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys));
 
     AppMgrResultCode GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo>& info, int32_t userId);
 
-    AppMgrResultCode AbilityBehaviorAnalysis(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState) override;
     AppMgrResultCode ConnectAppMgrService() override;
     AppMgrResultCode RegisterAppStateCallback(const sptr<IAppStateCallback>& callback) override;
 };

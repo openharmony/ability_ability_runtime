@@ -30,7 +30,7 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/impl/ark/ark_native_deferred.h"
 #include "native_engine/native_engine.h"
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "napi_common_want.h"
 
 #include "mock_parse_requestcode.h"
@@ -425,7 +425,7 @@ HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_OnStartUIServiceExten
 {
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
 
@@ -434,7 +434,7 @@ HWTEST_F(AbilityContextTest, AbilityRuntime_AbilityContext_OnStartUIServiceExten
     info.argv[0] = OHOS::AppExecFwk::WrapWant(env, want);
     jsAbilityContext_->OnStartUIServiceExtension(env, info);
 
-    NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
 }
 
 }  // namespace AAFwk

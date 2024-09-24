@@ -43,7 +43,11 @@ struct VerificationInfo {
 
     bool IsSACall() const;
 
+    bool IsSACallByTokenId(uint32_t callerTokenId) const;
+
     bool IsShellCall() const;
+
+    bool IsShellCallByTokenId(uint32_t callerTokenId) const;
 
     bool CheckSpecificSystemAbilityAccessPermission(const std::string &processName) const;
 
@@ -91,6 +95,8 @@ struct VerificationInfo {
 
     bool IsSystemAppCall() const;
 
+    bool IsSystemAppCallByTokenId(uint32_t callerTokenId) const;
+
     bool VerifyPrepareTerminatePermission() const;
 
     bool VerifyPrepareTerminatePermission(const int &tokenId) const;
@@ -104,6 +110,10 @@ struct VerificationInfo {
     bool VerifyKillProcessDependedOnWebPermission() const;
 
     bool VerifyBackgroundCallPermission(const bool isBackgroundCall) const;
+
+    bool VerifyBlockAllAppStartPermission() const;
+
+    bool VerifyStartUIAbilityToHiddenPermission() const;
 
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);

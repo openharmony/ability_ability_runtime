@@ -94,6 +94,8 @@ public:
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
+
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 };
 
@@ -137,7 +139,7 @@ public:
      */
     int LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
         const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-        const Want &want, int32_t abilityRecordId);
+        const Want &want, int32_t abilityRecordId, const std::string &instanceKey);
 
     /**
      * terminate ability with token.
@@ -178,19 +180,6 @@ public:
      * @return
      */
     void UpdateExtensionState(const sptr<IRemoteObject> &token, const AppExecFwk::ExtensionState state);
-
-    /**
-     * AbilityBehaviorAnalysis, ability behavior analysis assistant process optimization.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param visibility, the visibility information about windows info.
-     * @param perceptibility, the Perceptibility information about windows info.
-     * @param connectionState, the service ability connection state.
-     * @return Returns RESULT_OK on success, others on failure.
-     */
-    void AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const int32_t visibility, const int32_t perceptibility, const int32_t connectionState);
 
     /**
      * KillProcessByAbilityToken, call KillProcessByAbilityToken() through proxy object,
@@ -374,6 +363,14 @@ public:
     void SetCurrentUserId(int32_t userId);
 
     /**
+     * Set enable start process flag by userId
+     * @param userId the user id.
+     * @param enableStartProcess enable start process.
+     * @return
+     */
+    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess);
+
+    /**
      * Get bundleName by pid.
      *
      * @param pid process id.
@@ -505,6 +502,8 @@ protected:
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+    
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
 private:
     std::mutex lock_;

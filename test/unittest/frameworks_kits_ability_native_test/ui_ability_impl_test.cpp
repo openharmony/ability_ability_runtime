@@ -29,7 +29,6 @@
 #include "mock_ui_ability.h"
 #include "mock_ui_ability_impl.h"
 #include "ohos_application.h"
-#include "mock_ability_lifecycle_callbacks.h"
 #include "process_options.h"
 #include "session_info.h"
 
@@ -1058,7 +1057,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_0500, TestSize.Level1)
 /**
  * @tc.number: AbilityRuntime_Start_0600
  * @tc.name: Start
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Start failed.
+ * @tc.desc: Verify Start failed.
  */
 HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_0600, TestSize.Level1)
 {
@@ -1070,7 +1069,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_0600, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     Want want;
     abilityImpl_->Start(want);
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
@@ -1112,7 +1110,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0300, TestSize.Level1)
 /**
  * @tc.number: AbilityRuntime_Stop_0400
  * @tc.name: Stop
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0400, TestSize.Level1)
 {
@@ -1125,7 +1123,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0400, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->Stop();
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_Stop_0400 end";
@@ -1170,7 +1167,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0600, TestSize.Level1)
 /**
  * @tc.number: AbilityRuntime_Stop_0700
  * @tc.name: Stop
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0700, TestSize.Level1)
 {
@@ -1183,7 +1180,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0700, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     bool isAsyncCallback = true;
     abilityImpl_->Stop(isAsyncCallback);
     EXPECT_FALSE(isAsyncCallback);
@@ -1262,7 +1258,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_StopCallback_0300, TestSize.Level1)
 /**
  * @tc.number: AbilityRuntime_StopCallback_0400
  * @tc.name: StopCallback
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(UIAbilityImplTest, AbilityRuntime_StopCallback_0400, TestSize.Level1)
 {
@@ -1275,7 +1271,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_StopCallback_0400, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->StopCallback();
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_StopCallback_0400 end";
@@ -2256,7 +2251,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ExecuteInsightIntentRepeateForeground
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0100 start";
     ASSERT_NE(abilityImpl_, nullptr);
     abilityImpl_->ability_ = std::make_shared<UIAbility>();
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->PostForegroundInsightIntent();
     EXPECT_EQ(abilityImpl_->lifecycleState_, 0);
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0100 end";
@@ -2272,7 +2266,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ExecuteInsightIntentRepeateForeground
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0200 start";
     ASSERT_NE(abilityImpl_, nullptr);
     abilityImpl_->ability_ = nullptr;
-    abilityImpl_->abilityLifecycleCallbacks_ = std::make_shared<MockAbilityLifecycleCallbacks>();
     abilityImpl_->PostForegroundInsightIntent();
     EXPECT_EQ(abilityImpl_->lifecycleState_, 0);
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0200 end";

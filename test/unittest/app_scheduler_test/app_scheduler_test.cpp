@@ -231,7 +231,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_oprator_004, TestSize.Level1)
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
     EXPECT_NE((int)ERR_OK,
         DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-            token, pretoken, record->GetAbilityInfo(), record->GetApplicationInfo(), record->GetWant(), 0));
+            token, pretoken, record->GetAbilityInfo(), record->GetApplicationInfo(), record->GetWant(), 0, ""));
 }
 
 /*
@@ -253,7 +253,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_LoadAbility_001, TestSize.Level1)
     Want want;
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     int res = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token, preToken, abilityInfo, applicationInfo, want, 0);
+        token, preToken, abilityInfo, applicationInfo, want, 0, "");
     EXPECT_EQ(res, INNER_ERR);
 }
 
@@ -452,78 +452,6 @@ HWTEST_F(AppSchedulerTest, AppScheduler_oprator_013, TestSize.Level1)
 {
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
     EXPECT_EQ(false, DelayedSingleton<AppScheduler>::GetInstance()->Init(appStateMock_));
-}
-
-/*
- * Feature: AppScheduler
- * Function: AbilityBehaviorAnalysis
- * SubFunction: NA
- * FunctionPoints: AppScheduler AbilityBehaviorAnalysis
- * EnvConditions:NA
- * CaseDescription: Verify appmgrclient_ Is not nullptr causes AbilityBehaviorAnalysis to success
- */
-HWTEST_F(AppSchedulerTest, AppScheduler_oprator_014, TestSize.Level1)
-{
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::make_unique<AppExecFwk::AppMgrClient>();
-
-    std::string deviceName = "device";
-    std::string abilityName = "FirstAbility";
-    std::string appName = "FirstApp";
-    std::string bundleName = "com.ix.First";
-    auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
-    auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
-    auto token = record->GetToken();
-    ASSERT_NE(token, nullptr);
-    const int32_t visibility = 1;
-    const int32_t perceptibility = 1;
-    const int32_t connectionState = 1;
-
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, nullptr, visibility, perceptibility, connectionState);
-
-    auto pretoken = record->GetToken();
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, pretoken, visibility, perceptibility, connectionState);
-
-    const int32_t visibility_1 = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, token, visibility_1, perceptibility, connectionState);
-
-    const int32_t perceptibility_1 = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, token, visibility_1, perceptibility_1, connectionState);
-
-    const int32_t connectionState_1 = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, token, visibility_1, perceptibility_1, connectionState_1);
-}
-
-/*
- * Feature: AppScheduler
- * Function: AbilityBehaviorAnalysis
- * SubFunction: NA
- * FunctionPoints: AppScheduler AbilityBehaviorAnalysis
- * EnvConditions:NA
- * CaseDescription: Verify appmgrclient_ Is nullptr causes AbilityBehaviorAnalysis to fail
- */
-HWTEST_F(AppSchedulerTest, AppScheduler_oprator_015, TestSize.Level1)
-{
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
-
-    std::string deviceName = "device";
-    std::string abilityName = "FirstAbility";
-    std::string appName = "FirstApp";
-    std::string bundleName = "com.ix.First";
-    auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
-    auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
-    auto token = record->GetToken();
-    ASSERT_NE(token, nullptr);
-    const int32_t visibility = 0;
-    const int32_t perceptibility = 1;
-    const int32_t connectionState = 1;
-
-    DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(
-        token, nullptr, visibility, perceptibility, connectionState);
 }
 
 /*

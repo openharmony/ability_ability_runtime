@@ -58,8 +58,8 @@ public:
      *
      * @return AppRunningRecord pointer if success get or create.
      */
-    std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
-        const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo);
+    std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(const std::shared_ptr<ApplicationInfo> &appInfo,
+        const std::string &processName, const BundleInfo &bundleInfo, const std::string &instanceKey);
 
     /**
      * CheckAppRunningRecordIsExist, Get process record by application name and process Name.
@@ -72,7 +72,7 @@ public:
      */
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordIsExist(const std::string &appName,
         const std::string &processName, const int uid, const BundleInfo &bundleInfo,
-        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr);
+        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "");
 
 #ifdef APP_NO_RESPONSE_DIALOG
     /**
@@ -350,11 +350,15 @@ public:
 
     void SetMultiUserConfigurationMgr(const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr);
 
-  private:
+    int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
+
+private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
+        const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
 
 private:
     std::mutex runningRecordMapMutex_;

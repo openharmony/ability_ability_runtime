@@ -398,6 +398,14 @@ public:
         const Want *resultWant, int64_t callerRequestCode);
 
     /**
+     * TerminateUIServiceExtensionAbility with token.
+     *
+     * @param token Ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode TerminateUIServiceExtensionAbility(sptr<IRemoteObject> token);
+
+    /**
      * TerminateUIExtensionAbility with want, return want from ability manager service.
      *
      * @param extensionSessionInfo the extension session info of the ability to terminate.
@@ -1579,6 +1587,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode TerminateMission(int32_t missionId);
+
+    /**
+     * Notify ability manager to set the flag to block all apps from starting.
+     * Needs to apply for ohos.permission.BLOCK_ALL_APP_START.
+     * @param flag, The flag to block all apps from starting
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode BlockAllAppStart(bool flag);
 
 private:
     AbilityManagerClient();

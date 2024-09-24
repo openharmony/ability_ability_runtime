@@ -24,18 +24,18 @@ namespace AppExecFwk {
 namespace {
 constexpr int64_t MS_PER_NS = 1000000;
 constexpr int32_t MAX_PERIOD_COUNT = 10;
+
+int64_t GetSysTimeNs()
+{
+    auto now = std::chrono::steady_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
 }
+} // namespace
 
 IdleTime::IdleTime(const std::shared_ptr<EventHandler> &eventHandler, IdleTimeCallback idleTimeCallback)
 {
     eventHandler_ = eventHandler;
     callback_ = idleTimeCallback;
-}
-
-int64_t IdleTime::GetSysTimeNs()
-{
-    auto now = std::chrono::steady_clock::now().time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
 }
 
 void IdleTime::InitVSyncReceiver()

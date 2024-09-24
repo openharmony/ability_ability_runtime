@@ -161,6 +161,17 @@ public:
         RunningMultiAppInfo &info) override;
 
     /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running isntance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys) override;
+
+    /**
      * GetRunningProcessesByBundleType, call GetRunningProcessesByBundleType() through proxy project.
      * Obtains information about application processes by bundle type that are running on the device.
      *
@@ -346,6 +357,20 @@ public:
     virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
+
+    /**
+     * Register KIA interceptor.
+     * @param interceptor KIA interceptor.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor) override;
+
+    /**
+     * Check if the given pid is a KIA process.
+     * @param pid process id.
+     * @return Returns true if it is a KIA process, false otherwise.
+     */
+    virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia) override;
 
     bool GetAppRunningStateByBundleName(const std::string &bundleName) override;
 

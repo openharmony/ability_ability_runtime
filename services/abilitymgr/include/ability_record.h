@@ -275,7 +275,6 @@ struct AbilityRequest {
     uint32_t specifyTokenId = 0;
     bool uriReservedFlag = false;
     std::string reservedBundleName;
-
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -957,6 +956,14 @@ public:
     int32_t GetRestartCount() const;
     void SetRestartCount(int32_t restartCount);
     bool GetKeepAlive() const;
+    void SetKeepAliveBundle(bool value)
+    {
+        keepAliveBundle_ = value;
+    }
+    bool IsKeepAliveBundle() const
+    {
+        return keepAliveBundle_;
+    }
     void SetLoading(bool status);
     bool IsLoading() const;
     int64_t GetRestartTime();
@@ -1085,6 +1092,16 @@ public:
 
     void RemoveConnectWant();
 
+    inline std::string GetInstanceKey() const
+    {
+        return instanceKey_;
+    }
+
+    void SetInstanceKey(const std::string& key)
+    {
+        instanceKey_ = key;
+    }
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
@@ -1194,7 +1211,6 @@ private:
     int recordId_ = 0;                                // record id
     int32_t uiExtensionAbilityId_ = 0;                // uiextension ability id
     AppExecFwk::AbilityInfo abilityInfo_ = {};             // the ability info get from BMS
-    AppExecFwk::ApplicationInfo applicationInfo_ = {};     // the ability info get from BMS
     std::weak_ptr<AbilityRecord> preAbilityRecord_ = {};   // who starts this ability record
     std::weak_ptr<AbilityRecord> nextAbilityRecord_ = {};  // ability that started by this ability
     int64_t startTime_ = 0;                           // records first time of ability start
@@ -1260,7 +1276,7 @@ private:
     bool minimizeReason_ = false;
 
     bool clearMissionFlag_ = false;
-
+    bool keepAliveBundle_ = false;
     int32_t restartCount_ = -1;
     int32_t restartMax_ = -1;
     std::string specifiedFlag_;
@@ -1311,6 +1327,7 @@ private:
     ffrt::mutex connectWantLock_;
     bool isLaunching_ = true;
     LaunchDebugInfo launchDebugInfo_;
+    std::string instanceKey_ = "";
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -261,16 +261,14 @@ void JsAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 void JsAbility::AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
-    auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; JsAbility::" + methodName +
-        "; the " + methodName + " begin";
+    auto entry = std::string("JsAbility::") + methodName + "; the " + methodName + " begin";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
 void JsAbility::AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
-    auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; JsAbility::" + methodName +
-        "; the " + methodName + " end";
+    auto entry = std::string("JsAbility::") + methodName + "; the " + methodName + " end";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
@@ -556,7 +554,7 @@ bool JsAbility::OnBackPress()
 bool JsAbility::OnPrepareTerminate()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITY, "call, ability: %{public}s", GetAbilityName().c_str());
+    TAG_LOGI(AAFwkTag::ABILITY, "prepare terminate call, ability: %{public}s", GetAbilityName().c_str());
     Ability::OnPrepareTerminate();
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
@@ -566,7 +564,6 @@ bool JsAbility::OnPrepareTerminate()
         TAG_LOGW(AAFwkTag::ABILITY, "get js value failed");
         return false;
     }
-    TAG_LOGD(AAFwkTag::ABILITY, "end, ret:%{public}d", ret);
     return ret;
 }
 

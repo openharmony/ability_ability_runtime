@@ -154,7 +154,9 @@ HWTEST_F(CjRuntimeTest, CjRuntimeStartDebuggerMode_001, TestSize.Level0)
     debugOption.processName = processName;
 
     instance->StartDebugMode(debugOption);
+    EXPECT_TRUE(debugOption.isStartWithDebug);
     instance->StartDebugMode(debugOption);
+    EXPECT_TRUE(debugOption.isDebugApp);
 }
 
 }  // namespace Runtime

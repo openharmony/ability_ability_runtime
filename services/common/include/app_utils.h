@@ -53,8 +53,9 @@ public:
     bool EnableMoveUIAbilityToBackgroundApi();
     bool IsLaunchEmbededUIAbility();
     bool IsSupportNativeChildProcess();
+    bool IsSupportMultiInstance();
     bool IsAllowResidentInExtremeMemory(const std::string& bundleName, const std::string& abilityName = "");
-    bool IsAllowNativeChildProcess(const std::string& bundleName);
+    bool IsAllowNativeChildProcess(const std::string &appIdentifier);
     int32_t GetLimitMaximumExtensionsPerProc();
     int32_t GetLimitMaximumExtensionsPerDevice();
     std::string GetCacheExtensionTypeList();
@@ -84,6 +85,7 @@ private:
     volatile DeviceConfiguration<bool> enableMoveUIAbilityToBackgroundApi_ = {false, true};
     volatile DeviceConfiguration<bool> isLaunchEmbededUIAbility_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportNativeChildProcess_ = {false, false};
+    volatile DeviceConfiguration<bool> isSupportMultiInstance_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     DeviceConfiguration<std::vector<std::string>>

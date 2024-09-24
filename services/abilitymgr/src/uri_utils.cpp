@@ -115,7 +115,7 @@ bool UriUtils::CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest
     if (abilityRequest.appInfo.apiTargetVersion % API_VERSION_MOD <= API12) {
         return true;
     }
-    if (abilityRequest.want.GetElement().GetBundleName().empty()) {
+    if (abilityRequest.want.GetElement().GetAbilityName().empty()) {
         return true;
     }
     bool isFileUri = !abilityRequest.want.GetUriString().empty() && abilityRequest.want.GetUri().GetScheme() == "file";
@@ -130,8 +130,8 @@ bool UriUtils::CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest
     return false;
 }
 
-std::vector<Uri> UriUtils::GetPermissionedUriList(Want &want, std::vector<std::string> &uriVec,
-    std::vector<bool> &checkResults)
+std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string> &uriVec,
+    const std::vector<bool> &checkResults, Want &want)
 {
     std::vector<Uri> permissionedUris;
     if (uriVec.size() != checkResults.size()) {

@@ -70,9 +70,12 @@ HWTEST_F(ExtensionControlInterceptorTest, DoProcess_001, TestSize.Level1)
     int32_t userId = 100;
     bool isWithUI = false;
     sptr<IRemoteObject> token = GetAbilityToken();
-    AbilityInterceptorParam param = AbilityInterceptorParam(want, requestCode, userId, isWithUI, token);
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, requestCode, userId, isWithUI, token,
+        shouldBlockFunc);
     extensionControlInterceptor->DoProcess(param);
-    AbilityInterceptorParam param2 = AbilityInterceptorParam(want, requestCode, userId, isWithUI, nullptr);
+    AbilityInterceptorParam param2 = AbilityInterceptorParam(want, requestCode, userId, isWithUI, nullptr,
+        shouldBlockFunc);
     EXPECT_EQ(extensionControlInterceptor->DoProcess(param2), ERR_OK);
 }
 

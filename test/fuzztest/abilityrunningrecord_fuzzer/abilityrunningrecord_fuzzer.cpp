@@ -70,14 +70,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityRecord.SetWant(want);
     AppExecFwk::AbilityState state = AppExecFwk::AbilityState::ABILITY_STATE_READY;
     abilityRecord.SetState(state);
-    sptr<IRemoteObject> pretoken = GetFuzzAbilityToken();
-    abilityRecord.SetPreToken(pretoken);
-    int32_t visibility = static_cast<int32_t>(GetU32Data(data));
-    abilityRecord.SetVisibility(visibility);
-    int32_t perceptibility = static_cast<int32_t>(GetU32Data(data));
-    abilityRecord.SetPerceptibility(perceptibility);
-    int32_t connectionState = static_cast<int32_t>(GetU32Data(data));
-    abilityRecord.SetConnectionState(connectionState);
     int64_t eventId = static_cast<int64_t>(GetU32Data(data));
     abilityRecord.SetEventId(eventId);
     int32_t ownerUserId = static_cast<int64_t>(GetU32Data(data));
@@ -91,18 +83,13 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityRecord.GetWant();
     abilityRecord.GetToken();
     abilityRecord.GetState();
-    abilityRecord.GetLastLaunchTime();
-    abilityRecord.GetPreToken();
-    abilityRecord.GetVisibility();
-    abilityRecord.GetPerceptibility();
-    abilityRecord.GetConnectionState();
     abilityRecord.GetEventId();
     abilityRecord.SetTerminating();
     abilityRecord.IsTerminating();
     abilityRecord.GetOwnerUserId();
     abilityRecord.IsSingleUser();
     abilityRecord.GetFocusFlag();
-    return abilityRecord.IsSameState(state);
+    return true;
 }
 }
 

@@ -54,6 +54,8 @@ int AppStateCallbackHost::OnRemoteRequest(
             return HandleNotifyStartResidentProcess(data, reply);
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_REMOTE_DIED):
             return HandleOnAppRemoteDied(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_PRE_CACHE):
+            return HandleNotifyAppPreCache(data, reply);
     }
 
     TAG_LOGD(AAFwkTag::APPMGR, "AppStateCallbackHost::OnRemoteRequest end");
@@ -66,6 +68,11 @@ void AppStateCallbackHost::OnAbilityRequestDone(const sptr<IRemoteObject> &, con
 }
 
 void AppStateCallbackHost::OnAppStateChanged(const AppProcessData &)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+}
+
+void AppStateCallbackHost::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
@@ -158,6 +165,22 @@ int32_t AppStateCallbackHost::HandleOnAppRemoteDied(MessageParcel &data, Message
         abilityTokens.emplace_back(obj);
     }
     OnAppRemoteDied(abilityTokens);
+    return NO_ERROR;
+}
+
+int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t pid = data.ReadInt32();
+    if (pid <= 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "pid is illegal");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t userId = data.ReadInt32();
+    if (userId < 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "userId is illegal");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyAppPreCache(pid, userId);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

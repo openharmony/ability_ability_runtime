@@ -200,21 +200,6 @@ AppMgrResultCode AppMgrClient::RegisterAppStateCallback(const sptr<IAppStateCall
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token,
-    const sptr<IRemoteObject> &preToken, const int32_t visibility, const int32_t perceptibility,
-    const int32_t connectionState)
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service != nullptr) {
-        sptr<IAmsMgr> amsService = service->GetAmsMgr();
-        if (amsService != nullptr) {
-            amsService->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState);
-            return AppMgrResultCode::RESULT_OK;
-        }
-    }
-    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-}
-
 AppMgrResultCode AppMgrClient::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -423,6 +408,20 @@ AppMgrResultCode AppMgrClient::GetProcessRunningInformation(AppExecFwk::RunningP
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         int32_t result = service->GetProcessRunningInformation(info);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }
@@ -658,12 +657,12 @@ void AppMgrClient::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecF
     amsService->StartSpecifiedAbility(want, abilityInfo, requestId);
 }
 
-void AppMgrClient::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
+void AppMgrClient::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     if (!IsAmsServiceReady()) {
         return;
     }
-    amsService_->SetKeepAliveEnableState(bundleName, enable);
+    amsService_->SetKeepAliveEnableState(bundleName, enable, uid);
 }
 
 void AppMgrClient::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
@@ -867,6 +866,19 @@ void AppMgrClient::SetCurrentUserId(const int32_t userId)
         return;
     }
     amsService->SetCurrentUserId(userId);
+}
+
+void AppMgrClient::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        return;
+    }
+    amsService->SetEnableStartProcessFlagByUserId(userId, enableStartProcess);
 }
 
 int32_t AppMgrClient::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
