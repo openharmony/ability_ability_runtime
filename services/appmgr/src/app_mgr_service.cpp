@@ -60,8 +60,6 @@ constexpr const char* TASK_APPLICATION_FOREGROUNDED = "ApplicationForegroundedTa
 constexpr const char* TASK_APPLICATION_BACKGROUNDED = "ApplicationBackgroundedTask";
 constexpr const char* TASK_APPLICATION_TERMINATED = "ApplicationTerminatedTask";
 constexpr const char* TASK_ABILITY_CLEANED = "AbilityCleanedTask";
-constexpr const char* TASK_ADD_APP_DEATH_RECIPIENT = "AddAppRecipientTask";
-constexpr const char* TASK_CLEAR_UP_APPLICATION_DATA = "ClearUpApplicationDataTask";
 constexpr const char* TASK_STARTUP_RESIDENT_PROCESS = "StartupResidentProcess";
 constexpr const char* TASK_ADD_ABILITY_STAGE_DONE = "AddAbilityStageDone";
 constexpr const char* TASK_START_USER_TEST_PROCESS = "StartUserTestProcess";
@@ -395,6 +393,16 @@ int32_t AppMgrService::GetRunningMultiAppInfoByBundleName(const std::string &bun
         return ERR_PERMISSION_DENIED;
     }
     return appMgrServiceInner_->GetRunningMultiAppInfoByBundleName(bundleName, info);
+}
+
+
+int32_t AppMgrService::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
 }
 
 int32_t AppMgrService::GetRunningProcessesByBundleType(BundleType bundleType,

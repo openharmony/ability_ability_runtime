@@ -630,6 +630,8 @@ public:
     bool IsKilling() const;
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
+    void SetInstanceKey(const std::string& instanceKey);
+    std::string GetInstanceKey() const;
     void SetSecurityFlag(bool securityFlag);
     bool GetSecurityFlag() const;
 
@@ -797,6 +799,9 @@ public:
     void SetAttachedToStatusBar(bool isAttached);
     bool IsAttachedToStatusBar();
 
+    bool SetEnableProcessCache(bool enable);
+    bool GetEnableProcessCache();
+
     void ScheduleCacheProcess();
 
     void SetBrowserHost(sptr<IRemoteObject> browser);
@@ -925,7 +930,6 @@ private:
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
     int32_t appRecordId_ = 0;
-    std::string appName_;
     std::string processName_;  // the name of this process
     std::string specifiedProcessFlag_; // the flag of specified Process
     int64_t eventId_ = 0;
@@ -986,6 +990,7 @@ private:
     ffrt::mutex renderPidSetLock_;
     AppSpawnStartMsg startMsg_;
     int32_t appIndex_ = 0;
+    std::string instanceKey_;
     bool securityFlag_ = false;
     int32_t requestProcCode_ = 0;
     ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;
@@ -1006,6 +1011,7 @@ private:
     bool isErrorInfoEnhance_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
+    bool enableProcessCache_ = false;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     bool processCacheBlocked = false; // temporarily block process cache feature
     sptr<IRemoteObject> browserHost_;

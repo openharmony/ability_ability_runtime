@@ -1735,6 +1735,17 @@ public:
     {
         return 0;
     }
+
+    /**
+     * Notify ability manager to set the flag to block all apps from starting.
+     * Needs to apply for ohos.permission.BLOCK_ALL_APP_START.
+     * @param flag, The flag to block all apps from starting
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t BlockAllAppStart(bool flag)
+    {
+        return 0;
+    }
 };
 }  // namespace AAFwk
 }  // namespace OHOS

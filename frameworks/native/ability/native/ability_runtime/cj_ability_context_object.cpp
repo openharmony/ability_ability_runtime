@@ -24,6 +24,8 @@
 #include "napi_common_start_options.h"
 #include "napi_common_util.h"
 #include "pixel_map.h"
+#include "js_ability_context.h"
+#include "js_runtime_utils.h"
 
 using namespace OHOS::FFI;
 
@@ -499,6 +501,82 @@ EXPORT void *FFIGetContext(int64_t id)
 typedef struct napi_env__ *napi_env;
 typedef struct napi_value__* napi_value;
 
+void BindJsAbilityContextStartStop(napi_env env, napi_value result)
+{
+    const char *moduleName = "JsAbilityContext";
+    BindNativeFunction((napi_env)env, result, "startAbility", moduleName, JsAbilityContext::StartAbility);
+    BindNativeFunction((napi_env)env, result, "openLink", moduleName, JsAbilityContext::OpenLink);
+    BindNativeFunction((napi_env)env, result, "startAbilityAsCaller", moduleName,
+        JsAbilityContext::StartAbilityAsCaller);
+    BindNativeFunction((napi_env)env, result, "startAbilityWithAccount", moduleName,
+        JsAbilityContext::StartAbilityWithAccount);
+    BindNativeFunction((napi_env)env, result, "startAbilityByCall", moduleName, JsAbilityContext::StartAbilityByCall);
+    BindNativeFunction((napi_env)env, result, "startAbilityForResult",
+        moduleName, JsAbilityContext::StartAbilityForResult);
+    BindNativeFunction((napi_env)env, result, "startAbilityForResultWithAccount", moduleName,
+        JsAbilityContext::StartAbilityForResultWithAccount);
+    BindNativeFunction((napi_env)env, result, "startServiceExtensionAbility", moduleName,
+        JsAbilityContext::StartServiceExtensionAbility);
+    BindNativeFunction((napi_env)env, result, "startServiceExtensionAbilityWithAccount", moduleName,
+        JsAbilityContext::StartServiceExtensionAbilityWithAccount);
+    BindNativeFunction((napi_env)env, result, "stopServiceExtensionAbility", moduleName,
+        JsAbilityContext::StopServiceExtensionAbility);
+    BindNativeFunction((napi_env)env, result, "stopServiceExtensionAbilityWithAccount", moduleName,
+        JsAbilityContext::StopServiceExtensionAbilityWithAccount);
+}
+
+void BindJsAbilityContextOther(napi_env env, napi_value result)
+{
+    const char *moduleName = "JsAbilityContext";
+    BindNativeFunction((napi_env)env, result, "connectServiceExtensionAbility", moduleName,
+        JsAbilityContext::ConnectAbility);
+    BindNativeFunction((napi_env)env, result, "connectAbilityWithAccount", moduleName,
+        JsAbilityContext::ConnectAbilityWithAccount);
+    BindNativeFunction((napi_env)env, result, "connectServiceExtensionAbilityWithAccount", moduleName,
+        JsAbilityContext::ConnectAbilityWithAccount);
+    BindNativeFunction((napi_env)env, result, "disconnectAbility", moduleName, JsAbilityContext::DisconnectAbility);
+    BindNativeFunction((napi_env)env, result, "disconnectServiceExtensionAbility", moduleName,
+        JsAbilityContext::DisconnectAbility);
+    BindNativeFunction((napi_env)env, result, "terminateSelf", moduleName, JsAbilityContext::TerminateSelf);
+    BindNativeFunction((napi_env)env, result, "terminateSelfWithResult", moduleName,
+        JsAbilityContext::TerminateSelfWithResult);
+    BindNativeFunction((napi_env)env, result, "backToCallerAbilityWithResult", moduleName,
+        JsAbilityContext::BackToCallerAbilityWithResult);
+    BindNativeFunction((napi_env)env, result, "restoreWindowStage", moduleName, JsAbilityContext::RestoreWindowStage);
+    BindNativeFunction((napi_env)env, result, "isTerminating", moduleName, JsAbilityContext::IsTerminating);
+    BindNativeFunction((napi_env)env, result, "startRecentAbility", moduleName,
+        JsAbilityContext::StartRecentAbility);
+    BindNativeFunction((napi_env)env, result, "requestDialogService", moduleName,
+        JsAbilityContext::RequestDialogService);
+    BindNativeFunction((napi_env)env, result, "reportDrawnCompleted", moduleName,
+        JsAbilityContext::ReportDrawnCompleted);
+    BindNativeFunction((napi_env)env, result, "setMissionContinueState", moduleName,
+        JsAbilityContext::SetMissionContinueState);
+    BindNativeFunction((napi_env)env, result, "startAbilityByType", moduleName,
+        JsAbilityContext::StartAbilityByType);
+    BindNativeFunction((napi_env)env, result, "requestModalUIExtension", moduleName,
+        JsAbilityContext::RequestModalUIExtension);
+    BindNativeFunction((napi_env)env, result, "showAbility", moduleName,
+        JsAbilityContext::ShowAbility);
+    BindNativeFunction((napi_env)env, result, "hideAbility", moduleName,
+        JsAbilityContext::HideAbility);
+    BindNativeFunction((napi_env)env, result, "openAtomicService", moduleName,
+        JsAbilityContext::OpenAtomicService);
+    BindNativeFunction((napi_env)env, result, "moveAbilityToBackground", moduleName,
+        JsAbilityContext::MoveAbilityToBackground);
+    BindNativeFunction((napi_env)env, result, "setRestoreEnabled", moduleName, JsAbilityContext::SetRestoreEnabled);
+    BindNativeFunction((napi_env)env, result, "startUIServiceExtensionAbility", moduleName,
+        JsAbilityContext::StartUIServiceExtension);
+    BindNativeFunction((napi_env)env, result, "connectUIServiceExtensionAbility", moduleName,
+        JsAbilityContext::ConnectUIServiceExtension);
+    BindNativeFunction((napi_env)env, result, "disconnectUIServiceExtensionAbility", moduleName,
+        JsAbilityContext::DisconnectUIServiceExtension);
+#ifdef SUPPORT_GRAPHICS
+    BindNativeFunction((napi_env)env, result, "setMissionLabel", moduleName, JsAbilityContext::SetMissionLabel);
+    BindNativeFunction((napi_env)env, result, "setMissionIcon", moduleName, JsAbilityContext::SetMissionIcon);
+#endif
+}
+
 EXPORT napi_value FFICreateNapiValue(void *env, void *context)
 {
     napi_value result = nullptr;
@@ -518,6 +596,14 @@ EXPORT napi_value FFICreateNapiValue(void *env, void *context)
     napi_get_boolean((napi_env)env, true, &value);
     napi_set_named_property((napi_env)env, result, "stageMode", value);
 
+    return result;
+}
+
+EXPORT napi_value FFICreateNapiValueJsAbilityContext(void *env, void *context)
+{
+    napi_value result = FFICreateNapiValue(env, context);
+    BindJsAbilityContextStartStop((napi_env)env, result);
+    BindJsAbilityContextOther((napi_env)env, result);
     return result;
 }
 

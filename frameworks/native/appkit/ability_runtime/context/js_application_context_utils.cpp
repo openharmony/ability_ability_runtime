@@ -938,6 +938,70 @@ napi_value JsApplicationContextUtils::OnGetCurrentAppCloneIndex(napi_env env, Na
     return CreateJsValue(env, appIndex);
 }
 
+napi_value JsApplicationContextUtils::GetCurrentInstanceKey(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnGetCurrentInstanceKey, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetCurrentInstanceKey(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Get current instance key");
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context is nullptr.");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return CreateJsUndefined(env);
+    }
+    if (context->GetCurrentAppMode() != static_cast<int32_t>(AppExecFwk::MultiAppModeType::MULTI_INSTANCE)) {
+        ThrowError(env, AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED);
+        return CreateJsUndefined(env);
+    }
+    std::string instanceKey = context->GetCurrentInstanceKey();
+    return CreateJsValue(env, instanceKey);
+}
+
+napi_value JsApplicationContextUtils::GetAllRunningInstanceKeys(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnGetAllRunningInstanceKeys, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Get all running instance keys");
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    std::shared_ptr<std::vector<std::string>> instanceKeys;
+    NapiAsyncTask::ExecuteCallback execute =
+        [applicationContext = applicationContext_, innerErrCode, instanceKeys]() {
+        auto context = applicationContext.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+            *innerErrCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+            return;
+        }
+        if (context->GetCurrentAppMode() != static_cast<int32_t>(AppExecFwk::MultiAppModeType::MULTI_INSTANCE)) {
+            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED);
+            return;
+        }
+        std::string bundleName = context->GetBundleName();
+        *innerErrCode = context->GetAllRunningInstanceKeys(bundleName, *instanceKeys);
+    };
+    auto complete = [applicationContext = applicationContext_, innerErrCode, instanceKeys](
+        napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*innerErrCode != ERR_OK) {
+            task.Reject(env, CreateJsError(env, *innerErrCode, "failed to get instance keys."));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateNativeArray(env, *instanceKeys));
+    };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnGetRunningProcessInformation",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 void JsApplicationContextUtils::Finalizer(napi_env env, void *data, void *hint)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
@@ -1464,6 +1528,13 @@ napi_value JsApplicationContextUtils::OnGetApplicationContext(napi_env env, Napi
         return CreateJsUndefined(env);
     }
 
+    if (!applicationContext->GetApplicationInfoUpdateFlag()) {
+        auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetGlobalObject(env);
+        if (appContextObj != nullptr) {
+            return appContextObj->GetNapiValue();
+        }
+    }
+
     napi_value value = CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
@@ -1529,7 +1600,8 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
         napi_set_named_property(env, object, "resourceManager", CreateJsResourceManager(env, resourceManager, context));
     }
 
-    BindNativeApplicationContext(env, object);
+    BindNativeApplicationContextOne(env, object);
+    BindNativeApplicationContextTwo(env, object);
     return object;
 }
 
@@ -1575,7 +1647,7 @@ napi_value JsApplicationContextUtils::OnSetSupportedProcessCacheSelf(napi_env en
     return CreateJsUndefined(env);
 }
 
-void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_value object)
+void JsApplicationContextUtils::BindNativeApplicationContextOne(napi_env env, napi_value object)
 {
     BindNativeProperty(env, object, "cacheDir", JsApplicationContextUtils::GetCacheDir);
     BindNativeProperty(env, object, "tempDir", JsApplicationContextUtils::GetTempDir);
@@ -1612,6 +1684,10 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
     BindNativeFunction(env, object, "setFont", MD_NAME, JsApplicationContextUtils::SetFont);
     BindNativeFunction(env, object, "clearUpApplicationData", MD_NAME,
         JsApplicationContextUtils::ClearUpApplicationData);
+}
+
+void JsApplicationContextUtils::BindNativeApplicationContextTwo(napi_env env, napi_value object)
+{
     BindNativeFunction(env, object, "preloadUIExtensionAbility", MD_NAME,
         JsApplicationContextUtils::PreloadUIExtensionAbility);
     BindNativeFunction(env, object, "getProcessRunningInformation", MD_NAME,
@@ -1620,6 +1696,10 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
         JsApplicationContextUtils::GetRunningProcessInformation);
     BindNativeFunction(env, object, "getCurrentAppCloneIndex", MD_NAME,
         JsApplicationContextUtils::GetCurrentAppCloneIndex);
+    BindNativeFunction(env, object, "getCurrentInstanceKey", MD_NAME,
+        JsApplicationContextUtils::GetCurrentInstanceKey);
+    BindNativeFunction(env, object, "getAllRunningInstanceKeys", MD_NAME,
+        JsApplicationContextUtils::GetAllRunningInstanceKeys);
     BindNativeFunction(env, object, "getGroupDir", MD_NAME, JsApplicationContextUtils::GetGroupDir);
     BindNativeFunction(env, object, "restartApp", MD_NAME, JsApplicationContextUtils::RestartApp);
     BindNativeFunction(env, object, "setSupportedProcessCache", MD_NAME,

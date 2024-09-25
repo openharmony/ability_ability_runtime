@@ -92,12 +92,14 @@ HWTEST_F(CjApplicationContextTest, CJApplicationContextTestGetApplicationInfo_00
     appInfo->bundleName = "com.example.testapp";
     appContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
     appContext_->SetApplicationInfo(appInfo);
+    EXPECT_NE(appInfo, nullptr);
 
     // 创建一个 CJApplicationContext 对象
     cjAppContext_ = std::make_shared<CJApplicationContext>(appContext_);
 
     // 测试 GetApplicationInfo 函数
     auto appInfoResult = cjAppContext_->GetApplicationInfo();
+    EXPECT_NE(appInfoResult, nullptr);
 }
 
 }  // namespace AbilityRuntime

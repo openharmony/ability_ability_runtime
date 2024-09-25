@@ -32,6 +32,7 @@ using OHOS::AppExecFwk::ProcessData;
 using OHOS::AppExecFwk::RunningProcessInfo;
 using OHOS::AppExecFwk::RunningMultiAppInfo;
 using OHOS::AppExecFwk::RunningAppClone;
+using OHOS::AppExecFwk::RunningMultiInstanceInfo;
 #ifdef SUPPORT_GRAPHICS
 using OHOS::AppExecFwk::AbilityFirstFrameStateData;
 #endif
@@ -69,6 +70,8 @@ JsAppProcessState ConvertToJsAppProcessState(
 napi_value CreateJsRunningMultiAppInfo(napi_env env, const RunningMultiAppInfo &info);
 napi_value CreateJsRunningAppCloneArray(napi_env env, const std::vector<RunningAppClone>& data);
 napi_value CreateJsRunningAppClone(napi_env env, const RunningAppClone &info);
+napi_value CreateJsRunningMultiInstanceInfosArray(napi_env env, const std::vector<RunningMultiInstanceInfo>& data);
+napi_value CreateJsRunningMultiInstanceInfo(napi_env env, const RunningMultiInstanceInfo &info);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_UTILS_H

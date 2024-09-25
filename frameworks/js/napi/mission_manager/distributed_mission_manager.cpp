@@ -917,7 +917,7 @@ napi_value NAPI_RegisterMissionListener(napi_env env, napi_callback_info info)
     return ret;
 }
 
-napi_value NAPI_On(napi_env env, napi_callback_info info)
+napi_value NAPI_NotifyToOn(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
     std::string errInfo = "Parameter error";
@@ -940,7 +940,7 @@ napi_value NAPI_On(napi_env env, napi_callback_info info)
     return ret;
 }
 
-napi_value NAPI_Off(napi_env env, napi_callback_info info)
+napi_value NAPI_NotifyToOff(napi_env env, napi_callback_info info)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
     std::string errInfo = "Parameter error";
@@ -961,21 +961,6 @@ napi_value NAPI_Off(napi_env env, napi_callback_info info)
     }
     TAG_LOGI(AAFwkTag::MISSION, "end");
     return ret;
-}
-
-napi_value NAPI_ContinueState(napi_env env)
-{
-    TAG_LOGI(AAFwkTag::MISSION, "called");
-    napi_value continueState = nullptr;
-    napi_create_object(env, &continueState);
-    napi_value active = nullptr;
-    napi_value inActive = nullptr;
-    napi_create_int32(env, 0, &active);
-    napi_create_int32(env, 1, &inActive);
-    napi_set_named_property(env, continueState, "ACTIVE", active);
-    napi_set_named_property(env, continueState, "INACTIVE", inActive);
-    TAG_LOGI(AAFwkTag::MISSION, "end");
-    return continueState;
 }
 
 NAPIRemoteMissionListener::~NAPIRemoteMissionListener()
@@ -2142,16 +2127,14 @@ void NAPIMissionContinue::OnContinueDone(int32_t result)
 napi_value DistributedMissionManagerExport(napi_env env, napi_value exports)
 {
     TAG_LOGI(AAFwkTag::MISSION, "called");
-    napi_value continueState = NAPI_ContinueState(env);
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("startSyncRemoteMissions", NAPI_StartSyncRemoteMissions),
         DECLARE_NAPI_FUNCTION("stopSyncRemoteMissions", NAPI_StopSyncRemoteMissions),
         DECLARE_NAPI_FUNCTION("registerMissionListener", NAPI_RegisterMissionListener),
         DECLARE_NAPI_FUNCTION("unRegisterMissionListener", NAPI_UnRegisterMissionListener),
         DECLARE_NAPI_FUNCTION("continueMission", NAPI_ContinueAbility),
-        DECLARE_NAPI_FUNCTION("on", NAPI_On),
-        DECLARE_NAPI_FUNCTION("off", NAPI_Off),
-        DECLARE_NAPI_PROPERTY("ContinueState", continueState),
+        DECLARE_NAPI_FUNCTION("on", NAPI_NotifyToOn),
+        DECLARE_NAPI_FUNCTION("off", NAPI_NotifyToOff),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
     return exports;

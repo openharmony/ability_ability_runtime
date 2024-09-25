@@ -133,6 +133,39 @@ HWTEST_F(WatchdogTest, AppExecFwk_watchdog_ReportEvent_0002, Function | MediumTe
 }
 
 /**
+ * @tc.number: AppExecFwk_watchdog_ReportEvent_0003
+ * @tc.name: ReportEvent
+ * @tc.desc: Test ReportEvent.
+ * @tc.require: I5UL6H
+ */
+HWTEST_F(WatchdogTest, AppExecFwk_watchdog_ReportEvent_0003, Function | MediumTest | Level3)
+{
+    watchdog_->isBgWorkingThread_.store(true);
+    watchdog_->ReportEvent();
+    EXPECT_TRUE(watchdog_->needReport_);
+}
+
+/**
+ * @tc.number: AppExecFwk_watchdog_ReportEvent_0004
+ * @tc.name: ReportEvent
+ * @tc.desc: Test ReportEvent.
+ * @tc.require: I5UL6H
+ */
+HWTEST_F(WatchdogTest, AppExecFwk_watchdog_ReportEvent_0004, Function | MediumTest | Level3)
+{
+    watchdog_->isBgWorkingThread_.store(false);
+    watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count() - TEST_INTERVAL_TIME;
+    watchdog_->needReport_ = true;
+    watchdog_->isSixSecondEvent_.store(true);
+    watchdog_->isInBackground_.store(false);
+    watchdog_->ReportEvent();
+    watchdog_->needReport_ = false;
+    watchdog_->ReportEvent();
+    EXPECT_TRUE(!watchdog_->needReport_);
+}
+
+/**
  * @tc.number: WatchdogTest_Init_001
  * @tc.name: Init
  * @tc.desc: Verify that function Init.
