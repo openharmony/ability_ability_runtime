@@ -53,7 +53,8 @@ public:
         state_ = APP_STATE_BACKGROUND;
     }
 
-    virtual void OnConfigurationUpdated(Configuration config)
+    virtual void OnConfigurationUpdated(Configuration config,
+        AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::System)
     {
         GTEST_LOG_(INFO) << "MockApplication::OnConfigurationUpdated called";
         onConfigurationUpdatedCalled_ = true;
