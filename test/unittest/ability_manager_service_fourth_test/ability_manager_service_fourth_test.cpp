@@ -24,6 +24,8 @@
 #include "mock_parameters.h"
 #include "ability_manager_service.h"
 #include "insight_intent_execute_manager.h"
+#include "modal_system_dialog/modal_system_dialog_ui_extension.h"
+#include "utils/modal_system_dialog_util.h"
 #undef private
 #undef protected
 #include "hilog_tag_wrapper.h"
@@ -98,6 +100,63 @@ sptr<Token> AbilityManagerServiceFourthTest::MockToken(AbilityType abilityType)
     return abilityRecord->GetToken();
 }
 
+class IRemoteObjectMocker : public IRemoteObject {
+public:
+    IRemoteObjectMocker() : IRemoteObject { u"IRemoteObjectMocker" } {}
+
+    ~IRemoteObjectMocker() {}
+
+    int32_t GetObjectRefCount()
+    {
+        return 0;
+    }
+
+    int SendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        int32_t key = data.ReadInt32();
+        std::string parameters = Str16ToStr8(data.ReadString16());
+        std::string command = Str16ToStr8(data.ReadString16());
+        if (command.compare("test") == 0) {
+            isSuccess_ = true;
+            return 0;
+        }
+        isSuccess_ = false;
+        return -1;
+    }
+
+    bool IsProxyObject() const
+    {
+        return true;
+    }
+
+    bool CheckObjectLegality() const
+    {
+        return true;
+    }
+
+    bool AddDeathRecipient(const sptr<DeathRecipient>& recipient)
+    {
+        return true;
+    }
+
+    bool RemoveDeathRecipient(const sptr<DeathRecipient>& recipient)
+    {
+        return true;
+    }
+
+    sptr<IRemoteBroker> AsInterface()
+    {
+        return nullptr;
+    }
+
+    int Dump(int fd, const std::vector<std::u16string>& args)
+    {
+        return 0;
+    }
+
+public:
+    bool isSuccess_ = false;
+};
 
 /*
  * Feature: AbilityManagerService
@@ -1423,5 +1482,74 @@ HWTEST_F(AbilityManagerServiceFourthTest, SetAbilityRequestSessionInfo_003, Test
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest SetAbilityRequestSessionInfo_003 end");
 }
 
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckDebugAppNotInDeveloperMode
+ * SubFunction: NA
+ * FunctionPoints: ModalSystemDialogUtil CheckDebugAppNotInDeveloperMode
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, CheckDebugAppNotInDeveloperMode_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckDebugAppNotInDeveloperMode start");
+    bool srcDeveloperMode = OHOS::system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
+
+    OHOS::system::SetBoolParameter(DEVELOPER_MODE_STATE, false);
+    ApplicationInfo applicationInfo;
+    applicationInfo.appProvisionType = "release";
+    EXPECT_FALSE(ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(applicationInfo));
+
+    applicationInfo.appProvisionType = "debug";
+    EXPECT_TRUE(ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(applicationInfo));
+
+    OHOS::system::SetBoolParameter(DEVELOPER_MODE_STATE, true);
+    applicationInfo.appProvisionType = "release";
+    EXPECT_FALSE(ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(applicationInfo));
+
+    applicationInfo.appProvisionType = "debug";
+    EXPECT_FALSE(ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(applicationInfo));
+
+    OHOS::system::SetBoolParameter(DEVELOPER_MODE_STATE, srcDeveloperMode);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckDebugAppNotInDeveloperMode end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CreateModalUIExtension
+ * SubFunction: NA
+ * FunctionPoints: ModalSystemDialogUIExtension CreateModalUIExtension
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, ModalSystemDialogUIExtension_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ModalSystemDialogUIExtension_001 start");
+    auto modalSystemDialog = std::make_shared<ModalSystemDialogUIExtension>();
+    ASSERT_NE(modalSystemDialog, nullptr);
+    std::string commandStr = "test";
+    auto result = modalSystemDialog->CreateModalUIExtension(commandStr);
+    EXPECT_FALSE(result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ModalSystemDialogUIExtension_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnAbilityConnectDone
+ * SubFunction: NA
+ * FunctionPoints: ModalSystemDialogUIExtension OnAbilityConnectDone
+ */
+HWTEST_F(AbilityManagerServiceFourthTest, OnAbilityConnectDone_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnAbilityConnectDone_001 start");
+    sptr<ModalSystemDialogUIExtension::DialogConnection> dialogConnection(
+        new (std::nothrow) ModalSystemDialogUIExtension::DialogConnection("test"));
+    ASSERT_NE(dialogConnection, nullptr);
+    ElementName element("", "", "ability", "");
+    dialogConnection->OnAbilityConnectDone(element, nullptr, 0);
+    sptr<IRemoteObjectMocker> iRemoteObject = new IRemoteObjectMocker();
+    dialogConnection->OnAbilityConnectDone(element, iRemoteObject, 0);
+    EXPECT_TRUE(iRemoteObject->isSuccess_);
+    dialogConnection->commandStr_ = "";
+    dialogConnection->OnAbilityConnectDone(element, iRemoteObject, 0);
+    EXPECT_FALSE(iRemoteObject->isSuccess_);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnAbilityConnectDone_001 end");
+}
 } // namespace AAFwk
 } // namespace OHOS
