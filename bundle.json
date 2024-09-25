@@ -276,6 +276,14 @@
               "header_files": [
               ]
             },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:abilitykit_utils"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/",
+              "header_files": [
+              ]
+            },
             "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:abilitykit_native"
           },
           {
