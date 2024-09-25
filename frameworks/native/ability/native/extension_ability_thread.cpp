@@ -239,8 +239,6 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
     }
     currentExtension_.reset(extension);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    mainRunner == nullptr ? abilityRecord->SetEventRunner(runner_) : abilityRecord->SetEventRunner(mainRunner);
     abilityRecord->SetAbilityThread(this);
     HandleAttachInner(application, abilityRecord);
 }

@@ -55,7 +55,7 @@ sptr<AppExecFwk::AbilityThread> MockCreateAbilityThread()
 
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
 
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(info->name);
 
     abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);

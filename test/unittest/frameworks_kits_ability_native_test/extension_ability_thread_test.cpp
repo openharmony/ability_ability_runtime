@@ -68,7 +68,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_DumpAbilityInfo_0100
         abilityInfo->type = AbilityType::EXTENSION;
         sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
         std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-        std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
         extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
         std::vector<std::string> params;
@@ -144,8 +144,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_Attach_3_Param_0100,
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             sleep(1);
@@ -173,8 +172,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_Attach_3_Param_0200,
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = nullptr;
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             sleep(1);
@@ -202,8 +200,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_Attach_2_Param_0100,
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             extensionabilitythread->Attach(application, abilityRecord, nullptr);
             sleep(1);
         }
@@ -230,8 +227,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_Attach_2_Param_0200,
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = nullptr;
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, nullptr);
             sleep(1);
@@ -260,8 +256,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityTrans
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             Want want;
@@ -293,8 +288,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityTrans
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             extensionabilitythread->Attach(application, abilityRecord, nullptr);
             Want want;
             LifeCycleStateInfo lifeCycleStateInfo;
@@ -367,8 +361,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleConnectAbili
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             Want want;
@@ -397,7 +390,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleConnectAbili
         abilityInfo->type = AbilityType::EXTENSION;
         sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
         std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-        std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
         extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
         Want want;
@@ -426,8 +419,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleDisconnectAb
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             Want want;
@@ -456,7 +448,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleDisconnectAb
         abilityInfo->type = AbilityType::EXTENSION;
         sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
         std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-        std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
         extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
         Want want;
@@ -486,8 +478,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleCommandAbili
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             Want want;
@@ -518,7 +509,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleCommandAbili
         abilityInfo->type = AbilityType::EXTENSION;
         sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
         std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-        std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
         extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
         Want want;
@@ -549,8 +540,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleCommandAbili
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             Want want;
@@ -1007,7 +997,7 @@ HWTEST_F(
     abilityInfo->name = "ExtensionAbility";
     abilityInfo->type = AbilityType::EXTENSION;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
     std::string abilityName = extensionabilitythread->CreateAbilityName(abilityRecord, application);
     auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
