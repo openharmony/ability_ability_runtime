@@ -41,6 +41,7 @@ public:
     ErrCode GetSandboxHapModuleInfo(const AbilityInfo &abilityInfo, int32_t appIndex, int32_t userId,
         HapModuleInfo &hapModuleInfo);
     bool GetBundleInfo(const std::string &bundleName, int32_t flags, BundleInfo &bundleInfo, int32_t userId);
+    std::string GetAppIdByBundleName(const std::string &bundleName, const int32_t userId);
     bool GetHapModuleInfo(const AbilityInfo &abilityInfo, HapModuleInfo &hapModuleInfo);
     std::string GetAbilityLabel(const std::string &bundleName, const std::string &abilityName);
     std::string GetAppType(const std::string &bundleName);
