@@ -162,7 +162,7 @@ void ApplicationImpl::PerformConfigurationUpdated(const Configuration &config)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ != nullptr) {
-        application_->OnConfigurationUpdated(config);
+        application_->OnConfigurationUpdated(config, AbilityRuntime::SetLevel::System);
     }
 }
 
