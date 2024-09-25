@@ -694,6 +694,10 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
     auto resultTask =
         [env, outTask = std::move(task)](int32_t resultCode, const AAFwk::Want &resultWant) {
         auto retData = new (std::nothrow) RequestResult();
+        if (retData == nullptr) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "null retData");
+            return;
+        }
         retData->resultCode = resultCode;
         retData->resultWant = resultWant;
         retData->task = std::move(outTask);
@@ -705,6 +709,10 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
             return;
         }
         auto work = new (std::nothrow) uv_work_t;
+        if (work == nullptr) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "null work");
+            return;
+        }
         work->data = static_cast<void*>(retData);
         int rev = uv_queue_work_with_qos(
             loop,
