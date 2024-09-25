@@ -75,6 +75,12 @@ public:
      * @return Returns the ability token.
      */
     const sptr<IRemoteObject> &GetToken() const;
+
+    /**
+     * @brief Obtains the record id of the ability.
+     *
+     * @return Returns the ability record id.
+     */
     int32_t GetAbilityRecordId() const
     {
         return abilityRecordId_;
@@ -116,7 +122,16 @@ public:
     void SetEventId(const int64_t eventId);
     int64_t GetEventId() const;
 
+    /**
+     * @brief SetOwnerUserId set the owner of the ability.
+     */
     void SetOwnerUserId(int32_t ownerUserId);
+
+    /**
+     * @brief GetOwnerUserId get the owner of the ability.
+     *
+     * @return Return the owner's userId.
+     */
     int32_t GetOwnerUserId() const;
     void SetIsSingleUser(bool flag);
     bool IsSingleUser() const;
@@ -126,6 +141,12 @@ public:
     int32_t GetUIExtensionAbilityId() const;
     void SetUserRequestCleaningStatus();
     bool IsUserRequestCleaning() const;
+
+    /**
+     * @brief Whether the ability is scene board.
+     *
+     * @return Returns whether the ability is scene board.
+     */
     bool IsSceneBoard() const;
 
 private:
