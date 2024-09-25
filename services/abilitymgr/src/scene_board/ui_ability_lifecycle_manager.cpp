@@ -2517,7 +2517,8 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     if (sessionInfo->processOptions == nullptr ||
-        !ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode)) {
+        (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
+        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "process options check failed");
         return ERR_START_OPTIONS_CHECK_FAILED;
     }
