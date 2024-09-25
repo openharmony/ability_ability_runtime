@@ -596,6 +596,8 @@ public:
 
     bool GrantUriPermissionForServiceExtension();
 
+    bool GrantUriPermissionForUIExtension();
+
     /**
      * check whether the ability is launcher.
      *
@@ -1158,8 +1160,6 @@ private:
     void DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const;
 
     void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
-
-    bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
 
     void PublishFileOpenEvent(const Want &want);
 
