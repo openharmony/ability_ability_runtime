@@ -28,6 +28,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr int32_t INVALID_EXTENSION_RECORD_ID = 0;
+constexpr int32_t MAX_EXTENSION_RECORD = 10;
 }
 class ExtensionRecord : public std::enable_shared_from_this<ExtensionRecord> {
 public:

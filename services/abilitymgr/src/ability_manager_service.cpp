@@ -9573,7 +9573,7 @@ int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abil
             return NO_FOUND_ABILITY_BY_CALLER;
         }
 
-        if (!abilityRequest.appInfo.isSystemApp && !callerRecord->GetApplicationInfo().isSystemApp) {
+        if (!abilityRequest.appInfo.isSystemApp) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "bundle %{public}s want start or caller bundle %{public}s "
                 "isn't system app, type %{public}d not allowed", abilityRequest.appInfo.bundleName.c_str(),
                 callerRecord->GetApplicationInfo().bundleName.c_str(), extensionType);
