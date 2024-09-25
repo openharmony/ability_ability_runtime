@@ -255,6 +255,7 @@ constexpr int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
 constexpr int32_t BROKER_UID = 5557;
 constexpr int32_t BROKER_RESERVE_UID = 5005;
 constexpr int32_t DMS_UID = 5522;
+constexpr int32_t WMS_UID = 4606;
 constexpr int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 constexpr int32_t BOOTEVENT_COMPLETED_DELAY_TIME = 1000;
 constexpr int32_t BOOTEVENT_BOOT_ANIMATION_READY_SIZE = 6;
@@ -354,6 +355,8 @@ bool AbilityManagerService::Init()
     subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler_, eventHandler_);
     subManagersHelper_->InitSubManagers(MAIN_USER_ID, true);
     SwitchManagers(U0_USER_ID, false);
+    int amsTimeOut = AmsConfigurationParameter::GetInstance().GetAMSTimeOutTime();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "amsTimeOut is %{public}d", amsTimeOut);
 #ifdef SUPPORT_GRAPHICS
     implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
