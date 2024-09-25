@@ -58,6 +58,7 @@
 #include "restart_app_manager.h"
 #include "scene_board_judgement.h"
 #include "server_constant.h"
+#include "session_manager_lite.h"
 #include "softbus_bus_center.h"
 #include "start_ability_handler/start_ability_sandbox_savefile.h"
 #include "start_ability_utils.h"
@@ -12270,26 +12271,32 @@ void AbilityManagerService::SendStartAbilityOtherExtensionEvent(const AppExecFwk
 void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest,
     AppExecFwk::ExtensionAbilityType extensionType)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         return;
     }
+
     abilityRequest.want.RemoveParam(WANT_PARAMS_HOST_WINDOW_ID_KEY);
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    if (callerAbilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo, callerAbilityRecord null");
-        return;
-    }
+    CHECK_POINTER_LOG(callerAbilityRecord, "callerAbilityRecord is nullptr");
     sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();
-    if (callerSessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo, callerSessionInfo null");
-        return;
-    }
+    CHECK_POINTER_LOG(callerSessionInfo, "callerSessionInfo is nullptr");
+
     if (callerAbilityRecord->GetAbilityInfo().type == AbilityType::PAGE) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "SetAbilityRequestSessionInfo, caller is UIAbility");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "UIAbility Caller");
         abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, callerSessionInfo->persistentId);
-        return;
+    } else if (AAFwk::UIExtensionUtils::IsUIExtension(callerAbilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        int32_t mainWindowId = -1;
+        auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().
+            GetSceneSessionManagerLiteProxy();
+        CHECK_POINTER_LOG(sceneSessionManager, "sceneSessionManager is nullptr");
+        auto err = sceneSessionManager->GetRootMainWindowId(static_cast<int32_t>(callerSessionInfo->hostWindowId),mainWindowId);      
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "callerSessionInfo->hostWindowId = %{public}d, mainWindowId = %{public}d, err = %{public}d",
+            callerSessionInfo->hostWindowId, mainWindowId, err);
+        abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, mainWindowId);
+    } else {
+        abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
     }
-    abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, 0);
 }
 
 int32_t AbilityManagerService::TerminateMission(int32_t missionId)
