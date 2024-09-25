@@ -42,6 +42,9 @@ int32_t ExtensionRecordManager::GenerateExtensionRecordId(const int32_t extensio
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Input id is %{public}d.", extensionRecordId);
     std::lock_guard<std::mutex> lock(mutex_);
+    if (extensionRecordIdSet_.size() >= MAX_EXTENSION_RECORD) {
+        return INVALID_EXTENSION_RECORD_ID;
+    }
     if (extensionRecordId != INVALID_EXTENSION_RECORD_ID &&
         !extensionRecordIdSet_.count(extensionRecordId)) {
         extensionRecordIdSet_.insert(extensionRecordId);
@@ -533,6 +536,10 @@ int32_t ExtensionRecordManager::CreateExtensionRecord(const AAFwk::AbilityReques
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = extensionRecord->abilityRecord_;
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_NULL_OBJECT);
     extensionRecordId = GenerateExtensionRecordId(extensionRecordId);
+    if (extensionRecordId == INVALID_EXTENSION_RECORD_ID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "beyond max extension record limit");
+            return ERR_INVALID_VALUE;
+    }
     extensionRecord->extensionRecordId_ = extensionRecordId;
     extensionRecord->hostBundleName_ = hostBundleName;
     abilityRecord->SetOwnerMissionUserId(userId_);
