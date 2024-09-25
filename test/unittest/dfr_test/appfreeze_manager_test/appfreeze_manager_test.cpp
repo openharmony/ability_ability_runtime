@@ -98,6 +98,9 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_002, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     ret = appfreezeManager->AcquireStack(faultData, appInfo, "test");
     EXPECT_EQ(ret, 0);
+    faultData.errorObject.name = AppFreezeType::LIFECYCLE_HALF_TIMEOUT;
+    ret = appfreezeManager->AppfreezeHandleWithStack(faultData, appInfo);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -151,9 +154,9 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_004, TestSize.Level1)
         .bundleName = "",
         .msg = "Test",
     };
-    auto flow = std::make_unique<FreezeUtil::LifecycleFlow>();
-    flow->state = AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND;
-    ret = appfreezeManager->LifecycleTimeoutHandle(info3, std::move(flow));
+    FreezeUtil::LifecycleFlow flow;
+    flow.state = AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND;
+    ret = appfreezeManager->LifecycleTimeoutHandle(info3, flow);
     EXPECT_EQ(ret, 0);
 }
 
@@ -199,6 +202,72 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_006, TestSize.Level1)
     EXPECT_TRUE(!result);
     result = appfreezeManager->IsNeedIgnoreFreezeEvent(pid);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_007
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_007, TestSize.Level1)
+{
+    int32_t pid = static_cast<int32_t>(getprocpid());
+    int state = AppfreezeManager::AppFreezeState::APPFREEZE_STATE_IDLE;
+    EXPECT_EQ(appfreezeManager->GetFreezeState(pid), state);
+    appfreezeManager->SetFreezeState(pid,
+        AppfreezeManager::AppFreezeState::APPFREEZE_STATE_FREEZE);
+    appfreezeManager->SetFreezeState(pid, state);
+    EXPECT_EQ(appfreezeManager->GetFreezeState(pid), state);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_AppFreezeFilter_001
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_001, TestSize.Level1)
+{
+    int32_t pid = static_cast<int32_t>(getprocpid());
+    EXPECT_TRUE(!appfreezeManager->CancelAppFreezeDetect(pid, ""));
+    appfreezeManager->ResetAppfreezeState(pid, "");
+    EXPECT_TRUE(appfreezeManager->IsValidFreezeFilter(pid, ""));
+    appfreezeManager->RemoveDeathProcess("");
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_AppFreezeFilter_002
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_002, TestSize.Level1)
+{
+    int32_t pid = static_cast<int32_t>(getprocpid());
+    std::string bundleName = "AppfreezeManagerTest_AppFreezeFilter_002";
+    EXPECT_TRUE(appfreezeManager->CancelAppFreezeDetect(pid, bundleName));
+    EXPECT_TRUE(appfreezeManager->IsProcessDebug(pid, bundleName));
+    appfreezeManager->ResetAppfreezeState(pid, bundleName);
+    EXPECT_TRUE(!appfreezeManager->IsProcessDebug(pid, bundleName));
+    EXPECT_TRUE(!appfreezeManager->IsValidFreezeFilter(pid, bundleName));
+    appfreezeManager->RemoveDeathProcess(bundleName);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_CatchStack_001
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CatchStack_001, TestSize.Level1)
+{
+    int32_t pid = static_cast<int32_t>(getprocpid());
+    std::string ret = "";
+    appfreezeManager->FindStackByPid(ret, pid);
+    EXPECT_TRUE(ret.empty());
+    appfreezeManager->catchStackMap_[pid] = "AppfreezeManagerTest_CatchStack_001";
+    appfreezeManager->FindStackByPid(ret, pid);
+    EXPECT_TRUE(!ret.empty());
+    EXPECT_TRUE(!appfreezeManager->catchStackMap_.empty());
+    appfreezeManager->DeleteStack(pid);
+    EXPECT_TRUE(appfreezeManager->catchStackMap_.empty());
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

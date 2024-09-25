@@ -115,7 +115,7 @@ bool UriUtils::CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest
     if (abilityRequest.appInfo.apiTargetVersion % API_VERSION_MOD <= API12) {
         return true;
     }
-    if (abilityRequest.want.GetElement().GetAbilityName().empty()) {
+    if (abilityRequest.want.GetElement().GetBundleName().empty()) {
         return true;
     }
     bool isFileUri = !abilityRequest.want.GetUriString().empty() && abilityRequest.want.GetUri().GetScheme() == "file";

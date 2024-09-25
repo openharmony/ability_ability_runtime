@@ -754,6 +754,9 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::TERMINATE_MISSION) {
         return TerminateMissionInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::BLOCK_ALL_APP_START) {
+        return BlockAllAppStartInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4031,6 +4034,17 @@ int32_t AbilityManagerStub::TerminateMissionInner(MessageParcel &data, MessagePa
     }
     reply.WriteInt32(result);
     return result;
+}
+
+int32_t AbilityManagerStub::BlockAllAppStartInner(MessageParcel &data, MessageParcel &reply)
+{
+    bool flag = data.ReadBool();
+    int32_t result = BlockAllAppStart(flag);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result failed");
+        return IPC_STUB_ERR;
+    }
+    return ERR_OK;
 }
 } // namespace AAFwk
 } // namespace OHOS

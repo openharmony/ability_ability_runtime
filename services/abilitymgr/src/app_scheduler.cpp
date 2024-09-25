@@ -68,7 +68,7 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
 
 int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
     const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-    const Want &want, int32_t abilityRecordId)
+    const Want &want, int32_t abilityRecordId, const std::string &instanceKey)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
@@ -80,6 +80,7 @@ int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> pre
     loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
     loadParam.token = token;
     loadParam.preToken = preToken;
+    loadParam.instanceKey = instanceKey;
     int ret = static_cast<int>(IN_PROCESS_CALL(
         appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {
@@ -226,6 +227,13 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     auto callback = callback_.lock();
     CHECK_POINTER(callback);
     callback->OnAppRemoteDied(abilityTokens);
+}
+
+void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->NotifyAppPreCache(pid, userId);
 }
 
 int AppScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)

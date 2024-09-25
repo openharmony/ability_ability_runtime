@@ -37,6 +37,10 @@
 
 using namespace testing;
 using namespace testing::ext;
+using testing::_;
+using testing::Invoke;
+using testing::Return;
+
 using namespace OHOS::AppExecFwk;
 using OHOS::AppExecFwk::AbilityType;
 using OHOS::AppExecFwk::ExtensionAbilityType;
@@ -144,11 +148,10 @@ HWTEST_F(AbilityManagerServiceSixthTest, InitPushTask_001, TestSize.Level1)
 {
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
-    std::shared_ptr<TaskHandlerWrap> taskHandler =
+    std::shared_ptr<MockTaskHandlerWrap> taskHandler =
         MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceSixth");
-    EXPECT_CALL(*std::static_pointer_cast<MockTaskHandlerWrap>(taskHandler), SubmitTask(_, _))
-        .WillRepeatedly(Return(TaskHandle()));
     abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
     abilityMs->InitPushTask();
     EXPECT_NE(taskHandler, nullptr);
 }
@@ -200,10 +203,9 @@ HWTEST_F(AbilityManagerServiceSixthTest, ReportEventToRss_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ReportEventToRss_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
-    std::shared_ptr<TaskHandlerWrap> taskHandler =
+    std::shared_ptr<MockTaskHandlerWrap> taskHandler =
         MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceSixth");
-    EXPECT_CALL(*std::static_pointer_cast<MockTaskHandlerWrap>(taskHandler), SubmitTask(_, _))
-        .WillRepeatedly(Return(TaskHandle()));
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
     abilityMs->taskHandler_ = taskHandler;
 
     sptr<IRemoteObject> callerToken = nullptr;
@@ -235,15 +237,14 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartUIAbilityBySCBDefault_001, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUIAbilityBySCBDefault_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
-    std::shared_ptr<TaskHandlerWrap> taskHandler =
+    std::shared_ptr<MockTaskHandlerWrap> taskHandler =
         MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceSixth");
-    EXPECT_CALL(*std::static_pointer_cast<MockTaskHandlerWrap>(taskHandler), SubmitTask(_, _))
-        .WillRepeatedly(Return(TaskHandle()));
     abilityMs->taskHandler_ = taskHandler;
     sptr<SessionInfo> sessionInfo = new SessionInfo();
     uint32_t sceneFlag = 0;
     bool isColdStart = true;
-    EXPECT_EQ(abilityMs->StartUIAbilityBySCBDefault(sessionInfo, sceneFlag, isColdStart), ERR_APP_CLONE_INDEX_INVALID);
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_EQ(abilityMs->StartUIAbilityBySCBDefault(sessionInfo, sceneFlag, isColdStart), RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUIAbilityBySCBDefault_001 end");
 }
 

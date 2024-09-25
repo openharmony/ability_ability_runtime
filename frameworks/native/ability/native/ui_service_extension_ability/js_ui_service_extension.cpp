@@ -282,7 +282,17 @@ void JsUIServiceExtension::OnStop()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::UISERVC_EXT, "The service extension connection is not disconnected.");
     }
+#ifdef SUPPORT_GRAPHICS
     Rosen::DisplayManager::GetInstance().UnregisterDisplayListener(displayListener_);
+    if (saStatusChangeListener_) {
+        auto saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (saMgr) {
+            saMgr->UnSubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, saStatusChangeListener_);
+        } else {
+            TAG_LOGW(AAFwkTag::UISERVC_EXT, "OnStop SaMgr null");
+        }
+    }
+#endif
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "ok");
 }
 
@@ -614,13 +624,13 @@ void JsUIServiceExtension::ListenWMS()
         return;
     }
 
-    auto listener = sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_);
-    if (listener == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Failed to create status change listener.");
+    saStatusChangeListener_ = sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_);
+    if (saStatusChangeListener_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "create status change listener failed");
         return;
     }
 
-    auto ret = abilityManager->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, listener);
+    auto ret = abilityManager->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, saStatusChangeListener_);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "subscribe system ability failed, ret = %{public}d.", ret);
     }

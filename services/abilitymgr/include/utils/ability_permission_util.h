@@ -38,9 +38,20 @@ public:
     // check dominate screen
     bool IsDominateScreen(const Want &want, bool isPendingWantCaller);
 
+    int32_t CheckMultiInstanceAndAppClone(Want &want, int32_t userId, int32_t appIndex,
+        sptr<IRemoteObject> callerToken);
+
+    int32_t CheckMultiInstanceKeyForExtension(const AbilityRequest &abilityRequest);
+
 private:
     AbilityPermissionUtil() = default;
     ~AbilityPermissionUtil() = default;
+
+    int32_t CheckMultiInstance(Want &want, sptr<IRemoteObject> callerToken, bool isCreating,
+        const std::string &instanceKey, int32_t maxCount);
+
+    int32_t UpdateInstanceKey(Want &want, const std::string &originInstanceKey,
+        const std::vector<std::string> &instanceKeyArray, const std::string &instanceKey);
 
     DISALLOW_COPY_AND_MOVE(AbilityPermissionUtil);
 };

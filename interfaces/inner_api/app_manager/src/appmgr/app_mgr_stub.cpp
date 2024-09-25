@@ -213,6 +213,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
             return HandleStartNativeProcessForDebugger(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT):
             return HandleNotifyFault(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_BUNDLENAME):
+            return HandleGetAllRunningInstanceKeysByBundleName(data, reply);
     }
     return INVALID_FD;
 }
@@ -484,6 +486,22 @@ int32_t AppMgrStub::HandleGetRunningMultiAppInfoByBundleName(MessageParcel &data
     RunningMultiAppInfo info;
     int32_t result = GetRunningMultiAppInfoByBundleName(bundleName, info);
     if (!reply.WriteParcelable(&info)) {
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAllRunningInstanceKeysByBundleName(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = data.ReadString();
+    std::vector<std::string> instanceKeys;
+    int32_t result = GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    if (!reply.WriteStringVector(instanceKeys)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to write isntanceKeys");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(result)) {

@@ -18,12 +18,14 @@
 #include <regex>
 
 #include "ability_manager_service.h"
+#include "ability_permission_util.h"
 #include "ability_resident_process_rdb.h"
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "assert_fault_callback_death_mgr.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
+#include "multi_instance_utils.h"
 #include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
@@ -140,6 +142,11 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability_name:%{public}s", abilityRequest.want.GetElement().GetURI().c_str());
 
+    int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
     std::shared_ptr<AbilityRecord> targetService;
     bool isLoadedAbility = false;
     if (UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
@@ -149,7 +156,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
             return ERR_NULL_OBJECT;
         }
         std::string hostBundleName = callerAbilityRecord->GetAbilityInfo().bundleName;
-        int32_t ret = GetOrCreateExtensionRecord(abilityRequest, false, hostBundleName, targetService, isLoadedAbility);
+        ret = GetOrCreateExtensionRecord(abilityRequest, false, hostBundleName, targetService, isLoadedAbility);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, ret: %{public}d", ret);
             return ret;
@@ -178,7 +185,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     }
 
     auto &abilityInfo = abilityRequest.abilityInfo;
-    auto ret = ReportXiaoYiToRSSIfNeeded(abilityInfo);
+    ret = ReportXiaoYiToRSSIfNeeded(abilityInfo);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -432,6 +439,9 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
             targetService->SetRestartTime(abilityRequest.restartTime);
             targetService->SetRestartCount(abilityRequest.restartCount);
         }
+        if (MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
+            targetService->SetInstanceKey(MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
+        }
         AddToServiceMap(serviceKey, targetService);
         isLoadedAbility = false;
     }
@@ -482,10 +492,14 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
         TAG_LOGE(AAFwkTag::ABILITYMGR, "can't preload non-uiextension type");
         return ERR_WRONG_INTERFACE_CALL;
     }
+    int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
+    if (ret != ERR_OK) {
+        return ret;
+    }
     std::shared_ptr<ExtensionRecord> extensionRecord = nullptr;
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
     int32_t extensionRecordId = INVALID_EXTENSION_RECORD_ID;
-    int32_t ret = uiExtensionAbilityRecordMgr_->CreateExtensionRecord(abilityRequest, hostBundleName,
+    ret = uiExtensionAbilityRecordMgr_->CreateExtensionRecord(abilityRequest, hostBundleName,
         extensionRecord, extensionRecordId);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateExtensionRecord ERR");
@@ -535,9 +549,13 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     std::lock_guard guard(serialMutex_);
 
     // 1. get target service ability record, and check whether it has been loaded.
+    int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
+    if (ret != ERR_OK) {
+        return ret;
+    }
     std::shared_ptr<AbilityRecord> targetService;
     bool isLoadedAbility = false;
-    int32_t ret = GetOrCreateTargetServiceRecord(abilityRequest, connectInfo, targetService, isLoadedAbility);
+    ret = GetOrCreateTargetServiceRecord(abilityRequest, connectInfo, targetService, isLoadedAbility);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -1392,7 +1410,7 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     UpdateUIExtensionInfo(abilityRecord);
     DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         token, perToken, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(),
-        abilityRecord->GetWant(), abilityRecord->GetRecordId());
+        abilityRecord->GetWant(), abilityRecord->GetRecordId(), abilityRecord->GetInstanceKey());
     abilityRecord->SetLoadState(AbilityLoadState::LOADING);
 }
 
@@ -3164,6 +3182,10 @@ void AbilityConnectManager::UpdateUIExtensionInfo(const std::shared_ptr<AbilityR
 std::string AbilityConnectManager::GenerateBundleName(const AbilityRequest &abilityRequest) const
 {
     auto bundleName = abilityRequest.abilityInfo.bundleName;
+    if (MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
+        bundleName = bundleName + '-' + MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest);
+        return bundleName;
+    }
     if (AbilityRuntime::StartupUtil::IsSupportAppClone(abilityRequest.abilityInfo.extensionAbilityType)) {
         auto appCloneIndex = abilityRequest.want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
         if (appCloneIndex > 0) {

@@ -94,6 +94,8 @@ public:
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
+
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 };
 
@@ -137,7 +139,7 @@ public:
      */
     int LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
         const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-        const Want &want, int32_t abilityRecordId);
+        const Want &want, int32_t abilityRecordId, const std::string &instanceKey);
 
     /**
      * terminate ability with token.
@@ -500,6 +502,8 @@ protected:
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+    
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
 private:
     std::mutex lock_;
