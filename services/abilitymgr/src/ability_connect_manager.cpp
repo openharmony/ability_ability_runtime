@@ -1307,7 +1307,7 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByIdFromTermin
     return nullptr;
 }
 
-std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensioBySessionInfo(
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensionBySessionInfo(
     const sptr<SessionInfo> &sessionInfo)
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, nullptr);

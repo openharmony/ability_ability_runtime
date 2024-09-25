@@ -2453,7 +2453,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Start_Service_With_SessionInfo_001, Te
     abilityRequest_.sessionInfo = nullptr;
     WaitUntilTaskDone(TaskHandler());
 
-    auto service = ConnectManager()->GetUIExtensioBySessionInfo(sessionInfo);
+    auto service = ConnectManager()->GetUIExtensionBySessionInfo(sessionInfo);
     EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 1);
 }
 

@@ -404,13 +404,13 @@ const std::string &AppRunningRecord::GetAppIdentifier() const
 
 const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> AppRunningRecord::GetAbilities()
 {
-    std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilitysMap;
+    std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilitiesMap;
     auto moduleRecordList = GetAllModuleRecord();
     for (const auto &moduleRecord : moduleRecordList) {
         auto abilities = moduleRecord->GetAbilities();
-        abilitysMap.insert(abilities.begin(), abilities.end());
+        abilitiesMap.insert(abilities.begin(), abilities.end());
     }
-    return abilitysMap;
+    return abilitiesMap;
 }
 
 sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
@@ -808,7 +808,7 @@ void AppRunningRecord::AddModule(std::shared_ptr<ApplicationInfo> appInfo,
 }
 
 std::shared_ptr<ModuleRunningRecord> AppRunningRecord::GetModuleRecordByModuleName(
-    const std::string bundleName, const std::string &moduleName)
+    const std::string &bundleName, const std::string &moduleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto moduleRecords = hapModules_.find(bundleName);
@@ -1208,14 +1208,14 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
         EVENT_KEY_BUNDLE_NAME, appInfo->bundleName, EVENT_KEY_SUPPORT_STATE, state);
     if (moduleRecord->GetAbilities().empty() && (!IsKeepAliveApp()
         || AAFwk::UIExtensionUtils::IsUIExtension(GetExtensionType())
-        || !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !needCache) {
+        || !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) && !needCache) {
         RemoveModuleRecord(moduleRecord, isExtensionDebug);
     }
 
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty() && (!IsKeepAliveApp()
         || AAFwk::UIExtensionUtils::IsUIExtension(GetExtensionType())
-        || !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isExtensionDebug
+        || !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) && !isExtensionDebug
         && !needCache) {
         ScheduleTerminate();
     }
@@ -1981,7 +1981,7 @@ int32_t AppRunningRecord::NotifyAppFault(const FaultData &faultData)
     return appLifeCycleDeal_->NotifyAppFault(faultData);
 }
 
-bool AppRunningRecord::IsAbilitytiesBackground()
+bool AppRunningRecord::IsAbilitiesBackground()
 {
     std::lock_guard<ffrt::mutex> hapModulesLock(hapModulesLock_);
     for (const auto &iter : hapModules_) {
@@ -2014,7 +2014,7 @@ void AppRunningRecord::ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisi
             return;
         }
     }
-    
+
     auto iter = windowIds_.find(info->windowId_);
     if (iter != windowIds_.end() &&
         info->visibilityState_ == OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
@@ -2063,7 +2063,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
             ScheduleForegroundRunning();
         }
-        if (windowIds_.empty() && IsAbilitytiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
+        if (windowIds_.empty() && IsAbilitiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
             ScheduleBackgroundRunning();
         }
@@ -2072,7 +2072,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
         if (!windowIds_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         }
-        if (windowIds_.empty() && IsAbilitytiesBackground()) {
+        if (windowIds_.empty() && IsAbilitiesBackground()) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
         }
     }

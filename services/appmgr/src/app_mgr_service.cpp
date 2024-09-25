@@ -1508,14 +1508,14 @@ int32_t AppMgrService::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<p
     return appMgrServiceInner_->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 
-int32_t AppMgrService::NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
+int32_t AppMgrService::NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
 
-    return appMgrServiceInner_->NotifyMemorySizeStateChanged(isMemorySizeSufficent);
+    return appMgrServiceInner_->NotifyMemorySizeStateChanged(isMemorySizeSufficient);
 }
 
 int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)

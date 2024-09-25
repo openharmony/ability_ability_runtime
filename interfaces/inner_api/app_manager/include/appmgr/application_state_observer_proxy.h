@@ -100,6 +100,11 @@ public:
      */
     virtual void OnAppStateChanged(const AppStateData &appStateData) override;
 
+     /**
+     * Called when one process is reused.
+     *
+     * @param processData Process data.
+     */
     virtual void OnProcessReused(const ProcessData &processData) override;
 
     /**
