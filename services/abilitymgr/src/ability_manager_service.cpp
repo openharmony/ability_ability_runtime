@@ -10544,7 +10544,8 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
         (startOptions.processOptions->startupVisibility == StartupVisibility::STARTUP_HIDE);
     bool hasStartBackgroundAbilityPermission = PermissionVerification::GetInstance()->
         VerifyStartUIAbilityToHiddenPermission();
-    bool canStartupHide = (isStartupVisibilityHide && hasStartBackgroundAbilityPermission);
+    bool canStartupHide = (ProcessOptions::IsNoAttachmentMode(startOptions.processOptions->processMode) &&
+        isStartupVisibilityHide && hasStartBackgroundAbilityPermission);
     if (!CheckCallingTokenId(element.GetBundleName(), userId, appIndex) &&
         !canStartupHide) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not self application and has no start background ability permission");
@@ -12321,6 +12322,11 @@ int32_t AbilityManagerService::BlockAllAppStart(bool flag)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
 
+    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not supported device");
+        return ERR_PERMISSION_DENIED;
+    }
+
     if (!PermissionVerification::GetInstance()->VerifyBlockAllAppStartPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verification failed");
         return ERR_PERMISSION_DENIED;
@@ -12333,6 +12339,10 @@ int32_t AbilityManagerService::BlockAllAppStart(bool flag)
 
 bool AbilityManagerService::ShouldBlockAllAppStart()
 {
+    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        return false;
+    }
+
     std::unique_lock<ffrt::mutex> lock(shouldBlockAllAppStartMutex_);
     return shouldBlockAllAppStart_;
 }
