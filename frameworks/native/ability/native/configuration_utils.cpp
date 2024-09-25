@@ -49,8 +49,6 @@ void ConfigurationUtils::GetGlobalConfig(const Configuration &configuration,
     resourceConfig.SetHasPointerDevice(configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE));
     resourceConfig.SetMcc(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     resourceConfig.SetMnc(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
-    resourceConfig.SetColorModeIsSetByApp(
-        configuration.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP));
     resourceConfig.SetThemeId(configuration.GetItem(AAFwk::GlobalConfigurationKey::THEME_ID));
 }
 
