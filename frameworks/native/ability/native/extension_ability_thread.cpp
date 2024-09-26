@@ -211,7 +211,7 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
         return;
     }
 
-    TAG_LOGI(AAFwkTag::EXT, "Begin, extension: %{public}s", abilityName.c_str());
+    TAG_LOGI(AAFwkTag::EXT, "HandleAttach, extension: %{public}s", abilityName.c_str());
     if (mainRunner == nullptr) {
         runner_ = AppExecFwk::EventRunner::Create(abilityName);
         if (runner_ == nullptr) {
@@ -265,7 +265,7 @@ void ExtensionAbilityThread::HandleExtensionTransaction(
     const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::EXT, "%{public}s Begin", __func__);
+    TAG_LOGD(AAFwkTag::EXT, "%{public}s", __func__);
     if (extensionImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extensionImpl_");
         return;

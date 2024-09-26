@@ -7741,10 +7741,10 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
 }
 
-void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc& func)
+void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc&& func)
 {
     std::lock_guard lock(loadTaskListMutex_);
-    loadAbilityTaskFuncList_.emplace_back(func);
+    loadAbilityTaskFuncList_.emplace_back(std::move(func));
 }
 
 void AppMgrServiceInner::SubmitCacheLoadAbilityTask()

@@ -1290,7 +1290,7 @@ public:
     /**
      * Scene board has the highest priority. If Scene board is loading cache other apps' request.
      */
-    void CacheLoadAbilityTask(const LoadAbilityTaskFunc& func);
+    void CacheLoadAbilityTask(const LoadAbilityTaskFunc&& func);
 
     void SubmitCacheLoadAbilityTask();
     /**
