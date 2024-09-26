@@ -1786,6 +1786,9 @@ public:
 
     int32_t TerminateMission(int32_t missionId) override;
 
+    int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag) override;
+
     int32_t BlockAllAppStart(bool flag) override;
 
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
@@ -2366,6 +2369,7 @@ private:
 
     std::shared_ptr<AbilityAutoStartupService> abilityAutoStartupService_;
 
+    std::mutex whiteListMutex_;
     std::map<std::string, std::list<std::string>> whiteListMap_;
 
     std::list<std::string> exportWhiteList_;
