@@ -39,7 +39,6 @@ ohos_moduletest("IpcAbilityMgrServiceModuleTest") {
   ]
 
   external_deps = [
-    "ability_base:configuration",
     "ability_base:session_info",
     "ability_base:want",
     "ability_base:zuri",
