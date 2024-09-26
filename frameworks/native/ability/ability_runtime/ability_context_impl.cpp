@@ -753,10 +753,6 @@ ErrCode AbilityContextImpl::SetMissionContinueState(const AAFwk::ContinueState &
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "called, stage: %{public}d", state);
     auto sessionToken = GetSessionToken();
-    if (sessionToken == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null sessionToken");
-        return ERR_INVALID_VALUE;
-    }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->SetMissionContinueState(token_, state, sessionToken);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed: %{public}d", err);
