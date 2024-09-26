@@ -2249,7 +2249,7 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
         eventInfo.versionCode = applicationInfo->versionCode;
     }
     if (ret >= 0) {
-        std::lock_guard lock(killpedProcessMapLock_);
+        std::lock_guard lock(killedProcessMapLock_);
         int64_t killTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
             system_clock::now().time_since_epoch()).count();
         killedProcessMap_.emplace(killTime, appRecord->GetProcessName());
@@ -2600,7 +2600,7 @@ void AppMgrServiceInner::KillProcessByAbilityToken(const sptr<IRemoteObject> &to
 
     // before exec ScheduleProcessSecurityExit return
     // The resident process won't let him die
-    if (appRecord->IsKeepAliveApp() && IsMemorySizeSufficent()) {
+    if (appRecord->IsKeepAliveApp() && IsMemorySizeSufficient()) {
         return;
     }
 
@@ -3469,7 +3469,7 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
 void AppMgrServiceInner::SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::lock_guard lock(killpedProcessMapLock_);
+    std::lock_guard lock(killedProcessMapLock_);
     int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count();
     for (auto iter = killedProcessMap_.begin(); iter != killedProcessMap_.end();) {
@@ -3948,9 +3948,9 @@ void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord
     auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
         return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
     };
-    auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(), findRestartResidentTask);
-    if (findIter != restartResedentTaskList_.end()) {
-        restartResedentTaskList_.erase(findIter);
+    auto findIter = find_if(restartResidentTaskList_.begin(), restartResidentTaskList_.end(), findRestartResidentTask);
+    if (findIter != restartResidentTaskList_.end()) {
+        restartResidentTaskList_.erase(findIter);
     }
 
     if (!CheckRemoteClient() || !appRecord || !appRunningManager_) {
@@ -3961,8 +3961,11 @@ void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     BundleInfo bundleInfo;
     auto userId = GetUserIdByUid(appRecord->GetUid());
+    auto flags = BundleFlag::GET_BUNDLE_DEFAULT | BundleFlag::GET_BUNDLE_WITH_REQUESTED_PERMISSION;
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(
-        appRecord->GetBundleName(), BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
+        appRecord->GetBundleName(),
+        static_cast<BundleFlag>(flags),
+        bundleInfo, userId))) {
         TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
         return;
     }
@@ -6344,7 +6347,7 @@ int32_t AppMgrServiceInner::AttachAppDebug(const std::string &bundleName)
         appDebugManager_->StartDebug(debugInfos);
     }
 
-    NotifyAbilitysDebugChange(bundleName, true);
+    NotifyAbilitiesDebugChange(bundleName, true);
     return ERR_OK;
 }
 
@@ -6370,7 +6373,7 @@ int32_t AppMgrServiceInner::DetachAppDebug(const std::string &bundleName)
         }
     }
 
-    NotifyAbilitysDebugChange(bundleName, false);
+    NotifyAbilitiesDebugChange(bundleName, false);
     return ERR_OK;
 }
 
@@ -6582,7 +6585,7 @@ int32_t AppMgrServiceInner::RegisterAbilityDebugResponse(const sptr<IAbilityDebu
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::NotifyAbilitysDebugChange(const std::string &bundleName, const bool &isAppDebug)
+int32_t AppMgrServiceInner::NotifyAbilitiesDebugChange(const std::string &bundleName, const bool &isAppDebug)
 {
     if (appRunningManager_ == nullptr || abilityDebugResponse_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ or abilityDebugResponse null");
@@ -6598,7 +6601,7 @@ int32_t AppMgrServiceInner::NotifyAbilitysDebugChange(const std::string &bundleN
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::NotifyAbilitysAssertDebugChange(
+int32_t AppMgrServiceInner::NotifyAbilitiesAssertDebugChange(
     const std::shared_ptr<AppRunningRecord> &appRecord, bool isAssertDebug)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -6682,10 +6685,10 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
         if (!AAFwk::AppUtils::GetInstance().IsAllowResidentInExtremeMemory(appRecord->GetBundleName()) &&
             ExitResidentProcessManager::GetInstance().RecordExitResidentBundleName(appRecord->GetBundleName(),
                 appRecord->GetUid())) {
-            TAG_LOGI(AAFwkTag::APPMGR, "memory size insufficent");
+            TAG_LOGI(AAFwkTag::APPMGR, "memory size insufficient");
             return;
         }
-        TAG_LOGI(AAFwkTag::APPMGR, "memory size sufficent");
+        TAG_LOGI(AAFwkTag::APPMGR, "memory size sufficient");
         auto restartProcess = [appRecord, innerService = shared_from_this()]() {
             innerService->RestartResidentProcess(appRecord);
         };
@@ -6700,13 +6703,13 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
                 return (appRecord != nullptr && appRunningRecord != nullptr &&
                         appRecord->GetBundleName() == appRunningRecord->GetBundleName());
             };
-            auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(),
+            auto findIter = find_if(restartResidentTaskList_.begin(), restartResidentTaskList_.end(),
                 findRestartResidentTask);
-            if (findIter != restartResedentTaskList_.end()) {
+            if (findIter != restartResidentTaskList_.end()) {
                 TAG_LOGW(AAFwkTag::APPMGR, "reboot task already registered");
                 return;
             }
-            restartResedentTaskList_.emplace_back(appRecord);
+            restartResidentTaskList_.emplace_back(appRecord);
             TAG_LOGD(AAFwkTag::APPMGR, "Post restart resident process delay task.");
             taskHandler_->SubmitTask(restartProcess, "RestartResidentProcessDelayTask", RESTART_INTERVAL_TIME);
         }
@@ -7372,7 +7375,7 @@ void AppMgrServiceInner::SetAppAssertionPauseState(bool flag)
         flag ? appDebugManager_->StartDebug(debugInfos) : appDebugManager_->StopDebug(debugInfos);
     }
 
-    NotifyAbilitysAssertDebugChange(appRecord, flag);
+    NotifyAbilitiesAssertDebugChange(appRecord, flag);
 }
 
 int32_t AppMgrServiceInner::UpdateRenderState(pid_t renderPid, int32_t state)
@@ -7477,10 +7480,10 @@ int32_t AppMgrServiceInner::GetAllUIExtensionProviderPid(pid_t hostPid, std::vec
     return appRunningManager_->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 
-int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
+int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "isMemorySizeSufficent: %{public}d",
-        isMemorySizeSufficent);
+    TAG_LOGI(AAFwkTag::APPMGR, "isMemorySizeSufficient: %{public}d",
+        isMemorySizeSufficient);
     bool isMemmgrCall = AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
         MEMMGR_PROC_NAME);
     bool isSupportCall = OHOS::system::GetBoolParameter(SUPPORT_CALL_NOTIFY_MEMORY_CHANGED, false);
@@ -7489,7 +7492,7 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
         return ERR_PERMISSION_DENIED;
     }
 
-    if (!isMemorySizeSufficent) {
+    if (!isMemorySizeSufficient) {
         auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent();
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "handleMemorySizeInSufficent fail, ret: %{public}d", ret);
@@ -7517,9 +7520,9 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
     return ERR_OK;
 }
 
-bool AppMgrServiceInner::IsMemorySizeSufficent()
+bool AppMgrServiceInner::IsMemorySizeSufficient()
 {
-    return ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent();
+    return ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient();
 }
 
 void AppMgrServiceInner::NotifyAppPreCache(int32_t pid, int32_t userId)
@@ -7738,10 +7741,10 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
 }
 
-void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc& func)
+void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc&& func)
 {
     std::lock_guard lock(loadTaskListMutex_);
-    loadAbilityTaskFuncList_.emplace_back(func);
+    loadAbilityTaskFuncList_.emplace_back(std::move(func));
 }
 
 void AppMgrServiceInner::SubmitCacheLoadAbilityTask()

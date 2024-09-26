@@ -158,6 +158,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
@@ -313,11 +314,8 @@ ohos_shared_library("app_context") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ets_runtime:libark_jsruntime",
-    # "form_fwk:form_manager",
-    # "graphic_2d:2d_graphics",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
-    # "image_framework:image_native",
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:ipc_napi",
@@ -325,7 +323,6 @@ ohos_shared_library("app_context") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
-    # "skia:skia_canvaskit",
   ]
   public_external_deps = [
     "ability_base:configuration",
@@ -391,7 +388,6 @@ ohos_shared_library("app_context_utils") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
-    # "graphic_2d:2d_graphics",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
@@ -400,7 +396,6 @@ ohos_shared_library("app_context_utils") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "resource_management:resmgr_napi_core",
-    # "skia:skia_canvaskit",
   ]
   public_external_deps = [ "ability_base:configuration" ]
   if (ability_runtime_graphics) {

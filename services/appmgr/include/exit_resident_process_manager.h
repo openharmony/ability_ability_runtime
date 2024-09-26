@@ -44,7 +44,7 @@ class ExitResidentProcessManager {
 public:
     static ExitResidentProcessManager &GetInstance();
     ~ExitResidentProcessManager();
-    bool IsMemorySizeSufficent() const;
+    bool IsMemorySizeSufficient() const;
     bool RecordExitResidentBundleName(const std::string &bundleName, int32_t uid);
     void RecordExitResidentBundleDependedOnWeb(const std::string &bundleName, int32_t uid);
     int32_t HandleMemorySizeInSufficent();

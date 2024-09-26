@@ -94,8 +94,17 @@ public:
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
+    /**
+     * @brief Notify abilityms app process pre cache
+     * @param pid process pid.
+     * @param userId userId Designation User ID.
+     */
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
 
+    /**
+     * @brief Notify abilityms app process OnRemoteDied
+     * @param abilityTokens abilities in died process.
+     */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 };
 
@@ -197,8 +206,19 @@ public:
      */
     void KillProcessesByUserId(int32_t userId);
 
+    /**
+     * KillProcessesByPids, only in process call is allowed,
+     * kill the processes by pid list given.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     */
     void KillProcessesByPids(std::vector<int32_t> &pids);
 
+    /**
+     * Set child and parent relationship
+     * @param token child process
+     * @param callerToken parent process
+     */
     void AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken);
 
     /**
@@ -259,12 +279,36 @@ public:
      */
     int UpdateApplicationInfoInstalled(const std::string &bundleName, const int32_t uid);
 
+    /**
+     * Ability attach timeout. If start ability encounter failure, attach timeout to terminate.
+     *
+     * @param token Ability identify.
+     */
     void AttachTimeOut(const sptr<IRemoteObject> &token);
 
+    /**
+     * Prepare terminate.
+     *
+     * @param token Ability identify.
+     * @param clearMissionFlag Clear mission flag.
+     */
     void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
+    /**
+     * Get running process information by ability token.
+     *
+     * @param token Ability identify.
+     * @param info Running process info.
+     */
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
 
+    /**
+     * Get running process information by pid.
+     *
+     * @param pid process id.
+     * @param info Output parameters, return runningProcessInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
 
     /**
@@ -280,10 +324,31 @@ public:
      */
     void StartupResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos);
 
+    /**
+     * Start specified ability.
+     *
+     * @param want Want contains information of the ability to start.
+     * @param abilityInfo Ability information.
+     * @param requestId request id to callback
+     */
     void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0);
+
+    /**
+     * @brief Get running process information.
+     *
+     * @param info Running process information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info);
 
+    /**
+     * Start specified process.
+     *
+     * @param want Want contains information wish to start.
+     * @param abilityInfo Ability information.
+     * @param requestId for callback
+     */
     void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0);
 
@@ -303,6 +368,14 @@ public:
      */
     int FinishUserTest(const std::string &msg, const int64_t &resultCode, const std::string &bundleName);
 
+    /**
+     * GetProcessRunningInfosByUserId, call GetProcessRunningInfosByUserId() through proxy project.
+     * Obtains information about application processes that are running on the device.
+     *
+     * @param info, app name in Application record.
+     * @param userId, user Id in Application record.
+     * @return ERR_OK ,return back success，others fail.
+     */
     int GetProcessRunningInfosByUserId(std::vector<AppExecFwk::RunningProcessInfo> &info, int32_t userId);
     std::string ConvertAppState(const AppState &state);
 
@@ -314,6 +387,12 @@ public:
      */
     int UpdateConfiguration(const AppExecFwk::Configuration &config);
 
+    /**
+     * GetConfiguration
+     *
+     * @param info to retrieve configuration data.
+     * @return ERR_OK ,return back success，others fail.
+     */
     int GetConfiguration(AppExecFwk::Configuration &config);
 
     /**
@@ -438,8 +517,8 @@ public:
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
 
     /**
-     * whether memory size is sufficent.
-     * @return Returns true is sufficent memory size, others return false.
+     * whether memory size is sufficient.
+     * @return Returns true is sufficient memory size, others return false.
      */
     virtual bool IsMemorySizeSufficent() const;
 
@@ -450,6 +529,11 @@ public:
      */
     void AttachedToStatusBar(const sptr<IRemoteObject> &token);
 
+     /**
+     * Temporarily block the process cache feature.
+     *
+     * @param pids the pids of the processes that should be blocked.
+     */
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
 
     /**
@@ -460,6 +544,12 @@ public:
      */
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
+    /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
     bool IsKilledForUpgradeWeb(const std::string &bundleName);
 
     /**
@@ -501,8 +591,17 @@ protected:
      */
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
+    /**
+     * @brief Notify abilityms app process OnRemoteDied
+     * @param abilityTokens abilities in died process.
+     */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
-    
+
+    /**
+     * @brief Notify abilityms app process pre cache
+     * @param pid process pid.
+     * @param userId userId Designation User ID.
+     */
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
 private:

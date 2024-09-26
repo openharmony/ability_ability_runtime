@@ -18,6 +18,7 @@
 
 #include "ability_scheduler_stub.h"
 #include "context.h"
+#include "event_runner.h"
 #include "ohos_application.h"
 
 namespace OHOS {

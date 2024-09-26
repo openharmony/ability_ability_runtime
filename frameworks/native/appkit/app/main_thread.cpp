@@ -706,9 +706,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
         newWant.CloseAllFd();
     }
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>(info);
-    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
-    abilityRecord->SetWant(want);
-    abilityRecord->SetAbilityRecordId(abilityRecordId);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, want, abilityRecordId);
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog != nullptr) {
         tmpWatchdog->SetBgWorkingThreadStatus(IsBgWorkingThread(info));
@@ -1370,7 +1368,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         std::vector<std::string> localPaths;
         ChangeToLocalPath(bundleName, appInfo.moduleSourceDirs, localPaths);
         LoadAbilityLibrary(localPaths);
-        LoadNativeLiabrary(bundleInfo, appInfo.nativeLibraryPath);
+        LoadNativeLibrary(bundleInfo, appInfo.nativeLibraryPath);
 #ifdef SUPPORT_SCREEN
     } else if (Ace::AceForwardCompatibility::PipelineChanged()) {
         std::vector<std::string> localPaths;
@@ -1817,7 +1815,7 @@ void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::st
     }
 }
 
-void MainThread::LoadNativeLiabrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath)
+void MainThread::LoadNativeLibrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath)
 {
     CalcNativeLiabraryEntries(bundleInfo, nativeLibraryPath);
     if (nativeFileEntries_.empty()) {

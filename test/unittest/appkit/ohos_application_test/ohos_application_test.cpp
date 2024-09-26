@@ -129,7 +129,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_DumpApplication_010
     ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = nullptr;
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, record);
     ohosApplication_->DumpApplication();
     EXPECT_TRUE(record != nullptr);
@@ -147,7 +147,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_DumpApplication_020
     ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> record =  std::make_shared<AbilityLocalRecord>(info, token);
+    auto record =  std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     info->permissions.push_back(std::string("abc"));
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, record);
     ohosApplication_->DumpApplication();
@@ -291,7 +291,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnConfigurationUpda
     ohosApplication_->configuration_ = std::make_shared<Configuration>();
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info =  nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityRecord =  std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord =  std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, abilityRecord);
     sptr<AbilityThread> abilityThread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
     abilityRecord->SetAbilityThread(abilityThread);
@@ -371,7 +371,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0100,
     ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
     std::shared_ptr<AbilityInfo> info = nullptr;
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(abilityRecord != nullptr);
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, abilityRecord);
     sptr<AbilityThread> abilityThread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
@@ -450,7 +450,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_030
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_0300 start.";
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
     bool isAsyncCallback = false;
@@ -469,7 +469,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_040
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     info->applicationInfo.multiProjects = true;
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     auto want = std::make_shared<AAFwk::Want>();
     abilityRecord->SetWant(want);
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
@@ -490,7 +490,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_050
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = nullptr;
     std::string moduleName = "entry";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     std::shared_ptr<AbilityRuntime::AbilityStage> abilityStages = std::make_shared<AbilityRuntime::AbilityStage>();
     ohosApplication_->abilityStages_.emplace(moduleName, abilityStages);
@@ -513,7 +513,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_060
     sptr<Notification::MockIRemoteObject> token;
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     info->moduleName = "entry";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
     bool isAsyncCallback = false;
     ohosApplication_->AddAbilityStage(abilityRecord, callback, isAsyncCallback);
@@ -532,7 +532,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_070
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_0700 start.";
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     abilityRecord->token_ = new (std::nothrow) Notification::MockIRemoteObject();
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
     bool isAsyncCallback = false;
