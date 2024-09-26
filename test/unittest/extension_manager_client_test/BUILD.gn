@@ -39,7 +39,6 @@ ohos_unittest("extension_manager_client_test") {
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "hilog:libhilog",
-    "image_framework:image_native",
     "ipc:ipc_core",
   ]
 }
