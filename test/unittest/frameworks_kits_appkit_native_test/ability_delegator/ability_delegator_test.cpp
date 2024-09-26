@@ -22,7 +22,7 @@
 #define private public
 #include "ability_delegator.h"
 #include "ability_manager_client.h"
-#include "context_impl.h"
+#include "foundation/ability/ability_runtime/interfaces/kits/native/appkit/ability_runtime/context/context_impl.h"
 #undef private
 
 #include "ability_delegator_infos.h"
@@ -38,7 +38,6 @@
 #include "test_observer_stub.h"
 #include "test_observer.h"
 #include "test_runner.h"
-
 #include "want.h"
 #include "scene_board_judgement.h"
 
