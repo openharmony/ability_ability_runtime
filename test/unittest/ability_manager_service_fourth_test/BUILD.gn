@@ -49,6 +49,8 @@ ohos_unittest("ability_manager_service_fourth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/auto_startup_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/exit_reason.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_execute_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/modal_system_dialog/modal_system_dialog_ui_extension.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/modal_system_dialog_util.cpp",
     "${ability_runtime_services_path}/common/src/ffrt_task_handler_wrap.cpp",
     "${ability_runtime_services_path}/common/src/queue_task_handler_wrap.cpp",
     "${ability_runtime_services_path}/common/src/task_handler_wrap.cpp",

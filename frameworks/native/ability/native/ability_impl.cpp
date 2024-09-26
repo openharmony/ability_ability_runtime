@@ -31,11 +31,6 @@
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
-namespace {
-const std::string PERMISSION_KEY = "ohos.user.grant.permission";
-const std::string GRANTED_RESULT_KEY = "ohos.user.grant.permission.result";
-}
-
 void AbilityImpl::Init(const std::shared_ptr<OHOSApplication> &application,
                        const std::shared_ptr<AbilityLocalRecord> &record,
                        std::shared_ptr<Ability> &ability,

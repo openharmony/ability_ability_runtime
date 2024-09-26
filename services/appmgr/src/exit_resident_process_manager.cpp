@@ -37,7 +37,7 @@ ExitResidentProcessManager &ExitResidentProcessManager::GetInstance()
     return instance;
 }
 
-bool ExitResidentProcessManager::IsMemorySizeSufficent() const
+bool ExitResidentProcessManager::IsMemorySizeSufficient() const
 {
     std::lock_guard<ffrt::mutex> lock(mutexLock_);
     return currentMemorySizeState_ == MemorySizeState::MEMORY_SIZE_SUFFICIENT;
