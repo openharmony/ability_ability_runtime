@@ -60,7 +60,7 @@ public:
     virtual ~AppMgrService() override;
 
     // the function about application
-    // attach the application to ams, then ams can control it.
+    // attach the application to ability mgr, then ability mgr can control it.
     /**
      * AttachApplication, call AttachApplication() through proxy object,
      * get all the information needed to start the Application (data related to the Application ).
@@ -159,6 +159,17 @@ public:
      */
     virtual int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
         RunningMultiAppInfo &info) override;
+
+    /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running instance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys) override;
 
     /**
      * GetRunningProcessesByBundleType, call GetRunningProcessesByBundleType() through proxy project.
@@ -319,32 +330,105 @@ public:
      */
     int Dump(int fd, const std::vector<std::u16string>& args) override;
 
+    /**
+     * @brief called when the abilityStage's onAcceptWant lifecycle completed.
+     * @param recordId record id of the ability.
+     * @param want want has been accepted.
+     * @param flag flag get from OnAcceptWant.
+     */
     virtual void ScheduleAcceptWantDone(
         const int32_t recordId, const AAFwk::Want &want, const std::string &flag) override;
 
     virtual void ScheduleNewProcessRequestDone(
         const int32_t recordId, const AAFwk::Want &want, const std::string &flag) override;
 
+    /**
+     *  Get the token of ability records by process ID.
+     *
+     * @param pid The process id.
+     * @param tokens The token of ability records.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens) override;
 
+    /**
+     * Prestart nwebspawn process.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int PreStartNWebSpawnProcess() override;
 
+    /**
+     * Start nweb render process, called by nweb host.
+     *
+     * @param renderParam, params passed to renderProcess.
+     * @param ipcFd, ipc file descriptor for web browser and render process.
+     * @param sharedFd, shared memory file descriptor.
+     * @param crashFd, crash signal file descriptor.
+     * @param renderPid, created render pid.
+     * @param isGPU, is or not gpu process
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int StartRenderProcess(const std::string &renderParam,
                                    int32_t ipcFd, int32_t sharedFd,
                                    int32_t crashFd, pid_t &renderPid, bool isGPU = false) override;
 
+    /**
+     * Render process call this to attach to app manager service.
+     *
+     * @param renderScheduler scheduler of render process.
+     */
     virtual void AttachRenderProcess(const sptr<IRemoteObject> &shceduler) override;
 
+    /**
+     * Get render process termination status, called by nweb host.
+     *
+     * @param renderPid, target render pid.
+     * @param status, termination status of the render process.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status) override;
 
+    /**
+     * GetConfiguration
+     *
+     * @param info to retrieve configuration data.
+     * @return ERR_OK ,return back success，others fail.
+     */
     virtual int32_t GetConfiguration(Configuration& config) override;
 
+    /**
+     * UpdateConfiguration, ANotify application update system environment changes.
+     *
+     * @param config System environment change parameters.
+     * @param userId configuration for the user
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override;
 
+    /**
+     *  Update config by bundle name.
+     *
+     * @param config Application environment change parameters.
+     * @param name Application bundle name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) override;
 
+    /**
+     * @brief register a configuration observer which will receive notifies when updated.
+     * @param observer the configuration observer to receive notify.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
+    /**
+     * @brief unregister a configuration observer registered before.
+     * @param observer the configuration observer registered before.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
     /**
@@ -361,12 +445,39 @@ public:
      */
     virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia) override;
 
+    /**
+     * @brief Get the running state of application by bundle name.
+     *
+     * @param bundleName Bundle name
+     * @return Returns true if process is running, false if process isn't running.
+     */
     bool GetAppRunningStateByBundleName(const std::string &bundleName) override;
 
+    /**
+     * @brief Notify application load patch.
+     *
+     * @param bundleName Bundle name
+     * @param callback called when LoadPatch finished.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
     int32_t NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) override;
 
+    /**
+     * @brief Notify application reload page.
+     *
+     * @param bundleName Bundle name
+     * @param callback called when HotReload finished.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
     int32_t NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) override;
 
+    /**
+     * @brief Notify application unload patch.
+     *
+     * @param bundleName Bundle name
+     * @param callback called when UnloadPatch finished.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
     int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) override;
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
@@ -382,6 +493,11 @@ public:
      */
     virtual bool IsSharedBundleRunning(const std::string &bundleName, uint32_t versionCode) override;
 
+    /**
+     * start native process for debugger.
+     *
+     * @param want param to start a process.
+     */
     virtual int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) override;
 
     /**
@@ -529,28 +645,89 @@ public:
      */
     void ExitChildProcessSafely() override;
 
+    /**
+     * @brief register a render process state observer to receive change.
+     * @param observer the render process state observer to receive notify.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t RegisterRenderStateObserver(const sptr<IRenderStateObserver> &observer) override;
 
+    /**
+     * @brief unregister a render process state observer registered before.
+     * @param observer the render process state observer registered before.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t UnregisterRenderStateObserver(const sptr<IRenderStateObserver> &observer) override;
 
+    /**
+     * @brief update a render process state.
+     * @param renderPid the pid of the render process to be updated.
+     * @param state the new state value of the render process.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t UpdateRenderState(pid_t renderPid, int32_t state) override;
 
+    /**
+     * @brief mark a process which is going restart.
+     * @param bundleName the bundleName of the process.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t SignRestartAppFlag(const std::string &bundleName) override;
 
+    /**
+     * Get appRunningUniqueId by pid.
+     * @param pid pid.
+     * @param appRunningUniqueId appRunningUniqueId.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId) override;
 
+    /*
+     * Get all uiextension root host process id, need apply permission ohos.permission.GET_RUNNING_INFO.
+     * If specified pid mismatch UIExtensionAbility type, return empty vector.
+     * @param pid Process id.
+     * @param hostPids All host process id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t GetAllUIExtensionRootHostPid(pid_t pid, std::vector<pid_t> &hostPids) override;
 
+    /**
+     * Get all uiextension provider process id, need apply permission ohos.permission.GET_RUNNING_INFO.
+     * If specified hostPid didn't start any UIExtensionAbility, return empty vector.
+     * @param hostPid Host process id.
+     * @param providerPids All provider process id started by specified hostPid.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid_t> &providerPids) override;
 
-    int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent) override;
+    /**
+     * @brief Notify memory size state changed to sufficient or insufficient.
+     * @param isMemorySizeSufficient Indicates the memory size state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficient) override;
 
+    /**
+     * Set application assertion pause state.
+     *
+     * @param flag assertion pause state.
+     */
     void SetAppAssertionPauseState(bool flag) override;
 
+    /**
+     * @brief set support process cache by self
+     */
     int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
-    
+
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) override;
 
+    /**
+     * set browser channel for caller
+     */
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
 
     /**
@@ -570,10 +747,19 @@ public:
     int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback) override;
 
+    /**
+     * Notify that the process depends on web by itself.
+     */
     virtual int32_t NotifyProcessDependedOnWeb() override;
 
+    /**
+     * Kill process depended on web by sa.
+     */
     virtual void KillProcessDependedOnWeb() override;
 
+    /**
+     * Restart resident process depended on web.
+     */
     virtual void RestartResidentProcessDependedOnWeb() override;
 private:
     /**

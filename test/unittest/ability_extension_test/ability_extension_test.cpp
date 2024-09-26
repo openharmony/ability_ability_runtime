@@ -182,8 +182,7 @@ HWTEST_F(AbilityExtensionTest, Init_0200, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "Init start");
 
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = nullptr;
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = nullptr;
@@ -206,8 +205,7 @@ HWTEST_F(AbilityExtensionTest, Init_0300, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "Init start");
 
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
@@ -230,8 +228,7 @@ HWTEST_F(AbilityExtensionTest, Init_0400, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "Init start");
 
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = nullptr;
@@ -254,8 +251,7 @@ HWTEST_F(AbilityExtensionTest, Init_0500, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "Init start");
 
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
@@ -280,8 +276,7 @@ HWTEST_F(AbilityExtensionTest, OnStart_0100, TestSize.Level1)
     Extension extension;
     // Init extension
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
@@ -319,8 +314,7 @@ HWTEST_F(AbilityExtensionTest, OnStop_0100, TestSize.Level1)
     Extension extension;
     // Init extension
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
@@ -346,8 +340,7 @@ HWTEST_F(AbilityExtensionTest, OnConnect_0100, TestSize.Level1)
     Extension extension;
     // Init extension
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
@@ -385,8 +378,7 @@ HWTEST_F(AbilityExtensionTest, OnDisconnect_0100, TestSize.Level1)
     Extension extension;
     // Init extension
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
@@ -424,8 +416,7 @@ HWTEST_F(AbilityExtensionTest, OnDisconnect_0200, TestSize.Level1)
     Extension extension;
     // Init extension
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
-    std::shared_ptr<AppExecFwk::AbilityLocalRecord> record =
-        std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();

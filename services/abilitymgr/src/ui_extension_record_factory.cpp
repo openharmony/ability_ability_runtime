@@ -16,6 +16,7 @@
 #include "ui_extension_record_factory.h"
 
 #include "hilog_tag_wrapper.h"
+#include "multi_instance_utils.h"
 #include "ui_extension_record.h"
 
 namespace OHOS {
@@ -54,6 +55,9 @@ int32_t UIExtensionRecordFactory::CreateRecord(
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "create record failed");
         return ERR_NULL_OBJECT;
+    }
+    if (AAFwk::MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
+        abilityRecord->SetInstanceKey(AAFwk::MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
     }
     extensionRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
     extensionRecord->processMode_ = GetExtensionProcessMode(abilityRequest, extensionRecord->isHostSpecified_);

@@ -163,7 +163,7 @@ public:
     void ScheduleProcessSecurityExit();
 
     /**
-     * cheduleClearPageStack, call cheduleClearPageStack() through proxy project,
+     * scheduleClearPageStack, call scheduleClearPageStack() through proxy project,
      * Notify application clear recovery page stack.
      *
      * @return
@@ -184,6 +184,12 @@ public:
      */
     sptr<IAppScheduler> GetApplicationClient() const;
 
+    /**
+     * @brief Schedule the given module the onAcceptWant lifecycle call.
+     *
+     * @param want the param passed to onAcceptWant lifecycle.
+     * @param want the moduleName of which being scheduled.
+     */
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName);
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
@@ -196,14 +202,43 @@ public:
      */
     int32_t UpdateConfiguration(const Configuration &config);
 
+    /**
+     * @brief Notify application load patch.
+     *
+     * @param bundleName Bundle name
+     * @param callback called when LoadPatch finished.
+     * @param recordId callback data
+     * @return Returns 0 on success, error code on failure.
+     */
     int32_t NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback,
         const int32_t recordId);
 
+    /**
+     * @brief Notify application reload page.
+     *
+     * @param callback called when HotReload finished.
+     * @param recordId callback data
+     * @return Returns 0 on success, error code on failure.
+     */
     int32_t NotifyHotReloadPage(const sptr<IQuickFixCallback> &callback, const int32_t recordId);
 
+    /**
+     * @brief Notify application unload patch.
+     *
+     * @param bundleName Bundle name
+     * @param callback called when UnloadPatch finished.
+     * @param recordId callback data
+     * @return Returns 0 on success, error code on failure.
+     */
     int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback,
         const int32_t recordId);
 
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t NotifyAppFault(const FaultData &faultData);
 
     /**
@@ -215,7 +250,18 @@ public:
      */
     int32_t ChangeAppGcState(int32_t state);
 
+    /**
+     * @brief attach to a process to debug.
+     *
+     * @return ERR_OK, return back success, others fail.
+     */
     int32_t AttachAppDebug();
+
+    /**
+     * @brief detach a debugging process.
+     *
+     * @return ERR_OK, return back success, others fail.
+     */
     int32_t DetachAppDebug();
 
     /**
@@ -233,9 +279,6 @@ public:
 
     /**
      * Notifies the application of process caching.
-     *
-     *
-     * @return
      */
     void ScheduleCacheProcess();
 

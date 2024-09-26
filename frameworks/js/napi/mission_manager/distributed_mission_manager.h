@@ -284,7 +284,7 @@ enum ErrorCode {
      */
     MISSION_FOR_CONTINUING_IS_NOT_ALIVE = 29360224,
     /*
-     * Result(29360144) for get local deviceid fail.
+     * Result(29360144) for get local deviceId fail.
      */
     GET_LOCAL_DEVICE_ERR = 29360144,
     /**

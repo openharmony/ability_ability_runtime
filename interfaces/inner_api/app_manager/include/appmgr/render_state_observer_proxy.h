@@ -26,6 +26,11 @@ public:
     explicit RenderStateObserverProxy(const sptr<IRemoteObject> &impl);
     virtual ~RenderStateObserverProxy() = default;
 
+    /**
+     * Called when one render process's state changes.
+     *
+     * @param renderStateData retrieved state data.
+     */
     virtual void OnRenderStateChanged(const RenderStateData &renderStateData) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);

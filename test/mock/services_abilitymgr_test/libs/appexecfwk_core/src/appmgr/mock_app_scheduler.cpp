@@ -43,7 +43,7 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback>& callback)
 
 int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
     const AppExecFwk::AbilityInfo& abilityInfo, const AppExecFwk::ApplicationInfo& applicationInfo,
-    const AAFwk::Want& want, int32_t abilityRecordId)
+    const AAFwk::Want& want, int32_t abilityRecordId, const std::string &instanceKey)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::LoadAbility()");
     if (applicationInfo.bundleName.find("com.ix.First.Test") != std::string::npos) {
@@ -137,6 +137,11 @@ void AppScheduler::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo
 void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAppRemoteDied()");
+}
+
+void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyAppPreCache()");
 }
 
 void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject>& token, const AppExecFwk::AbilityState state)

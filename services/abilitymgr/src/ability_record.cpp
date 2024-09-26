@@ -31,6 +31,7 @@
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
+#include "multi_instance_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
 #include "res_sched_util.h"
@@ -100,8 +101,7 @@ const int RESTART_SCENEBOARD_DELAY = 500;
 auto g_addLifecycleEventTask = [](sptr<Token> token, FreezeUtil::TimeoutState state, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
     FreezeUtil::LifecycleFlow flow = { token->AsObject(), state };
-    auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) + "; AbilityRecord::" + methodName +
-        "; the " + methodName + " lifecycle starts.";
+    std::string entry = std::string("AbilityRecord::") + methodName + "; the " + methodName + " lifecycle starts.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 };
 
@@ -219,6 +219,9 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->SetAppIndex(appIndex);
     abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
     abilityRecord->sessionInfo_ = abilityRequest.sessionInfo;
+    if (abilityRequest.sessionInfo != nullptr) {
+        abilityRecord->instanceKey_ = abilityRequest.sessionInfo->instanceKey;
+    }
     if (!abilityRecord->Init()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed init");
         return nullptr;
@@ -331,7 +334,7 @@ int AbilityRecord::LoadAbility()
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token_, callerToken_, abilityInfo_, abilityInfo_.applicationInfo, want_, recordId_);
+        token_, callerToken_, abilityInfo_, abilityInfo_.applicationInfo, want_, recordId_, instanceKey_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
     SetLoadState(AbilityLoadState::LOADING);
 
@@ -397,16 +400,22 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     }
 }
 
+bool AbilityRecord::GrantUriPermissionForUIExtension()
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "GrantUriPermissionForUIExtension:: called.");
+    if (UIExtensionUtils::IsUIExtension(abilityInfo_.extensionAbilityType)) {
+        std::lock_guard guard(wantLock_);
+        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0);
+        return true;
+    }
+    return false;
+}
+
 void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
-    // grant uri permission
-    {
-        std::lock_guard guard(wantLock_);
-        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0);
-    }
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
@@ -1813,7 +1822,7 @@ void AbilityRecord::SendSandboxSavefileResult(const Want &want, int resultCode, 
             }
         }
     } else {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "uri illigal for request: %{public}d", requestCode);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "uri illegal for request: %{public}d", requestCode);
     }
 
     auto scheduler = scheduler_;
@@ -3175,36 +3184,6 @@ void AbilityRecord::DumpAbilityInfoDone(std::vector<std::string> &infos)
     dumpCondition_.notify_all();
 }
 
-bool AbilityRecord::GetUriListFromWant(Want &want, std::vector<std::string> &uriVec)
-{
-    auto uriStr = want.GetUri().ToString();
-    uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
-    if (uriVec.empty() && uriStr.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "uriVec empty.");
-        return false;
-    }
-    // process param stream
-    auto paramStreamUriCount = uriVec.size();
-    if (uriStr.empty() && paramStreamUriCount > MAX_URI_COUNT) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "uri empty, paream stream counts: %{public}zu", paramStreamUriCount);
-        uriVec.resize(MAX_URI_COUNT);
-        want.RemoveParam(AbilityConfig::PARAMS_STREAM);
-        want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
-        return true;
-    }
-    if (!uriStr.empty() && paramStreamUriCount > MAX_URI_COUNT - 1) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "paream stream counts: %{public}zu", paramStreamUriCount);
-        uriVec.resize(MAX_URI_COUNT - 1);
-        want.RemoveParam(AbilityConfig::PARAMS_STREAM);
-        want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
-    }
-    // process uri
-    if (!uriStr.empty()) {
-        uriVec.insert(uriVec.begin(), uriStr);
-    }
-    return true;
-}
-
 void AbilityRecord::PublishFileOpenEvent(const Want &want)
 {
     auto wangUri = want.GetUri();
@@ -3253,7 +3232,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         return;
     }
 
-    if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
+    if (!UriUtils::GetInstance().IsGrantUriPermissionFlag(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Do not call uriPermissionMgr.");
         return;
     }
@@ -3262,7 +3241,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         return;
     }
     std::vector<std::string> uriVec;
-    if (!GetUriListFromWant(want, uriVec)) {
+    if (!UriUtils::GetInstance().GetUriListFromWant(want, uriVec)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get uri list failed");
         return;
     }
@@ -3289,9 +3268,22 @@ void AbilityRecord::GrantUriPermissionInner(Want &want, std::vector<std::string>
         return;
     }
     uint32_t flag = want.GetFlags();
-    auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
-        uriVec, flag, callerTokenId));
-    auto permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
+    std::vector<Uri> permissionUris;
+    if (abilityInfo_.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE &&
+        abilityInfo_.extensionAbilityType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
+            uriVec, flag, callerTokenId));
+        permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
+    } else {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "target is Service Extension.");
+        // for service extension, uri permission checked ahead
+        for (auto &uriStr: uriVec) {
+            Uri uri(uriStr);
+            if (uri.GetScheme() == "file") {
+                permissionUris.emplace_back(uri);
+            }
+        }
+    }
     if (permissionUris.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uris not permissioned.");
         return;
@@ -3585,7 +3577,9 @@ std::string AbilityRecord::GetURI() const
 {
     if (uri_.empty()) {
         auto bundleName = abilityInfo_.bundleName;
-        if (AbilityRuntime::StartupUtil::IsSupportAppClone(abilityInfo_.extensionAbilityType)) {
+        if (MultiInstanceUtils::IsMultiInstanceApp(abilityInfo_.applicationInfo)) {
+            bundleName = bundleName + '-' + GetInstanceKey();
+        } else if (AbilityRuntime::StartupUtil::IsSupportAppClone(abilityInfo_.extensionAbilityType)) {
             if (appIndex_ > 0) {
                 bundleName = std::to_string(appIndex_) + bundleName;
             }

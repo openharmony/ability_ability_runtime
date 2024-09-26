@@ -17,6 +17,7 @@
 
 #include "ability_util.h"
 #include "app_utils.h"
+#include "multi_instance_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -127,6 +128,9 @@ int32_t ExtensionRecordFactory::CreateRecord(
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord create failed");
         return ERR_NULL_OBJECT;
+    }
+    if (AAFwk::MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
+        abilityRecord->SetInstanceKey(AAFwk::MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
     }
     extensionRecord = std::make_shared<ExtensionRecord>(abilityRecord);
     extensionRecord->processMode_ = GetExtensionProcessMode(abilityRequest, extensionRecord->isHostSpecified_);
