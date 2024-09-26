@@ -791,7 +791,7 @@ public:
      * @return Returns RESULT_OK on success, others on failure.
      */
     virtual AppMgrResultCode AttachedToStatusBar(const sptr<IRemoteObject> &token);
-
+    
     /**
      * Temporarily block the process cache feature.
      *
