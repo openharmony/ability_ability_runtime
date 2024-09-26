@@ -121,7 +121,7 @@ public:
 
     static napi_value KillProcessesByBundleName(napi_env env, napi_callback_info info)
     {
-        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnKillProcessesByBundleName);
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnkillProcessesByBundleName);
     }
 
     static napi_value ClearUpApplicationData(napi_env env, napi_callback_info info)
@@ -759,7 +759,7 @@ private:
         return result;
     }
 
-    napi_value OnKillProcessesByBundleName(napi_env env, size_t argc, napi_value* argv)
+    napi_value OnkillProcessesByBundleName(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_ONE) {
@@ -767,15 +767,17 @@ private:
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
+
         std::string bundleName;
-        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
+        if (!ConvertFromJsValue(env, argv[0], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get bundleName error!");
             ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
             return CreateJsUndefined(env);
         }
+
+        TAG_LOGI(AAFwkTag::APPMGR, "kill process [%{public}s]", bundleName.c_str());
         NapiAsyncTask::CompleteCallback complete =
-            [bundleName, abilityManager = abilityManager_](
-                napi_env env, NapiAsyncTask& task, int32_t status) {
+            [bundleName, abilityManager = abilityManager_](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -788,9 +790,10 @@ private:
                 task.Reject(env, CreateJsErrorByNativeErr(env, ret, "kill process failed."));
             }
         };
+
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
-        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessesByBundleName",
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnkillProcessesByBundleName",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -837,24 +840,25 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Params not match");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
 
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[0], bundleName)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "get bundleName wrong!");
+            TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
             ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
             return CreateJsUndefined(env);
         }
 
         uint32_t versionCode = 0;
         if (!ConvertFromJsValue(env, argv[1], versionCode)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "get versionCode failed!");
+            TAG_LOGE(AAFwkTag::APPMGR, "get versionCode failed");
             ThrowInvalidParamError(env, "Parse param versionCode failed, must be a number.");
             return CreateJsUndefined(env);
         }
+
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, versionCode, appManager = appManager_](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (appManager == nullptr) {
@@ -882,21 +886,22 @@ private:
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
+
         std::string bundleName;
-        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
+        if (!ConvertFromJsValue(env, argv[0], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Parse bundleName failed");
             ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
             return CreateJsUndefined(env);
         }
         int32_t accountId = -1;
-        if (!ConvertFromJsValue(env, argv[INDEX_ONE], accountId)) {
+        if (!ConvertFromJsValue(env, argv[1], accountId)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Parse userId failed");
             ThrowInvalidParamError(env, "Parse param accountId failed, must be a number.");
             return CreateJsUndefined(env);
         }
+
         NapiAsyncTask::CompleteCallback complete =
-            [appManager = appManager_, bundleName, accountId](
-                napi_env env, NapiAsyncTask &task, int32_t status) {
+            [appManager = appManager_, bundleName, accountId](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
                     TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr or amsMgr is nullptr.");
                     task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -909,6 +914,7 @@ private:
                     task.Reject(env, CreateJsErrorByNativeErr(env, ret, "Kill processes failed."));
                 }
             };
+
         napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessWithAccount",
@@ -973,6 +979,7 @@ private:
             ThrowInvalidParamError(env, "Parse param pid failed, must be a number.");
             return CreateJsUndefined(env);
         }
+
         NapiAsyncTask::CompleteCallback complete =
             [pid, appManager = appManager_](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (appManager == nullptr) {
@@ -1027,6 +1034,7 @@ private:
             ThrowInvalidParamError(env, "The number of param exceeded.");
             return CreateJsUndefined(env);
         }
+
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, userId, appManager = appManager_](napi_env env, NapiAsyncTask &task, int32_t status) {
             if (appManager == nullptr) {
