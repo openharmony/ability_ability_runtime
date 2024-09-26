@@ -6830,9 +6830,9 @@ int32_t AppMgrServiceInner::StartChildProcessPreCheck(pid_t callingPid, int32_t 
     CHECK_POINTER_AND_RETURN_VALUE(hostRecord, ERR_NULL_OBJECT);
     auto &appUtils = AAFwk::AppUtils::GetInstance();
     if (!appUtils.IsMultiProcessModel()) {
-        bool checkWhiteList = childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS ||
+        bool checkAllowList = childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS ||
             childProcessType == CHILD_PROCESS_TYPE_NATIVE;
-        if (!checkWhiteList || !appUtils.IsAllowNativeChildProcess(hostRecord->GetAppIdentifier())) {
+        if (!checkAllowList || !appUtils.IsAllowNativeChildProcess(hostRecord->GetAppIdentifier())) {
             TAG_LOGE(AAFwkTag::APPMGR, "not support child process.");
             return AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS;
         }
