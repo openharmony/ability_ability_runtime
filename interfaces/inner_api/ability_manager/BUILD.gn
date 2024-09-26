@@ -87,7 +87,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_execute_result.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_state_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_listener_stub.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/mission/mission_listener_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/open_link/open_link_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/prepare_terminate_callback_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/prepare_terminate_callback_stub.cpp",
@@ -229,8 +229,8 @@ ohos_shared_library("mission_info") {
   branch_protector_ret = "pac_ret"
 
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/mission_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_snapshot.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/mission/mission_info.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/mission/mission_snapshot.cpp",
   ]
 
   public_configs = [ ":ability_manager_public_config" ]

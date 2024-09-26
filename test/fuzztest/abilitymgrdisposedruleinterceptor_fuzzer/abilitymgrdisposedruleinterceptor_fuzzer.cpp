@@ -74,7 +74,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     bool isWithUI = *data % ENABLE;
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
-    AbilityInterceptorParam param = AbilityInterceptorParam(want, requestCode, userId, isWithUI, token);
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, requestCode, userId, isWithUI, token,
+        shouldBlockFunc);
     const std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo;
     int32_t bundleType = static_cast<int32_t>(GetU32Data(data));
 

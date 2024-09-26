@@ -54,6 +54,7 @@ public:
     static napi_value GetRunningProcessInformation(napi_env env, napi_callback_info info);
     static napi_value CreateJsApplicationContext(napi_env env, const std::shared_ptr<Context> &context);
     static napi_value SetSupportedProcessCacheSelf(napi_env env, napi_callback_info info);
+    static napi_value SetColorMode(napi_env env, napi_callback_info info);
 
     napi_value OnGetCacheDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetTempDir(napi_env env, NapiCallbackInfo& info);

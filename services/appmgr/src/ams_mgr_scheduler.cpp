@@ -629,7 +629,7 @@ bool AmsMgrScheduler::IsMemorySizeSufficent()
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return true;
     }
-    return amsMgrServiceInner_->IsMemorySizeSufficent();
+    return amsMgrServiceInner_->IsMemorySizeSufficient();
 }
 
 void AmsMgrScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)

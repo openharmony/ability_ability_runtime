@@ -30,6 +30,7 @@ int FFIAbilityGetAbilityContext();
 int FFIAbilityContextGetFilesDir();
 int FFIGetContext();
 int FFICreateNapiValue();
+int FFICreateNapiValueJsAbilityContext();
 int FFIGetArea();
 int FFICJApplicationInfo();
 int FFIAbilityDelegatorRegistryGetAbilityDelegator();

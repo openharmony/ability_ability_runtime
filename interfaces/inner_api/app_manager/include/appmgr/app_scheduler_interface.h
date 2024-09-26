@@ -134,6 +134,14 @@ public:
      */
     virtual void ScheduleAbilityStage(const HapModuleInfo &) = 0;
 
+    /**
+     * Notify application to launch ability.
+     *
+     * @param ability The ability info.
+     * @param token The ability token.
+     * @param want The want to start the ability.
+     * @param token The ability token.
+     */
     virtual void ScheduleLaunchAbility(const AbilityInfo &, const sptr<IRemoteObject> &,
         const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId) = 0;
 
@@ -172,8 +180,19 @@ public:
      */
     virtual void ScheduleProcessSecurityExit() = 0;
 
+    /**
+     * scheduleClearPageStack, call scheduleClearPageStack() through proxy project,
+     * Notify application clear recovery page stack.
+     *
+     */
     virtual void ScheduleClearPageStack() = 0;
 
+    /**
+     * @brief Schedule the given module the onAcceptWant lifecycle call.
+     *
+     * @param want the param passed to onAcceptWant lifecycle.
+     * @param want the moduleName of which being scheduled.
+     */
     virtual void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) = 0;
 
     virtual void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) = 0;
@@ -183,6 +202,7 @@ public:
      *
      * @param bundleName Bundle name
      * @param callback called when LoadPatch finished.
+     * @param recordId callback data
      * @return Returns 0 on success, error code on failure.
      */
     virtual int32_t ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
@@ -192,6 +212,7 @@ public:
      * @brief Notify application reload page.
      *
      * @param callback called when HotReload finished.
+     * @param recordId callback data
      * @return Returns 0 on success, error code on failure.
      */
     virtual int32_t ScheduleNotifyHotReloadPage(const sptr<IQuickFixCallback> &callback, const int32_t recordId) = 0;
@@ -201,6 +222,7 @@ public:
      *
      * @param bundleName Bundle name
      * @param callback called when UnloadPatch finished.
+     * @param recordId callback data
      * @return Returns 0 on success, error code on failure.
      */
     virtual int32_t ScheduleNotifyUnLoadRepairPatch(const std::string &bundleName,
@@ -264,6 +286,11 @@ public:
      */
     virtual int32_t ScheduleDumpIpcStat(std::string& result) = 0;
 
+    /**
+     *
+     * @brief Notify application to prepare for process caching.
+     *
+     */
     virtual void ScheduleCacheProcess() = 0;
 
     /**

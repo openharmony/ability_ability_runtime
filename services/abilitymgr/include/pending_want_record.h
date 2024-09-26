@@ -56,6 +56,7 @@ private:
     void BuildSendWant(SenderInfo &senderInfo, Want &want);
     int32_t ExecuteOperation(
         std::shared_ptr<PendingWantManager> pendingWantManager, SenderInfo &senderInfo, Want &want);
+    void CheckAppInstanceKey(WantParams &wantParams);
 
 private:
     std::weak_ptr<PendingWantManager> pendingWantManager_ = {};

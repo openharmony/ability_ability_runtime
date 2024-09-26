@@ -29,10 +29,6 @@
 #endif
 namespace OHOS {
 namespace AppExecFwk {
-class Ability;
-class AbilityHandler;
-class ApplicationImpl;
-class AbilityLocalRecord;
 class AbilityLifecycleCallbacks;
 class OHOSApplication;
 class AbilityImpl : public std::enable_shared_from_this<AbilityImpl> {
@@ -491,15 +487,6 @@ protected:
     std::mutex notifyForegroundLock_;
 
 private:
-    typedef enum {
-        START,
-        INACTIVE,
-        ACTIVE,
-        BACKGROUND,
-        FOREGROUND,
-        STOP,
-    } Action;
-
     std::shared_ptr<ApplicationImpl> applicationImpl_;
     std::shared_ptr<ContextDeal> contextDeal_;
     bool hasSaveData_ = false;

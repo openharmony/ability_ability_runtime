@@ -72,7 +72,7 @@ HWTEST_F(ServiceAbilityImplTest, AaFwk_ServiceAbilityImpl_HandleAbilityTransacti
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "MockServiceAbility";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     sptr<AbilityThread> abilityThread =
@@ -113,7 +113,7 @@ HWTEST_F(ServiceAbilityImplTest, AaFwk_ServiceAbilityImpl_HandleAbilityTransacti
     abilityInfo->name = "MockServiceAbility";
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     sptr<AbilityThread> abilityThread =
@@ -150,7 +150,7 @@ HWTEST_F(ServiceAbilityImplTest, AaFwk_ServiceAbilityImpl_HandleAbilityTransacti
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "MockServiceAbility";
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
@@ -186,7 +186,7 @@ HWTEST_F(ServiceAbilityImplTest, AaFwk_ServiceAbilityImpl_HandleAbilityTransacti
     abilityInfo->name = "MockServiceAbility";
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);

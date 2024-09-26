@@ -221,8 +221,10 @@ HWTEST_F(AmsAppRunningRecordTest, CreateAppRunningRecord_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
     EXPECT_EQ(record->GetName(), GetTestAppName());
@@ -256,13 +258,14 @@ HWTEST_F(AmsAppRunningRecordTest, CreateAppRunningRecord_002, TestSize.Level1)
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
     // Create
-    sptr<IRemoteObject> token = GetMockToken();
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     record->SetUid(1010);
     // Get
     auto record1 = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     EXPECT_TRUE(record1 != nullptr);
     EXPECT_EQ(record1->GetName(), GetTestAppName());
     EXPECT_EQ(record1->GetProcessName(), GetTestProcessName());
@@ -291,22 +294,23 @@ HWTEST_F(AmsAppRunningRecordTest, CreateAppRunningRecord_003, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     record->SetUid(1010);
 
     auto anotherAbilityInfo = std::make_shared<AbilityInfo>();
     anotherAbilityInfo->name = "Another_ability";
     anotherAbilityInfo->applicationInfo.uid = 1010;
-    sptr<IRemoteObject> anotherToken = new (std::nothrow) MockAbilityToken();
-    auto record1 = service_->CreateAppRunningRecord(GetMockToken(),
-        anotherToken,
+    loadParam->preToken = new (std::nothrow) MockAbilityToken();
+    auto record1 = service_->CreateAppRunningRecord(loadParam,
         appInfo,
         anotherAbilityInfo,
         GetTestProcessName(),
         bundleInfo,
         hapModuleInfo,
-        nullptr, 0);
+        nullptr);
     EXPECT_EQ(record1->GetName(), GetTestAppName());
     EXPECT_EQ(record1->GetProcessName(), GetTestProcessName());
 
@@ -335,8 +339,10 @@ HWTEST_F(AmsAppRunningRecordTest, CreateAppRunningRecord_004, TestSize.Level1)
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
     // Create
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, nullptr, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, nullptr, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     EXPECT_TRUE(record == nullptr);
 }
 
@@ -359,8 +365,10 @@ HWTEST_F(AmsAppRunningRecordTest, CreateAppRunningRecord_005, TestSize.Level1)
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
     // Create
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, nullptr, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, nullptr, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     EXPECT_TRUE(record != nullptr);
 }
 
@@ -747,8 +755,10 @@ HWTEST_F(AmsAppRunningRecordTest, DeleteAppRunningRecord_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     EXPECT_TRUE(record != nullptr);
     record->SetState(ApplicationState::APP_STATE_BACKGROUND);
     record->SetApplicationClient(GetMockedAppSchedulerClient());
@@ -957,8 +967,10 @@ HWTEST_F(AmsAppRunningRecordTest, LaunchAbilityForApp_001, TestSize.Level1)
     hapModuleInfo.moduleName = "module789";
 
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchApplication(_, _)).Times(1);
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchAbility(_, _, _, _)).Times(1);
@@ -998,8 +1010,10 @@ HWTEST_F(AmsAppRunningRecordTest, LaunchAbilityForApp_002, TestSize.Level1)
     const int EXPECT_ABILITY_LAUNCH_TIME = 3;
     EXPECT_TRUE(service_ != nullptr);
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     sptr<IRemoteObject> token2 = new (std::nothrow) MockAbilityToken();
     record->AddModule(appInfo, abilityInfo2, token2, hapModuleInfo, nullptr, 0);
@@ -1046,8 +1060,10 @@ HWTEST_F(AmsAppRunningRecordTest, LaunchAbilityForApp_003, TestSize.Level1)
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     record->SetState(ApplicationState::APP_STATE_READY);
     record->SetApplicationClient(GetMockedAppSchedulerClient());
 
@@ -1090,8 +1106,10 @@ HWTEST_F(AmsAppRunningRecordTest, LaunchAbilityForApp_004, TestSize.Level1)
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchApplication(_, _)).Times(1);
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchAbility(_, _, _, _)).Times(1);
@@ -1100,10 +1118,8 @@ HWTEST_F(AmsAppRunningRecordTest, LaunchAbilityForApp_004, TestSize.Level1)
     EXPECT_EQ(record->GetState(), ApplicationState::APP_STATE_READY);
 
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchApplication(_, _)).Times(0);
-    AbilityRuntime::LoadParam loadParam;
-    loadParam.token = new (std::nothrow) MockAbilityToken();
-    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
-    service_->LoadAbility(abilityInfo2, appInfo, nullptr, loadParamPtr);
+    loadParam->token = new (std::nothrow) MockAbilityToken();
+    service_->LoadAbility(abilityInfo2, appInfo, nullptr, loadParam);
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest LaunchAbilityForApp_004 end");
 }
 
@@ -1137,8 +1153,10 @@ HWTEST_F(AmsAppRunningRecordTest, LaunchAbilityForApp_005, TestSize.Level1)
     const int EXPECT_ABILITY_LAUNCH_TIME = 2;
     EXPECT_TRUE(service_ != nullptr);
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     sptr<IRemoteObject> token2 = new (std::nothrow) MockAbilityToken();
     record->AddModule(appInfo, abilityInfo2, token2, hapModuleInfo, nullptr, 0);
@@ -1204,8 +1222,10 @@ HWTEST_F(AmsAppRunningRecordTest, TerminateAbility_002, TestSize.Level1)
     appInfo->name = GetTestAppName();
     appInfo->bundleName = GetTestAppName();
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleCleanAbility(_, _)).Times(0);
     record->TerminateAbility(GetMockToken(), false);
@@ -1272,8 +1292,10 @@ HWTEST_F(AmsAppRunningRecordTest, SetUid_GetUid_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
     record->SetUid(102);
@@ -1307,8 +1329,10 @@ HWTEST_F(AmsAppRunningRecordTest, OnAbilityStateChanged_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     auto moduleRecord = record->GetModuleRecordByModuleName(appInfo->bundleName, hapModuleInfo.moduleName);
     EXPECT_TRUE(moduleRecord != nullptr);
     auto abilityRecord = record->GetAbilityRunningRecordByToken(GetMockToken());
@@ -1361,8 +1385,10 @@ HWTEST_F(AmsAppRunningRecordTest, AddModule_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo0, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo0, nullptr, 0);
+        loadParam, appInfo0, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo0, nullptr);
     EXPECT_TRUE(record != nullptr);
     auto moduleRecordList = record->GetAllModuleRecord();
     EXPECT_TRUE(moduleRecordList.size() == 1);
@@ -1412,8 +1438,10 @@ HWTEST_F(AmsAppRunningRecordTest, AddModule_002, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
 
@@ -1456,7 +1484,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetModuleRecordByModuleName_001, TestSize.Leve
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
-    auto record = service_->appRunningManager_->CreateAppRunningRecord(appInfo, GetTestProcessName(), bundleInfo);
+    auto record = service_->appRunningManager_->CreateAppRunningRecord(appInfo, GetTestProcessName(), bundleInfo, "");
     EXPECT_TRUE(record != nullptr);
     EXPECT_TRUE(record->hapModules_.size() == 0);
     auto moduleRecord = record->GetModuleRecordByModuleName(appInfo->bundleName, hapModuleInfo.moduleName);
@@ -1506,8 +1534,10 @@ HWTEST_F(AmsAppRunningRecordTest, GetAbilities_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
 
@@ -1542,8 +1572,10 @@ HWTEST_F(AmsAppRunningRecordTest, GetAbilities_002, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
 
@@ -1581,8 +1613,10 @@ HWTEST_F(AmsAppRunningRecordTest, RemoveModuleRecord_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
 
@@ -1786,8 +1820,10 @@ HWTEST_F(AmsAppRunningRecordTest, StartSpecifiedAbility_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
     EXPECT_EQ(record->GetName(), GetTestAppName());
@@ -1818,8 +1854,10 @@ HWTEST_F(AmsAppRunningRecordTest, StartSpecifiedAbility_002, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
     EXPECT_EQ(record->GetName(), GetTestAppName());
@@ -1857,8 +1895,10 @@ HWTEST_F(AmsAppRunningRecordTest, Specified_LaunchApplication_001, TestSize.Leve
     hapModuleInfo.moduleName = "module789";
 
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     record->SetApplicationClient(GetMockedAppSchedulerClient());
     record->specifiedRequestId_ = 1;
@@ -2258,8 +2298,10 @@ HWTEST_F(AmsAppRunningRecordTest, GetAbilityRunningRecord_002, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
 
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     std::shared_ptr<AppRunningRecord> record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
     record->AddModule(appInfo, abilityInfo, token, hapModuleInfo, nullptr, 0);
@@ -2302,8 +2344,10 @@ HWTEST_F(AmsAppRunningRecordTest, AddAbilityStage_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     EXPECT_TRUE(record != nullptr);
 
     record->AddAbilityStage();
@@ -2350,8 +2394,10 @@ HWTEST_F(AmsAppRunningRecordTest, AddAbilityStageBySpecifiedAbility_001, TestSiz
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     EXPECT_TRUE(record != nullptr);
 
     record->AddAbilityStageBySpecifiedAbility(bundleName1);
@@ -2404,8 +2450,10 @@ HWTEST_F(AmsAppRunningRecordTest, AddAbilityStageDone_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     EXPECT_TRUE(record != nullptr);
     record->AddAbilityStageDone();
 
@@ -2454,7 +2502,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetModuleRunningRecordByToken_001, TestSize.Le
     hapModuleInfo.moduleName = "module789";
     sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
     EXPECT_TRUE(service_ != nullptr);
-    auto record = service_->appRunningManager_->CreateAppRunningRecord(appInfo, GetTestProcessName(), bundleInfo);
+    auto record = service_->appRunningManager_->CreateAppRunningRecord(appInfo, GetTestProcessName(), bundleInfo, "");
     EXPECT_TRUE(record != nullptr);
     EXPECT_TRUE(record->hapModules_.size() == 0);
 
@@ -2510,7 +2558,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetModuleRunningRecordByTerminateLists_001, Te
     sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
     sptr<IRemoteObject> token1 = new (std::nothrow) MockAbilityToken();
     EXPECT_TRUE(service_ != nullptr);
-    auto record = service_->appRunningManager_->CreateAppRunningRecord(appInfo, GetTestProcessName(), bundleInfo);
+    auto record = service_->appRunningManager_->CreateAppRunningRecord(appInfo, GetTestProcessName(), bundleInfo, "");
     EXPECT_TRUE(record != nullptr);
     EXPECT_TRUE(record->hapModules_.size() == 0);
 
@@ -2559,8 +2607,10 @@ HWTEST_F(AmsAppRunningRecordTest, UpdateAbilityFocusState_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
     EXPECT_TRUE(record != nullptr);
 
     auto abilityRecord = record->GetAbilityRunningRecordByToken(GetMockToken());
@@ -2763,8 +2813,10 @@ HWTEST_F(AmsAppRunningRecordTest, IsUIExtension_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
     EXPECT_EQ(AAFwk::UIExtensionUtils::IsUIExtension(record->extensionType_), false);
@@ -2799,8 +2851,10 @@ HWTEST_F(AmsAppRunningRecordTest, IsUIExtension_002, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
 
     EXPECT_TRUE(record != nullptr);
     EXPECT_EQ(AAFwk::UIExtensionUtils::IsUIExtension(record->extensionType_), true);
@@ -2932,7 +2986,7 @@ HWTEST_F(AmsAppRunningRecordTest, IsAbilitytiesBackground_001, TestSize.Level1)
     // 1. create AppRunningRecord and verify default status
     auto record = GetTestAppRunningRecord();
     EXPECT_NE(record, nullptr);
-    EXPECT_TRUE(record->IsAbilitytiesBackground());
+    EXPECT_TRUE(record->IsAbilitiesBackground());
 
     // 2. create AbilityInfo and AppInfo, and construct ModuleRunningRecord
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
@@ -2957,7 +3011,7 @@ HWTEST_F(AmsAppRunningRecordTest, IsAbilitytiesBackground_001, TestSize.Level1)
     record->hapModules_.emplace(bundleName, moduleRecords);
 
     // 4. verify function
-    EXPECT_FALSE(record->IsAbilitytiesBackground());
+    EXPECT_FALSE(record->IsAbilitiesBackground());
 
     moduleRecord->abilities_.clear();
     abilityRecord->state_ = AbilityState::ABILITY_STATE_BACKGROUND;
@@ -2965,7 +3019,7 @@ HWTEST_F(AmsAppRunningRecordTest, IsAbilitytiesBackground_001, TestSize.Level1)
     moduleRecords.clear();
     moduleRecords.push_back(moduleRecord);
     record->hapModules_.emplace(bundleName, moduleRecords);
-    EXPECT_TRUE(record->IsAbilitytiesBackground());
+    EXPECT_TRUE(record->IsAbilitiesBackground());
     GTEST_LOG_(INFO) << "IsAbilitytiesBackground_001 end.";
 }
 

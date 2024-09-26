@@ -102,7 +102,9 @@ HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnCreate_001, TestSize.Level0)
 {
     AAFwk::Want want;
     cjAbilityStage_->OnCreate(want);
+    EXPECT_NE(cjAbilityStage_, nullptr);
     initCjAbilityStage_->OnCreate(want);
+    EXPECT_NE(initCjAbilityStage_, nullptr);
 }
 
 /**
@@ -128,7 +130,9 @@ HWTEST_F(CjAbilityStageTest, CjAbilityStageTestOnMemoryLevel_001, TestSize.Level
 {
     int level = 1;
     cjAbilityStage_->OnMemoryLevel(level);
+    EXPECT_NE(cjAbilityStage_, nullptr);
     initCjAbilityStage_->OnMemoryLevel(level);
+    EXPECT_NE(initCjAbilityStage_, nullptr);
 }
 
 }  // namespace AbilityRuntime

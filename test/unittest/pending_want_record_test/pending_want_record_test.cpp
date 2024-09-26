@@ -628,5 +628,61 @@ HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2100, TestSize.Level1)
     pendingWantRecord->SenderInner(info);
     EXPECT_TRUE(info.resolvedType == key->GetRequestResolvedType());
 }
+
+/*
+ * @tc.number    : PendingWantRecordTest_2200
+ * @tc.name      : BuildSendWant
+ * @tc.desc      : 1.BuildSendWant
+ */
+HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2200, TestSize.Level1)
+{
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    want.SetParam(std::string("ohos.extra.param.key.appInstance"), std::string("app_instance_100"));
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::ONE_TIME_FLAG, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    EXPECT_NE(key, nullptr);
+    key->SetType(static_cast<int32_t>(OperationType::START_SERVICE));
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    Want senderWant;
+    pendingWantRecord->BuildSendWant(info, senderWant);
+    EXPECT_EQ(senderWant.GetParams().GetStringParam(
+        std::string("ohos.extra.param.key.appInstance")), std::string("app_instance_100"));
+}
+
+/*
+ * @tc.number    : PendingWantRecordTest_2300
+ * @tc.name      : BuildSendWant
+ * @tc.desc      : 1.BuildSendWant
+ */
+HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2300, TestSize.Level1)
+{
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    want.SetParam(std::string("ohos.extra.param.key.appInstance"), std::string("app_instance_100"));
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::ONE_TIME_FLAG, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    EXPECT_NE(key, nullptr);
+    key->SetType(static_cast<int32_t>(OperationType::START_ABILITY));
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    SenderInfo info;
+    Want senderWant;
+    pendingWantRecord->BuildSendWant(info, senderWant);
+    EXPECT_EQ(senderWant.GetParams().GetStringParam(
+        std::string("ohos.extra.param.key.appInstance")), std::string());
+}
 }  // namespace AAFwk
 }  // namespace OHOS

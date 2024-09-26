@@ -108,7 +108,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_CheckAppRunningRecordIsE
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_CheckAppRunningRecordIsExistByUid_0100 start 2");
     /**
      * @tc.steps: step2. SetUid USR_ID_100, SetRestartAppFlag false
@@ -127,7 +127,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_CheckAppRunningRecordIsE
     record->SetRestartAppFlag(true);
     ret = appRunningManager->CheckAppRunningRecordIsExistByUid(USR_ID_100);
     EXPECT_FALSE(ret);
- 
+
     /**
      * @tc.steps: step4. call CheckAppRunningRecordIsExistByUid USR_ID_101
      * @tc.expected: step4. expect call CheckAppRunningRecordIsExistByUid false
@@ -164,7 +164,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_CheckAppCloneRunningReco
     appInfo_->bundleName = BUNDLE_NAME;
     const std::string processName = "testProcessName";
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     ASSERT_NE(record, nullptr);
 
     /**
@@ -234,7 +234,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_ProcessExitByBundleName_
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     std::shared_ptr<AppRunningRecord> record1 =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     ASSERT_NE(record1, nullptr);
     record1->appInfos_.emplace(BUNDLE_NAME, appInfo_);
 
@@ -280,7 +280,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_ProcessExitByBundleName_
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record1 =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     ASSERT_NE(record1, nullptr);
     record1->appInfos_.emplace(BUNDLE_NAME, appInfo_);
 
@@ -294,17 +294,17 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_ProcessExitByBundleName_
     record1->SetKeepAliveEnableState(true);
     record1->SetMainProcess(true);
     record1->GetPriorityObject()->SetPid(10000); // 10000 means valid process id
-    ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent(); // marked mem insufficent
+    ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent(); // marked mem insufficient
     std::list<pid_t> pids;
     appRunningManager->ProcessExitByBundleName(BUNDLE_NAME, pids, false);
     EXPECT_TRUE(pids.empty());
 
     /**
      * @tc.steps: step2. process resident process and ExitResidentProcessManager Memory Size Insufficent
-     * @tc.expected: step2. expect pids not empty, memory size sufficent
+     * @tc.expected: step2. expect pids not empty, memory size sufficient
      */
     pids.clear();
-    ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficient(processInfos); // marked mem sufficent
+    ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficient(processInfos); // marked mem sufficient
     appRunningManager->ProcessExitByBundleName(BUNDLE_NAME, pids, true);
     EXPECT_TRUE(pids.empty());
 }
@@ -325,7 +325,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_GetPidsByBundleNameUserI
     appInfo_->appIndex = 0;
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record1 =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     ASSERT_NE(record1, nullptr);
     record1->appInfos_.emplace(BUNDLE_NAME, appInfo_);
 
@@ -394,7 +394,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_OnRemoteDied_0100, TestS
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     ASSERT_NE(record, nullptr);
     std::shared_ptr<MockAppMgrServiceInner> appServiceInner = std::make_shared<MockAppMgrServiceInner>();
     sptr<MockApplication> mockApp1 = sptr<MockApplication>::MakeSptr();
@@ -435,11 +435,11 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyMemoryLevel_0100, 
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto recordId = AppRecordId::Create();
     appRunningManager->appRunningRecordMap_.emplace(recordId, nullptr);
     std::shared_ptr<AppRunningRecord> record2 =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record2->priorityObject_ = nullptr;
     auto ret = appRunningManager->NotifyMemoryLevel(1);
 
@@ -460,11 +460,11 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyProcMemoryLevel_01
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto recordId = AppRecordId::Create();
     appRunningManager->appRunningRecordMap_.emplace(recordId, nullptr);
     std::shared_ptr<AppRunningRecord> record2 =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record2->priorityObject_ = nullptr;
     std::map<pid_t, MemoryLevel> procLevelMap;
     auto ret = appRunningManager->NotifyProcMemoryLevel(procLevelMap);
@@ -487,9 +487,9 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_DumpHeapMemory_0100, Tes
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
 
-    auto record2 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record2 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record2->priorityObject_ = nullptr;
     OHOS::AppExecFwk::MallocInfo mallocInfo;
     auto ret = appRunningManager->DumpHeapMemory(1, mallocInfo);
@@ -512,8 +512,8 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_GetAppRunningRecordByRen
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
-    auto record2 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    auto record2 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto renderRecord = std::make_shared<RenderRecord>(0, "", -1, -1, -1, record2);
     record2->AddRenderRecord(renderRecord);
     auto ret = appRunningManager->GetAppRunningRecordByRenderPid(1);
@@ -535,7 +535,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyLoadRepairPatch_01
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto ret = appRunningManager->NotifyLoadRepairPatch(BUNDLE_NAME, nullptr);
 
     /**
@@ -560,7 +560,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyLoadRepairPatch_02
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     sptr<MockApplication> mockApp1 = sptr<MockApplication>::MakeSptr();
     record1->SetApplicationClient(mockApp1);
     EXPECT_CALL(*mockApp1, ScheduleNotifyLoadRepairPatch(_, _, _)).Times(1).WillOnce(Return(ERR_OK));
@@ -591,7 +591,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyLoadRepairPatch_03
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto recordId = AppRecordId::Create();
     appRunningManager->appRunningRecordMap_.emplace(recordId, nullptr);
 
@@ -617,7 +617,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyHotReloadPage_0100
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto ret = appRunningManager->NotifyHotReloadPage(BUNDLE_NAME, nullptr);
 
     /**
@@ -642,7 +642,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyHotReloadPage_0200
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     sptr<MockApplication> mockApp1 = sptr<MockApplication>::MakeSptr();
     record1->SetApplicationClient(mockApp1);
     EXPECT_CALL(*mockApp1, ScheduleNotifyHotReloadPage(_, _)).Times(1).WillOnce(Return(ERR_OK));
@@ -674,7 +674,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyHotReloadPage_0300
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto recordId = AppRecordId::Create();
     appRunningManager->appRunningRecordMap_.emplace(recordId, nullptr);
 
@@ -702,7 +702,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyUnLoadRepairPatch_
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto ret = appRunningManager->NotifyUnLoadRepairPatch(BUNDLE_NAME, nullptr);
 
     /**
@@ -728,7 +728,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyUnLoadRepairPatch_
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     sptr<MockApplication> mockApp1 = sptr<MockApplication>::MakeSptr();
     record1->SetApplicationClient(mockApp1);
     EXPECT_CALL(*mockApp1, ScheduleNotifyUnLoadRepairPatch(_, _, _)).Times(1).WillOnce(Return(ERR_OK));
@@ -760,7 +760,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NotifyUnLoadRepairPatch_
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto recordId = AppRecordId::Create();
     appRunningManager->appRunningRecordMap_.emplace(recordId, nullptr);
 
@@ -923,7 +923,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstForegr
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
 
     /**
      * @tc.steps: step1. Initialize AppRunningManager instance
@@ -953,7 +953,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstForegr
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::UI;
 
     /**
@@ -983,7 +983,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstForegr
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::UI;
 
     /**
@@ -1013,7 +1013,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstForegr
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
     record->SetAppIndex(0);
 
@@ -1045,7 +1045,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstForegr
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
     record->SetAppIndex(1);
     record->SetState(ApplicationState::APP_STATE_FOREGROUND);
@@ -1078,7 +1078,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstForegr
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
     record->SetAppIndex(1);
     record->SetState(ApplicationState::APP_STATE_BACKGROUND);
@@ -1163,7 +1163,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationBackground_
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::UI;
 
     /**
@@ -1191,7 +1191,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationBackground_
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::WINDOW;
 
     /**
@@ -1220,7 +1220,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationBackground_
     EXPECT_NE(appRunningManager, nullptr);
 
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
     record->SetState(ApplicationState::APP_STATE_FOREGROUND);
 
@@ -1249,7 +1249,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationBackground_
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     record->extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
     record->SetAppIndex(1);
     record->SetState(ApplicationState::APP_STATE_BACKGROUND);
@@ -1309,7 +1309,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstFocuse
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
 
     /**
      * @tc.steps: step2. Initialize AppRunningManager instance
@@ -1338,7 +1338,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstFocuse
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
 
     /**
      * @tc.steps: step2. Initialize AppRunningManager instance
@@ -1365,7 +1365,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstFocuse
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto abilityInfo = std::make_shared<AbilityInfo>();
     auto ability = std::make_shared<AbilityRunningRecord>(abilityInfo, nullptr, 0);
     record->AbilityFocused(ability);
@@ -1397,7 +1397,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationFirstFocuse
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto abilityInfo = std::make_shared<AbilityInfo>();
     auto ability = std::make_shared<AbilityRunningRecord>(abilityInfo, nullptr, 0);
     record->AbilityFocused(ability);
@@ -1456,7 +1456,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationUnfocused_0
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
 
     /**
      * @tc.steps: step2. Initialize AppRunningManager instance
@@ -1483,7 +1483,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationUnfocused_0
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
 
     /**
      * @tc.steps: step2. Initialize AppRunningManager instance
@@ -1509,7 +1509,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_IsApplicationUnfocused_0
     auto appRunningManager = std::make_shared<AppRunningManager>();
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
-    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto abilityInfo = std::make_shared<AbilityInfo>();
     auto ability = std::make_shared<AbilityRunningRecord>(abilityInfo, nullptr, 0);
     record->AbilityFocused(ability);
@@ -1566,7 +1566,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0200,
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
 
     /**
      * @tc.steps: step2. Initialize AppRunningManager instance
@@ -1593,7 +1593,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0300,
     EXPECT_NE(appRunningManager, nullptr);
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
-        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo);
+        appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
 
     /**
      * @tc.steps: step2. Initialize AppRunningManager instance

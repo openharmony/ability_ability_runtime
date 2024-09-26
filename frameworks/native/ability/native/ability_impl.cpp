@@ -31,11 +31,6 @@
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
-namespace {
-const std::string PERMISSION_KEY = "ohos.user.grant.permission";
-const std::string GRANTED_RESULT_KEY = "ohos.user.grant.permission.result";
-}
-
 void AbilityImpl::Init(const std::shared_ptr<OHOSApplication> &application,
                        const std::shared_ptr<AbilityLocalRecord> &record,
                        std::shared_ptr<Ability> &ability,
@@ -623,8 +618,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle";
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     bool needNotifyAMS = false;
@@ -659,8 +653,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     TAG_LOGI(AAFwkTag::ABILITY, "window after background");
