@@ -530,11 +530,11 @@ void AppRunningRecord::AddAbilityStage()
     }
 }
 
-void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
+bool AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
 {
     if (!eventHandler_) {
         TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
-        return;
+        return false;
     }
 
     HapModuleInfo hapModuleInfo;
@@ -547,10 +547,12 @@ void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
         }
         if (appLifeCycleDeal_ == nullptr) {
             TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
-            return;
+            return false;
         }
         appLifeCycleDeal_->AddAbilityStage(hapModuleInfo);
+        return true;
     }
+    return false;
 }
 
 void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bundleName)
