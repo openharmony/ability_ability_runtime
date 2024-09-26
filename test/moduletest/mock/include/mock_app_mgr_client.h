@@ -37,6 +37,8 @@ public:
     MOCK_METHOD2(GetRunningProcessInfoByToken, void((const sptr<IRemoteObject>& token,
         AppExecFwk::RunningProcessInfo& info)));
     MOCK_METHOD1(GetAllRunningProcesses, AppMgrResultCode(std::vector<RunningProcessInfo>& info));
+    MOCK_METHOD2(GetAllRunningInstanceKeysByBundleName, AppMgrResultCode(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys));
 
     AppMgrResultCode GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo>& info, int32_t userId);
 

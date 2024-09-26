@@ -52,36 +52,6 @@ void AbilityLocalRecordTest::TearDown()
 {}
 
 /**
- * @tc.number: GetEventHandler_0100
- * @tc.name: GetEventHandler
- * @tc.desc: GetEventHandler Test, return is not nullptr.
- */
-HWTEST_F(AbilityLocalRecordTest, GetEventHandler_0100, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetEventHandler_0100 start";
-    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
-    auto handler = std::make_shared<EventHandler>(EventRunner::Create());
-    record->SetEventHandler(handler);
-    EXPECT_TRUE(record->GetEventHandler() != nullptr);
-    GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetEventHandler_0100 end";
-}
-
-/**
- * @tc.number: GetEventRunner_0100
- * @tc.name: GetEventRunner
- * @tc.desc: GetEventRunner Test, return is not nullptr.
- */
-HWTEST_F(AbilityLocalRecordTest, GetEventRunner_0100, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "AbilityLocalRecordTest SetEventHandler_0100 start";
-    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
-    std::shared_ptr<EventRunner> runner = EventRunner::GetMainEventRunner();
-    record->SetEventRunner(runner);
-    EXPECT_TRUE(record->GetEventRunner() != nullptr);
-    GTEST_LOG_(INFO) << "AbilityLocalRecordTest SetEventHandler_0100 end";
-}
-
-/**
  * @tc.number: GetAbilityThread_0100
  * @tc.name: GetAbilityThread
  * @tc.desc: GetAbilityThread Test, return is nullptr.
@@ -89,7 +59,7 @@ HWTEST_F(AbilityLocalRecordTest, GetEventRunner_0100, TestSize.Level0)
 HWTEST_F(AbilityLocalRecordTest, GetAbilityThread_0100, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetAbilityThread_0100 start";
-    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
+    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
     auto abilityThread = sptr<AbilityThread>(nullptr);
     record->SetAbilityThread(abilityThread);
     EXPECT_TRUE(record->GetAbilityThread() == nullptr);
@@ -104,9 +74,8 @@ HWTEST_F(AbilityLocalRecordTest, GetAbilityThread_0100, TestSize.Level0)
 HWTEST_F(AbilityLocalRecordTest, GetWant_0100, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetWant_0100 start";
-    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
     std::shared_ptr<AAFwk::Want> want;
-    record->SetWant(want);
+    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, want, 0);
     EXPECT_TRUE(record->GetWant() == nullptr);
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetWant_0100 end";
 }
@@ -121,7 +90,7 @@ HWTEST_F(AbilityLocalRecordTest, GetAbilityInfo_0100, TestSize.Level0)
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetAbilityInfo_0100 start";
     auto info = std::make_shared<OHOS::AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
-    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(record->GetAbilityInfo() != nullptr);
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetAbilityInfo_0100 end";
 }
@@ -136,7 +105,7 @@ HWTEST_F(AbilityLocalRecordTest, GetToken_0100, TestSize.Level0)
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetToken_0100 start";
     auto info = std::make_shared<OHOS::AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
-    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(record->GetToken() != nullptr);
     GTEST_LOG_(INFO) << "AbilityLocalRecordTest GetToken_0100 end";
 }

@@ -196,6 +196,19 @@ ErrCode BundleMgrHelper::GetSandboxHapModuleInfo(const AbilityInfo &abilityInfo,
     return bundleMgr->GetSandboxHapModuleInfo(abilityInfo, appIndex, userId, hapModuleInfo);
 }
 
+std::string BundleMgrHelper::GetAppIdByBundleName(const std::string &bundleName, const int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "GetAppIdByBundleName called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect.");
+        return "";
+    }
+ 
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetAppIdByBundleName(bundleName, userId);
+}
+
 sptr<IBundleMgr> BundleMgrHelper::Connect()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -209,7 +222,7 @@ sptr<IBundleMgr> BundleMgrHelper::Connect()
             return nullptr;
         }
 
-        sptr<IRemoteObject> remoteObject_ = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        sptr<IRemoteObject> remoteObject_ = systemAbilityManager->CheckSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
         if (remoteObject_ == nullptr || (bundleMgr_ = iface_cast<IBundleMgr>(remoteObject_)) == nullptr) {
             TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to get bundle mgr service remote object");
             return nullptr;

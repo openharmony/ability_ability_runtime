@@ -207,12 +207,12 @@ public:
         AbilityCommand abilityCmd);
 
     /**
-     * GetUIExtensioBySessionInfo.
+     * GetUIExtensionBySessionInfo.
      *
      * @param sessionToken, service ability's session token.
      * @return Returns AbilityRecord shared_ptr.
      */
-    std::shared_ptr<AbilityRecord> GetUIExtensioBySessionInfo(const sptr<SessionInfo> &sessionInfo);
+    std::shared_ptr<AbilityRecord> GetUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo);
 
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromAbilityCache(const sptr<IRemoteObject> &token);
@@ -577,7 +577,7 @@ private:
     void HandleUIExtWindowDiedTask(const sptr<IRemoteObject> &remote);
 
     /**
-     * Post an extension's disconnect task, auto disconnect when extension conected timeout.
+     * Post an extension's disconnect task, auto disconnect when extension connected timeout.
      */
     void PostExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 

@@ -98,29 +98,6 @@ HWTEST_F(AbilityRecordMgrTest, SetToken_0100, TestSize.Level0)
 }
 
 /**
- * @tc.number: SetEventRunner_0100
- * @tc.name: SetEventRunner
- * @tc.desc: SetEventRunner Test, return is not nullptr.
- */
-HWTEST_F(AbilityRecordMgrTest, SetEventRunner_0100, TestSize.Level0)
-{
-    GTEST_LOG_(INFO) << "AbilityRecordMgrTest SetEventRunner_0100 start";
-    auto recordMgr = std::make_shared<OHOS::AppExecFwk::AbilityRecordMgr>();
-    EXPECT_NE(recordMgr, nullptr);
-    recordMgr->SetEventRunner(nullptr);
-
-    std::shared_ptr<AppExecFwk::EventRunner> runner = EventRunner::GetMainEventRunner();
-    EXPECT_NE(runner, nullptr);
-    recordMgr->tokens_ = nullptr;
-    recordMgr->SetEventRunner(runner);
-
-    sptr<IRemoteObject> token = new (std::nothrow) AbilityMgrToken();
-    recordMgr->SetToken(token);
-    recordMgr->SetEventRunner(runner);
-    GTEST_LOG_(INFO) << "AbilityRecordMgrTest SetEventRunner_0100 end";
-}
-
-/**
  * @tc.number: AddAbilityRecord_0100
  * @tc.name: AddAbilityRecord
  * @tc.desc: AddAbilityRecord Test, return is not nullptr.
@@ -136,7 +113,7 @@ HWTEST_F(AbilityRecordMgrTest, AddAbilityRecord_0100, TestSize.Level0)
     token = new (std::nothrow) AbilityMgrToken();
     recordMgr->AddAbilityRecord(token, nullptr);
 
-    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
+    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
     EXPECT_NE(abilityRecord, nullptr);
 
     recordMgr->AddAbilityRecord(token, abilityRecord);
@@ -158,7 +135,7 @@ HWTEST_F(AbilityRecordMgrTest, RemoveAbilityRecord_0100, TestSize.Level0)
     recordMgr->RemoveAbilityRecord(token);
 
     token = new (std::nothrow) AbilityMgrToken();
-    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
+    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
     recordMgr->AddAbilityRecord(token, abilityRecord);
     EXPECT_EQ(recordMgr->abilityRecords_.size(), 1);
 
@@ -179,7 +156,7 @@ HWTEST_F(AbilityRecordMgrTest, GetRecordCount_0100, TestSize.Level0)
     EXPECT_EQ(recordMgr->GetRecordCount(), 0);
 
     sptr<IRemoteObject> token = new (std::nothrow) AbilityMgrToken();
-    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
+    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
     recordMgr->AddAbilityRecord(token, abilityRecord);
     EXPECT_EQ(recordMgr->GetRecordCount(), 1);
     GTEST_LOG_(INFO) << "AbilityRecordMgrTest GetRecordCount_0100 end";
@@ -198,7 +175,7 @@ HWTEST_F(AbilityRecordMgrTest, GetAbilityItem_0100, TestSize.Level0)
     EXPECT_EQ(recordMgr->GetAbilityItem(token), nullptr);
 
     token = new (std::nothrow) AbilityMgrToken();
-    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
+    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
     recordMgr->AddAbilityRecord(token, abilityRecord);
     EXPECT_NE(recordMgr->GetAbilityItem(token), nullptr);
 
@@ -219,7 +196,7 @@ HWTEST_F(AbilityRecordMgrTest, GetAllTokens_0100, TestSize.Level0)
     auto recordMgr = std::make_shared<OHOS::AppExecFwk::AbilityRecordMgr>();
 
     sptr<IRemoteObject> token = new (std::nothrow) AbilityMgrToken();
-    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr);
+    auto abilityRecord = std::make_shared<OHOS::AppExecFwk::AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
     recordMgr->AddAbilityRecord(token, abilityRecord);
     EXPECT_EQ(recordMgr->GetAllTokens().size(), 1);
 

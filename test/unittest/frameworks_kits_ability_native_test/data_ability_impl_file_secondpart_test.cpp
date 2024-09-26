@@ -69,7 +69,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_BatchInsert_001, Functio
     abilityInfo->name = "MockDataAbility";
     abilityInfo->type = AbilityType::DATA;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
     std::shared_ptr<Ability> ability = std::make_shared<MockDataAbility>();
     dataabilityimpl->Init(application, record, ability, handler, token);
@@ -117,7 +117,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_HandleAbilityTransaction
     abilityInfo->name = "MockDataAbility";
     abilityInfo->type = AbilityType::DATA;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
     std::shared_ptr<Ability> ability = std::make_shared<MockDataAbility>();
     dataabilityimpl->Init(application, record, ability, handler, token);
@@ -144,7 +144,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_HandleAbilityTransaction
     abilityInfo->name = "MockDataAbility";
     abilityInfo->type = AbilityType::DATA;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
     std::shared_ptr<Ability> ability = std::make_shared<MockDataAbility>();
     dataabilityimpl->Init(application, record, ability, handler, token);

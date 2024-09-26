@@ -49,6 +49,8 @@ public:
     MOCK_METHOD3(ClearUpApplicationDataBySelf, int32_t(int32_t, pid_t, int32_t userId));
     MOCK_METHOD1(IsBackgroundRunningRestricted, int32_t(const std::string&));
     MOCK_METHOD1(GetAllRunningProcesses, int32_t(std::vector<RunningProcessInfo>&));
+    MOCK_METHOD2(GetAllRunningInstanceKeysByBundleName, int32_t(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys));
     MOCK_METHOD1(GetAllRenderProcesses, int32_t(std::vector<RenderProcessInfo>&));
     MOCK_METHOD1(GetAllChildrenProcesses, int(std::vector<ChildProcessInfo>&));
     MOCK_METHOD1(RegisterAppStateCallback, void(const sptr<IAppStateCallback>& callback));
@@ -68,7 +70,7 @@ public:
     MOCK_METHOD1(GetWaitingDebugApp, int32_t(std::vector<std::string> &debugInfoList));
     MOCK_METHOD1(IsWaitingDebugApp, bool(const std::string &bundleName));
     MOCK_METHOD0(ClearNonPersistWaitingDebugFlag, void());
-    MOCK_METHOD0(IsMemorySizeSufficent, bool());
+    MOCK_METHOD0(IsMemorySizeSufficient, bool());
     MOCK_METHOD4(StartNativeChildProcess, int32_t(const pid_t hostPid,
         const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback));
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)

@@ -103,8 +103,19 @@ public:
      */
     virtual void KillProcessesByUserId(int32_t userId) = 0;
 
+    /**
+     * KillProcessesByPids, only in process call is allowed,
+     * kill the processes by pid list given.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     */
     virtual void KillProcessesByPids(std::vector<int32_t> &pids) {}
 
+    /**
+     * Set child and parent relationship
+     * @param token child process
+     * @param callerToken parent process
+     */
     virtual void AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken) {}
 
     /**
@@ -174,23 +185,73 @@ public:
         return ERR_OK;
     }
 
+    /**
+     * Ability attach timeout. If start ability encounter failure, attach timeout to terminate.
+     *
+     * @param token Ability identify.
+     */
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) = 0;
 
+    /**
+     * Prepare terminate.
+     *
+     * @param token Ability identify.
+     * @param clearMissionFlag Clear mission flag.
+     */
     virtual void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false) = 0;
 
+    /**
+     * Get running process information by ability token.
+     *
+     * @param token Ability identify.
+     * @param info Running process info.
+     */
     virtual void GetRunningProcessInfoByToken(
         const sptr<IRemoteObject> &token, OHOS::AppExecFwk::RunningProcessInfo &info) = 0;
 
+    /**
+     * Set AbilityForegroundingFlag of an app-record to true.
+     *
+     * @param pid, pid.
+     *
+     */
     virtual void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) = 0;
 
+    /**
+     * Start specified ability.
+     *
+     * @param want Want contains information of the ability to start.
+     * @param abilityInfo Ability information.
+     * @param requestId request id to callback
+     */
     virtual void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0) = 0;
 
+    /**
+     * Register response of start specified ability.
+     *
+     * @param response Response of start specified ability.
+     */
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) = 0;
 
+    /**
+     * Start specified process.
+     *
+     * @param want Want contains information wish to start.
+     * @param abilityInfo Ability information.
+     * @param requestId for callback
+     */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0) = 0;
 
+    /**
+     * Get application info by process id.
+     *
+     * @param pid Process id.
+     * @param application Application information got.
+     * @param debug Whether IsDebugApp.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug) = 0;
 
     /**
@@ -307,6 +368,7 @@ public:
      * @brief Set resident process enable status.
      * @param bundleName The application bundle name.
      * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
      */
     virtual void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid) {};
 
@@ -318,8 +380,8 @@ public:
     virtual void ClearProcessByToken(sptr<IRemoteObject> token) {}
 
     /**
-     * whether memory size is sufficent.
-     * @return Returns true is sufficent memory size, others return false.
+     * whether memory size is sufficient.
+     * @return Returns true is sufficient memory size, others return false.
      */
     virtual bool IsMemorySizeSufficent() = 0;
 
@@ -368,6 +430,9 @@ public:
         return false;
     }
 
+    /**
+     * Whether a process is attached, refer to AttachApplication
+     */
     virtual bool IsProcessAttached(sptr<IRemoteObject> token)
     {
         return false;

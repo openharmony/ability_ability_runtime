@@ -93,8 +93,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Start_Test_0100, Function | M
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
         usleep(AbilityBaseTest::TEST_WAIT_TIME);
@@ -117,8 +116,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Start_Test_0200, Function | M
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
         usleep(AbilityBaseTest::TEST_WAIT_TIME);
@@ -154,8 +152,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Start_Test_0400, Function | M
     if (abilityToken != nullptr) {
         std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
         usleep(AbilityBaseTest::TEST_WAIT_TIME);
@@ -177,8 +174,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Start_Test_0500, Function | M
         std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
         usleep(AbilityBaseTest::TEST_WAIT_TIME);
@@ -218,8 +214,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Start_Test_0600, Function | M
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -252,8 +247,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_Lifecycle_Test_0100, Function | MediumTe
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -283,8 +277,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Lifecycle_Test_0200, Function
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -315,8 +308,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Lifecycle_Test_0300, Function
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -350,8 +342,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Lifecycle_Test_0400, Function
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -384,8 +375,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Lifecycle_Test_0500, Function
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -420,8 +410,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Lifecycle_Test_0600, Function
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -457,8 +446,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_TerminateAbility_ForResult_Test_0100, Fu
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -527,8 +515,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_Ability_Terminate_test_0100, Function | Med
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_Ability_Terminate_test_001 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -564,8 +551,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_Ability_Terminate_test_0200, Function | Med
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_Ability_Terminate_test_002 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -601,8 +587,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_Ability_Terminate_test_0300, Function | Med
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_Ability_Terminate_test_0300 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -638,8 +623,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_Ability_Terminate_test_0400, Function | Med
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_Ability_Terminate_test_0400 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -675,8 +659,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_Ability_Terminate_test_0500, Function | Med
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_Ability_Terminate_test_005 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -707,8 +690,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_Ability_Terminate_test_0600, Function | Med
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_Ability_Terminate_test_006 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -739,8 +721,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_Ability_Terminate_test_0700, Function | Med
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_Ability_Terminate_test_007 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -771,8 +752,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_Ability_Terminate_test_0800, Function | Med
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_Ability_Terminate_test_008 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -803,8 +783,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_WMS_window_test_0100, Function | MediumTest
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_WMS_window_test_001 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -836,8 +815,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_WMS_window_test_0200, Function | MediumTest
         abilityInfo->type = AppExecFwk::AbilityType::PAGE;
         abilityInfo->name = ABILITY_NAME;
         abilityInfo->isNativeAbility = true;
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         GTEST_LOG_(INFO) << "AaFwk_WMS_window_test_002 AbilityThreadMain";
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
@@ -873,8 +851,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_DataAbility_Launch_0100, Function | MediumT
         std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
         abilityInfo->type = AppExecFwk::AbilityType::DATA;
         abilityInfo->name = "DemoAbility";
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -906,8 +883,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_DataAbility_Start_0100, Function | MediumTe
         std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
         abilityInfo->type = AppExecFwk::AbilityType::DATA;
         abilityInfo->name = "DemoAbility";
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -939,8 +915,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_DataAbility_Start_0200, Function | MediumTe
         std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
         abilityInfo->type = AppExecFwk::AbilityType::DATA;
         abilityInfo->name = "DemoAbility";
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -972,8 +947,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_DataAbility_Start_0300, Function | MediumTe
         std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
         abilityInfo->type = AppExecFwk::AbilityType::DATA;
         abilityInfo->name = "DemoAbility";
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -1005,8 +979,7 @@ HWTEST_F(AbilityTerminateTest, AaFwk_DataAbility_Start_0400, Function | MediumTe
         std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
         abilityInfo->type = AppExecFwk::AbilityType::DATA;
         abilityInfo->name = "DemoAbility";
-        std::shared_ptr<AbilityLocalRecord> abilityRecord =
-            std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+        auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
         AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 

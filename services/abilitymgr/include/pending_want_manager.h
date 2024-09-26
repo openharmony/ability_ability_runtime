@@ -165,6 +165,7 @@ public:
 
     void Dump(std::vector<std::string> &info);
     void DumpByRecordId(std::vector<std::string> &info, const std::string &args);
+    int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName, std::vector<std::string> &appKey);
 
 private:
     sptr<IWantSender> GetWantSenderLocked(const int32_t callingUid, const int32_t uid, const int32_t userId,

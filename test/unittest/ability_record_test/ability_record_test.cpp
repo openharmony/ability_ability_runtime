@@ -3338,7 +3338,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_001, TestSize.Level
     Want want;
     want.SetUri("file://com.example.test/test.txt");
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 1);
 }
 
@@ -3357,7 +3357,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_002, TestSize.Level
     std::vector<std::string> oriUriVec = { "file://com.example.test/test.txt" };
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 1);
 }
 
@@ -3377,7 +3377,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_003, TestSize.Level
     std::vector<std::string> oriUriVec = { "file://com.example.test/test.txt" };
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 2);
 }
 
@@ -3397,7 +3397,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_004, TestSize.Level
     std::vector<std::string> oriUriVec(500, "file://com.example.test/test.txt");
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 500);
 }
 
@@ -3416,7 +3416,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_005, TestSize.Level
     std::vector<std::string> oriUriVec(501, "file://com.example.test/test.txt");
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 500);
 }
 
@@ -3544,6 +3544,21 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_006, TestSize.L
     EXPECT_EQ(want.GetUriString(), uri1);
     auto paramStramUris = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
     EXPECT_EQ(paramStramUris.size(), 1);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GetInstanceKey
+ * SubFunction: GetInstanceKey
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GetInstanceKey
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GetInstanceKey_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    auto instanceKey = abilityRecord->GetInstanceKey();
+    EXPECT_EQ(instanceKey, "");
 }
 
 }  // namespace AAFwk

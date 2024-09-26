@@ -26,7 +26,8 @@
 #endif
 
 #ifndef AAFWK_FILE_NAME
-#define AAFWK_FILE_NAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
+#define AAFWK_FILE_NAME \
+    (__builtin_strrchr(__FILE_NAME__, '/') ? __builtin_strrchr(__FILE_NAME__, '/') + 1 : __FILE_NAME__)
 #endif
 
 #ifndef AAFWK_FUNC_INFO

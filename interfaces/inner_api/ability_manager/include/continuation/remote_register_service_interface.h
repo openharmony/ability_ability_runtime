@@ -52,7 +52,7 @@ public:
      * notify continuation status to controlcenter continuation register service.
      *
      * @param registerToken token from register.
-     * @param deviceId deviceid.
+     * @param deviceId deviceId.
      * @param status device status.
      */
     virtual bool UpdateConnectStatus(int registerToken, const std::string &deviceId, int status) = 0;

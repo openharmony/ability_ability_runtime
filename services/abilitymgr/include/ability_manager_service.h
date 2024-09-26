@@ -85,7 +85,6 @@ constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t INVALID_USER_ID = -1;
 constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 using OHOS::AppExecFwk::IAbilityController;
-class PendingWantManager;
 struct StartAbilityInfo;
 class WindowFocusChangedListener;
 
@@ -407,7 +406,7 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED) override;
 
     /**
-     * Requset modal UIExtension with want, send want to ability manager service.
+     * Request modal UIExtension with want, send want to ability manager service.
      *
      * @param want, the want contains ability info about caller and called.
      * @return Returns ERR_OK on success, others on failure.
@@ -653,7 +652,7 @@ public:
     /**
      * NotifyCompleteContinuation, notify continuation complete to dms.
      * @param deviceId, source device which start a continuation.
-     * @param sessionId, represent a continuaion.
+     * @param sessionId, represent a continuation.
      * @param isSuccess, continuation result.
      * @return
      */
@@ -1558,7 +1557,7 @@ public:
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.
-     * @param isTerminate the result of ability onPrepareToTermiante.
+     * @param isTerminate the result of ability onPrepareToTerminate.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isTerminate) override;
@@ -1787,6 +1786,8 @@ public:
 
     int32_t TerminateMission(int32_t missionId) override;
 
+    int32_t BlockAllAppStart(bool flag) override;
+
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         uint32_t sceneFlag, bool &isColdStart);
 
@@ -1836,6 +1837,17 @@ protected:
 
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
+    /**
+     * @brief Notify abilityms app process pre cache
+     * @param pid process pid.
+     * @param userId userId Designation User ID.
+     */
+    void NotifyAppPreCache(int32_t pid, int32_t userId) override;
+
+    /**
+     * @brief Notify abilityms app process OnRemoteDied
+     * @param abilityTokens abilities in died process.
+     */
     void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
 private:
@@ -1858,7 +1870,7 @@ private:
      */
     void StartHighestPriorityAbility(int32_t userId, bool isBoot);
     /**
-     * connet bms.
+     * connect bms.
      *
      */
     void ConnectBmsService();
@@ -1924,6 +1936,7 @@ private:
     int StartRemoteAbilityByCall(const Want &want, const sptr<IRemoteObject> &callerToken,
         const sptr<IRemoteObject> &connect);
     int ReleaseRemoteAbility(const sptr<IRemoteObject> &connect, const AppExecFwk::ElementName &element);
+    void ForceTerminateServiceExtensionByPid(int32_t pid, int32_t userId);
 
     void DumpInner(const std::string &args, std::vector<std::string> &info);
     void DumpMissionInner(const std::string &args, std::vector<std::string> &info);
@@ -2279,12 +2292,27 @@ private:
 
     void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
         const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
-    
+
     void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
         const Want& want, uint32_t specifyTokenId);
 
+    void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
+
+    /**
+     * @brief Check debug app in developer mode.
+     * @param applicationInfo. The application info.
+     * @return Returns true or false.
+     */
+    bool CheckDebugAppNotInDeveloperMode(const AppExecFwk::ApplicationInfo &applicationInfo);
+
+    /**
+     * @brief Prompt user that developer mode has not been turned on.
+     * @param bundleName. The bundleName of the blocked hap.
+     * @param abilityName. The abilityName of the blocked hap.
+     */
+    void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
-    constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
@@ -2370,6 +2398,9 @@ private:
     void UpdateBackToCallerFlag(const sptr<IRemoteObject> &callerToken, Want &want, int32_t requestCode, bool backFlag);
 
     void SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType);
+
+    bool ShouldBlockAllAppStart();
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
@@ -2399,6 +2430,9 @@ private:
     ffrt::mutex abilityDebugDealLock_;
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
+
+    ffrt::mutex shouldBlockAllAppStartMutex_;
+    bool shouldBlockAllAppStart_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -35,9 +35,9 @@ public:
     /**
      * Notify Browser's fd to render process.
      *
-     * @param ipcFd, ipc file descriptior for web browser and render process.
-     * @param sharedFd, shared memory file descriptior.
-     * @param crashFd, crash signal file descriptior.
+     * @param ipcFd, ipc file descriptor for web browser and render process.
+     * @param sharedFd, shared memory file descriptor.
+     * @param crashFd, crash signal file descriptor.
      */
     virtual void NotifyBrowserFd(int32_t ipcFd, int32_t sharedFd,
                                  int32_t crashFd, sptr<IRemoteObject> browser) override;

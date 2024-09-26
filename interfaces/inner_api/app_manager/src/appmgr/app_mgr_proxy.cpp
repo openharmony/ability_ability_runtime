@@ -219,6 +219,25 @@ int32_t AppMgrProxy::GetRunningMultiAppInfoByBundleName(const std::string &bundl
     return result;
 }
 
+int32_t AppMgrProxy::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, String, bundleName);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_BUNDLENAME, data, reply, option);
+    if (!reply.ReadStringVector(&instanceKeys)) {
+        return ERR_INVALID_DATA;
+    }
+    int32_t result = reply.ReadInt32();
+    return result;
+}
+
 int32_t AppMgrProxy::GetRunningProcessesByBundleType(const BundleType bundleType,
     std::vector<RunningProcessInfo> &info)
 {
@@ -1807,13 +1826,13 @@ int32_t AppMgrProxy::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
+int32_t AppMgrProxy::NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_INVALID_DATA;
     }
-    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isMemorySizeSufficent);
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isMemorySizeSufficient);
 
     MessageParcel reply;
     MessageOption option;

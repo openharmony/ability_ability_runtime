@@ -37,6 +37,8 @@ public:
     ErrCode GetCloneBundleInfo(const std::string &bundleName, int32_t flags, int32_t appCloneIndex,
         BundleInfo &bundleInfo, int32_t userId);
     
+    std::string GetAppIdByBundleName(const std::string &bundleName, const int32_t userId);
+    
 private:
     void OnDeath();
 	

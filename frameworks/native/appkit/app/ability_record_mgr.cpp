@@ -42,32 +42,6 @@ void AbilityRecordMgr::SetToken(const sptr<IRemoteObject> &token)
 }
 
 /**
- * @brief Set the eventRunner of abilitythread to the AbilityRecordMgr.
- *
- * @param eventRunner The runner of the abilitythread.
- *
- */
-void AbilityRecordMgr::SetEventRunner(const std::shared_ptr<EventRunner> &eventRunner)
-{
-    if (eventRunner == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "eventRunner is nullptr");
-        return;
-    }
-    sptr<IRemoteObject> token = GetToken();
-    if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
-        return;
-    }
-
-    std::shared_ptr<AbilityLocalRecord> abilityInstance = GetAbilityItem(token);
-    if (abilityInstance != nullptr) {
-        abilityInstance->SetEventRunner(eventRunner);
-    } else {
-        TAG_LOGW(AAFwkTag::APPKIT, "ability record not exist");
-    }
-}
-
-/**
  * @brief Save the token and abilityRecord to the AbilityRecordMgr.
  *
  * @param token The token which the abilityRecord belongs to.

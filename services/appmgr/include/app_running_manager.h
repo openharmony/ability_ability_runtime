@@ -58,8 +58,8 @@ public:
      *
      * @return AppRunningRecord pointer if success get or create.
      */
-    std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
-        const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo);
+    std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(const std::shared_ptr<ApplicationInfo> &appInfo,
+        const std::string &processName, const BundleInfo &bundleInfo, const std::string &instanceKey);
 
     /**
      * CheckAppRunningRecordIsExist, Get process record by application name and process Name.
@@ -72,18 +72,18 @@ public:
      */
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordIsExist(const std::string &appName,
         const std::string &processName, const int uid, const BundleInfo &bundleInfo,
-        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr);
+        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "");
 
 #ifdef APP_NO_RESPONSE_DIALOG
     /**
      * CheckAppRunningRecordIsExist, Check whether the process of the app exists by bundle name and process Name.
      *
      * @param bundleName, Indicates the bundle name of the bundle..
-     * @param ablityName, ablity name.
+     * @param abilityName, ability name.
      *
      * @return true if exist.
      */
-    bool CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &ablityName);
+    bool CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &abilityName);
 #endif
 
     /**
@@ -357,6 +357,8 @@ private:
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
+        const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
 
 private:
     std::mutex runningRecordMapMutex_;
