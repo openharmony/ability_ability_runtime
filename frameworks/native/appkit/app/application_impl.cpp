@@ -70,7 +70,6 @@ bool ApplicationImpl::PerformForeground()
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (((curState_ == APP_STATE_READY) || (curState_ == APP_STATE_BACKGROUND)) && application_ != nullptr) {
         application_->OnForeground();
-        application_->CleanUselessTempData();
         curState_ = APP_STATE_FOREGROUND;
         return true;
     }
