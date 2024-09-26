@@ -285,8 +285,6 @@ void FAAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     }
     currentAbility_.reset(ability);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    abilityRecord->SetEventRunner(mainRunner);
     abilityRecord->SetAbilityThread(this);
     std::shared_ptr<AppExecFwk::AbilityContext> abilityObject = currentAbility_;
     std::shared_ptr<AppExecFwk::ContextDeal> contextDeal =
@@ -356,8 +354,6 @@ void FAAbilityThread::AttachExtension(const std::shared_ptr<AppExecFwk::OHOSAppl
 
     currentExtension_.reset(extension);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    abilityRecord->SetEventRunner(mainRunner);
     abilityRecord->SetAbilityThread(this);
     extensionImpl_ = std::make_shared<ExtensionImpl>();
     if (extensionImpl_ == nullptr) {
@@ -405,8 +401,6 @@ void FAAbilityThread::AttachExtension(const std::shared_ptr<AppExecFwk::OHOSAppl
 
     currentExtension_.reset(extension);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    abilityRecord->SetEventRunner(runner_);
     abilityRecord->SetAbilityThread(this);
     extensionImpl_ = std::make_shared<ExtensionImpl>();
     if (extensionImpl_ == nullptr) {
@@ -460,8 +454,6 @@ void FAAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     }
     currentAbility_.reset(ability);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    abilityRecord->SetEventRunner(runner_);
     abilityRecord->SetAbilityThread(this);
     std::shared_ptr<AppExecFwk::AbilityContext> abilityObject = currentAbility_;
     std::shared_ptr<AppExecFwk::ContextDeal> contextDeal =

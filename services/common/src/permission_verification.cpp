@@ -536,34 +536,22 @@ bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
 
 bool PermissionVerification::VerifyBlockAllAppStartPermission() const
 {
-    if (!IsSACall()) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "not SA call");
-        return false;
+    if (IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_BLOCK_ALL_APP_START)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
     }
-#ifdef ENABLE_BLOCK_ALL_APP_START
-    if (!VerifyCallingPermission(PermissionConstants::PERMISSION_BLOCK_ALL_APP_START)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "no PERMISSION_BLOCK_ALL_APP_START");
-        return false;
-    }
-#endif
-    TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
-    return true;
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
+    return false;
 }
 
 bool PermissionVerification::VerifyStartUIAbilityToHiddenPermission() const
 {
-    if (!IsSACall()) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "not SA call");
-        return false;
+    if (IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_START_UIABILITY_TO_HIDDEN)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
     }
-#ifdef ENABLE_BLOCK_ALL_APP_START
-    if (!VerifyCallingPermission(PermissionConstants::PERMISSION_START_UIABILITY_TO_HIDDEN)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "no PERMISSION_START_UIABILITY_TO_HIDDEN");
-        return false;
-    }
-#endif
-    TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
-    return true;
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

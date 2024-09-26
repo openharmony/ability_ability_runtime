@@ -19,8 +19,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-AbilityLocalRecord::AbilityLocalRecord(const std::shared_ptr<AbilityInfo> &info, const sptr<IRemoteObject> &token)
-    : abilityInfo_(info), token_(token) {}
+AbilityLocalRecord::AbilityLocalRecord(const std::shared_ptr<AbilityInfo> &info, const sptr<IRemoteObject> &token,
+    const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId)
+    : abilityInfo_(info), token_(token), want_(want), abilityRecordId_(abilityRecordId) {}
 
 AbilityLocalRecord::~AbilityLocalRecord() {}
 
@@ -29,29 +30,14 @@ const std::shared_ptr<AbilityInfo> &AbilityLocalRecord::GetAbilityInfo()
     return abilityInfo_;
 }
 
-const std::shared_ptr<EventHandler> &AbilityLocalRecord::GetEventHandler()
-{
-    return handler_;
-}
-
-void AbilityLocalRecord::SetEventHandler(const std::shared_ptr<EventHandler> &handler)
-{
-    handler_ = handler;
-}
-
-const std::shared_ptr<EventRunner> &AbilityLocalRecord::GetEventRunner()
-{
-    return runner_;
-}
-
-void AbilityLocalRecord::SetEventRunner(const std::shared_ptr<EventRunner> &runner)
-{
-    runner_ = runner;
-}
-
 const sptr<IRemoteObject> &AbilityLocalRecord::GetToken()
 {
     return token_;
+}
+
+int32_t AbilityLocalRecord::GetAbilityRecordId() const
+{
+    return abilityRecordId_;
 }
 
 const sptr<AbilityThread> &AbilityLocalRecord::GetAbilityThread()
@@ -62,11 +48,6 @@ const sptr<AbilityThread> &AbilityLocalRecord::GetAbilityThread()
 void AbilityLocalRecord::SetAbilityThread(const sptr<AbilityThread> &abilityThread)
 {
     abilityThread_ = abilityThread;
-}
-
-void AbilityLocalRecord::SetWant(const std::shared_ptr<AAFwk::Want> &want)
-{
-    want_ = want;
 }
 
 const std::shared_ptr<AAFwk::Want> &AbilityLocalRecord::GetWant()

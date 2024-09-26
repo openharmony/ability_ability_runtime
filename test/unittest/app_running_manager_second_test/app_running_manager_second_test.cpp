@@ -127,7 +127,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_CheckAppRunningRecordIsE
     record->SetRestartAppFlag(true);
     ret = appRunningManager->CheckAppRunningRecordIsExistByUid(USR_ID_100);
     EXPECT_FALSE(ret);
- 
+
     /**
      * @tc.steps: step4. call CheckAppRunningRecordIsExistByUid USR_ID_101
      * @tc.expected: step4. expect call CheckAppRunningRecordIsExistByUid false
@@ -294,17 +294,17 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_ProcessExitByBundleName_
     record1->SetKeepAliveEnableState(true);
     record1->SetMainProcess(true);
     record1->GetPriorityObject()->SetPid(10000); // 10000 means valid process id
-    ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent(); // marked mem insufficent
+    ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent(); // marked mem insufficient
     std::list<pid_t> pids;
     appRunningManager->ProcessExitByBundleName(BUNDLE_NAME, pids, false);
     EXPECT_TRUE(pids.empty());
 
     /**
      * @tc.steps: step2. process resident process and ExitResidentProcessManager Memory Size Insufficent
-     * @tc.expected: step2. expect pids not empty, memory size sufficent
+     * @tc.expected: step2. expect pids not empty, memory size sufficient
      */
     pids.clear();
-    ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficient(processInfos); // marked mem sufficent
+    ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficient(processInfos); // marked mem sufficient
     appRunningManager->ProcessExitByBundleName(BUNDLE_NAME, pids, true);
     EXPECT_TRUE(pids.empty());
 }

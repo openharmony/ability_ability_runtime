@@ -1692,7 +1692,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_ClearProcessByToke
 
 /**
  * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_001
- * @tc.desc: Test IsMemorySizeSufficent
+ * @tc.desc: Test IsMemorySizeSufficient
  * @tc.type: FUNC
  */
 HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_001, TestSize.Level1)
@@ -1713,7 +1713,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSuffic
 
 /*
  * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_002
- * @tc.desc: Test IsMemorySizeSufficent
+ * @tc.desc: Test IsMemorySizeSufficient
  * @tc.type: FUNC
  */
 HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_002, TestSize.Level1)
@@ -1735,7 +1735,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSuffic
 
 /*
  * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_003
- * @tc.desc: Test IsMemorySizeSufficent
+ * @tc.desc: Test IsMemorySizeSufficient
  * @tc.type: FUNC
  */
 HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_003, TestSize.Level1)

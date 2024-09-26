@@ -2986,7 +2986,7 @@ HWTEST_F(AmsAppRunningRecordTest, IsAbilitytiesBackground_001, TestSize.Level1)
     // 1. create AppRunningRecord and verify default status
     auto record = GetTestAppRunningRecord();
     EXPECT_NE(record, nullptr);
-    EXPECT_TRUE(record->IsAbilitytiesBackground());
+    EXPECT_TRUE(record->IsAbilitiesBackground());
 
     // 2. create AbilityInfo and AppInfo, and construct ModuleRunningRecord
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
@@ -3011,7 +3011,7 @@ HWTEST_F(AmsAppRunningRecordTest, IsAbilitytiesBackground_001, TestSize.Level1)
     record->hapModules_.emplace(bundleName, moduleRecords);
 
     // 4. verify function
-    EXPECT_FALSE(record->IsAbilitytiesBackground());
+    EXPECT_FALSE(record->IsAbilitiesBackground());
 
     moduleRecord->abilities_.clear();
     abilityRecord->state_ = AbilityState::ABILITY_STATE_BACKGROUND;
@@ -3019,7 +3019,7 @@ HWTEST_F(AmsAppRunningRecordTest, IsAbilitytiesBackground_001, TestSize.Level1)
     moduleRecords.clear();
     moduleRecords.push_back(moduleRecord);
     record->hapModules_.emplace(bundleName, moduleRecords);
-    EXPECT_TRUE(record->IsAbilitytiesBackground());
+    EXPECT_TRUE(record->IsAbilitiesBackground());
     GTEST_LOG_(INFO) << "IsAbilitytiesBackground_001 end.";
 }
 

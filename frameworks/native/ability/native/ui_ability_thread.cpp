@@ -140,8 +140,6 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     ability->SetAbilityRecordId(abilityRecord->GetAbilityRecordId());
     currentAbility_.reset(ability);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    abilityRecord->SetEventRunner(mainRunner);
     abilityRecord->SetAbilityThread(this);
     std::shared_ptr<AppExecFwk::AbilityContext> abilityObject = currentAbility_;
     std::shared_ptr<AppExecFwk::ContextDeal> contextDeal =
@@ -212,8 +210,6 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     ability->SetAbilityRecordId(abilityRecord->GetAbilityRecordId());
     currentAbility_.reset(ability);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    abilityRecord->SetEventRunner(runner_);
     abilityRecord->SetAbilityThread(this);
     std::shared_ptr<AppExecFwk::AbilityContext> abilityObject = currentAbility_;
     std::shared_ptr<AppExecFwk::ContextDeal> contextDeal =

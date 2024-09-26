@@ -42,7 +42,7 @@ private:
     int GetObsoleteBundleTempPath(const std::vector<std::string> &rootPath, std::vector<std::string> &tempPath);
     bool RemoveDir(const std::string &tempPath);
     void TraverseObsoleteTempDirectory(const std::string &currentPath, std::vector<std::string> &tempDirs);
-    bool CheckFileSize(const std::vector<std::string> bundlePath, const int64_t maxFileSize);
+    bool CheckFileSize(const std::vector<std::string> &bundlePath);
 
 private:
     std::shared_ptr<AbilityRuntime::ApplicationContext> context_ = nullptr;

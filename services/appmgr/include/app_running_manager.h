@@ -79,11 +79,11 @@ public:
      * CheckAppRunningRecordIsExist, Check whether the process of the app exists by bundle name and process Name.
      *
      * @param bundleName, Indicates the bundle name of the bundle..
-     * @param ablityName, ablity name.
+     * @param abilityName, ability name.
      *
      * @return true if exist.
      */
-    bool CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &ablityName);
+    bool CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &abilityName);
 #endif
 
     /**

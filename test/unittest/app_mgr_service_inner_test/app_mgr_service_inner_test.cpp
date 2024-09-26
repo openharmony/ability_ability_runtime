@@ -2045,14 +2045,14 @@ HWTEST_F(AppMgrServiceInnerTest, CheckGetRunningInfoPermission_001, TestSize.Lev
  */
 HWTEST_F(AppMgrServiceInnerTest, IsMemorySizeSufficent_001, TestSize.Level0)
 {
-    TAG_LOGI(AAFwkTag::TEST, "IsMemorySizeSufficent start");
+    TAG_LOGI(AAFwkTag::TEST, "IsMemorySizeSufficient start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->IsMemorySizeSufficent();
+    appMgrServiceInner->IsMemorySizeSufficient();
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->IsMemorySizeSufficent();
+    appMgrServiceInner->IsMemorySizeSufficient();
 
     TAG_LOGI(AAFwkTag::TEST, "IsMemorySizeSufficent_001 end");
 }
@@ -3644,7 +3644,7 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterAbilityDebugResponse_001, TestSize.Leve
 
 /**
  * @tc.name: NotifyAbilitysDebugChange_001
- * @tc.desc: Test the status of NotifyAbilitysDebugChange.
+ * @tc.desc: Test the status of NotifyAbilitiesDebugChange.
  * @tc.type: FUNC
  */
 HWTEST_F(AppMgrServiceInnerTest, NotifyAbilitysDebugChange_001, TestSize.Level0)
@@ -3655,7 +3655,7 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAbilitysDebugChange_001, TestSize.Level0)
     bool isAppDebug = true;
     appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
     appMgrServiceInner->appDebugManager_ = std::make_shared<AppDebugManager>();
-    auto result = appMgrServiceInner->NotifyAbilitysDebugChange(bundleName, isAppDebug);
+    auto result = appMgrServiceInner->NotifyAbilitiesDebugChange(bundleName, isAppDebug);
     EXPECT_EQ(result, ERR_NO_INIT);
 }
 

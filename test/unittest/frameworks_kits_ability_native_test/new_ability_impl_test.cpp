@@ -79,7 +79,7 @@ HWTEST_F(NewAbilityImplTest, AaFwk_NewAbilityImpl_HandleAbilityTransaction_0100,
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "newAbility";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
@@ -136,7 +136,7 @@ HWTEST_F(NewAbilityImplTest, AaFwk_NewAbilityImpl_HandleAbilityTransaction_0300,
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "newAbility";
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);

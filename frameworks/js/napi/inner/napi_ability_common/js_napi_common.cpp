@@ -1714,7 +1714,7 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
                    (abilityName == obj.first.want.GetElement().GetAbilityName());
         });
     if (item != connects_.end()) {
-        // match deviceid & bundlename && abilityname
+        // match deviceId & bundlename && abilityname
         connects_.erase(item);
         TAG_LOGI(AAFwkTag::JSNAPI, "erase connects_.size:%{public}zu", connects_.size());
     }

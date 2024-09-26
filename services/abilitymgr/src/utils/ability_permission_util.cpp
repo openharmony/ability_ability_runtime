@@ -21,6 +21,7 @@
 #include "app_utils.h"
 #include "accesstoken_kit.h"
 #include "hitrace_meter.h"
+#include "implicit_start_processor.h"
 #include "insight_intent_execute_param.h"
 #include "ipc_skeleton.h"
 #include "multi_instance_utils.h"
@@ -110,6 +111,9 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
 int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t userId, int32_t appIndex,
     sptr<IRemoteObject> callerToken)
 {
+    if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
+        return ERR_OK;
+    }
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
     AppExecFwk::ApplicationInfo appInfo;

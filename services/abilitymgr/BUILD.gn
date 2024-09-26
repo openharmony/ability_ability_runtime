@@ -33,6 +33,7 @@ config("abilityms_config") {
     "include/",
     "include/data_ability",
     "include/dialog_session/",
+    "include/mission/",
     "include/rdb/",
     "include/screen_lock/",
     "include/utils/",
@@ -111,6 +112,7 @@ ohos_shared_library("abilityms") {
   include_dirs = [
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
+    "${ability_runtime_services_path}/abilitymgr/include/mission",
   ]
   deps = [
     ":wantagent_manager",
@@ -156,7 +158,6 @@ ohos_shared_library("abilityms") {
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
-    # "graphic_2d:color_manager",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -171,7 +172,6 @@ ohos_shared_library("abilityms") {
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
-    # "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libmodal_system_ui_extension_client",
@@ -337,6 +337,7 @@ ohos_shared_library("mission_list") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_services_path}/abilitymgr/data_ability/include",
     "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_services_path}/abilitymgr/include/mission",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_utils_path}/global/constant",
@@ -362,11 +363,11 @@ ohos_shared_library("mission_list") {
   }
 
   sources = [
-    "src/mission.cpp",
-    "src/mission_data_storage.cpp",
-    "src/mission_info_mgr.cpp",
-    "src/mission_list.cpp",
-    "src/mission_list_manager.cpp",
+    "src/mission/mission.cpp",
+    "src/mission/mission_data_storage.cpp",
+    "src/mission/mission_info_mgr.cpp",
+    "src/mission/mission_list.cpp",
+    "src/mission/mission_list_manager.cpp",
     "src/task_data_persistence_mgr.cpp",
   ]
 

@@ -15,13 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("featureability") {
-  include_dirs = [
-    "./",
-    "${relational_store_napi_path}/common/include",
-    "${relational_store_napi_path}/dataability/include",
-    "${relational_store_napi_path}/rdb/include",
-    "${relational_store_base_path}/frameworks/common/include",
-  ]
+  include_dirs = [ "./" ]
 
   sources = [
     "feature_ability.cpp",
@@ -54,14 +48,9 @@ ohos_shared_library("featureability") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "ets_runtime:libark_jsruntime",
-    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
-    "ipc:ipc_napi",
-    "kv_store:distributeddata_inner",
-    "data_share:datashare_provider",
     "libuv:uv",
     "napi:ace_napi",
   ]
@@ -77,25 +66,24 @@ ohos_shared_library("featureability") {
     ]
   }
 
-  # if (ability_runtime_relational) {
-  #   include_dirs += [
-  #     "${relational_store_napi_path}/common/include",
-  #     "${relational_store_napi_path}/dataability/include",
-  #     "${relational_store_napi_path}/rdb/include",
-  #   ]
-  #   sources += [
-  #     "${relational_store_napi_path}/common/src/js_utils.cpp",
-  #     "${relational_store_napi_path}/dataability/src/napi_data_ability_predicates.cpp",
-  #     "${relational_store_napi_path}/rdb/src/napi_rdb_js_utils.cpp",
-  #     "${relational_store_napi_path}/rdb/src/napi_result_set.cpp",
-  #   ]
-  #   external_deps += [
-  #     "kv_store:distributeddata_mgr",
-  #     "relational_store:native_dataability",
-  #     "relational_store:native_rdb",
-  #     "relational_store:rdb_data_share_adapter",
-  #   ]
-  # }
+  if (ability_runtime_relational) {
+    include_dirs += [ "data_ability/include" ]
+    sources += [
+      "data_ability/js_utils.cpp",
+      "data_ability/napi_data_ability_predicates.cpp",
+      "data_ability/napi_rdb_js_utils.cpp",
+      "data_ability/napi_result_set.cpp",
+    ]
+    external_deps += [
+      "ets_runtime:libark_jsruntime",
+      "eventhandler:libeventhandler",
+      "kv_store:distributeddata_mgr",
+      "relational_store:native_appdatafwk",
+      "relational_store:native_dataability",
+      "relational_store:native_rdb",
+      "relational_store:rdb_data_share_adapter",
+    ]
+  }
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
