@@ -606,6 +606,51 @@ enum {
      */
     ERR_INSIGHT_INTENT_GET_PROFILE_FAILED = 2097269,
 
+    /*
+     * Result (2097270) for all apps are blocked from starting due to resource shortage.
+     */
+    ERR_ALL_APP_START_BLOCKED = 2097270,
+
+    /**
+     * Result(2097271) not support multi-instance.
+     */
+    ERR_MULTI_INSTANCE_NOT_SUPPORTED = 2097271,
+
+    /*
+     * Result (2097272) for not support app instance key.
+     */
+    ERR_APP_INSTANCE_KEY_NOT_SUPPORT = 2097272,
+
+    /*
+     * Result (2097273) for reach the upper limit.
+     */
+    ERR_UPPER_LIMIT = 2097273,
+
+    /*
+     * Result (2097274) for not support to create a new instance.
+     */
+    ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT = 2097274,
+
+    /*
+     * Result (2097275) for invalid app instance key.
+     */
+    ERR_INVALID_APP_INSTANCE_KEY = 2097275,
+
+    /*
+     * Result (2097276) for not support app clone.
+     */
+    ERR_NOT_SUPPORT_APP_CLONE = 2097276,
+
+    /*
+     * Result (2097277) for invalid extension type.
+     */
+    ERR_INVALID_EXTENSION_TYPE = 2097277,
+
+    /*
+     * Result (2097278) for replying failed while executing insight intent.
+     */
+    ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED = 2097278,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

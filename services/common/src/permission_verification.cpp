@@ -533,5 +533,25 @@ bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
     TAG_LOGW(AAFwkTag::APPMGR, "Permission denied");
     return false;
 }
+
+bool PermissionVerification::VerifyBlockAllAppStartPermission() const
+{
+    if (IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_BLOCK_ALL_APP_START)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
+    return false;
+}
+
+bool PermissionVerification::VerifyStartUIAbilityToHiddenPermission() const
+{
+    if (IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_START_UIABILITY_TO_HIDDEN)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

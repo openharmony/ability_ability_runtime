@@ -38,6 +38,7 @@ ohos_unittest("AppMgrServiceInnerTest") {
 
   sources = [
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
+    "${ability_runtime_test_path}/mock/task_handler_wrap_mock/src/mock_task_handler_wrap.cpp",
     "app_mgr_service_inner_test.cpp",
   ]
 

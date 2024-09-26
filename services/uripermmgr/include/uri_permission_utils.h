@@ -33,6 +33,7 @@ public:
     static bool IsSystemAppCall(uint32_t tokenId);
     static bool CheckIsSystemAppByTokenId(uint32_t tokenId);
     static bool GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName);
+    static int32_t GetAppIdByBundleName(const std::string &bundleName, std::string &appId);
     static std::string GetCallerNameByTokenId(uint32_t callerTokenId);
     static int32_t GetTokenIdByBundleName(const std::string &bundleName, int32_t appIndex, uint32_t &tokenId);
     static bool IsDocsCloudUri(Uri &uri);

@@ -94,7 +94,7 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_0300, Function | MediumTest | L
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_0300 start";
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
@@ -141,7 +141,7 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_0500, Function | MediumTest | L
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_0500 start";
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     std::shared_ptr<OHOSApplication> application;
     std::shared_ptr<AbilityHandler> handler;
     AbilityRuntime::Runtime::Options options;

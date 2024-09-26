@@ -512,7 +512,7 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
-     * ConnectUIServiceExtesnionAbility, connect session with uiService ability.
+     * ConnectUIServiceExtensionAbility, connect session with uiService ability.
      *
      * @param want, Special want for uiService type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
@@ -672,7 +672,7 @@ public:
     /**
      * notify continuation complete to dms.
      * @param deviceId, source device which start a continuation.
-     * @param sessionId, represent a continuaion.
+     * @param sessionId, represent a continuation.
      * @param isSuccess, continuation result.
      * @return
      */
@@ -721,7 +721,7 @@ public:
     void SetLockedState(int32_t sessionId, bool lockedState);
 
     /**
-     * @brief Register mission listener to ams.
+     * @brief Register mission listener to ability mgr.
      * @param listener The handler of listener.
      *
      * @return Returns ERR_OK on success, others on failure.
@@ -729,7 +729,7 @@ public:
     ErrCode RegisterMissionListener(sptr<IMissionListener> listener);
 
     /**
-     * @brief UnRegister mission listener from ams.
+     * @brief UnRegister mission listener from ability mgr.
      * @param listener The handler of listener.
      *
      * @return Returns ERR_OK on success, others on failure.
@@ -773,8 +773,8 @@ public:
     ErrCode UnRegisterMissionListener(const std::string &deviceId, sptr<IRemoteMissionListener> listener);
 
     /**
-     * @brief Get mission infos from ams.
-     * @param deviceId local or remote deviceid.
+     * @brief Get mission infos from ability mgr.
+     * @param deviceId local or remote deviceId.
      * @param numMax max number of missions.
      * @param missionInfos mission info result.
      *
@@ -784,9 +784,9 @@ public:
 
     /**
      * @brief Get mission info by id.
-     * @param deviceId local or remote deviceid.
+     * @param deviceId local or remote deviceId.
      * @param missionId Id of target mission.
-     * @param missionInfo mision info of target mission.
+     * @param missionInfo mission info of target mission.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
@@ -794,7 +794,7 @@ public:
 
     /**
      * @brief Get the Mission Snapshot Info object
-     * @param deviceId local or remote deviceid.
+     * @param deviceId local or remote deviceId.
      * @param missionId Id of target mission.
      * @param snapshot snapshot of target mission.
      * @param isLowResolution get low resolution snapshot.
@@ -1022,7 +1022,7 @@ public:
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to terminate.
-     * @param isPrepareTerminate the result of ability onPrepareToTermiante.
+     * @param isPrepareTerminate the result of ability onPrepareToTerminate.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PrepareTerminateAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isPrepareTerminate);
@@ -1030,7 +1030,7 @@ public:
     /**
      * Set mission continue state of this ability.
      *
-     * @param token Indidate token of ability.
+     * @param token Indicate token of ability.
      * @param state the mission continuation state of this ability.
      * @return Returns ERR_OK if success.
      */
@@ -1041,8 +1041,8 @@ public:
     /**
      * Set mission label of this ability.
      *
-     * @param abilityToken Indidate token of ability.
-     * @param label Indidate the label showed of the ability in recent missions.
+     * @param abilityToken Indicate token of ability.
+     * @param label Indicate the label showed of the ability in recent missions.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetMissionLabel(sptr<IRemoteObject> abilityToken, const std::string &label);
@@ -1050,8 +1050,8 @@ public:
     /**
      * Set mission icon of this ability.
      *
-     * @param abilityToken Indidate token of ability.
-     * @param icon Indidate the icon showed of the ability in recent missions.
+     * @param abilityToken Indicate token of ability.
+     * @param icon Indicate the icon showed of the ability in recent missions.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetMissionIcon(sptr<IRemoteObject> abilityToken,
@@ -1060,7 +1060,7 @@ public:
     /**
      * Register the WindowManagerService handler
      *
-     * @param handler Indidate handler of WindowManagerService.
+     * @param handler Indicate handler of WindowManagerService.
      * @return ErrCode Returns ERR_OK on success, others on failure.
      */
     ErrCode RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler,
@@ -1069,14 +1069,14 @@ public:
     /**
      * WindowManager notification AbilityManager after the first frame is drawn.
      *
-     * @param abilityToken Indidate token of ability.
+     * @param abilityToken Indicate token of ability.
      */
     void CompleteFirstFrameDrawing(sptr<IRemoteObject> abilityToken);
 
     /**
      * WindowManager notification AbilityManager after the first frame is drawn.
      *
-     * @param sessionId Indidate session id.
+     * @param sessionId Indicate session id.
      */
     void CompleteFirstFrameDrawing(int32_t sessionId);
 
@@ -1587,6 +1587,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode TerminateMission(int32_t missionId);
+
+    /**
+     * Notify ability manager to set the flag to block all apps from starting.
+     * Needs to apply for ohos.permission.BLOCK_ALL_APP_START.
+     * @param flag, The flag to block all apps from starting
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode BlockAllAppStart(bool flag);
 
 private:
     AbilityManagerClient();

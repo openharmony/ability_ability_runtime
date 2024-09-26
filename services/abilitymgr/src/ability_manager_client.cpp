@@ -2028,5 +2028,13 @@ ErrCode AbilityManagerClient::TerminateMission(int32_t missionId)
     }
     return ret;
 }
+
+ErrCode AbilityManagerClient::BlockAllAppStart(bool flag)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_INVALID_VALUE(abms);
+    return abms->BlockAllAppStart(flag);
+}
 } // namespace AAFwk
 } // namespace OHOS

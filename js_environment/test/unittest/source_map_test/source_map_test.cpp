@@ -154,12 +154,12 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_0800, Function | MediumTest | Level1)
     int32_t row = 0;
     int32_t col = 1;
     SourceMapData targetMap;
-    auto info = modSourceMap->Find(row, col, targetMap);
+    auto info = modSourceMap->Find(row, col, targetMap, "");
     EXPECT_TRUE(info.sources.empty());
 
     row = 1;
     col = 0;
-    info = modSourceMap->Find(row, col, targetMap);
+    info = modSourceMap->Find(row, col, targetMap, "");
     EXPECT_TRUE(info.sources.empty());
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_0800 end";
 }
@@ -188,7 +188,7 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_0900, Function | MediumTest | Level1)
             targetMap.afterPos_.emplace_back(mapInfo);
         }
     }
-    auto info = modSourceMap->Find(row, col, targetMap);
+    auto info = modSourceMap->Find(row, col, targetMap, "");
     EXPECT_STREQ(info.sources.c_str(), "");
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_0900 end";
 }
@@ -217,7 +217,7 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_1000, Function | MediumTest | Level1)
             targetMap.afterPos_.emplace_back(mapInfo);
         }
     }
-    auto info = modSourceMap->Find(row, col, targetMap);
+    auto info = modSourceMap->Find(row, col, targetMap, "");
     EXPECT_STREQ(info.sources.c_str(), "");
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_1000 end";
 }

@@ -54,8 +54,10 @@ abilityms_files = [
   "src/insight_intent_utils.cpp",
   "src/insight_intent_profile.cpp",
   "src/recovery_info_timer.cpp",
+  "src/modal_system_dialog/modal_system_dialog_ui_extension.cpp",
   "src/interceptor/ability_interceptor_executer.cpp",
   "src/interceptor/ability_jump_interceptor.cpp",
+  "src/interceptor/block_all_app_start_interceptor.cpp",
   "src/interceptor/control_interceptor.cpp",
   "src/interceptor/crowd_test_interceptor.cpp",
   "src/interceptor/disposed_rule_interceptor.cpp",
@@ -83,8 +85,8 @@ abilityms_files = [
   "src/call_container.cpp",
   "src/call_record.cpp",
   "src/inner_mission_info.cpp",
-  "src/mission_listener_controller.cpp",
-  "src/mission_listener_proxy.cpp",
+  "src/mission/mission_listener_controller.cpp",
+  "src/mission/mission_listener_proxy.cpp",
   "src/rdb/ability_resident_process_rdb.cpp",
   "src/rdb/parser_util.cpp",
   "src/rdb/rdb_data_manager.cpp",
@@ -134,6 +136,8 @@ abilityms_files = [
   "src/utils/app_mgr_util.cpp",
   "src/utils/dump_utils.cpp",
   "src/utils/ability_permission_util.cpp",
+  "src/utils/modal_system_dialog_util.cpp",
+  "src/utils/multi_instance_utils.cpp",
 ]
 
 if (ability_runtime_graphics) {

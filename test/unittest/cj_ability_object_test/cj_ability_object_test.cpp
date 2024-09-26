@@ -29,7 +29,7 @@ using namespace OHOS::AbilityRuntime;
 class CjAbilityObjectTest : public testing::Test {
 };
 
-void ProxyCall()
+bool ProxyCall()
 {
     CJAbilityObject::LoadModule("0");
     CJAbilityObject::LoadModule("1");
@@ -53,11 +53,13 @@ void ProxyCall()
     proxy.Dump(params, infos);
     proxy.OnSceneDestroyed();
     proxy.OnStop();
+    return true;
 }
 
 HWTEST_F(CjAbilityObjectTest, CJAbilityObject001, TestSize.Level1)
 {
-    ProxyCall();
+    auto result = ProxyCall();
+    EXPECT_TRUE(result);
 }
 
 HWTEST_F(CjAbilityObjectTest, CJAbilityObject002, TestSize.Level1)
@@ -81,4 +83,5 @@ HWTEST_F(CjAbilityObjectTest, CJAbilityObject002, TestSize.Level1)
     RegisterCJAbilityFuncs(registerFunc);
     ProxyCall();
     RegisterCJAbilityFuncs(nullptr);
+    EXPECT_NE(registerFunc, nullptr);
 }
