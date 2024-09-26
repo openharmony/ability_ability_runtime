@@ -308,15 +308,39 @@ public:
      */
     sptr<IAppScheduler> GetApplicationClient() const;
 
+     /**
+     * @brief Load a module and schedule the stage's lifecycle
+     * @param appInfo app info
+     * @param abilityInfo ability info
+     * @param token the ability's token
+     * @param hapModuleInfo module info
+     * @param want starting ability param
+     * @param abilityRecordId the record id of the ability
+     */
     void AddModule(std::shared_ptr<ApplicationInfo> appInfo, std::shared_ptr<AbilityInfo> abilityInfo,
         sptr<IRemoteObject> token, const HapModuleInfo &hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
+    /**
+     * @brief Batch adding modules whose stages will be loaded
+     * @param appInfo app info
+     * @param moduleInfos list of modules to be added
+     */
     void AddModules(const std::shared_ptr<ApplicationInfo> &appInfo, const std::vector<HapModuleInfo> &moduleInfos);
 
+    /**
+     * @brief Search a module record by bundleName and moduleName
+     * @param bundleName bundleName of the module
+     * @param moduleName moduleName of the module
+     * @return the module record matched the params or null
+     */
     std::shared_ptr<ModuleRunningRecord> GetModuleRecordByModuleName(
-        const std::string bundleName, const std::string &moduleName);
+        const std::string &bundleName, const std::string &moduleName);
 
+    /**
+     * @brief Get one ability's module record
+     * @param token represents the ability
+     */
     std::shared_ptr<ModuleRunningRecord> GetModuleRunningRecordByToken(const sptr<IRemoteObject> &token) const;
 
     std::shared_ptr<ModuleRunningRecord> GetModuleRunningRecordByTerminateLists(const sptr<IRemoteObject> &token) const;
@@ -446,7 +470,7 @@ public:
      *
      * @param token, the unique identification to the ability.
      *
-     * @return
+     * @return ability running record
      */
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecordByToken(const sptr<IRemoteObject> &token) const;
 
@@ -528,27 +552,69 @@ public:
 
     int64_t GetEventId() const;
 
+    /**
+     * When the one process has no ability, it will go dying.
+     */
     bool IsLastAbilityRecord(const sptr<IRemoteObject> &token);
 
     bool IsLastPageAbilityRecord(const sptr<IRemoteObject> &token);
 
     bool ExtensionAbilityRecordExists();
 
+    /**
+     * @brief indicates one process will go dying.
+     * Then the process won't be reused.
+     */
     void SetTerminating();
 
+    /**
+     * @brief Whether the process is dying.
+     */
     bool IsTerminating();
 
+    /**
+     * @brief Whether the process should keep alive.
+     */
     bool IsKeepAliveApp() const;
 
+    /**
+     * @brief Whether the process can keep empty alive.
+     */
     bool IsEmptyKeepAliveApp() const;
 
+    /**
+     * @brief Whether the process is main process.
+     */
     bool IsMainProcess() const;
 
+    /**
+     * @brief indicates one process can stay alive without any abilities.
+     * One case is that the process's stages being loaded
+     *
+     * @param isEmptyKeepAliveApp new value
+     */
     void SetEmptyKeepAliveAppState(bool isEmptyKeepAliveApp);
 
+    /**
+     * @brief A process can config itself to keep alive or not.
+     * when one process started, this method will be called from ability mgr with data selected from db.
+     *
+     * @param isKeepAliveEnable new value
+     */
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
+
+    /**
+     * @brief roughly considered as a value from the process's bundle info.
+     *
+     * @param isKeepAliveBundle new value
+     */
     void SetKeepAliveBundle(bool isKeepAliveBundle);
 
+    /**
+     * @brief only the bundle's main process can stay alive.
+     *
+     * @param isMainProcess new value
+     */
     void SetMainProcess(bool isMainProcess);
 
     void SetSingleton(bool isSingleton);
@@ -594,21 +660,48 @@ public:
     void SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo);
     void SetSpecifiedAbilityFlagAndWant(int requestId, const AAFwk::Want &want, const std::string &moduleName);
     void SetScheduleNewProcessRequestState(int32_t requestId, const AAFwk::Want &want, const std::string &moduleName);
+    /**
+     * Is processing new process request
+     */
     bool IsNewProcessRequest() const;
+    /**
+     * Is processing specified ability request
+     */
     bool IsStartSpecifiedAbility() const;
+    /**
+     * Get the specified requestId, -1 for none specified
+     */
     int32_t GetSpecifiedRequestId() const;
+    /**
+     * Called when one specified request is finished to set the request id to -1
+     */
     void ResetSpecifiedRequestId();
+    /**
+     * call the scheduler to go acceptWant procedure
+     */
     void ScheduleAcceptWant(const std::string &moduleName);
+    /**
+     * Called when acceptWant complete
+     */
     void ScheduleAcceptWantDone();
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
     void ScheduleNewProcessRequestDone();
     void ApplicationTerminated();
+    /**
+     * Get the want param for specified request
+     */
     AAFwk::Want GetSpecifiedWant() const;
     AAFwk::Want GetNewProcessRequestWant() const;
     int32_t GetNewProcessRequestId() const;
     void ResetNewProcessRequestId();
     void SetDebugApp(bool isDebugApp);
+    /**
+     * Indicate whether the process is a debugging one
+     */
     bool IsDebugApp();
+    /**
+     * debug flag or assert flag is set
+     */
     bool IsDebugging() const;
     void SetErrorInfoEnhance(const bool errorInfoEnhance);
     void SetNativeDebug(bool isNativeDebug);
@@ -680,12 +773,18 @@ public:
     ExtensionAbilityType GetExtensionType() const;
     ProcessType GetProcessType() const;
 
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t NotifyAppFault(const FaultData &faultData);
 #ifdef SUPPORT_SCREEN
     void ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisibilityInfo> &info);
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
 #endif //SUPPORT_SCREEN
-    bool IsAbilitytiesBackground();
+    bool IsAbilitiesBackground();
 
     inline void SetAbilityForegroundingFlag()
     {
@@ -930,7 +1029,6 @@ private:
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
     int32_t appRecordId_ = 0;
-    std::string appName_;
     std::string processName_;  // the name of this process
     std::string specifiedProcessFlag_; // the flag of specified Process
     int64_t eventId_ = 0;

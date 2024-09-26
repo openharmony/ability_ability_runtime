@@ -558,6 +558,9 @@ enum class AbilityManagerInterfaceCode {
 
     // ipc for block all apps from starting
     BLOCK_ALL_APP_START = 6119,
+
+    // update associate config list
+    UPDATE_ASSOCIATE_CONFIG_LIST = 6120,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

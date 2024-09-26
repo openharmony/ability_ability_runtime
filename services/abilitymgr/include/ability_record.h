@@ -596,10 +596,12 @@ public:
 
     bool GrantUriPermissionForServiceExtension();
 
+    bool GrantUriPermissionForUIExtension();
+
     /**
      * check whether the ability is launcher.
      *
-     * @return true : lanucher ,false: not lanucher
+     * @return true : launcher ,false: not launcher
      */
     bool IsLauncherAbility() const;
 
@@ -921,7 +923,7 @@ public:
     void DumpService(std::vector<std::string> &info, std::vector<std::string> &params, bool isClient = false) const;
 
     /**
-     * set aconnect remote object.
+     * set connect remote object.
      *
      */
     void SetConnRemoteObject(const sptr<IRemoteObject> &remoteObject);
@@ -1159,8 +1161,6 @@ private:
 
     void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
 
-    bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
-
     void PublishFileOpenEvent(const Want &want);
 
     void SetDebugAppByWaitingDebugFlag();
@@ -1194,7 +1194,7 @@ private:
 
     void StartingWindowTask(bool isRecent, bool isCold, const AbilityRequest &abilityRequest,
         std::shared_ptr<StartOptions> &startOptions);
-    void StartingWindowColdTask(bool isRecnet, const AbilityRequest &abilityRequest,
+    void StartingWindowColdTask(bool isRecent, const AbilityRequest &abilityRequest,
         std::shared_ptr<StartOptions> &startOptions);
     void PostCancelStartingWindowColdTask();
     void StartingWindowHot(const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<Want> &want,
@@ -1242,14 +1242,14 @@ private:
      */
     bool isAbilityForegrounding_ = false;
 
-    // service(ability) can be connected by multi-pages(abilites), so need to store this service's connections
+    // service(ability) can be connected by multi-pages(abilities), so need to store this service's connections
     mutable ffrt::mutex connRecordListMutex_;
     std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};
     // service(ability) onConnect() return proxy of service ability
     sptr<IRemoteObject> connRemoteObject_ = {};
     int startId_ = 0;  // service(ability) start id
 
-    // page(ability) can be started by multi-pages(abilites), so need to store this ability's caller
+    // page(ability) can be started by multi-pages(abilities), so need to store this ability's caller
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};
 
     bool isUninstall_ = false;

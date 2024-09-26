@@ -54,7 +54,7 @@ void ExtensionTest::SetUp(void)
 {
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -97,7 +97,7 @@ HWTEST_F(ExtensionTest, AaFwk_Extension_0200, Function | MediumTest | Level1)
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = nullptr;
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     std::shared_ptr<AppExecFwk::OHOSApplication> application;
     std::shared_ptr<AppExecFwk::AbilityHandler> handler;
 
@@ -162,7 +162,7 @@ HWTEST_F(ExtensionTest, AaFwk_Extension_0500, Function | MediumTest | Level1)
     GTEST_LOG_(INFO) << "AaFwk_Extension_0500 start";
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
 
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
 

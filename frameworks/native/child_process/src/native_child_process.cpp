@@ -125,6 +125,10 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
     std::map<std::string, int32_t> fds;
     NativeChildProcess_Fd* cur = args.fdList.head;
     while (cur != nullptr) {
+        if (!cur->fdName) {
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "fdName null");
+            return NCP_ERR_INVALID_PARAM;
+        }
         std::string key(cur->fdName);
         if (key.size() > MAX_KEY_SIZE) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "fd name too long");
@@ -143,10 +147,8 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
         std::string entryParams(args.entryParams);
         childArgs.entryParams = entryParams;
     }
-
     AppExecFwk::ChildProcessOptions childProcessOptions;
     childProcessOptions.isolationMode = options.isolationMode == NCP_ISOLATION_MODE_ISOLATED;
-
     int32_t childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS;
 
     ChildProcessManager &mgr = ChildProcessManager::GetInstance();
@@ -154,6 +156,5 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
         return CvtChildProcessManagerErrCode(cpmErr);
     }
-
     return NCP_NO_ERROR;
 }

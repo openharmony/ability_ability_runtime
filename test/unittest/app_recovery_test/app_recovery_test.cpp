@@ -698,5 +698,27 @@ HWTEST_F(AppRecoveryUnitTest, DeleteInValidMissionFiles_001, TestSize.Level1)
     AppRecovery::GetInstance().DeleteInValidMissionFiles();
     EXPECT_NE(AbilityRuntime::Context::GetApplicationContext(), nullptr);
 }
+
+/**
+ * @tc.name:  DeleteInValidMissionFileById_001
+ * @tc.desc:  add testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, DeleteInValidMissionFileById_001, TestSize.Level1)
+{
+    AbilityRuntime::ApplicationContext::GetInstance()->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    AppRecovery::GetInstance().DeleteInValidMissionFileById("/data/local/tmp", 10);
+    EXPECT_NE(AbilityRuntime::Context::GetApplicationContext(), nullptr);
+}
+
+/**
+ * @tc.name:  ClearPageStack_001
+ * @tc.desc:  add testcase.
+ */
+HWTEST_F(AppRecoveryUnitTest, ClearPageStack_001, TestSize.Level1)
+{
+    AbilityRuntime::ApplicationContext::GetInstance()->contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+    AppRecovery::GetInstance().ClearPageStack("ClearPageStack_001");
+    EXPECT_NE(AbilityRuntime::Context::GetApplicationContext(), nullptr);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

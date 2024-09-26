@@ -25,6 +25,7 @@ enum class ProcessMode {
     NEW_PROCESS_ATTACH_TO_PARENT = 1,
     NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM = 2,
     ATTACH_TO_STATUS_BAR_ITEM = 3,
+    NO_ATTACHMENT = 99,
     END
 };
 
@@ -49,6 +50,7 @@ public:
     static bool IsNewProcessMode(ProcessMode value);
     static bool IsAttachToStatusBarMode(ProcessMode value);
     static bool IsValidProcessMode(ProcessMode value);
+    static bool IsNoAttachmentMode(ProcessMode value);
 
     ProcessMode processMode = ProcessMode::UNSPECIFIED;
     StartupVisibility startupVisibility = StartupVisibility::UNSPECIFIED;
