@@ -145,7 +145,8 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
 
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
 
     std::shared_ptr<AbilityRecord> targetService;
@@ -495,7 +496,8 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
     }
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
     std::shared_ptr<ExtensionRecord> extensionRecord = nullptr;
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
@@ -552,7 +554,8 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     // 1. get target service ability record, and check whether it has been loaded.
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
     std::shared_ptr<AbilityRecord> targetService;
     bool isLoadedAbility = false;
