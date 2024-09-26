@@ -762,6 +762,8 @@ HWTEST_F(AmsAppRunningRecordTest, DeleteAppRunningRecord_001, TestSize.Level1)
     EXPECT_TRUE(record != nullptr);
     record->SetState(ApplicationState::APP_STATE_BACKGROUND);
     record->SetApplicationClient(GetMockedAppSchedulerClient());
+    auto taskHandler = AAFwk::TaskHandlerWrap::CreateQueueHandler("DeleteAppRunningRecord_001");
+    service_->SetTaskHandler(taskHandler);
     service_->ApplicationTerminated(record->GetRecordId());
     record = service_->GetAppRunningRecordByAppRecordId(record->GetRecordId());
     EXPECT_TRUE(record == nullptr);
