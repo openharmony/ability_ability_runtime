@@ -971,7 +971,7 @@ napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, 
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Get all running instance keys");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    std::shared_ptr<std::vector<std::string>> instanceKeys;
+    std::shared_ptr<std::vector<std::string>> instanceKeys = std::make_shared<std::vector<std::string>>();
     NapiAsyncTask::ExecuteCallback execute =
         [applicationContext = applicationContext_, innerErrCode, instanceKeys]() {
         auto context = applicationContext.lock();
@@ -997,7 +997,7 @@ napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, 
     };
 
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnGetRunningProcessInformation",
+    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnGetAllRunningInstanceKeys",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }

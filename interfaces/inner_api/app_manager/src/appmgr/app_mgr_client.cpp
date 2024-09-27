@@ -425,8 +425,10 @@ AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysByBundleName(const std::
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAllRunningInstanceKeysByBundleName returns result=%{public}d", result);
         return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
     }
+    TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
