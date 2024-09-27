@@ -30,6 +30,7 @@
 #include "mission_info.h"
 #include "permission_constants.h"
 #include "permission_verification.h"
+#include "permission_constants.h"
 #include "process_options.h"
 #include "scene_board/status_bar_delegate_manager.h"
 #include "session_info.h"
