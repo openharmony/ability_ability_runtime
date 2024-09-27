@@ -1107,12 +1107,11 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
         appRecord->AddAbilityStage();
         return;
     }
-
+    appRecord->LaunchPendingAbilities();
     if (appRecord->IsStartSpecifiedAbility()) {
         appRecord->AddAbilityStageBySpecifiedAbility(appRecord->GetBundleName());
-        return;
     }
-    appRecord->LaunchPendingAbilities();
+
     appRecord->SetPreloadState(PreloadState::PRELOADED);
     SendAppLaunchEvent(appRecord);
 }
