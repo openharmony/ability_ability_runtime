@@ -239,7 +239,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetFileEncryptStatus(uint32_t userId, bool &isEncrypted) override
+    virtual int32_t GetFileEncryptStatus(uint32_t userId, bool &isEncrypted, bool judgeVirDirFlag) override
     {
         return E_OK;
     }
