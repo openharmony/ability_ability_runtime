@@ -564,6 +564,8 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         if (abilityRecord->GetAbilityInfo() != nullptr) {
             isPage = (abilityRecord->GetAbilityInfo()->type == AbilityType::PAGE);
         }
+        appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(
+            AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
 
     if ((isPage || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
@@ -571,10 +573,14 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         appRecord->SetTerminating();
     }
 
-    auto timeoutTask = [appRecord, token]() {
-        if (appRecord) {
-            appRecord->TerminateAbility(token, true);
+    std::weak_ptr<AppRunningRecord> appRecordWptr(appRecord);
+    auto timeoutTask = [appRecordWptr, token]() {
+        auto appRecord = appRecordWptr.lock();
+        if (appRecord == nullptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
+            return;
         }
+        appRecord->TerminateAbility(token, true, true);
     };
     appRecord->PostTask("DELAY_KILL_ABILITY", AMSEventHandler::KILL_PROCESS_TIMEOUT, timeoutTask);
 }
