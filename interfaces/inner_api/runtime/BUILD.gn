@@ -40,6 +40,7 @@ config("runtime_public_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
     "include",
+    "//third_party/json/include",
   ]
 }
 
