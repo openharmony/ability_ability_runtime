@@ -49,8 +49,12 @@ void ApplicationImpl::SetApplication(const std::shared_ptr<OHOSApplication> &app
 bool ApplicationImpl::PerformAppReady()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (application_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
+        return false;
+    }
     application_->CleanUselessTempData();
-    if (curState_ == APP_STATE_CREATE && application_ != nullptr) {
+    if (curState_ == APP_STATE_CREATE) {
         application_->OnStart();
         curState_ = APP_STATE_READY;
         return true;
