@@ -203,6 +203,10 @@ int32_t AbilityPermissionUtil::UpdateInstanceKey(Want &want, const std::string &
 
 int32_t AbilityPermissionUtil::CheckMultiInstanceKeyForExtension(const AbilityRequest &abilityRequest)
 {
+    if (abilityRequest.want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not support to create a new instance");
+        return ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT;
+    }
     auto instanceKey = MultiInstanceUtils::GetInstanceKey(abilityRequest.want);
     if (instanceKey.empty()) {
         return ERR_OK;
