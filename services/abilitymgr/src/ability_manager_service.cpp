@@ -78,7 +78,6 @@
 #include "utils/dump_utils.h"
 #include "utils/extension_permissions_util.h"
 #include "utils/modal_system_dialog_util.h"
-#include "utils/start_option_utils.h"
 #include "utils/window_options_utils.h"
 #include "utils/want_utils.h"
 #ifdef SUPPORT_GRAPHICS
@@ -863,7 +862,7 @@ int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemote
     }
 
     OHOS::AAFwk::Want newWant = want;
-    StartOptionUtils::UpdateWantToSetDisplayID(newWant, callerToken);
+    WindowOptionsUtils::UpdateWantToSetDisplayID(newWant, callerToken);
     return StartAbilityInner(newWant, callerToken,
         requestCode, isPendingWantCaller, userId, isStartAsCaller, specifyToken, isForegroundToRestartApp, isImplicit,
         isUIAbilityOnly);
@@ -1303,7 +1302,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
     OHOS::AAFwk::Want newWant = want;
-    StartOptionUtils::UpdateWantToSetDisplayID(newWant, callerToken);
+    WindowOptionsUtils::UpdateWantToSetDisplayID(newWant, callerToken);
     return StartAbilityDetails(newWant, abilityStartSetting, callerToken, userId, requestCode);
 }
 
@@ -1631,7 +1630,7 @@ int AbilityManagerService::StartAbilityForOptionWrap(const Want &want, const Sta
     }
 
     OHOS::AAFwk::StartOptions newStartOptions = startOptions;
-    StartOptionUtils::UpdateStartOptionsToSetDisplayID(newStartOptions, callerToken);
+    WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(newStartOptions, callerToken);
     return StartAbilityForOptionInner(want, newStartOptions, callerToken, isPendingWantCaller, userId, requestCode,
         isStartAsCaller, callerTokenId, isImplicit, isCallByShortcut);
 }
