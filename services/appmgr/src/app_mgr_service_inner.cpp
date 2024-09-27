@@ -5954,6 +5954,8 @@ bool AppMgrServiceInner::SetAppFreezeFilter(int32_t pid)
         taskHandler_->SubmitTask(resetAppfreezeTask, "resetAppfreezeTask", waitTime);
         return cancelResult;
     }
+    TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter failed, pid %{public}d calling pid %{public}d",
+        pid, callingPid);
     return false;
 }
 
