@@ -601,6 +601,7 @@ private:
 
     std::string identityToken_;
     bool showOnLockScreen_ = false;
+    std::mutex wantMutexlock_;
 #endif
 };
 } // namespace AbilityRuntime
