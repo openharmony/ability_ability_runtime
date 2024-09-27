@@ -1126,6 +1126,29 @@ void AppMgrServiceInner::AddAbilityStageDone(const int32_t recordId)
     appRecord->AddAbilityStageDone();
 }
 
+void AppMgrServiceInner::UpdateAllProviderConfig(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (appRunningManager_ == nullptr || appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null ptr");
+        return;
+    }
+
+    auto obj = appRecord->GetPriorityObject();
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null ptr");
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::APPMGR, "hostPid: %{public}d", obj->GetPid());
+    std::vector<pid_t> providerPids;
+    appRunningManager_->GetAllUIExtensionProviderPid(obj->GetPid(), providerPids);
+
+    for (pid_t providerPid : providerPids) {
+        auto providerRecord = appRunningManager_->GetAppRunningRecordByPid(providerPid);
+        appRunningManager_->UpdateConfigurationDelayed(providerRecord);
+    }
+}
+
 void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -1144,6 +1167,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND) {
         if (appState == ApplicationState::APP_STATE_BACKGROUND) {
             appRunningManager_->UpdateConfigurationDelayed(appRecord);
+            UpdateAllProviderConfig(appRecord);
         }
         appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
         bool needNotifyApp = appRunningManager_->IsApplicationFirstForeground(*appRecord);
