@@ -43,6 +43,7 @@
 #include "mock_sa_call.h"
 #include "scene_board_judgement.h"
 #include "string_wrapper.h"
+#include "utils/window_options_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2387,8 +2388,8 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0100, TestSize
 {
     Want want;
     sptr<IRemoteObject> callerToken = nullptr;
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->UpdateWantToSetDisplayID(want, callerToken);
+
+    WindowOptionsUtils::UpdateWantToSetDisplayID(want, callerToken);
     auto displayId = want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
     std::string expectDisplayId = "0";
     EXPECT_EQ(displayId, expectDisplayId);
@@ -2404,8 +2405,8 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0200, TestSize
     Want want;
     sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->UpdateWantToSetDisplayID(want, callerToken);
+    
+    WindowOptionsUtils::UpdateWantToSetDisplayID(want, callerToken);
     auto displayId = want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
     std::string expectDisplayId = "0";
     EXPECT_EQ(displayId, expectDisplayId);
@@ -2430,9 +2431,8 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0300, TestSize
     record->Init();
     sptr<IRemoteObject> token = record->GetToken();
 
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
-    abilityMs_->UpdateWantToSetDisplayID(want, token);
+    WindowOptionsUtils::UpdateWantToSetDisplayID(want, token);
     auto displayId = want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
     EXPECT_EQ(displayId, testDisplayId);
 }
@@ -2457,10 +2457,9 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateStartOptionsToSetDisplayID_0100, 
     record->Init();
     sptr<IRemoteObject> token = record->GetToken();
 
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
     StartOptions startOptions;
     startOptions.SetDisplayID(0);
-    abilityMs_->UpdateStartOptionsToSetDisplayID(startOptions, token);
+    WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(startOptions, token);
     int32_t expectDisplayId = 0;
     EXPECT_NE(startOptions.GetDisplayID(), expectDisplayId);
 }
@@ -2473,10 +2472,10 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateStartOptionsToSetDisplayID_0100, 
 HWTEST_F(AbilityManagerServiceFirstTest, UpdateStartOptionsToSetDisplayID_0200, TestSize.Level1)
 {
     sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    
     StartOptions startOptions;
     startOptions.SetDisplayID(0);
-    abilityMs_->UpdateStartOptionsToSetDisplayID(startOptions, callerToken);
+    WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(startOptions, callerToken);
     int32_t expectDisplayId = 0;
     EXPECT_EQ(startOptions.GetDisplayID(), expectDisplayId);
 }
