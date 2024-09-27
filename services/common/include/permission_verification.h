@@ -115,6 +115,8 @@ struct VerificationInfo {
 
     bool VerifyStartUIAbilityToHiddenPermission() const;
 
+    bool VerifySuperviseKiaServicePermission() const;
+
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
 
