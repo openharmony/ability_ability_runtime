@@ -595,7 +595,6 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
         ThrowInvalidParamError(env, "Not enough params.");
         return CreateJsUndefined(env);
     }
-
     TAG_LOGD(AAFwkTag::APPKIT, "kill self process");
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
@@ -644,8 +643,8 @@ napi_value JsApplicationContextUtils::OnSetColorMode(napi_env env, NapiCallbackI
 
     int32_t colorMode = 0;
     if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], colorMode)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Parse colorMode failed");
         ThrowInvalidParamError(env, "Parse param colorMode failed, colorMode must be number.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse colorMode failed");
         return CreateJsUndefined(env);
     }
     applicationContext->SetColorMode(colorMode);
