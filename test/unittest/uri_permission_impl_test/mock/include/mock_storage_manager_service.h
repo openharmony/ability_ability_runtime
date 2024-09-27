@@ -206,7 +206,7 @@ public:
                                                  uint32_t userId,
                                                  std::vector<std::vector<uint8_t>> &plainText) override
     {
-        return E_OK;
+            return E_OK;
     }
 
     virtual int32_t ActiveUserKey(uint32_t userId,
