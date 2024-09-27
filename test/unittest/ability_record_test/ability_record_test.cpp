@@ -3075,7 +3075,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_001, TestSize.Level
     Want want;
     want.SetUri("file://com.example.test/test.txt");
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 1);
 }
 
@@ -3094,7 +3094,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_002, TestSize.Level
     std::vector<std::string> oriUriVec = { "file://com.example.test/test.txt" };
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 1);
 }
 
@@ -3114,7 +3114,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_003, TestSize.Level
     std::vector<std::string> oriUriVec = { "file://com.example.test/test.txt" };
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 2);
 }
 
@@ -3134,7 +3134,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_004, TestSize.Level
     std::vector<std::string> oriUriVec(500, "file://com.example.test/test.txt");
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 500);
 }
 
@@ -3153,7 +3153,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_005, TestSize.Level
     std::vector<std::string> oriUriVec(501, "file://com.example.test/test.txt");
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 500);
 }
 
@@ -3284,4 +3284,3 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_006, TestSize.L
 }
 }  // namespace AAFwk
 }  // namespace OHOS
-
