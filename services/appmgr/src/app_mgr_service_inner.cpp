@@ -236,7 +236,6 @@ constexpr const char* ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 constexpr const char* PROCESS_EXIT_EVENT_TASK = "Send Process Exit Event Task";
 constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
-constexpr int32_t FILE_GUARD_UID = 6266;
 constexpr const char* KEY_WATERMARK_BUSINESS_NAME = "com.ohos.param.watermarkBusinessName";
 constexpr const char* KEY_IS_WATERMARK_ENABLED = "com.ohos.param.isWatermarkEnabled";
 
@@ -8057,8 +8056,9 @@ int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bund
 int AppMgrServiceInner::RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
-    if (IPCSkeleton::GetCallingUid() != FILE_GUARD_UID) {
-        TAG_LOGE(AAFwkTag::APPMGR, "only open to file guard.");
+    if (!AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation() ||
+        !AAFwk::PermissionVerification::GetInstance()->VerifySuperviseKiaServicePermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no kia permission.");
         return ERR_PERMISSION_DENIED;
     }
     if (interceptor == nullptr) {
@@ -8072,8 +8072,9 @@ int AppMgrServiceInner::RegisterKiaInterceptor(const sptr<IKiaInterceptor> &inte
 int32_t AppMgrServiceInner::CheckIsKiaProcess(pid_t pid, bool &isKia)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
-    if (IPCSkeleton::GetCallingUid() != FILE_GUARD_UID) {
-        TAG_LOGE(AAFwkTag::APPMGR, "only open to file guard.");
+    if (!AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation() ||
+        !AAFwk::PermissionVerification::GetInstance()->VerifySuperviseKiaServicePermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no kia permission.");
         return ERR_PERMISSION_DENIED;
     }
     if (!appRunningManager_) {
