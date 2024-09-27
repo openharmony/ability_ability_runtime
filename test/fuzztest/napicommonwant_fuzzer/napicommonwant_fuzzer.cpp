@@ -36,7 +36,7 @@
 #include "string_wrapper.h"
 #include "zchar_wrapper.h"
 #include "remote_object_wrapper.h"
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "js_environment.h"
 
 using namespace OHOS::AAFwk;
@@ -147,7 +147,7 @@ void NapiCommonWantFuzztest3(bool boolParam, std::string &stringParam, int32_t i
 {
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
     AbilityRuntime::JsRuntime::Options options;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     ElementName elementName1;
     elementName1.SetDeviceID(stringParam);
@@ -191,7 +191,7 @@ void NapiCommonWantFuzztest4(bool boolParam, std::string &stringParam, int32_t i
     napi_value param = nullptr;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
     AbilityRuntime::JsRuntime::Options options;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     Want want;
     want.SetElementName(stringParam, stringParam, stringParam, stringParam);
@@ -238,7 +238,7 @@ void NapiCommonWantFuzztest5(bool boolParam, std::string &stringParam, int32_t i
     napi_value param = nullptr;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
     AbilityRuntime::JsRuntime::Options options;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     napi_value nullObject = nullptr;
     std::size_t size = 3; // 3 means arraysize.
@@ -292,7 +292,7 @@ void NapiCommonWantFuzztest6(bool boolParam, std::string &stringParam, int32_t i
     napi_value param = nullptr;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
     AbilityRuntime::JsRuntime::Options options;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     napi_value nullObject = nullptr;
     std::size_t size = 3; // 3 means arraysize.
