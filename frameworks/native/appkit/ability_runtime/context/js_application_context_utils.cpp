@@ -981,6 +981,7 @@ napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, 
             return;
         }
         if (context->GetCurrentAppMode() != static_cast<int32_t>(AppExecFwk::MultiAppModeType::MULTI_INSTANCE)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "multi-instance not supported");
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED);
             return;
         }
@@ -990,7 +991,8 @@ napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, 
     auto complete = [applicationContext = applicationContext_, innerErrCode, instanceKeys](
         napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode != ERR_OK) {
-            task.Reject(env, CreateJsError(env, *innerErrCode, "failed to get instance keys."));
+            TAG_LOGE(AAFwkTag::APPKIT, "failed to get instance keys,innerErrCode=%{public}d", *innerErrCode);
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
             return;
         }
         task.ResolveWithNoError(env, CreateNativeArray(env, *instanceKeys));
