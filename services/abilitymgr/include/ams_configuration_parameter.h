@@ -117,7 +117,7 @@ public:
     /**
      * get the application cold start timeout time.
      */
-    int GetAppStartTimeoutTime() const;
+    int GetAppStartTimeoutTime(const std::string& bundleName) const;
 
     bool IsSupportBackToCaller() const;
 
