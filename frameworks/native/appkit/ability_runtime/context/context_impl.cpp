@@ -288,7 +288,7 @@ std::string ContextImpl::GetResourceDir()
         return "";
     }
     std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR +
-                      hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
+        hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
     if (OHOS::FileExists(dir)) {
         return dir;
     }
@@ -703,7 +703,7 @@ int32_t ContextImpl::CreateBundleContext(std::shared_ptr<Context> &context, cons
     std::shared_ptr<Context> inputContext)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    
+
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "bundleName is empty");
         return ERR_INVALID_VALUE;
