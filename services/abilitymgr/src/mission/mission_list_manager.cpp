@@ -1855,7 +1855,7 @@ void MissionListManager::DelayCompleteTerminate(const std::shared_ptr<AbilityRec
         TAG_LOGI(AAFwkTag::ABILITYMGR, "emit delay complete terminate task");
         self->CompleteTerminate(abilityRecord);
     };
-    int killTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * KILL_TIMEOUT_MULTIPLE;
+    int killTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime("") * KILL_TIMEOUT_MULTIPLE;
     handler->SubmitTask(timeoutTask, "DELAY_KILL_PROCESS", killTimeout);
 }
 
@@ -4193,7 +4193,7 @@ int MissionListManager::PrepareClearMissionLocked(int missionId, const std::shar
     };
     auto handler = AbilityManagerService::GetPubInstance()->GetTaskHandler();
     int prepareTerminateTimeout =
-        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * PREPARE_TERMINATE_TIMEOUT_MULTIPLE;
+        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime("") * PREPARE_TERMINATE_TIMEOUT_MULTIPLE;
     if (handler) {
         handler->SubmitTask(terminateTask, "PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()),
             prepareTerminateTimeout);
