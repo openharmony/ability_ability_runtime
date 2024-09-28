@@ -1843,7 +1843,40 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys)
+{
+    if (remoteClientManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager_ null");
+        return ERR_NO_INIT;
+    }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
+        return ERR_INVALID_VALUE;
+    }
+    std::string bundleName;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callingUid, bundleName));
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetNameForUid failed, ret=%{public}d", ret);
+        return AAFwk::ERR_BUNDLE_NOT_EXIST;
+    }
+    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys);
+}
+
 int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    auto userId = GetUserIdByUid(IPCSkeleton::GetCallingUid());
+    if (VerifyAccountPermission(AAFwk::PermissionConstants::PERMISSION_GET_RUNNING_INFO, userId) ==
+        ERR_PERMISSION_DENIED) {
+        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Permission verification fail", __func__);
+        return ERR_PERMISSION_DENIED;
+    }
+    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys);
+}
+
+int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
     std::vector<std::string> &instanceKeys)
 {
     if (bundleName.empty()) {
