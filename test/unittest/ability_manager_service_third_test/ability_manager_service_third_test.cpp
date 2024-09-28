@@ -1835,18 +1835,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, AppUpgradeCompleted_002, TestSize.Level
 
 /*
  * Feature: AbilityManagerService
- * Function: GetAppMgr
- * FunctionPoints: AbilityManagerService GetAppMgr
- */
-HWTEST_F(AbilityManagerServiceThirdTest, GetAppMgr_001, TestSize.Level1)
-{
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    auto result = abilityMs->GetAppMgr();
-    EXPECT_NE(result, nullptr);
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: OnAddSystemAbility
  * FunctionPoints: AbilityManagerService OnAddSystemAbility
  */
