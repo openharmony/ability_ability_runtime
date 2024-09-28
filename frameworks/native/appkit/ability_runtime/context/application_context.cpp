@@ -598,10 +598,9 @@ int32_t ApplicationContext::GetProcessRunningInformation(AppExecFwk::RunningProc
     return (contextImpl_ != nullptr) ? contextImpl_->GetProcessRunningInformation(info) : -1;
 }
 
-int32_t ApplicationContext::GetAllRunningInstanceKeys(const std::string& bundleName,
-    std::vector<std::string> &instanceKeys)
+int32_t ApplicationContext::GetAllRunningInstanceKeys(std::vector<std::string> &instanceKeys)
 {
-    return (contextImpl_ != nullptr) ? contextImpl_->GetAllRunningInstanceKeys(bundleName, instanceKeys) : -1;
+    return (contextImpl_ != nullptr) ? contextImpl_->GetAllRunningInstanceKeys(instanceKeys) : -1;
 }
 
 bool ApplicationContext::IsUpdatingConfigurations()

@@ -984,8 +984,7 @@ napi_value JsApplicationContextUtils::OnGetAllRunningInstanceKeys(napi_env env, 
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED);
             return;
         }
-        std::string bundleName = context->GetBundleName();
-        *innerErrCode = context->GetAllRunningInstanceKeys(bundleName, *instanceKeys);
+        *innerErrCode = context->GetAllRunningInstanceKeys(*instanceKeys);
     };
     auto complete = [applicationContext = applicationContext_, innerErrCode, instanceKeys](
         napi_env env, NapiAsyncTask& task, int32_t status) {

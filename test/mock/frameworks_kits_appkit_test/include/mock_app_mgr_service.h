@@ -82,6 +82,7 @@ public:
     MOCK_METHOD2(UpdateRenderState, int32_t(pid_t renderPid, int32_t state));
     MOCK_METHOD2(GetRunningMultiAppInfoByBundleName, int32_t(const std::string &bundleName,
         RunningMultiAppInfo &info));
+    MOCK_METHOD1(GetAllRunningInstanceKeysBySelf, int32_t(std::vector<std::string> &instanceKeys));
     MOCK_METHOD2(GetAllRunningInstanceKeysByBundleName, int32_t(const std::string &bundleName,
         std::vector<std::string> &instanceKeys));
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupported));

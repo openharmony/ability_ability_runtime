@@ -219,6 +219,23 @@ int32_t AppMgrProxy::GetRunningMultiAppInfoByBundleName(const std::string &bundl
     return result;
 }
 
+int32_t AppMgrProxy::GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_SELF, data, reply, option);
+    if (!reply.ReadStringVector(&instanceKeys)) {
+        return ERR_INVALID_DATA;
+    }
+    int32_t result = reply.ReadInt32();
+    return result;
+}
+
 int32_t AppMgrProxy::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
     std::vector<std::string> &instanceKeys)
 {
