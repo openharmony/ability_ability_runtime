@@ -883,10 +883,10 @@ ErrCode BundleMgrHelper::QueryCloneExtensionAbilityInfoWithAppIndex(const Elemen
 ErrCode BundleMgrHelper::GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes,
     int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "Called.");
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "Called");
     auto bundleMgr = Connect();
     if (bundleMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect.");
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
