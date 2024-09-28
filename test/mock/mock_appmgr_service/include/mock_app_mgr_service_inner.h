@@ -46,6 +46,7 @@ public:
         int32_t(const std::string&, const int32_t, const pid_t, int32_t appCloneIndex, int32_t userId));
     MOCK_METHOD1(IsBackgroundRunningRestricted, int32_t(const std::string&));
     MOCK_METHOD1(GetAllRunningProcesses, int32_t(std::vector<RunningProcessInfo>&));
+    MOCK_METHOD1(GetAllRunningInstanceKeysBySelf, int32_t(std::vector<std::string> &instanceKeys));
     MOCK_METHOD2(GetAllRunningInstanceKeysByBundleName, int32_t(const std::string &bundleName,
         std::vector<std::string> &instanceKeys));
     MOCK_METHOD1(GetAllRenderProcesses, int32_t(std::vector<RenderProcessInfo>&));

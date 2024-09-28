@@ -368,6 +368,15 @@ public:
         RunningMultiAppInfo &info);
 
     /**
+     * GetAllRunningInstanceKeysBySelf, call GetAllRunningInstanceKeysBySelf() through proxy project.
+     * Obtains running instance keys of multi-instance app that are running on the device.
+     *
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys);
+
+    /**
      * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
      * Obtains running instance keys of multi-instance app that are running on the device.
      *
@@ -1796,6 +1805,8 @@ private:
         RunningMultiAppInfo &info);
     void GetMultiInstanceInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
         RunningMultiAppInfo &info);
+    int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
