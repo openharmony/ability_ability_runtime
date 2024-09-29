@@ -35,6 +35,7 @@ ohos_shared_library("cj_ability_ffi") {
   ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
   ]
@@ -44,6 +45,7 @@ ohos_shared_library("cj_ability_ffi") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "hilog:libhilog",
+    "napi:cj_bind_ffi",
     "napi:cj_bind_native",
   ]
 
@@ -52,6 +54,7 @@ ohos_shared_library("cj_ability_ffi") {
     "cj_application_context.cpp",
     "cj_element_name_ffi.cpp",
     "cj_utils_ffi.cpp",
+    "cj_want_agent_ffi.cpp",
     "cj_want_ffi.cpp",
   ]
 
