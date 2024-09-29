@@ -111,10 +111,8 @@ int ConnectionRecord::DisconnectAbility()
                 TAG_LOGE(AAFwkTag::CONNECTION, "Disconnect timeout");
                 connectionRecord->DisconnectTimeout();
             };
-            const AppExecFwk::AbilityInfo &abilityInfo = targetService_->GetAbilityInfo();
             int disconnectTimeout =
-                AmsConfigurationParameter::GetInstance()
-                    .GetAppStartTimeoutTime(abilityInfo.bundleName) * DISCONNECT_TIMEOUT_MULTIPLE;
+                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * DISCONNECT_TIMEOUT_MULTIPLE;
             handler->SubmitTask(disconnectTask, taskName, disconnectTimeout);
         }
         /* schedule disconnect to target ability */
