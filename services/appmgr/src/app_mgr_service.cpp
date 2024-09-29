@@ -317,7 +317,7 @@ sptr<IAmsMgr> AppMgrService::GetAmsMgr()
     return amsMgrScheduler_;
 }
 
-int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
+int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, int32_t userId)
 {
     if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
         TAG_LOGE(AAFwkTag::APPMGR, "The caller is not system-app, can not use system-api");
@@ -351,9 +351,8 @@ int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, con
             return AAFwk::CHECK_PERMISSION_FAILED;
         }
     }
-    int32_t uid = IPCSkeleton::GetCallingUid();
     pid_t pid = IPCSkeleton::GetCallingPid();
-    appMgrServiceInner_->ClearUpApplicationData(bundleName, uid, pid, userId);
+    appMgrServiceInner_->ClearUpApplicationData(bundleName, callingUid, pid, appCloneIndex, userId);
     return ERR_OK;
 }
 

@@ -144,7 +144,7 @@ sptr<IAmsMgr> AppMgrProxy::GetAmsMgr()
     return amsMgr;
 }
 
-int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
+int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, const int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -153,6 +153,7 @@ int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, const
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_UTIL_WRITE_RET_INT(data, String, bundleName);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, appCloneIndex);
     PARCEL_UTIL_WRITE_RET_INT(data, Int32, userId);
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::APP_CLEAR_UP_APPLICATION_DATA, data, reply, option);
