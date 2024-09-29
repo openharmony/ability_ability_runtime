@@ -216,6 +216,7 @@ ohos_source_set("abilityms_test_source") {
   }
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
+    "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
@@ -409,6 +410,7 @@ group("unittest") {
       "app_mgr_service_dump_ipc_test:unittest",
       "app_mgr_service_dump_test:unittest",
       "app_mgr_service_event_handler_test:unittest",
+      "app_mgr_service_inner_mock_test:unittest",
       "app_mgr_service_inner_second_test:unittest",
       "app_mgr_service_inner_tdd_test:unittest",
       "app_mgr_service_inner_test:unittest",

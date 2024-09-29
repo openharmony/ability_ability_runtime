@@ -236,7 +236,6 @@ constexpr const char* ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 constexpr const char* PROCESS_EXIT_EVENT_TASK = "Send Process Exit Event Task";
 constexpr const char* KILL_PROCESS_REASON_PREFIX = "Kill Reason:";
 constexpr const char* PRELOAD_APPLIATION_TASK = "PreloadApplicactionTask";
-constexpr int32_t FILE_GUARD_UID = 6266;
 constexpr const char* KEY_WATERMARK_BUSINESS_NAME = "com.ohos.param.watermarkBusinessName";
 constexpr const char* KEY_IS_WATERMARK_ENABLED = "com.ohos.param.isWatermarkEnabled";
 
@@ -1107,12 +1106,11 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
         appRecord->AddAbilityStage();
         return;
     }
-
+    appRecord->LaunchPendingAbilities();
     if (appRecord->IsStartSpecifiedAbility()) {
         appRecord->AddAbilityStageBySpecifiedAbility(appRecord->GetBundleName());
-        return;
     }
-    appRecord->LaunchPendingAbilities();
+
     appRecord->SetPreloadState(PreloadState::PRELOADED);
     SendAppLaunchEvent(appRecord);
 }
@@ -1125,6 +1123,29 @@ void AppMgrServiceInner::AddAbilityStageDone(const int32_t recordId)
         return;
     }
     appRecord->AddAbilityStageDone();
+}
+
+void AppMgrServiceInner::UpdateAllProviderConfig(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (appRunningManager_ == nullptr || appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null ptr");
+        return;
+    }
+
+    auto obj = appRecord->GetPriorityObject();
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null ptr");
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::APPMGR, "hostPid: %{public}d", obj->GetPid());
+    std::vector<pid_t> providerPids;
+    appRunningManager_->GetAllUIExtensionProviderPid(obj->GetPid(), providerPids);
+
+    for (pid_t providerPid : providerPids) {
+        auto providerRecord = appRunningManager_->GetAppRunningRecordByPid(providerPid);
+        appRunningManager_->UpdateConfigurationDelayed(providerRecord);
+    }
 }
 
 void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
@@ -1145,6 +1166,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND) {
         if (appState == ApplicationState::APP_STATE_BACKGROUND) {
             appRunningManager_->UpdateConfigurationDelayed(appRecord);
+            UpdateAllProviderConfig(appRecord);
         }
         appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
         bool needNotifyApp = appRunningManager_->IsApplicationFirstForeground(*appRecord);
@@ -1820,7 +1842,40 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys)
+{
+    if (remoteClientManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "remoteClientManager_ null");
+        return ERR_NO_INIT;
+    }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
+        return ERR_INVALID_VALUE;
+    }
+    std::string bundleName;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callingUid, bundleName));
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetNameForUid failed, ret=%{public}d", ret);
+        return AAFwk::ERR_BUNDLE_NOT_EXIST;
+    }
+    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys);
+}
+
 int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys)
+{
+    auto userId = GetUserIdByUid(IPCSkeleton::GetCallingUid());
+    if (VerifyAccountPermission(AAFwk::PermissionConstants::PERMISSION_GET_RUNNING_INFO, userId) ==
+        ERR_PERMISSION_DENIED) {
+        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Permission verification fail", __func__);
+        return ERR_PERMISSION_DENIED;
+    }
+    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys);
+}
+
+int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
     std::vector<std::string> &instanceKeys)
 {
     if (bundleName.empty()) {
@@ -3961,8 +4016,11 @@ void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     BundleInfo bundleInfo;
     auto userId = GetUserIdByUid(appRecord->GetUid());
+    auto flags = BundleFlag::GET_BUNDLE_DEFAULT | BundleFlag::GET_BUNDLE_WITH_REQUESTED_PERMISSION;
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(
-        appRecord->GetBundleName(), BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
+        appRecord->GetBundleName(),
+        static_cast<BundleFlag>(flags),
+        bundleInfo, userId))) {
         TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
         return;
     }
@@ -4361,7 +4419,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             TAG_LOGD(AAFwkTag::APPMGR, "module record is nullptr, add modules");
             appRecord->AddModules(appInfo, hapModules);
             appRecord->AddAbilityStageBySpecifiedAbility(appInfo->bundleName);
-        } else {
+        } else if (!appRecord->AddAbilityStageBySpecifiedAbility(appInfo->bundleName)) {
             TAG_LOGD(AAFwkTag::APPMGR, "schedule accept want");
             appRecord->ScheduleAcceptWant(hapModuleInfo.moduleName);
         }
@@ -5928,6 +5986,8 @@ bool AppMgrServiceInner::SetAppFreezeFilter(int32_t pid)
         taskHandler_->SubmitTask(resetAppfreezeTask, "resetAppfreezeTask", waitTime);
         return cancelResult;
     }
+    TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter failed, pid %{public}d calling pid %{public}d",
+        pid, callingPid);
     return false;
 }
 
@@ -6827,9 +6887,9 @@ int32_t AppMgrServiceInner::StartChildProcessPreCheck(pid_t callingPid, int32_t 
     CHECK_POINTER_AND_RETURN_VALUE(hostRecord, ERR_NULL_OBJECT);
     auto &appUtils = AAFwk::AppUtils::GetInstance();
     if (!appUtils.IsMultiProcessModel()) {
-        bool checkWhiteList = childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS ||
+        bool checkAllowList = childProcessType == CHILD_PROCESS_TYPE_NATIVE_ARGS ||
             childProcessType == CHILD_PROCESS_TYPE_NATIVE;
-        if (!checkWhiteList || !appUtils.IsAllowNativeChildProcess(hostRecord->GetAppIdentifier())) {
+        if (!checkAllowList || !appUtils.IsAllowNativeChildProcess(hostRecord->GetAppIdentifier())) {
             TAG_LOGE(AAFwkTag::APPMGR, "not support child process.");
             return AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS;
         }
@@ -7738,10 +7798,10 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
 }
 
-void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc& func)
+void AppMgrServiceInner::CacheLoadAbilityTask(const LoadAbilityTaskFunc&& func)
 {
     std::lock_guard lock(loadTaskListMutex_);
-    loadAbilityTaskFuncList_.emplace_back(func);
+    loadAbilityTaskFuncList_.emplace_back(std::move(func));
 }
 
 void AppMgrServiceInner::SubmitCacheLoadAbilityTask()
@@ -8054,8 +8114,9 @@ int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bund
 int AppMgrServiceInner::RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
-    if (IPCSkeleton::GetCallingUid() != FILE_GUARD_UID) {
-        TAG_LOGE(AAFwkTag::APPMGR, "only open to file guard.");
+    if (!AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation() ||
+        !AAFwk::PermissionVerification::GetInstance()->VerifySuperviseKiaServicePermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no kia permission.");
         return ERR_PERMISSION_DENIED;
     }
     if (interceptor == nullptr) {
@@ -8069,8 +8130,9 @@ int AppMgrServiceInner::RegisterKiaInterceptor(const sptr<IKiaInterceptor> &inte
 int32_t AppMgrServiceInner::CheckIsKiaProcess(pid_t pid, bool &isKia)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
-    if (IPCSkeleton::GetCallingUid() != FILE_GUARD_UID) {
-        TAG_LOGE(AAFwkTag::APPMGR, "only open to file guard.");
+    if (!AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation() ||
+        !AAFwk::PermissionVerification::GetInstance()->VerifySuperviseKiaServicePermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no kia permission.");
         return ERR_PERMISSION_DENIED;
     }
     if (!appRunningManager_) {

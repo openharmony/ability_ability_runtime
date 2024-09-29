@@ -130,6 +130,16 @@ public:
     virtual AppMgrResultCode GetAllRunningProcesses(std::vector<RunningProcessInfo>& info);
 
     /**
+     * GetAllRunningInstanceKeysBySelf, call GetAllRunningInstanceKeysBySelf() through proxy project.
+     * Obtains running instance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual AppMgrResultCode GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys);
+
+    /**
      * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
      * Obtains running instance keys of multi-instance app that are running on the device.
      *

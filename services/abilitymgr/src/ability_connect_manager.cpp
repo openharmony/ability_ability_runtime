@@ -66,6 +66,7 @@ const int32_t AUTO_DISCONNECT_INFINITY = -1;
 constexpr const char* FROZEN_WHITE_DIALOG = "com.huawei.hmos.huaweicast";
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
+constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 
 const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
 
@@ -144,7 +145,8 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
 
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
 
     std::shared_ptr<AbilityRecord> targetService;
@@ -292,7 +294,8 @@ void AbilityConnectManager::EnqueueStartServiceReq(const AbilityRequest &ability
         };
 
         int connectTimeout =
-            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * CONNECT_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance()
+                .GetAppStartTimeoutTime(abilityRequest.abilityInfo.bundleName) * CONNECT_TIMEOUT_MULTIPLE;
         taskHandler_->SubmitTask(callback, std::string("start_service_timeout:") + abilityUri,
             connectTimeout);
     }
@@ -494,7 +497,8 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
     }
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
     std::shared_ptr<ExtensionRecord> extensionRecord = nullptr;
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
@@ -551,7 +555,8 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     // 1. get target service ability record, and check whether it has been loaded.
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
     std::shared_ptr<AbilityRecord> targetService;
     bool isLoadedAbility = false;
@@ -1210,6 +1215,7 @@ void AbilityConnectManager::CompleteCommandAbility(std::shared_ptr<AbilityRecord
     // manage queued request
     CompleteStartServiceReq(abilityRecord->GetURI());
     if (abilityRecord->NeedConnectAfterCommand()) {
+        abilityRecord->UpdateConnectWant();
         ConnectAbility(abilityRecord);
     }
 }
@@ -1477,10 +1483,12 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
         // first load ability, There is at most one connect record.
         int recordId = abilityRecord->GetRecordId();
         taskName = std::string("LoadTimeout_") + std::to_string(recordId);
-        delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
+        delayTime = AmsConfigurationParameter::GetInstance()
+            .GetAppStartTimeoutTime(abilityRecord->GetApplicationInfo().bundleName) * LOAD_TIMEOUT_MULTIPLE;
     } else if (messageId == AbilityConnectManager::CONNECT_TIMEOUT_MSG) {
         taskName = std::string("ConnectTimeout_") + std::to_string(connectRecordId);
-        delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * CONNECT_TIMEOUT_MULTIPLE;
+        delayTime = AmsConfigurationParameter::GetInstance()
+            .GetAppStartTimeoutTime(abilityRecord->GetApplicationInfo().bundleName) * CONNECT_TIMEOUT_MULTIPLE;
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord->GetPid(),
             abilityRecord->GetUid(), delayTime);
     } else {
@@ -1761,7 +1769,8 @@ void AbilityConnectManager::CommandAbility(const std::shared_ptr<AbilityRecord> 
             connectManager->HandleCommandTimeoutTask(abilityRecord);
         };
         int commandTimeout =
-            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COMMAND_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance()
+                .GetAppStartTimeoutTime(abilityRecord->GetApplicationInfo().bundleName) * COMMAND_TIMEOUT_MULTIPLE;
         taskHandler_->SubmitTask(timeoutTask, taskName, commandTimeout);
         // scheduling command ability
         abilityRecord->CommandAbility();
@@ -1787,7 +1796,9 @@ void AbilityConnectManager::CommandAbilityWindow(const std::shared_ptr<AbilityRe
             connectManager->HandleCommandWindowTimeoutTask(abilityRecord, sessionInfo, winCmd);
         };
         int commandWindowTimeout =
-            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COMMAND_WINDOW_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance()
+                .GetAppStartTimeoutTime(
+                    abilityRecord->GetApplicationInfo().bundleName) * COMMAND_WINDOW_TIMEOUT_MULTIPLE;
         taskHandler_->SubmitTask(timeoutTask, taskName, commandWindowTimeout);
         // scheduling command ability
         abilityRecord->CommandAbilityWindow(sessionInfo, winCmd);
@@ -2353,6 +2364,8 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
         StartAbilityLocked(requestInfo);
         return;
     }
+
+    requestInfo.want.SetParam(WANT_PARAMS_APP_RESTART_FLAG, true);
 
     // restart other resident ability
     if (abilityRecord->CanRestartResident()) {

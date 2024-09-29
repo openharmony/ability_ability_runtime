@@ -24,6 +24,7 @@
 #include "hitrace_meter.h"
 #include "permission_constants.h"
 #include "process_options.h"
+#include "start_window_option.h"
 #include "scene_board/status_bar_delegate_manager.h"
 #include "session_manager_lite.h"
 #include "session/host/include/zidl/session_interface.h"
@@ -894,7 +895,7 @@ bool UIAbilityLifecycleManager::IsAbilityStarted(AbilityRequest &abilityRequest,
 
 int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CallAbilityLocked");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
 
@@ -959,7 +960,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
 
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     CHECK_POINTER_LOG(sessionInfo, "sessionInfo is invalid.");
@@ -1003,6 +1004,7 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
     sessionInfo->callerToken = abilityRequest.callerToken;
     sessionInfo->want = abilityRequest.want;
     sessionInfo->processOptions = abilityRequest.processOptions;
+    sessionInfo->startWindowOption = abilityRequest.startWindowOption;
     if (abilityRequest.startSetting != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Assign start setting to session.");
         sessionInfo->startSetting = abilityRequest.startSetting;
@@ -1354,7 +1356,8 @@ void UIAbilityLifecycleManager::DelayCompleteTerminate(const std::shared_ptr<Abi
         TAG_LOGI(AAFwkTag::ABILITYMGR, "delay complete terminate task");
         self->CompleteTerminate(abilityRecord);
     };
-    int killTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * KILL_TIMEOUT_MULTIPLE;
+    int killTimeout = AmsConfigurationParameter::GetInstance()
+        .GetAppStartTimeoutTime(abilityRecord->GetApplicationInfo().bundleName) * KILL_TIMEOUT_MULTIPLE;
     handler->SubmitTask(timeoutTask, "DELAY_KILL_PROCESS", killTimeout);
 }
 
@@ -1670,6 +1673,7 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
                 return;
             }
             if (!abilityRecord) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "OnAcceptWantResponse abilityRecord null");
                 return;
             }
             abilityRecord->SetWant(abilityRequest.want);
@@ -1818,6 +1822,7 @@ int UIAbilityLifecycleManager::MoveAbilityToFront(const AbilityRequest &abilityR
     sessionInfo->callerToken = abilityRequest.callerToken;
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->processOptions = nullptr;
+    sessionInfo->startWindowOption = nullptr;
     SendSessionInfoToSCB(callerAbility, sessionInfo);
     abilityRecord->RemoveWindowMode();
     if (startOptions != nullptr) {
@@ -1866,6 +1871,7 @@ int UIAbilityLifecycleManager::StartAbilityBySpecifed(const AbilityRequest &abil
     sessionInfo->want = abilityRequest.want;
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->processOptions = abilityRequest.processOptions;
+    sessionInfo->startWindowOption = abilityRequest.startWindowOption;
     sessionInfo->instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
     SpecifiedInfo specifiedInfo;
     specifiedInfo.abilityName = abilityRequest.abilityInfo.name;
@@ -2404,6 +2410,7 @@ int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId, std::shared
     sptr<SessionInfo> sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     sessionInfo->processOptions = nullptr;
+    sessionInfo->startWindowOption = nullptr;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call PendingSessionActivation by rootSceneSession"
         "windowLeft=%{public}d,windowTop=%{public}d,"
         "windowHeight=%{public}d,windowWidth=%{public}d",
@@ -2443,6 +2450,13 @@ int32_t UIAbilityLifecycleManager::DoProcessAttachment(std::shared_ptr<AbilityRe
     auto statusBarDelegateManager = GetStatusBarDelegateManager();
     CHECK_POINTER_AND_RETURN(statusBarDelegateManager, ERR_INVALID_VALUE);
     return statusBarDelegateManager->DoProcessAttachment(abilityRecord);
+}
+
+int32_t UIAbilityLifecycleManager::DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    auto statusBarDelegateManager = GetStatusBarDelegateManager();
+    CHECK_POINTER_AND_RETURN(statusBarDelegateManager, ERR_INVALID_VALUE);
+    return statusBarDelegateManager->DoCallerProcessAttachment(abilityRecord);
 }
 
 int32_t UIAbilityLifecycleManager::TryPrepareTerminateByPids(const std::vector<int32_t>& pids)
@@ -2516,11 +2530,20 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     }
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
+
+    if (!IsCallerInStatusBar() && (sessionInfo->processOptions != nullptr &&
+        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
+        return ERR_CAN_NOT_SHOW_HIDE;
+    }
     if (sessionInfo->processOptions == nullptr ||
         (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
         !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "process options check failed");
-        return ERR_START_OPTIONS_CHECK_FAILED;
+        auto ret = DoCallerProcessAttachment(abilityRecord);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
+            return ERR_CAN_NOT_SHOW_HIDE;
+        }
     }
     auto callerSessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(callerSessionInfo, ERR_INVALID_VALUE);
@@ -2541,11 +2564,6 @@ int UIAbilityLifecycleManager::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> 
     }
     std::shared_ptr<AbilityRecord> uiAbilityRecord = iter->second;
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
-    auto state = uiAbilityRecord->GetAbilityVisibilityState();
-    if (state == AbilityVisibilityState::UNSPECIFIED || state == AbilityVisibilityState::INITIAL) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability visibility check failed");
-        return ERR_NATIVE_ABILITY_STATE_CHECK_FAILED;
-    }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "change ability visibility: %{public}d", isShow);
     if (isShow) {
         uiAbilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_SHOW);

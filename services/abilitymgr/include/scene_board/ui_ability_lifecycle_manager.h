@@ -442,6 +442,7 @@ private:
     void TerminateSession(std::shared_ptr<AbilityRecord> abilityRecord);
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
+    int32_t DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;

@@ -336,7 +336,7 @@ public:
      * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartExtensionAbility(
+    virtual int32_t StartExtensionAbility(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
@@ -597,7 +597,7 @@ public:
      * @param userId, Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ConnectAbility(
+    virtual int32_t ConnectAbility(
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
@@ -613,7 +613,7 @@ public:
      * @param userId, the service user ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ConnectAbilityCommon(
+    virtual int32_t ConnectAbilityCommon(
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
@@ -1879,6 +1879,19 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t BlockAllAppStart(bool flag)
+    {
+        return 0;
+    }
+
+    /**
+     * update associate config list by rss.
+     *
+     * @param configs The rss config info.
+     * @param exportConfigs The rss export config info.
+     * @param flag UPDATE_CONFIG_FLAG_COVER is cover config, UPDATE_CONFIG_FLAG_APPEND is append config.
+     */
+    virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag)
     {
         return 0;
     }

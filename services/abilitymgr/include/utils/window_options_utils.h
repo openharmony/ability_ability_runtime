@@ -17,8 +17,10 @@
 #define OHOS_ABILITY_RUNTIME_WINDOW_OPTIONS_UTILS_H
 
 #include "ability_info.h"
+#include "hilog_tag_wrapper.h"
 #include "iremote_object.h"
 #include "start_options.h"
+#include "string_wrapper.h"
 #include "want.h"
 
 namespace OHOS {
@@ -28,6 +30,9 @@ public:
     static void SetWindowPositionAndSize(Want& want,
         const sptr<IRemoteObject>& callerToken, const StartOptions& startOptions);
     static std::pair<bool, AppExecFwk::SupportWindowMode> WindowModeMap(int32_t windowMode);
+    static void UpdateWantToSetDisplayID(Want &want, const sptr<IRemoteObject> &callerToken);
+    static void UpdateStartOptionsToSetDisplayID(StartOptions &startOptions,
+        const sptr<IRemoteObject> &callerToken);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

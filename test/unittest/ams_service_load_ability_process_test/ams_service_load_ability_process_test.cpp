@@ -122,7 +122,7 @@ void AmsServiceLoadAbilityProcessTest::MockBundleInstallerAndSA()
         }
     };
     EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-    EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_))
+    EXPECT_CALL(*mockSystemAbility_, CheckSystemAbility(testing::_))
         .WillOnce(testing::Invoke(mockGetSystemAbility))
         .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
 }

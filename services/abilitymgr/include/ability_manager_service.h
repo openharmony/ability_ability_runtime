@@ -399,7 +399,7 @@ public:
      * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartExtensionAbility(
+    virtual int32_t StartExtensionAbility(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
@@ -582,13 +582,13 @@ public:
      * @param userId, Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ConnectAbility(
+    virtual int32_t ConnectAbility(
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
-    virtual int ConnectAbilityCommon(
+    virtual int32_t ConnectAbilityCommon(
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
@@ -1031,7 +1031,7 @@ public:
         bool isImplicit = false,
         bool isUIAbilityOnly = false);
 
-    int StartExtensionAbilityInner(
+    int32_t StartExtensionAbilityInner(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId,
@@ -1786,6 +1786,9 @@ public:
 
     int32_t TerminateMission(int32_t missionId) override;
 
+    int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag) override;
+
     int32_t BlockAllAppStart(bool flag) override;
 
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
@@ -1896,7 +1899,7 @@ private:
     int32_t PreStartInner(const FreeInstallInfo& taskInfo);
     void RemovePreStartSession(const std::string& sessionId);
 
-    int ConnectLocalAbility(
+    int32_t ConnectLocalAbility(
         const Want &want,
         const int32_t userId,
         const sptr<IAbilityConnection> &connect,
@@ -2366,6 +2369,7 @@ private:
 
     std::shared_ptr<AbilityAutoStartupService> abilityAutoStartupService_;
 
+    std::mutex whiteListMutex_;
     std::map<std::string, std::list<std::string>> whiteListMap_;
 
     std::list<std::string> exportWhiteList_;

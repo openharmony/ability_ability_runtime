@@ -65,5 +65,54 @@ std::pair<bool, AppExecFwk::SupportWindowMode> WindowOptionsUtils::WindowModeMap
     }
     return result;
 }
+
+void WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(StartOptions &startOptions,
+    const sptr<IRemoteObject> &callerToken)
+{
+    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        return;
+    }
+    sptr<IRemoteObject> caller;
+    if (startOptions.GetDisplayID() == 0) {
+        if (callerToken != nullptr) {
+            caller = callerToken;
+        }
+        std::shared_ptr<AbilityRecord> abilityRecord = Token::GetAbilityRecordByToken(caller);
+        if (abilityRecord != nullptr) {
+            std::string displayId = abilityRecord->GetWant().GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
+            startOptions.SetDisplayID(std::stoi(displayId));
+        }
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start ability displayID is %{public}d", startOptions.GetDisplayID());
+}
+
+void WindowOptionsUtils::UpdateWantToSetDisplayID(Want &want,
+    const sptr<IRemoteObject> &callerToken)
+{
+    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        return;
+    }
+    sptr<IRemoteObject> caller;
+    OHOS::AAFwk::WantParams params = want.GetParams();
+    if (callerToken != nullptr) {
+        caller = callerToken;
+    } else {
+        params.SetParam(Want::PARAM_RESV_DISPLAY_ID, AAFwk::String::Box("0"));
+        want.SetParams(params);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "start ability displayID is 0");
+        return;
+    }
+    std::shared_ptr<AbilityRecord> abilityRecord = Token::GetAbilityRecordByToken(caller);
+    if (abilityRecord != nullptr) {
+        std::string displayId = abilityRecord->GetWant().GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
+        params.SetParam(Want::PARAM_RESV_DISPLAY_ID, AAFwk::String::Box(displayId));
+        want.SetParams(params);
+    } else {
+        params.SetParam(Want::PARAM_RESV_DISPLAY_ID, AAFwk::String::Box("0"));
+        want.SetParams(params);
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start ability displayID is %{public}s",
+        want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID).c_str());
+}
 }  // namespace AAFwk
 }  // namespace OHOS
