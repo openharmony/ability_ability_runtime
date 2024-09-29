@@ -154,7 +154,7 @@ int32_t AbilityPermissionUtil::CheckMultiInstance(Want &want, sptr<IRemoteObject
     }
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     std::vector<std::string> instanceKeyArray;
-    auto result = appMgr->GetAllRunningInstanceKeysByBundleName(want.GetBundle(), instanceKeyArray);
+    auto result = IN_PROCESS_CALL(appMgr->GetAllRunningInstanceKeysByBundleName(want.GetBundle(), instanceKeyArray));
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "Failed to get instance key");
         return ERR_INVALID_VALUE;

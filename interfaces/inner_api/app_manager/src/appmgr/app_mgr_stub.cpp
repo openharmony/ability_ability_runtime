@@ -515,8 +515,9 @@ int32_t AppMgrStub::HandleGetAllRunningInstanceKeysBySelf(MessageParcel &data, M
 int32_t AppMgrStub::HandleGetAllRunningInstanceKeysByBundleName(MessageParcel &data, MessageParcel &reply)
 {
     std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
     std::vector<std::string> instanceKeys;
-    int32_t result = GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    int32_t result = GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     if (!reply.WriteStringVector(instanceKeys)) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed to write isntanceKeys");
         return ERR_INVALID_VALUE;
