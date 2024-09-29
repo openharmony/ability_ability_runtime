@@ -2315,6 +2315,8 @@ private:
      */
     void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
 
+    bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
 
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
