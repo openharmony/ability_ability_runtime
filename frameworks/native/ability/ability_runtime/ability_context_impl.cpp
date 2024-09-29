@@ -402,7 +402,7 @@ ErrCode AbilityContextImpl::ConnectAbility(const AAFwk::Want& want, const sptr<A
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::CONTEXT,
-        "ConnectAbility called, caller:%{public}s, target:%{public}s",
+        "ConnectAbility, caller:%{public}s, target:%{public}s",
         abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode ret = ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
@@ -440,7 +440,7 @@ void AbilityContextImpl::DisconnectAbility(const AAFwk::Want& want,
     const sptr<AbilityConnectCallback>& connectCallback, int32_t accountId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::CONTEXT, "DisconnectAbility called, caller:%{public}s, target:%{public}s",
+    TAG_LOGI(AAFwkTag::CONTEXT, "DisconnectAbility, caller:%{public}s, target:%{public}s",
         abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode ret =
         ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);
@@ -694,6 +694,10 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
     auto resultTask =
         [env, outTask = std::move(task)](int32_t resultCode, const AAFwk::Want &resultWant) {
         auto retData = new (std::nothrow) RequestResult();
+        if (retData == nullptr) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "null retData");
+            return;
+        }
         retData->resultCode = resultCode;
         retData->resultWant = resultWant;
         retData->task = std::move(outTask);
@@ -705,6 +709,10 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
             return;
         }
         auto work = new (std::nothrow) uv_work_t;
+        if (work == nullptr) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "null work");
+            return;
+        }
         work->data = static_cast<void*>(retData);
         int rev = uv_queue_work_with_qos(
             loop,

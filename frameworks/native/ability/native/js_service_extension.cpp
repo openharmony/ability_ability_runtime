@@ -224,7 +224,7 @@ void JsServiceExtension::ListenWMS()
         return;
     }
 
-    auto saStatusChangeListener_ =
+    saStatusChangeListener_ =
         sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_, context->GetToken());
     if (saStatusChangeListener_ == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "create status change listener failed");

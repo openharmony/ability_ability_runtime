@@ -25,6 +25,8 @@ namespace {
 constexpr int32_t LOAD_CONFIGURATION_FAILED = -1;
 constexpr int32_t LOAD_CONFIGURATION_SUCCESS = 0;
 constexpr int32_t MAX_RESIDENT_WHITE_LIST_SIZE = 100;
+const int32_t MIGRATE_CLIENT_TIMEOUT_RATIO = 3;
+const char* BUNDLE_NAME_MIGRATE_CLIENT = "com.huawei.hmos.migrateclient";
 }
 
 AmsConfigurationParameter::AmsConfigurationParameter() {}
@@ -94,8 +96,11 @@ int AmsConfigurationParameter::GetBootAnimationTimeoutTime() const
     return bootAnimationTime_;
 }
 
-int AmsConfigurationParameter::GetAppStartTimeoutTime() const
+int AmsConfigurationParameter::GetAppStartTimeoutTime(const std::string& bundleName) const
 {
+    if (!bundleName.empty() && bundleName == BUNDLE_NAME_MIGRATE_CLIENT) {
+        return timeoutUnitTime_ * AppUtils::GetInstance().GetTimeoutUnitTimeRatio() * MIGRATE_CLIENT_TIMEOUT_RATIO;
+    }
     return timeoutUnitTime_ * AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
 }
 

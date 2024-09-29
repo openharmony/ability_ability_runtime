@@ -133,7 +133,8 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     if (isAppCloneSelector) {
         ret = GenerateAbilityRequestByAppIndexes(userId, request, dialogAppInfos);
     } else {
-        ret = GenerateAbilityRequestByAction(userId, request, dialogAppInfos, false, findDefaultApp);
+        ret = GenerateAbilityRequestByAction(userId, request, dialogAppInfos, false, findDefaultApp,
+            isAppCloneSelector);
     }
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generate request failed");
@@ -198,7 +199,8 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         }
         std::vector<DialogAppInfo> dialogAllAppInfos;
         bool isMoreHapList = true;
-        ret = GenerateAbilityRequestByAction(userId, request, dialogAllAppInfos, isMoreHapList, findDefaultApp);
+        ret = GenerateAbilityRequestByAction(userId, request, dialogAllAppInfos, isMoreHapList, findDefaultApp,
+            isAppCloneSelector);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "request failed");
             return ret;
@@ -369,7 +371,8 @@ void ImplicitStartProcessor::OnlyKeepReserveApp(std::vector<AppExecFwk::AbilityI
 }
 
 int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
-    AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos, bool isMoreHapList, bool &findDefaultApp)
+    AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos, bool isMoreHapList, bool &findDefaultApp,
+    bool &isAppCloneSelector)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s.", __func__);
@@ -439,6 +442,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     if (abilityInfos.size() + extensionInfos.size() > 1) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "filter applications by erms");
         bool ret = FilterAbilityList(request.want, abilityInfos, extensionInfos, userId);
+        FindAppClone(abilityInfos, extensionInfos, isAppCloneSelector);
         if (!ret) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "FilterAbilityList failed");
         }
@@ -922,18 +926,77 @@ bool ImplicitStartProcessor::IsActionImplicitStart(const Want &want, bool findDe
         return false;
     }
 
-    bool isOpenLink = want.HasParameter(OPEN_LINK_APP_LINKING_ONLY);
-    if (isOpenLink) {
-        return false;
-    }
-
     std::string bundleName = "";
-    if (want.GetElement().GetBundleName() != "" && want.GetAction() != "" &&
-        DeepLinkReserveConfig::GetInstance().isLinkReserved(want.GetUriString(),
+    if (DeepLinkReserveConfig::GetInstance().isLinkReserved(want.GetUriString(),
         bundleName)) {
         return false;
     }
 
+    if (want.GetUriString() == "" ||
+        (want.GetUri().GetScheme() != "file" && want.GetUri().GetScheme() != "content" &&
+        want.GetUri().GetScheme() != "mailto")) {
+        return false;
+    }
+
+    if (want.GetElement().GetBundleName() != "") {
+        return false;
+    }
+
+    return true;
+}
+
+int32_t ImplicitStartProcessor::FindAppClone(std::vector<AppExecFwk::AbilityInfo> &abilityInfos,
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos, bool &isAppCloneSelector)
+{
+    if (abilityInfos.size() > 0 && extensionInfos.size() > 0) {
+        return ERR_OK;
+    }
+    
+    bool isExitAbilityAppClone = FindAbilityAppClone(abilityInfos);
+    bool isExitExtensionAppClone = FindExtensionAppClone(extensionInfos);
+    if ((abilityInfos.size() == 0 && FindExtensionAppClone(extensionInfos)) ||
+        (extensionInfos.size() == 0 && FindAbilityAppClone(abilityInfos))) {
+        isAppCloneSelector = true;
+    }
+
+    return ERR_OK;
+}
+
+bool ImplicitStartProcessor::FindAbilityAppClone(std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+{
+    if (abilityInfos.size() <= 1) {
+        return false;
+    }
+    std::string appCloneBundleName = "";
+    std::string appCloneAbilityName = "";
+    for (const auto &iter : abilityInfos) {
+        if (appCloneBundleName == "" && appCloneAbilityName == "") {
+            appCloneBundleName = iter.bundleName;
+            appCloneAbilityName = iter.name;
+        }
+        if (iter.bundleName != appCloneBundleName || iter.name != appCloneAbilityName) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ImplicitStartProcessor::FindExtensionAppClone(std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos)
+{
+    if (extensionInfos.size() <= 1) {
+        return false;
+    }
+    std::string appCloneBundleName = "";
+    std::string appCloneAbilityName = "";
+    for (const auto &iter : extensionInfos) {
+        if (appCloneBundleName == "" && appCloneAbilityName == "") {
+            appCloneBundleName = iter.bundleName;
+            appCloneAbilityName = iter.name;
+        }
+        if (iter.bundleName != appCloneBundleName || iter.name != appCloneAbilityName) {
+            return false;
+        }
+    }
     return true;
 }
 }  // namespace AAFwk
