@@ -47,7 +47,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-    // constexpr const char* PERSIST_DARKMODE_KEY = "persist.ace.darkmode";
+    constexpr const char* PERSIST_DARKMODE_KEY = "persist.ace.darkmode";
 }
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
 constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;

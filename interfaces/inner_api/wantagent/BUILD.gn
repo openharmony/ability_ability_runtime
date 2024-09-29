@@ -72,7 +72,6 @@ ohos_shared_library("wantagent_innerkits") {
   external_deps = [
     "ability_base:want",
     "c_utils:utils",
-    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",

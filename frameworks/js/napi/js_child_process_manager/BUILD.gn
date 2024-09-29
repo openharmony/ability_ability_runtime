@@ -35,7 +35,6 @@ ohos_shared_library("childprocessmanager_napi") {
 
   external_deps = [
     "c_utils:utils",
-    "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",

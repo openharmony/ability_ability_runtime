@@ -83,12 +83,12 @@ bool InsightIntentExecuteParam::GenerateFromWant(const AAFwk::Want &want,
         return false;
     }
     uint64_t insightIntentId = 0;
-    // try {
-    //     insightIntentId = std::stoull(wantParams.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_ID));
-    // } catch (...) {
-    //     TAG_LOGE(AAFwkTag::ABILITY, "invalid insight intent ID");
-    //     return false;
-    // }
+    try {
+        insightIntentId = std::stoull(wantParams.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_ID));
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::ABILITY, "invalid insight intent ID");
+        return false;
+    }
 
     AppExecFwk::ElementName elementName = want.GetElement();
     executeParam.bundleName_ = elementName.GetBundleName();
