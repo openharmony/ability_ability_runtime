@@ -280,17 +280,14 @@ int32_t AbilityRecord::GetPid()
 void AbilityRecord::LoadUIAbility()
 {
     SetLoading(true);
-    int loadTimeout = AmsConfigurationParameter::GetInstance()
-        .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * LOAD_TIMEOUT_MULTIPLE;
+    int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
     if (abilityInfo_.applicationInfo.asanEnabled || abilityInfo_.applicationInfo.tsanEnabled) {
-        loadTimeout = AmsConfigurationParameter::GetInstance()
-            .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * LOAD_TIMEOUT_ASANENABLED;
+        loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_ASANENABLED;
         SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, loadTimeout / HALF_TIMEOUT);
         SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, loadTimeout);
     } else {
         int coldStartTimeout =
-            AmsConfigurationParameter::GetInstance()
-                .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * COLDSTART_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COLDSTART_TIMEOUT_MULTIPLE;
         std::lock_guard guard(wantLock_);
         auto delayTime = want_.GetBoolParam("coldStart", false) ? coldStartTimeout : loadTimeout;
         SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, delayTime / HALF_TIMEOUT);
@@ -474,8 +471,7 @@ void AbilityRecord::PostForegroundTimeoutTask()
         return;
     }
     int foregroundTimeout =
-        AmsConfigurationParameter::GetInstance()
-            .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * FOREGROUND_TIMEOUT_MULTIPLE;
+        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * FOREGROUND_TIMEOUT_MULTIPLE;
     SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, foregroundTimeout / HALF_TIMEOUT);
     SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, foregroundTimeout);
     std::string methodName = "ForegroundAbility";
@@ -509,17 +505,15 @@ void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
     TAG_LOGD(AAFwkTag::ABILITYMGR, "post timeout %{public}d, id %{public}d", messageId, recordId_);
     switch (messageId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG: {
-            uint32_t timeout = AmsConfigurationParameter::GetInstance()
-                .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) *
-                    static_cast<uint32_t>(LOAD_TIMEOUT_MULTIPLE);
+            uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+                static_cast<uint32_t>(LOAD_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, timeout, recordId_, true);
             break;
         }
         case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
-            uint32_t timeout = AmsConfigurationParameter::GetInstance()
-                .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) *
-                    static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
+            uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+                static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout, recordId_, true);
             ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
@@ -893,8 +887,7 @@ void AbilityRecord::PostCancelStartingWindowHotTask()
     };
     auto taskName = std::to_string(missionId_) + "_hot";
     int foregroundTimeout =
-        AmsConfigurationParameter::GetInstance()
-            .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * FOREGROUND_TIMEOUT_MULTIPLE;
+        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * FOREGROUND_TIMEOUT_MULTIPLE;
     handler->SubmitTask(delayTask, taskName, foregroundTimeout);
 }
 
@@ -923,8 +916,7 @@ void AbilityRecord::PostCancelStartingWindowColdTask()
         }
     };
     auto taskName = std::to_string(missionId_) + "_cold";
-    int loadTimeout = AmsConfigurationParameter::GetInstance()
-        .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * LOAD_TIMEOUT_MULTIPLE;
+    int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
     handler->SubmitTask(delayTask, taskName, loadTimeout);
 }
 
@@ -1238,8 +1230,7 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (handler && task) {
             int backgroundTimeout =
-                AmsConfigurationParameter::GetInstance()
-                    .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * BACKGROUND_TIMEOUT_MULTIPLE;
+                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * BACKGROUND_TIMEOUT_MULTIPLE;
             handler->SubmitTask(task, "background_" + std::to_string(recordId_), backgroundTimeout, false);
 
             if (abilityInfo_.type == AppExecFwk::AbilityType::PAGE) {
@@ -1582,8 +1573,7 @@ void AbilityRecord::Activate()
     CHECK_POINTER(lifecycleDeal_);
 
     if (!IsDebug()) {
-        int activeTimeout = AmsConfigurationParameter::GetInstance()
-            .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * ACTIVE_TIMEOUT_MULTIPLE;
+        int activeTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * ACTIVE_TIMEOUT_MULTIPLE;
         SendEvent(AbilityManagerService::ACTIVE_TIMEOUT_MSG, activeTimeout);
     }
 
@@ -1603,8 +1593,7 @@ void AbilityRecord::Inactivate()
 
     if (!IsDebug()) {
         int inactiveTimeout =
-            AmsConfigurationParameter::GetInstance()
-                .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * INACTIVE_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * INACTIVE_TIMEOUT_MULTIPLE;
         SendEvent(AbilityManagerService::INACTIVE_TIMEOUT_MSG, inactiveTimeout);
     }
 
@@ -1626,13 +1615,11 @@ void AbilityRecord::Terminate(const Closure &task)
         if (handler && task) {
             if (abilityInfo_.applicationInfo.asanEnabled) {
                 int terminateTimeout =
-                    AmsConfigurationParameter::GetInstance()
-                        .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * TERMINATE_TIMEOUT_ASANENABLED;
+                    AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_ASANENABLED;
                 handler->SubmitTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
             } else {
                 int terminateTimeout =
-                    AmsConfigurationParameter::GetInstance()
-                        .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * TERMINATE_TIMEOUT_MULTIPLE;
+                    AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_MULTIPLE;
                 handler->SubmitTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
             }
         }
@@ -1656,8 +1643,7 @@ void AbilityRecord::ShareData(const int32_t &uniqueId)
     CHECK_POINTER(lifecycleDeal_);
     if (!IsDebug()) {
         int loadTimeout =
-            AmsConfigurationParameter::GetInstance()
-                .GetAppStartTimeoutTime(GetApplicationInfo().bundleName) * SHAREDATA_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * SHAREDATA_TIMEOUT_MULTIPLE;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "loadTimeOut %{public}d.", loadTimeout);
         SendEvent(AbilityManagerService::SHAREDATA_TIMEOUT_MSG, loadTimeout, uniqueId);
     }
