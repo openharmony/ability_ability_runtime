@@ -1891,8 +1891,6 @@ private:
      */
     void InitGlobalConfiguration();
 
-    sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
-
     int StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
         const sptr<IRemoteObject> &callerToken);
     int StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool &isColdStart);
