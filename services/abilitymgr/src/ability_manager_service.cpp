@@ -24,6 +24,7 @@
 #include "app_utils.h"
 #include "app_exit_reason_data_manager.h"
 #include "application_util.h"
+#include "app_mgr_util.h"
 #include "recovery_info_timer.h"
 #include "assert_fault_callback_death_mgr.h"
 #include "connection_state_manager.h"
@@ -2398,29 +2399,13 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, const ExitReason 
 
 int32_t AbilityManagerService::GetConfiguration(AppExecFwk::Configuration& config)
 {
-    auto appMgr = GetAppMgr();
+    auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "getAppMgr failed");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
         return -1;
     }
 
     return appMgr->GetConfiguration(config);
-}
-
-OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AbilityManagerService::GetAppMgr()
-{
-    if (appMgr_) {
-        return appMgr_;
-    }
-
-    OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
-        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        return nullptr;
-    }
-    OHOS::sptr<OHOS::IRemoteObject> object = systemAbilityManager->GetSystemAbility(OHOS::APP_MGR_SERVICE_ID);
-    appMgr_ = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(object);
-    return appMgr_;
 }
 
 int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
@@ -5538,7 +5523,7 @@ void AbilityManagerService::DumpSysProcess(
 
 void AbilityManagerService::DumpUIExtensionRootHostRunningInfos(pid_t pid, std::vector<std::string> &info)
 {
-    auto appMgr = GetAppMgr();
+    auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "get appMgr failed");
         return;
@@ -5567,7 +5552,7 @@ void AbilityManagerService::DumpUIExtensionRootHostRunningInfos(pid_t pid, std::
 
 void AbilityManagerService::DumpUIExtensionProviderRunningInfos(pid_t hostPid, std::vector<std::string> &info)
 {
-    auto appMgr = GetAppMgr();
+    auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "get appMgr failed");
         return;
@@ -11473,9 +11458,9 @@ int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want)
 int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::string &bundleName,
     bool isAppRecovery)
 {
-    auto appMgr = GetAppMgr();
+    auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "getAppMgr failed");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
         return ERR_INVALID_VALUE;
     }
     auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(bundleName));
@@ -11822,9 +11807,9 @@ int32_t AbilityManagerService::TransferAbilityResultForExtension(const sptr<IRem
 void AbilityManagerService::GetRunningMultiAppIndex(const std::string &bundleName, int32_t uid, int32_t &appIndex)
 {
     AppExecFwk::RunningMultiAppInfo runningMultiAppInfo;
-    auto appMgr = GetAppMgr();
+    auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "getAppMgr failed");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
         return;
     }
     auto ret = IN_PROCESS_CALL(appMgr->GetRunningMultiAppInfoByBundleName(bundleName, runningMultiAppInfo));
@@ -11855,7 +11840,7 @@ void AbilityManagerService::NotifyFrozenProcessByRSS(const std::vector<int32_t> 
 void AbilityManagerService::HandleRestartResidentProcessDependedOnWeb()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    auto appMgr = GetAppMgr();
+    auto appMgr = AppMgrUtil::GetAppMgr();
     CHECK_POINTER_LOG(appMgr, "get appMgr fail");
     appMgr->RestartResidentProcessDependedOnWeb();
 }
