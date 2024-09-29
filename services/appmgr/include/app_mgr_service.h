@@ -175,10 +175,11 @@ public:
      *
      * @param bundlename, bundle name in Application record.
      * @param instanceKeys, output instance keys of the multi-instance app.
+     * @param userId, user id.
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
-        std::vector<std::string> &instanceKeys) override;
+        std::vector<std::string> &instanceKeys, int32_t userId = -1) override;
 
     /**
      * GetRunningProcessesByBundleType, call GetRunningProcessesByBundleType() through proxy project.

@@ -382,10 +382,11 @@ public:
      *
      * @param bundlename, bundle name in Application record.
      * @param instanceKeys, output instance keys of the multi-instance app.
+     * @param userId, user id.
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
-        std::vector<std::string> &instanceKeys);
+        std::vector<std::string> &instanceKeys, int32_t userId = -1);
 
     /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
@@ -1806,7 +1807,7 @@ private:
     void GetMultiInstanceInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
         RunningMultiAppInfo &info);
     int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
-        std::vector<std::string> &instanceKeys);
+        std::vector<std::string> &instanceKeys, int32_t userId);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
