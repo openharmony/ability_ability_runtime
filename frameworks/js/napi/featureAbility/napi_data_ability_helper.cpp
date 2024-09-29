@@ -996,12 +996,12 @@ napi_value DenormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperDen
 
 void UnwrapDataAbilityPredicates(NativeRdb::DataAbilityPredicates &predicates, napi_env env, napi_value value)
 {
-    // auto tempPredicates = DataAbilityJsKit::DataAbilityPredicatesProxy::GetNativePredicates(env, value);
-    // if (tempPredicates == nullptr) {
-    //     TAG_LOGE(AAFwkTag::FA, "null tempPredicates");
-    //     return;
-    // }
-    // predicates = *tempPredicates;
+    auto tempPredicates = DataAbilityJsKit::DataAbilityPredicatesProxy::GetNativePredicates(env, value);
+    if (tempPredicates == nullptr) {
+        TAG_LOGE(AAFwkTag::FA, "null tempPredicates");
+        return;
+    }
+    predicates = *tempPredicates;
 }
 
 /**

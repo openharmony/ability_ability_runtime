@@ -70,7 +70,6 @@ ohos_shared_library("particleability") {
       "../featureAbility/data_ability/napi_result_set.cpp",
     ]
     external_deps += [
-      "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "kv_store:distributeddata_mgr",
       "relational_store:native_appdatafwk",

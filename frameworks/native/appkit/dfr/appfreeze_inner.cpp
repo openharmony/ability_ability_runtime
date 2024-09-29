@@ -34,12 +34,12 @@ namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
 namespace {
-// constexpr char EVENT_UID[] = "UID";
+constexpr char EVENT_UID[] = "UID";
 constexpr char EVENT_PID[] = "PID";
 constexpr char EVENT_MESSAGE[] = "MSG";
-// constexpr char EVENT_PACKAGE_NAME[] = "PACKAGE_NAME";
+constexpr char EVENT_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_PROCESS_NAME[] = "PROCESS_NAME";
-// constexpr char EVENT_STACK[] = "STACK";
+constexpr char EVENT_STACK[] = "STACK";
 }
 std::weak_ptr<EventHandler> AppfreezeInner::appMainHandler_;
 std::shared_ptr<AppfreezeInner> AppfreezeInner::instance_ = nullptr;

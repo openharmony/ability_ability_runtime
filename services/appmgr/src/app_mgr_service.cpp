@@ -34,7 +34,7 @@
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "system_ability_definition.h"
-#include "base/security/access_token/interfaces/innerkits/accesstoken/include/accesstoken_kit.h"
+#include "accesstoken_kit.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
 #include "cache_process_manager.h"
@@ -60,11 +60,6 @@ constexpr const char* TASK_APPLICATION_FOREGROUNDED = "ApplicationForegroundedTa
 constexpr const char* TASK_APPLICATION_BACKGROUNDED = "ApplicationBackgroundedTask";
 constexpr const char* TASK_APPLICATION_TERMINATED = "ApplicationTerminatedTask";
 constexpr const char* TASK_ABILITY_CLEANED = "AbilityCleanedTask";
-<<<<<<< HEAD
-// constexpr const char* TASK_ADD_APP_DEATH_RECIPIENT = "AddAppRecipientTask";
-// constexpr const char* TASK_CLEAR_UP_APPLICATION_DATA = "ClearUpApplicationDataTask";
-=======
->>>>>>> upstream/master
 constexpr const char* TASK_STARTUP_RESIDENT_PROCESS = "StartupResidentProcess";
 constexpr const char* TASK_ADD_ABILITY_STAGE_DONE = "AddAbilityStageDone";
 constexpr const char* TASK_START_USER_TEST_PROCESS = "StartUserTestProcess";

@@ -45,11 +45,11 @@ namespace {
 constexpr uint32_t DELAY_NOTIFY_LABEL_TIME = 30; // 30ms
 constexpr uint32_t SCENE_FLAG_KEYGUARD = 1;
 constexpr uint32_t ONLY_ONE_ABILITY = 1;
-// constexpr const char* EVENT_KEY_UID = "UID";
-// constexpr const char* EVENT_KEY_PID = "PID";
-// constexpr const char* EVENT_KEY_MESSAGE = "MSG";
-// constexpr const char* EVENT_KEY_PACKAGE_NAME = "PACKAGE_NAME";
-// constexpr const char* EVENT_KEY_PROCESS_NAME = "PROCESS_NAME";
+constexpr const char* EVENT_KEY_UID = "UID";
+constexpr const char* EVENT_KEY_PID = "PID";
+constexpr const char* EVENT_KEY_MESSAGE = "MSG";
+constexpr const char* EVENT_KEY_PACKAGE_NAME = "PACKAGE_NAME";
+constexpr const char* EVENT_KEY_PROCESS_NAME = "PROCESS_NAME";
 constexpr int32_t SINGLE_MAX_INSTANCE_COUNT = 128;
 constexpr int32_t MAX_INSTANCE_COUNT = 512;
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns

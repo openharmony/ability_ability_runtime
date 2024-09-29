@@ -42,12 +42,8 @@ ohos_shared_library("abilitylifecyclecallback") {
     ":ability_lifecycle_callback_js",
   ]
 
-  external_deps = [
-    "napi:ace_napi",
-    "ets_runtime:libark_jsruntime",
-    "runtime_core:libarkfile_static",
-    ]
-
+  external_deps = [ "napi:ace_napi" ]
+  
   relative_install_dir = "module/app/ability"
   subsystem_name = "ability"
   part_name = "ability_runtime"

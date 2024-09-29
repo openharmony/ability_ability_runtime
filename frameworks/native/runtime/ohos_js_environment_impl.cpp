@@ -15,8 +15,8 @@
 
 #include "ohos_js_environment_impl.h"
 
-#include "commonlibrary/ets_utils/js_sys_module/console/console.h"
-#include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
+#include "console.h"
+#include "timer.h"
 #include "hilog_tag_wrapper.h"
 #include "js_utils.h"
 #include "js_worker.h"
@@ -113,7 +113,7 @@ void OHOSJsEnvironmentImpl::InitTimerModule(NativeEngine* engine)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     CHECK_POINTER(engine);
-    auto ret = JsSysModule::Timer::RegisterTime(reinterpret_cast<napi_env>(engine));
+    auto ret = OHOS::JsSysModule::Timer::RegisterTime(reinterpret_cast<napi_env>(engine));
     if (!ret) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Register timer failed");
     }

@@ -42,11 +42,7 @@ ohos_shared_library("datauriutils") {
     ":ability_data_uri_utils_js",
   ]
 
-  external_deps = [
-    "napi:ace_napi",
-    "ets_runtime:libark_jsruntime",
-    "runtime_core:libarkfile_static",
-  ]
+  external_deps = [ "napi:ace_napi" ]
 
   relative_install_dir = "module/app/ability"
   subsystem_name = "ability"

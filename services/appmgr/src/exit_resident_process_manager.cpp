@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-// constexpr int32_t U0_USER_ID = 0;
+constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t BASE_USER_RANGE = 200000;
 }
 ExitResidentProcessManager::~ExitResidentProcessManager() {}

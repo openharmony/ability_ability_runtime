@@ -39,7 +39,6 @@ ohos_shared_library("autofillmanager_napi") {
     "ability_base:view_data",
     "ability_base:want",
     "c_utils:utils",
-    "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",
