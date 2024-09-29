@@ -126,14 +126,14 @@ void BundleMgrHelperFuzztest2(bool boolParam, std::string &stringParam, int32_t 
     std::vector<AbilityInfo> abilityInfos;
     std::vector<ExtensionAbilityInfo> extensionInfos;
     bmHelper->ImplicitQueryInfos(want, int32Param, int32Param, boolParam, abilityInfos, extensionInfos);
-    bmHelper->CleanBundleDataFiles(stringParam, int32Param);
+    bmHelper->CleanBundleDataFiles(stringParam, int32Param, int32Param);
     std::vector<DataGroupInfo> infos;
     bmHelper->QueryDataGroupInfos(stringParam, int32Param, infos);
     bmHelper->RegisterBundleEventCallback(nullptr);
     HapModuleInfo hapModuleInfo;
     bmHelper->GetHapModuleInfo(abilityInfo, int32Param, hapModuleInfo);
     bmHelper->QueryAppGalleryBundleName(stringParam);
-    bmHelper->GetUidByBundleName(stringParam, int32Param);
+    bmHelper->GetUidByBundleName(stringParam, int32Param, int32Param);
     bmHelper->QueryExtensionAbilityInfosOnlyWithTypeName(stringParam, int32Param, int32Param, extensionInfos);
     bmHelper->GetDefaultAppProxy();
     bmHelper->GetJsonProfile(static_cast<ProfileType>(int32Param), stringParam, stringParam, stringParam, int32Param);
