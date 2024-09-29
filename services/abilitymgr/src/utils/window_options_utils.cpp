@@ -66,6 +66,11 @@ std::pair<bool, AppExecFwk::SupportWindowMode> WindowOptionsUtils::WindowModeMap
     return result;
 }
 
+bool is_number(const std::string& str)
+{
+    return std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(c); });
+}
+
 void WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken)
 {
@@ -80,6 +85,9 @@ void WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(StartOptions &startOpt
         std::shared_ptr<AbilityRecord> abilityRecord = Token::GetAbilityRecordByToken(caller);
         if (abilityRecord != nullptr) {
             std::string displayId = abilityRecord->GetWant().GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
+            if (displayId.empty() || !is_number(displayId)) {
+                displayId = "0";
+            }
             startOptions.SetDisplayID(std::stoi(displayId));
         }
     }

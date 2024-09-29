@@ -294,8 +294,7 @@ void AbilityConnectManager::EnqueueStartServiceReq(const AbilityRequest &ability
         };
 
         int connectTimeout =
-            AmsConfigurationParameter::GetInstance()
-                .GetAppStartTimeoutTime(abilityRequest.abilityInfo.bundleName) * CONNECT_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * CONNECT_TIMEOUT_MULTIPLE;
         taskHandler_->SubmitTask(callback, std::string("start_service_timeout:") + abilityUri,
             connectTimeout);
     }
@@ -1483,12 +1482,10 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
         // first load ability, There is at most one connect record.
         int recordId = abilityRecord->GetRecordId();
         taskName = std::string("LoadTimeout_") + std::to_string(recordId);
-        delayTime = AmsConfigurationParameter::GetInstance()
-            .GetAppStartTimeoutTime(abilityRecord->GetApplicationInfo().bundleName) * LOAD_TIMEOUT_MULTIPLE;
+        delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
     } else if (messageId == AbilityConnectManager::CONNECT_TIMEOUT_MSG) {
         taskName = std::string("ConnectTimeout_") + std::to_string(connectRecordId);
-        delayTime = AmsConfigurationParameter::GetInstance()
-            .GetAppStartTimeoutTime(abilityRecord->GetApplicationInfo().bundleName) * CONNECT_TIMEOUT_MULTIPLE;
+        delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * CONNECT_TIMEOUT_MULTIPLE;
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord->GetPid(),
             abilityRecord->GetUid(), delayTime);
     } else {
@@ -1769,8 +1766,7 @@ void AbilityConnectManager::CommandAbility(const std::shared_ptr<AbilityRecord> 
             connectManager->HandleCommandTimeoutTask(abilityRecord);
         };
         int commandTimeout =
-            AmsConfigurationParameter::GetInstance()
-                .GetAppStartTimeoutTime(abilityRecord->GetApplicationInfo().bundleName) * COMMAND_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COMMAND_TIMEOUT_MULTIPLE;
         taskHandler_->SubmitTask(timeoutTask, taskName, commandTimeout);
         // scheduling command ability
         abilityRecord->CommandAbility();
@@ -1796,9 +1792,7 @@ void AbilityConnectManager::CommandAbilityWindow(const std::shared_ptr<AbilityRe
             connectManager->HandleCommandWindowTimeoutTask(abilityRecord, sessionInfo, winCmd);
         };
         int commandWindowTimeout =
-            AmsConfigurationParameter::GetInstance()
-                .GetAppStartTimeoutTime(
-                    abilityRecord->GetApplicationInfo().bundleName) * COMMAND_WINDOW_TIMEOUT_MULTIPLE;
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COMMAND_WINDOW_TIMEOUT_MULTIPLE;
         taskHandler_->SubmitTask(timeoutTask, taskName, commandWindowTimeout);
         // scheduling command ability
         abilityRecord->CommandAbilityWindow(sessionInfo, winCmd);
@@ -2358,7 +2352,10 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
             TAG_LOGW(AAFwkTag::ABILITYMGR, "delay restart root launcher until switch user");
             return;
         }
-        requestInfo.want.SetParam("ohos.app.recovery", true);
+        if (abilityRecord->IsSceneBoard()) {
+            requestInfo.want.SetParam("ohos.app.recovery", true);
+            DelayedSingleton<AbilityManagerService>::GetInstance()->EnableListForSCBRecovery(userId_);
+        }
         requestInfo.restartCount = abilityRecord->GetRestartCount();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "restart root launcher, number:%{public}d", requestInfo.restartCount);
         StartAbilityLocked(requestInfo);

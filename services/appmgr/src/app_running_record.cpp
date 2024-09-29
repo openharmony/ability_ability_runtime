@@ -1159,7 +1159,7 @@ void AppRunningRecord::PopForegroundingAbilityTokens()
     }
 }
 
-void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce)
+void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce, bool isTimeout)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "isForce: %{public}d", static_cast<int>(isForce));
 
@@ -1170,8 +1170,10 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     }
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
-    StateChangedNotifyObserver(
-        abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
+    if (!isTimeout) {
+        StateChangedNotifyObserver(
+            abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
+    }
     moduleRecord->TerminateAbility(shared_from_this(), token, isForce);
 }
 
