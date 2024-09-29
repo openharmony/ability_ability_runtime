@@ -1356,8 +1356,7 @@ void UIAbilityLifecycleManager::DelayCompleteTerminate(const std::shared_ptr<Abi
         TAG_LOGI(AAFwkTag::ABILITYMGR, "delay complete terminate task");
         self->CompleteTerminate(abilityRecord);
     };
-    int killTimeout = AmsConfigurationParameter::GetInstance()
-        .GetAppStartTimeoutTime(abilityRecord->GetApplicationInfo().bundleName) * KILL_TIMEOUT_MULTIPLE;
+    int killTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * KILL_TIMEOUT_MULTIPLE;
     handler->SubmitTask(timeoutTask, "DELAY_KILL_PROCESS", killTimeout);
 }
 
