@@ -44,6 +44,8 @@ config("abilityms_config") {
     "//prebuilts/jdk/jdk8/linux-x86/include/linux",
     "//third_party/json/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${relational_store_innerapi_path}/rdb/include",
+    "${relational_store_innerapi_path}/dataability/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
     "${ability_runtime_path}/tools/aa/include",
     "${ability_runtime_innerkits_path}/wantagent/include",
@@ -54,6 +56,8 @@ config("abilityms_config") {
     "${ability_runtime_utils_path}/server/constant",
     "${bgtaskmgr_frameworks_path}/common/include",
     "${bgtaskmgr_frameworks_path}/include",
+    "${init_path}/interfaces/innerkits/include/syspara/",
+    "${bundlefwk_inner_api_path}/appexecfwk_core/include",
   ]
 
   defines = []
@@ -70,6 +74,8 @@ config("abilityms_config") {
     include_dirs += [
       "${global_path}/i18n/frameworks/intl/include",
       "${graphic_path}/interfaces/inner_api",
+      "${graphic_path}/utils/color_manager/export",
+      "${multimedia_path}/interfaces/innerkits/include",
       "${graphic_path}/interfaces/inner_api/wmservice",
     ]
 
@@ -158,7 +164,6 @@ ohos_shared_library("abilityms") {
     "config_policy:configpolicy_util",
     "dsoftbus:softbus_client",
     "ffrt:libffrt",
-    "graphic_2d:color_manager",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
