@@ -33,6 +33,7 @@ public:
 
 private:
     std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord_ = std::weak_ptr<AbilityRuntime::ExtensionRecord>();
+    int32_t APP_STATE_CACHED = 100;
 };
 } // namespace AAFwk
 } // namespace OHOS
