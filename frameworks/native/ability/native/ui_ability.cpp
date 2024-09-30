@@ -218,6 +218,9 @@ void UIAbility::OnStop()
         return;
     }
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_STOP);
+#ifdef SUPPORT_SCREEN
+    Rosen::DisplayManager::GetInstance().RemoveDisplayIdFromAms(token_);
+#endif
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -988,6 +991,9 @@ void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
         int32_t displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         TAG_LOGD(AAFwkTag::UIABILITY, "abilityName: %{public}s, displayId: %{public}d",
             abilityInfo_->name.c_str(), displayId);
+#ifdef SUPPORT_SCREEN
+        Rosen::DisplayManager::GetInstance().AddDisplayIdFromAms(displayId, token_);
+#endif
         auto option = GetWindowOption(want);
         InitWindow(displayId, option);
 
