@@ -364,11 +364,12 @@ AppMgrResultCode AppMgrClient::KillApplicationSelf()
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
+AppMgrResultCode AppMgrClient::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex,
+    int32_t userId)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        int32_t result = service->ClearUpApplicationData(bundleName, userId);
+        int32_t result = service->ClearUpApplicationData(bundleName, appCloneIndex, userId);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }

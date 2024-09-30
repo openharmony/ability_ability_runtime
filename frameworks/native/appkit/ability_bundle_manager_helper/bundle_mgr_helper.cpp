@@ -699,7 +699,7 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want &want, int32_t flags, int32_
     return ret;
 }
 
-bool BundleMgrHelper::CleanBundleDataFiles(const std::string &bundleName, const int32_t userId)
+bool BundleMgrHelper::CleanBundleDataFiles(const std::string &bundleName, int32_t userId, int32_t appCloneIndex)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
     auto bundleMgr = Connect();
@@ -709,7 +709,7 @@ bool BundleMgrHelper::CleanBundleDataFiles(const std::string &bundleName, const 
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->CleanBundleDataFiles(bundleName, userId);
+    return bundleMgr->CleanBundleDataFiles(bundleName, userId, appCloneIndex);
 }
 
 bool BundleMgrHelper::QueryDataGroupInfos(
@@ -770,7 +770,7 @@ bool BundleMgrHelper::QueryAppGalleryBundleName(std::string &bundleName)
     return bundleMgr->QueryAppGalleryBundleName(bundleName);
 }
 
-ErrCode BundleMgrHelper::GetUidByBundleName(const std::string &bundleName, const int32_t userId)
+ErrCode BundleMgrHelper::GetUidByBundleName(const std::string &bundleName, int32_t userId, int32_t appCloneIndex)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
     auto bundleMgr = Connect();
@@ -780,7 +780,7 @@ ErrCode BundleMgrHelper::GetUidByBundleName(const std::string &bundleName, const
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->GetUidByBundleName(bundleName, userId);
+    return bundleMgr->GetUidByBundleName(bundleName, userId, appCloneIndex);
 }
 
 ErrCode BundleMgrHelper::QueryExtensionAbilityInfosOnlyWithTypeName(const std::string &extensionTypeName,
