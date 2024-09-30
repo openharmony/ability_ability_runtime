@@ -20,6 +20,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t APP_STATE_CACHED = 100;
+}
 PreLoadUIExtStateObserver::PreLoadUIExtStateObserver(
     std::weak_ptr<OHOS::AbilityRuntime::ExtensionRecord> extensionRecord) : extensionRecord_(extensionRecord) {}
 
