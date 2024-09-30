@@ -760,7 +760,7 @@ int32_t PendingWantManager::GetAllRunningInstanceKeysByBundleName(
         return OBJECT_NULL;
     }
 
-    return appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec);
+    return IN_PROCESS_CALL(appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

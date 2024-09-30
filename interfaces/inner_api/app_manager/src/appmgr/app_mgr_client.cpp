@@ -432,11 +432,11 @@ AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysBySelf(std::vector<std::
 }
 
 AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
-    std::vector<std::string> &instanceKeys)
+    std::vector<std::string> &instanceKeys, int32_t userId)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        int32_t result = service->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+        int32_t result = service->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }

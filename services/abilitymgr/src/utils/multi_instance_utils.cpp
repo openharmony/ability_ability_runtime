@@ -87,7 +87,7 @@ bool MultiInstanceUtils::IsInstanceKeyExist(const std::string& bundleName, const
     auto appMgr = AppMgrUtil::GetAppMgr();
     CHECK_POINTER_AND_RETURN(appMgr, false);
     std::vector<std::string> instanceKeyArray;
-    auto result = appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeyArray);
+    auto result = IN_PROCESS_CALL(appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeyArray));
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get instance key");
         return false;
