@@ -73,7 +73,7 @@ public:
     /**
      * schedule ability life cycle to foreground
      */
-    void ForegroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
+    bool ForegroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
         sptr<SessionInfo> sessionInfo = nullptr);
     /**
      * schedule ability life cycle to background

@@ -443,6 +443,8 @@ public:
         return false;
     }
 
+    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) {}
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -496,6 +498,7 @@ public:
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
         IS_PROCESS_ATTACHED,
         IS_APP_KILLING,
+        SET_APP_EXCEPTION_CALLBACK,
         // Add enumeration values above
         END
     };

@@ -41,8 +41,10 @@ namespace OHOS {
 namespace AppExecFwk {
 class TestAppSchedulerImpl : public AppSchedulerHost {
 public:
-    void ScheduleForegroundApplication() override
-    {}
+    bool ScheduleForegroundApplication() override
+    {
+        return true;
+    }
     void ScheduleBackgroundApplication() override
     {}
     void ScheduleTerminateApplication(bool isLastProcess = false) override

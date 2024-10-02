@@ -25,7 +25,7 @@ namespace AppExecFwk {
 class MockApplicationProxy : public AppSchedulerProxy {
 public:
     MockApplicationProxy(const sptr<IRemoteObject> &impl) : AppSchedulerProxy(impl) {}
-    MOCK_METHOD0(ScheduleForegroundApplication, void());
+    MOCK_METHOD0(ScheduleForegroundApplication, bool());
     MOCK_METHOD0(ScheduleBackgroundApplication, void());
     MOCK_METHOD1(ScheduleTerminateApplication, void(bool));
     MOCK_METHOD1(ScheduleShrinkMemory, void(const int));
