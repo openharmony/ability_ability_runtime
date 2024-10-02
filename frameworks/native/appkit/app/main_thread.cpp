@@ -410,7 +410,7 @@ std::shared_ptr<EventHandler> MainThread::GetMainHandler() const
  * @brief Schedule the foreground lifecycle of application.
  *
  */
-void MainThread::ScheduleForegroundApplication()
+bool MainThread::ScheduleForegroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
@@ -429,10 +429,10 @@ void MainThread::ScheduleForegroundApplication()
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
-        return;
+    } else {
+        tmpWatchdog->SetBackgroundStatus(false);
     }
-    tmpWatchdog->SetBackgroundStatus(false);
-    tmpWatchdog = nullptr;
+    return true;
 }
 
 /**

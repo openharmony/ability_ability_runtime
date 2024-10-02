@@ -20,6 +20,7 @@
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
 #include "ability_scheduler_stub.h"
+#include "app_exception_handler.h"
 #include "app_exit_reason_data_manager.h"
 #include "app_utils.h"
 #include "array_wrapper.h"
@@ -398,7 +399,9 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
     Want want = GetWant();
     UpdateDmsCallerInfo(want);
-    lifecycleDeal_->ForegroundNew(want, lifeCycleStateInfo_, GetSessionInfo());
+    if (!lifecycleDeal_->ForegroundNew(want, lifeCycleStateInfo_, GetSessionInfo()) && token_) {
+        AppExceptionHandler::GetInstance().AbilityForegroundFailed(token_->AsObject(), "ForegroundNew");
+    }
     lifeCycleStateInfo_.sceneFlag = 0;
     lifeCycleStateInfo_.sceneFlagBak = 0;
     {
@@ -494,6 +497,7 @@ void AbilityRecord::RemoveForegroundTimeoutTask()
     CHECK_POINTER(handler);
     handler->RemoveEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, GetAbilityRecordId());
     handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, GetAbilityRecordId());
+    SetFreezeStrategy(FreezeStrategy::NOTIFY_FREEZE_MGR);
 }
 
 void AbilityRecord::RemoveLoadTimeoutTask()
@@ -502,6 +506,7 @@ void AbilityRecord::RemoveLoadTimeoutTask()
     CHECK_POINTER(handler);
     handler->RemoveEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, GetAbilityRecordId());
     handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, GetAbilityRecordId());
+    SetFreezeStrategy(FreezeStrategy::NOTIFY_FREEZE_MGR);
 }
 
 void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)

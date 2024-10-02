@@ -84,9 +84,9 @@ public:
      * ScheduleForegroundRunning, call ScheduleForegroundApplication() through proxy project,
      * Notify application to switch to foreground.
      *
-     * @return
+     * @return bool operation status
      */
-    void ScheduleForegroundRunning();
+    bool ScheduleForegroundRunning();
 
     /**
      * ScheduleBackgroundRunning, call ScheduleBackgroundApplication() through proxy project,

@@ -21,6 +21,7 @@
 #include "ability_resident_process_rdb.h"
 #include "accesstoken_kit.h"
 #include "ability_manager_xcollie.h"
+#include "app_exception_handler.h"
 #include "app_utils.h"
 #include "app_exit_reason_data_manager.h"
 #include "application_util.h"
@@ -3660,8 +3661,8 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
             abilityRecord->GetPid(), true));
     } else {
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->SetProcessCacheStatus(
-            abilityRecord->GetPid(), false)); 
-    }    
+            abilityRecord->GetPid(), false));
+    }
     EventInfo eventInfo;
     eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
     eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
@@ -7119,6 +7120,7 @@ void AbilityManagerService::ConnectServices()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed init appScheduler");
         usleep(REPOLL_TIME_MICRO_SECONDS);
     }
+    AppExceptionHandler::GetInstance().RegisterAppExceptionCallback();
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "waiting bundleMgr service run completed");
     while (AbilityUtil::GetBundleManagerHelper() == nullptr) {
@@ -12031,7 +12033,7 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
             abilityRecord->GetPid(), true));
     } else {
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->SetProcessCacheStatus(
-            abilityRecord->GetPid(), false));        
+            abilityRecord->GetPid(), false));
     }
     int32_t errCode = uiAbilityManager->CleanUIAbility(abilityRecord, forceKillProcess);
     ReportCleanSession(sessionInfo, abilityRecord, errCode);
@@ -12134,7 +12136,7 @@ void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &ability
         auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().
             GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_LOG(sceneSessionManager, "sceneSessionManager is nullptr");
-        auto err = sceneSessionManager->GetRootMainWindowId(static_cast<int32_t>(callerSessionInfo->hostWindowId),mainWindowId);      
+        auto err = sceneSessionManager->GetRootMainWindowId(static_cast<int32_t>(callerSessionInfo->hostWindowId),mainWindowId);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "callerSessionInfo->hostWindowId = %{public}d, mainWindowId = %{public}d, err = %{public}d",
             callerSessionInfo->hostWindowId, mainWindowId, err);
         abilityRequest.want.SetParam(WANT_PARAMS_HOST_WINDOW_ID_KEY, mainWindowId);
