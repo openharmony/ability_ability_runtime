@@ -4369,6 +4369,53 @@ HWTEST_F(AppMgrServiceInnerTest, GetRunningMultiAppInfoByBundleName_002, TestSiz
 }
 
 /**
+ * @tc.name: GetAllRunningInstanceKeysBySelf_001
+ * @tc.desc: GetAllRunningInstanceKeysBySelf.
+ * @tc.type: FUNC
+ * @tc.require: issueI9HMAO
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetAllRunningInstanceKeysBySelf_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysBySelf_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::vector<std::string> instanceKeys;
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_NE(ret, ERR_OK);
+
+    appMgrServiceInner->remoteClientManager_ = nullptr;
+    ret = appMgrServiceInner->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_EQ(ret, ERR_NO_INIT);
+
+    appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
+    ret = appMgrServiceInner->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_NE(ret, ERR_NO_INIT);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysBySelf_001 end");
+}
+
+/**
+ * @tc.name: GetAllRunningInstanceKeysByBundleName_001
+ * @tc.desc: GetAllRunningInstanceKeysByBundleName.
+ * @tc.type: FUNC
+ * @tc.require: issueI9HMAO
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetAllRunningInstanceKeysByBundleName_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "testBundleName";
+    std::vector<std::string> instanceKeys;
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_001 end");
+}
+
+/**
  * @tc.name: SendCreateAtomicServiceProcessEvent_001
  * @tc.desc: Report event of create atomic service process.
  * @tc.type: FUNC
