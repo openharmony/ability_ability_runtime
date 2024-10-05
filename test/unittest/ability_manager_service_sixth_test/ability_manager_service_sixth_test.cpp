@@ -19,6 +19,7 @@
 #define protected public
 #include "ability_manager_service.h"
 #include "ability_record.h"
+#include "iservice_registry.h"
 #include "mission_list_manager.h"
 #include "ui_ability_lifecycle_manager.h"
 #undef private
@@ -26,14 +27,19 @@
 
 #include "ability_manager_errors.h"
 #include "ability_manager_stub_mock_test.h"
+#include "ability_scheduler_mock.h"
 #include "hilog_tag_wrapper.h"
+#include "insight_intent_execute_manager.h"
 #include "mock_ability_token.h"
 #include "mock_bundle_manager_service.h"
 #include "mock_my_flag.h"
 #include "mock_permission_verification.h"
+#include "mock_system_ability_manager.h"
 #include "mock_task_handler_wrap.h"
 #include "process_options.h"
+#include "recovery_param.h"
 #include "scene_board_judgement.h"
+#include "ui_service_extension_connection_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -47,6 +53,7 @@ using OHOS::AppExecFwk::ExtensionAbilityType;
 namespace OHOS {
 namespace AAFwk {
 namespace {
+constexpr int32_t DEFAULT_INVALID_USER_ID = -1;
 const int32_t USER_ID_U100 = 100;
 const int32_t APP_MEMORY_SIZE = 512;
 constexpr const char* DEBUG_APP = "debugApp";
@@ -72,6 +79,10 @@ constexpr const char* LAUNCHER_ABILITY_NAME = "com.ohos.launcher.MainAbility";
 constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
 constexpr const char* BUNDLE_NAME_TEST = "com.huawei.hmos.passwordvault";
 constexpr const char* BUNDLE_NAME_SMART_TEST = "com.huawei.hms.textautofill";
+const std::string APP_INSTANCE_KEY("ohos.extra.param.key.appInstance");
+const std::string CREATE_APP_INSTANCE_KEY("ohos.extra.param.key.createAppInstance");
+constexpr int32_t BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
+auto mockBundleMgr = sptr<MockBundleManagerService>::MakeSptr();
 }  // namespace
 class AbilityManagerServiceSixthTest : public testing::Test {
 public:
@@ -79,10 +90,12 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-
+    void MockBundleInstallerAndSA();
+    sptr<ISystemAbilityManager> iSystemAbilityMgr_ = nullptr;
+    sptr<AppExecFwk::MockSystemAbilityManager> mockSystemAbility_ = nullptr;
+    std::shared_ptr<BundleMgrHelper> bundleMgrHelper_{ nullptr };
     AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
         const std::string& appName, const std::string& bundleName, const std::string& moduleName);
-
     std::shared_ptr<AbilityManagerService> MockAbilityManagerService();
 
 public:
@@ -134,9 +147,31 @@ void AbilityManagerServiceSixthTest::SetUpTestCase() {}
 
 void AbilityManagerServiceSixthTest::TearDownTestCase() {}
 
-void AbilityManagerServiceSixthTest::SetUp() {}
+void AbilityManagerServiceSixthTest::SetUp()
+{
+    mockSystemAbility_ = new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
+    iSystemAbilityMgr_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
+    MockBundleInstallerAndSA();
+}
 
-void AbilityManagerServiceSixthTest::TearDown() {}
+void AbilityManagerServiceSixthTest::TearDown()
+{
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = iSystemAbilityMgr_;
+}
+
+void AbilityManagerServiceSixthTest::MockBundleInstallerAndSA()
+{
+    auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
+        if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+            return bms->AsObject();
+        } else {
+            return saMgr->GetSystemAbility(systemAbilityId);
+        }
+    };
+    EXPECT_CALL(*mockSystemAbility_, CheckSystemAbility(testing::_))
+        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
+}
 
 /*
  * Feature: AbilityManagerService
@@ -284,6 +319,11 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0200, TestSize.Leve
     Want want;
     want.SetParam(DEBUG_APP, true);
     want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.name = "ability1";
+    abilityInfo.bundleName = "testBundleName";
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
     auto abilityMs = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
 
@@ -291,11 +331,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0200, TestSize.Leve
      * @tc.steps: step2. CONTACTS_BUNDLE_NAME
      * @tc.expected: step2. expect ERR_NOT_IN_APP_PROVISION_MODE
      */
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
-    } else {
-        EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
-    }
+    EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0200 end");
 }
 
@@ -305,9 +341,9 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0200, TestSize.Leve
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartAbilityDetails
  */
-HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_002, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0300, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_002 start");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
 
     /**
@@ -318,7 +354,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_002, TestSize.Level
     want1.SetElementName(DEVICE_MANAGER_BUNDLE_NAME, DEVICE_MANAGER_NAME);
     auto ret = abilityMs->StartAbilityDetails(want1, abilityStartSetting_, nullptr, MAIN_USER_ID, -1, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_002 end");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 end");
 }
 
 /*
@@ -327,25 +363,30 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_002, TestSize.Level
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartAbilityDetails
  */
-HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_003, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0400, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_003 start");
-
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0400 start");
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.name = "ability1";
+    abilityInfo.bundleName = "testBundleName";
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityInfo.applicationInfo.name = "test";
+    abilityInfo.applicationInfo.bundleName = "testBundleName";
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
     Want want;
     want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
     auto abilityMs = MockAbilityManagerService();
+    MyFlag::flag_ = 0;
     auto ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
-
     /**
      * @tc.steps: step2. interceptorExecuter_ is inited, for CONTACTS_BUNDLE_NAME is sigeleton，usrid 0
      * @tc.expected: step2. expect missionListManager/uiAbilityManager null, return ERR_INVALID_VALUE
      */
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
-    } else {
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    }
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_003 end");
+    MyFlag::flag_ = 1;
+    ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0400 end");
 }
 
 /*
@@ -363,17 +404,14 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_001, TestSize.Level1)
     abilityMs->afterCheckExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     Want want;
     want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
+    MyFlag::abilityCallFlag_ = 0;
     auto ret = abilityMs->StartAbilityInner(want, nullptr, -1, false);
 
     /**
      * @tc.steps: step2. interceptorExecuter_ is inited, for CONTACTS_BUNDLE_NAME is sigeleton，usrid 0
      * @tc.expected: step2. expect missionListManager/uiAbilityManager null, return ERR_INVALID_VALUE
      */
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
-    } else {
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    }
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityInner_001 end");
 }
 
@@ -440,7 +478,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, SetAutoFillElementName_001, TestSize.Le
         EXPECT_EQ(extensionSessionInfo->want.GetBundle(), BUNDLE_NAME_SMART_TEST);
         EXPECT_EQ(extensionSessionInfo->want.GetModuleName(), AUTO_FILL_MODULE_NAME);
     } else {
-        EXPECT_EQ(extensionSessionInfo->want.GetBundle(), AUTO_FILL_PASSWORD_BUNDLE_NAME);
+        EXPECT_EQ(extensionSessionInfo->want.GetBundle(), AUTO_FILL_SMART_BUNDLE_NAME);
         EXPECT_EQ(extensionSessionInfo->want.GetModuleName(), AUTO_FILL_MODULE_NAME);
     }
 
@@ -867,6 +905,744 @@ HWTEST_F(AbilityManagerServiceSixthTest, DumpSysState_001, TestSize.Level1)
     abilityMs->DumpSysState(args, info, false, true, 0);
     EXPECT_TRUE(info.empty());
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest DumpSysState_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetMinimizedDuringFreeInstall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetMinimizedDuringFreeInstall
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, SetMinimizedDuringFreeInstall_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SetMinimizedDuringFreeInstall_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    abilityMs->SetMinimizedDuringFreeInstall(nullptr);
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    EXPECT_FALSE(sessionInfo->isMinimizedDuringFreeInstall);
+    abilityMs->SetMinimizedDuringFreeInstall(sessionInfo);
+    Want want;
+    std::string sessionId = "";
+    sessionInfo->want.SetParam(KEY_SESSION_ID, sessionId);
+    abilityMs->SetMinimizedDuringFreeInstall(sessionInfo);
+
+    sessionId = std::string("testSesssionId");
+    sessionInfo->want.SetParam(KEY_SESSION_ID, sessionId);
+    abilityMs->SetMinimizedDuringFreeInstall(sessionInfo);
+
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    FreeInstallInfo info;
+    info.want = sessionInfo->want;
+    abilityMs->freeInstallManager_->freeInstallList_.push_back(info);
+    abilityMs->SetMinimizedDuringFreeInstall(sessionInfo);
+    abilityMs->preStartSessionMap_.emplace("testSesssionId", sessionInfo);
+    abilityMs->SetMinimizedDuringFreeInstall(sessionInfo);
+    EXPECT_TRUE(sessionInfo->isMinimizedDuringFreeInstall);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SetMinimizedDuringFreeInstall_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectAbilityCommon
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectAbilityCommon
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    MyFlag::systemAppFlag_ = 0;
+    auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
+        INT_MAX, false);
+    EXPECT_EQ(ret, ERR_NOT_SYSTEM_APP);
+    std::string value = "";
+    want.SetParam(UISERVICEHOSTPROXY_KEY, value);
+    ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
+        INT_MAX, false);
+    EXPECT_EQ(ret, ERR_WRONG_INTERFACE_CALL);
+    want.RemoveParam(UISERVICEHOSTPROXY_KEY);
+    MyFlag::systemAppFlag_ = 1;
+    // expect interceptorExecuter_ nullptr return ERR_INVALID_VALUE
+    ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
+        INT_MAX, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
+        -1, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = abilityMs->ConnectAbilityCommon(want, impl, token, AppExecFwk::ExtensionAbilityType::UI_SERVICE,
+        INT_MAX, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectAbilityCommon
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectAbilityCommon
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    want.SetUri("http://www.so.com");
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(Return(false));
+    auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
+        -1, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    want.SetFlags(Want::FLAG_INSTALL_ON_DEMAND);
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(Return(true)); // name empty
+    ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
+        -1, false);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ExtensionAbilityInfo extensionInfo;
+    extensionInfo.name = "extension";
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(extensionInfo), Return(true))); // bundle empty
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    extensionInfo.bundleName = "extensionBundle";
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(extensionInfo), Return(true)));
+    ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
+        -1, false);
+    want.SetUri("file://kia-file-uri");
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    ret = abilityMs->ConnectAbilityCommon(want, impl, nullptr, ExtensionAbilityType::SERVICE,
+        -1, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectUIExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectUIExtensionAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectUIExtensionAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectUIExtensionAbility_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    MyFlag::systemAppFlag_ = 0;
+    sptr<SessionInfo> sessionInfo = sptr<SessionInfo>::MakeSptr();
+    sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr;
+    auto ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, INT_MAX, connectInfo);
+    EXPECT_EQ(ret, ERR_NOT_SYSTEM_APP);
+    sessionInfo->callerToken = abilityRecord->token_;
+    ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
+    EXPECT_EQ(ret, ERR_INVALID_CALLER);
+    sessionInfo->callerToken = nullptr;
+    ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    want.SetUri("file://kia-file-uri");
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(Return(false));
+    ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(Return(true)); // name empty
+    ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ExtensionAbilityInfo extensionInfo;
+    extensionInfo.name = "extension";
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(extensionInfo), Return(true))); // bundle empty
+    ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    extensionInfo.bundleName = "extensionBundle";
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(extensionInfo), Return(true)));
+    ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
+    want.SetUri("");
+    ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectUIExtensionAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectLocalAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectLocalAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    sptr<SessionInfo> sessionInfo = nullptr;
+    AppExecFwk::ExtensionAbilityType extensionType = ExtensionAbilityType::SERVICE;
+    sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr;
+    auto ret = abilityMs->ConnectLocalAbility(want, INT_MAX, impl, token, extensionType, sessionInfo,
+        true, connectInfo);
+    EXPECT_EQ(ret, ERR_CROSS_USER);
+    std::vector<ExtensionAbilityInfo> extensionInfos;
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfos(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos empty
+    ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
+        true, connectInfo);
+    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR); // extensionInfos is empty
+    extensionType = ExtensionAbilityType::SHARE;
+    ExtensionAbilityInfo extensionInfo;
+    extensionInfos.push_back(extensionInfo);
+    ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
+        false, connectInfo);
+    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
+    extensionInfos[0].bundleName = TEST_BUNDLE_NAME;
+    ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
+        false, connectInfo);
+    extensionInfos[0].name = "testExtension";
+    extensionInfos[0].applicationInfo.name = "app";
+    extensionInfos[0].applicationInfo.bundleName = TEST_BUNDLE_NAME;
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfos(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos empty
+    ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
+        false, connectInfo);
+
+    extensionType = ExtensionAbilityType::SERVICE;
+    abilityInfo.name = "ability1";
+    abilityInfo.bundleName = "testBundleName";
+    abilityInfo.applicationInfo.name = abilityInfo.name;
+    abilityInfo.applicationInfo.bundleName = abilityInfo.bundleName;
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
+    ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
+        false, connectInfo);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectLocalAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectLocalAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    sptr<SessionInfo> sessionInfo = nullptr;
+    sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr;
+    std::vector<ExtensionAbilityInfo> extensionInfos;
+    ExtensionAbilityInfo extensionInfo;
+    extensionInfos.push_back(extensionInfo);
+    extensionInfos[0].type = ExtensionAbilityType::SERVICE;
+    AppExecFwk::ExtensionAbilityType extensionType = ExtensionAbilityType::SERVICE;
+    extensionInfos[0].bundleName = TEST_BUNDLE_NAME;
+    extensionInfos[0].name = "testExtension";
+    extensionInfos[0].applicationInfo.name = "app";
+    extensionInfos[0].applicationInfo.bundleName = TEST_BUNDLE_NAME;
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfos(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos not empty
+    auto ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
+        false, connectInfo);
+    extensionType = ExtensionAbilityType::UI;
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfos(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos not empty
+    ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
+        false, connectInfo);
+    extensionInfos[0].type = ExtensionAbilityType::UI;
+    extensionType = ExtensionAbilityType::SERVICE;
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfos(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos not empty
+    abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
+        true, connectInfo);
+    abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, nullptr, extensionType, sessionInfo,
+        true, connectInfo);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GenerateDataAbilityRequestByUri
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GenerateDataAbilityRequestByUri
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, GenerateDataAbilityRequestByUri_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest GenerateDataAbilityRequestByUri_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto callerToken = abilityRecord->token_;
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(false)));
+    AbilityRequest abilityRequest;
+    auto ret = abilityMs->GenerateDataAbilityRequestByUri("", abilityRequest, callerToken, DEFAULT_INVALID_USER_ID);
+    EXPECT_FALSE(ret);
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
+    ret = abilityMs->GenerateDataAbilityRequestByUri("", abilityRequest, callerToken, DEFAULT_INVALID_USER_ID);
+    EXPECT_FALSE(ret);
+    abilityInfo.name = "testAbility";
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
+    ret = abilityMs->GenerateDataAbilityRequestByUri("", abilityRequest, callerToken, DEFAULT_INVALID_USER_ID);
+    EXPECT_FALSE(ret);
+    abilityInfo.bundleName = TEST_BUNDLE_NAME;
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
+    ret = abilityMs->GenerateDataAbilityRequestByUri("", abilityRequest, callerToken, DEFAULT_INVALID_USER_ID);
+    EXPECT_TRUE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest GenerateDataAbilityRequestByUri_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: AcquireDataAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService AcquireDataAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, AcquireDataAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AcquireDataAbility_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto callerToken = abilityRecord->token_;
+    abilityInfo.name = "testAbility";
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
+    Uri uri("");
+    auto ret = abilityMs->AcquireDataAbility(uri, true, callerToken);
+    EXPECT_EQ(ret, nullptr);
+    Uri uri1("dataability:");
+    ret = abilityMs->AcquireDataAbility(uri1, true, callerToken);
+    EXPECT_EQ(ret, nullptr);
+    Uri uri2("dataability://device_id/com.domainname.dataability.persondata/person/10");
+    ret = abilityMs->AcquireDataAbility(uri2, true, callerToken);
+    EXPECT_EQ(ret, nullptr);
+    abilityInfo.bundleName = TEST_BUNDLE_NAME;
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
+    ret = abilityMs->AcquireDataAbility(uri2, true, callerToken);
+    EXPECT_EQ(ret, nullptr);
+    abilityInfo.applicationInfo.name = "app";
+    abilityInfo.applicationInfo.bundleName = TEST_BUNDLE_NAME;
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
+    ret = abilityMs->AcquireDataAbility(uri2, true, callerToken);
+    EXPECT_EQ(ret, nullptr);
+    abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
+    ret = abilityMs->AcquireDataAbility(uri2, true, callerToken);
+    EXPECT_EQ(ret, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AcquireDataAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: AcquireDataAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService AcquireDataAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, AcquireDataAbility_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AcquireDataAbility_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto callerToken = abilityRecord->token_;
+    abilityInfo.name = "testAbility";
+    abilityInfo.bundleName = TEST_BUNDLE_NAME;
+    abilityInfo.applicationInfo.name = "app";
+    abilityInfo.applicationInfo.bundleName = TEST_BUNDLE_NAME;
+    abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    MyFlag::flag_ = MyFlag::IS_SHELL_CALL;
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
+    Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
+    auto ret = abilityMs->AcquireDataAbility(uri, true, callerToken);
+    EXPECT_EQ(ret, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AcquireDataAbility_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ReleaseDataAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ReleaseDataAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ReleaseDataAbility_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ReleaseDataAbility_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto callerToken = abilityRecord->token_;
+    sptr<IAbilityScheduler> dataAbilityScheduler = nullptr;
+    auto ret = abilityMs->ReleaseDataAbility(dataAbilityScheduler, callerToken);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    dataAbilityScheduler = sptr<AbilitySchedulerMock>::MakeSptr();
+    ret = abilityMs->ReleaseDataAbility(dataAbilityScheduler, nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = abilityMs->ReleaseDataAbility(dataAbilityScheduler, callerToken);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ReleaseDataAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: AbilityTransitionDone
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService AbilityTransitionDone
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, AbilityTransitionDone_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AbilityTransitionDone_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    auto appInfo = const_cast<ApplicationInfo&>(abilityRecord->GetApplicationInfo());
+    appInfo.accessTokenId = callingTokenId;
+    PacMap saveData;
+    int state = 0;
+    auto ret = abilityMs->AbilityTransitionDone(nullptr, state, saveData);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+        return;
+    } else {
+        EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
+    }
+    abilityRecord->abilityInfo_.type = AbilityType::SERVICE;
+    ret = abilityMs->AbilityTransitionDone(token, state, saveData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    abilityRecord->abilityInfo_.type = AbilityType::EXTENSION;
+    ret = abilityMs->AbilityTransitionDone(token, state, saveData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    abilityRecord->abilityInfo_.type = AbilityType::DATA;
+    ret = abilityMs->AbilityTransitionDone(token, state, saveData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    abilityRecord->abilityInfo_.type = AbilityType::UNKNOWN;
+    ret = abilityMs->AbilityTransitionDone(token, state, saveData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = abilityMs->AbilityTransitionDone(token, AbilityState::BACKGROUND, saveData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = abilityMs->AbilityTransitionDone(token, AbilityState::ACTIVE, saveData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = abilityMs->AbilityTransitionDone(token, AbilityState::INITIAL, saveData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AbilityTransitionDone_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: AbilityWindowConfigTransitionDone
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService AbilityWindowConfigTransitionDone
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, AbilityWindowConfigTransitionDone_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AbilityWindowConfigTransitionDone_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    auto appInfo = const_cast<ApplicationInfo&>(abilityRecord->GetApplicationInfo());
+    appInfo.accessTokenId = callingTokenId;
+    WindowConfig windowConfig;
+    auto ret = abilityMs->AbilityWindowConfigTransitionDone(nullptr, windowConfig);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    } else {
+        EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
+    }
+    abilityRecord->abilityInfo_.extensionAbilityType = ExtensionAbilityType::SERVICE;
+    ret = abilityMs->AbilityWindowConfigTransitionDone(token, windowConfig);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    abilityRecord->abilityInfo_.extensionAbilityType = ExtensionAbilityType::UI_SERVICE;
+    ret = abilityMs->AbilityWindowConfigTransitionDone(token, windowConfig);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AbilityWindowConfigTransitionDone_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnAbilityRequestDone
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnAbilityRequestDone
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, OnAbilityRequestDone_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::DATA;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::SERVICE;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::UNKNOWN;
+    abilityMs->OnAbilityRequestDone(token, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartHighestPriorityAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartHighestPriorityAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartHighestPriorityAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    EXPECT_CALL(*mockBundleMgr, ImplicitQueryInfoByPriority(testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(Return(false)).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    abilityMs->StartHighestPriorityAbility(-1, false);
+    abilityMs->StartHighestPriorityAbility(-1, false);
+    abilityMs->StartHighestPriorityAbility(-1, true);
+
+    AbilityInfo abilityInfo;
+    abilityInfo.name = "ability";
+    EXPECT_CALL(*mockBundleMgr, ImplicitQueryInfoByPriority(testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(TRUE)));
+    abilityMs->StartHighestPriorityAbility(-1, true);
+
+    ExtensionAbilityInfo extensionAbilityInfo;
+    extensionAbilityInfo.name = "extension";
+    EXPECT_CALL(*mockBundleMgr, ImplicitQueryInfoByPriority(testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<4>(extensionAbilityInfo), Return(true)));
+    abilityMs->StartHighestPriorityAbility(-1, true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: HandleLoadTimeOut
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService HandleLoadTimeOut
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, HandleLoadTimeOut_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest HandleLoadTimeOut_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    abilityMs->HandleLoadTimeOut(0, false, true);
+    abilityMs->HandleLoadTimeOut(0, false, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest HandleLoadTimeOut_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: HandleForegroundTimeOut
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService HandleForegroundTimeOut
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, HandleForegroundTimeOut_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest HandleForegroundTimeOut_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    abilityMs->HandleForegroundTimeOut(0, false, true);
+    abilityMs->HandleForegroundTimeOut(0, false, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest HandleForegroundTimeOut_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: EnableRecoverAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService EnableRecoverAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, EnableRecoverAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest EnableRecoverAbility_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto callerToken = abilityRecord->token_;
+    abilityMs->EnableRecoverAbility(nullptr);
+    abilityMs->EnableRecoverAbility(callerToken);
+    abilityRecord->SetClearMissionFlag(true);
+    abilityMs->EnableRecoverAbility(callerToken);
+    const_cast<ApplicationInfo&>(abilityRecord->GetApplicationInfo()).accessTokenId = IPCSkeleton::GetCallingTokenID();
+    abilityMs->EnableRecoverAbility(callerToken);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest EnableRecoverAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SubmitSaveRecoveryInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SubmitSaveRecoveryInfo
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, SubmitSaveRecoveryInfo_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SubmitSaveRecoveryInfo_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto callerToken = abilityRecord->token_;
+    abilityMs->SubmitSaveRecoveryInfo(nullptr);
+    abilityMs->SubmitSaveRecoveryInfo(callerToken);
+    const_cast<ApplicationInfo&>(abilityRecord->GetApplicationInfo()).accessTokenId = IPCSkeleton::GetCallingTokenID();
+    abilityMs->SubmitSaveRecoveryInfo(callerToken);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SubmitSaveRecoveryInfo_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: AppRecoverKill
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService AppRecoverKill
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, AppRecoverKill_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AppRecoverKill_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    pid_t pid = 1;
+    int32_t reason = AppExecFwk::StateReason::CPP_CRASH;
+    abilityMs->AppRecoverKill(pid, reason);
+    reason = AppExecFwk::StateReason::JS_ERROR;
+    abilityMs->AppRecoverKill(pid, reason);
+    reason = AppExecFwk::StateReason::APP_FREEZE;
+    abilityMs->AppRecoverKill(pid, reason);
+    reason = static_cast<int32_t>(AppExecFwk::FaultDataType::UNKNOWN);
+    abilityMs->AppRecoverKill(pid, reason);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AppRecoverKill_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ScheduleRecoverAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ScheduleRecoverAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ScheduleRecoverAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ScheduleRecoverAbility_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    int32_t reason = static_cast<int32_t>(AppExecFwk::FaultDataType::UNKNOWN);
+    Want want;
+    abilityMs->ScheduleRecoverAbility(nullptr, reason, &want);
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto callerToken = abilityRecord->token_;
+    abilityMs->ScheduleRecoverAbility(callerToken, reason, &want);
+
+    abilityRecord->currentState_ = AbilityState::INITIAL;
+    abilityRecord->isAbilityForegrounding_ = false;
+    abilityMs->ScheduleRecoverAbility(callerToken, reason, &want);
+
+    abilityRecord->isAbilityForegrounding_ = true;
+    abilityMs->ScheduleRecoverAbility(callerToken, reason, &want);
+    abilityRecord->currentState_ = AbilityState::FOREGROUNDING;
+    abilityMs->ScheduleRecoverAbility(callerToken, reason, &want);
+    const_cast<ApplicationInfo&>(abilityRecord->GetApplicationInfo()).accessTokenId = IPCSkeleton::GetCallingTokenID();
+    abilityMs->ScheduleRecoverAbility(callerToken, reason, &want);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ScheduleRecoverAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUserTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUserTest
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartUserTest_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUserTest_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Want want;
+    auto ret = abilityMs->StartUserTest(want, nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto observer = abilityRecord->token_;
+    ret = abilityMs->StartUserTest(want, observer);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    std::string branch = "-b";
+    std::string value = "test";
+    want.SetParam(branch, value);
+    ret = abilityMs->StartUserTest(want, observer);
+    EXPECT_EQ(ret, ERR_MULTI_INSTANCE_NOT_SUPPORTED);
+    want.SetParam(APP_INSTANCE_KEY, value);
+    want.SetParam(CREATE_APP_INSTANCE_KEY, true);
+    ret = abilityMs->StartUserTest(want, observer);
+    EXPECT_EQ(ret, ERR_MULTI_INSTANCE_NOT_SUPPORTED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUserTest_001 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
