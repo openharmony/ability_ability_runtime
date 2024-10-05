@@ -2259,9 +2259,6 @@ private:
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
 
-    void GetRunningMultiAppIndex(const std::string &bundleName, int32_t uid, int32_t &appIndex);
-    ErrCode ConvertToExplicitWant(Want& want);
-
     int CheckUIExtensionUsage(AppExecFwk::UIExtensionUsage uiExtensionUsage,
         AppExecFwk::ExtensionAbilityType extensionType);
 
