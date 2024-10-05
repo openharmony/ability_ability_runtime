@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MY_FLAG_H
-#define MOCK_MY_FLAG_H
+#ifndef MOCK_PARAMETERS_H
+#define MOCK_PARAMETERS_H
+
+#include <string>
+
 namespace OHOS {
-namespace AAFwk {
-class MyFlag {
-public:
-    enum FLAG {
-        IS_SA_CALL = 1,
-        IS_SHELL_CALL,
-        IS_SA_AND_SHELL_CALL,
-    };
-    static int flag_;
-    static int systemAppFlag_;
-    static int abilityCallFlag_;
-};
-}  // namespace AAFwk
-}  // namespace OHOS
-#endif // MOCK_MY_FLAG_H
+namespace system {
+
+void SetBoolParameter(const std::string& key, bool def);
+
+bool GetBoolParameter(const std::string& key, bool def);
+
+} // namespace system
+} // namespace OHOS
+
+#endif // MOCK_PARAMETERS_H
