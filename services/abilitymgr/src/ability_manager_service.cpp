@@ -51,6 +51,7 @@
 #include "mock_session_manager_service.h"
 #include "modal_system_dialog/modal_system_dialog_ui_extension.h"
 #include "modal_system_ui_extension.h"
+#include "multi_app_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "permission_constants.h"
 #include "process_options.h"
@@ -4643,7 +4644,7 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
     if (!wantSenderInfo.allWants.empty()) {
         AppExecFwk::BundleInfo bundleInfo;
         std::string bundleName = wantSenderInfo.allWants.back().want.GetElement().GetBundleName();
-        GetRunningMultiAppIndex(bundleName, callerUid, appIndex);
+        MultiAppUtils::GetRunningMultiAppIndex(bundleName, callerUid, appIndex);
         if (!isSpecifyUidBySa) {
             bundleMgrResult = IN_PROCESS_CALL(bms->GetCloneBundleInfo(bundleName,
                 static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
@@ -11835,27 +11836,6 @@ int32_t AbilityManagerService::TransferAbilityResultForExtension(const sptr<IRem
     abilityRecord->SaveResultToCallers(resultCode, newWant);
     abilityRecord->SendResultToCallers();
     return ERR_OK;
-}
-
-void AbilityManagerService::GetRunningMultiAppIndex(const std::string &bundleName, int32_t uid, int32_t &appIndex)
-{
-    AppExecFwk::RunningMultiAppInfo runningMultiAppInfo;
-    auto appMgr = AppMgrUtil::GetAppMgr();
-    if (appMgr == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
-        return;
-    }
-    auto ret = IN_PROCESS_CALL(appMgr->GetRunningMultiAppInfoByBundleName(bundleName, runningMultiAppInfo));
-    if (ret != ERR_OK) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "getAppInfo failed, bundle:%{public}s",
-            bundleName.c_str());
-    }
-    for (auto &item : runningMultiAppInfo.runningAppClones) {
-        if (item.uid == uid) {
-            appIndex = item.appCloneIndex;
-            break;
-        }
-    }
 }
 
 void AbilityManagerService::NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid)
