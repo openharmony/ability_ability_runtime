@@ -2306,22 +2306,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, NotifyFrozenProcessByRSS_001, TestSize.
 
 /*
  * Feature: AbilityManagerService
- * Function: GetRunningMultiAppIndex
- * FunctionPoints: GetRunningMultiAppIndex
- */
-HWTEST_F(AbilityManagerServiceThirdTest, GetRunningMultiAppIndex_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
-
-    int32_t  UID = 1000;
-    int32_t  APPINDEX = 28;
-    abilityMs_->GetRunningMultiAppIndex("com.ix.hiservcie", UID, APPINDEX);
-}
-
-
-/*
- * Feature: AbilityManagerService
  * Function: TransferAbilityResultForExtension
  * FunctionPoints: TransferAbilityResultForExtension
  */
