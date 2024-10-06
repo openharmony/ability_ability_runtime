@@ -2241,7 +2241,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartUIAbilityByPreInstallInner_001, Te
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    FreeInstallInfo  taskInfo;
+    FreeInstallInfo taskInfo;
     auto result2 = abilityMs_->StartUIAbilityByPreInstall(taskInfo);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StartUIAbilityByPreInstallInner_001 result2 %{public}d",
         result2);

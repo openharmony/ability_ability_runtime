@@ -47,7 +47,7 @@ public:
         int32_t userId, std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos));
     MOCK_METHOD5(GetJsonProfile, ErrCode(AppExecFwk::ProfileType, const std::string&, const std::string&,
         std::string&, int32_t));
-    MOCK_METHOD3(QueryExtensionAbilityInfoByUri, bool(const std::string &uri, int32_t userId, 
+    MOCK_METHOD3(QueryExtensionAbilityInfoByUri, bool(const std::string &uri, int32_t userId,
         AppExecFwk::ExtensionAbilityInfo &extensionAbilityInfo));
     MOCK_METHOD4(QueryExtensionAbilityInfos, bool(const Want&, const int32_t&, const int32_t&,
         std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos));
