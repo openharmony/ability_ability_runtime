@@ -603,6 +603,15 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     bool isProcCache = false;
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey);
+    if (appRecord && appRecord->IsCaching()) {
+        if (appRecord->GetPriorityObject()) {
+            int32_t pid = appRecord->GetPriorityObject()->GetPid();
+            appRecord->SetKilling();
+            appRecord->PostTask("ASYNC_KILL_PROCESS", 0, [pid, this]() {
+                this->KillProcessByPid(pid, "load_ability_when_caching_process");
+            });
+        }
+    }
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         NotifyMemMgrPriorityChanged(appRecord);
     }
@@ -7650,7 +7659,7 @@ int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
         return ERR_INVALID_VALUE;
     }
 
-    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCacheFromKits()) {
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
         TAG_LOGE(AAFwkTag::APPMGR, "process cache feature is disabled.");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
