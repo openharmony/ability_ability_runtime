@@ -20,6 +20,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t APP_STATE_CACHED = 100;
+}
 PreLoadUIExtStateObserver::PreLoadUIExtStateObserver(
     std::weak_ptr<OHOS::AbilityRuntime::ExtensionRecord> extensionRecord) : extensionRecord_(extensionRecord) {}
 
@@ -48,8 +51,8 @@ void PreLoadUIExtStateObserver::OnAppCacheStateChanged(const AppExecFwk::AppStat
     if (extensionRecord != nullptr) {
         auto hostPid = extensionRecord->hostPid_;
         int32_t cachePid = appStateData.pid;
-        if (static_cast<int32_t>(hostPid) != cachePid || appStateData != 100) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "processData.state = %{public}d", appStateData.state);
+        if (static_cast<int32_t>(hostPid) != cachePid || appStateData.state != APP_STATE_CACHED) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "appStateData.state = %{public}d", appStateData.state);
             return;
         }
         extensionRecord->UnloadUIExtensionAbility();
