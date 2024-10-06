@@ -131,7 +131,6 @@ public:
      */
     void PerformConfigurationUpdated(const Configuration &config);
 
-private:
     enum {
         APP_STATE_CREATE = 0,
         APP_STATE_READY = 1,
@@ -139,6 +138,7 @@ private:
         APP_STATE_BACKGROUND = 3,
         APP_STATE_TERMINATED = 4
     };
+private:
     int curState_;
     int recordId_;
     std::shared_ptr<OHOSApplication> application_ = nullptr;
