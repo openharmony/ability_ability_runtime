@@ -610,6 +610,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             appRecord->PostTask("ASYNC_KILL_PROCESS", 0, [pid, this]() {
                 this->KillProcessByPid(pid, "load_ability_when_caching_process");
             });
+            appRecord = nullptr;
         }
     }
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
