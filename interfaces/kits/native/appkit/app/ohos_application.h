@@ -178,7 +178,7 @@ public:
      */
     virtual void OnConfigurationUpdated(Configuration config,
         AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::System);
-    
+
     /**
      *
      * @brief Will be Called when the application font of the device changes.
@@ -257,7 +257,7 @@ public:
      * @param abilityInfo
      */
     void CleanAbilityStage(const sptr<IRemoteObject> &token, const std::shared_ptr<AbilityInfo> &abilityInfo,
-        bool isCacheProcess = false);
+        bool isCacheProcess);
 
     /**
      * @brief return the application context
@@ -320,7 +320,6 @@ public:
     void CleanEmptyAbilityStage();
 
 private:
-    void DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo);
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
     bool isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level);
