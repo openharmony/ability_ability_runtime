@@ -861,7 +861,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbility_
     EXPECT_NE(appMgrServiceInner->appRunningManager_, nullptr);
     appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
     int32_t userId = 101;
-    appMgrServiceInner->SetEnableStartProcessFlagByUs erId(userId, false);
+    appMgrServiceInner->SetEnableStartProcessFlagByUserId(userId, false);
     applicationInfo_->uid = USER_SCALE * 101;
     appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
     applicationInfo_->uid = 1;
@@ -1294,9 +1294,9 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationDataByUserId_0100, Test
  * @tc.desc: Test GetAllRunningInstanceKeysByBundleName
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_1000, TestSize.Level0)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_0100 start");
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_1000 start");
     std::string bundleName = "";
     std::vector<std::string> instanceKeys;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1309,7 +1309,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_010
     appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
     res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
     EXPECT_EQ(res, AAFwk::ERR_BUNDLE_NOT_EXIST);
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_0100 end");
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_1000 end");
 }
 
 /**

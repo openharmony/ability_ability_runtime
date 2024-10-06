@@ -26,6 +26,7 @@ public:
     };
     static int flag_;
     static int systemAppFlag_;
+    static int systemCallFlag_;
     static int abilityCallFlag_;
 };
 }  // namespace AAFwk

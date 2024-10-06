@@ -125,7 +125,7 @@ bool PermissionVerification::VerifyPrepareTerminatePermission() const
 }
 bool PermissionVerification::IsSystemAppCall() const
 {
-    return true;
+    return MyFlag::systemCallFlag_;
 }
 
 bool PermissionVerification::VerifySetProcessCachePermission() const
