@@ -865,23 +865,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, DelegatorMoveMissionToFront_001, TestSi
 
 /*
  * Feature: AbilityManagerService
- * Function: UpdateCallerInfo
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService UpdateCallerInfo
- */
-HWTEST_F(AbilityManagerServiceFirstTest, UpdateCallerInfo_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest UpdateCallerInfo_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    Want want;
-    sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
-    ASSERT_NE(abilityMs_, nullptr);
-    abilityMs_->UpdateCallerInfo(want, callerToken);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest UpdateCallerInfo_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: IsCallFromBackground
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService IsCallFromBackground
@@ -2051,44 +2034,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, HandleInactiveTimeOut_0100, TestSize.Le
     abilityMs->HandleInactiveTimeOut(abilityRecord->GetAbilityRecordId());
     EXPECT_EQ(abilityMs->subManagersHelper_, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest HandleInactiveTimeOut_0100 end");
-}
-
-/**
- * @tc.name: AbilityManagerServiceFirstTest_UpdateAsCallerInfoFromCallerRecord_0001
- * @tc.desc: Test the state of QueryAllAutoStartupApplications
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceFirstTest, UpdateAsCallerInfoFromCallerRecord_0001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityManagerService> abilityMs = std::make_shared<AbilityManagerService>();
-    Want want;
-    sptr<IRemoteObject> callerToken = nullptr;
-    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
-    callerToken = abilityRecord->GetToken();
-
-    abilityMs->UpdateAsCallerInfoFromCallerRecord(want, callerToken);
-    EXPECT_NE(callerToken, nullptr);
-}
-
-/**
- * @tc.name: AbilityManagerServiceFirstTest_UpdateCallerInfoFromToken_0001
- * @tc.desc: Test the state of UpdateCallerInfoFromToken
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceFirstTest, UpdateCallerInfoFromToken_0001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityManagerService> abilityMs = std::make_shared<AbilityManagerService>();
-    Want want;
-    sptr<IRemoteObject> callerToken = nullptr;
-    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
-    callerToken = abilityRecord->GetToken();
-
-    abilityMs->UpdateCallerInfoFromToken(want, callerToken);
-    EXPECT_NE(abilityRecord, nullptr);
-
-    abilityRecord = nullptr;
-    abilityMs->UpdateCallerInfoFromToken(want, callerToken);
-    EXPECT_EQ(abilityRecord, nullptr);
 }
 
 /**

@@ -1095,6 +1095,8 @@ public:
 
     void RemoveConnectWant();
 
+    void UpdateDmsCallerInfo(Want &want);
+
     inline std::string GetInstanceKey() const
     {
         return instanceKey_;
