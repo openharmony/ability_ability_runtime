@@ -2053,17 +2053,10 @@ void MainThread::HandleCleanAbilityLocal(const sptr<IRemoteObject> &token)
     }
 
     std::shared_ptr<AbilityLocalRecord> record = abilityRecordMgr_->GetAbilityItem(token);
-    if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord not found");
-        return;
-    }
+    CHECK_POINTER_TAG_LOG(record, AAFwkTag::APPKIT, "abilityRecord not found");
     std::shared_ptr<AbilityInfo> abilityInfo = record->GetAbilityInfo();
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "record->GetAbilityInfo() failed");
-        return;
-    }
+    CHECK_POINTER_TAG_LOG(abilityInfo, AAFwkTag::APPKIT, "record->GetAbilityInfo() failed");
     TAG_LOGD(AAFwkTag::APPKIT, "ability name: %{public}s", abilityInfo->name.c_str());
-
     abilityRecordMgr_->RemoveAbilityRecord(token);
     application_->CleanAbilityStage(token, abilityInfo, false);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
@@ -2101,29 +2094,16 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
         TAG_LOGE(AAFwkTag::APPKIT, "should launch application first");
         return;
     }
-
-    if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is null");
-        return;
-    }
-
+    CHECK_POINTER_TAG_LOG(token, AAFwkTag::APPKIT, "token is null");
     std::shared_ptr<AbilityLocalRecord> record = abilityRecordMgr_->GetAbilityItem(token);
-    if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord not found");
-        return;
-    }
+    CHECK_POINTER_TAG_LOG(record, AAFwkTag::APPKIT, "abilityRecord not found");
     std::shared_ptr<AbilityInfo> abilityInfo = record->GetAbilityInfo();
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "record->GetAbilityInfo() failed");
-        return;
-    }
-
+    CHECK_POINTER_TAG_LOG(abilityInfo, AAFwkTag::APPKIT, "record->GetAbilityInfo() failed");
 #ifdef SUPPORT_GRAPHICS
     if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
         AppRecovery::GetInstance().RemoveAbility(token);
     }
 #endif
-
     abilityRecordMgr_->RemoveAbilityRecord(token);
     application_->CleanAbilityStage(token, abilityInfo, isCacheProcess);
 #ifdef APP_ABILITY_USE_TWO_RUNNER

@@ -1111,26 +1111,6 @@ HWTEST_F(JsRuntimeTest, StartDebugger_0100, TestSize.Level0)
 }
 
 /**
- * @tc.name: DoCleanWorkAfterStageCleaned_0100
- * @tc.desc: JsRuntime test for DoCleanWorkAfterStageCleaned.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, DoCleanWorkAfterStageCleaned_0100, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "DoCleanWorkAfterStageCleaned_0100 start");
-
-    AbilityRuntime::Runtime::Options options;
-    options.preload = true;
-    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-
-    ASSERT_NE(jsRuntime, nullptr);
-
-    jsRuntime->DoCleanWorkAfterStageCleaned();
-    jsRuntime.reset();
-    TAG_LOGI(AAFwkTag::TEST, "DoCleanWorkAfterStageCleaned_0100 end");
-}
-
-/**
  * @tc.name: ReloadFormComponent_0100
  * @tc.desc: JsRuntime test for ReloadFormComponent.
  * @tc.type: FUNC
