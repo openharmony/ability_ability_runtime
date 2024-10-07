@@ -144,7 +144,8 @@ void EcologicalRuleInterceptor::GetEcologicalTargetInfo(const Want &want,
             targetAbilityInfo.applicationInfo.bundleType));
         callerInfo.targetAbilityType = targetAbilityInfo.type;
         callerInfo.targetExtensionAbilityType = targetAbilityInfo.extensionAbilityType;
-        callerInfo.targetApplicationReservedFlag = targetAbilityInfo.applicationInfo.applicationReservedFlag;
+        callerInfo.targetApplicationReservedFlag = static_cast<int32_t>(
+            targetAbilityInfo.applicationInfo.applicationReservedFlag);
     } else if (abilityInfo != nullptr) {
         callerInfo.targetAppDistType = abilityInfo->applicationInfo.appDistributionType;
         callerInfo.targetAppProvisionType = abilityInfo->applicationInfo.appProvisionType;
@@ -152,7 +153,8 @@ void EcologicalRuleInterceptor::GetEcologicalTargetInfo(const Want &want,
             abilityInfo->applicationInfo.bundleType));
         callerInfo.targetAbilityType = abilityInfo->type;
         callerInfo.targetExtensionAbilityType = abilityInfo->extensionAbilityType;
-        callerInfo.targetApplicationReservedFlag = abilityInfo->applicationInfo.applicationReservedFlag;
+        callerInfo.targetApplicationReservedFlag = static_cast<int32_t>(
+            abilityInfo->applicationInfo.applicationReservedFlag);
     }
 }
 
