@@ -77,7 +77,7 @@ void AmsMgrScheduler::LoadAbility(const sptr<IRemoteObject> &token, const sptr<I
     }
 
     if (amsMgrServiceInner_->VerifyRequestPermission() != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed");
         return;
     }
     PerfProfile::GetInstance().SetAbilityLoadStartTime(GetTickCount());
