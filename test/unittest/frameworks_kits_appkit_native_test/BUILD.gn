@@ -768,6 +768,7 @@ group("unittest") {
     ":context_container_by_mock_bms_test",
     ":context_container_test",
     ":context_deal_test",
+    ":context_impl_test",
     ":dump_ipc_helper_test",
     ":dump_runtime_helper_test",
     ":extension_plugin_info_test",
