@@ -23,6 +23,7 @@
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "assert_fault_callback_death_mgr.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
 #include "multi_instance_utils.h"
