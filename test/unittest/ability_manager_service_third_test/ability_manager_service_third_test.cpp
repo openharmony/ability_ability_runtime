@@ -1396,7 +1396,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, ParseJsonFromBoot_001, TestSize.Level1)
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    abilityMs_->ParseJsonFromBoot(nullptr, "", "");
+    abilityMs_->ParseJsonFromBoot("");
 }
 
 /*
