@@ -1199,7 +1199,7 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
     dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
     dumpOption.isVmMode = true;
     dumpOption.isPrivate = false;
-    dumpOption.captureNumericValue = false;
+    dumpOption.captureNumericValue = true;
     dumpOption.isFullGC = isFullGC;
     dumpOption.isSync = false;
     DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
