@@ -690,12 +690,6 @@ int ContextImpl::GetCurrentActiveAccountId() const
         TAG_LOGE(AAFwkTag::APPKIT, "no accounts");
         return 0;
     }
-
-    if (accountIds.size() > 1) {
-        TAG_LOGE(AAFwkTag::APPKIT, "no current now");
-        return 0;
-    }
-
     return accountIds[0];
 }
 
