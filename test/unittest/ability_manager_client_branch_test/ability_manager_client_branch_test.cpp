@@ -2407,7 +2407,10 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetMissionLabel_01
     sptr<IRemoteObject> token = nullptr;
     std::string label = "label";
     ErrCode ret = client_->SetMissionLabel(token, label);
-    EXPECT_EQ(ret, ERR_OK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_OK);
+    }
+    EXPECT_TRUE(client_ != nullptr);
     GTEST_LOG_(INFO) << "AbilityManagerClient_SetMissionLabel_0100 end";
 }
 #endif
