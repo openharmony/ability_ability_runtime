@@ -40,6 +40,24 @@ struct CJWantAgentInfo {
     char* extraInfos;
 };
 
+struct CJTriggerInfo {
+    int32_t code;
+    WantHandle want;
+    bool hasWant;
+    char* permission;
+    // Record<string, Object>
+    char* extraInfos;
+};
+
+struct CJCompleteData {
+    int64_t info;
+    WantHandle want;
+    int32_t finalCode;
+    char* finalData;
+    // Record<string, Object>
+    char* extraInfo;
+};
+
 }
 }
 #endif // CJ_WANT_AGENT_UTILS_FFI_H
