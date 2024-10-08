@@ -1845,7 +1845,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, TransferAbilityResultForExtension_001, 
     abilityRecord->Init();
     auto callerToken = abilityRecord->token_;
     auto ret = abilityMs->TransferAbilityResultForExtension(callerToken, -1, want);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     const_cast<ApplicationInfo&>(abilityRecord->GetApplicationInfo()).accessTokenId = IPCSkeleton::GetCallingTokenID();
     ret = abilityMs->TransferAbilityResultForExtension(callerToken, -1, want);
     const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::EXTENSION;

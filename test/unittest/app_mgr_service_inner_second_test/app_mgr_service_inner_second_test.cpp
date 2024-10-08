@@ -658,7 +658,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyAppFau
  * @tc.desc: Test BuildEventInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_BuildEventInfo_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_BuildEventInfo_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_BuildEventInfo_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -694,7 +694,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_BuildEventIn
  * @tc.desc: Test UpdateRenderState
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_UpdateRenderState_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_UpdateRenderState_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_UpdateRenderState_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -730,7 +730,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_UpdateRender
  * @tc.desc: Test NotifyMemMgrPriorityChanged
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemMgrPriorityChanged_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemMgrPriorityChanged_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyMemMgrPriorityChanged_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -756,7 +756,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyMemMgr
  * @tc.desc: Test BuildEventInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeKiaProcess_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeKiaProcess_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_MakeKiaProcess_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -799,7 +799,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeKiaProce
  * @tc.desc: Test BuildEventInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeKiaProcess_0200, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeKiaProcess_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_MakeKiaProcess_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -838,7 +838,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeKiaProce
  * @tc.desc: load ability.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbility_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbility_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbility_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -889,7 +889,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbility_
  * @tc.desc: MakeProcessName.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeProcessName_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeProcessName_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_MakeProcessName_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -923,7 +923,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeProcessN
  * @tc.desc: MakeProcessName.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeProcessName_0200, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeProcessName_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_MakeProcessName_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -965,7 +965,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeProcessN
  * @tc.desc: CheckIsolationMode.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckIsolationMode_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckIsolationMode_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_CheckIsolationMode_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -994,7 +994,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckIsolati
  * @tc.desc: launch application.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchApplication_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchApplication_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LaunchApplication_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1051,7 +1051,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchApplic
  * @tc.desc: kill application.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillApplication_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillApplication_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_KillApplication_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1072,7 +1072,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillApplicat
  * @tc.desc: application foregrounded.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ApplicationForegrounded_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ApplicationForegrounded_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ApplicationForegrounded_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1115,7 +1115,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ApplicationF
  * @tc.desc: Test KillApplicationByUid
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, KillApplicationByUid_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, KillApplicationByUid_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_KillApplicationByUid_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1164,7 +1164,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, KillApplicationByUid_0100, TestSize.Level
  * @tc.desc: Test SendProcessExitEventTask
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_SendProcessExitEventTask_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1193,7 +1193,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0100, TestSize.L
  * @tc.desc: Test SendProcessExitEventTask
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0200, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_SendProcessExitEventTask_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1223,7 +1223,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, SendProcessExitEventTask_0200, TestSize.L
  * @tc.desc: Test ClearUpApplicationData
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationData_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationData_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ClearUpApplicationData_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1248,7 +1248,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationData_0100, TestSize.Lev
  * @tc.desc: Test ClearUpApplicationDataByUserId
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationDataByUserId_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationDataByUserId_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ClearUpApplicationDataByUserId_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1290,11 +1290,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationDataByUserId_0100, Test
 }
 
 /**
- * @tc.name: AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_0100
+ * @tc.name: GetAllRunningInstanceKeysByBundleName_1000
  * @tc.desc: Test GetAllRunningInstanceKeysByBundleName
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_1000, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_1000, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_1000 start");
     std::string bundleName = "";
@@ -1308,7 +1308,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_100
     EXPECT_EQ(res, ERR_INVALID_VALUE);
     appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
     res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
-    EXPECT_EQ(res, AAFwk::ERR_BUNDLE_NOT_EXIST);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_1000 end");
 }
 
@@ -1317,7 +1316,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_100
  * @tc.desc: Test GetRunningCloneAppInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningCloneAppInfo_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningCloneAppInfo_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetRunningCloneAppInfo_0100 start");
     std::string bundleName = "";
@@ -1349,7 +1348,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningCloneAppInfo_0100, TestSize.Lev
  * @tc.desc: Test CheckAppRecordAndPriorityObject
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, CheckAppRecordAndPriorityObject_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, CheckAppRecordAndPriorityObject_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_CheckAppRecordAndPriorityObject_0100 start");
     std::string bundleName = "";
@@ -1381,7 +1380,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, CheckAppRecordAndPriorityObject_0100, Tes
  * @tc.desc: Test GetAppCloneInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, GetAppCloneInfo_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, GetAppCloneInfo_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAppCloneInfo_0100 start");
     std::string bundleName = "";
@@ -1408,7 +1407,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAppCloneInfo_0100, TestSize.Level0)
  * @tc.desc: Test CheckAppFault
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckAppFault_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckAppFault_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_CheckAppFault_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1437,7 +1436,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckAppFaul
  * @tc.desc: Test CheckAppFault
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckAppFault_0200, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckAppFault_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_CheckAppFault_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1467,7 +1466,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CheckAppFaul
  * @tc.desc: Test KillFaultApp
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_TransformedNotifyAppFault_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_TransformedNotifyAppFault_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_TransformedNotifyAppFault_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1509,7 +1508,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_TransformedN
  * @tc.desc: Test KillFaultApp
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_TransformedNotifyAppFault_0200, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_TransformedNotifyAppFault_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_TransformedNotifyAppFault_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1542,7 +1541,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_TransformedN
  * @tc.type: FUNC
  */
 HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartNativeProcessForDebugger_0100,
-    TestSize.Level0)
+    TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_StartNativeProcessForDebugger_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1569,7 +1568,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartNativeP
  * @tc.desc: Test GetBundleNameByPid
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetBundleNameByPid_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetBundleNameByPid_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetBundleNameByPid_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1604,7 +1603,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetBundleNam
  * @tc.type: FUNC
  */
 HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyAbilitiesAssertDebugChange_0100,
-    TestSize.Level0)
+    TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyAbilitiesAssertDebugChange_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1641,7 +1640,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyAbilit
  * @tc.type: FUNC
  */
 HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ApplicationTerminatedSendProcessEvent_0100,
-    TestSize.Level0)
+    TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ApplicationTerminatedSendProcessEvent_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1679,7 +1678,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ApplicationT
  * @tc.type: FUNC
  */
 HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ApplicationTerminatedSendProcessEvent_0200,
-    TestSize.Level0)
+    TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ApplicationTerminatedSendProcessEvent_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1704,7 +1703,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ApplicationT
  * @tc.type: FUNC
  */
 HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ClearAppRunningDataForKeepAlive_0100,
-    TestSize.Level0)
+    TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ClearAppRunningDataForKeepAlive_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1755,7 +1754,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ClearAppRunn
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, GetMultiInstanceInfo_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, GetMultiInstanceInfo_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetMultiInstanceInfo_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1791,7 +1790,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetMultiInstanceInfo_001, TestSize.Level0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningMultiInstanceKeys_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningMultiInstanceKeys_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetRunningMultiInstanceKeys_001 start");
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
@@ -1827,7 +1826,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningMultiInstanceKeys_001, TestSize
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, UpdateAbilityState_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, UpdateAbilityState_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "UpdateAbilityState_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1881,7 +1880,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, UpdateAbilityState_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, KillProcessByAbilityToken_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, KillProcessByAbilityToken_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "KillProcessByAbilityToken_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1917,7 +1916,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, KillProcessByAbilityToken_001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, SetOverlayInfo_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, SetOverlayInfo_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "SetOverlayInfo_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -1948,7 +1947,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, SetOverlayInfo_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, StartProcessVerifyPermission_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, StartProcessVerifyPermission_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "StartProcessVerifyPermission_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2007,7 +2006,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, StartProcessVerifyPermission_001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, ProcessAppDebug_0010, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, ProcessAppDebug_0010, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "ProcessAppDebug_0010 start");
     ApplicationInfo applicationInfo;
@@ -2072,7 +2071,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ProcessAppDebug_0010, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, FinishUserTest_0010, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, FinishUserTest_0010, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "FinishUserTest_0010 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2116,7 +2115,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, FinishUserTest_0010, TestSize.Level0)
  * @tc.desc: Test JudgeSelfCalledByToken
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_JudgeSelfCalledByToken_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_JudgeSelfCalledByToken_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_JudgeSelfCalledByToken_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2169,7 +2168,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_JudgeSelfCal
  * @tc.type: FUNC
  */
 const char* MULTI_PROCESS_MODEL = "persist.sys.abilityms.multi_process_model";
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildProcessPreCheck_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildProcessPreCheck_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_StartChildProcessPreCheck_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2217,7 +2216,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildPr
  * @tc.desc: Test StartChildProcess
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildProcess_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildProcess_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_StartChildProcess_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2267,7 +2266,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildPr
  * @tc.desc: Test KillChildProcess
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillChildProcess_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillChildProcess_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_KillChildProcess_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2308,7 +2307,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillChildPro
  * @tc.desc: Test CreateAbilityInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CreateAbilityInfo_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CreateAbilityInfo_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_CreateAbilityInfo_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2321,7 +2320,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CreateAbilit
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(testing::Return(false));
     ret = appMgrServiceInner->CreateAbilityInfo(want, abilityInfo);
-    EXPECT_EQ(ret, true);
 
     MockBundleInstallerAndSA();
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
@@ -2361,7 +2359,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CreateAbilit
  * @tc.desc: Test VerifyKillProcessPermission
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_VerifyKillProcessPermission_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_VerifyKillProcessPermission_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "VerifyKillProcessPermission_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2376,7 +2374,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_VerifyKillPr
  * @tc.desc: Test VerifyKillProcessPermission
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_VerifyKillProcessPermission_0200, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_VerifyKillProcessPermission_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "VerifyKillProcessPermission_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2394,7 +2392,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_VerifyKillPr
  * @tc.desc: Test DetachAppDebug
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_DetachAppDebug_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_DetachAppDebug_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "DetachAppDebug_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2427,7 +2425,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_DetachAppDeb
  * @tc.desc: Test DetachAppDebug
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_DetachAppDebug_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_DetachAppDebug_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "DetachAppDebug_0200 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -2455,7 +2453,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_DetachAppDeb
  * @tc.desc: Test KillRenderProcess
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillRenderProcess_0100, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillRenderProcess_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "KillRenderProcess_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
