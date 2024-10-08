@@ -16,14 +16,43 @@
 #include "hilog_tag_wrapper.h"
 #include "want_agent_helper.h"
 #include "want_params_wrapper.h"
+#include "start_options.h"
 #include "cj_want_agent_ffi.h"
 #include "cj_ability_runtime_error.h"
 #include "cj_utils_ffi.h"
+#include "cj_lambda.h"
 
 namespace OHOS {
 namespace WantAgentCJ {
 
 using namespace OHOS::AbilityRuntime;
+
+constexpr int32_t BUSINESS_ERROR_CODE_OK = 0;
+
+CJTriggerCompleteCallBack::CJTriggerCompleteCallBack()
+{}
+
+CJTriggerCompleteCallBack::~CJTriggerCompleteCallBack()
+{}
+
+void CJTriggerCompleteCallBack::SetCallbackInfo(std::function<void(CJCompleteData)> callback)
+{
+    callback_ = callback;
+}
+
+void CJTriggerCompleteCallBack::SetWantAgentInstance(int64_t wantAgent)
+{
+    wantAgent_ = wantAgent;
+}
+
+void CJTriggerCompleteCallBack::OnSendFinished(
+    const AAFwk::Want &want, int resultCode, const std::string &resultData, const AAFwk::WantParams &resultExtras)
+{
+    CJCompleteData data = { .info = wantAgent_, .want = new (std::nothrow) AAFwk::Want(want),
+        .finalCode = resultCode, .finalData = CreateCStringFromString(resultData),
+        .extraInfo = CreateCStringFromString(OHOS::AAFwk::WantParamWrapper(resultExtras).ToString())};
+    callback_(data);
+}
 
 std::string CJWantAgent::OnGetBundleName(int32_t *errCode)
 {
@@ -39,10 +68,56 @@ int32_t CJWantAgent::OnGetUid(int32_t *errCode)
     return uid;
 }
 
+void CJWantAgent::OnCancel(int32_t *errCode)
+{
+    *errCode = WantAgentHelper::Cancel(wantAgent_);
+}
+
+void CJWantAgent::OnTrigger(CJTriggerInfo cjTriggerInfo, std::function<void(CJCompleteData)> callback, int32_t *errCode)
+{
+    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> wantAgent = nullptr;
+    TriggerInfo triggerInfo;
+    auto triggerObj = std::make_shared<CJTriggerCompleteCallBack>();
+    *errCode = UnWrapTriggerInfoParam(cjTriggerInfo, callback, wantAgent, triggerInfo, triggerObj);
+    if (*errCode != NO_ERROR) {
+        return;
+    }
+    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
+}
+
+int32_t CJWantAgent::UnWrapTriggerInfoParam(CJTriggerInfo cjTriggerInfo, std::function<void(CJCompleteData)> callback,
+    std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> &wantAgent, TriggerInfo &triggerInfo,
+    std::shared_ptr<CJTriggerCompleteCallBack> &triggerObj)
+{
+    wantAgent = wantAgent_;
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    if (cjTriggerInfo.hasWant) {
+        auto actualWant = reinterpret_cast<AAFwk::Want*>(cjTriggerInfo.want);
+        want = std::make_shared<AAFwk::Want>(*actualWant);
+    }
+    std::string permission = std::string(cjTriggerInfo.permission);
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
+    if (cjTriggerInfo.extraInfos != nullptr) {
+        extraInfo = std::make_shared<AAFwk::WantParams>(
+            OHOS::AAFwk::WantParamWrapper::ParseWantParams(cjTriggerInfo.extraInfos));
+    }
+    std::shared_ptr<AAFwk::StartOptions> startOptions = std::make_shared<AAFwk::StartOptions>();
+    
+    TriggerInfo triggerInfoData(permission, extraInfo, want, startOptions, cjTriggerInfo.code);
+    triggerInfo = triggerInfoData;
+
+    triggerObj->SetCallbackInfo(callback);
+    triggerObj->SetWantAgentInstance(GetID());
+
+    return BUSINESS_ERROR_CODE_OK;
+}
+
 extern "C" {
 int64_t FfiWantAgentGetWantAgent(CJWantAgentInfo info, int32_t *errCode)
 {
-    std::shared_ptr<AAFwk::WantParams> extraInfo = 
+    std::shared_ptr<AAFwk::WantParams> extraInfo =
         std::make_shared<AAFwk::WantParams>(OHOS::AAFwk::WantParamWrapper::ParseWantParams(info.extraInfos));
     std::vector<WantAgentConstant::Flags> wantAgentFlags;
     for (int64_t i = 0; i < info.actionFlags.size; i++) {
@@ -98,7 +173,7 @@ char* FfiWantAgentGetBoundleName(int64_t cjWantAgent, int32_t *errCode)
     return CreateCStringFromString(bundleName);
 }
 
-int32_t FfiWantAgentGetUidCallback(int64_t cjWantAgent, int32_t *errCode)
+int32_t FfiWantAgentGetUid(int64_t cjWantAgent, int32_t *errCode)
 {
     auto nativeWantAgent = OHOS::FFI::FFIData::GetData<CJWantAgent>(cjWantAgent);
     if (nativeWantAgent == nullptr) {
@@ -106,6 +181,27 @@ int32_t FfiWantAgentGetUidCallback(int64_t cjWantAgent, int32_t *errCode)
         return -1;
     }
     return nativeWantAgent->OnGetUid(errCode);
+}
+
+void FfiWantAgentCancel(int64_t cjWantAgent, int32_t *errCode)
+{
+    auto nativeWantAgent = OHOS::FFI::FFIData::GetData<CJWantAgent>(cjWantAgent);
+    if (nativeWantAgent == nullptr) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    return nativeWantAgent->OnCancel(errCode);
+}
+
+void FfiWantAgentTrigger(int64_t cjWantAgent, CJTriggerInfo triggerInfo,
+    void (*callback)(CJCompleteData), int32_t *errCode)
+{
+    auto nativeWantAgent = OHOS::FFI::FFIData::GetData<CJWantAgent>(cjWantAgent);
+    if (nativeWantAgent == nullptr) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    return nativeWantAgent->OnTrigger(triggerInfo, CJLambda::Create(callback), errCode);
 }
 }
 
