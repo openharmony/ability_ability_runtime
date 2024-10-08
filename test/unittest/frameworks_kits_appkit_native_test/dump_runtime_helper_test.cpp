@@ -63,5 +63,5 @@ HWTEST_F(DumpRuntimeHelperTest, DumpJsHeap_0100, Function | MediumTest | Level1)
     EXPECT_NE(application, nullptr);
     GTEST_LOG_(INFO) << "DumpRuntimeHelperTest DumpJsHeap_0100 end";
 }
-}
-}
+} // namespace AppExecFwk
+} // namespace OHOS
