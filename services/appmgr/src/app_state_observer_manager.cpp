@@ -414,17 +414,17 @@ void AppStateObserverManager::StateChangedNotifyObserver(
     const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
 {
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, StateChangedNotifyObserver failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler, failed");
         return;
     }
 
     auto task = [weak = weak_from_this(), abilityStateData, isAbility, isFromWindowFocusChanged]() {
         auto self = weak.lock();
         if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, StateChangedNotifyObserver failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "null self, failed");
             return;
         }
-        TAG_LOGI(AAFwkTag::APPMGR, "StateChangedNotifyObserver come.");
+        TAG_LOGD(AAFwkTag::APPMGR, "StateChangedNotifyObserver come");
         self->HandleStateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
     };
     handler_->SubmitTask(task);
