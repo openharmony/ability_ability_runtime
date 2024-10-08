@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef WITH_DLP
 #include "dlp_utils.h"
+#endif // WITH_DLP
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,6 +44,7 @@ void DlpUtilsTest::SetUp()
 void DlpUtilsTest::TearDown()
 {}
 
+#ifdef WITH_DLP
 /**
  * @tc.name: OtherAppsAccessDlpCheck_0100
  * @tc.desc: OtherAppsAccessDlpCheck Test
@@ -90,5 +93,6 @@ HWTEST_F(DlpUtilsTest, DlpAccessOtherAppsCheck_0100, TestSize.Level0)
     bool result = DlpUtils::DlpAccessOtherAppsCheck(abilityRecord->GetToken(), want);
     EXPECT_TRUE(result);
 }
+#endif // WITH_DLP
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -1090,8 +1090,10 @@ private:
 
     void RecordSaCallerInfo(const Want &want);
 
+#ifdef WITH_DLP
     void HandleDlpAttached();
     void HandleDlpClosed();
+#endif // WITH_DLP
     void NotifyRemoveShellProcess(int32_t type);
     void NotifyAnimationAbilityDied();
     inline void SetCallerAccessTokenId(uint32_t callerAccessTokenId)
