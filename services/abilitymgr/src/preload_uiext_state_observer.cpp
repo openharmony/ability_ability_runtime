@@ -48,7 +48,7 @@ void PreLoadUIExtStateObserver::OnAppCacheStateChanged(const AppExecFwk::AppStat
     if (extensionRecord != nullptr) {
         auto hostPid = extensionRecord->hostPid_;
         int32_t cachePid = appStateData.pid;
-        if (static_cast<int32_t>(hostPid) != cachePid || appStateData.state != AppExecFwk::ApplicationState::APP_STATE_CACHED) {
+        if (static_cast<int32_t>(hostPid) != cachePid || appStateData.state != static_cast<int32_t>(AppExecFwk::ApplicationState::APP_STATE_CACHED)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "appStateData.state = %{public}d", appStateData.state);
             return;
         }
