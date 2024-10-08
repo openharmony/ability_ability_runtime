@@ -661,6 +661,7 @@ private:
     std::string pathSeparator_ = "/";
     std::string abilityLibraryType_ = ".so";
     static std::weak_ptr<OHOSApplication> applicationForDump_;
+    bool isDeveloperMode_ = false;
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**
