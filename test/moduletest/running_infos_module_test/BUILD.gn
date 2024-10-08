@@ -135,6 +135,9 @@ ohos_moduletest("running_infos_module_test") {
       "window_manager:libdm",
     ]
   }
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 group("moduletest") {

@@ -39,7 +39,9 @@ constexpr int32_t DEFAULT_DMS_SESSION_ID = 0;
 constexpr char LAUNCHER_BUNDLE_NAME[] = "com.ohos.launcher";
 constexpr char LAUNCHER_ABILITY_NAME[] = "com.ohos.launcher.MainAbility";
 constexpr char SHOW_ON_LOCK_SCREEN[] = "ShowOnLockScreen";
+#ifdef WITH_DLP
 constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
+#endif // WITH_DLP
 constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 constexpr int32_t ERR_INVALID_VALUE = -1;
 }
@@ -159,8 +161,10 @@ void UIAbility::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessio
         return;
     }
 
+#ifdef WITH_DLP
     securityFlag_ = want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false);
     (const_cast<AAFwk::Want &>(want)).RemoveParam(DLP_PARAMS_SECURITY_FLAG);
+#endif // WITH_DLP
     SetWant(want);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s.", abilityInfo_->name.c_str());
 #ifdef SUPPORT_GRAPHICS

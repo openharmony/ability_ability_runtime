@@ -94,6 +94,9 @@ ohos_unittest("AmsAbilityRunningRecordTest") {
     external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
     defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 group("unittest") {

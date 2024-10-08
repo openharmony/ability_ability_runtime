@@ -71,6 +71,11 @@ ohos_shared_library("perm_verification") {
     "ipc:ipc_core",
   ]
 
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
+
   subsystem_name = "ability"
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "ability_runtime"

@@ -507,9 +507,11 @@ int AbilityManagerStub::OnRemoteRequestInnerThirteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_CONNECTION_OBSERVER) {
         return UnregisterConnectionObserverInner(data, reply);
     }
+#ifdef WITH_DLP
     if (interfaceCode == AbilityManagerInterfaceCode::GET_DLP_CONNECTION_INFOS) {
         return GetDlpConnectionInfosInner(data, reply);
     }
+#endif // WITH_DLP
     if (interfaceCode == AbilityManagerInterfaceCode::MOVE_ABILITY_TO_BACKGROUND) {
         return MoveAbilityToBackgroundInner(data, reply);
     }
@@ -2632,11 +2634,13 @@ int AbilityManagerStub::UnregisterObserver(const sptr<AbilityRuntime::IConnectio
     return NO_ERROR;
 }
 
+#ifdef WITH_DLP
 int AbilityManagerStub::GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos)
 {
     // should implement in child
     return NO_ERROR;
 }
+#endif // WITH_DLP
 
 int AbilityManagerStub::GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &infos)
 {
@@ -2879,6 +2883,7 @@ int AbilityManagerStub::UnregisterConnectionObserverInner(MessageParcel &data, M
     return UnregisterObserver(observer);
 }
 
+#ifdef WITH_DLP
 int AbilityManagerStub::GetDlpConnectionInfosInner(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<AbilityRuntime::DlpConnectionInfo> infos;
@@ -2902,6 +2907,7 @@ int AbilityManagerStub::GetDlpConnectionInfosInner(MessageParcel &data, MessageP
 
     return ERR_OK;
 }
+#endif // WITH_DLP
 
 int AbilityManagerStub::GetConnectionDataInner(MessageParcel &data, MessageParcel &reply)
 {

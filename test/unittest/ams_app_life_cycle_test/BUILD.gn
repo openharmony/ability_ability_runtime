@@ -80,6 +80,10 @@ ohos_unittest("AmsAppLifeCycleTest") {
     "memory_utils:libmeminfo",
     "resource_schedule_service:ressched_client",
   ]
+
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 group("unittest") {
