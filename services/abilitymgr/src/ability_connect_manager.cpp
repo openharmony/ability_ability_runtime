@@ -76,6 +76,7 @@ const std::unordered_set<std::string> FROZEN_WHITE_LIST {
 };
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
+constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 
 const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
 
@@ -2282,6 +2283,8 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
         StartAbilityLocked(requestInfo);
         return;
     }
+
+    requestInfo.want.SetParam(WANT_PARAMS_APP_RESTART_FLAG, true);
 
     // restart other resident ability
     if (abilityRecord->CanRestartResident()) {
