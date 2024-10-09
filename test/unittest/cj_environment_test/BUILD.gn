@@ -16,8 +16,8 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/ability/ability_runtime/cj_environment/cj_environment.gni")
 
-ohos_unittest("cj_environment_test") {
-  module_out_path = "ability_runtime/cj_environment_test"
+ohos_unittest("cj_environment_other_test") {
+  module_out_path = "ability_runtime/cj_environment_other_test"
   include_dirs = [
     "${ability_runtime_test_path}/mock/common/include",
     "${resource_management_path}/frameworks/resmgr/include",
@@ -91,5 +91,5 @@ ohos_unittest("cj_environment_test") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":cj_environment_test" ]
+  deps = [ ":cj_environment_other_test" ]
 }
