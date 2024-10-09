@@ -19,16 +19,13 @@
 #include <string>
 
 #include "iremote_object.h"
-#include "event_runner.h"
 #include "ability_info.h"
-#include "application_info.h"
 #include "refbase.h"
 #include "want.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 class AbilityThread;
-class AbilityImpl;
 class AbilityLocalRecord {
 public:
     /**
@@ -36,7 +33,8 @@ public:
      * default constructor
      *
      */
-    AbilityLocalRecord(const std::shared_ptr<AbilityInfo> &info, const sptr<IRemoteObject> &token);
+    AbilityLocalRecord(const std::shared_ptr<AbilityInfo> &info, const sptr<IRemoteObject> &token,
+        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId);
 
     /**
      *
@@ -53,47 +51,12 @@ public:
     const std::shared_ptr<AbilityInfo> &GetAbilityInfo();
 
     /**
-     * @description: Get an EventHandler in an ability.
-     *
-     * @return Returns a pointer to EventHandler
-     */
-    const std::shared_ptr<EventHandler> &GetEventHandler();
-
-    /**
-     * @description: Set an EventHandler in an ability.
-     * @param handler EventHandler object
-     * @return None.
-     */
-    void SetEventHandler(const std::shared_ptr<EventHandler> &handler);
-
-    /**
-     * @description: Get an EventRunner in an ability.
-     *
-     * @return Returns a pointer to EventRunner
-     */
-    const std::shared_ptr<EventRunner> &GetEventRunner();
-
-    /**
-     * @description: Set an EventRunner in an ability.
-     * @param runner EventHandler object
-     * @return None.
-     */
-    void SetEventRunner(const std::shared_ptr<EventRunner> &runner);
-
-    /**
      * @description: Gets the identity of the ability
      * @return return the identity of the ability.
      */
     const sptr<IRemoteObject> &GetToken();
 
-    int32_t GetAbilityRecordId() const
-    {
-        return abilityRecordId_;
-    }
-    void SetAbilityRecordId(int32_t abilityRecordId)
-    {
-        abilityRecordId_ = abilityRecordId;
-    }
+    int32_t GetAbilityRecordId() const;
 
     /**
      * @description: Obtains the information based on ability thread.
@@ -113,14 +76,11 @@ public:
     const std::shared_ptr<AAFwk::Want> &GetWant();
 private:
     std::shared_ptr<AbilityInfo> abilityInfo_ = nullptr;
-    sptr<IRemoteObject> token_;
-    int32_t abilityRecordId_ = 0;
-    std::shared_ptr<EventRunner> runner_ = nullptr;
-    std::shared_ptr<EventHandler> handler_ = nullptr;
-    std::shared_ptr<AbilityImpl> abilityImpl_ = nullptr;  // store abilityImpl
-    sptr<AbilityThread> abilityThread_;
+    sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AAFwk::Want> want_ = nullptr;
+    int32_t abilityRecordId_ = 0;
+    sptr<AbilityThread> abilityThread_;
 };
-}  // namespace AppExecFwk
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ABILITY_LOCAL_RECORD_H
+} // namespace AppExecFwk
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_ABILITY_LOCAL_RECORD_H

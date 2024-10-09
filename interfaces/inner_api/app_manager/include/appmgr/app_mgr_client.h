@@ -126,8 +126,19 @@ public:
      */
     virtual AppMgrResultCode KillProcessesByUserId(int32_t userId);
 
+    /**
+     * KillProcessesByPids, only in process call is allowed,
+     * kill the processes by pid list given.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     */
     virtual AppMgrResultCode KillProcessesByPids(std::vector<int32_t> &pids);
 
+    /**
+     * Set child and parent relationship
+     * @param token child process
+     * @param callerToken parent process
+     */
     virtual AppMgrResultCode AttachPidToParent(const sptr<IRemoteObject> &token,
         const sptr<IRemoteObject> &callerToken);
 
@@ -235,15 +246,25 @@ public:
     virtual AppMgrResultCode GetProcessRunningInformation(RunningProcessInfo &info);
 
     /**
+     * GetAllRunningInstanceKeysBySelf, call GetAllRunningInstanceKeysBySelf() through proxy project.
+     * Obtains running instance keys of multi-instance app that are running on the device.
+     *
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual AppMgrResultCode GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys);
+
+    /**
      * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
-     * Obtains running isntance keys of multi-instance app that are running on the device.
+     * Obtains running instance keys of multi-instance app that are running on the device.
      *
      * @param bundlename, bundle name in Application record.
-     * @param instanceKeys, output instance keys of the multi-insatnce app.
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @param userId, user id.
      * @return ERR_OK ,return back success，others fail.
      */
     virtual AppMgrResultCode GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
-        std::vector<std::string> &instanceKeys);
+        std::vector<std::string> &instanceKeys, int32_t userId = -1);
 
     /**
      * GetAllRenderProcesses, call GetAllRenderProcesses() through proxy project.
@@ -303,7 +324,7 @@ public:
     /**
      * GetConfiguration
      *
-     * @param info, configuration.
+     * @param info to retrieve configuration data.
      * @return ERR_OK ,return back success，others fail.
      */
     virtual AppMgrResultCode GetConfiguration(Configuration& config);
@@ -362,7 +383,7 @@ public:
     /**
      *  Update config by bundle name.
      *
-     * @param config Application enviroment change parameters.
+     * @param config Application environment change parameters.
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
@@ -403,8 +424,9 @@ public:
     /**
      * Start specified ability.
      *
-     * @param want Want contains information wish to start.
+     * @param want Want contains information of the ability to start.
      * @param abilityInfo Ability information.
+     * @param requestId request id to callback
      */
     virtual void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0);
@@ -421,6 +443,7 @@ public:
      *
      * @param want Want contains information wish to start.
      * @param abilityInfo Ability information.
+     * @param requestId for callback
      */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0);
@@ -453,10 +476,10 @@ public:
     /**
      * Start nweb render process, called by nweb host.
      *
-     * @param renderParam, params passed to renderprocess.
-     * @param ipcFd, ipc file descriptior for web browser and render process.
-     * @param sharedFd, shared memory file descriptior.
-     * @param crashFd, crash signal file descriptior.
+     * @param renderParam, params passed to renderProcess.
+     * @param ipcFd, ipc file descriptor for web browser and render process.
+     * @param sharedFd, shared memory file descriptor.
+     * @param crashFd, crash signal file descriptor.
      * @param renderPid, created render pid.
      * @return Returns ERR_OK on success, others on failure.
      */
@@ -465,7 +488,7 @@ public:
                                    int32_t crashFd, pid_t &renderPid, bool isGPU = false);
 
     /**
-     * Render process call this to attach app manager service.
+     * Render process call this to attach to app manager service.
      *
      * @param renderScheduler, scheduler of render process.
      */
@@ -491,12 +514,9 @@ public:
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
 
     /**
-     * Get application info by process id.
+     * start native process for debugger.
      *
-     * @param pid Process id.
-     * @param application Application information got.
-     * @param debug Whether IsDebugApp.
-     * @return Returns ERR_OK on success, others on failure.
+     * @param want param to start a process.
      */
     int32_t StartNativeProcessForDebugger(const AAFwk::Want &want);
 
@@ -646,6 +666,7 @@ public:
      * @brief Set resident process enable status.
      * @param bundleName The application bundle name.
      * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
      */
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
@@ -711,12 +732,34 @@ public:
      */
     bool IsFinalAppProcess();
 
+    /**
+     * Register render state observer.
+     * @param observer Render process state observer.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t RegisterRenderStateObserver(const sptr<IRenderStateObserver> &observer);
 
+    /**
+     * Unregister render state observer.
+     * @param observer Render process state observer.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t UnregisterRenderStateObserver(const sptr<IRenderStateObserver> &observer);
 
+    /**
+     * Update render state.
+     * @param renderPid Render pid.
+     * @param state foreground or background state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t UpdateRenderState(pid_t renderPid, int32_t state);
 
+    /**
+     * Get appRunningUniqueId by pid.
+     * @param pid pid.
+     * @param appRunningUniqueId appRunningUniqueId.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
     /**
@@ -738,15 +781,15 @@ public:
     int32_t GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid_t> &providerPids);
 
     /**
-     * @brief Notify memory size state changed to sufficient or insufficent.
-     * @param isMemorySizeSufficent Indicates the memory size state.
+     * @brief Notify memory size state changed to sufficient or insufficient.
+     * @param isMemorySizeSufficient Indicates the memory size state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent);
+    int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficient);
 
     /**
-     * whether memory size is sufficent.
-     * @return Returns true is sufficent memory size, others return false.
+     * whether memory size is sufficient.
+     * @return Returns true is sufficient memory size, others return false.
      */
     bool IsMemorySizeSufficent() const;
 
@@ -771,10 +814,16 @@ public:
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex = 0);
 
+    /**
+     * @brief set support process cache by self
+     */
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
     int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
+    /**
+     * set browser channel for caller
+     */
     void SaveBrowserChannel(sptr<IRemoteObject> browser);
 
     /**
@@ -793,8 +842,14 @@ public:
      */
     virtual AppMgrResultCode AttachedToStatusBar(const sptr<IRemoteObject> &token);
 
+    /**
+     * Notify that the process depends on web by itself.
+     */
     int32_t NotifyProcessDependedOnWeb();
 
+    /**
+     * Kill process depended on web by sa.
+     */
     void KillProcessDependedOnWeb();
 
     /**
@@ -826,6 +881,9 @@ public:
      */
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
+    /**
+     * Whether a process is attached, refer to AttachApplication
+     */
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
     bool IsAppKilling(sptr<IRemoteObject> token) const;

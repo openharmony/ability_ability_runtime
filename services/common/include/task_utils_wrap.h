@@ -25,6 +25,7 @@ enum class TaskStatus {
     FINISHED,
     CANCELED
 };
+
 enum class TaskQoS {
     INHERENT = 0,
     BACKGROUND,
@@ -34,10 +35,19 @@ enum class TaskQoS {
     DEADLINE_REQUEST,
     USER_INTERACTIVE
 };
+
+enum class TaskQueuePriority {
+    IMMEDIATE = 0,
+    HIGH,
+    LOW,
+    IDLE
+};
+
 struct TaskAttribute {
     std::string taskName_;
     int64_t delayMillis_ = 0;
     TaskQoS taskQos_ = TaskQoS::DEFAULT;
+    TaskQueuePriority taskPriority_ = TaskQueuePriority::LOW;
 
     bool IsDefault() const
     {

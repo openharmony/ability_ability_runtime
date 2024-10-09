@@ -27,6 +27,7 @@ ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const ChildProcessRequest 
     hostRecord_(hostRecord), isStartWithDebug_(request.isStartWithDebug)
 {
     srcEntry_ = request.srcEntry;
+    fds_ = request.args.fds;
     if (childProcessType_ == CHILD_PROCESS_TYPE_NATIVE_ARGS) {
         auto pos = request.srcEntry.rfind(":");
         if (pos != std::string::npos) {
@@ -49,6 +50,9 @@ ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const std::string &libName
 ChildProcessRecord::~ChildProcessRecord()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    for (const auto &item : fds_) {
+        close(item.second);
+    }
 }
 
 std::shared_ptr<ChildProcessRecord> ChildProcessRecord::CreateChildProcessRecord(pid_t hostPid,

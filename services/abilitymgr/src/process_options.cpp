@@ -93,5 +93,10 @@ bool ProcessOptions::IsValidProcessMode(ProcessMode value)
 {
     return (value > ProcessMode::UNSPECIFIED) && (value < ProcessMode::END);
 }
+
+bool ProcessOptions::IsNoAttachmentMode(ProcessMode value)
+{
+    return (value == ProcessMode::NO_ATTACHMENT);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

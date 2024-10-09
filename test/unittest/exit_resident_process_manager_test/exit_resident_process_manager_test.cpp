@@ -52,13 +52,13 @@ void ExitResidentProcessManagerTest::TearDown()
 
 /**
  * @tc.name: IsMemorySizeSufficent_001
- * @tc.desc: Verify that the IsMemorySizeSufficent interface calls normally
+ * @tc.desc: Verify that the IsMemorySizeSufficient interface calls normally
  * @tc.type: FUNC
  */
 HWTEST_F(ExitResidentProcessManagerTest, IsMemorySizeSufficent_001, TestSize.Level1)
 {
     auto exitResidentProcessManager = std::make_shared<ExitResidentProcessManager>();
-    EXPECT_EQ(exitResidentProcessManager->IsMemorySizeSufficent(), true);
+    EXPECT_EQ(exitResidentProcessManager->IsMemorySizeSufficient(), true);
 }
 
 /**

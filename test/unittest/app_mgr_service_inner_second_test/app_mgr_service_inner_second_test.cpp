@@ -414,6 +414,43 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetRunningMu
 }
 
 /**
+ * @tc.name: GetAllRunningInstanceKeysBySelf_0100
+ * @tc.desc: Test GetAllRunningInstanceKeysBySelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysBySelf_0100,
+    TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysBySelf_0100 start");
+    RunningMultiAppInfo info;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    std::vector<std::string> instanceKeys;
+    auto ret = appMgrServiceInner->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysBySelf_0100 end");
+}
+
+/**
+ * @tc.name: GetAllRunningInstanceKeysByBundleName_0100
+ * @tc.desc: Test GetAllRunningInstanceKeysByBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_0100,
+    TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_0100 start");
+    RunningMultiAppInfo info;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    std::string bundleName = "testBundleName";
+    std::vector<std::string> instanceKeys;
+    auto ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_0100 end");
+}
+
+/**
  * @tc.name: AppMgrServiceInnerSecondTest_GetAllChildrenProcesses_0100
  * @tc.desc: Test GetAllChildrenProcesses
  * @tc.type: FUNC

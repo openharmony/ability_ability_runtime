@@ -29,14 +29,6 @@ public:
     ~AbilityRecordMgr() = default;
 
     /**
-     * @brief Set the eventRunner of abilitythread to the AbilityRecordMgr.
-     *
-     * @param eventRunner The runner of the abilitythread.
-     *
-     */
-    void SetEventRunner(const std::shared_ptr<EventRunner> &eventRunner);
-
-    /**
      * @brief Get the token witch is set to the AbilityRecordMgr.
      *
      * @return Returns the token which is set to the AbilityRecordMgr.

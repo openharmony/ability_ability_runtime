@@ -145,8 +145,7 @@ public:
     void SetCurrentAppCloneIndex(int32_t appIndex);
     std::string GetCurrentInstanceKey();
     void SetCurrentInstanceKey(const std::string& instanceKey);
-    int32_t GetAllRunningInstanceKeys(const std::string& bundleName,
-        std::vector<std::string> &instanceKeys);
+    int32_t GetAllRunningInstanceKeys(std::vector<std::string> &instanceKeys);
     int32_t GetCurrentAppMode();
     void SetCurrentAppMode(int32_t appIndex);
     void ProcessSecurityExit(const AAFwk::ExitReason &exitReason);

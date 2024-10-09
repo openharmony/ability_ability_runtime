@@ -422,6 +422,7 @@ ErrCode AbilityManagerClient::MoveAbilityToBackground(sptr<IRemoteObject> token)
 
 ErrCode AbilityManagerClient::MoveUIAbilityToBackground(const sptr<IRemoteObject> token)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "MoveUIAbilityToBackground call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->MoveUIAbilityToBackground(token);
@@ -2035,6 +2036,15 @@ ErrCode AbilityManagerClient::BlockAllAppStart(bool flag)
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_INVALID_VALUE(abms);
     return abms->BlockAllAppStart(flag);
+}
+
+ErrCode AbilityManagerClient::UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+    const std::list<std::string>& exportConfigs, int32_t flag)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->UpdateAssociateConfigList(configs, exportConfigs, flag);
 }
 } // namespace AAFwk
 } // namespace OHOS

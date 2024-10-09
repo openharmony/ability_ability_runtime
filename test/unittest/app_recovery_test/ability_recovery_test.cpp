@@ -514,6 +514,19 @@ HWTEST_F(AbilityRecoveryUnitTest, PersistAppState_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name:  PersistAppState_003
+ * @tc.desc:  add testcase.
+ * @tc.type: FUNC
+ * @tc.require: I5Z7LE
+ */
+HWTEST_F(AbilityRecoveryUnitTest, PersistAppState_003, TestSize.Level1)
+{
+    abilityRecovery_->abilityInfo_ = abilityInfo_;
+    abilityRecovery_->missionId_ = -1;
+    EXPECT_FALSE(abilityRecovery_->PersistState());
+}
+
+/**
  * @tc.name:  IsSameAbility_001
  * @tc.desc:  Test IsSameAbility when not set SetJsAbility.
  * @tc.type: FUNC
@@ -550,6 +563,30 @@ HWTEST_F(AbilityRecoveryUnitTest, TestAppRecoveryAllocator_001, TestSize.Level1)
     allocator.Dealloc(nullptr);
     EXPECT_EQ(allocator.Alloc(0), nullptr);
     EXPECT_EQ(allocator.Realloc(nullptr, 0), nullptr);
+}
+
+/**
+ * @tc.name:  Test ReadSerializeDataFromFile
+ * @tc.desc:  add testcase
+ * @tc.type: Bugfix
+ */
+HWTEST_F(AbilityRecoveryUnitTest, TestReadSerializeDataFromFile_001, TestSize.Level1)
+{
+    int32_t savedStateId = 0;
+    AAFwk::WantParams wantParams;
+    EXPECT_TRUE(!abilityRecovery_->ReadSerializeDataFromFile(savedStateId, wantParams));
+}
+
+/**
+ * @tc.name:  Test LoadSavedState
+ * @tc.desc:  add testcase
+ * @tc.type: Bugfix
+ */
+HWTEST_F(AbilityRecoveryUnitTest, TestLoadSavedState_001, TestSize.Level1)
+{
+    abilityRecovery_->hasLoaded_ = false;
+    abilityRecovery_->missionId_ = 10;
+    EXPECT_TRUE(!abilityRecovery_->LoadSavedState(StateReason::DEVELOPER_REQUEST));
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
