@@ -1823,7 +1823,7 @@ void AbilityConnectManager::DoBackgroundAbilityWindow(const std::shared_ptr<Abil
         abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "exist initial or foregrounding task");
         abilityRecord->DoBackgroundAbilityWindowDelayed(true);
-    } else if (!abilityRecord->IsAbilityState(AbilityState::BACKGROUNDING)){
+    } else if (!abilityRecord->IsAbilityState(AbilityState::BACKGROUNDING)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid ability state");
     }
 }
