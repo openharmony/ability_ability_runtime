@@ -124,6 +124,7 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
         return true;
     }
     appRecord->ScheduleCacheProcess();
+    appRecord->SetProcessCaching(false);
     auto appInfo = appRecord->GetApplicationInfo();
     HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
