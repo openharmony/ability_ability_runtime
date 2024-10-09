@@ -2109,6 +2109,16 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
             }
             (sessionInfo->want).SetElement(launchWant.GetElement());
         }
+        auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+        CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+        if (uiAbilityManager->GetUIAbilityRecordBySessionInfo(sessionInfo) == nullptr) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "first time open");
+            auto err = StartUIAbilityByPreInstallInner(sessionInfo, 0, sceneFlag, isColdStart);
+            if (err != ERR_OK) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "startUIAbilityByPreInstallInner failed");
+            }
+            return err;
+        }
         return StartUIAbilityBySCBDefault(sessionInfo, sceneFlag, isColdStart);
     }
 
