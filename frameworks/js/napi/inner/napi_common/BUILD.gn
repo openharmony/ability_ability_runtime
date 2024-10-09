@@ -81,8 +81,9 @@ ohos_shared_library("napi_common") {
     ]
   }
 
-  if (ability_runtime_graphics && ability_runtime_pixelMap) {
-    defines += [ "SUPPORT_PIXELMAP" ]
+  if (ability_runtime_graphics &&
+      ability_runtime_start_window_options_with_pixelmap) {
+    defines += [ "START_WINDOW_OPTIONS_WITH_PIXELMAP" ]
     external_deps += [ "image_framework:image" ]
   }
 

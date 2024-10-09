@@ -363,9 +363,10 @@ ohos_shared_library("start_window_option") {
     "napi:ace_napi",
   ]
 
-  if (ability_runtime_graphics && ability_runtime_pixelMap) {
+  if (ability_runtime_graphics &&
+      ability_runtime_start_window_options_with_pixelmap) {
+    defines = [ "START_WINDOW_OPTIONS_WITH_PIXELMAP" ]
     external_deps += [ "image_framework:image_native" ]
-    defines = [ "SUPPORT_PIXELMAP" ]
   }
 
   cflags_cc = []
