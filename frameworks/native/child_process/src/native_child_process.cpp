@@ -81,19 +81,19 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
         TAG_LOGE(AAFwkTag::PROCESSMGR, "relative path not allow");
         return NCP_ERR_INVALID_PARAM;
     }
-    
+
     std::unique_lock autoLock(g_mutexCallBackObj);
     if (g_Callback != nullptr || g_CallbackStub != nullptr) {
         TAG_LOGW(AAFwkTag::PROCESSMGR, "Another native process starting");
         return NCP_ERR_BUSY;
     }
-    
+
     sptr<IRemoteObject> callbackStub(new (std::nothrow) NativeChildCallback(OnNativeChildProcessStartedWapper));
     if (!callbackStub) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Alloc callbackStub obj faild");
         return NCP_ERR_INTERNAL;
     }
-    
+
     ChildProcessManager &mgr = ChildProcessManager::GetInstance();
     auto cpmErr = mgr.StartNativeChildProcessByAppSpawnFork(strLibName, callbackStub);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
@@ -118,7 +118,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
         return NCP_ERR_INVALID_PARAM;
     }
     if (pid == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "pid null.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "pid null");
         return NCP_ERR_INVALID_PARAM;
     }
 
