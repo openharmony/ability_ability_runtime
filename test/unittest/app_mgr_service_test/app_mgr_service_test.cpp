@@ -27,6 +27,7 @@
 #include "mock_sa_call.h"
 #include "ipc_skeleton.h"
 #include "parameters.h"
+#include "mock_kia_interceptor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1735,7 +1736,7 @@ HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_002, TestSize.Level0)
     applicationInfo_->name = "hiservcie";
     applicationInfo_->bundleName = "com.ix.hiservcie";
     std::shared_ptr<AppRunningRecord> appRecord =
-        appRunningMgr->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+        appRunningMgr->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
     appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
     appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
@@ -1800,6 +1801,138 @@ HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Lev
     int32_t ret = appMgrService->GetRunningMultiAppInfoByBundleName(bundleName, info);
     EXPECT_NE(ret, ERR_OK);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysBySelf
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllRunningInstanceKeysBySelf
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllRunningInstanceKeysBySelf
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysBySelf_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysBySelf
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllRunningInstanceKeysBySelf
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllRunningInstanceKeysBySelf
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysBySelf_002, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    std::vector<std::string> instanceKeys;
+    int32_t ret = appMgrService->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetAllRunningInstanceKeysBySelf_003
+ * @tc.desc: Start native child process.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysBySelf_003, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "GetAllRunningInstanceKeysBySelf_003 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, GetAllRunningInstanceKeysBySelf(_))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysByBundleName
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllRunningInstanceKeysByBundleName
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllRunningInstanceKeysByBundleName
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysByBundleName_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+
+    std::string bundleName = "testBundle";
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysByBundleName
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllRunningInstanceKeysByBundleName
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllRunningInstanceKeysByBundleName
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysByBundleName_002, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    std::string bundleName = "testBundle";
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetAllRunningInstanceKeysByBundleName_003
+ * @tc.desc: Start native child process.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysByBundleName_003, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_003 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, GetAllRunningInstanceKeysByBundleName(_, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    std::string bundleName = "testBundle";
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    EXPECT_EQ(res, ERR_OK);
+}
+
 /**
  * @tc.name: StartNativeChildProcess_0100
  * @tc.desc: Start native child process.
@@ -1866,6 +1999,104 @@ HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level0)
     std::vector<int32_t> pidList;
     int32_t res = appMgrService->GetSupportedProcessCachePids(bundleName, pidList);
     EXPECT_EQ(res, AAFwk::CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: RegisterKiaInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService RegisterKiaInterceptor
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterKiaInterceptor
+ */
+HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_001, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, RegisterKiaInterceptor(_))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+    sptr<IKiaInterceptor> interceptor = new MockKiaInterceptor();
+    int32_t res = appMgrService->RegisterKiaInterceptor(interceptor);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: RegisterKiaInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService RegisterKiaInterceptor
+ * EnvConditions: NA
+ * CaseDescription: Verify RegisterKiaInterceptor
+ */
+HWTEST_F(AppMgrServiceTest, RegisterKiaInterceptor_002, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "RegisterKiaInterceptor_001 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, RegisterKiaInterceptor(_))
+        .Times(1)
+        .WillOnce(Return(ERR_INVALID_VALUE));
+    sptr<IKiaInterceptor> interceptor = new MockKiaInterceptor();
+    int32_t res = appMgrService->RegisterKiaInterceptor(interceptor);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: CheckIsKiaProcess
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService CheckIsKiaProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckIsKiaProcess
+ */
+HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_001, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, CheckIsKiaProcess(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+    pid_t pid = 1234;
+    bool isKia = false;
+    int32_t res = appMgrService->CheckIsKiaProcess(pid, isKia);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: CheckIsKiaProcess
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService CheckIsKiaProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckIsKiaProcess
+ */
+HWTEST_F(AppMgrServiceTest, CheckIsKiaProcess_002, TestSize.Level0)
+{
+    TAG_LOGD(AAFwkTag::TEST, "CheckIsKiaProcess_001 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, CheckIsKiaProcess(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_INVALID_VALUE));
+    pid_t pid = 1234;
+    bool isKia = false;
+    int32_t res = appMgrService->CheckIsKiaProcess(pid, isKia);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

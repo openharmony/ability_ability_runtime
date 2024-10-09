@@ -369,6 +369,8 @@ public:
 
     int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool forceKill);
 
+    void EnableListForSCBRecovery();
+
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -403,6 +405,8 @@ private:
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest) const;
     int CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord,
         int resultCode, const Want *resultWant, bool isClearSession);
+    int32_t BackToCallerAbilityWithResultLocked(sptr<SessionInfo> currentSessionInfo,
+        std::shared_ptr<AbilityRecord> callerAbilityRecord);
 
     // byCall
     int CallAbilityLocked(const AbilityRequest &abilityRequest);
@@ -440,8 +444,9 @@ private:
     void TerminateSession(std::shared_ptr<AbilityRecord> abilityRecord);
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
-    int32_t BackToCallerAbilityWithResultLocked(sptr<SessionInfo> currentSessionInfo,
-        std::shared_ptr<AbilityRecord> callerAbilityRecord);
+    int32_t DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
+    std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        bool &isColdStart);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -456,6 +461,8 @@ private:
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
+    bool isSCBRecovery_ = false;
+    std::unordered_set<int32_t> codeStartInSCBRecovery_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

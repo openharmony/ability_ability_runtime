@@ -609,7 +609,7 @@ void JsEmbeddableUIAbilityContext::WrapJsUIExtensionContext(napi_env env,
 napi_value JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(napi_env env,
     std::shared_ptr<AbilityContext> uiAbiContext, std::shared_ptr<UIExtensionContext> uiExtContext, int32_t screenMode)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "Create JS embeddable UIAbility context begin");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     napi_value objValue = nullptr;
     if (screenMode == AAFwk::JUMP_SCREEN_MODE) {
         WrapJsUIAbilityContext(env, uiAbiContext, objValue, screenMode);

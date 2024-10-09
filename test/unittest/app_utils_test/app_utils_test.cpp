@@ -311,5 +311,25 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_1400, TestSize.Level0)
     auto allow = AAFwk::AppUtils::GetInstance().IsAllowNativeChildProcess("com.test.demo");
     EXPECT_FALSE(allow);
 }
+
+/**
+ * @tc.number: AppUtilsTest_1500
+ * @tc.desc: Test IsSupportMultiInstance works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_1500, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_1500 called.");
+    bool isSupportMultiInstance = AAFwk::AppUtils::GetInstance().IsSupportMultiInstance();
+    std::string deviceType = OHOS::system::GetDeviceType();
+    TAG_LOGI(AAFwkTag::TEST, "current deviceType is %{public}s", deviceType.c_str());
+    if (deviceType == "default") {
+        EXPECT_TRUE(isSupportMultiInstance == false);
+    } else if (deviceType == "phone") {
+        EXPECT_TRUE(isSupportMultiInstance == false);
+    } else if (deviceType == "2in1") {
+        EXPECT_TRUE(isSupportMultiInstance == true);
+    }
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

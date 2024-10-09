@@ -89,7 +89,7 @@ void JsAutoFillExtensionTest::CreateJsAutoFillExtension()
 {
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
@@ -163,7 +163,9 @@ HWTEST_F(JsAutoFillExtensionTest, OnStart_0100, TestSize.Level1)
 {
     Want want;
     ASSERT_NE(jsAutoFillExtension_, nullptr);
-    jsAutoFillExtension_->OnStart(want);
+    sptr<AAFwk::SessionInfo> sessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    ASSERT_NE(sessionInfo, nullptr);
+    jsAutoFillExtension_->OnStart(want, sessionInfo);
 
     auto context = jsAutoFillExtension_->GetContext();
     ASSERT_NE(context, nullptr);

@@ -255,7 +255,7 @@ public:
      * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartExtensionAbility(
+    virtual int32_t StartExtensionAbility(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
@@ -339,6 +339,14 @@ public:
      */
     virtual int BackToCallerAbilityWithResult(const sptr<IRemoteObject> &token, int resultCode,
         const Want *resultWant, int64_t callerRequestCode) override;
+
+    /**
+     * TerminateUIServiceExtensionAbility, terminate UIServiceExtensionAbility.
+     *
+     * @param token, the token of the UIServiceExtensionAbility to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token) override;
 
     /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
@@ -635,7 +643,7 @@ public:
         int32_t appIndex = 0) override;
 
     virtual sptr<IWantSender> GetWantSender(
-        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) override;
+        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid = -1) override;
 
     virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) override;
 
@@ -687,26 +695,84 @@ public:
 
     virtual void SetLockedState(int32_t sessionId, bool lockedState) override;
 
+    /**
+     * @brief Register mission listener to ability mgr.
+     * @param listener The handler of listener.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int RegisterMissionListener(const sptr<IMissionListener> &listener) override;
 
+    /**
+     * @brief UnRegister mission listener from ability mgr.
+     * @param listener The handler of listener.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int UnRegisterMissionListener(const sptr<IMissionListener> &listener) override;
 
+    /**
+     * @brief Get mission infos from ability mgr.
+     * @param deviceId local or remote deviceId.
+     * @param numMax max number of missions.
+     * @param missionInfos mission info result.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetMissionInfos(const std::string& deviceId, int32_t numMax,
         std::vector<MissionInfo> &missionInfos) override;
 
+    /**
+     * @brief Get mission info by id.
+     * @param deviceId local or remote deviceId.
+     * @param missionId Id of target mission.
+     * @param missionInfo mission info of target mission.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetMissionInfo(const std::string& deviceId, int32_t missionId,
         MissionInfo &missionInfos) override;
 
+    /**
+     * @brief Clean mission by id.
+     * @param missionId Id of target mission.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int CleanMission(int32_t missionId) override;
 
+    /**
+     * @brief Clean all missions in system.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int CleanAllMissions() override;
 
     virtual int MoveMissionToFront(int32_t missionId) override;
 
+    /**
+     * @brief Move a mission to front.
+     * @param missionId Id of target mission.
+     * @param startOptions Special startOptions for target mission.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int MoveMissionToFront(int32_t missionId, const StartOptions &startOptions) override;
 
+    /**
+     * Move missions to front
+     * @param missionIds Ids of target missions
+     * @param topMissionId Indicate which mission will be moved to top, if set to -1, missions' order won't change
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId) override;
 
+    /**
+     * Move missions to background
+     * @param missionIds Ids of target missions
+     * @param result The result of move missions to background, and the array is sorted by zOrder
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int MoveMissionsToBackground(const std::vector<int32_t>& missionIds,
         std::vector<int32_t>& result) override;
 
@@ -739,10 +805,29 @@ public:
     virtual int ReleaseCall(
         const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) override;
 
+    /**
+     * @brief start user.
+     * @param accountId accountId.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int StartUser(int userId, sptr<IUserCallback> callback) override;
 
+    /**
+     * @brief stop user.
+     * @param accountId accountId.
+     * @param callback callback.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int StopUser(int userId, const sptr<IUserCallback> &callback) override;
 
+    /**
+     * @brief logout user.
+     * @param accountId accountId.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int LogoutUser(int32_t userId) override;
 
     virtual int SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state) override;
@@ -773,13 +858,38 @@ public:
     virtual int UnregisterAbilityFirstFrameStateObserver(
         const sptr<IAbilityFirstFrameStateObserver> &observer) override;
 #endif
-
+    /**
+     * @brief Get the ability running information.
+     *
+     * @param info Ability running information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) override;
 
+    /**
+     * @brief Get the extension running information.
+     *
+     * @param upperLimit The maximum limit of information wish to get.
+     * @param info Extension running information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info) override;
 
+    /**
+     * @brief Get running process information.
+     *
+     * @param info Running process information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info) override;
 
+    /**
+     * @brief Register mission listener to ability manager service.
+     * @param deviceId The remote device Id.
+     * @param listener The handler of listener.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int RegisterMissionListener(const std::string &deviceId,
         const sptr<IRemoteMissionListener> &listener) override;
 
@@ -808,13 +918,41 @@ public:
      */
     virtual bool IsRunningInStabilityTest() override;
 
+    /**
+     * @brief Register the snapshot handler
+     * @param handler snapshot handler
+     * @return ErrCode Returns ERR_OK on success, others on failure.
+     */
     virtual int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
 
+    /**
+     * @brief Get the Mission Snapshot Info object
+     * @param deviceId local or remote deviceId.
+     * @param missionId Id of target mission.
+     * @param snapshot snapshot of target mission.
+     * @param isLowResolution get low resolution snapshot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
         MissionSnapshot& snapshot, bool isLowResolution) override;
 
+    /**
+     * @brief start user test.
+     * @param want the want of the ability user test to start.
+     * @param observer test observer callback.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int StartUserTest(const Want &want, const sptr<IRemoteObject> &observer) override;
 
+    /**
+     * @brief Finish user test.
+     * @param msg user test message.
+     * @param resultCode user test result Code.
+     * @param bundleName user test bundleName.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int FinishUserTest(
         const std::string &msg, const int64_t &resultCode, const std::string &bundleName) override;
 
@@ -921,6 +1059,11 @@ public:
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
 
+    /**
+     * @brief Schedule clear recovery page stack.
+     *
+     * @param bundleName application bundleName.
+     */
     virtual void ScheduleClearRecoveryPageStack() override;
 
     /**
@@ -1078,10 +1221,17 @@ public:
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.
-     * @param isPrepareTerminate the result of ability onPrepareToTermiante.
+     * @param isPrepareTerminate the result of ability onPrepareToTerminate.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate) override;
+
+    /**
+     * @brief Register session handler.
+     * @param object The handler.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+    */
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
 
     /**
@@ -1179,6 +1329,14 @@ public:
         std::vector<int32_t> &sessionIds) override;
 
     /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @param isAppRecovery True indicates that the app is restarted because of recovery.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
+
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1199,14 +1357,6 @@ public:
      */
     int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
-
-    /**
-     * @brief Restart app self.
-     * @param want The ability type must be UIAbility.
-     * @param isAppRecovery True indicates that the app is restarted because of recovery.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t RestartApp(const AAFwk::Want &want, bool isAppRecovery = false) override;
 
     /**
      * @brief Pop-up launch of full-screen atomic service.
@@ -1331,6 +1481,24 @@ public:
      */
     virtual int32_t TerminateMission(int32_t missionId) override;
 
+    /**
+     * Notify ability manager to set the flag to block all apps from starting.
+     * Needs to apply for ohos.permission.BLOCK_ALL_APP_START.
+     * @param flag, The flag to block all apps from starting
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t BlockAllAppStart(bool flag) override;
+
+    /**
+     * update associate config list by rss.
+     *
+     * @param configs The rss config info.
+     * @param exportConfigs The rss export config info.
+     * @param flag UPDATE_CONFIG_FLAG_COVER is cover config, UPDATE_CONFIG_FLAG_APPEND is append config.
+     */
+    virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
@@ -1341,6 +1509,8 @@ private:
         MessageOption& option);
     int CheckUISessionParams(MessageParcel &data, const sptr<IRemoteObject> &callerToken,
         const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode);
+    bool UpdateAssociateConfigInner(const std::map<std::string, std::list<std::string>>& configs,
+        MessageParcel& data);
 
 private:
     static inline BrokerDelegator<AbilityManagerProxy> delegator_;

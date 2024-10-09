@@ -47,16 +47,37 @@ public:
      */
     void Activate(const Want &want, LifeCycleStateInfo &stateInfo);
     void Inactivate(const Want &want, LifeCycleStateInfo &stateInfo, sptr<SessionInfo> sessionInfo = nullptr);
+    /**
+     * schedule ability life cycle to background
+     */
     void MoveToBackground(const Want &want, LifeCycleStateInfo &stateInfo);
+    /**
+     * schedule ability onConnect
+     */
     void ConnectAbility(const Want &want);
+    /**
+     * schedule ability onDisconnect
+     */
     void DisconnectAbility(const Want &want);
+    /**
+     * schedule ability onDestroy
+     */
     void Terminate(const Want &want, LifeCycleStateInfo &stateInfo, sptr<SessionInfo> sessionInfo = nullptr);
+    /**
+     * schedule ability onRequest
+     */
     void CommandAbility(const Want &want, bool reStart, int startId);
     void CommandAbilityWindow(const Want &want, const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
     void SaveAbilityState();
     void RestoreAbilityState(const PacMap &inState);
+    /**
+     * schedule ability life cycle to foreground
+     */
     void ForegroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
         sptr<SessionInfo> sessionInfo = nullptr);
+    /**
+     * schedule ability life cycle to background
+     */
     void BackgroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
         sptr<SessionInfo> sessionInfo = nullptr);
     void ContinueAbility(const std::string& deviceId, uint32_t versionCode);

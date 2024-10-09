@@ -16,12 +16,33 @@
 #ifndef OHOS_ABILITY_RUNTIME_RESIDENT_PROCESS_MANAGER_H
 #define OHOS_ABILITY_RUNTIME_RESIDENT_PROCESS_MANAGER_H
 
+#include <list>
+#include <mutex>
+
 #include "app_scheduler.h"
 #include "bundle_info.h"
 #include "singleton.h"
 
 namespace OHOS {
 namespace AAFwk {
+struct ResidentAbilityInfo {
+    std::string bundleName;
+    std::string abilityName;
+    int32_t userId = 0;
+    int32_t residentId = -1;
+};
+
+class ResidentAbilityInfoGuard {
+public:
+    ResidentAbilityInfoGuard() = default;
+    ~ResidentAbilityInfoGuard();
+    ResidentAbilityInfoGuard(ResidentAbilityInfoGuard &) = delete;
+    void operator=(ResidentAbilityInfoGuard &) = delete;
+    ResidentAbilityInfoGuard(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+    void SetResidentAbilityInfo(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+private:
+    int32_t residentId_ = -1;
+};
 /**
  * @class ResidentProcessManager
  * ResidentProcessManager
@@ -45,13 +66,48 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t SetResidentProcessEnabled(const std::string &bundleName, const std::string &callerName, bool updateEnable);
+
+    /**
+     * start empty resident processes.
+     *
+     * @param bundleInfos bundles of resident processes.
+     */
     void StartResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos);
+    /**
+     * If bundle has right main element, start the main element
+     */
     void StartResidentProcessWithMainElement(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
+    /**
+     * Once one process created, query keepalive status from db and update then
+     */
     void OnAppStateChanged(const AppInfo &info);
+    /**
+     * Before starting a resident element, store it.
+     */
+    int32_t PutResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+    bool IsResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+    /**
+     * After a resident element being started, remove it
+     */
+    void RemoveResidentAbility(int32_t residentId);
+    /**
+     * query resident bundles for user
+     */
+    bool GetResidentBundleInfosForUser(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
+    void StartFailedResidentAbilities();
 private:
     bool CheckMainElement(const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &processName,
         std::string &mainElement, std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex, int32_t userId = 0);
     void UpdateResidentProcessesStatus(const std::string &bundleName, bool localEnable, bool updateEnable);
+    void AddFailedResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+
+    std::mutex residentAbilityInfoMutex_;
+    std::list<ResidentAbilityInfo> residentAbilityInfos_;
+    int32_t residentId_ = 0;
+
+    std::mutex failedResidentAbilityInfoMutex_;
+    std::list<ResidentAbilityInfo> failedResidentAbilityInfos_;
+    std::atomic_bool unlockedAfterBoot_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

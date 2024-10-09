@@ -416,6 +416,37 @@ AppMgrResultCode AppMgrClient::GetProcessRunningInformation(AppExecFwk::RunningP
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->GetAllRunningInstanceKeysBySelf(instanceKeys);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAllRunningInstanceKeysBySelf returns result=%{public}d", result);
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+    std::vector<std::string> &instanceKeys, int32_t userId)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAllRunningInstanceKeysByBundleName returns result=%{public}d", result);
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    TAG_LOGE(AAFwkTag::APPMGR, "service is nullptr");
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
 AppMgrResultCode AppMgrClient::GetAllRenderProcesses(std::vector<RenderProcessInfo> &info)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -643,12 +674,12 @@ void AppMgrClient::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecF
     amsService->StartSpecifiedAbility(want, abilityInfo, requestId);
 }
 
-void AppMgrClient::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
+void AppMgrClient::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     if (!IsAmsServiceReady()) {
         return;
     }
-    amsService_->SetKeepAliveEnableState(bundleName, enable);
+    amsService_->SetKeepAliveEnableState(bundleName, enable, uid);
 }
 
 void AppMgrClient::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
@@ -852,6 +883,19 @@ void AppMgrClient::SetCurrentUserId(const int32_t userId)
         return;
     }
     amsService->SetCurrentUserId(userId);
+}
+
+void AppMgrClient::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        return;
+    }
+    amsService->SetEnableStartProcessFlagByUserId(userId, enableStartProcess);
 }
 
 int32_t AppMgrClient::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
@@ -1170,14 +1214,14 @@ int32_t AppMgrClient::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pi
     return service->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 
-int32_t AppMgrClient::NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
+int32_t AppMgrClient::NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->NotifyMemorySizeStateChanged(isMemorySizeSufficent);
+    return service->NotifyMemorySizeStateChanged(isMemorySizeSufficient);
 }
 
 bool AppMgrClient::IsMemorySizeSufficent() const

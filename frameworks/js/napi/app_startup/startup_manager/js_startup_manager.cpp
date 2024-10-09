@@ -129,18 +129,18 @@ napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
     int32_t res = DelayedSingleton<StartupManager>::GetInstance()->GetResult(startupTask, result);
     if (res != ERR_OK || result == nullptr || result->GetResultCode() != ERR_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "get %{public}s result failed", startupTask.c_str());
-        ThrowInvalidParamError(env, "%{public}s, failed to get result.");
+        ThrowInvalidParamError(env, "Parameter error: Failed to get result.");
         return CreateJsUndefined(env);
     }
     if (result->GetResultType() != StartupTaskResult::ResultType::JS) {
         TAG_LOGE(AAFwkTag::STARTUP, "%{public}s result type error", startupTask.c_str());
-        ThrowInvalidParamError(env, "%{public}s, the result type is not js.");
+        ThrowInvalidParamError(env, "Parameter error: The result type is not js.");
         return CreateJsUndefined(env);
     }
     std::shared_ptr<JsStartupTaskResult> jsResult = std::static_pointer_cast<JsStartupTaskResult>(result);
     if (jsResult == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "null jsResult: %{public}s", startupTask.c_str());
-        ThrowInvalidParamError(env, "%{public}s, failed to convert to js result.");
+        ThrowInvalidParamError(env, "Parameter error: Failed to convert to js result.");
         return CreateJsUndefined(env);
     }
     std::shared_ptr<NativeReference> jsResultRef = jsResult->GetJsStartupResultRef();
@@ -169,8 +169,8 @@ napi_value JsStartupManager::OnIsInitialized(napi_env env, NapiCallbackInfo &inf
     bool isInitialized = false;
     int32_t res = DelayedSingleton<StartupManager>::GetInstance()->IsInitialized(startupTask, isInitialized);
     if (res != ERR_OK) {
-        TAG_LOGE(AAFwkTag::STARTUP, "get %{public}s result failed:%{public}d", startupTask.c_str(), res);
-        ThrowInvalidParamError(env, "%{public}s, failed to get result, res = %{public}d.");
+        TAG_LOGE(AAFwkTag::STARTUP, "get %{public}s if initialized failed:%{public}d", startupTask.c_str(), res);
+        ThrowInvalidParamError(env, "Parameter error: Startup manager not initialized.");
         return CreateJsUndefined(env);
     }
     return CreateJsValue(env, isInitialized);
@@ -195,7 +195,7 @@ napi_value JsStartupManager::OnRemoveResult(napi_env env, NapiCallbackInfo &info
     int32_t res = DelayedSingleton<StartupManager>::GetInstance()->RemoveResult(startupTask);
     if (res != ERR_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "remove %{public}s result failed:%{public}d", startupTask.c_str(), res);
-        ThrowInvalidParamError(env, "%{public}s, failed to get result, res = %{public}d.");
+        ThrowInvalidParamError(env, "Parameter error: Failed to remove result.");
         return CreateJsUndefined(env);
     }
     return CreateJsUndefined(env);

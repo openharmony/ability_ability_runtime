@@ -26,7 +26,6 @@
 #include "ability_impl_factory.h"
 #include "context_deal.h"
 #include "mock_ability_impl.h"
-#include "mock_ability_lifecycle_callbacks.h"
 #include "mock_ability_thread.h"
 #include "mock_ability_token.h"
 #include "mock_data_ability.h"
@@ -232,7 +231,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_CreateAbilityName_0100, Functi
     abilityInfo->name = "MockPageAbility";
     abilityInfo->type = AbilityType::PAGE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, nullptr);
     EXPECT_EQ(abilityName, "");
@@ -272,7 +271,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_CreateExtensionAbilityName_010
     std::string abilityName = "MockPageAbility";
     abilitythread->CreateExtensionAbilityName(application, abilityInfo, abilityName);
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::string ret = abilitythread->CreateAbilityName(abilityRecord, application);
     EXPECT_EQ(abilityName, "MockPageAbility");
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_CreateExtensionAbilityName_0101 end";
@@ -296,7 +295,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_CreateExtensionAbilityName_020
     std::string abilityName = "";
     abilitythread->CreateExtensionAbilityName(application, abilityInfo, abilityName);
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::string ret = abilitythread->CreateAbilityName(abilityRecord, application);
     EXPECT_EQ(abilityName, "ServiceExtension");
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_CreateExtensionAbilityName_0200 end";
@@ -317,7 +316,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_AttachExtension_0300, Function
     abilityInfo->name = "MockPageAbility";
     abilityInfo->type = AbilityType::PAGE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
 
@@ -371,7 +370,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_AttachExtension_0500, Function
     abilityInfo->name = "MockPageAbility";
     abilityInfo->type = AbilityType::PAGE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, application);
     auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
@@ -399,7 +398,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_CreateAndInitContextDeal_0500,
     abilityInfo->name = "MockPageAbility";
     abilityInfo->type = AbilityType::PAGE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, application);
     auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
@@ -425,7 +424,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_CreateAndInitContextDeal_0600,
     abilityInfo->name = "MockPageAbility";
     abilityInfo->type = AbilityType::PAGE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::shared_ptr<AppExecFwk::AbilityContext> abilityObject = std::make_shared<AppExecFwk::AbilityContext>();
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, nullptr);
@@ -454,7 +453,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_InitExtensionFlag_0200, Functi
     abilityInfo->name = "MockPageAbility";
     abilityInfo->type = AbilityType::PAGE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, application);
     auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
@@ -486,7 +485,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_InitExtensionFlag_0300, Functi
     abilityInfo->name = "MockPageAbility";
     abilityInfo->type = AbilityType::PAGE;
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, application);
     auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);

@@ -55,7 +55,6 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
 #endif
     ability_->Init(record, application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
-    abilityLifecycleCallbacks_ = application;
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -63,8 +62,8 @@ void UIAbilityImpl::Start(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sess
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_ or abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -77,7 +76,6 @@ void UIAbilityImpl::Start(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sess
 #else
     lifecycleState_ = AAFwk::ABILITY_STATE_INACTIVE;
 #endif
-    abilityLifecycleCallbacks_->OnAbilityStart(ability_);
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -132,8 +130,8 @@ void UIAbilityImpl::Stop(bool &isAsyncCallback)
 
 void UIAbilityImpl::StopCallback()
 {
-    if (ability_ == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_ or abilityLifecycleCallbacks_");
+    if (ability_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -141,7 +139,6 @@ void UIAbilityImpl::StopCallback()
 #else
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
 #endif
-    abilityLifecycleCallbacks_->OnAbilityStop(ability_);
     ability_->DestroyInstance(); // Release window and ability.
 }
 
@@ -220,8 +217,7 @@ void UIAbilityImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleStat
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityManagerClient::AbilityTransitionDone; the transaction start.";
+    std::string entry = "AbilityManagerClient::AbilityTransitionDone; the transaction start.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         lifecycleState_ = AAFwk::ABILITY_STATE_FOREGROUND_NEW;
@@ -243,13 +239,12 @@ void UIAbilityImpl::ExecuteInsightIntentDone(uint64_t intentId, const InsightInt
 #ifdef SUPPORT_SCREEN
 bool UIAbilityImpl::PrepareTerminateAbility()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (ability_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return false;
     }
     bool ret = ability_->OnPrepareTerminate();
-    TAG_LOGD(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
+    TAG_LOGI(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
     return ret;
 }
 #endif
@@ -449,8 +444,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-        "; UIAbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle.";
+    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     bool needNotifyAMS = false;
@@ -467,8 +461,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 
     if (needNotifyAMS) {
         TAG_LOGI(AAFwkTag::UIABILITY, "notify ability manager service");
-        entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-            "; AbilityManagerClient::AbilityTransitionDone; the transaction start.";
+        entry = "AbilityManagerClient::AbilityTransitionDone; the transaction start.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         owner->lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
         AppExecFwk::PacMap restoreData;
@@ -485,8 +478,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:call");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-        "; UIAbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
+    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     AppExecFwk::PacMap restoreData;
@@ -519,7 +511,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterUnfocused()
 
 void UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGE(AAFwkTag::UIABILITY, "scb call, ForegroundFailed");
     AppExecFwk::PacMap restoreData;
     switch (type) {
         case static_cast<int32_t>(OHOS::Rosen::WMError::WM_ERROR_INVALID_OPERATION): {
@@ -551,8 +543,8 @@ void UIAbilityImpl::Foreground(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_ or abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
 
@@ -567,7 +559,6 @@ void UIAbilityImpl::Foreground(const AAFwk::Want &want)
         std::lock_guard<std::mutex> lock(notifyForegroundLock_);
         notifyForegroundByAbility_ = true;
     }
-    abilityLifecycleCallbacks_->OnAbilityForeground(ability_);
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -584,14 +575,13 @@ void UIAbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
 void UIAbilityImpl::Background()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_ or abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
     ability_->OnLeaveForeground();
     ability_->OnBackground();
     lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
-    abilityLifecycleCallbacks_->OnAbilityBackground(ability_);
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 #endif
@@ -767,7 +757,7 @@ void UIAbilityImpl::ExecuteInsightIntentMoveToForeground(const Want &want,
 void UIAbilityImpl::PostForegroundInsightIntent()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (ability_ == nullptr || abilityLifecycleCallbacks_ == nullptr) {
+    if (ability_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "invalid params ");
         return;
     }
@@ -778,8 +768,6 @@ void UIAbilityImpl::PostForegroundInsightIntent()
         std::lock_guard<std::mutex> lock(notifyForegroundLock_);
         notifyForegroundByAbility_ = true;
     }
-
-    abilityLifecycleCallbacks_->OnAbilityForeground(ability_);
 
     bool flag = true;
     {

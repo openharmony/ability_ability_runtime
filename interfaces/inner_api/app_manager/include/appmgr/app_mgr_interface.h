@@ -28,6 +28,7 @@
 #include "child_process_info.h"
 #include "child_process_request.h"
 #include "fault_data.h"
+#include "kia_interceptor_interface.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
@@ -156,6 +157,27 @@ public:
      */
     virtual int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
         RunningMultiAppInfo &info) = 0;
+
+    /**
+     * GetAllRunningInstanceKeysBySelf, call GetAllRunningInstanceKeysBySelf() through proxy project.
+     * Obtains running instance keys of multi-instance app that are running on the device.
+     *
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysBySelf(std::vector<std::string> &instanceKeys) = 0;
+
+    /**
+     * GetAllRunningInstanceKeysByBundleName, call GetAllRunningInstanceKeysByBundleName() through proxy project.
+     * Obtains running instance keys of multi-instance app that are running on the device.
+     *
+     * @param bundlename, bundle name in Application record.
+     * @param instanceKeys, output instance keys of the multi-instance app.
+     * @param userId, user id.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys, int32_t userId = -1) = 0;
 
     /**
      * GetRunningProcessesByBundleType, call GetRunningProcessesByBundleType() through proxy project.
@@ -320,6 +342,13 @@ public:
      */
     virtual int FinishUserTest(const std::string &msg, const int64_t &resultCode, const std::string &bundleName) = 0;
 
+    /**
+     * Schedule accept want done.
+     *
+     * @param recordId Application record.
+     * @param want Want.
+     * @param flag flag get from OnAcceptWant.
+     */
     virtual void ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::Want &want, const std::string &flag) = 0;
 
     virtual void ScheduleNewProcessRequestDone(const int32_t recordId, const AAFwk::Want &want,
@@ -344,10 +373,10 @@ public:
     /**
      * Start nweb render process, called by nweb host.
      *
-     * @param renderParam, params passed to renderprocess.
-     * @param ipcFd, ipc file descriptior for web browser and render process.
-     * @param sharedFd, shared memory file descriptior.
-     * @param crashFd, crash signal file descriptior.
+     * @param renderParam, params passed to renderProcess.
+     * @param ipcFd, ipc file descriptor for web browser and render process.
+     * @param sharedFd, shared memory file descriptor.
+     * @param crashFd, crash signal file descriptor.
      * @param renderPid, created render pid.
      * @param isGPU, is or not gpu process
      * @return Returns ERR_OK on success, others on failure.
@@ -372,14 +401,46 @@ public:
      */
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status) = 0;
 
+    /**
+     * GetConfiguration
+     *
+     * @param info to retrieve configuration data.
+     * @return ERR_OK ,return back success，others fail.
+     */
     virtual int32_t GetConfiguration(Configuration& config) = 0;
 
+    /**
+     * UpdateConfiguration, ANotify application update system environment changes.
+     *
+     * @param config System environment change parameters.
+     * @param userId configuration for the user
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) = 0;
 
+    /**
+     *  Update config by bundle name.
+     *
+     * @param config Application environment change parameters.
+     * @param name Application bundle name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) = 0;
 
+    /**
+     * Register configuration observer.
+     *
+     * @param observer Configuration observer. When configuration changed, observer will be called.
+     * @return Returns RESULT_OK on success, others on failure.
+     */
     virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) = 0;
 
+    /**
+     * Unregister configuration observer.
+     *
+     * @param observer Configuration observer.
+     * @return Returns RESULT_OK on success, others on failure.
+     */
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) = 0;
 
     /**
@@ -395,7 +456,7 @@ public:
      *
      * @param bundleName Bundle name
      * @param callback called when LoadPatch finished.
-     * @return Returns 0 on success, error code on failure.
+     * @return Returns ERR_OK on success, error code on failure.
      */
     virtual int32_t NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) = 0;
 
@@ -404,7 +465,7 @@ public:
      *
      * @param bundleName Bundle name
      * @param callback called when HotReload finished.
-     * @return Returns 0 on success, error code on failure.
+     * @return Returns ERR_OK on success, error code on failure.
      */
     virtual int32_t NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) = 0;
 
@@ -413,7 +474,7 @@ public:
      *
      * @param bundleName Bundle name
      * @param callback called when UnloadPatch finished.
-     * @return Returns 0 on success, error code on failure.
+     * @return Returns ERR_OK on success, error code on failure.
      */
     virtual int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) = 0;
 
@@ -464,6 +525,11 @@ public:
      */
     virtual bool IsSharedBundleRunning(const std::string &bundleName, uint32_t versionCode) = 0;
 
+   /**
+     * start native process for debugger.
+     *
+     * @param want param to start a process.
+     */
     virtual int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) = 0;
 
     /**
@@ -640,6 +706,20 @@ public:
     virtual int32_t UnregisterRenderStateObserver(const sptr<IRenderStateObserver> &observer) = 0;
 
     /**
+     * Register KIA interceptor.
+     * @param interceptor KIA interceptor.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor) = 0;
+
+    /**
+     * Check if the given pid is a KIA process.
+     * @param pid process id.
+     * @return Returns true if it is a KIA process, false otherwise.
+     */
+    virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia) = 0;
+
+    /**
      * Update render state.
      * @param renderPid Render pid.
      * @param state foreground or background state.
@@ -647,6 +727,12 @@ public:
      */
     virtual int32_t UpdateRenderState(pid_t renderPid, int32_t state) = 0;
 
+    /**
+     * @brief mark a process which is going restart.
+     * @param bundleName the bundleName of the process.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int32_t SignRestartAppFlag(const std::string &bundleName)
     {
         return 0;
@@ -668,7 +754,7 @@ public:
      * If specified pid mismatch UIExtensionAbility type, return empty vector.
      * @param pid Process id.
      * @param hostPids All host process id.
-     * @return Returns 0 on success, others on failure.
+     * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t GetAllUIExtensionRootHostPid(pid_t pid, std::vector<pid_t> &hostPids)
     {
@@ -680,7 +766,7 @@ public:
      * If specified hostPid didn't start any UIExtensionAbility, return empty vector.
      * @param hostPid Host process id.
      * @param providerPids All provider process id started by specified hostPid.
-     * @return Returns 0 on success, others on failure.
+     * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid_t> &providerPids)
     {
@@ -688,17 +774,20 @@ public:
     }
 
     /**
-     * @brief Notify memory size state changed to sufficient or insufficent.
-     * @param isMemorySizeSufficent Indicates the memory size state.
+     * @brief Notify memory size state changed to sufficient or insufficient.
+     * @param isMemorySizeSufficient Indicates the memory size state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
+    virtual int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficient)
     {
         return 0;
     }
 
+    /**
+     * @brief set support process cache by self
+     */
     virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
-    
+
     virtual int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) = 0;
 
     /**
@@ -718,6 +807,9 @@ public:
     virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback) = 0;
 
+    /**
+     * set browser channel for caller
+     */
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) = 0;
 
     /**

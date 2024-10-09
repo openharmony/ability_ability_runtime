@@ -123,11 +123,6 @@ class MockAppMgrStub : public AppMgrStub {
         return nullptr;
     }
 
-    int32_t ClearUpApplicationData(const std::string &bundleName, const int32_t userId) override
-    {
-        return 0;
-    }
-
     int GetAllRunningProcesses(std::vector<RunningProcessInfo> &info) override
     {
         return 0;
@@ -261,6 +256,16 @@ class MockAppMgrStub : public AppMgrStub {
     bool IsFinalAppProcess() override
     {
         return true;
+    }
+
+    int32_t RegisterKiaInterceptor(const sptr<IKiaInterceptor> &interceptor) override
+    {
+        return 0;
+    }
+
+    int32_t CheckIsKiaProcess(pid_t pid, bool &isKia) override
+    {
+        return 0;
     }
 };
 
@@ -661,7 +666,7 @@ HWTEST_F(MainThreadTest, CheckAbilityItem_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(info, nullptr);
+    auto record = std::make_shared<AbilityLocalRecord>(info, nullptr, nullptr, 0);
     EXPECT_FALSE(mainThread_->CheckAbilityItem(record));
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -675,7 +680,7 @@ HWTEST_F(MainThreadTest, CheckAbilityItem_0100, TestSize.Level1)
 HWTEST_F(MainThreadTest, CheckAbilityItem_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(nullptr, nullptr);
+    auto record = std::make_shared<AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
     EXPECT_FALSE(mainThread_->CheckAbilityItem(record));
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -823,7 +828,7 @@ HWTEST_F(MainThreadTest, CheckForHandleLaunchApplication_0200, TestSize.Level1)
     ProcessInfo processInfo("test", 1);
     appLaunchData.SetApplicationInfo(appInfo);
     appLaunchData.SetProcessInfo(processInfo);
-    EXPECT_FALSE(mainThread_->CheckForHandleLaunchApplication(appLaunchData));
+    EXPECT_TRUE(mainThread_->CheckForHandleLaunchApplication(appLaunchData));
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
@@ -986,7 +991,7 @@ HWTEST_F(MainThreadTest, PrepareAbilityDelegator_0400, TestSize.Level1)
 HWTEST_F(MainThreadTest, HandleLaunchAbility_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(nullptr, nullptr);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(nullptr, nullptr, nullptr, 0);
     ASSERT_NE(abilityRecord, nullptr);
     mainThread_->HandleLaunchAbility(abilityRecord);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
@@ -1499,6 +1504,7 @@ HWTEST_F(MainThreadTest, HandleScheduleAcceptWant_0400, TestSize.Level1)
  */
 HWTEST_F(MainThreadTest, HandleScheduleAcceptWant_0500, TestSize.Level1)
 {
+    Want want;
     std::string moduleName = "entry";
     std::string loadPath = "test";
     std::string bundleName = "com.ohos.demo";
@@ -1507,6 +1513,8 @@ HWTEST_F(MainThreadTest, HandleScheduleAcceptWant_0500, TestSize.Level1)
     int32_t appType = 0;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
         bundleName, moduleName, loadPath, overlayPaths, *resConfig, appType));
+    mainThread_->HandleScheduleAcceptWant(want, moduleName);
+    ASSERT_NE(mainThread_, nullptr);
 }
 
 #ifdef ABILITY_LIBRARY_LOADER
@@ -1524,10 +1532,10 @@ HWTEST_F(MainThreadTest, LoadNativeLiabrary_0100, TestSize.Level1)
     std::string nativeLibraryPath = "";
     ASSERT_NE(mainThread_, nullptr);
     BundleInfo bundleInfo;
-    mainThread_->LoadNativeLiabrary(bundleInfo, nativeLibraryPath);
+    mainThread_->LoadNativeLibrary(bundleInfo, nativeLibraryPath);
 
     nativeLibraryPath = "test/";
-    mainThread_->LoadNativeLiabrary(bundleInfo, nativeLibraryPath);
+    mainThread_->LoadNativeLibrary(bundleInfo, nativeLibraryPath);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 #endif
@@ -1743,7 +1751,7 @@ HWTEST_F(MainThreadTest, HandleLaunchApplication_0500, TestSize.Level1)
     EXPECT_EQ(launchData.GetPerfCmd(), perfCmd);
 
     // check JIT enabled
-    launchData.SetJITEnabled(true)
+    launchData.SetJITEnabled(true);
     EXPECT_EQ(launchData.IsJITEnabled(), true);
 
     // check debug app
@@ -1895,11 +1903,11 @@ HWTEST_F(MainThreadTest, HandleLaunchAbility_0200, TestSize.Level1)
 
     const std::shared_ptr<AbilityInfo> info1 = nullptr;
     const sptr<IRemoteObject> token = nullptr;
-    const std::shared_ptr<AbilityLocalRecord> abilityRecord2 = std::make_shared<AbilityLocalRecord>(info1, token);
+    const auto abilityRecord2 = std::make_shared<AbilityLocalRecord>(info1, token, nullptr, 0);
     mainThread_->HandleLaunchAbility(abilityRecord2);
 
     const std::shared_ptr<AbilityInfo> info2 = std::make_shared<AbilityInfo>();
-    const std::shared_ptr<AbilityLocalRecord> abilityRecord3 = std::make_shared<AbilityLocalRecord>(info2, token);
+    const auto abilityRecord3 = std::make_shared<AbilityLocalRecord>(info2, token, nullptr, 0);
     mainThread_->application_ = std::make_shared<OHOSApplication>();
     mainThread_->HandleLaunchAbility(abilityRecord3);
 
@@ -1946,7 +1954,7 @@ HWTEST_F(MainThreadTest, HandleCleanAbility_0100, TestSize.Level1)
     mainThread_->HandleCleanAbility(token);
 
     std::shared_ptr<AbilityInfo> info = nullptr;
-    abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     mainThread_->abilityRecordMgr_->AddAbilityRecord(token, abilityRecord);
     mainThread_->HandleCleanAbility(token);
 

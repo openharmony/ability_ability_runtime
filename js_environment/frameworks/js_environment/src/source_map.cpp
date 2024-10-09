@@ -157,7 +157,7 @@ std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
         if (isModular_) {
             auto iter = sourceMaps_.find(key);
             if (iter != sourceMaps_.end()) {
-                sourceInfo = GetSourceInfo(line, column, *(iter->second));
+                sourceInfo = GetSourceInfo(line, column, *(iter->second), key);
             } else if (key.rfind(".js") != std::string::npos) {
                 ans = ans + temp + "\n";
                 continue;
@@ -170,7 +170,7 @@ std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
                 continue;
             }
             ExtractSourceMapData(curSourceMap, nonModularMap_);
-            sourceInfo = GetSourceInfo(line, column, *nonModularMap_);
+            sourceInfo = GetSourceInfo(line, column, *nonModularMap_, key);
         }
         if (sourceInfo.empty()) {
             continue;
@@ -297,7 +297,7 @@ void SourceMap::ExtractSourceMapData(const std::string& allmappings, std::shared
     curMapData->mappings_.shrink_to_fit();
 }
 
-MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targetMap)
+MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targetMap, const std::string& key)
 {
     if (row < 1 || col < 1 || targetMap.afterPos_.empty() || targetMap.sources_[0].empty()) {
         return MappingInfo {0, 0, ""};
@@ -308,10 +308,8 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
     int32_t left = 0;
     int32_t right = static_cast<int32_t>(targetMap.afterPos_.size()) - 1;
     int32_t res = 0;
-    std::string sources = targetMap.sources_[0].substr(REAL_SOURCE_INDEX,
-                                                       targetMap.sources_[0].size() - REAL_SOURCE_SIZE - 1);
     if (row > targetMap.afterPos_[targetMap.afterPos_.size() - 1].afterRow) {
-        return MappingInfo { row + 1, col + 1, sources };
+        return MappingInfo { row + 1, col + 1, key };
     }
     while (right - left >= 0) {
         int32_t mid = (right + left) / 2;
@@ -323,6 +321,8 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
             left = mid + 1;
         }
     }
+    std::string sources = targetMap.sources_[0].substr(REAL_SOURCE_INDEX,
+                                                       targetMap.sources_[0].size() - REAL_SOURCE_SIZE - 1);
     auto pos = sources.find(WEBPACK);
     if (pos != std::string::npos) {
         sources.replace(pos, sizeof(WEBPACK) - 1, "");
@@ -464,15 +464,15 @@ bool SourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans)
 };
 
 std::string SourceMap::GetSourceInfo(const std::string& line, const std::string& column,
-    const SourceMapData& targetMap)
+    const SourceMapData& targetMap, const std::string& key)
 {
     int32_t offSet = 0;
     std::string sourceInfo;
     MappingInfo mapInfo;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        mapInfo = Find(StringToInt(line) - offSet + OFFSET_PREVIEW, StringToInt(column), targetMap);
+        mapInfo = Find(StringToInt(line) - offSet + OFFSET_PREVIEW, StringToInt(column), targetMap, key);
 #else
-        mapInfo = Find(StringToInt(line) - offSet, StringToInt(column), targetMap);
+        mapInfo = Find(StringToInt(line) - offSet, StringToInt(column), targetMap, key);
 #endif
     if (mapInfo.row == 0 || mapInfo.col == 0) {
         return "";
@@ -535,9 +535,9 @@ bool SourceMap::GetLineAndColumnNumbers(int& line, int& column, SourceMapData& t
     int32_t offSet = 0;
     MappingInfo mapInfo;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        mapInfo = Find(line - offSet + OFFSET_PREVIEW, column, targetMap);
+        mapInfo = Find(line - offSet + OFFSET_PREVIEW, column, targetMap, url);
 #else
-        mapInfo = Find(line - offSet, column, targetMap);
+        mapInfo = Find(line - offSet, column, targetMap, url);
 #endif
     if (mapInfo.row == 0 || mapInfo.col == 0) {
         return false;

@@ -310,6 +310,7 @@ bool JsUIExtensionBase::CheckPromise(napi_value result)
         TAG_LOGD(AAFwkTag::UI_EXT, "result is nullptr");
         return false;
     }
+    HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     bool isPromise = false;
     napi_is_promise(env, result, &isPromise);
@@ -339,7 +340,8 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
 
 bool JsUIExtensionBase::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo)
 {
-    auto env = jsRuntime_.GetNapiEnv();
+    HandleScope handleScope(jsRuntime_);
+    napi_env env = jsRuntime_.GetNapiEnv();
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to convert native value to NativeObject");
         return false;
@@ -356,7 +358,6 @@ bool JsUIExtensionBase::CallPromise(napi_value result, AppExecFwk::AbilityTransa
         TAG_LOGE(AAFwkTag::UI_EXT, "property then is not callable");
         return false;
     }
-    HandleScope handleScope(jsRuntime_);
     napi_value promiseCallback = nullptr;
     napi_status createStatus = napi_create_function(env, "promiseCallback", strlen("promiseCallback"), PromiseCallback,
         callbackInfo, &promiseCallback);
@@ -624,12 +625,10 @@ bool JsUIExtensionBase::CallJsOnSessionCreate(const AAFwk::Want &want, const spt
 
 bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr || sessionInfo->uiExtensionComponentId == 0) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return false;
     }
-
     TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", element: %{public}s",
         sessionInfo->uiExtensionComponentId, want.GetElement().GetURI().c_str());
     if (sessionInfo == nullptr || sessionInfo->uiExtensionComponentId == 0) {
@@ -652,8 +651,13 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
         option->SetParentId(sessionInfo->hostWindowId);
         option->SetRealParentId(sessionInfo->realHostWindowId);
+        option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
-        auto uiWindow = Rosen::Window::Create(option, context_, sessionInfo->sessionToken);
+        sptr<Rosen::Window> uiWindow;
+        {
+            HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
+            uiWindow = Rosen::Window::Create(option, context_, sessionInfo->sessionToken);
+        }
         if (uiWindow == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "create ui window error");
             return false;
@@ -682,6 +686,7 @@ void JsUIExtensionBase::ForegroundWindow(const AAFwk::Want &want, const sptr<AAF
     auto componentId = sessionInfo->uiExtensionComponentId;
     auto &uiWindow = uiWindowMap_[componentId];
     if (uiWindow) {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::show");
         uiWindow->Show();
         foregroundWindows_.emplace(componentId);
     }
@@ -766,6 +771,7 @@ napi_value JsUIExtensionBase::CallObjectMethod(const char *name, napi_value cons
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "CallFunction(%{public}s), success", name);
     napi_value result = nullptr;
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     napi_call_function(env, obj, method, argc, argv, &result);
     return result;
 }
@@ -780,7 +786,7 @@ void JsUIExtensionBase::OnConfigurationUpdated(const AppExecFwk::Configuration &
     }
 
     auto configUtils = std::make_shared<ConfigurationUtils>();
-    configUtils->UpdateGlobalConfig(configuration, context_->GetResourceManager());
+    configUtils->UpdateGlobalConfig(configuration, context_->GetConfiguration(), context_->GetResourceManager());
 
     ConfigurationUpdated();
 }

@@ -30,6 +30,7 @@ namespace AAFwk {
 namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
+constexpr const char* NET_WORK_ID_MARK = "?networkid=";
 }
 
 std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::ConnectManagerHelper()
@@ -194,6 +195,23 @@ bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName
     return false;
 }
 
+int32_t UPMSUtils::GetAppIdByBundleName(const std::string &bundleName, std::string &appId)
+{
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "BundleName is %{public}s.", bundleName.c_str());
+    auto bms = ConnectManagerHelper();
+    if (bms == nullptr) {
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "The bundleMgrHelper is nullptr.");
+        return GET_BUNDLE_MANAGER_SERVICE_FAILED;
+    }
+    auto userId = GetCurrentAccountId();
+    appId = IN_PROCESS_CALL(bms->GetAppIdByBundleName(bundleName, userId));
+    if (appId.empty()) {
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "Get appId by bundle name failed, userId is %{private}d", userId);
+        return INNER_ERR;
+    }
+    return ERR_OK;
+}
+
 std::string UPMSUtils::GetCallerNameByTokenId(uint32_t tokenId)
 {
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
@@ -254,6 +272,11 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
     }
     tokenId = bundleInfo.applicationInfo.accessTokenId;
     return ERR_OK;
+}
+
+bool UPMSUtils::IsDocsCloudUri(Uri &uri)
+{
+    return (uri.GetAuthority() == "docs" && uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
 }
 
 std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::bundleMgrHelper_ = nullptr;

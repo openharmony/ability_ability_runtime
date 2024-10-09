@@ -71,12 +71,15 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
     const std::map<std::string, int32_t> &fds)
 {
     NativeChildProcess_Args args;
+    args.fdList.head = nullptr;
     args.entryParams = new(std::nothrow) char[entryParams.size() + 1];
     if (!args.entryParams) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "entryParams nullptr.");
         return args;
     }
     if (strcpy_s(args.entryParams, entryParams.size() + 1, entryParams.c_str()) != ERR_OK) {
+        delete[] args.entryParams;
+        args.entryParams = nullptr;
         TAG_LOGE(AAFwkTag::APPKIT, "strcpy_s failed.");
         return args;
     }
@@ -90,8 +93,13 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
             TAG_LOGE(AAFwkTag::PROCESSMGR, "fd node nullptr.");
             return args;
         }
+        node->next = nullptr;
         node->fdName = new char[fdName.size() + 1];
         if (strcpy_s(node->fdName, fdName.size() + 1, fdName.c_str()) != ERR_OK) {
+            delete[] node->fdName;
+            node->fdName = nullptr;
+            delete node;
+            node = nullptr;
             TAG_LOGE(AAFwkTag::APPKIT, "strcpy_s failed.");
             return args;
         }

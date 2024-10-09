@@ -22,6 +22,8 @@ constexpr int32_t MAX_APP_CLONE_INDEX = 1000;
 
 constexpr int32_t TIMEOUT_UNIT_TIME = 1000;
 
+constexpr int32_t PREPARE_TERMINATE_TIMEOUT_TIME = 10000;
+
 #ifdef SUPPORT_ASAN
 constexpr int32_t COLDSTART_TIMEOUT_MULTIPLE = 15000;
 constexpr int32_t LOAD_TIMEOUT_MULTIPLE = 15000;
@@ -45,6 +47,8 @@ constexpr int32_t SHAREDATA_TIMEOUT_MULTIPLE = 5;
 constexpr int32_t TYPE_RESERVE = 1;
 constexpr int32_t TYPE_OTHERS = 2;
 #endif
+
+constexpr int32_t MIGRATE_CLIENT_TIMEOUT_MULTIPLE = 3;
 
 constexpr int32_t GetLoadTimeOutBase()
 {

@@ -173,25 +173,80 @@ public:
      */
     virtual void ScheduleProcessSecurityExit() override;
 
+    /**
+     * scheduleClearPageStack, call scheduleClearPageStack() through proxy project,
+     * Notify application clear recovery page stack.
+     *
+     */
     virtual void ScheduleClearPageStack() override;
 
+    /**
+     * @brief Schedule the given module the onAcceptWant lifecycle call.
+     *
+     * @param want the param passed to onAcceptWant lifecycle.
+     * @param want the moduleName of which being scheduled.
+     */
     virtual void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
     virtual void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
 
+    /**
+     * @brief Notify application load patch.
+     *
+     * @param bundleName Bundle name
+     * @param callback called when LoadPatch finished.
+     * @param recordId callback data
+     * @return Returns 0 on success, error code on failure.
+     */
     int32_t ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
         const sptr<IQuickFixCallback> &callback, const int32_t recordId) override;
 
+    /**
+     * @brief Notify application reload page.
+     *
+     * @param callback called when HotReload finished.
+     * @param recordId callback data
+     * @return Returns 0 on success, error code on failure.
+     */
     int32_t ScheduleNotifyHotReloadPage(const sptr<IQuickFixCallback> &callback, const int32_t recordId) override;
 
+    /**
+     * @brief Notify application unload patch.
+     *
+     * @param bundleName Bundle name
+     * @param callback called when UnloadPatch finished.
+     * @param recordId callback data
+     * @return Returns 0 on success, error code on failure.
+     */
     int32_t ScheduleNotifyUnLoadRepairPatch(const std::string &bundleName,
         const sptr<IQuickFixCallback> &callback, const int32_t recordId) override;
 
+    /**
+     * @brief Schedule Notify App Fault Data.
+     *
+     * @param faultData fault data
+     * @return Returns ERR_OK on success, error code on failure.
+     */
     int32_t ScheduleNotifyAppFault(const FaultData &faultData) override;
 
+    /**
+     * @brief Notify NativeEngine GC of status change.
+     *
+     * @param state GC state
+     * @param pid pid
+     *
+     * @return Is the status change completed.
+     */
     virtual int32_t ScheduleChangeAppGcState(int32_t state) override;
 
+    /**
+     * @brief Attach app debug.
+     */
     void AttachAppDebug() override;
+
+     /**
+     * @brief Detach app debug.
+     */
     void DetachAppDebug() override;
 
     /**
@@ -224,6 +279,9 @@ public:
      */
     virtual int32_t ScheduleDumpIpcStat(std::string& result) override;
 
+    /**
+     * @brief Notify application to prepare for process caching.
+     */
     virtual void ScheduleCacheProcess() override;
 
     /**

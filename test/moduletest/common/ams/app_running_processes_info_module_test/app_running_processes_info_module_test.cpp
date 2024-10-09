@@ -24,7 +24,7 @@
 #define private public
 #include "app_mgr_service_inner.h"
 #undef private
-#include "mock_application.h"
+#include "mock_application_proxy.h"
 #include "ability_info.h"
 #include "application_info.h"
 #include "mock_bundle_manager.h"
@@ -33,6 +33,7 @@
 #include "mock_app_spawn_client.h"
 #include "mock_native_token.h"
 #include "mock_sa_call.h"
+#include "param.h"
 
 using namespace testing::ext;
 using OHOS::iface_cast;
@@ -68,11 +69,11 @@ protected:
         return "";
     }
 
-    void CheckLaunchApplication(const sptr<MockApplication>& mockApplication, const unsigned long index,
+    void CheckLaunchApplication(const sptr<MockApplicationProxy>& mockApplication, const unsigned long index,
         std::shared_ptr<AppRunningRecord> record, const std::string& testPoint) const
     {
         EXPECT_TRUE(record != nullptr) << "record is nullptr!";
-        sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockApplication);
+        sptr<IAppScheduler> client = mockApplication;
         record->SetApplicationClient(client);
 
         std::string applicationName(GetTestAppName(index));
@@ -88,7 +89,7 @@ protected:
 
         EXPECT_CALL(*mockApplication, ScheduleLaunchApplication(_, _))
             .Times(1)
-            .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplication::LaunchApplication));
+            .WillOnce(Invoke(mockApplication.GetRefPtr(), &MockApplicationProxy::LaunchApplication));
         Configuration config;
         record->LaunchApplication(config);
         mockApplication->Wait();
@@ -199,8 +200,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_001, TestSize.Level
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     EXPECT_FALSE(service_->GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo));
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr);
     record->SetUid(uid);
     EXPECT_TRUE(record != nullptr) << ",create apprunningrecord fail!";
 
@@ -208,13 +211,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_001, TestSize.Level
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
     // LaunchApplication
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_001";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -258,8 +262,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_002, TestSize.Level
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     EXPECT_FALSE(service_->GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo));
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr);
     record->SetUid(uid);
     EXPECT_TRUE(record != nullptr) << ",create apprunningrecord fail!";
 
@@ -267,13 +273,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_002, TestSize.Level
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
     // LaunchApplication
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_001";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -319,8 +326,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_003, TestSize.Level
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     EXPECT_FALSE(service_->GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo));
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr);
     record->SetUid(uid);
     EXPECT_TRUE(record != nullptr) << ",create apprunningrecord fail!";
 
@@ -328,13 +337,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_003, TestSize.Level
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
     // LaunchApplication
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_001";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -359,9 +369,9 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_003, TestSize.Level
     BundleInfo bundleInfo2;
     HapModuleInfo hapModuleInfo2;
     EXPECT_FALSE(service_->GetBundleAndHapInfo(*abilityInfo2, appInfo2, bundleInfo2, hapModuleInfo2));
-    sptr<MockAbilityToken> mockToken = new (std::nothrow) MockAbilityToken();
+    loadParam->token = new (std::nothrow) MockAbilityToken();
     auto record2 = service_->CreateAppRunningRecord(
-        mockToken, nullptr, appInfo2, abilityInfo2, processName2, bundleInfo2, hapModuleInfo2, nullptr, 0);
+        loadParam, appInfo2, abilityInfo2, processName2, bundleInfo2, hapModuleInfo2, nullptr);
     record2->SetUid(uid);
     EXPECT_TRUE(record != nullptr) << ",create apprunningrecord fail!";
 
@@ -398,20 +408,23 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_004, TestSize.Level
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     EXPECT_FALSE(service_->GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo));
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr);
     record->SetUid(uid);
     EXPECT_TRUE(record != nullptr) << ",create apprunningrecord fail!";
 
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_001";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -455,8 +468,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_005, TestSize.Level
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     EXPECT_FALSE(service_->GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo));
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr);
     record->SetUid(uid);
     pid_t pid = 16738;
     record->GetPriorityObject()->SetPid(pid);
@@ -466,13 +481,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_005, TestSize.Level
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
     // LaunchApplication
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_005";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -516,8 +532,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_006, TestSize.Level
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     EXPECT_FALSE(service_->GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo));
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
     auto record = service_->CreateAppRunningRecord(
-        GetMockToken(), nullptr, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr, 0);
+        loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, nullptr);
     record->SetUid(uid);
     pid_t pid = 16739;
     record->GetPriorityObject()->SetPid(pid);
@@ -525,13 +543,14 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_006, TestSize.Level
 
     CheckAppRunningRecording(appInfo, abilityInfo, record, index, result);
 
-    sptr<MockApplication> mockApplication(new MockApplication());
+    sptr<IRemoteObject> impl = nullptr;
+    sptr<MockApplicationProxy> mockApplication = sptr<MockApplicationProxy>::MakeSptr(impl);
     std::string testPoint = "ApplicationStart_006";
     CheckLaunchApplication(mockApplication, index, record, testPoint);
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplicationProxy::Post));
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();

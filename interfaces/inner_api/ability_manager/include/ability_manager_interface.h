@@ -336,7 +336,7 @@ public:
      * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartExtensionAbility(
+    virtual int32_t StartExtensionAbility(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
@@ -472,6 +472,17 @@ public:
     };
 
     /**
+     * TerminateUIServiceExtensionAbility, terminate the UIServiceExtensionAbility.
+     *
+     * @param token, the token of the ability to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateUIServiceExtensionAbility(const sptr<IRemoteObject> &token)
+    {
+        return 0;
+    }
+
+    /**
      * TerminateUIExtensionAbility, terminate the special ui extension ability.
      *
      * @param extensionSessionInfo the extension session info of the ability to terminate.
@@ -586,7 +597,7 @@ public:
      * @param userId, Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ConnectAbility(
+    virtual int32_t ConnectAbility(
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
@@ -602,7 +613,7 @@ public:
      * @param userId, the service user ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ConnectAbilityCommon(
+    virtual int32_t ConnectAbilityCommon(
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
@@ -803,7 +814,7 @@ public:
     }
 
     virtual sptr<IWantSender> GetWantSender(
-        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) = 0;
+        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid = -1) = 0;
 
     virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) = 0;
 
@@ -852,36 +863,108 @@ public:
         return;
     }
 
+    /**
+     * @brief Register mission listener to ability mgr.
+     * @param listener The handler of listener.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int RegisterMissionListener(const sptr<IMissionListener> &listener) = 0;
 
+    /**
+     * @brief UnRegister mission listener from ability mgr.
+     * @param listener The handler of listener.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int UnRegisterMissionListener(const sptr<IMissionListener> &listener) = 0;
 
+    /**
+     * @brief Get mission infos from ability mgr.
+     * @param deviceId local or remote deviceId.
+     * @param numMax max number of missions.
+     * @param missionInfos mission info result.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetMissionInfos(
         const std::string &deviceId, int32_t numMax, std::vector<MissionInfo> &missionInfos) = 0;
 
+    /**
+     * @brief Get mission info by id.
+     * @param deviceId local or remote deviceId.
+     * @param missionId Id of target mission.
+     * @param missionInfo mission info of target mission.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetMissionInfo(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo) = 0;
 
+    /**
+     * @brief Get the Mission Snapshot Info object
+     * @param deviceId local or remote deviceId.
+     * @param missionId Id of target mission.
+     * @param snapshot snapshot of target mission.
+     * @param isLowResolution get low resolution snapshot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
         MissionSnapshot& snapshot, bool isLowResolution) = 0;
 
+    /**
+     * @brief Clean mission by id.
+     * @param missionId Id of target mission.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int CleanMission(int32_t missionId) = 0;
 
+    /**
+     * @brief Clean all missions in system.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int CleanAllMissions() = 0;
 
     virtual int MoveMissionToFront(int32_t missionId) = 0;
 
+    /**
+     * @brief Move a mission to front.
+     * @param missionId Id of target mission.
+     * @param startOptions Special startOptions for target mission.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int MoveMissionToFront(int32_t missionId, const StartOptions &startOptions) = 0;
 
+    /**
+     * Move missions to front
+     * @param missionIds Ids of target missions
+     * @param topMissionId Indicate which mission will be moved to top, if set to -1, missions' order won't change
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId)
     {
         return 0;
     }
 
+    /**
+     * Move missions to background
+     * @param missionIds Ids of target missions
+     * @param result The result of move missions to background, and the array is sorted by zOrder
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int MoveMissionsToBackground(const std::vector<int32_t>& missionIds, std::vector<int32_t>& result)
     {
         return 0;
     }
 
+    /**
+     * @brief Register session handler.
+     * @param object The handler.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+    */
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object)
     {
         return 0;
@@ -914,10 +997,29 @@ public:
      */
     virtual int ReleaseCall(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) = 0;
 
+    /**
+     * @brief start user.
+     * @param accountId accountId.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int StartUser(int userId, sptr<IUserCallback> callback) = 0;
 
+    /**
+     * @brief stop user.
+     * @param accountId accountId.
+     * @param callback callback.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int StopUser(int userId, const sptr<IUserCallback> &callback) = 0;
 
+    /**
+     * @brief logout user.
+     * @param accountId accountId.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int LogoutUser(int32_t userId)
     {
         return 0;
@@ -945,7 +1047,7 @@ public:
     /**
      * Register the WindowManagerService handler
      *
-     * @param handler Indidate handler of WindowManagerService.
+     * @param handler Indicate handler of WindowManagerService.
      * @return ErrCode Returns ERR_OK on success, others on failure.
      */
     virtual int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
@@ -957,14 +1059,14 @@ public:
     /**
      * WindowManager notification AbilityManager after the first frame is drawn.
      *
-     * @param abilityToken Indidate token of ability.
+     * @param abilityToken Indicate token of ability.
      */
     virtual void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) = 0;
 
     /**
      * WindowManager notification AbilityManager after the first frame is drawn.
      *
-     * @param sessionId Indidate session id.
+     * @param sessionId Indicate session id.
      */
     virtual void CompleteFirstFrameDrawing(int32_t sessionId)
     {}
@@ -1014,11 +1116,29 @@ public:
     }
 
 #endif
-
+    /**
+     * @brief Get the ability running information.
+     *
+     * @param info Ability running information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) = 0;
 
+    /**
+     * @brief Get the extension running information.
+     *
+     * @param upperLimit The maximum limit of information wish to get.
+     * @param info Extension running information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info) = 0;
 
+    /**
+     * @brief Get running process information.
+     *
+     * @param info Running process information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info) = 0;
 
     /**
@@ -1037,6 +1157,13 @@ public:
      */
     virtual int StopSyncRemoteMissions(const std::string &devId) = 0;
 
+    /**
+     * @brief Register mission listener to ability manager service.
+     * @param deviceId The remote device Id.
+     * @param listener The handler of listener.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int RegisterMissionListener(const std::string &deviceId, const sptr<IRemoteMissionListener> &listener) = 0;
 
     virtual int RegisterOnListener(const std::string &type, const sptr<IRemoteOnListener> &listener)
@@ -1075,8 +1202,23 @@ public:
      */
     virtual int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) = 0;
 
+    /**
+     * @brief start user test.
+     * @param want the want of the ability user test to start.
+     * @param observer test observer callback.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int StartUserTest(const Want &want, const sptr<IRemoteObject> &observer) = 0;
 
+    /**
+     * @brief Finish user test.
+     * @param msg user test message.
+     * @param resultCode user test result Code.
+     * @param bundleName user test bundleName.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int FinishUserTest(const std::string &msg, const int64_t &resultCode, const std::string &bundleName) = 0;
 
     /**
@@ -1186,6 +1328,11 @@ public:
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
 
+    /**
+     * @brief Schedule clear recovery page stack.
+     *
+     * @param bundleName application bundleName.
+     */
     virtual void ScheduleClearRecoveryPageStack() {};
 
     /**
@@ -1721,6 +1868,30 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t TerminateMission(int32_t missionId)
+    {
+        return 0;
+    }
+
+    /**
+     * Notify ability manager to set the flag to block all apps from starting.
+     * Needs to apply for ohos.permission.BLOCK_ALL_APP_START.
+     * @param flag, The flag to block all apps from starting
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t BlockAllAppStart(bool flag)
+    {
+        return 0;
+    }
+
+    /**
+     * update associate config list by rss.
+     *
+     * @param configs The rss config info.
+     * @param exportConfigs The rss export config info.
+     * @param flag UPDATE_CONFIG_FLAG_COVER is cover config, UPDATE_CONFIG_FLAG_APPEND is append config.
+     */
+    virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag)
     {
         return 0;
     }

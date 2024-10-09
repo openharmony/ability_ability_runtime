@@ -25,6 +25,7 @@ namespace AAFwk {
 class QueueTaskHandlerWrap : public TaskHandlerWrap {
 public:
     QueueTaskHandlerWrap(const std::string &queueName, TaskQoS queueQos);
+    QueueTaskHandlerWrap(const std::string &queueName, int32_t concurrentNum, TaskQoS queueQos);
     virtual ~QueueTaskHandlerWrap() = default;
 protected:
     std::shared_ptr<InnerTaskHandle> SubmitTaskInner(std::function<void()> &&task,

@@ -31,8 +31,8 @@ using namespace OHOS::AbilityRuntime;
 class JSAbilityDelegator {
 public:
     struct TimeoutCallback {
-        bool hasTimeoutPara;
-        bool hasCallbackPara;
+        bool hasTimeoutPara = false;
+        bool hasCallbackPara = false;
     };
 
     /**

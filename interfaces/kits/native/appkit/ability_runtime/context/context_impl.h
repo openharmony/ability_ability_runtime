@@ -352,6 +352,13 @@ public:
     int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
 
     /**
+     * @brief Get all running instance keys for the current app
+     *
+     * @return error code
+     */
+    int32_t GetAllRunningInstanceKeys(std::vector<std::string> &instanceKeys);
+
+    /**
      * @brief Restart app
      *
      * @return error code

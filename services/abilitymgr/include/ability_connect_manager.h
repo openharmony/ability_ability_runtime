@@ -69,7 +69,7 @@ public:
      * @param abilityRequest, the request of the service ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int StartAbility(const AbilityRequest &abilityRequest);
+    int32_t StartAbility(const AbilityRequest &abilityRequest);
 
     /**
      * TerminateAbility with token and result want.
@@ -97,7 +97,7 @@ public:
      * @param connectInfo the connect info.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int ConnectAbilityLocked(const AbilityRequest &abilityRequest, const sptr<IAbilityConnection> &connect,
+    int32_t ConnectAbilityLocked(const AbilityRequest &abilityRequest, const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken, sptr<SessionInfo> sessionInfo = nullptr,
         sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr);
 
@@ -207,12 +207,12 @@ public:
         AbilityCommand abilityCmd);
 
     /**
-     * GetUIExtensioBySessionInfo.
+     * GetUIExtensionBySessionInfo.
      *
      * @param sessionToken, service ability's session token.
      * @return Returns AbilityRecord shared_ptr.
      */
-    std::shared_ptr<AbilityRecord> GetUIExtensioBySessionInfo(const sptr<SessionInfo> &sessionInfo);
+    std::shared_ptr<AbilityRecord> GetUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo);
 
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromAbilityCache(const sptr<IRemoteObject> &token);
@@ -328,6 +328,7 @@ public:
     void SignRestartAppFlag(const std::string &bundleName);
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
+    void UninstallApp(const std::string &bundleName);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t CONNECT_TIMEOUT_MSG = 1;
@@ -339,7 +340,7 @@ private:
      * @param abilityRequest, the request of the service ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int StartAbilityLocked(const AbilityRequest &abilityRequest);
+    int32_t StartAbilityLocked(const AbilityRequest &abilityRequest);
 
     /**
      * TerminateAbilityLocked with token and result want.
@@ -576,7 +577,7 @@ private:
     void HandleUIExtWindowDiedTask(const sptr<IRemoteObject> &remote);
 
     /**
-     * Post an extension's disconnect task, auto disconnect when extension conected timeout.
+     * Post an extension's disconnect task, auto disconnect when extension connected timeout.
      */
     void PostExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 
@@ -621,8 +622,7 @@ private:
 
     void AddConnectObjectToMap(sptr<IRemoteObject> connectObject, const ConnectListType &connectRecordList,
         bool updateOnly);
-    void GetKeepAliveAbilities();
-    bool IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo);
+
     void KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
     void ProcessEliminateAbilityRecord(std::shared_ptr<AbilityRecord> eliminateRecord);
     std::string GetServiceKey(const std::shared_ptr<AbilityRecord> &service);
@@ -665,9 +665,6 @@ private:
 
     std::unique_ptr<UIExtensionAbilityConnectManager> uiExtensionAbilityRecordMgr_ = nullptr;
     uint32_t sceneBoardTokenId_ = 0;
-
-    std::mutex keepAliveAbilitiesMutex_;
-    std::vector<std::pair<std::string, std::string>> keepAliveAbilities_;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };

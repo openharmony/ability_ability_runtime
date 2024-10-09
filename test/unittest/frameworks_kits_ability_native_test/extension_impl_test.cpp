@@ -111,7 +111,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_0300, Function | MediumTest | Le
 
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
 
     std::shared_ptr<AbilityRuntime::Extension> extension;
     std::shared_ptr<AppExecFwk::AbilityHandler> handler;
@@ -199,7 +199,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_0700, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -222,7 +222,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_0800, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -279,7 +279,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_1100, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -304,7 +304,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_1200, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -360,7 +360,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_1500, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -386,7 +386,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_1600, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -439,7 +439,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_1900, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -496,7 +496,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_2200, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -523,7 +523,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_2300, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -560,7 +560,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_2600, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -591,7 +591,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_2700, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -618,7 +618,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_2800, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -645,7 +645,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_2900, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);
@@ -670,7 +670,7 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_3000, Function | MediumTest | Le
     auto application = std::make_shared<AppExecFwk::OHOSApplication>();
     std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
     sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
-    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, token, nullptr, 0);
     auto extension = std::make_shared<AbilityRuntime::Extension>();
     std::shared_ptr<EventRunner> runner;
     auto handler = std::make_shared<AppExecFwk::AbilityHandler>(runner);

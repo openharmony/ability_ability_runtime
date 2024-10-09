@@ -237,6 +237,7 @@ int AbilitySchedulerStub::CommandAbilityInner(MessageParcel &data, MessageParcel
 
 int AbilitySchedulerStub::PrepareTerminateAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "prepare terminate call");
     bool ret = SchedulePrepareTerminateAbility();
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to write ret");

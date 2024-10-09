@@ -107,8 +107,19 @@ public:
      */
     virtual void KillProcessesByUserId(int32_t userId) override;
 
+    /**
+     * KillProcessesByPids, only in process call is allowed,
+     * kill the processes by pid list given.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     */
     virtual void KillProcessesByPids(std::vector<int32_t> &pids) override;
 
+    /**
+     * Set child and parent relationship
+     * @param token child process
+     * @param callerToken parent process
+     */
     virtual void AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken) override;
 
     /**
@@ -168,16 +179,54 @@ public:
      */
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid) override;
 
+    /**
+     * KillApplicationSelf, this allows app to terminate itself.
+     *
+     * @param clearPageStack, the flag indicates if ClearPageStack lifecycle should be scheduled.
+     * @return ERR_OK for success call, others for failure.
+     */
     virtual int KillApplicationSelf(const bool clearPageStack = false) override;
 
+    /**
+     * Get application info by process id.
+     *
+     * @param pid Process id.
+     * @param application Application information got.
+     * @param debug Whether IsDebugApp.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug) override;
 
+    /**
+     * Record process exit reason to appRunningRecord
+     * @param pid pid
+     * @param reason reason enum
+     * @param exitMsg exitMsg
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual int32_t NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg) override;
 
+    /**
+     * AbilityAttachTimeOut, called by ability manager service when an ability is loaded timeout.
+     *
+     * @param token indicates the token of the ability which is timeout.
+     */
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) override;
 
+    /**
+     * PrepareTerminate, called before terminating one ability by ability manager service to notify application.
+     *
+     * @param token indicates the token of the ability to be terminated.
+     * @param clearMissionFlag indicates whether it is caused by cleaning mission.
+     */
     virtual void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false) override;
 
+    /**
+     * GetRunningProcessInfoByToken, get process info for one ability.
+     *
+     * @param token indicates the token of the ability requested.
+     * @param info output of the information.
+     */
     virtual void GetRunningProcessInfoByToken(
         const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info) override;
 
@@ -189,16 +238,50 @@ public:
      */
     void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) override;
 
+    /**
+     * Start specified ability.
+     *
+     * @param want Want contains information of the ability to start.
+     * @param abilityInfo Ability information.
+     * @param requestId request id to callback
+     */
     virtual void StartSpecifiedAbility(
         const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo, int32_t requestId = 0) override;
 
+    /**
+     * Register response of start specified ability.
+     *
+     * @param response Response of start specified ability.
+     */
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) override;
 
+    /**
+     * Start specified process.
+     *
+     * @param want Want contains information wish to start.
+     * @param abilityInfo Ability information.
+     * @param requestId for callback
+     */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0) override;
 
+    /**
+     * SetCurrentUserId, set the userid to app mgr by ability mgr when switching to another user.
+     *
+     * @param userId the new user.
+     */
     virtual void SetCurrentUserId(const int32_t userId) override;
 
+    virtual void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess) override;
+
+    /**
+     * GetBundleNameByPid, get bundleName and uid of a process.
+     *
+     * @param pid input param indicates the pid of the process.
+     * @param bundleName output for bundleName.
+     * @param uid output for uid.
+     * @return ERR_OK for success call, others for failure.
+     */
     virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
 
     /**
@@ -279,8 +362,9 @@ public:
      * @brief Set resident process enable status.
      * @param bundleName The application bundle name.
      * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
      */
-    void SetKeepAliveEnableState(const std::string &bundleName, bool enable) override;
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid) override;
 
     /**
      * To clear the process by ability token.
@@ -290,8 +374,8 @@ public:
     virtual void ClearProcessByToken(sptr<IRemoteObject> token) override;
 
     /**
-     * whether memory size is sufficent.
-     * @return Returns true is sufficent memory size, others return false.
+     * whether memory size is sufficient.
+     * @return Returns true is sufficient memory size, others return false.
      */
     virtual bool IsMemorySizeSufficent() override;
 
@@ -326,6 +410,9 @@ public:
      */
     virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid) override;
 
+    /**
+     * Whether a process is attached, refer to AttachApplication
+     */
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
     virtual bool IsAppKilling(sptr<IRemoteObject> token) override;

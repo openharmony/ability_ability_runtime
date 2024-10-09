@@ -111,6 +111,7 @@ public:
     void SetColorMode(int32_t colorMode);
     void SetLanguage(const std::string &language);
     void SetFont(const std::string &font);
+    bool SetFontSizeScale(double fontSizeScale);
     void SetMcc(const std::string &mcc);
     void SetMnc(const std::string &mnc);
     void ClearUpApplicationData();
@@ -142,6 +143,9 @@ public:
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
     int32_t GetCurrentAppCloneIndex();
     void SetCurrentAppCloneIndex(int32_t appIndex);
+    std::string GetCurrentInstanceKey();
+    void SetCurrentInstanceKey(const std::string& instanceKey);
+    int32_t GetAllRunningInstanceKeys(std::vector<std::string> &instanceKeys);
     int32_t GetCurrentAppMode();
     void SetCurrentAppMode(int32_t appIndex);
     void ProcessSecurityExit(const AAFwk::ExitReason &exitReason);
@@ -170,6 +174,7 @@ private:
     std::string appRunningUniqueId_;
     int32_t appIndex_ = 0;
     int32_t appMode_ = 0;
+    std::string instanceKey_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

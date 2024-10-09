@@ -53,8 +53,9 @@ public:
     bool EnableMoveUIAbilityToBackgroundApi();
     bool IsLaunchEmbededUIAbility();
     bool IsSupportNativeChildProcess();
+    bool IsSupportMultiInstance();
     bool IsAllowResidentInExtremeMemory(const std::string& bundleName, const std::string& abilityName = "");
-    bool IsAllowNativeChildProcess(const std::string& bundleName);
+    bool IsAllowNativeChildProcess(const std::string &appIdentifier);
     int32_t GetLimitMaximumExtensionsPerProc();
     int32_t GetLimitMaximumExtensionsPerDevice();
     std::string GetCacheExtensionTypeList();
@@ -63,6 +64,7 @@ public:
     int32_t GetCollaboratorBrokerUID();
     int32_t GetCollaboratorBrokerReserveUID();
     int32_t MaxChildProcess();
+    std::string GetMigrateClientBundleName();
 
 private:
     void LoadResidentProcessInExtremeMemory();
@@ -84,6 +86,7 @@ private:
     volatile DeviceConfiguration<bool> enableMoveUIAbilityToBackgroundApi_ = {false, true};
     volatile DeviceConfiguration<bool> isLaunchEmbededUIAbility_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportNativeChildProcess_ = {false, false};
+    volatile DeviceConfiguration<bool> isSupportMultiInstance_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     DeviceConfiguration<std::vector<std::string>>
@@ -96,6 +99,7 @@ private:
     volatile DeviceConfiguration<int32_t> collaboratorBrokerUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerReserveUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> maxChildProcess_ = {false, DEFAULT_MAX_CHILD_PROCESS};
+    DeviceConfiguration<std::string> migrateClientBundleName_ = {true, "com.huwei.hmos.migratecilent"};
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk

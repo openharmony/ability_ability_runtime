@@ -31,11 +31,6 @@
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
-namespace {
-const std::string PERMISSION_KEY = "ohos.user.grant.permission";
-const std::string GRANTED_RESULT_KEY = "ohos.user.grant.permission.result";
-}
-
 void AbilityImpl::Init(const std::shared_ptr<OHOSApplication> &application,
                        const std::shared_ptr<AbilityLocalRecord> &record,
                        std::shared_ptr<Ability> &ability,
@@ -62,7 +57,6 @@ void AbilityImpl::Init(const std::shared_ptr<OHOSApplication> &application,
 #endif
     ability_->Init(record->GetAbilityInfo(), application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
-    abilityLifecycleCallbacks_ = application;
     TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
@@ -70,8 +64,8 @@ void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 #ifdef SUPPORT_SCREEN
@@ -108,8 +102,8 @@ void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 void AbilityImpl::Stop()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "nullability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "nullability_");
         return;
     }
 
@@ -120,8 +114,8 @@ void AbilityImpl::Stop()
 void AbilityImpl::Stop(bool &isAsyncCallback)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         isAsyncCallback = false;
         return;
     }
@@ -155,8 +149,8 @@ void AbilityImpl::Stop(bool &isAsyncCallback)
 
 void AbilityImpl::StopCallback()
 {
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 #ifdef SUPPORT_SCREEN
@@ -175,8 +169,8 @@ void AbilityImpl::StopCallback()
 void AbilityImpl::Active()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 
@@ -194,8 +188,8 @@ void AbilityImpl::Active()
 void AbilityImpl::Inactive()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 
@@ -229,9 +223,9 @@ bool AbilityImpl::IsStageBasedModel() const
 void AbilityImpl::DispatchSaveAbilityState()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || abilityLifecycleCallbacks_ == nullptr) {
+    if (ability_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY,
-            "null ability_/abilityLifecycleCallbacks_");
+            "null ability_");
         return;
     }
 
@@ -624,8 +618,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle";
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     bool needNotifyAMS = false;
@@ -660,8 +653,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     TAG_LOGI(AAFwkTag::ABILITY, "window after background");
@@ -730,8 +722,8 @@ void AbilityImpl::Foreground(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 
@@ -761,8 +753,8 @@ void AbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
 void AbilityImpl::Background()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null ability_/abilityLifecycleCallbacks_");
+    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
     ability_->OnLeaveForeground();
