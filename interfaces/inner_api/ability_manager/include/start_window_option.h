@@ -34,7 +34,7 @@ public:
 
     bool hasStartWindow = false;
     std::string startWindowBackgroundColor;
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_PIXELMAP
     std::shared_ptr<Media::PixelMap> startWindowIcon = nullptr;
 #endif
 };
