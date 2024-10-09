@@ -17,6 +17,10 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
+constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
+}
 AbilityRunningRecord::AbilityRunningRecord(std::shared_ptr<AbilityInfo> info,
     sptr<IRemoteObject> token, int32_t abilityRecordId)
     : info_(info), token_(token), abilityRecordId_(abilityRecordId)
@@ -188,6 +192,14 @@ void AbilityRunningRecord::SetUserRequestCleaningStatus()
 bool AbilityRunningRecord::IsUserRequestCleaning() const
 {
     return isUserRequestCleaning_;
+}
+
+bool AbilityRunningRecord::IsSceneBoard() const
+{
+    if (info_ == nullptr) {
+        return false;
+    }
+    return info_->name == SCENEBOARD_ABILITY_NAME && info_->bundleName == BUNDLE_NAME_SCENEBOARD;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

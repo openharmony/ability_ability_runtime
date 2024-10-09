@@ -1161,6 +1161,8 @@ public:
 
     bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
 
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);

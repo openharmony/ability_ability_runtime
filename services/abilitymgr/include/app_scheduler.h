@@ -464,6 +464,8 @@ public:
 
     bool IsKilledForUpgradeWeb(const std::string &bundleName);
 
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.
