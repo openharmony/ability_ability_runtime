@@ -20,6 +20,7 @@
 
 #include "ability_record.h"
 #include "app_mgr_client.h"
+#include "param.h"
 #include "parcel.h"
 #include "securec.h"
 
@@ -85,11 +86,14 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     // fuzz for want
     Parcel wantParcel;
     Want* want = nullptr;
-    int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = static_cast<int32_t>(GetU32Data(data));
+    loadParam.token = token;
+    loadParam.preToken = preToken;
     if (wantParcel.WriteBuffer(data, size)) {
         want = Want::Unmarshalling(wantParcel);
         if (want) {
-            appMgrClient->LoadAbility(token, preToken, abilityInfo, appInfo, *want, int32Param);
+            appMgrClient->LoadAbility(abilityInfo, appInfo, *want, loadParam);
         }
     }
 

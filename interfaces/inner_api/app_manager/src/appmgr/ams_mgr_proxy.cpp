@@ -16,6 +16,7 @@
 #include "ams_mgr_proxy.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
+#include "param.h"
 #include "string_ex.h"
 
 #include "appexecfwk_errors.h"
@@ -55,9 +56,9 @@ bool WriteTokenObject(MessageParcel &data, sptr<IRemoteObject> token)
 }
 }
 
-void AmsMgrProxy::LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-    const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-    const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId)
+void AmsMgrProxy::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
+    const std::shared_ptr<ApplicationInfo> &appInfo,
+    const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start");
     if (!abilityInfo || !appInfo) {
@@ -72,21 +73,14 @@ void AmsMgrProxy::LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemo
         return;
     }
 
-    if (!WriteTokenObject(data, token)) {
-        return;
-    }
-    if (!WriteTokenObject(data, preToken)) {
-        return;
-    }
-
     data.WriteParcelable(abilityInfo.get());
     data.WriteParcelable(appInfo.get());
     if (!data.WriteParcelable(want.get())) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write want failed");
         return;
     }
-    if (!data.WriteInt32(abilityRecordId)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write data abilityRecordId failed.");
+    if (!data.WriteParcelable(loadParam.get())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write data loadParam failed.");
         return;
     }
 
