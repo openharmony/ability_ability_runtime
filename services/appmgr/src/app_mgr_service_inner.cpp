@@ -604,14 +604,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey);
     if (appRecord && appRecord->IsCaching()) {
-        if (appRecord->GetPriorityObject()) {
-            int32_t pid = appRecord->GetPriorityObject()->GetPid();
-            appRecord->SetKilling();
-            appRecord->PostTask("ASYNC_KILL_PROCESS", 0, [pid, this]() {
-                this->KillProcessByPid(pid, "load_ability_when_caching_process");
-            });
-            appRecord = nullptr;
-        }
+        appRecord->SetProcessCacheBlocked(true);
+        appRecord = nullptr;
     }
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         NotifyMemMgrPriorityChanged(appRecord);
