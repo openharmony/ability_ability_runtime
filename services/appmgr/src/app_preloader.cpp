@@ -138,7 +138,7 @@ bool AppPreloader::GetBundleAndHapInfo(const std::string &bundleName, int32_t us
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(bundleName,
         static_cast<BundleFlag>(flags),
         bundleInfo, userId))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetBundleInfo failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication GetBundleInfo failed.");
         return false;
     }
 
