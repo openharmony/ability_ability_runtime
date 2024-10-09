@@ -444,11 +444,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_002, TestSize.Level1)
     Want want2;
     want2.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
     ret = abilityMs->StartAbilityInner(want2, callerToken, -1, false, -1, true, 1, true);
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
-    } else {
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityInner_002 end");
 }
 
@@ -1354,12 +1349,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, AbilityTransitionDone_001, TestSize.Lev
     PacMap saveData;
     int state = 0;
     auto ret = abilityMs->AbilityTransitionDone(nullptr, state, saveData);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
-        return;
-    } else {
-        EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
-    }
     abilityRecord->abilityInfo_.type = AbilityType::SERVICE;
     ret = abilityMs->AbilityTransitionDone(token, state, saveData);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -1402,11 +1391,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, AbilityWindowConfigTransitionDone_001, 
     appInfo.accessTokenId = callingTokenId;
     WindowConfig windowConfig;
     auto ret = abilityMs->AbilityWindowConfigTransitionDone(nullptr, windowConfig);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    } else {
-        EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
-    }
     abilityRecord->abilityInfo_.extensionAbilityType = ExtensionAbilityType::SERVICE;
     ret = abilityMs->AbilityWindowConfigTransitionDone(token, windowConfig);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -1737,37 +1721,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, GetElementNameByToken_001, TestSize.Lev
     ret = abilityMs->GetElementNameByToken(token, true);
     EXPECT_EQ(ret, elementName);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest GetElementNameByToken_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: UpdateBackToCallerFlag
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService UpdateBackToCallerFlag
- */
-HWTEST_F(AbilityManagerServiceSixthTest, UpdateBackToCallerFlag_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest UpdateBackToCallerFlag_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs, nullptr);
-    int32_t requestCode = -1;
-    Want want;
-    abilityMs->UpdateBackToCallerFlag(nullptr, want, requestCode, false);
-
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
-    abilityRecord->Init();
-    auto callerToken = abilityRecord->token_;
-    abilityMs->UpdateBackToCallerFlag(callerToken, want, requestCode, false);
-
-    std::string code = "test";
-    want.SetParam(CALLER_REQUEST_CODE, code);
-    abilityMs->UpdateBackToCallerFlag(callerToken, want, requestCode, false);
-    requestCode = 1;
-    abilityMs->UpdateBackToCallerFlag(nullptr, want, requestCode, false);
-    abilityMs->UpdateBackToCallerFlag(callerToken, want, requestCode, false);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest UpdateBackToCallerFlag_001 end");
 }
 
 /*

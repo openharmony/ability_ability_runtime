@@ -24,6 +24,7 @@ ohos_unittest("AppMgrServiceInnerSecondTest") {
     blocklist = "../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
+  use_exceptions = true
 
   include_dirs = [
     "${ability_runtime_test_path}/mock/common/include",
