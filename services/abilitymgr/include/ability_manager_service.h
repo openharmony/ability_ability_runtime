@@ -2243,6 +2243,9 @@ private:
 
     void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
         const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
+
+    void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
+        const Want& want, uint32_t specifyTokenId);
     
     void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
