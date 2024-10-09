@@ -69,6 +69,7 @@ private:
         if (remote_ == remote.promote()) {
             remote_->RemoveDeathRecipient(deathRecipient_);
             remote_ = nullptr;
+            deathRecipient_ = nullptr;
         }
     }
 
@@ -77,6 +78,10 @@ private:
         if (!serviceManager_) {
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
+        if (remote_) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        TAG_LOGI(AAFwkTag::APPMGR, "get AppMgrRemote object");
         remote_ = serviceManager_->GetAppMgrService();
         if (!remote_) {
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
