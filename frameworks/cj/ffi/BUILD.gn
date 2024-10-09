@@ -50,6 +50,7 @@ ohos_shared_library("cj_ability_ffi") {
 
   sources = [
     "cj_ability_delegator.cpp",
+    "cj_ability_delegator_args.cpp",
     "cj_ability_lifecycle_callback.cpp",
     "cj_application_context.cpp",
     "cj_application_state_change_callback.cpp",

@@ -358,6 +358,7 @@ enum {
      * Result(2097219) for prouct application boot setting.
      */
     ERR_NOT_SUPPORTED_PRODUCT_TYPE,
+
     /**
      * Result(2097220) for starting invalid component.
      */
@@ -447,7 +448,7 @@ enum {
      * Native error(2097237) for ability state check failed.
      */
     ERR_NATIVE_ABILITY_STATE_CHECK_FAILED,
-    
+
     /**
      * Native error(2097238) for kill process not exist.
      */
@@ -539,7 +540,7 @@ enum {
      * Result(2097256) for non-app-provision mode
      */
     ERR_NOT_IN_APP_PROVISION_MODE = 2097256,
-    
+
     /*
      * Result(2097257) for share file uri non-implicitly
      */
@@ -569,7 +570,7 @@ enum {
      * Result (2097262) caller not exists.
      */
     ERR_CALLER_NOT_EXISTS = 2097262,
-    
+
     /*
      * Result (2097263) Not support back to caller.
      */
@@ -594,6 +595,66 @@ enum {
      * Result(2097267) for check is debug app.
      */
     ERR_NOT_DEBUG_APP = 2097267,
+
+    /*
+     * Result (2097268) for native child process reach limit.
+     */
+    ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS = 2097268,
+
+    /*
+     * Result (2097269) for failed to get profile when execute insight intent.
+     */
+    ERR_INSIGHT_INTENT_GET_PROFILE_FAILED = 2097269,
+
+    /*
+     * Result (2097270) for all apps are blocked from starting due to resource shortage.
+     */
+    ERR_ALL_APP_START_BLOCKED = 2097270,
+
+    /**
+     * Result(2097271) not support multi-instance.
+     */
+    ERR_MULTI_INSTANCE_NOT_SUPPORTED = 2097271,
+
+    /*
+     * Result (2097272) for not support app instance key.
+     */
+    ERR_APP_INSTANCE_KEY_NOT_SUPPORT = 2097272,
+
+    /*
+     * Result (2097273) for reach the upper limit.
+     */
+    ERR_UPPER_LIMIT = 2097273,
+
+    /*
+     * Result (2097274) for not support to create a new instance.
+     */
+    ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT = 2097274,
+
+    /*
+     * Result (2097275) for invalid app instance key.
+     */
+    ERR_INVALID_APP_INSTANCE_KEY = 2097275,
+
+    /*
+     * Result (2097276) for not support app clone.
+     */
+    ERR_NOT_SUPPORT_APP_CLONE = 2097276,
+
+    /*
+     * Result (2097277) for invalid extension type.
+     */
+    ERR_INVALID_EXTENSION_TYPE = 2097277,
+
+    /*
+     * Result (2097278) for replying failed while executing insight intent.
+     */
+    ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED = 2097278,
+
+    /*
+    * Result (2097279) for can not show or hide
+     */
+    ERR_CAN_NOT_SHOW_HIDE = 2097279,
 
     /**
      * Native error(3000000) for target bundle not exist.

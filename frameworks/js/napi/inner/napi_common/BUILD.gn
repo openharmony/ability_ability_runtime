@@ -19,6 +19,8 @@ config("napi_common_public_config") {
 }
 
 ohos_shared_library("napi_common") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [ "${ability_runtime_napi_path}/featureAbility" ]
 
   public_configs = [
@@ -42,6 +44,7 @@ ohos_shared_library("napi_common") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
+    "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
   ]
@@ -72,8 +75,10 @@ ohos_shared_library("napi_common") {
       "SUPPORT_GRAPHICS",
       "SUPPORT_SCREEN",
     ]
+    external_deps += [ "image_framework:image" ]
     public_external_deps += [
       "form_fwk:form_manager",
+      "graphic_2d:color_manager",
       "window_manager:libdm",
     ]
   }

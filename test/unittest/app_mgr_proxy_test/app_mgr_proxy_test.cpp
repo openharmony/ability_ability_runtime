@@ -687,6 +687,60 @@ HWTEST_F(AppMgrProxyTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level
 }
 
 /**
+ * @tc.name: GetAllRunningInstanceKeysBySelf_001
+ * @tc.desc: GetAllRunningInstanceKeysBySelf.
+ * @tc.type: FUNC
+ * @tc.require: issueI9HMAO
+ */
+HWTEST_F(AppMgrProxyTest, GetAllRunningInstanceKeysBySelf_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(AppMgrStub::GetDescriptor());
+
+    EXPECT_CALL(*mockAppMgrService_, GetAllRunningInstanceKeysBySelf(_)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_SELF), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: GetAllRunningInstanceKeysByBundleName_001
+ * @tc.desc: GetAllRunningInstanceKeysByBundleName.
+ * @tc.type: FUNC
+ * @tc.require: issueI9HMAO
+ */
+HWTEST_F(AppMgrProxyTest, GetAllRunningInstanceKeysByBundleName_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(AppMgrStub::GetDescriptor());
+    std::string bundleName = "testBundleName";
+    data.WriteString(bundleName);
+    int32_t userId = -1;
+    data.WriteInt32(userId);
+
+    EXPECT_CALL(*mockAppMgrService_, GetAllRunningInstanceKeysByBundleName(_, _, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_BUNDLENAME), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
  * @tc.name: GetSupportedProcessCachePids_001
  * @tc.desc: Get pids of processes which belong to specific bundle name and support process cache feature.
  * @tc.type: FUNC

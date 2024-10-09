@@ -263,6 +263,7 @@ struct AbilityRequest {
 
     std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<ProcessOptions> processOptions = nullptr;
+    std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
     std::string specifiedFlag;
     int32_t userId = -1;
     bool callSpecifiedFlagTimeout = false;
@@ -275,7 +276,6 @@ struct AbilityRequest {
     uint32_t specifyTokenId = 0;
     bool uriReservedFlag = false;
     std::string reservedBundleName;
-
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -597,10 +597,12 @@ public:
 
     bool GrantUriPermissionForServiceExtension();
 
+    bool GrantUriPermissionForUIExtension();
+
     /**
      * check whether the ability is launcher.
      *
-     * @return true : lanucher ,false: not lanucher
+     * @return true : launcher ,false: not launcher
      */
     bool IsLauncherAbility() const;
 
@@ -922,7 +924,7 @@ public:
     void DumpService(std::vector<std::string> &info, std::vector<std::string> &params, bool isClient = false) const;
 
     /**
-     * set aconnect remote object.
+     * set connect remote object.
      *
      */
     void SetConnRemoteObject(const sptr<IRemoteObject> &remoteObject);
@@ -957,6 +959,14 @@ public:
     int32_t GetRestartCount() const;
     void SetRestartCount(int32_t restartCount);
     bool GetKeepAlive() const;
+    void SetKeepAliveBundle(bool value)
+    {
+        keepAliveBundle_ = value;
+    }
+    bool IsKeepAliveBundle() const
+    {
+        return keepAliveBundle_;
+    }
     void SetLoading(bool status);
     bool IsLoading() const;
     int64_t GetRestartTime();
@@ -1085,6 +1095,28 @@ public:
 
     void RemoveConnectWant();
 
+    void UpdateDmsCallerInfo(Want &want);
+
+    inline std::string GetInstanceKey() const
+    {
+        return instanceKey_;
+    }
+
+    void SetInstanceKey(const std::string& key)
+    {
+        instanceKey_ = key;
+    }
+
+    void SetSecurityFlag(bool securityFlag)
+    {
+        securityFlag_ = securityFlag;
+    }
+
+    bool GetSecurityFlag() const
+    {
+        return securityFlag_;
+    }
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
@@ -1142,8 +1174,6 @@ private:
 
     void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
 
-    bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
-
     void PublishFileOpenEvent(const Want &want);
 
     void SetDebugAppByWaitingDebugFlag();
@@ -1177,7 +1207,7 @@ private:
 
     void StartingWindowTask(bool isRecent, bool isCold, const AbilityRequest &abilityRequest,
         std::shared_ptr<StartOptions> &startOptions);
-    void StartingWindowColdTask(bool isRecnet, const AbilityRequest &abilityRequest,
+    void StartingWindowColdTask(bool isRecent, const AbilityRequest &abilityRequest,
         std::shared_ptr<StartOptions> &startOptions);
     void PostCancelStartingWindowColdTask();
     void StartingWindowHot(const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<Want> &want,
@@ -1194,7 +1224,6 @@ private:
     int recordId_ = 0;                                // record id
     int32_t uiExtensionAbilityId_ = 0;                // uiextension ability id
     AppExecFwk::AbilityInfo abilityInfo_ = {};             // the ability info get from BMS
-    AppExecFwk::ApplicationInfo applicationInfo_ = {};     // the ability info get from BMS
     std::weak_ptr<AbilityRecord> preAbilityRecord_ = {};   // who starts this ability record
     std::weak_ptr<AbilityRecord> nextAbilityRecord_ = {};  // ability that started by this ability
     int64_t startTime_ = 0;                           // records first time of ability start
@@ -1226,14 +1255,14 @@ private:
      */
     bool isAbilityForegrounding_ = false;
 
-    // service(ability) can be connected by multi-pages(abilites), so need to store this service's connections
+    // service(ability) can be connected by multi-pages(abilities), so need to store this service's connections
     mutable ffrt::mutex connRecordListMutex_;
     std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};
     // service(ability) onConnect() return proxy of service ability
     sptr<IRemoteObject> connRemoteObject_ = {};
     int startId_ = 0;  // service(ability) start id
 
-    // page(ability) can be started by multi-pages(abilites), so need to store this ability's caller
+    // page(ability) can be started by multi-pages(abilities), so need to store this ability's caller
     std::list<std::shared_ptr<CallerRecord>> callerList_ = {};
 
     bool isUninstall_ = false;
@@ -1260,7 +1289,7 @@ private:
     bool minimizeReason_ = false;
 
     bool clearMissionFlag_ = false;
-
+    bool keepAliveBundle_ = false;
     int32_t restartCount_ = -1;
     int32_t restartMax_ = -1;
     std::string specifiedFlag_;
@@ -1311,6 +1340,8 @@ private:
     ffrt::mutex connectWantLock_;
     bool isLaunching_ = true;
     LaunchDebugInfo launchDebugInfo_;
+    std::string instanceKey_ = "";
+    bool securityFlag_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

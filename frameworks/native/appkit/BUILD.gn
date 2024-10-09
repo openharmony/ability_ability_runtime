@@ -159,6 +159,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
@@ -267,6 +268,8 @@ ohos_shared_library("appkit_native") {
 
 # build so
 ohos_shared_library("app_context") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
@@ -335,6 +338,8 @@ ohos_shared_library("app_context") {
 
 # build so
 ohos_shared_library("app_context_utils") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_napi_path}/ability_auto_startup_callback",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
@@ -397,6 +402,8 @@ ohos_shared_library("app_context_utils") {
 
 # build so
 ohos_shared_library("appkit_delegator") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
@@ -480,6 +487,8 @@ config("application_context_manager_config") {
 }
 
 ohos_shared_library("appkit_manager_helper") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
@@ -524,6 +533,8 @@ ohos_shared_library("appkit_manager_helper") {
 }
 
 ohos_shared_library("application_context_manager") {
+  branch_protector_ret = "pac_ret"
+
   sources = [ "${ability_runtime_native_path}/appkit/ability_runtime/context/application_context_manager.cpp" ]
 
   cflags = []

@@ -82,12 +82,17 @@ public:
     MOCK_METHOD2(UpdateRenderState, int32_t(pid_t renderPid, int32_t state));
     MOCK_METHOD2(GetRunningMultiAppInfoByBundleName, int32_t(const std::string &bundleName,
         RunningMultiAppInfo &info));
+    MOCK_METHOD1(GetAllRunningInstanceKeysBySelf, int32_t(std::vector<std::string> &instanceKeys));
+    MOCK_METHOD3(GetAllRunningInstanceKeysByBundleName, int32_t(const std::string &bundleName,
+        std::vector<std::string> &instanceKeys, int32_t userId));
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupported));
     MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
     MOCK_METHOD2(GetSupportedProcessCachePids, int32_t(const std::string &bundleName,
         std::vector<int32_t> &pidList));
+    MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
+    MOCK_METHOD2(CheckIsKiaProcess, int32_t(pid_t pid, bool &isKia));
 
     void AttachApplication(const sptr<IRemoteObject>& app)
     {
@@ -153,6 +158,12 @@ public:
     }
 
     virtual int GetAllRunningProcesses(std::vector<RunningProcessInfo>& info) override
+    {
+        return 0;
+    }
+
+    virtual int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
+        RunningMultiAppInfo &info) override
     {
         return 0;
     }

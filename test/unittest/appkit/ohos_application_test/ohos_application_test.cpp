@@ -25,8 +25,6 @@
 #include "context_impl.h"
 #include "fa_ability_thread.h"
 #include "hilog_tag_wrapper.h"
-#include "mock_ability_lifecycle_callbacks.h"
-#include "mock_element_callback.h"
 #include "mock_i_remote_object.h"
 #include "mock_runtime.h"
 #include "ohos_application.h"
@@ -64,38 +62,6 @@ void OHOSApplicationTest::SetUp()
 void OHOSApplicationTest::TearDown()
 {
     ohosApplication_ = nullptr;
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_DispatchAbilitySavedState_0100
-* @tc.name: DispatchAbilitySavedState
-* @tc.desc: Verify function DispatchAbilitySavedState list abilityLifecycleCallbacks_ empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_DispatchAbilitySavedState_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_DispatchAbilitySavedState_0100 start.";
-    PacMap outState;
-    ohosApplication_->DispatchAbilitySavedState(outState);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_DispatchAbilitySavedState_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_DispatchAbilitySavedState_0200
-* @tc.name: DispatchAbilitySavedState
-* @tc.desc: Verify function DispatchAbilitySavedState list abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_DispatchAbilitySavedState_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_DispatchAbilitySavedState_0200 start.";
-    PacMap outState;
-    std::shared_ptr<MockAbilityLifecycleCallbacks> abilityLifecycleCallbacks =
-        std::make_shared<MockAbilityLifecycleCallbacks>();
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(abilityLifecycleCallbacks);
-    ohosApplication_->DispatchAbilitySavedState(outState);
-    EXPECT_TRUE(!ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_DispatchAbilitySavedState_0200 end.";
 }
 
 /*
@@ -163,7 +129,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_DumpApplication_010
     ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = nullptr;
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(info, token);
+    auto record = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, record);
     ohosApplication_->DumpApplication();
     EXPECT_TRUE(record != nullptr);
@@ -181,7 +147,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_DumpApplication_020
     ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> record =  std::make_shared<AbilityLocalRecord>(info, token);
+    auto record =  std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     info->permissions.push_back(std::string("abc"));
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, record);
     ohosApplication_->DumpApplication();
@@ -296,332 +262,6 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_SetAbilityRecordMgr
 }
 
 /*
-* @tc.number: AppExecFwk_OHOSApplicationTest_RegisterAbilityLifecycleCallbacks_0100
-* @tc.name: RegisterAbilityLifecycleCallbacks
-* @tc.desc: Verify function RegisterAbilityLifecycleCallbacks list abilityLifecycleCallbacks_ empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_RegisterAbilityLifecycleCallbacks_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterAbilityLifecycleCallbacks_0100 start.";
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callBack = nullptr;
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    ohosApplication_->RegisterAbilityLifecycleCallbacks(callBack);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterAbilityLifecycleCallbacks_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_RegisterAbilityLifecycleCallbacks_0200
-* @tc.name: RegisterAbilityLifecycleCallbacks
-* @tc.desc: Verify function RegisterAbilityLifecycleCallbacks list abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_RegisterAbilityLifecycleCallbacks_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterAbilityLifecycleCallbacks_0200 start.";
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callBack = std::make_shared<MockAbilityLifecycleCallbacks>();
-    ohosApplication_->RegisterAbilityLifecycleCallbacks(callBack);
-    EXPECT_FALSE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterAbilityLifecycleCallbacks_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_UnregisterAbilityLifecycleCallbacks_0100
-* @tc.name: UnregisterAbilityLifecycleCallbacks
-* @tc.desc: Verify function UnregisterAbilityLifecycleCallbacks list abilityLifecycleCallbacks_ empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_UnregisterAbilityLifecycleCallbacks_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_UnregisterAbilityLifecycleCallbacks_0100 start.";
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callBack = nullptr;
-    ohosApplication_->UnregisterAbilityLifecycleCallbacks(callBack);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_UnregisterAbilityLifecycleCallbacks_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_UnregisterAbilityLifecycleCallbacks_0200
-* @tc.name: UnregisterAbilityLifecycleCallbacks
-* @tc.desc: Verify function UnregisterAbilityLifecycleCallbacks list abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_UnregisterAbilityLifecycleCallbacks_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_UnregisterAbilityLifecycleCallbacks_0200 start.";
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callBack = std::make_shared<MockAbilityLifecycleCallbacks>();
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callBack);
-    EXPECT_FALSE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    ohosApplication_->UnregisterAbilityLifecycleCallbacks(callBack);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_UnregisterAbilityLifecycleCallbacks_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityStart_0100
-* @tc.name: OnAbilityStart
-* @tc.desc: Verify function OnAbilityStart pointer ability empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityStart_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityStart_0100 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    EXPECT_TRUE(ability == nullptr);
-    ohosApplication_->OnAbilityStart(ability);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityStart_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityStart_0200
-* @tc.name: OnAbilityStart
-* @tc.desc: Verify function OnAbilityStart pointer abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityStart_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityStart_0200 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
-    EXPECT_TRUE(ability != nullptr);
-    ohosApplication_->OnAbilityStart(ability);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback1 = std::make_shared<MockAbilityLifecycleCallbacks>();
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback2 = nullptr;
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callback1);
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callback2);
-    ohosApplication_->OnAbilityStart(ability);
-    EXPECT_FALSE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityStart_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityInactive_0100
-* @tc.name: OnAbilityInactive
-* @tc.desc: Verify function OnAbilityInactive pointer ability empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityInactive_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityInactive_0100 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ohosApplication_->OnAbilityInactive(ability);
-    EXPECT_TRUE(ability == nullptr);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityInactive_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityInactive_0200
-* @tc.name: OnAbilityInactive
-* @tc.desc: Verify function OnAbilityInactive pointer abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityInactive_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityInactive_0200 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
-    EXPECT_TRUE(ability != nullptr);
-    ohosApplication_->OnAbilityInactive(ability);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback1 = std::make_shared<MockAbilityLifecycleCallbacks>();
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback2 = nullptr;
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callback1);
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callback2);
-    ohosApplication_->OnAbilityInactive(ability);
-    EXPECT_FALSE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityInactive_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityBackground_0100
-* @tc.name: OnAbilityBackground
-* @tc.desc: Verify function OnAbilityBackground pointer ability empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityBackground_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityBackground_0100 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ohosApplication_->OnAbilityBackground(ability);
-    EXPECT_TRUE(ability == nullptr);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityBackground_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityBackground_0200
-* @tc.name: OnAbilityBackground
-* @tc.desc: Verify function OnAbilityBackground pointer abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityBackground_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityBackground_0200 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
-    EXPECT_TRUE(ability != nullptr);
-    ohosApplication_->OnAbilityBackground(ability);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback = std::make_shared<MockAbilityLifecycleCallbacks>();
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callback);
-    ohosApplication_->OnAbilityBackground(ability);
-    EXPECT_TRUE(!ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityBackground_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityForeground_0100
-* @tc.name: OnAbilityForeground
-* @tc.desc: Verify function OnAbilityForeground pointer ability empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityForeground_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityForeground_0100 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ohosApplication_->OnAbilityForeground(ability);
-    EXPECT_TRUE(ability == nullptr);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityForeground_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityForeground_0200
-* @tc.name: OnAbilityForeground
-* @tc.desc: Verify function OnAbilityForeground pointer abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityForeground_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityForeground_0200 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
-    EXPECT_TRUE(ability != nullptr);
-    ohosApplication_->OnAbilityForeground(ability);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback = std::make_shared<MockAbilityLifecycleCallbacks>();
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callback);
-    ohosApplication_->OnAbilityForeground(ability);
-    EXPECT_TRUE(!ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityForeground_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityActive_0100
-* @tc.name: OnAbilityActive
-* @tc.desc: Verify function OnAbilityActive pointer ability empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityActive_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityActive_0100 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ohosApplication_->OnAbilityActive(ability);
-    EXPECT_TRUE(ability == nullptr);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityActive_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityActive_0200
-* @tc.name: OnAbilityActive
-* @tc.desc: Verify function OnAbilityActive pointer abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityActive_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityActive_0200 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
-    EXPECT_TRUE(ability != nullptr);
-    ohosApplication_->OnAbilityActive(ability);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback = std::make_shared<MockAbilityLifecycleCallbacks>();
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callback);
-    ohosApplication_->OnAbilityActive(ability);
-    EXPECT_TRUE(!ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityActive_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityStop_0100
-* @tc.name: OnAbilityStop
-* @tc.desc: Verify function OnAbilityStop pointer ability empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityStop_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityStop_0100 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ohosApplication_->OnAbilityStop(ability);
-    EXPECT_TRUE(ability == nullptr);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityStop_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnAbilityStop_0200
-* @tc.name: OnAbilityStop
-* @tc.desc: Verify function OnAbilityStop pointer abilityLifecycleCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnAbilityStop_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityStop_0200 start.";
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
-    EXPECT_TRUE(ability != nullptr);
-    ohosApplication_->OnAbilityStop(ability);
-    EXPECT_TRUE(ohosApplication_->abilityLifecycleCallbacks_.empty());
-    std::shared_ptr<MockAbilityLifecycleCallbacks> callback = std::make_shared<MockAbilityLifecycleCallbacks>();
-    ohosApplication_->abilityLifecycleCallbacks_.emplace_back(callback);
-    ohosApplication_->OnAbilityStop(ability);
-    EXPECT_TRUE(!ohosApplication_->abilityLifecycleCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnAbilityStop_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_RegisterElementsCallbacks_0100
-* @tc.name: RegisterElementsCallbacks
-* @tc.desc: Verify function RegisterElementsCallbacks list elementsCallbacks_ empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_RegisterElementsCallbacks_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterElementsCallbacks_0100 start.";
-    std::shared_ptr<MockElementsCallback> callback = nullptr;
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    ohosApplication_->RegisterElementsCallbacks(callback);
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterElementsCallbacks_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_RegisterElementsCallbacks_0200
-* @tc.name: RegisterElementsCallbacks
-* @tc.desc: Verify function RegisterElementsCallbacks list elementsCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_RegisterElementsCallbacks_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterElementsCallbacks_0200 start.";
-    std::shared_ptr<MockElementsCallback> callback = std::make_shared<MockElementsCallback>();
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    ohosApplication_->RegisterElementsCallbacks(callback);
-    EXPECT_TRUE(!ohosApplication_->elementsCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_RegisterElementsCallbacks_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_UnregisterElementsCallbacks_0100
-* @tc.name: UnregisterElementsCallbacks
-* @tc.desc: Verify function UnregisterElementsCallbacks list elementsCallbacks_ empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_UnregisterElementsCallbacks_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_UnregisterElementsCallbacks_0100 start.";
-    std::shared_ptr<MockElementsCallback> callback = nullptr;
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    ohosApplication_->UnregisterElementsCallbacks(callback);
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_UnregisterElementsCallbacks_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_UnregisterElementsCallbacks_0200
-* @tc.name: UnregisterElementsCallbacks
-* @tc.desc: Verify function UnregisterElementsCallbacks list elementsCallbacks_ not empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_UnregisterElementsCallbacks_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_UnregisterElementsCallbacks_0200 start.";
-    std::shared_ptr<MockElementsCallback> callback = std::make_shared<MockElementsCallback>();
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    ohosApplication_->elementsCallbacks_.emplace_back(callback);
-    EXPECT_FALSE(ohosApplication_->elementsCallbacks_.empty());
-    ohosApplication_->UnregisterElementsCallbacks(callback);
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_UnregisterElementsCallbacks_0200 end.";
-}
-
-/*
 * @tc.number: AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0100
 * @tc.name: OnConfigurationUpdated
 * @tc.desc: Verify function OnConfigurationUpdated pointer abilityRecordMgr_ empty
@@ -651,7 +291,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnConfigurationUpda
     ohosApplication_->configuration_ = std::make_shared<Configuration>();
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info =  nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityRecord =  std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord =  std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, abilityRecord);
     sptr<AbilityThread> abilityThread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
     abilityRecord->SetAbilityThread(abilityThread);
@@ -679,45 +319,6 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnConfigurationUpda
     ohosApplication_->OnConfigurationUpdated(config);
     EXPECT_TRUE(!ohosApplication_->abilityStages_.empty());
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0300 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0400
-* @tc.name: OnConfigurationUpdated
-* @tc.desc: Verify function OnConfigurationUpdated variable configurationUpdated_ true
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0400, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0400 start.";
-    Configuration config;
-    ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
-    ohosApplication_->configuration_ = std::make_shared<Configuration>();
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    std::shared_ptr<MockElementsCallback> callback = std::make_shared<MockElementsCallback>();
-    ohosApplication_->elementsCallbacks_.emplace_back(callback);
-    EXPECT_FALSE(callback->configurationUpdated_);
-    ohosApplication_->OnConfigurationUpdated(config);
-    EXPECT_TRUE(callback != nullptr);
-    EXPECT_FALSE(ohosApplication_->elementsCallbacks_.empty());
-    EXPECT_TRUE(callback->configurationUpdated_);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0400 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0500
-* @tc.name: OnConfigurationUpdated
-* @tc.desc: Verify function OnConfigurationUpdated list elementsCallbacks_ empty
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0500, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0500 start.";
-    Configuration config;
-    ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
-    ohosApplication_->configuration_ = std::make_shared<Configuration>();
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    ohosApplication_->OnConfigurationUpdated(config);
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0500 end.";
 }
 
 /*
@@ -770,7 +371,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0100,
     ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
     std::shared_ptr<AbilityInfo> info = nullptr;
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(abilityRecord != nullptr);
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, abilityRecord);
     sptr<AbilityThread> abilityThread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
@@ -800,44 +401,6 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0200,
     ohosApplication_->OnMemoryLevel(level);
     EXPECT_TRUE(!ohosApplication_->abilityStages_.empty());
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0300
-* @tc.name: OnMemoryLevel
-* @tc.desc: Verify function OnMemoryLevel variable onMemoryLevel_ true
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0300, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0300 start.";
-    constexpr int32_t level = 1;
-    ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    std::shared_ptr<MockElementsCallback> callback1 = std::make_shared<MockElementsCallback>();
-    std::shared_ptr<MockElementsCallback> callback2 = nullptr;
-    ohosApplication_->elementsCallbacks_.emplace_back(callback1);
-    ohosApplication_->elementsCallbacks_.emplace_back(callback2);
-    EXPECT_FALSE(callback1->onMemoryLevel_);
-    ohosApplication_->OnMemoryLevel(level);
-    EXPECT_FALSE(ohosApplication_->elementsCallbacks_.empty());
-    EXPECT_TRUE(callback1->onMemoryLevel_);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0300 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0400
-* @tc.name: OnMemoryLevel
-* @tc.desc: Verify function OnMemoryLevel variable onMemoryLevel_ true
-*/
-HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0400, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0400 start.";
-    constexpr int32_t level = 1;
-    ohosApplication_->abilityRecordMgr_ = std::make_shared<AbilityRecordMgr>();
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    ohosApplication_->OnMemoryLevel(level);
-    EXPECT_TRUE(ohosApplication_->elementsCallbacks_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnMemoryLevel_0400 end.";
 }
 
 /*
@@ -887,7 +450,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_030
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_0300 start.";
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
     bool isAsyncCallback = false;
@@ -906,7 +469,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_040
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     info->applicationInfo.multiProjects = true;
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     auto want = std::make_shared<AAFwk::Want>();
     abilityRecord->SetWant(want);
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
@@ -927,7 +490,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_050
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = nullptr;
     std::string moduleName = "entry";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     std::shared_ptr<AbilityRuntime::AbilityStage> abilityStages = std::make_shared<AbilityRuntime::AbilityStage>();
     ohosApplication_->abilityStages_.emplace(moduleName, abilityStages);
@@ -950,7 +513,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_060
     sptr<Notification::MockIRemoteObject> token;
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     info->moduleName = "entry";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
     bool isAsyncCallback = false;
     ohosApplication_->AddAbilityStage(abilityRecord, callback, isAsyncCallback);
@@ -969,7 +532,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_070
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_0700 start.";
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, nullptr, 0);
     abilityRecord->token_ = new (std::nothrow) Notification::MockIRemoteObject();
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
     bool isAsyncCallback = false;

@@ -15,7 +15,6 @@
 
 #include "ability_record_mgr.h"
 #include "hilog_tag_wrapper.h"
-
 namespace OHOS {
 namespace AppExecFwk {
 /**
@@ -43,32 +42,6 @@ void AbilityRecordMgr::SetToken(const sptr<IRemoteObject> &token)
 }
 
 /**
- * @brief Set the eventRunner of abilitythread to the AbilityRecordMgr.
- *
- * @param eventRunner The runner of the abilitythread.
- *
- */
-void AbilityRecordMgr::SetEventRunner(const std::shared_ptr<EventRunner> &eventRunner)
-{
-    if (eventRunner == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "eventRunner is nullptr");
-        return;
-    }
-    sptr<IRemoteObject> token = GetToken();
-    if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
-        return;
-    }
-
-    std::shared_ptr<AbilityLocalRecord> abilityInstance = GetAbilityItem(token);
-    if (abilityInstance != nullptr) {
-        abilityInstance->SetEventRunner(eventRunner);
-    } else {
-        TAG_LOGW(AAFwkTag::APPKIT, "ability record not exist");
-    }
-}
-
-/**
  * @brief Save the token and abilityRecord to the AbilityRecordMgr.
  *
  * @param token The token which the abilityRecord belongs to.
@@ -87,7 +60,6 @@ void AbilityRecordMgr::AddAbilityRecord(
         TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord is nullptr");
         return;
     }
-
     abilityRecords_[token] = abilityRecord;
 }
 
@@ -147,13 +119,11 @@ std::shared_ptr<AbilityLocalRecord> AbilityRecordMgr::GetAbilityItem(const sptr<
 std::vector<sptr<IRemoteObject>> AbilityRecordMgr::GetAllTokens()
 {
     std::vector<sptr<IRemoteObject>> tokens;
-    for (std::map<sptr<IRemoteObject>, std::shared_ptr<AbilityLocalRecord>>::iterator it = abilityRecords_.begin();
-         it != abilityRecords_.end();
-         ++it) {
+    for (auto it = abilityRecords_.begin(); it != abilityRecords_.end(); ++it) {
         sptr<IRemoteObject> token = it->first;
         tokens.emplace_back(token);
     }
     return tokens;
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
+} // namespace AppExecFwk
+} // namespace OHOS

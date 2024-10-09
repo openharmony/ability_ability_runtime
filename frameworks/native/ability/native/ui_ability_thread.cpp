@@ -140,8 +140,6 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     ability->SetAbilityRecordId(abilityRecord->GetAbilityRecordId());
     currentAbility_.reset(ability);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    abilityRecord->SetEventRunner(mainRunner);
     abilityRecord->SetAbilityThread(this);
     std::shared_ptr<AppExecFwk::AbilityContext> abilityObject = currentAbility_;
     std::shared_ptr<AppExecFwk::ContextDeal> contextDeal =
@@ -170,8 +168,7 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     // ability attach : ipc
     TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Attach");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityThread::Attach start; the load lifecycle.";
+    std::string entry = "AbilityThread::Attach start; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
@@ -213,8 +210,6 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     ability->SetAbilityRecordId(abilityRecord->GetAbilityRecordId());
     currentAbility_.reset(ability);
     token_ = abilityRecord->GetToken();
-    abilityRecord->SetEventHandler(abilityHandler_);
-    abilityRecord->SetEventRunner(runner_);
     abilityRecord->SetAbilityThread(this);
     std::shared_ptr<AppExecFwk::AbilityContext> abilityObject = currentAbility_;
     std::shared_ptr<AppExecFwk::ContextDeal> contextDeal =
@@ -253,14 +248,12 @@ void UIAbilityThread::AddLifecycleEvent(uint32_t state, std::string &methodName)
 {
     if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-        std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-            "; AbilityThread::" + methodName + "; the foreground lifecycle.";
+        std::string entry = "AbilityThread::" + methodName + "; the foreground lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
     if (state == AAFwk::ABILITY_STATE_BACKGROUND_NEW) {
         FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-        std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-            "; AbilityThread::" + methodName + "; the background lifecycle.";
+        std::string entry = "AbilityThread::" + methodName + "; the background lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
 }
@@ -376,7 +369,6 @@ void UIAbilityThread::ScheduleShareData(const int32_t &uniqueId)
 
 bool UIAbilityThread::SchedulePrepareTerminateAbility()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (abilityImpl_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityImpl_");
         return true;
@@ -387,11 +379,12 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
     }
     if (getpid() == gettid()) {
         bool ret = abilityImpl_->PrepareTerminateAbility();
-        TAG_LOGD(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
+        TAG_LOGI(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
         return ret;
     }
     wptr<UIAbilityThread> weak = this;
     auto task = [weak]() {
+        TAG_LOGI(AAFwkTag::UIABILITY, "prepare terminate task");
         auto abilityThread = weak.promote();
         if (abilityThread == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
@@ -417,7 +410,7 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
     if (!cv_.wait_for(lock, std::chrono::milliseconds(PREPARE_TO_TERMINATE_TIMEOUT_MILLISECONDS), condition)) {
         TAG_LOGW(AAFwkTag::UIABILITY, "wait timeout");
     }
-    TAG_LOGD(AAFwkTag::UIABILITY, "ret: %{public}d", isPrepareTerminate_);
+    TAG_LOGI(AAFwkTag::UIABILITY, "ret: %{public}d", isPrepareTerminate_);
     return isPrepareTerminate_;
 }
 
@@ -658,7 +651,7 @@ void UIAbilityThread::HandlePrepareTermianteAbility()
         return;
     }
     isPrepareTerminate_ = abilityImpl_->PrepareTerminateAbility();
-    TAG_LOGD(AAFwkTag::UIABILITY, "end ret: %{public}d", isPrepareTerminate_);
+    TAG_LOGI(AAFwkTag::UIABILITY, "end ret: %{public}d", isPrepareTerminate_);
     isPrepareTerminateAbilityDone_.store(true);
     cv_.notify_all();
 }

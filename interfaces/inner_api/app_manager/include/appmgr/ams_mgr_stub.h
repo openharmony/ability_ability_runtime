@@ -69,6 +69,7 @@ private:
     int32_t HandleNotifyAppMgrRecordExitReason(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateApplicationInfoInstalled(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetCurrentUserId(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetEnableStartProcessFlagByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterAppDebugListener(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterAppDebugListener(MessageParcel &data, MessageParcel &reply);
@@ -96,8 +97,8 @@ private:
     int32_t OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int32_t HandleBlockProcessCacheByPids(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleCleanAbilityByUserRequest(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCleanAbilityByUserRequest(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsProcessAttached(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsAppKilling(MessageParcel &data, MessageParcel &reply);

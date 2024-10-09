@@ -29,7 +29,6 @@
 #include "mock_ui_ability.h"
 #include "mock_ui_ability_impl.h"
 #include "ohos_application.h"
-#include "mock_ability_lifecycle_callbacks.h"
 #include "process_options.h"
 #include "session_info.h"
 
@@ -81,7 +80,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleUpdateConfiguration_001, Test
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
@@ -129,7 +128,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleUpdateConfiguration_002, Test
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
@@ -185,7 +184,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ScheduleUpdateConfiguration_003, Test
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
@@ -245,7 +244,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Init_001, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability = std::make_shared<UIAbility>();
@@ -275,7 +274,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_001, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability;
@@ -314,7 +313,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_001, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability;
@@ -354,7 +353,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_New_Foreground_001, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<Ability> uiability = nullptr;
@@ -398,7 +397,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_New_Foreground_002, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<Ability> uiability = nullptr;
@@ -440,7 +439,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_New_Background_001, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability = nullptr;
@@ -483,7 +482,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_New_Background_002, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability = nullptr;
@@ -528,7 +527,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_New_Foreground_Background_001, TestSi
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability = nullptr;
@@ -573,7 +572,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_New_Foreground_Background_002, TestSi
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<Ability> uiability = nullptr;
@@ -619,7 +618,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_New_Foreground_Background_003, TestSi
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<Ability> uiability = nullptr;
@@ -664,7 +663,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_New_Foreground_Background_004, TestSi
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability = nullptr;
@@ -708,7 +707,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_DispatchRestoreAbilityState_001, Test
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability = std::make_shared<UIAbility>();
@@ -738,7 +737,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_DispatchRestoreAbilityState_002, Test
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability = nullptr;
@@ -768,7 +767,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_SendResult_001, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability;
@@ -807,7 +806,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_NewWant_001, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability;
@@ -844,7 +843,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_CheckAndRestore_001, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability;
@@ -873,7 +872,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Init_0200, TestSize.Level1)
     std::shared_ptr<OHOSApplication> application;
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
     std::shared_ptr<UIAbility> uiability = pMocKUIAbility;
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
@@ -914,7 +913,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Init_0400, TestSize.Level1)
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<UIAbility> uiability;
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
@@ -934,7 +933,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Init_0500, TestSize.Level1)
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
     std::shared_ptr<UIAbility> uiability = pMocKUIAbility;
     std::shared_ptr<AbilityHandler> handler;
@@ -954,7 +953,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Init_0600, TestSize.Level1)
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     sptr<IRemoteObject> token = nullptr;
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
     std::shared_ptr<UIAbility> uiability = pMocKUIAbility;
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
@@ -975,7 +974,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Init_0700, TestSize.Level1)
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockUIAbility> pMocKUIAbility = std::make_shared<MockUIAbility>();
     std::shared_ptr<UIAbility> uiability = pMocKUIAbility;
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
@@ -1003,7 +1002,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_0300, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability;
@@ -1058,7 +1057,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_0500, TestSize.Level1)
 /**
  * @tc.number: AbilityRuntime_Start_0600
  * @tc.name: Start
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Start failed.
+ * @tc.desc: Verify Start failed.
  */
 HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_0600, TestSize.Level1)
 {
@@ -1070,7 +1069,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_0600, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     Want want;
     abilityImpl_->Start(want);
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
@@ -1112,7 +1110,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0300, TestSize.Level1)
 /**
  * @tc.number: AbilityRuntime_Stop_0400
  * @tc.name: Stop
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0400, TestSize.Level1)
 {
@@ -1125,7 +1123,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0400, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->Stop();
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_Stop_0400 end";
@@ -1170,7 +1167,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0600, TestSize.Level1)
 /**
  * @tc.number: AbilityRuntime_Stop_0700
  * @tc.name: Stop
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0700, TestSize.Level1)
 {
@@ -1183,7 +1180,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0700, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     bool isAsyncCallback = true;
     abilityImpl_->Stop(isAsyncCallback);
     EXPECT_FALSE(isAsyncCallback);
@@ -1205,7 +1201,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0800, TestSize.Level1)
     sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     EXPECT_NE(token, nullptr);
     if (token != nullptr) {
-        std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+        auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
         std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
         std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
         std::shared_ptr<UIAbility> uiability;
@@ -1262,7 +1258,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_StopCallback_0300, TestSize.Level1)
 /**
  * @tc.number: AbilityRuntime_StopCallback_0400
  * @tc.name: StopCallback
- * @tc.desc: abilityLifecycleCallbacks_ is nullptr, Verify Stop failed.
+ * @tc.desc: Verify Stop failed.
  */
 HWTEST_F(UIAbilityImplTest, AbilityRuntime_StopCallback_0400, TestSize.Level1)
 {
@@ -1275,7 +1271,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_StopCallback_0400, TestSize.Level1)
     contextDeal->SetAbilityInfo(abilityInfo);
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->StopCallback();
     EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_StopCallback_0400 end";
@@ -2256,7 +2251,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ExecuteInsightIntentRepeateForeground
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0100 start";
     ASSERT_NE(abilityImpl_, nullptr);
     abilityImpl_->ability_ = std::make_shared<UIAbility>();
-    abilityImpl_->abilityLifecycleCallbacks_ = nullptr;
     abilityImpl_->PostForegroundInsightIntent();
     EXPECT_EQ(abilityImpl_->lifecycleState_, 0);
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0100 end";
@@ -2272,7 +2266,6 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ExecuteInsightIntentRepeateForeground
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0200 start";
     ASSERT_NE(abilityImpl_, nullptr);
     abilityImpl_->ability_ = nullptr;
-    abilityImpl_->abilityLifecycleCallbacks_ = std::make_shared<MockAbilityLifecycleCallbacks>();
     abilityImpl_->PostForegroundInsightIntent();
     EXPECT_EQ(abilityImpl_->lifecycleState_, 0);
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0200 end";

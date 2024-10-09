@@ -425,7 +425,6 @@ private:
      *
      */
     void HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCacheProcess = false);
-    void AfterCleanAbilityGC();
 
     /**
      *
@@ -662,6 +661,7 @@ private:
     std::string pathSeparator_ = "/";
     std::string abilityLibraryType_ = ".so";
     static std::weak_ptr<OHOSApplication> applicationForDump_;
+    bool isDeveloperMode_ = false;
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**
@@ -675,7 +675,7 @@ private:
     void LoadAceAbilityLibrary();
 
     void CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
-    void LoadNativeLiabrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
+    void LoadNativeLibrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
 
     void LoadAppDetailAbilityLibrary(std::string &nativeLibraryPath);
 

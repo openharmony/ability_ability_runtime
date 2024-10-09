@@ -89,7 +89,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_ConnectAbility_0100, Function
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -115,7 +115,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_DisconnectAbility_0100, Funct
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -142,7 +142,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_StartAbility_0100, Function |
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     Want want;
@@ -163,7 +163,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_TerminateAbility_0100, Functi
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     Want want;
@@ -190,7 +190,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_TerminateAbility_0200, Functi
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -214,7 +214,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_StopService_0100, Function | 
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
 
@@ -243,7 +243,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_StopService_0200, Function | 
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
@@ -331,7 +331,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_ConnectAbility_0300, Function
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::DATA;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
     deal->SetAbilityInfo(abilityInfo);
@@ -353,7 +353,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_StopService_0300, Function | 
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::DATA;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
@@ -555,7 +555,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_GetAbilityInfoType_0200, Func
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
 
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
@@ -602,7 +602,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_GetResourceManager_0200, Func
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
     deal->SetAbilityInfo(abilityInfo);
@@ -651,7 +651,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_VerifyPermission_0300, Functi
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AppExecFwk::AbilityType::SERVICE;
     abilityInfo->name = "DemoAbility";
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
     deal->SetAbilityInfo(abilityInfo);
@@ -896,7 +896,7 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_Context_SetColorMode_0100, Function |
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new AbilityRuntime::FAAbilityThread());
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken, nullptr, 0);
     AbilityThread::AbilityThreadMain(application, abilityRecord, nullptr);
     std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
     deal->SetAbilityInfo(abilityInfo);

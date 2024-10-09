@@ -71,7 +71,8 @@ HWTEST_F(AbilityExtensionConfigTest, GetExtensionConfigPath_001, TestSize.Level1
     extensionConfig_->LoadExtensionConfiguration();
     std::string  extensionTypeName = EXTENSION_TYPE_NAME;
     extensionConfig_->GetExtensionAutoDisconnectTime(extensionTypeName);
-    extensionConfig_->IsExtensionStartThirdPartyAppEnable(extensionTypeName);
+    auto result = extensionConfig_->IsExtensionStartThirdPartyAppEnable(extensionTypeName);
+    EXPECT_EQ(result, true);
 }
 
 /*
@@ -89,6 +90,7 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionServiceBlockedList_001, TestSi
     extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, "aa");
     jsOnFile[EXTENSION_SERVICE_BLOCKED_LIST_NAME] = {"aa", "bb"};
     extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, "aa");
+    EXPECT_TRUE(extensionConfig_ != nullptr);
 }
 
 /*
@@ -105,6 +107,7 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionThirdPartyAppBlockedList_001, 
     extensionConfig_->LoadExtensionThirdPartyAppBlockedList(jsOnFile, extensionTypeName);
     jsOnFile[EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME] = true;
     extensionConfig_->LoadExtensionThirdPartyAppBlockedList(jsOnFile, extensionTypeName);
+    EXPECT_TRUE(extensionConfig_ != nullptr);
 }
 
 /*
@@ -119,6 +122,7 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionAutoDisconnectTime_001, TestSi
     extensionConfig_->LoadExtensionAutoDisconnectTime(jsOnFile, extensionTypeName);
     jsOnFile[EXTENSION_AUTO_DISCONNECT_TIME] = 100;
     extensionConfig_->LoadExtensionAutoDisconnectTime(jsOnFile, extensionTypeName);
+    EXPECT_TRUE(extensionConfig_ != nullptr);
 }
 
 /*
@@ -136,6 +140,7 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionConfig_001, TestSize.Level1)
     jsOnItem2[EXTENSION_TYPE_NAME] = "bb";
     jsOnFile[EXTENSION_CONFIG_NAME] = {jsOnItem, jsOnItem2, "cc"};
     extensionConfig_->LoadExtensionConfig(jsOnFile);
+    EXPECT_TRUE(extensionConfig_ != nullptr);
 }
 
 /*
@@ -150,7 +155,8 @@ HWTEST_F(AbilityExtensionConfigTest, ReadFileInfoJson_001, TestSize.Level1)
     extensionConfig_->CheckServiceExtensionUriValid("http://aaa/bb/cc/");
     extensionConfig_->CheckServiceExtensionUriValid("http://aaa//cc/");
     nlohmann::json jsOne;
-    extensionConfig_->ReadFileInfoJson("d://dddd", jsOne);
+    auto result = extensionConfig_->ReadFileInfoJson("d://dddd", jsOne);
+    EXPECT_EQ(result, false);
 }
 }
 }

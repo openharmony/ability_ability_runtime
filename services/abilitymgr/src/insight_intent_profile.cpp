@@ -81,14 +81,12 @@ struct InsightIntentProfileInfoVec {
 void from_json(const nlohmann::json &jsonObject, UIAbilityProfileInfo &info)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ABILITY,
         info.abilityName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
     AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_EXECUTE_MODE,
@@ -102,85 +100,69 @@ void from_json(const nlohmann::json &jsonObject, UIAbilityProfileInfo &info)
 void from_json(const nlohmann::json &jsonObject, UIExtensionProfileInfo &info)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ABILITY,
         info.abilityName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
 }
 
 void from_json(const nlohmann::json &jsonObject, ServiceExtensionProfileInfo &info)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ABILITY,
         info.abilityName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
 }
 
 void from_json(const nlohmann::json &jsonObject, FormProfileInfo &info)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_ABILITY,
         info.abilityName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_FORM_NAME,
         info.formName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
 }
 
 void from_json(const nlohmann::json &jsonObject, InsightIntentProfileInfo &insightIntentInfo)
 {
     const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_NAME,
         insightIntentInfo.intentName,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_DOMAIN,
         insightIntentInfo.intentDomain,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_VERSION,
         insightIntentInfo.intentVersion,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    AppExecFwk::GetValueIfFindKey<std::string>(jsonObject,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_SRC_ENTRY,
         insightIntentInfo.srcEntry,
-        JsonType::STRING,
         true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+        g_parseResult);
     AppExecFwk::GetValueIfFindKey<UIAbilityProfileInfo>(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_UI_ABILITY,

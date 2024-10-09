@@ -86,7 +86,7 @@ private:
         OHOS::AAFwk::Want want;
         if (!OHOS::AppExecFwk::UnwrapWant(env, info.argv[0], want)) {
             TAG_LOGE(AAFwkTag::DIALOG, "UnwrapWant failed");
-            ThrowInvalidParamError(env, "Parse param want failed, must be a Want");
+            ThrowInvalidParamError(env, "Parse param want failed, must be a Want.");
             return CreateJsUndefined(env);
         }
 
@@ -124,14 +124,14 @@ private:
         OHOS::AAFwk::Want want;
         if (!OHOS::AppExecFwk::UnwrapWant(env, info.argv[0], want)) {
             TAG_LOGE(AAFwkTag::DIALOG, "The input want is invalid");
-            ThrowInvalidParamError(env, "Parse param want failed, must be a Want");
+            ThrowInvalidParamError(env, "Parse param want failed, must be a Want.");
             return CreateJsUndefined(env);
         }
 
         sptr<IRemoteObject> remoteObj = want.GetRemoteObject(RequestConstants::REQUEST_CALLBACK_KEY);
         if (!remoteObj) {
             TAG_LOGE(AAFwkTag::DIALOG, "Wrap Param requestCallback failed, must be a RequestCallback");
-            ThrowInvalidParamError(env, "Wrap Param requestCallback failed, must be a RequestCallback");
+            ThrowInvalidParamError(env, "Wrap Param requestCallback failed, must be a RequestCallback.");
             return CreateJsUndefined(env);
         }
 

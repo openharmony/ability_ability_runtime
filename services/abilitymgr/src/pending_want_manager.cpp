@@ -21,6 +21,7 @@
 #include "hitrace_meter.h"
 #include "permission_constants.h"
 #include "session_manager_lite.h"
+#include "utils/app_mgr_util.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -58,9 +59,15 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
 
     WantSenderInfo info = wantSenderInfo;
 
-    if (!isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
-        info.allWants.size() > 0) {
-        info.allWants.back().want.RemoveParam("ohos.extra.param.key.appCloneIndex");
+    if (wantSenderInfo.type != static_cast<int32_t>(OperationType::SEND_COMMON_EVENT) &&
+        !isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        for (auto it = info.allWants.begin(); it != info.allWants.end(); ++it) {
+            if (info.bundleName != it->want.GetBundle()) {
+                info.allWants.erase(it);
+            } else {
+                it->want.RemoveParam("ohos.extra.param.key.appCloneIndex");
+            }
+        }
     }
         
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
@@ -737,6 +744,23 @@ void PendingWantManager::DumpByRecordId(std::vector<std::string> &info, const st
             }
         }
     }
+}
+
+int32_t PendingWantManager::GetAllRunningInstanceKeysByBundleName(
+    const std::string &bundleName, std::vector<std::string> &appKeyVec)
+{
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "bundle name is empty");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto appMgr = AppMgrUtil::GetAppMgr();
+    if (appMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "app mgr is null");
+        return OBJECT_NULL;
+    }
+
+    return IN_PROCESS_CALL(appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

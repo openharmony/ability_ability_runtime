@@ -24,6 +24,9 @@ bool LoadParam::Marshalling(Parcel &parcel) const
     if (!parcel.WriteBool(isShellCall)) {
         return false;
     }
+    if (!parcel.WriteString(instanceKey)) {
+        return false;
+    }
     if (token == nullptr) {
         if (!parcel.WriteBool(false)) {
             return false;
@@ -55,6 +58,7 @@ bool LoadParam::ReadFromParcel(Parcel &parcel)
 {
     abilityRecordId = parcel.ReadInt32();
     isShellCall = parcel.ReadBool();
+    instanceKey = parcel.ReadString();
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
         if (token == nullptr) {

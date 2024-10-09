@@ -21,6 +21,8 @@
 
 namespace OHOS {
 namespace AAFwk {
+std::string APP_MULTI_INSTANCE{ "ohos.extra.param.key.appInstance" };
+
 PendingWantRecord::PendingWantRecord()
 {}
 
@@ -88,7 +90,7 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
     int32_t res = ExecuteOperation(pendingWantManager, senderInfo, want);
     if (sendFinish && res != START_CANCELED) {
         WantParams wantParams = {};
-        senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "", wantParams, false, false, 0);
+        senderInfo.finishedReceiver->PerformReceive(want, res, "", wantParams, false, false, 0);
     }
 
     return res;
@@ -149,7 +151,7 @@ void PendingWantRecord::BuildSendWant(SenderInfo &senderInfo, Want &want)
     if (!wantParams.HasParam("ohos.extra.param.key.appCloneIndex")) {
         wantParams.SetParam("ohos.extra.param.key.appCloneIndex", Integer::Box(key_->GetAppIndex()));
     }
-    
+    CheckAppInstanceKey(want.GetBundle(), wantParams);
     want.SetParams(wantParams);
 }
 
@@ -180,6 +182,52 @@ void PendingWantRecord::SetCallerUid(const int32_t callerUid)
 std::list<sptr<IWantReceiver>> PendingWantRecord::GetCancelCallbacks()
 {
     return mCancelCallbacks_;
+}
+
+void PendingWantRecord::CheckAppInstanceKey(const std::string& bundleName, WantParams &wantParams)
+{
+    if (key_ == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "pending want key is null");
+        return;
+    }
+
+    auto currType = key_->GetType();
+    if (!(static_cast<int32_t>(OperationType::START_ABILITY) == currType ||
+        static_cast<int32_t>(OperationType::START_ABILITIES) == currType)) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "want agent type mismatch");
+        return;
+    }
+
+    auto appKey = wantParams.GetStringParam(APP_MULTI_INSTANCE);
+    if (appKey.empty()) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "want params non-existent app instance value");
+        return;
+    }
+
+    auto pendingWantManager = pendingWantManager_.lock();
+    if (pendingWantManager == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "pending want manager is null");
+        return;
+    }
+
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "bundle name is empty");
+        return;
+    }
+
+    std::vector<std::string> appKeyVec;
+    auto result = pendingWantManager->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "get app key error");
+        return;
+    }
+
+    auto find = std::find(appKeyVec.begin(), appKeyVec.end(), appKey);
+    if (find == appKeyVec.end()) {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "%{public}s non-existent instance key %{public}s",
+            bundleName.c_str(), appKey.c_str());
+        wantParams.Remove(APP_MULTI_INSTANCE);
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS

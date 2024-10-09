@@ -426,21 +426,21 @@ void AppRecovery::DeleteInValidMissionFiles()
         return;
     }
     if (missionIds.empty()) {
-        TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery no mission file, no need delete it.");
+        TAG_LOGD(AAFwkTag::RECOVERY, "missionIds empty");
         return;
     }
     std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery DeleteInValidMissionFiles. abilityMgr client is not exist.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "bilityMgr client is not exist");
         return;
     }
     abilityMgr->IsValidMissionIds(missionIds, results);
     if (results.empty()) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery DeleteInValidMissionFiles. results is empty.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "results is empty");
         return;
     }
     for (auto& item : results) {
-        TAG_LOGI(AAFwkTag::RECOVERY, "AppRecovery missionResult: missionId: %{public}d, isValid: %{public}d",
+        TAG_LOGI(AAFwkTag::RECOVERY, "missionId: %{public}d, isValid: %{public}d",
             item.missionId, item.isValid);
         if (!item.isValid) {
             DeleteInValidMissionFileById(fileDir, item.missionId);

@@ -34,7 +34,6 @@ public:
     IdleNotifyStatusCallback GetIdleNotifyFunc();
 
 private:
-    int64_t GetSysTimeNs();
     void InitVSyncReceiver();
     void EventTask();
     void PostTask();

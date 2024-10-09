@@ -57,6 +57,7 @@ ohos_unittest("cj_ui_ability_test") {
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",

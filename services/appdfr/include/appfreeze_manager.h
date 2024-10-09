@@ -75,10 +75,10 @@ public:
     static void DestroyInstance();
     int AppfreezeHandle(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int AppfreezeHandleWithStack(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
-    int LifecycleTimeoutHandle(const ParamInfo& info, std::unique_ptr<FreezeUtil::LifecycleFlow> flow = nullptr);
+    int LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::LifecycleFlow flow = FreezeUtil::LifecycleFlow());
     std::string WriteToFile(const std::string& fileName, std::string& content);
     bool IsHandleAppfreeze(const std::string& bundleName);
-    bool IsProcessDebug(int32_t pid, std::string processName);
+    bool IsProcessDebug(int32_t pid, std::string bundleName);
     bool IsNeedIgnoreFreezeEvent(int32_t pid);
     void DeleteStack(int pid);
     bool CancelAppFreezeDetect(int32_t pid, const std::string& bundleName);

@@ -793,8 +793,8 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_OnAppStateChanged_001,
     dataAbilityManager->dataAbilityRecordsLoaded_["a"] = nullptr;
     dataAbilityManager->dataAbilityRecordsLoading_["a"] = nullptr;
     abilityRecord1->abilityInfo_.process = processName;
-    abilityRecord1->applicationInfo_.bundleName = "";
-    abilityRecord1->applicationInfo_.name = appName;
+    abilityRecord1->abilityInfo_.applicationInfo.bundleName = "";
+    abilityRecord1->abilityInfo_.applicationInfo.name = appName;
     abilityRecord1->abilityInfo_.applicationInfo.uid = uid;
     dataAbilityRecord1->ability_ = abilityRecord1;
     dataAbilityManager->dataAbilityRecordsLoaded_["b"] = dataAbilityRecord1;
@@ -802,8 +802,8 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_OnAppStateChanged_001,
     auto dataAbilityRecord2 = std::make_shared<DataAbilityRecord>(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord2 = AbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord2->abilityInfo_.process = "";
-    abilityRecord2->applicationInfo_.bundleName = processName;
-    abilityRecord2->applicationInfo_.name = "";
+    abilityRecord2->abilityInfo_.applicationInfo.bundleName = processName;
+    abilityRecord2->abilityInfo_.applicationInfo.name = "";
     abilityRecord2->abilityInfo_.applicationInfo.uid = 0;
     dataAbilityRecord2->ability_ = abilityRecord2;
     dataAbilityManager->dataAbilityRecordsLoaded_["c"] = dataAbilityRecord2;
@@ -811,7 +811,7 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_OnAppStateChanged_001,
     auto dataAbilityRecord3 = std::make_shared<DataAbilityRecord>(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord3 = AbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord3->abilityInfo_.process = "";
-    abilityRecord3->applicationInfo_.bundleName = "";
+    abilityRecord3->abilityInfo_.applicationInfo.bundleName = "";
     dataAbilityRecord3->ability_ = abilityRecord3;
     dataAbilityManager->dataAbilityRecordsLoaded_["d"] = dataAbilityRecord3;
     dataAbilityManager->dataAbilityRecordsLoading_["d"] = dataAbilityRecord3;
@@ -1504,7 +1504,7 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_GetAbilityRunningInfos
     abilityRequest.abilityInfo.name = "name";
     auto dataAbilityRecord = std::make_shared<DataAbilityRecord>(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->applicationInfo_.accessTokenId = -1;
+    abilityRecord->abilityInfo_.applicationInfo.accessTokenId = -1;
     dataAbilityRecord->ability_ = abilityRecord;
     dataAbilityManager->dataAbilityRecordsLoaded_["a"] = dataAbilityRecord;
     dataAbilityManager->GetAbilityRunningInfos(info, isPerm);
@@ -1530,7 +1530,7 @@ HWTEST_F(DataAbilityManagerTest, AaFwk_DataAbilityManager_GetAbilityRunningInfos
     abilityRequest.abilityInfo.name = "name";
     auto dataAbilityRecord = std::make_shared<DataAbilityRecord>(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->applicationInfo_.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    abilityRecord->abilityInfo_.applicationInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
     dataAbilityRecord->ability_ = abilityRecord;
     dataAbilityManager->dataAbilityRecordsLoaded_["a"] = dataAbilityRecord;
     dataAbilityManager->GetAbilityRunningInfos(info, isPerm);

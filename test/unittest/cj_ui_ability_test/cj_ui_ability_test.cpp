@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License;
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "cj_ui_ability.h"
 #include "ui_ability.h"
+#include <gtest/gtest.h>
 
 #include "insight_intent_executor_info.h"
 #include "ability_context_impl.h"
@@ -139,12 +139,13 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_Init_0100, Function | MediumTest | Level1)
     sptr<IRemoteObject> token = nullptr;
     cjAbility_->Init(nullptr, application, handler, token);
 
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
 
     abilityInfo->isModuleJson = true;
-    abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
+    EXPECT_NE(abilityLocalRecord, nullptr);
 
     GTEST_LOG_(INFO) << "CJRuntime_Init_0100 end";
 }
@@ -185,8 +186,9 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_OnNewWant_0100, Function | MediumTest | Leve
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
+    EXPECT_NE(abilityLocalRecord, nullptr);
     Want want;
     cjAbility_->OnNewWant(want);
     GTEST_LOG_(INFO) << "CJRuntime_OnNewWant_0100 end";
@@ -199,11 +201,13 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_OnStart_0100, Function | MediumTest | Level1
     AbilityType type = AbilityType::PAGE;
     abilityInfo->type = type;
     abilityInfo->isStageBasedModel = true;
+    GTEST_LOG_(INFO) << "CJRuntime_OnStart_0100 mid";
     std::shared_ptr<OHOSApplication> application = nullptr;
     std::shared_ptr<AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
+    EXPECT_NE(abilityLocalRecord, nullptr);
     Want want;
     cjAbility_->OnStart(want);
     GTEST_LOG_(INFO) << "CJRuntime_OnStart_0100 end";
@@ -237,10 +241,12 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_OnStop_0100, Function | MediumTest | Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     AbilityType type = AbilityType::PAGE;
     abilityInfo->type = type;
-    std::shared_ptr<OHOSApplication> application = nullptr;
+
+    GTEST_LOG_(INFO) << "CJRuntime_OnStop_0100 mid";
     std::shared_ptr<AbilityHandler> handler = nullptr;
+    std::shared_ptr<OHOSApplication> application = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
     cjAbility_->OnStop();
     AbilityLifecycleExecutor::LifecycleState state = cjAbility_->GetState();
@@ -262,11 +268,12 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_OnBackground_0300, Function | MediumTest | L
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     AbilityType type = AbilityType::PAGE;
     abilityInfo->type = type;
+    GTEST_LOG_(INFO) << "CJRuntime_OnBackground_0300 mid";
     abilityInfo->isStageBasedModel = true;
     std::shared_ptr<OHOSApplication> application = nullptr;
     std::shared_ptr<AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
     cjAbility_->OnBackground();
     AbilityLifecycleExecutor::LifecycleState state = cjAbility_->GetState();
@@ -331,10 +338,11 @@ HWTEST_F(CjUIAbilityTest, CJUIAbility_OnStop_AsyncCallback_0100, TestSize.Level1
 {
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AbilityType::PAGE;
+    GTEST_LOG_(INFO) << "CJUIAbility_OnStop_AsyncCallback_0100 mid";
     std::shared_ptr<OHOSApplication> application = nullptr;
     std::shared_ptr<AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
     bool isAsyncCallback = false;
     cjAbility_->OnStop(nullptr, isAsyncCallback);
@@ -395,10 +403,11 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_OnForeground_0100, Function | MediumTest | L
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     AbilityType type = AbilityType::PAGE;
     abilityInfo->type = type;
+    GTEST_LOG_(INFO) << "CJRuntime_OnForeground_0100 mid";
     std::shared_ptr<OHOSApplication> application = nullptr;
     std::shared_ptr<AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
     Want want;
     cjAbility_->OnForeground(want);
@@ -439,10 +448,11 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_OnForeground_0300, Function | MediumTest | L
     AbilityType type = AbilityType::PAGE;
     abilityInfo->type = type;
     abilityInfo->isStageBasedModel = true;
+    GTEST_LOG_(INFO) << "CJRuntime_OnForeground_0300 mid";
     std::shared_ptr<OHOSApplication> application = nullptr;
     std::shared_ptr<AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
     Want want;
     cjAbility_->OnForeground(want);
@@ -469,10 +479,10 @@ HWTEST_F(CjUIAbilityTest, CJUIAbilityVirtualFunc_0100, TestSize.Level1)
     pageAbilityInfo->isStageBasedModel = true;
     auto eventRunner = EventRunner::Create(pageAbilityInfo->name);
     auto handler = std::make_shared<AbilityHandler>(eventRunner);
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord =
-        std::make_shared<AbilityLocalRecord>(pageAbilityInfo, nullptr);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(pageAbilityInfo, nullptr, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, nullptr, handler, nullptr);
     cjAbility_->UpdateContextConfiguration();
+    EXPECT_NE(abilityLocalRecord, nullptr);
     int requestCode = 0;
     int resultCode = 0;
     cjAbility_->OnAbilityResult(requestCode, resultCode, want);
@@ -520,9 +530,9 @@ HWTEST_F(CjUIAbilityTest, CJUIAbilityRequestFocus_0100, TestSize.Level1)
     pageAbilityInfo->isStageBasedModel = true;
     auto eventRunner = EventRunner::Create(pageAbilityInfo->name);
     auto handler = std::make_shared<AbilityHandler>(eventRunner);
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord =
-        std::make_shared<AbilityLocalRecord>(pageAbilityInfo, nullptr);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(pageAbilityInfo, nullptr, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, nullptr, handler, nullptr);
+    EXPECT_NE(abilityLocalRecord, nullptr);
 
     // window is nullptr
     cjAbility_->RequestFocus(want);
@@ -543,10 +553,11 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_OnBackground_0100, Function | MediumTest | L
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     AbilityType type = AbilityType::PAGE;
     abilityInfo->type = type;
+    GTEST_LOG_(INFO) << "CJRuntime_OnBackground_0100 mid";
     std::shared_ptr<OHOSApplication> application = nullptr;
     std::shared_ptr<AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
     cjAbility_->OnBackground();
     AbilityLifecycleExecutor::LifecycleState state = cjAbility_->GetState();
@@ -566,10 +577,11 @@ HWTEST_F(CjUIAbilityTest, CJRuntime_OnBackground_0200, Function | MediumTest | L
 {
     GTEST_LOG_(INFO) << "CJRuntime_OnBackground_0200 start";
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    GTEST_LOG_(INFO) << "CJRuntime_OnBackground_0200 mid";
     std::shared_ptr<OHOSApplication> application = nullptr;
     std::shared_ptr<AbilityHandler> handler = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     cjAbility_->Init(abilityLocalRecord, application, handler, token);
     cjAbility_->OnBackground();
     AbilityLifecycleExecutor::LifecycleState state = cjAbility_->GetState();
@@ -606,14 +618,16 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0100, TestSize.Level1)
         std::make_shared<AbilityRuntime::CJUIAbility>(*(abilityRuntime.get()));
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "CJUIability";
+    GTEST_LOG_(INFO) << "InitedCJUIAbilityTest_0100 mid";
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
     sptr<IRemoteObject> token = nullptr;
     abilityInfo->isModuleJson = false;
     PreSetCJAbilityStageFuncs();
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     initedCJUIAbility_->Init(abilityLocalRecord, application, handler, token);
+    EXPECT_NE(abilityLocalRecord, nullptr);
 
     Want want;
     initedCJUIAbility_->OnStart(want);
@@ -627,13 +641,14 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0200, TestSize.Level1)
         std::make_shared<AbilityRuntime::CJUIAbility>(*(abilityRuntime.get()));
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "CJUIability";
+    GTEST_LOG_(INFO) << "InitedCJUIAbilityTest_0200 mid";
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
     sptr<IRemoteObject> token = nullptr;
     abilityInfo->isModuleJson = false;
     PreSetCJAbilityStageFuncs();
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     initedCJUIAbility_->Init(abilityLocalRecord, application, handler, token);
 
     Want want;
@@ -655,14 +670,16 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0300, TestSize.Level1)
         std::make_shared<AbilityRuntime::CJUIAbility>(*(abilityRuntime.get()));
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "CJUIability";
+    GTEST_LOG_(INFO) << "InitedCJUIAbilityTest_0300 mid";
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
     sptr<IRemoteObject> token = nullptr;
     abilityInfo->isModuleJson = false;
     PreSetCJAbilityStageFuncs();
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     initedCJUIAbility_->Init(abilityLocalRecord, application, handler, token);
+    EXPECT_NE(abilityLocalRecord, nullptr);
 
     Want want;
     int requestCode = 0;
@@ -680,14 +697,16 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0400, TestSize.Level1)
         std::make_shared<AbilityRuntime::CJUIAbility>(*(abilityRuntime.get()));
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "CJUIability";
+    GTEST_LOG_(INFO) << "InitedCJUIAbilityTest_0400 mid";
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
     sptr<IRemoteObject> token = nullptr;
     abilityInfo->isModuleJson = false;
     PreSetCJAbilityStageFuncs();
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     initedCJUIAbility_->Init(abilityLocalRecord, application, handler, token);
+    EXPECT_NE(abilityLocalRecord, nullptr);
 
     Want want;
     WantParams data;
@@ -716,14 +735,16 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0500, TestSize.Level1)
         std::make_shared<AbilityRuntime::CJUIAbility>(*(abilityRuntime.get()));
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "CJUIability";
+    GTEST_LOG_(INFO) << "InitedCJUIAbilityTest_0500 mid";
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
     sptr<IRemoteObject> token = nullptr;
     abilityInfo->isModuleJson = false;
     PreSetCJAbilityStageFuncs();
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     initedCJUIAbility_->Init(abilityLocalRecord, application, handler, token);
+    EXPECT_NE(abilityLocalRecord, nullptr);
 
     Want want;
 
@@ -754,14 +775,16 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0600, TestSize.Level1)
         std::make_shared<AbilityRuntime::CJUIAbility>(*(abilityRuntime.get()));
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "CJUIability";
+    GTEST_LOG_(INFO) << "InitedCJUIAbilityTest_0600 mid";
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
     sptr<IRemoteObject> token = nullptr;
     abilityInfo->isModuleJson = false;
     PreSetCJAbilityStageFuncs();
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     initedCJUIAbility_->Init(abilityLocalRecord, application, handler, token);
+    EXPECT_NE(abilityLocalRecord, nullptr);
 
     Want want;
 
@@ -787,13 +810,14 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0700, TestSize.Level1)
         std::make_shared<AbilityRuntime::CJUIAbility>(*(abilityRuntime.get()));
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "CJUIability";
+    GTEST_LOG_(INFO) << "InitedCJUIAbilityTest_0700 mid";
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
     std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
     sptr<IRemoteObject> token = nullptr;
     abilityInfo->isModuleJson = false;
     PreSetCJAbilityStageFuncs();
-    std::shared_ptr<AbilityLocalRecord> abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto abilityLocalRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     initedCJUIAbility_->Init(abilityLocalRecord, application, handler, token);
 
     Want want;

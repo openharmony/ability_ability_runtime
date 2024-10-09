@@ -41,7 +41,7 @@ const std::map<ChildProcessManagerErrorCode, Ability_NativeChildProcess_ErrCode>
     { ChildProcessManagerErrorCode::ERR_MAX_CHILD_PROCESSES, NCP_ERR_MAX_CHILD_PROCESSES_REACHED },
     { ChildProcessManagerErrorCode::ERR_LIB_LOADING_FAILED, NCP_ERR_LIB_LOADING_FAILED },
     { ChildProcessManagerErrorCode::ERR_CONNECTION_FAILED, NCP_ERR_CONNECTION_FAILED },
-    { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW, NCP_ERR_NOT_SUPPORTED },
+    { ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED_NEW, NCP_ERR_MULTI_PROCESS_DISABLED },
 };
 
 Ability_NativeChildProcess_ErrCode CvtChildProcessManagerErrCode(ChildProcessManagerErrorCode cpmErr)
@@ -81,19 +81,19 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
         TAG_LOGE(AAFwkTag::PROCESSMGR, "relative path not allow");
         return NCP_ERR_INVALID_PARAM;
     }
-    
+
     std::unique_lock autoLock(g_mutexCallBackObj);
     if (g_Callback != nullptr || g_CallbackStub != nullptr) {
         TAG_LOGW(AAFwkTag::PROCESSMGR, "Another native process starting");
         return NCP_ERR_BUSY;
     }
-    
+
     sptr<IRemoteObject> callbackStub(new (std::nothrow) NativeChildCallback(OnNativeChildProcessStartedWapper));
     if (!callbackStub) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "Alloc callbackStub obj faild");
         return NCP_ERR_INTERNAL;
     }
-    
+
     ChildProcessManager &mgr = ChildProcessManager::GetInstance();
     auto cpmErr = mgr.StartNativeChildProcessByAppSpawnFork(strLibName, callbackStub);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
@@ -118,13 +118,17 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
         return NCP_ERR_INVALID_PARAM;
     }
     if (pid == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "pid null.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "pid null");
         return NCP_ERR_INVALID_PARAM;
     }
 
     std::map<std::string, int32_t> fds;
     NativeChildProcess_Fd* cur = args.fdList.head;
     while (cur != nullptr) {
+        if (!cur->fdName) {
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "fdName null");
+            return NCP_ERR_INVALID_PARAM;
+        }
         std::string key(cur->fdName);
         if (key.size() > MAX_KEY_SIZE) {
             TAG_LOGE(AAFwkTag::PROCESSMGR, "fd name too long");
@@ -143,10 +147,8 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
         std::string entryParams(args.entryParams);
         childArgs.entryParams = entryParams;
     }
-
     AppExecFwk::ChildProcessOptions childProcessOptions;
     childProcessOptions.isolationMode = options.isolationMode == NCP_ISOLATION_MODE_ISOLATED;
-
     int32_t childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS;
 
     ChildProcessManager &mgr = ChildProcessManager::GetInstance();
@@ -154,6 +156,5 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
         return CvtChildProcessManagerErrCode(cpmErr);
     }
-
     return NCP_NO_ERROR;
 }

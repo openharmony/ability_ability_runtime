@@ -74,7 +74,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     bool boolParam = *data % ENABLE;
     sptr<IRemoteObject> callerToken = GetFuzzAbilityToken();
-    AbilityInterceptorParam param(want, requestCode, userId, boolParam, callerToken);
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param(want, requestCode, userId, boolParam, callerToken, shouldBlockFunc);
     executer->DoProcess(param);
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler;
     executer->SetTaskHandler(taskHandler);

@@ -410,6 +410,9 @@ enum class AbilityManagerInterfaceCode {
     // start ability only ui ability
     START_ABILITY_ONLY_UI_ABILITY = 1067,
 
+    //terminate UIServiceExtensionAbility
+    TERMINATE_UI_SERVICE_EXTENSION_ABILITY = 1068,
+    
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
@@ -552,6 +555,12 @@ enum class AbilityManagerInterfaceCode {
 
     // ipc id for terminate mission
     TERMINATE_MISSION = 6118,
+
+    // ipc for block all apps from starting
+    BLOCK_ALL_APP_START = 6119,
+
+    // update associate config list
+    UPDATE_ASSOCIATE_CONFIG_LIST = 6120,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

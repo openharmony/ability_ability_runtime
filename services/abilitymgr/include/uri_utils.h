@@ -34,8 +34,14 @@ public:
 
     bool CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest);
 
-    std::vector<Uri> GetPermissionedUriList(Want &want, std::vector<std::string> &uriVec,
-        std::vector<bool> &checkResults);
+    std::vector<Uri> GetPermissionedUriList(const std::vector<std::string> &uriVec,
+        const std::vector<bool> &checkResults, Want &want);
+
+    bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
+
+    bool IsGrantUriPermissionFlag(const Want &want);
+
+    void CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType);
 
 private:
     UriUtils();

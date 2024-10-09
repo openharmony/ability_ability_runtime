@@ -34,6 +34,11 @@ napi_value JsApplicationContextUtils::CreateBundleContext(napi_env env, napi_cal
     return nullptr;
 }
 
+napi_value JsApplicationContextUtils::SetColorMode(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
 napi_value JsApplicationContextUtils::SwitchArea(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnSwitchArea, APPLICATION_CONTEXT_NAME);
@@ -355,6 +360,7 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
         JsApplicationContextUtils::GetRunningProcessInformation);
     BindNativeFunction(env, object, "getRunningProcessInformation", MD_NAME,
         JsApplicationContextUtils::GetRunningProcessInformation);
+    BindNativeFunction(env, object, "setColorMode", MD_NAME, JsApplicationContextUtils::SetColorMode);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

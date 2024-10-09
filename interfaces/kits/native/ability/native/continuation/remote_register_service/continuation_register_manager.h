@@ -51,7 +51,7 @@ public:
      * notify continuation status to controlcenter continuation register service.
      *
      * @param token token from register.
-     * @param deviceId deviceid.
+     * @param deviceId deviceId.
      * @param status device status.
      * @param requestCallback callback for this request, -1 means failed, otherwise successed.
      */

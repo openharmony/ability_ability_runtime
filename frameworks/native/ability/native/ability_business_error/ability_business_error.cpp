@@ -32,11 +32,11 @@ constexpr const char* ERROR_MSG_CAPABILITY_NOT_SUPPORT = "Capability not support
 constexpr const char* ERROR_MSG_INNER = "Internal error.";
 constexpr const char* ERROR_MSG_RESOLVE_ABILITY = "The specified ability does not exist.";
 constexpr const char* ERROR_MSG_INVALID_ABILITY_TYPE = "Incorrect ability type.";
-constexpr const char* ERROR_MSG_INVALID_ID = "Input error. The specified ID does not exist.";
-constexpr const char* ERROR_MSG_INVISIBLE = "Can not start invisible component.";
+constexpr const char* ERROR_MSG_INVALID_ID = "The specified ID does not exist.";
+constexpr const char* ERROR_MSG_INVISIBLE = "Failed to start the invisible ability.";
 constexpr const char* ERROR_MSG_STATIC_CFG_PERMISSION = "The specified process does not have the permission.";
 constexpr const char* ERROR_MSG_CROSS_USER = "Cross-user operations are not allowed.";
-constexpr const char* ERROR_MSG_SERVICE_BUSY = "Service busy.Try again later.";
+constexpr const char* ERROR_MSG_SERVICE_BUSY = "Service busy. There are concurrent tasks. Try again later.";
 constexpr const char* ERROR_MSG_CROWDTEST_EXPIRED = "The crowdtesting application expires.";
 constexpr const char* ERROR_MSG_WUKONG_MODE = "An ability cannot be started or stopped in Wukong mode.";
 constexpr const char* ERROR_MSG_CONTINUATION_FLAG = "The call with the continuation flag is forbidden.";
@@ -53,28 +53,29 @@ constexpr const char* ERROR_MSG_FREE_INSTALL_OTHERS = "Installation-free is not 
 constexpr const char* ERROR_MSG_FREE_INSTALL_CROSS_DEVICE = "Cross-device installation-free is not supported.";
 constexpr const char* ERROR_MSG_INVALID_URI_FLAG = "Invalid URI flag.";
 constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Invalid URI type, only support file Uri.";
-constexpr const char* ERROR_MSG_GRANT_URI_PERMISSION = "Sandbox application can not grant URI permission.";
+constexpr const char* ERROR_MSG_GRANT_URI_PERMISSION = "A sandbox application cannot grant URI permission.";
 constexpr const char* ERROR_MSG_OPERATION_NOT_SUPPORTED = "Operation not supported.";
 constexpr const char* ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND =
-    "The number of child process exceeds upper bound.";
+    "The number of child processes exceeds the upper limit.";
 constexpr const char* ERROR_MSG_RESTART_APP_INCORRECT_ABILITY =
-    "The target to restart does not belong to the current app or is not a UIAbility.";
+    "The target to restart does not belong to the current application or is not a UIAbility.";
 constexpr const char* ERROR_MSG_RESTART_APP_FREQUENT = "Restart too frequently. Try again at least 10s later.";
 constexpr const char* ERROR_MSG_INVALID_CALLER = "The caller has been released.";
 constexpr const char* ERROR_MSG_NO_MISSION_ID = "The specified mission does not exist.";
-constexpr const char* ERROR_MSG_NO_MISSION_LISTENER = "Input error. The specified mission listener does not exist.";
-constexpr const char* ERROR_MSG_START_ABILITY_WAITTING = "The previous ability is starting, wait start later.";
-constexpr const char* ERROR_MSG_NOT_SELF_APPLICATION = "The target application is not self application.";
+constexpr const char* ERROR_MSG_NO_MISSION_LISTENER = "The specified mission listener does not exist.";
+constexpr const char* ERROR_MSG_START_ABILITY_WAITTING =
+    "Another ability is being started. Wait until it finishes starting.";
+constexpr const char* ERROR_MSG_NOT_SELF_APPLICATION = "The target application is not the current application.";
 constexpr const char* ERROR_MSG_ABILITY_NOT_FOREGROUND =
-    "The interface can be called only when ability is foreground.";
+    "The API can be called only when the ability is running in the foreground.";
 constexpr const char* ERROR_MSG_WUKONG_MODE_CANT_MOVE_STATE =
-    "An ability cannot move to foreground or background in Wukong mode.";
-constexpr const char* ERROR_MSG_START_OPTIONS_CHECK_FAILED = "Start options check failed.";
-constexpr const char* ERROR_MSG_ABILITY_ALREADY_RUNNING = "Ability already running.";
+    "An ability cannot switch to the foreground or background in Wukong mode.";
+constexpr const char* ERROR_MSG_START_OPTIONS_CHECK_FAILED = "The StartOptions check failed.";
+constexpr const char* ERROR_MSG_ABILITY_ALREADY_RUNNING = "The ability is already running.";
 constexpr const char* ERROR_MSG_NOT_SUPPORT_CROSS_APP_START =
-    "The application is not allow jumping to other applications when api version is above 11.";
-constexpr const char* ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT = "Can not match any component.";
-constexpr const char* ERROR_MSG_TARGET_BUNDLE_NOT_EXIST = "The target bundle does not exist.";
+    "Redirection to a third-party application is not allowed in API version 11 or later.";
+constexpr const char* ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT = "No matching ability is found.";
+constexpr const char* ERROR_MSG_TARGET_BUNDLE_NOT_EXIST = "The bundle does not exist or no patch has been applied.";
 constexpr const char* ERROR_MSG_NO_RESIDENT_PERMISSION =
     "The caller application can only set the resident status of the configured process.";
 constexpr const char* ERROR_MSG_MULTI_APP_NOT_SUPPORTED = "App clone or multi-instance is not supported.";
@@ -89,6 +90,11 @@ constexpr const char* ERROR_MSG_EXTENSION_START_THIRD_PARTY_APP_CONTROLLED =
     "The extension can not start the specified third party application.";
 constexpr const char* ERROR_MSG_EXTENSION_START_SERVICE_CONTROLLED = "The extension can not start the service.";
 constexpr const char* ERROR_MSG_FREE_INSTALL_TASK_NOT_EXIST = "The target free install task does not exist.";
+constexpr const char* ERROR_MSG_MULTI_INSTANCE_NOT_SUPPORTED = "Multi-instance is not supported.";
+constexpr const char* ERROR_MSG_INVALID_APP_INSTANCE_KEY = "The app instance key does not exist.";
+constexpr const char* ERROR_MSG_UPPER_LIMIT = "The number of app instances reaches the limit.";
+constexpr const char* ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT = "The APP_INSTANCE_KEY cannot be specified.";
+constexpr const char* ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT = "Creating a new instance is not supported.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -150,7 +156,12 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
         ERROR_MSG_EXTENSION_START_THIRD_PARTY_APP_CONTROLLED },
     { AbilityErrorCode::ERROR_CODE_EXTENSION_START_SERVICE_CONTROLLED, ERROR_MSG_EXTENSION_START_SERVICE_CONTROLLED},
     { AbilityErrorCode::ERROR_CODE_BUNDLE_NAME_INVALID, ERROR_MSG_TARGET_BUNDLE_NOT_EXIST},
-    { AbilityErrorCode::ERROR_CODE_FREE_INSTALL_TASK_NOT_EXIST, ERROR_MSG_FREE_INSTALL_TASK_NOT_EXIST }
+    { AbilityErrorCode::ERROR_CODE_FREE_INSTALL_TASK_NOT_EXIST, ERROR_MSG_FREE_INSTALL_TASK_NOT_EXIST },
+    { AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED, ERROR_MSG_MULTI_INSTANCE_NOT_SUPPORTED },
+    { AbilityErrorCode::ERROR_CODE_INVALID_APP_INSTANCE_KEY, ERROR_MSG_INVALID_APP_INSTANCE_KEY },
+    { AbilityErrorCode::ERROR_CODE_UPPER_LIMIT, ERROR_MSG_UPPER_LIMIT },
+    { AbilityErrorCode::ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT, ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT },
+    { AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT, ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT },
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -215,6 +226,12 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {EXTENSION_BLOCKED_BY_SERVICE_LIST, AbilityErrorCode::ERROR_CODE_EXTENSION_START_SERVICE_CONTROLLED},
     {ERR_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_BUNDLE_NAME_INVALID},
     {ERR_FREE_INSTALL_TASK_NOT_EXIST, AbilityErrorCode::ERROR_CODE_FREE_INSTALL_TASK_NOT_EXIST},
+    {ERR_MULTI_INSTANCE_NOT_SUPPORTED, AbilityErrorCode::ERROR_MULTI_INSTANCE_NOT_SUPPORTED},
+    {ERR_NOT_SUPPORT_APP_CLONE, AbilityErrorCode::ERROR_NOT_APP_CLONE},
+    {ERR_INVALID_APP_INSTANCE_KEY, AbilityErrorCode::ERROR_CODE_INVALID_APP_INSTANCE_KEY},
+    {ERR_UPPER_LIMIT, AbilityErrorCode::ERROR_CODE_UPPER_LIMIT},
+    {ERR_APP_INSTANCE_KEY_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT},
+    {ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT},
 };
 }
 

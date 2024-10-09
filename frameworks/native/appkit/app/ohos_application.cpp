@@ -51,34 +51,15 @@ namespace {
 }
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
 constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;
-
+using ApplicationConfigurationManager = AbilityRuntime::ApplicationConfigurationManager;
 OHOSApplication::OHOSApplication()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    abilityLifecycleCallbacks_.clear();
-    elementsCallbacks_.clear();
 }
 
 OHOSApplication::~OHOSApplication()
 {
-}
-
-/**
- *
- * @brief Called when Ability#onSaveAbilityState(PacMap) was called on an ability.
- *
- * @param outState Indicates the PacMap object passed to Ability#onSaveAbilityState(PacMap)
- * for storing user data and states. This parameter cannot be null.
- */
-
-void OHOSApplication::DispatchAbilitySavedState(const PacMap &outState)
-{
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilitySaveState(outState);
-        }
-    }
 }
 
 /**
@@ -201,7 +182,7 @@ void OHOSApplication::SetApplicationContext(
             TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr.");
             return;
         }
-        applicationSptr->OnConfigurationUpdated(config);
+        applicationSptr->OnConfigurationUpdated(config, AbilityRuntime::SetLevel::Application);
     });
     abilityRuntimeContext_->RegisterAppFontObserver([applicationWptr](const Configuration &config) {
         std::shared_ptr<OHOSApplication> applicationSptr = applicationWptr.lock();
@@ -231,240 +212,23 @@ void OHOSApplication::SetAbilityRecordMgr(const std::shared_ptr<AbilityRecordMgr
 
 /**
  *
- * Register AbilityLifecycleCallbacks with OHOSApplication
- *
- * @param callBack callBack When the life cycle of the ability in the application changes,
- */
-void OHOSApplication::RegisterAbilityLifecycleCallbacks(const std::shared_ptr<AbilityLifecycleCallbacks> &callBack)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
-    if (callBack == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "observer is null");
-        return;
-    }
-
-    abilityLifecycleCallbacks_.emplace_back(callBack);
-}
-
-/**
- *
- * Unregister AbilityLifecycleCallbacks with OHOSApplication
- *
- * @param callBack RegisterAbilityLifecycleCallbacks`s callBack
- */
-void OHOSApplication::UnregisterAbilityLifecycleCallbacks(const std::shared_ptr<AbilityLifecycleCallbacks> &callBack)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
-    if (callBack == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "observer is null");
-        return;
-    }
-
-    abilityLifecycleCallbacks_.remove(callBack);
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onStart
- *
- * @param Ability Indicates the ability object that calls the onStart() method.
- */
-void OHOSApplication::OnAbilityStart(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityStart(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onInactive
- *
- * @param Ability Indicates the Ability object that calls the onInactive() method.
- */
-void OHOSApplication::OnAbilityInactive(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityInactive(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onBackground
- *
- * @param Ability Indicates the Ability object that calls the onBackground() method.
- */
-void OHOSApplication::OnAbilityBackground(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityBackground(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onForeground
- *
- * @param Ability Indicates the Ability object that calls the onForeground() method.
- */
-void OHOSApplication::OnAbilityForeground(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityForeground(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onActive
- *
- * @param Ability Indicates the Ability object that calls the onActive() method.
- */
-void OHOSApplication::OnAbilityActive(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityActive(ability);
-        }
-    }
-}
-
-/**
- *
- * Will be called when the given ability calls Ability->onStop
- *
- * @param Ability Indicates the Ability object that calls the onStop() method.
- */
-void OHOSApplication::OnAbilityStop(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
-{
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
-        return;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : abilityLifecycleCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAbilityStop(ability);
-        }
-    }
-}
-
-/**
- *
- * @brief Register ElementsCallback with OHOSApplication
- *
- * @param callBack callBack when the system configuration of the device changes.
- */
-void OHOSApplication::RegisterElementsCallbacks(const std::shared_ptr<ElementsCallback> &callback)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
-    if (callback == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "observer is null");
-        return;
-    }
-
-    elementsCallbacks_.emplace_back(callback);
-}
-
-/**
- *
- * @brief Unregister ElementsCallback with OHOSApplication
- *
- * @param callback RegisterElementsCallbacks`s callback
- */
-void OHOSApplication::UnregisterElementsCallbacks(const std::shared_ptr<ElementsCallback> &callback)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
-    if (callback == nullptr) {
-        TAG_LOGD(AAFwkTag::APPKIT, "observer is null");
-        return;
-    }
-
-    elementsCallbacks_.remove(callback);
-}
-
-/**
- *
  * @brief Will be Called when the system configuration of the device changes.
  *
  * @param config Indicates the new Configuration object.
  */
-void OHOSApplication::OnConfigurationUpdated(Configuration config)
+void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntime::SetLevel level)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (!abilityRecordMgr_ || !configuration_) {
-        TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ is null");
+    if (!abilityRecordMgr_ || !configuration_ || !abilityRuntimeContext_) {
+        TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ or abilityRuntimeContext_ is null");
         return;
     }
-    std::string language = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    std::string colorMode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    std::string languageIsSetByApp =
-        config.GetItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP);
-    std::string colorModeIsSetByApp =
-        config.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
-    // COLORMODE_NEED_REMOVE_SET_BY_SA added when display move.
-    std::string colorModeNeedRemoveIsSetBySa =
-        config.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA);
-    std::string colorModeIsSetBySa =
-        config.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
-    std::string globalColorMode =
-        configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    std::string globalLanguageIsSetByApp =
-        configuration_->GetItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP);
-    std::string globalColorModeIsSetBySa =
-        configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
     // Whether the color changes with the system
-    bool isUpdateAppColor = isUpdateColor(config, colorMode, globalColorMode,
-        globalColorModeIsSetBySa, colorModeIsSetByApp, colorModeIsSetBySa);
+    bool isUpdateAppColor = IsUpdateColorNeeded(config, level);
     // Whether the font changes with the system
-    bool isUpdateAppFontSize = isUpdateFontSize(config);
+    bool isUpdateAppFontSize = isUpdateFontSize(config, level);
     // Whether the language changes with the system
-    bool isUpdateAppLanguage = isUpdateLanguage(config, language, languageIsSetByApp, globalLanguageIsSetByApp);
-    // If size is not equal to 0, other keys need to be updated.
+    bool isUpdateAppLanguage = IsUpdateLanguageNeeded(config, level);
     if (!isUpdateAppColor && !isUpdateAppFontSize && !isUpdateAppLanguage && config.GetItemSize() == 0) {
         TAG_LOGD(AAFwkTag::APPKIT, "configuration need not updated");
         return;
@@ -475,13 +239,11 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
         configuration_->CompareDifferent(changeKeyV, config);
         configuration_->Merge(changeKeyV, config);
     }
-    TAG_LOGD(AAFwkTag::APPKIT, "configuration_: %{public}s", configuration_->GetName().c_str());
-
+    TAG_LOGI(AAFwkTag::APPKIT, "configuration_: %{public}s, config: %{public}s",
+        configuration_->GetName().c_str(), config.GetName().c_str());
     // Update resConfig of resource manager, which belongs to application context.
     UpdateAppContextResMgr(config);
-
     // Notify all abilities
-    TAG_LOGI(AAFwkTag::APPKIT, "recordCount: [%{public}d]", static_cast<int>(abilityRecordMgr_->GetRecordCount()));
     for (const auto &abilityToken : abilityRecordMgr_->GetAllTokens()) {
         auto abilityRecord = abilityRecordMgr_->GetAbilityItem(abilityToken);
         if (abilityRecord && abilityRecord->GetAbilityThread()) {
@@ -489,8 +251,6 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
         }
     }
 
-    // Notify AbilityStage
-    TAG_LOGI(AAFwkTag::APPKIT, "abilityStages size: [%{public}zu]", abilityStages_.size());
     for (auto it = abilityStages_.begin(); it != abilityStages_.end(); it++) {
         auto abilityStage = it->second;
         if (abilityStage) {
@@ -499,34 +259,14 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
     }
 
 #ifdef SUPPORT_GRAPHICS
-    // Notify Window
     TAG_LOGD(AAFwkTag::APPKIT, "Update configuration for all window.");
     auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
     Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
 #endif
 
-    for (auto callback : elementsCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnConfigurationUpdated(nullptr, config);
-        }
-    }
-
     abilityRuntimeContext_->DispatchConfigurationUpdated(*configuration_);
     abilityRuntimeContext_->SetMcc(configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     abilityRuntimeContext_->SetMnc(configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
-
-    if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0 ||
-        (globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0 && (colorModeIsSetByApp.empty() ||
-        !colorModeIsSetBySa.empty()))) {
-        configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_AUTO);
-    }
-
-    // When display move happened, need to remove SA key, so setting can update colormode success after display move.
-    if (!colorModeNeedRemoveIsSetBySa.empty() && !globalColorModeIsSetBySa.empty()) {
-        configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
-        configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA);
-    }
-
     abilityRuntimeContext_->SetConfiguration(configuration_);
 }
 
@@ -538,11 +278,11 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
  */
 void OHOSApplication::OnFontUpdated(Configuration config)
 {
-    #ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_GRAPHICS
     // Notify Window
     auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
     Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
-    #endif
+#endif
 }
 
 /**
@@ -556,7 +296,10 @@ void OHOSApplication::OnFontUpdated(Configuration config)
 void OHOSApplication::OnMemoryLevel(int level)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-
+    if (abilityRuntimeContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityRuntimeContext_ is nullptr");
+        return;
+    }
     if (abilityRecordMgr_) {
         TAG_LOGD(
             AAFwkTag::APPKIT, "Number of ability to be notified : [%{public}d]", abilityRecordMgr_->GetRecordCount());
@@ -577,12 +320,6 @@ void OHOSApplication::OnMemoryLevel(int level)
     }
 
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    for (auto callback : elementsCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnMemoryLevel(level);
-        }
-    }
-
     abilityRuntimeContext_->DispatchMemoryLevel(level);
 }
 
@@ -601,21 +338,9 @@ void OHOSApplication::OnStart()
 void OHOSApplication::OnTerminate()
 {}
 
-/**
- *
- * @brief Called when an ability calls Ability#onSaveAbilityState(PacMap).
- * You can implement your own logic in this method.
- * @param outState IIndicates the {@link PacMap} object passed to the onSaveAbilityState() callback.
- *
- */
-void OHOSApplication::OnAbilitySaveState(const PacMap &outState)
-{
-    DispatchAbilitySavedState(outState);
-}
-
 void OHOSApplication::SetAppEnv(const std::vector<AppEnvironment>& appEnvironments)
 {
-    if (!appEnvironments.size()) {
+    if (appEnvironments.empty()) {
         return;
     }
 
@@ -670,10 +395,14 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         }
 
         abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *hapModuleInfo);
+        if (abilityStage == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
+            return nullptr;
+        }
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
-        
+
         auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
         if (autoStartupCallback != nullptr) {
             abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
@@ -682,7 +411,6 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
                 return nullptr;
             }
         }
-
         Want want;
         if (abilityRecord->GetWant()) {
             TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
@@ -735,15 +463,17 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
 void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
     const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName)
 {
+    if (abilityStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+        return;
+    }
+
     Want want;
     if (abilityRecord->GetWant()) {
         TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
         want = *(abilityRecord->GetWant());
     }
-    if (abilityStage == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
-        return;
-    }
+
     abilityStage->OnCreate(want);
     abilityStages_[moduleName] = abilityStage;
     const sptr<IRemoteObject> &token = abilityRecord->GetToken();
@@ -807,6 +537,10 @@ bool OHOSApplication::AddAbilityStage(const AppExecFwk::HapModuleInfo &hapModule
     }
 
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *moduleInfo);
+    if (abilityStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ability stage invalid");
+        return false;
+    }
     auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
     std::weak_ptr<OHOSApplication> weak = application;
     abilityStage->Init(stageContext, weak);
@@ -832,6 +566,10 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
     auto iterator = abilityStages_.find(moduleName);
     if (iterator != abilityStages_.end()) {
         auto abilityStage = iterator->second;
+        if (abilityStage == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+            return;
+        }
         abilityStage->RemoveAbility(token);
         if (!abilityStage->ContainsAbility() && !isCacheProcess) {
             abilityStage->OnDestroy();
@@ -854,6 +592,13 @@ void OHOSApplication::SetConfiguration(const Configuration &config)
 {
     if (!configuration_) {
         configuration_ = std::make_shared<Configuration>(config);
+    }
+    auto colorMode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    AbilityRuntime::ApplicationConfigurationManager::GetInstance().
+        SetColorModeSetLevel(AbilityRuntime::SetLevel::System, colorMode);
+
+    if (abilityRuntimeContext_ && configuration_) {
+        abilityRuntimeContext_->SetConfiguration(configuration_);
     }
 }
 
@@ -888,7 +633,7 @@ void OHOSApplication::ScheduleNewProcessRequest(const AAFwk::Want &want, const s
     }
 }
 
-std::shared_ptr<Configuration> OHOSApplication::GetConfiguration()
+std::shared_ptr<Configuration> OHOSApplication::GetConfiguration() const
 {
     return configuration_;
 }
@@ -994,70 +739,88 @@ void OHOSApplication::CleanEmptyAbilityStage()
     }
 }
 
-bool OHOSApplication::isUpdateColor(Configuration &config, std::string colorMode, std::string globalColorMode,
-    std::string globalColorModeIsSetBySa, std::string colorModeIsSetByApp, std::string colorModeIsSetBySa)
+bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level)
 {
-    bool isUpdateColor = true;
-    if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0 && globalColorModeIsSetBySa.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "colorMode is auto");
-        constexpr int buffSize = 64;
-        char valueGet[buffSize] = { 0 };
-        auto res = GetParameter(PERSIST_DARKMODE_KEY, colorMode.c_str(), valueGet, buffSize);
-        if (res <= 0) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get parameter failed.");
-            return false;
-        }
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, valueGet);
+    std::string colorMode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    std::string colorModeIsSetBySa =
+        config.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
+    if (level < AbilityRuntime::SetLevel::SA && !colorModeIsSetBySa.empty()) {
+        level = AbilityRuntime::SetLevel::SA;
     }
-    std::string globalColorModeIsSetByApp =
-        configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
-    if (!colorMode.empty() && colorModeIsSetByApp.empty() && colorModeIsSetBySa.empty()) {
-        if ((!globalColorModeIsSetByApp.empty() && globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) != 0) ||
-            !globalColorModeIsSetBySa.empty()) {
-            TAG_LOGD(AAFwkTag::APPKIT, "colormode has been set by app or sa");
-            config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            isUpdateColor = false;
+
+    TAG_LOGI(AAFwkTag::APPKIT, "current %{public}d, pre %{public}d",
+        static_cast<uint8_t>(level),
+        static_cast<uint8_t>(AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetColorModeSetLevel()));
+
+    bool needUpdate = true;
+
+    if (level < AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetColorModeSetLevel() ||
+        colorMode.empty()) {
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
+        TAG_LOGI(AAFwkTag::APPKIT, "color remove");
+        needUpdate = false;
+    }
+
+    if (!colorMode.empty()) {
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+            AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetColorModeSetLevel(level, colorMode));
+
+        if (level > AbilityRuntime::SetLevel::System) {
+            config.AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP,
+                AppExecFwk::ConfigurationInner::IS_SET_BY_APP);
         }
     }
-    if (!colorModeIsSetBySa.empty() && colorModeIsSetByApp.empty()) {
-        if (!globalColorModeIsSetByApp.empty() && globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) != 0) {
-            config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            isUpdateColor = false;
-        }
-    }
-    return isUpdateColor;
+
+    return needUpdate;
 }
 
-bool OHOSApplication::isUpdateFontSize(Configuration &config)
+bool OHOSApplication::isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level)
 {
-    std::string fontSizeScal = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    std::string fontSize = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (fontSize.empty()) {
+        TAG_LOGW(AAFwkTag::APPKIT, "fontSize is empty");
+        return false;
+    }
+
+    auto preLevle = ApplicationConfigurationManager::GetInstance().GetFontSetLevel();
+    if (level < preLevle) {
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+        return false;
+    }
+
     std::string globalFontFollowSysteme = configuration_->GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
-    if (!globalFontFollowSysteme.empty()
-        && globalFontFollowSysteme.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
-        return true;
+    if (level == preLevle && !globalFontFollowSysteme.empty()) {
+        if (globalFontFollowSysteme.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
+            return true;
+        }
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+        return false;
     }
-    TAG_LOGW(AAFwkTag::APPKIT, "the font size configured for the app does not take effect with the system");
-    config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE,
-        ConfigurationInner::SYSTEM_DEFAULT_FONTSIZE_SCALE);
-    return false;
+
+    // level > preLevle
+    configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    ApplicationConfigurationManager::GetInstance().SetfontSetLevel(level);
+    return true;
 }
 
-bool OHOSApplication::isUpdateLanguage(Configuration &config, const std::string language,
-    const std::string languageIsSetByApp, const std::string globalLanguageIsSetByApp)
+bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRuntime::SetLevel level)
 {
-    if (!language.empty() && languageIsSetByApp.empty() && !globalLanguageIsSetByApp.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "language has been set by app");
-        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-        return false;
-    }
+    TAG_LOGI(AAFwkTag::APPKIT, "current %{public}d, pre %{public}d",
+        static_cast<uint8_t>(level),
+        static_cast<uint8_t>(AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetLanguageSetLevel()));
+
+    std::string language = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     if (language.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "language is empty, need not update");
+        TAG_LOGW(AAFwkTag::APPKIT, "language is empty");
         return false;
     }
-    AbilityRuntime::SetLevel currentSetLevel = !globalLanguageIsSetByApp.empty() ?
-        AbilityRuntime::SetLevel::Application : AbilityRuntime::SetLevel::System;
-    AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(currentSetLevel);
+    if (level < AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetLanguageSetLevel()) {
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+        TAG_LOGI(AAFwkTag::APPKIT, "language remove");
+        return false;
+    }
+    AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(level);
     return true;
 }
 
@@ -1072,7 +835,7 @@ bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::st
     if (processType == ProcessType::NORMAL) {
         return true;
     }
-    
+
     std::string processName = processInfo->GetProcessName();
     if (processName == bundleName || processName == process) {
         return true;
