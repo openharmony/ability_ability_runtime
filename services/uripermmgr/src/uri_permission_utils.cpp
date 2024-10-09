@@ -194,6 +194,23 @@ bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName
     return false;
 }
 
+int32_t UPMSUtils::GetAppIdByBundleName(const std::string &bundleName, std::string &appId)
+{
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "BundleName is %{public}s.", bundleName.c_str());
+    auto bms = ConnectManagerHelper();
+    if (bms == nullptr) {
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "The bundleMgrHelper is nullptr.");
+        return GET_BUNDLE_MANAGER_SERVICE_FAILED;
+    }
+    auto userId = GetCurrentAccountId();
+    appId = IN_PROCESS_CALL(bms->GetAppIdByBundleName(bundleName, userId));
+    if (appId.empty()) {
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "Get appId by bundle name failed, userId is %{private}d", userId);
+        return INNER_ERR;
+    }
+    return ERR_OK;
+}
+
 std::string UPMSUtils::GetCallerNameByTokenId(uint32_t tokenId)
 {
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
