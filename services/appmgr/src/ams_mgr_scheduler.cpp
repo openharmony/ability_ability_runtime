@@ -710,5 +710,14 @@ bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token
     }
     return amsMgrServiceInner_->CleanAbilityByUserRequest(token);
 }
+
+bool AmsMgrScheduler::IsProcessAttached(sptr<IRemoteObject> token)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessAttached(token);
+}
 } // namespace AppExecFwk
 }  // namespace OHOS

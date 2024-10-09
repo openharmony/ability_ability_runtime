@@ -369,6 +369,11 @@ public:
         return true;
     }
 
+    virtual bool IsProcessAttached(sptr<IRemoteObject> token)
+    {
+        return false;
+    }
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -419,6 +424,7 @@ public:
         FORCE_KILL_APPLICATION,
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
+        IS_PROCESS_ATTACHED,
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
     };
 };

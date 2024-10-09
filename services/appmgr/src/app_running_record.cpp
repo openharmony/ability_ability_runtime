@@ -446,12 +446,6 @@ void AppRunningRecord::RemoveModuleRecord(
     }
 }
 
-void AppRunningRecord::ForceKillApp([[maybe_unused]] const std::string &reason) const
-{}
-
-void AppRunningRecord::ScheduleAppCrash([[maybe_unused]] const std::string &description) const
-{}
-
 void AppRunningRecord::LaunchApplication(const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -2452,6 +2446,14 @@ void AppRunningRecord::SetUserRequestCleaning()
 bool AppRunningRecord::IsUserRequestCleaning() const
 {
     return isUserRequestCleaning_;
+}
+
+bool AppRunningRecord::IsProcessAttached() const
+{
+    if (appLifeCycleDeal_ == nullptr) {
+        return false;
+    }
+    return appLifeCycleDeal_->GetApplicationClient() != nullptr;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
