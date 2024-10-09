@@ -1046,10 +1046,6 @@ void MainThread::OnStartAbility(const std::string &bundleName,
         loadPath = std::regex_replace(loadPath, pattern, std::string(LOCAL_CODE_PATH));
         TAG_LOGD(AAFwkTag::APPKIT, "ModuleResPath: %{public}s", loadPath.c_str());
         // getOverlayPath
-        auto res = GetOverlayModuleInfos(bundleName, entryHapModuleInfo.moduleName, overlayModuleInfos_);
-        if (res != ERR_OK) {
-            TAG_LOGW(AAFwkTag::APPKIT, "getOverlayPath failed");
-        }
         if (overlayModuleInfos_.empty()) {
             if (!resourceManager->AddResource(loadPath.c_str())) {
                 TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
