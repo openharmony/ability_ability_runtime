@@ -21,6 +21,7 @@
 
 #include "abs_shared_result_set.h"
 #include "data_ability_predicates.h"
+#include "param.h"
 #include "values_bucket.h"
 
 #include "want.h"

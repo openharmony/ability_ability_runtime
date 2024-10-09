@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include "app_mgr_client.h"
+#include "param.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -25,8 +26,8 @@ class MockAppMgrClient : public AppMgrClient {
 public:
     MockAppMgrClient();
     ~MockAppMgrClient();
-    MOCK_METHOD6(LoadAbility, AppMgrResultCode(sptr<IRemoteObject>, sptr<IRemoteObject>,
-        const AbilityInfo&, const ApplicationInfo&, const AAFwk::Want&, int32_t));
+    MOCK_METHOD4(LoadAbility, AppMgrResultCode(const AbilityInfo&, const ApplicationInfo&,
+        const AAFwk::Want&, AbilityRuntime::LoadParam));
     MOCK_METHOD2(TerminateAbility, AppMgrResultCode(const sptr<IRemoteObject>&, bool));
     MOCK_METHOD2(UpdateAbilityState, AppMgrResultCode(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD1(KillApplication, AppMgrResultCode(const std::string&));
