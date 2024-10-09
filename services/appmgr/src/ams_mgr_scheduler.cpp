@@ -710,5 +710,14 @@ bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
     }
     return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
 }
+
+bool AmsMgrScheduler::IsProcessAttached(sptr<IRemoteObject> token)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessAttached(token);
+}
 } // namespace AppExecFwk
 }  // namespace OHOS

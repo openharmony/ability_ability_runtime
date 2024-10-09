@@ -334,6 +334,8 @@ public:
      */
     virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
 
+    virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
+
 private:
     /**
      * @brief Judge whether the application service is ready.

@@ -269,8 +269,6 @@ public:
 
     void PauseExtensions();
 
-    void StartRootLauncher(const std::shared_ptr<AbilityRecord> &abilityRecord);
-
     void OnTimeOut(uint32_t msgId, int64_t abilityRecordId, bool isHalf = false);
 
     /**
