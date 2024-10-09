@@ -1489,23 +1489,25 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
 
     TAG_LOGW(AAFwkTag::ABILITYMGR, "Load time out , remove target service record from services map.");
     RemoveServiceAbility(abilityRecord);
-    if (abilityRecord->GetAbilityInfo().name != AbilityConfig::LAUNCHER_ABILITY_NAME) {
+    if (abilityRecord->IsSceneBoard()) {
+        auto isAttached = DelayedSingleton<AppScheduler>::GetInstance()->IsProcessAttached(abilityRecord->GetToken());
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
-        if (IsAbilityNeedKeepAlive(abilityRecord)) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "Load time out , try to restart.");
+        if (!isAttached) {
             RestartAbility(abilityRecord, userId_);
         }
-    } else {
-        // terminate the timeout root launcher.
-        DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
-        StartRootLauncher(abilityRecord);
+        return;
+    }
+    DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
+    if (IsAbilityNeedKeepAlive(abilityRecord)) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "Load time out, try to restart");
+        RestartAbility(abilityRecord, userId_);
     }
 }
 
 void AbilityConnectManager::HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
-    if (abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
+    if (AppUtils::GetInstance().IsLauncherAbility(abilityRecord->GetAbilityInfo().name)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle root launcher command timeout.");
         // terminate the timeout root launcher.
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
@@ -1544,21 +1546,6 @@ void AbilityConnectManager::HandleCommandWindowTimeoutTask(const std::shared_ptr
     // manage queued request
     CompleteStartServiceReq(abilityRecord->GetURI());
     TAG_LOGD(AAFwkTag::ABILITYMGR, "end");
-}
-
-void AbilityConnectManager::StartRootLauncher(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-    CHECK_POINTER(abilityRecord);
-    AbilityRequest requestInfo;
-    requestInfo.want = abilityRecord->GetWant();
-    requestInfo.abilityInfo = abilityRecord->GetAbilityInfo();
-    requestInfo.appInfo = abilityRecord->GetApplicationInfo();
-    requestInfo.restartTime = abilityRecord->GetRestartTime();
-    requestInfo.restart = true;
-    requestInfo.restartCount = abilityRecord->GetRestartCount() - 1;
-
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "restart root launcher, number:%{public}d", requestInfo.restartCount);
-    StartAbilityLocked(requestInfo);
 }
 
 void AbilityConnectManager::HandleStopTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -1999,7 +1986,7 @@ void AbilityConnectManager::HandleInactiveTimeout(const std::shared_ptr<AbilityR
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleInactiveTimeout start");
     CHECK_POINTER(ability);
-    if (ability->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
+    if (AppUtils::GetInstance().IsLauncherAbility(ability->GetAbilityInfo().name)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Handle root launcher inactive timeout.");
         // terminate the timeout root launcher.
         DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(ability->GetToken());
@@ -2075,7 +2062,7 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         static int64_t tickCount = GetTickCount();
         int64_t tickNow = GetTickCount();
         const int64_t maxTime = 240000; // 240000 4min
-        const int maxCount = 4; // 4: crash happend 4 times during 4 mins
+        const int maxCount = 4; // 4: crash happened 4 times during 4 mins
         if (tickNow - tickCount > maxTime) {
             sceneBoardCrashCount = 0;
             tickCount = tickNow;

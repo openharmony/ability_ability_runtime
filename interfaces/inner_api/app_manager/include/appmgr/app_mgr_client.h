@@ -820,6 +820,8 @@ public:
      */
     bool IsKilledForUpgradeWeb(const std::string &bundleName);
 
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**
