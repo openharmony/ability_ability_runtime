@@ -120,7 +120,8 @@ private:
 
     int32_t CheckCalledBySandBox();
 
-    bool CheckUriPermission(Uri uri, uint32_t flag, TokenIdPermission &tokenIdPermission);
+    std::vector<bool> CheckUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<Uri> &uriVec,
+        uint32_t flag);
 
     bool CheckUriTypeIsValid(Uri uri);
 
@@ -134,11 +135,8 @@ private:
     void HandleUriPermission(
         uint64_t tokenId, unsigned int flag, std::vector<PolicyInfo> &docsVec, bool isSystemAppCall);
 
-    int32_t CheckProxyUriPermission(TokenIdPermission &tokenIdPermission, const Uri &uri, uint32_t flag);
-
-    bool AccessMediaUriPermission(TokenIdPermission &tokenIdPermission, const Uri &uri, uint32_t flag);
-
-    bool AccessDocsUriPermission(TokenIdPermission &tokenIdPermission, const Uri &uri, uint32_t flag);
+    void CheckProxyUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<Uri> &uriVec, uint32_t flag,
+        std::vector<bool> &result);
     
     int32_t DeleteShareFile(uint32_t targetTokenId, const std::vector<std::string> &uriVec);
 
