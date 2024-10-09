@@ -79,7 +79,7 @@ bool RemoteRegisterServiceProxy::Unregister(int registerToken)
  * notify continuation status to controlcenter continuation register service.
  *
  * @param registerToken token from register.
- * @param deviceId deviceid.
+ * @param deviceId deviceId.
  * @param status device status.
  */
 bool RemoteRegisterServiceProxy::UpdateConnectStatus(int registerToken, const std::string &deviceId, int status)

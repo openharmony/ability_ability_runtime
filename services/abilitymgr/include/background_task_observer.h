@@ -30,21 +30,37 @@ public:
     BackgroundTaskObserver();
     virtual ~BackgroundTaskObserver();
     bool IsBackgroundTaskUid(const int uid);
+    bool IsEfficiencyResourcesTaskUid(const int uid);
 
     void GetContinuousTaskApps();
+    void GetEfficiencyResourcesTaskApps();
 
 private:
     void OnContinuousTaskStart(const std::shared_ptr<BackgroundTaskMgr::ContinuousTaskCallbackInfo>
-        &continuousTaskCallbackInfo);
+        &continuousTaskCallbackInfo) override;
 
     void OnContinuousTaskStop(const std::shared_ptr<BackgroundTaskMgr::ContinuousTaskCallbackInfo>
-        &continuousTaskCallbackInfo);
+        &continuousTaskCallbackInfo) override;
+
+    void OnAppEfficiencyResourcesApply(
+        const std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo> &resourceInfo) override;
+
+    void OnAppEfficiencyResourcesReset(
+        const std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo> &resourceInfo) override;
+
+    void OnProcEfficiencyResourcesApply(
+        const std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo> &resourceInfo) override;
+
+    void OnProcEfficiencyResourcesReset(
+        const std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo> &resourceInfo) override;
 
     sptr<AppExecFwk::IAppMgr> GetAppManager();
 
 private:
     std::list<int> bgTaskUids_;
     std::mutex bgTaskMutex_;
+    std::list<int> efficiencyUids_;
+    std::mutex efficiencyMutex_;
     sptr<OHOS::AppExecFwk::IAppMgr> appManager_ = nullptr;
 };
 }  // namespace AAFwk

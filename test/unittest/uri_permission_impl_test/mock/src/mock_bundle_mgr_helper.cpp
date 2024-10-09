@@ -76,6 +76,12 @@ bool BundleMgrHelper::GetApplicationInfo(const std::string &appName, uint32_t fl
     return true;
 }
 
+std::string BundleMgrHelper::GetAppIdByBundleName(const std::string &bundleName, const int32_t userId)
+{
+    auto appId = bundleName + "_appId";
+    return appId;
+}
+
 ErrCode BundleMgrHelper::GetCloneBundleInfo(const std::string &bundleName, int32_t flags, int32_t appCloneIndex,
     BundleInfo &bundleInfo, int32_t userId)
 {

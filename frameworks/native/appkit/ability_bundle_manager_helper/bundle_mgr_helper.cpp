@@ -33,6 +33,11 @@ BundleMgrHelper::~BundleMgrHelper()
     }
 }
 
+void BundleMgrHelper::PreConnect()
+{
+    Connect();
+}
+
 ErrCode BundleMgrHelper::GetNameForUid(const int32_t uid, std::string &name)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
@@ -194,6 +199,19 @@ ErrCode BundleMgrHelper::GetSandboxHapModuleInfo(const AbilityInfo &abilityInfo,
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetSandboxHapModuleInfo(abilityInfo, appIndex, userId, hapModuleInfo);
+}
+
+std::string BundleMgrHelper::GetAppIdByBundleName(const std::string &bundleName, const int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "GetAppIdByBundleName called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect.");
+        return "";
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetAppIdByBundleName(bundleName, userId);
 }
 
 sptr<IBundleMgr> BundleMgrHelper::Connect()

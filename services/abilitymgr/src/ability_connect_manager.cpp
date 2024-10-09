@@ -23,6 +23,7 @@
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "assert_fault_callback_death_mgr.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
 #include "multi_instance_utils.h"
@@ -66,6 +67,7 @@ const int32_t AUTO_DISCONNECT_INFINITY = -1;
 constexpr const char* FROZEN_WHITE_DIALOG = "com.huawei.hmos.huaweicast";
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
+constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 
 const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
 
@@ -144,7 +146,8 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
 
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
 
     std::shared_ptr<AbilityRecord> targetService;
@@ -493,7 +496,8 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
     }
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
     std::shared_ptr<ExtensionRecord> extensionRecord = nullptr;
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
@@ -550,7 +554,8 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     // 1. get target service ability record, and check whether it has been loaded.
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
-        return ret;
+        //  Do not distinguishing specific error codes
+        return ERR_INVALID_VALUE;
     }
     std::shared_ptr<AbilityRecord> targetService;
     bool isLoadedAbility = false;
@@ -806,7 +811,6 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
 void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "state: %{public}d", state);
-    std::lock_guard guard(serialMutex_);
     AppAbilityState abilityState = DelayedSingleton<AppScheduler>::GetInstance()->ConvertToAppAbilityState(state);
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
         auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
@@ -821,6 +825,8 @@ void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
         }
         std::string element = abilityRecord->GetURI();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability is %{public}s, start to foreground.", element.c_str());
+        abilityRecord->GrantUriPermissionForUIExtension();
+        std::lock_guard guard(serialMutex_);
         abilityRecord->ForegroundUIExtensionAbility();
     }
 }
@@ -1209,6 +1215,7 @@ void AbilityConnectManager::CompleteCommandAbility(std::shared_ptr<AbilityRecord
     // manage queued request
     CompleteStartServiceReq(abilityRecord->GetURI());
     if (abilityRecord->NeedConnectAfterCommand()) {
+        abilityRecord->UpdateConnectWant();
         ConnectAbility(abilityRecord);
     }
 }
@@ -1307,7 +1314,7 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByIdFromTermin
     return nullptr;
 }
 
-std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensioBySessionInfo(
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensionBySessionInfo(
     const sptr<SessionInfo> &sessionInfo)
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, nullptr);
@@ -2341,12 +2348,17 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
             TAG_LOGW(AAFwkTag::ABILITYMGR, "delay restart root launcher until switch user");
             return;
         }
-        requestInfo.want.SetParam("ohos.app.recovery", true);
+        if (abilityRecord->IsSceneBoard()) {
+            requestInfo.want.SetParam("ohos.app.recovery", true);
+            DelayedSingleton<AbilityManagerService>::GetInstance()->EnableListForSCBRecovery(userId_);
+        }
         requestInfo.restartCount = abilityRecord->GetRestartCount();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "restart root launcher, number:%{public}d", requestInfo.restartCount);
         StartAbilityLocked(requestInfo);
         return;
     }
+
+    requestInfo.want.SetParam(WANT_PARAMS_APP_RESTART_FLAG, true);
 
     // restart other resident ability
     if (abilityRecord->CanRestartResident()) {

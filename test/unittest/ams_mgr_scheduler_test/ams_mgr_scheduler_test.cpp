@@ -727,11 +727,11 @@ HWTEST_F(AmsMgrSchedulerTest, GetRunningProcessInfoByToken_001, TestSize.Level0)
 
 /*
  * Feature: AmsMgrScheduler
- * Function: IsMemorySizeSufficent
+ * Function: IsMemorySizeSufficient
  * SubFunction: NA
- * FunctionPoints: AmsMgrScheduler IsMemorySizeSufficent
+ * FunctionPoints: AmsMgrScheduler IsMemorySizeSufficient
  * EnvConditions: NA
- * CaseDescription: Verify IsMemorySizeSufficent
+ * CaseDescription: Verify IsMemorySizeSufficient
  */
 HWTEST_F(AmsMgrSchedulerTest, IsMemorySizeSufficent_001, TestSize.Level0)
 {

@@ -350,6 +350,7 @@ private:
     int32_t OpenLinkInner(MessageParcel &data, MessageParcel &reply);
     int32_t TerminateMissionInner(MessageParcel &data, MessageParcel &reply);
     int32_t BlockAllAppStartInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UpdateAssociateConfigListInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -65,6 +65,7 @@ constexpr const char* PERMISSION_KILL_PROCESS_DEPENDED_ON_WEB = "ohos.permission
 constexpr const char* PERMISSION_START_NATIVE_CHILD_PROCESS = "ohos.permission.START_NATIVE_CHILD_PROCESS";
 constexpr const char* PERMISSION_BLOCK_ALL_APP_START = "ohos.permission.BLOCK_ALL_APP_START";
 constexpr const char* PERMISSION_START_UIABILITY_TO_HIDDEN = "ohos.permission.START_UIABILITY_TO_HIDDEN";
+constexpr const char* PERMISSION_SUPERVISE_KIA_SERVICE = "ohos.permission.SUPERVISE_KIA_SERVICE";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS

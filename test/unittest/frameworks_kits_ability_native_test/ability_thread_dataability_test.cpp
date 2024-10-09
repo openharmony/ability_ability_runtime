@@ -94,8 +94,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_Query_0100, Function | MediumTes
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             std::shared_ptr<MockDataAbility> mockdataability = std::make_shared<MockDataAbility>();
@@ -159,8 +158,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_GetFileTypes_0100, Function | Me
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             std::shared_ptr<MockDataAbility> mockdataability = std::make_shared<MockDataAbility>();
@@ -223,8 +221,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_OpenFile_0100, Function | Medium
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             std::shared_ptr<MockDataAbility> mockdataability = std::make_shared<MockDataAbility>();
@@ -283,8 +280,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_Insert_0100, Function | MediumTe
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             std::shared_ptr<MockDataAbility> mockdataability = std::make_shared<MockDataAbility>();
@@ -339,8 +335,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_Update_0100, Function | MediumTe
         EXPECT_NE(token, nullptr);
         if (token != nullptr) {
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-            std::shared_ptr<AbilityLocalRecord> abilityRecord =
-                std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+            auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             std::shared_ptr<MockDataAbility> mockdataability = std::make_shared<MockDataAbility>();

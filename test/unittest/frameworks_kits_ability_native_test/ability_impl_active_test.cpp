@@ -125,7 +125,7 @@ HWTEST_F(AbilityImplActiveTest, AaFwk_AbilityImpl_Active_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockAbilityClass> mockAbility = std::make_shared<MockAbilityClass>();
     std::shared_ptr<Ability> ability = std::static_pointer_cast<Ability>(mockAbility);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
@@ -165,7 +165,7 @@ HWTEST_F(AbilityImplActiveTest, AaFwk_AbilityImpl_Active_002, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockAbilityClass> mockAbility = std::make_shared<MockAbilityClass>();
     std::shared_ptr<Ability> ability = std::static_pointer_cast<Ability>(mockAbility);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
@@ -205,7 +205,7 @@ HWTEST_F(AbilityImplActiveTest, AaFwk_AbilityImpl_Active_003, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockAbilityClass> mockAbility = std::make_shared<MockAbilityClass>();
     std::shared_ptr<Ability> ability = std::static_pointer_cast<Ability>(mockAbility);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
@@ -244,7 +244,7 @@ HWTEST_F(AbilityImplActiveTest, AaFwk_AbilityImpl_InActive_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockAbilityClass> mockAbility = std::make_shared<MockAbilityClass>();
     std::shared_ptr<Ability> ability = std::static_pointer_cast<Ability>(mockAbility);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
@@ -284,7 +284,7 @@ HWTEST_F(AbilityImplActiveTest, AaFwk_AbilityImpl_InActive_002, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockAbilityClass> mockAbility = std::make_shared<MockAbilityClass>();
     std::shared_ptr<Ability> ability = std::static_pointer_cast<Ability>(mockAbility);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
@@ -324,7 +324,7 @@ HWTEST_F(AbilityImplActiveTest, AaFwk_AbilityImpl_InActive_003, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token(new (std::nothrow) MockAbilityToken());
     std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
+    auto record = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<MockAbilityClass> mockAbility = std::make_shared<MockAbilityClass>();
     std::shared_ptr<Ability> ability = std::static_pointer_cast<Ability>(mockAbility);
     std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);

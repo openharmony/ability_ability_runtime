@@ -166,7 +166,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
 }
 
 #ifdef APP_NO_RESPONSE_DIALOG
-bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &ablityName)
+bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &abilityName)
 {
     std::lock_guard guard(runningRecordMapMutex_);
     if (appRunningRecordMap_.empty()) {
@@ -183,7 +183,7 @@ bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleNa
         const auto &abilityRunningRecordMap = appRecord->GetAbilities();
         for (const auto &abilityItem : abilityRunningRecordMap) {
             const auto &abilityRunning = abilityItem.second;
-            if (abilityRunning && abilityRunning->GetName() == ablityName) {
+            if (abilityRunning && abilityRunning->GetName() == abilityName) {
                 return true;
             }
         }
@@ -283,7 +283,7 @@ bool AppRunningManager::ProcessExitByBundleName(
         // condition [!appRecord->IsKeepAliveApp()] Is to not kill the resident process.
         // Before using this method, consider whether you need.
         if (appRecord && (!appRecord->IsKeepAliveApp() ||
-            !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
+            !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient())) {
             pid_t pid = appRecord->GetPriorityObject()->GetPid();
             auto appInfoList = appRecord->GetAppInfoList();
             auto isExist = [&bundleName](const std::shared_ptr<ApplicationInfo> &appInfo) {
@@ -564,17 +564,23 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         if (abilityRecord->GetAbilityInfo() != nullptr) {
             isPage = (abilityRecord->GetAbilityInfo()->type == AbilityType::PAGE);
         }
+        appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(
+            AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
 
     if ((isPage || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
-        !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
+        !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient())) {
         appRecord->SetTerminating();
     }
 
-    auto timeoutTask = [appRecord, token]() {
-        if (appRecord) {
-            appRecord->TerminateAbility(token, true);
+    std::weak_ptr<AppRunningRecord> appRecordWptr(appRecord);
+    auto timeoutTask = [appRecordWptr, token]() {
+        auto appRecord = appRecordWptr.lock();
+        if (appRecord == nullptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
+            return;
         }
+        appRecord->TerminateAbility(token, true, true);
     };
     appRecord->PostTask("DELAY_KILL_ABILITY", AMSEventHandler::KILL_PROCESS_TIMEOUT, timeoutTask);
 }
@@ -601,7 +607,7 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
     auto isLastAbility =
         clearMissionFlag ? appRecord->IsLastPageAbilityRecord(token) : appRecord->IsLastAbilityRecord(token);
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
-        !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
+        !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient())) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);
@@ -663,7 +669,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 #endif //SUPPORT_SCREEN
     auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
-        !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isLauncherApp) {
+        !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);

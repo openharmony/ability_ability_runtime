@@ -364,6 +364,13 @@ void MainThread::Attach()
         return;
     }
     mainThreadState_ = MainThreadState::ATTACH;
+    isDeveloperMode_ = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
+    auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgrHelper is nullptr");
+        return;
+    }
+    bundleMgrHelper->PreConnect();
 }
 
 /**
@@ -706,9 +713,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
         newWant.CloseAllFd();
     }
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>(info);
-    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
-    abilityRecord->SetWant(want);
-    abilityRecord->SetAbilityRecordId(abilityRecordId);
+    auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, want, abilityRecordId);
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog != nullptr) {
         tmpWatchdog->SetBgWorkingThreadStatus(IsBgWorkingThread(info));
@@ -1522,7 +1527,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             debugOption.perfCmd = perfCmd;
             runtime->StartProfiler(debugOption);
         } else {
-            runtime->StartDebugMode(debugOption);
+            if (isDeveloperMode_) {
+                runtime->StartDebugMode(debugOption);
+            }
         }
 
         std::vector<HqfInfo> hqfInfos = appInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
@@ -1671,11 +1678,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         entryHapModuleInfo.hapPath.empty() ? entryHapModuleInfo.resourcePath : entryHapModuleInfo.hapPath;
     std::regex inner_pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
     loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
-    std::vector<OverlayModuleInfo> overlayModuleInfos;
-    auto res = GetOverlayModuleInfos(bundleInfo.name, moduleName, overlayModuleInfos);
+    auto res = GetOverlayModuleInfos(bundleInfo.name, moduleName, overlayModuleInfos_);
     std::vector<std::string> overlayPaths;
     if (res == ERR_OK) {
-        overlayPaths = GetAddOverlayPaths(overlayModuleInfos);
+        overlayPaths = GetAddOverlayPaths(overlayModuleInfos_);
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     int32_t appType;
@@ -2050,7 +2056,8 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     Rosen::DisplayId defaultDisplayId = Rosen::DisplayManager::GetInstance().GetDefaultDisplayId();
     Rosen::DisplayId displayId = defaultDisplayId;
     if (abilityRecord->GetWant() != nullptr) {
-        displayId = abilityRecord->GetWant()->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId);
+        displayId = static_cast<uint64_t>(abilityRecord->GetWant()->GetIntParam(
+            AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId));
     }
     Rosen::DisplayManager::GetInstance().AddDisplayIdFromAms(displayId, abilityRecord->GetToken());
     TAG_LOGD(AAFwkTag::APPKIT, "add displayId: %{public}" PRIu64, displayId);
@@ -3238,12 +3245,12 @@ void MainThread::AssertFaultResumeMainThreadDetection()
 
 void MainThread::HandleInitAssertFaultTask(bool isDebugModule, bool isDebugApp)
 {
-    if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Unsupport assert fault dialog");
+    if (!isDeveloperMode_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Developer Mode is false");
         return;
     }
-    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Developer Mode is false");
+    if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
+        TAG_LOGD(AAFwkTag::APPKIT, "Unsupport assert fault dialog");
         return;
     }
     if (!isDebugApp) {

@@ -85,5 +85,22 @@ int32_t StatusBarDelegateManager::DoProcessAttachment(std::shared_ptr<AbilityRec
     }
     return ERR_OK;
 }
+
+int32_t StatusBarDelegateManager::DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    auto statusBarDelegate = GetStatusBarDelegate();
+    CHECK_POINTER_AND_RETURN(statusBarDelegate, ERR_INVALID_VALUE);
+    auto accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+    auto ret = statusBarDelegate->AttachPidToStatusBarItem(accessTokenId, abilityRecord->GetPid());
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret: %{public}d", ret);
+        return ret;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "caller process attach success");
+
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

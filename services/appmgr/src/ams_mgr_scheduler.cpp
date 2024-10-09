@@ -23,6 +23,7 @@
 #include "accesstoken_kit.h"
 #include "app_death_recipient.h"
 #include "app_mgr_constants.h"
+#include "app_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "perf_profile.h"
 #include "permission_constants.h"
@@ -50,6 +51,7 @@ constexpr const char* TASK_SCENE_BOARD_ATTACH_TIMEOUT = "sceneBoardAttachTimeout
 constexpr const char* TASK_ATTACHED_TO_STATUS_BAR = "AttachedToStatusBar";
 constexpr const char* TASK_BLOCK_PROCESS_CACHE_BY_PIDS = "BlockProcessCacheByPids";
 constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
+constexpr const char* TASK_LOAD_ABILITY = "LoadAbilityTask";
 };  // namespace
 
 AmsMgrScheduler::AmsMgrScheduler(
@@ -90,7 +92,7 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
 
     // cache other application load ability task before scene board attach
     if (!amsMgrServiceInner_->GetSceneBoardAttachFlag() && abilityInfo->bundleName != SCENE_BOARD_BUNDLE_NAME) {
-        amsMgrServiceInner_->CacheLoadAbilityTask(loadAbilityFunc);
+        amsMgrServiceInner_->CacheLoadAbilityTask(std::move(loadAbilityFunc));
         return;
     }
     if (abilityInfo->bundleName == SCENE_BOARD_BUNDLE_NAME && abilityInfo->name == SCENEBOARD_ABILITY_NAME) {
@@ -104,6 +106,15 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
             }
         };
         amsHandler_->SubmitTask(timeoutTask, TASK_SCENE_BOARD_ATTACH_TIMEOUT, SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME);
+    }
+
+    if (abilityInfo->bundleName == AAFwk::AppUtils::GetInstance().GetMigrateClientBundleName()) {
+        amsHandler_->SubmitTask(loadAbilityFunc, AAFwk::TaskAttribute{
+            .taskName_ = TASK_LOAD_ABILITY,
+            .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE,
+            .taskPriority_ = AAFwk::TaskQueuePriority::IMMEDIATE
+        });
+        return;
     }
 
     amsHandler_->SubmitTask(loadAbilityFunc);
@@ -629,7 +640,7 @@ bool AmsMgrScheduler::IsMemorySizeSufficent()
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return true;
     }
-    return amsMgrServiceInner_->IsMemorySizeSufficent();
+    return amsMgrServiceInner_->IsMemorySizeSufficient();
 }
 
 void AmsMgrScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
