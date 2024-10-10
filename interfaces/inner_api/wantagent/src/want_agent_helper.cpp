@@ -224,7 +224,7 @@ ErrCode WantAgentHelper::Send(const std::shared_ptr<PendingWant> &pendingWant,
         pendingWant->GetTarget());
 }
 
-ErrCode WantAgentHelper::Cancel(const std::shared_ptr<WantAgent> &agent)
+ErrCode WantAgentHelper::Cancel(const std::shared_ptr<WantAgent> agent)
 {
     if (agent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
