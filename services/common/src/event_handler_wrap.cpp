@@ -95,7 +95,7 @@ bool EventHandlerWrap::RemoveEvent(EventWrap event, bool force)
     }
     if (force || it->second.IsSame(event)) {
         auto result = it->second.GetEventTask().Cancel();
-        TAG_LOGD(AAFwkTag::DEFAULT, "RemoveEvent, result: %{public}d", result);
+        TAG_LOGD(AAFwkTag::DEFAULT, "Remove event: %{public}s, result: %{public}d", event.GetEventString().c_str(), result);
         eventMap_.erase(it);
         return true;
     }
