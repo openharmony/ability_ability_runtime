@@ -26,6 +26,7 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
+#include "param.h"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -219,14 +220,6 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
 ErrCode AmsMgrStub::HandleLoadAbility(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    sptr<IRemoteObject> token = nullptr;
-    sptr<IRemoteObject> preToke = nullptr;
-    if (data.ReadBool()) {
-        token = data.ReadRemoteObject();
-    }
-    if (data.ReadBool()) {
-        preToke = data.ReadRemoteObject();
-    }
     std::shared_ptr<AbilityInfo> abilityInfo(data.ReadParcelable<AbilityInfo>());
     if (!abilityInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<AbilityInfo> failed");
@@ -244,9 +237,13 @@ ErrCode AmsMgrStub::HandleLoadAbility(MessageParcel &data, MessageParcel &reply)
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable want failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
-    int32_t abilityRecordId = data.ReadInt32();
+    std::shared_ptr<AbilityRuntime::LoadParam> loadParam(data.ReadParcelable<AbilityRuntime::LoadParam>());
+    if (!loadParam) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable loadParam failed");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
 
-    LoadAbility(token, preToke, abilityInfo, appInfo, want, abilityRecordId);
+    LoadAbility(abilityInfo, appInfo, want, loadParam);
     return NO_ERROR;
 }
 

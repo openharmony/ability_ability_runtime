@@ -23,6 +23,7 @@
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
+#include "param.h"
 #include "utils/state_utils.h"
 
 namespace OHOS {
@@ -79,8 +80,13 @@ int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> pre
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = abilityRecordId;
+    loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    loadParam.token = token;
+    loadParam.preToken = preToken;
     int ret = static_cast<int>(IN_PROCESS_CALL(
-        appMgrClient_->LoadAbility(token, preToken, abilityInfo, applicationInfo, want, abilityRecordId)));
+        appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AppScheduler fail to LoadAbility. ret %d", ret);
         return INNER_ERR;
