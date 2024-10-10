@@ -1757,6 +1757,7 @@ void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no find request");
         return;
     }
+    abilityRequest.isFromIcon = true;
     int32_t requestId = 0;
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1837,6 +1838,7 @@ int UIAbilityLifecycleManager::MoveAbilityToFront(const AbilityRequest &abilityR
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->processOptions = nullptr;
     sessionInfo->startWindowOption = nullptr;
+    sessionInfo->isFromIcon = abilityRequest.isFromIcon;
     SendSessionInfoToSCB(callerAbility, sessionInfo);
     abilityRecord->RemoveWindowMode();
     if (startOptions != nullptr) {
@@ -1887,6 +1889,7 @@ int UIAbilityLifecycleManager::StartAbilityBySpecifed(const AbilityRequest &abil
     sessionInfo->processOptions = abilityRequest.processOptions;
     sessionInfo->startWindowOption = abilityRequest.startWindowOption;
     sessionInfo->instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
+    sessionInfo->isFromIcon = abilityRequest.isFromIcon;
     SpecifiedInfo specifiedInfo;
     specifiedInfo.abilityName = abilityRequest.abilityInfo.name;
     specifiedInfo.bundleName = abilityRequest.abilityInfo.bundleName;
