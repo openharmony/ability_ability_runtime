@@ -60,8 +60,8 @@ constexpr const char* PERMISSION_PRELOAD_APPLICATION = "ohos.permission.PRELOAD_
 constexpr const char* PERMISSION_SET_PROCESS_CACHE_STATE = "ohos.permission.SET_PROCESS_CACHE_STATE";
 constexpr const char* PERMISSION_PRELOAD_UI_EXTENSION_ABILITY = "ohos.permission.PRELOAD_UI_EXTENSION_ABILITY";
 constexpr const char* PERMISSION_KILL_APP_PROCESSES = "ohos.permission.KILL_APP_PROCESSES";
-constexpr const char* PERMISSION_PRE_START_ATOMIC_SERVICE = "ohos.permission.PRE_START_ATOMIC_SERVICE";
 constexpr const char* PERMISSION_KILL_PROCESS_DEPENDED_ON_WEB = "ohos.permission.KILL_PROCESS_DEPENDED_ON_ARKWEB";
+constexpr const char* PERMISSION_PRE_START_ATOMIC_SERVICE = "ohos.permission.PRE_START_ATOMIC_SERVICE";
 constexpr const char* PERMISSION_START_NATIVE_CHILD_PROCESS = "ohos.permission.START_NATIVE_CHILD_PROCESS";
 } // namespace PermissionConstants
 } // namespace AAFwk

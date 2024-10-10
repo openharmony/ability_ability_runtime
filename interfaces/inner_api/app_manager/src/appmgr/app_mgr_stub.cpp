@@ -1521,21 +1521,6 @@ int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, Message
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::string libName = data.ReadString();
-    int32_t childCount = data.ReadInt32();
-    sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    int32_t result = StartNativeChildProcess(libName, childCount, callback);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
-        return IPC_STUB_ERR;
-    }
-
-    return NO_ERROR;
-}
-
 int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -1550,6 +1535,21 @@ int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, Messag
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
     }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::string libName = data.ReadString();
+    int32_t childCount = data.ReadInt32();
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    int32_t result = StartNativeChildProcess(libName, childCount, callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+
     return NO_ERROR;
 }
 

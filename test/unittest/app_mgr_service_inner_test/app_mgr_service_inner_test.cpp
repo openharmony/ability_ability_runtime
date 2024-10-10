@@ -3467,7 +3467,6 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-
     int32_t pid = 0;
     int32_t uid = 0;
     std::string bundleName = "test_processName";

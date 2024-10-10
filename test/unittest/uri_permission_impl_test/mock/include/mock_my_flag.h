@@ -45,7 +45,6 @@ struct TokenInfo {
     }
 };
 
-
 class MyFlag {
 public:
     enum FLAG {
