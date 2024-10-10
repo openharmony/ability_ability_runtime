@@ -20,6 +20,32 @@
 
 namespace OHOS {
 namespace AAFwk {
+void WindowOptionsUtils::SetWindowPositionAndSize(Want& want,
+    const sptr<IRemoteObject>& callerToken, const StartOptions& startOptions)
+{
+    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+        return;
+    }
+    if (startOptions.windowLeftUsed_) {
+        want.SetParam(Want::PARAM_RESV_WINDOW_LEFT, startOptions.GetWindowLeft());
+    }
+    if (startOptions.windowTopUsed_) {
+        want.SetParam(Want::PARAM_RESV_WINDOW_TOP, startOptions.GetWindowTop());
+    }
+    if (startOptions.windowWidthUsed_) {
+        want.SetParam(Want::PARAM_RESV_WINDOW_WIDTH, startOptions.GetWindowWidth());
+    }
+    if (startOptions.windowHeightUsed_) {
+        want.SetParam(Want::PARAM_RESV_WINDOW_HEIGHT, startOptions.GetWindowHeight());
+    }
+    bool withAnimation = startOptions.GetWithAnimation();
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (!withAnimation && abilityRecord != nullptr &&
+        abilityRecord->GetAbilityInfo().bundleName == want.GetBundle()) {
+        want.SetParam(Want::PARAM_RESV_WITH_ANIMATION, withAnimation);
+    }
+}
+
 std::pair<bool, AppExecFwk::SupportWindowMode> WindowOptionsUtils::WindowModeMap(int32_t windowMode)
 {
     std::pair<bool, AppExecFwk::SupportWindowMode> result(false, AppExecFwk::SupportWindowMode::FULLSCREEN);
