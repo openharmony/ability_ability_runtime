@@ -1742,8 +1742,6 @@ public:
      */
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
 
-    void HandleRestartResidentProcessDependedOnWeb();
-
     /**
      * Open atomic service window prior to finishing free install.
      *
@@ -1760,6 +1758,8 @@ public:
 
     void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
         const std::string& reason);
+
+    void HandleRestartResidentProcessDependedOnWeb();
 
     /**
      * Judge if Caller-Application is in background state.
