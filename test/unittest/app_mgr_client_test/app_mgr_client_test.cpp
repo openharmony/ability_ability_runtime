@@ -313,7 +313,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetRenderProcessTerminationStatus_001, T
     std::string abilityName = "FirstAbility";
     std::string appName = "FirstApp";
     std::string bundleName = "com.ix.First.Test";
-    int status;
+    int status = ERROR_STATE;
     auto abilityReq = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName);
     auto record = AbilityRecord::CreateAbilityRecord(abilityReq);
     auto token = record->GetToken();
@@ -881,7 +881,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterAbilityDebugResponse_001, TestSi
  */
 HWTEST_F(AppMgrClientTest, AppMgrClient_AttachAppDebug_001, TestSize.Level1)
 {
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
 
