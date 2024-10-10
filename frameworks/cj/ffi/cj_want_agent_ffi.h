@@ -58,13 +58,15 @@ public:
     int32_t OnGetUid(int32_t *errCode);
     void OnCancel(int32_t *errCode);
     void OnTrigger(CJTriggerInfo triggerInfo, std::function<void(CJCompleteData)> callback, int32_t *errCode);
+    int32_t OnGetOperationType(int32_t *errCode);
+    bool OnEqual(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> second, int32_t *errCode);
 
 private:
     int32_t UnWrapTriggerInfoParam(CJTriggerInfo cjTriggerInfo, std::function<void(CJCompleteData)> callback,
         std::shared_ptr<WantAgent> &wantAgent, TriggerInfo &triggerInfo,
         std::shared_ptr<CJTriggerCompleteCallBack> &triggerObj);
 
-private:
+public:
     std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> wantAgent_;
 };
 
@@ -75,6 +77,8 @@ extern "C" {
     FFI_EXPORT void FfiWantAgentCancel(int64_t cjWantAgent, int32_t *errCode);
     FFI_EXPORT void FfiWantAgentTrigger(int64_t cjWantAgent, CJTriggerInfo triggerInfo,
         void (*callback)(CJCompleteData), int32_t *errCode);
+    FFI_EXPORT int32_t FfiWantAgentGetOperationType(int64_t cjWantAgent, int32_t *errCode);
+    FFI_EXPORT bool FfiWantAgentEqual(int64_t cjWantAgentFirst, int64_t cjWantAgentSecond, int32_t *errCode);
 }
 
 }
