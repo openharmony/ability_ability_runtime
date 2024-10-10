@@ -107,7 +107,7 @@ bool EventHandlerWrap::RemoveEvent(EventWrap event, bool force)
         return true;
     }
     TAG_LOGD(AAFwkTag::DEFAULT,
-             " force: %{public}d , IsSame: %{public}d", force, isSame);
+             "force: %{public}d , IsSame: %{public}d", force, isSame);
     return false;
 }
 }  // namespace AAFWK
