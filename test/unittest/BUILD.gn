@@ -374,7 +374,6 @@ group("unittest") {
       "ability_token_stub_test:unittest",
       "acquire_share_data_callback_proxy_test:unittest",
       "advanced_security_mode_manager_test:unittest",
-      "ag_convert_callback_impl_test:unittest",
       "ams_ability_running_record_test:unittest",
       "ams_app_death_recipient_test:unittest",
       "ams_app_life_cycle_test:unittest",
@@ -610,7 +609,6 @@ group("unittest") {
       "want_sender_info_test:unittest",
       "want_sender_proxy_test:unittest",
       "want_sender_stub_test:unittest",
-      "want_utils_test:unittest",
       "wants_info_test:unittest",
       "window_config_test:unittest",
       "window_focus_changed_listener_test:unittest",
@@ -631,6 +629,13 @@ group("unittest") {
         "specified_mission_list_test:unittest",
         "start_option_display_id_test:unittest",
         "ui_ability_lifecycle_manager_test:unittest",
+      ]
+    }
+
+    if (include_app_domain_verify) {
+      deps += [
+        "ag_convert_callback_impl_test:unittest",
+        "want_utils_test:unittest",
       ]
     }
   }
