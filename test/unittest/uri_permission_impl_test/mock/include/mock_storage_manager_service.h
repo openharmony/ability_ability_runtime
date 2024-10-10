@@ -61,6 +61,15 @@ public:
         return E_OK;
     }
 
+    int32_t NotifyMtpMounted(std::string id, std::string path)
+    {
+        return 0;
+    }
+
+    int32_t NotifyMtpUnmounted(std::string id, std::string path)
+    {
+        return 0;
+    }
 
     virtual int32_t GetFreeSizeOfVolume(std::string volumeUuid, int64_t &freeSize) override
     {
