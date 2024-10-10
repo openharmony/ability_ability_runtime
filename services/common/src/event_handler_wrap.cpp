@@ -14,6 +14,7 @@
  */
 
 #include "event_handler_wrap.h"
+#include "hilog_tag_wrapper.h"
 
 #include <mutex>
 #include "cpp/mutex.h"
@@ -93,7 +94,8 @@ bool EventHandlerWrap::RemoveEvent(EventWrap event, bool force)
         return false;
     }
     if (force || it->second.IsSame(event)) {
-        it->second.GetEventTask().Cancel();
+        auto result = it->second.GetEventTask().Cancel();
+        TAG_LOGD(AAFwkTag::DEFAULT, "RemoveEvent, result: %{public}d", result);
         eventMap_.erase(it);
         return true;
     }
