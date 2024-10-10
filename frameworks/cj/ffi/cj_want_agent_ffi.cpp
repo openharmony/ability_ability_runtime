@@ -28,6 +28,7 @@ namespace WantAgentCJ {
 using namespace OHOS::AbilityRuntime;
 
 constexpr int32_t BUSINESS_ERROR_CODE_OK = 0;
+constexpr int32_t NOTEQ = -1;
 
 CJTriggerCompleteCallBack::CJTriggerCompleteCallBack()
 {}
@@ -112,6 +113,24 @@ int32_t CJWantAgent::UnWrapTriggerInfoParam(CJTriggerInfo cjTriggerInfo, std::fu
     triggerObj->SetWantAgentInstance(GetID());
 
     return BUSINESS_ERROR_CODE_OK;
+}
+
+int32_t CJWantAgent::OnGetOperationType(int32_t *errCode)
+{
+    int32_t operType;
+    *errCode = WantAgentHelper::GetType(wantAgent_, operType);
+    return operType;
+}
+
+bool CJWantAgent::OnEqual(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> second, int32_t *errCode)
+{
+    *errCode = WantAgentHelper::IsEquals(wantAgent_, second);
+    if (*errCode == BUSINESS_ERROR_CODE_OK) {
+        return true;
+    } else if (*errCode == NOTEQ) {
+        *errCode = BUSINESS_ERROR_CODE_OK;
+    }
+    return false;
 }
 
 extern "C" {
@@ -203,7 +222,27 @@ void FfiWantAgentTrigger(int64_t cjWantAgent, CJTriggerInfo triggerInfo,
     }
     return nativeWantAgent->OnTrigger(triggerInfo, CJLambda::Create(callback), errCode);
 }
+
+int32_t FfiWantAgentGetOperationType(int64_t cjWantAgent, int32_t *errCode)
+{
+    auto nativeWantAgent = OHOS::FFI::FFIData::GetData<CJWantAgent>(cjWantAgent);
+    if (nativeWantAgent == nullptr) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return -1;
+    }
+    return nativeWantAgent->OnGetOperationType(errCode);
 }
 
+bool FfiWantAgentEqual(int64_t cjWantAgentFirst, int64_t cjWantAgentSecond, int32_t *errCode)
+{
+    auto nativeWantAgentFirst = OHOS::FFI::FFIData::GetData<CJWantAgent>(cjWantAgentFirst);
+    auto nativeWantAgentSecond = OHOS::FFI::FFIData::GetData<CJWantAgent>(cjWantAgentSecond);
+    if (nativeWantAgentFirst == nullptr || nativeWantAgentSecond == nullptr) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return false;
+    }
+    return nativeWantAgentFirst->OnEqual(nativeWantAgentSecond->wantAgent_, errCode);
 }
 }
+} // namespace WantAgentCJ
+} // namespace OHOS
