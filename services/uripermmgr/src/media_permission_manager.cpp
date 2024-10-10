@@ -50,7 +50,6 @@ Media::MediaLibraryManager *MediaPermissionManager::GetMediaLibraryManager()
     if (mediaLibraryManager_) {
         return mediaLibraryManager_;
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "mediaLibraryManager is nullptr.");
     mediaLibraryManager_ = Media::MediaLibraryManager::GetMediaLibraryManager();
     if (mediaLibraryManager_ == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GetMediaLibraryManager failed.");
@@ -66,28 +65,24 @@ std::vector<bool> MediaPermissionManager::CheckUriPermission(const std::vector<U
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::vector<std::string> uriStrVec;
-    std::vector<bool> results;
+    std::vector<bool> results = std::vector<bool>(uriVec.size(), false);
     for (auto &uri: uriVec) {
         uriStrVec.emplace_back(uri.ToString());
     }
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "Check photo uri permission start.");
     flag &= (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION);
-    std::string appId = "";
-    std::string bundleName;
+    std::string bundleName = "";
     if (!UPMSUtils::GetBundleNameByTokenId(callerTokenId, bundleName)) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "Get bundle name failed.");
-        results = std::vector<bool>(uriStrVec.size(), false);
         return results;
     }
+    std::string appId = "";
     if (UPMSUtils::GetAppIdByBundleName(bundleName, appId) != ERR_OK) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "Get appId by bundle failed.");
-        results = std::vector<bool>(uriStrVec.size(), false);
         return results;
     }
     auto mediaLibraryManager = GetMediaLibraryManager();
     if (mediaLibraryManager == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GetMediaLibraryManager failed.");
-        results = std::vector<bool>(uriStrVec.size(), false);
         return results;
     }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "CheckPhotoUriPermission start.");
@@ -103,12 +98,6 @@ std::vector<bool> MediaPermissionManager::CheckUriPermission(const std::vector<U
         TAG_LOGE(AAFwkTag::URIPERMMGR, "size of results is unexpected: %{public}zu", results.size());
         results = std::vector<bool>(uriStrVec.size(), false);
         return results;
-    }
-    for (size_t i = 0; i < results.size(); i++) {
-        if (!results[i]) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "No media permission, uri is %{private}s", uriStrVec[i].c_str());
-            break;
-        }
     }
     return results;
 }
