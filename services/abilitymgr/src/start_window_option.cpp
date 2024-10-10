@@ -16,7 +16,7 @@
 #include "start_window_option.h"
 #include "hilog_tag_wrapper.h"
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 #include "pixel_map.h"
 #endif
 
@@ -26,7 +26,7 @@ bool StartWindowOption::ReadFromParcel(Parcel &parcel)
 {
     hasStartWindow = parcel.ReadBool();
     startWindowBackgroundColor = parcel.ReadString();
-#ifdef SUPPORT_GRAPHICS
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
     std::shared_ptr<Media::PixelMap> pixelMap(parcel.ReadParcelable<Media::PixelMap>());
     startWindowIcon = pixelMap;
 #endif
@@ -58,7 +58,7 @@ bool StartWindowOption::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startWindowBackgroundColor write failed");
         return false;
     }
-#ifdef SUPPORT_GRAPHICS
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
     if (!parcel.WriteParcelable(startWindowIcon.get())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startWindowIcon write failed");
         return false;

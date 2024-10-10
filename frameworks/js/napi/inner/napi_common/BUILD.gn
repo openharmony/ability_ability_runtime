@@ -75,12 +75,16 @@ ohos_shared_library("napi_common") {
       "SUPPORT_GRAPHICS",
       "SUPPORT_SCREEN",
     ]
-    external_deps += [ "image_framework:image" ]
     public_external_deps += [
       "form_fwk:form_manager",
-      "graphic_2d:color_manager",
       "window_manager:libdm",
     ]
+  }
+
+  if (ability_runtime_graphics &&
+      ability_runtime_start_window_options_with_pixelmap) {
+    defines += [ "START_WINDOW_OPTIONS_WITH_PIXELMAP" ]
+    external_deps += [ "image_framework:image" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

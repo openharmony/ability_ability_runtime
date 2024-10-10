@@ -27,7 +27,8 @@
         "ability_runtime_graphics",
         "ability_runtime_power",
         "ability_runtime_app_no_response_dialog",
-        "ability_runtime_app_no_response_bundlename"
+        "ability_runtime_app_no_response_bundlename",
+        "ability_runtime_start_window_options_with_pixelmap"
       ],
       "adapted_system_type": [
           "standard"
