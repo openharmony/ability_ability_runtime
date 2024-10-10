@@ -91,22 +91,19 @@ bool EventHandlerWrap::RemoveEvent(EventWrap event, bool force)
     std::lock_guard<ffrt::mutex> guard(*eventMutex_);
     auto it = eventMap_.find(event.GetEventString());
     if (it == eventMap_.end()) {
-        TAG_LOGD(AAFwkTag::DEFAULT,
-                 "can't find event: %{public}s ", event.GetEventString().c_str());
+        TAG_LOGD(AAFwkTag::DEFAULT, "can't find event: %{public}s ", event.GetEventString().c_str());
         return false;
     }
     auto isSame = it->second.IsSame(event);
     if (force || isSame) {
         auto result = it->second.GetEventTask().Cancel();
         if (!result) {
-            TAG_LOGE(AAFwkTag::DEFAULT,
-                     "remove fail: %{public}s", event.GetEventString().c_str());
+            TAG_LOGE(AAFwkTag::DEFAULT, "remove fail: %{public}s", event.GetEventString().c_str());
         }
         eventMap_.erase(it);
         return true;
     }
-    TAG_LOGD(AAFwkTag::DEFAULT,
-             "force: %{public}d , IsSame: %{public}d", force, isSame);
+    TAG_LOGD(AAFwkTag::DEFAULT, "force: %{public}d , IsSame: %{public}d", force, isSame);
     return false;
 }
 }  // namespace AAFWK
