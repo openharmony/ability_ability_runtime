@@ -33,6 +33,7 @@ bool ProcessInfo::ReadFromParcel(Parcel &parcel)
 {
     processName_ = Str16ToStr8(parcel.ReadString16());
     pid_ = parcel.ReadInt32();
+    processType_ = ProcessType(parcel.ReadInt32());
     return true;
 }
 
@@ -59,7 +60,18 @@ ProcessInfo *ProcessInfo::Unmarshalling(Parcel &parcel)
  */
 bool ProcessInfo::Marshalling(Parcel &parcel) const
 {
-    return (parcel.WriteString16(Str8ToStr16(processName_)) && parcel.WriteInt32(pid_));
+    return (parcel.WriteString16(Str8ToStr16(processName_)) && parcel.WriteInt32(pid_)
+        && parcel.WriteInt32(static_cast<int32_t>(processType_)));
+}
+
+void ProcessInfo::SetProcessType(const ProcessType &processType)
+{
+    processType_ = processType;
+}
+
+ProcessType ProcessInfo::GetProcessType() const
+{
+    return processType_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
