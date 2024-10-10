@@ -96,7 +96,7 @@ bool EventHandlerWrap::RemoveEvent(EventWrap event, bool force)
         return false;
     }
     auto isSame = it->second.IsSame(event);
-    if (force || it->second.IsSame(event)) {
+    if (force || isSame) {
         auto result = it->second.GetEventTask().Cancel();
         if (!result) {
             TAG_LOGD(AAFwkTag::DEFAULT,
