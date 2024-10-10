@@ -1059,6 +1059,16 @@ public:
 
     void RemoveConnectWant();
 
+    void SetSecurityFlag(bool securityFlag)
+    {
+        securityFlag_ = securityFlag;
+    }
+
+    bool GetSecurityFlag() const
+    {
+        return securityFlag_;
+    }
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
@@ -1284,6 +1294,7 @@ private:
     ffrt::mutex connectWantLock_;
     bool isLaunching_ = true;
     LaunchDebugInfo launchDebugInfo_;
+    bool securityFlag_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
