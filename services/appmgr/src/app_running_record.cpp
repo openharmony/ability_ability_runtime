@@ -466,6 +466,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
         }
     }
     ProcessInfo processInfo(processName_, GetPriorityObject()->GetPid());
+    processInfo.SetProcessType(processType_);
     launchData.SetProcessInfo(processInfo);
     launchData.SetRecordId(appRecordId_);
     launchData.SetUId(mainUid_);

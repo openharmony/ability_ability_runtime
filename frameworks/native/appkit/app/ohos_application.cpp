@@ -669,7 +669,7 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
     const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback)
 {
     const std::shared_ptr<AbilityInfo> &abilityInfo = abilityRecord->GetAbilityInfo();
-    if (!IsBackupExtension(abilityInfo)) {
+    if (!IsMainProcess(abilityInfo->bundleName, abilityInfo->applicationInfo.process)) {
         return nullptr;
     }
     std::string moduleName = abilityInfo->moduleName;
@@ -1047,17 +1047,24 @@ bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRunti
     return true;
 }
 
-bool OHOSApplication::IsBackupExtension(const std::shared_ptr<AbilityInfo> &abilityInfo)
+bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::string &process)
 {
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
+    auto processInfo = GetProcessInfo();
+    if (processInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo");
         return false;
     }
-    if (abilityInfo->extensionAbilityType == ExtensionAbilityType::BACKUP) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Is backup extension");
-        return false;
+    ProcessType processType = processInfo->GetProcessType();
+    if (processType == ProcessType::NORMAL) {
+        return true;
     }
-    return true;
+    
+    std::string processName = processInfo->GetProcessName();
+    if (processName == bundleName || processName == process) {
+        return true;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "not main process");
+    return false;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

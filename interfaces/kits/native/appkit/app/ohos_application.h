@@ -328,7 +328,7 @@ private:
         const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
         const std::shared_ptr<AbilityLocalRecord> abilityRecord,
         const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback);
-    bool IsBackupExtension(const std::shared_ptr<AbilityInfo> &abilityInfo);
+    bool IsMainProcess(const std::string &bundleName, const std::string &process);
 
 private:
     std::list<std::shared_ptr<AbilityLifecycleCallbacks>> abilityLifecycleCallbacks_;
