@@ -100,8 +100,7 @@ bool EventHandlerWrap::RemoveEvent(EventWrap event, bool force)
         auto result = it->second.GetEventTask().Cancel();
         if (!result) {
             TAG_LOGD(AAFwkTag::DEFAULT,
-                     "Remove event: %{public}s, result: %{public}d",
-                     event.GetEventString().c_str(), result);
+                     "remove fail: %{public}s", event.GetEventString().c_str());
         }
         eventMap_.erase(it);
         return true;
