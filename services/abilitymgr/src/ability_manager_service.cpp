@@ -202,6 +202,7 @@ constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr static char WANT_PARAMS_VIEW_DATA_KEY[] = "ohos.ability.params.viewData";
+constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr const char* FRS_BUNDLE_NAME = "com.ohos.formrenderservice";
@@ -8081,6 +8082,7 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
     want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
     want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
     want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!abilityRecord) {
@@ -8157,6 +8159,7 @@ void AbilityManagerService::UpdateAsCallerInfoFromToken(Want& want, sptr<IRemote
     want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
     want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
 
     auto abilityRecord = Token::GetAbilityRecordByToken(asCallerSourceToken);
     if (abilityRecord == nullptr) {
@@ -8190,6 +8193,7 @@ void AbilityManagerService::UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<
     want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
     want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER(callerRecord);
     auto sourceInfo = callerRecord->GetCallerInfo();
@@ -8227,6 +8231,7 @@ bool AbilityManagerService::UpdateAsCallerInfoFromDialog(Want& want)
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
     want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     if (callerBundleName == "") {
         want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME,
             dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME));
@@ -8253,6 +8258,7 @@ void AbilityManagerService::UpdateCallerInfoFromToken(Want& want, const sptr<IRe
     want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
     want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
     want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
 
     std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
     want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
