@@ -356,8 +356,7 @@ public:
      *
      * @return error code
      */
-    int32_t GetAllRunningInstanceKeys(const std::string& bundleName,
-        std::vector<std::string> &instanceKeys);
+    int32_t GetAllRunningInstanceKeys(std::vector<std::string> &instanceKeys);
 
     /**
      * @brief Restart app

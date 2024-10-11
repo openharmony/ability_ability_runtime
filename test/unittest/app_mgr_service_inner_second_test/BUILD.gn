@@ -24,26 +24,31 @@ ohos_unittest("AppMgrServiceInnerSecondTest") {
     blocklist = "../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
+  use_exceptions = true
 
   include_dirs = [
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_test_path}/mock/mock_sa_call",
+    "${ability_runtime_test_path}/mock/mock_appmgr_service",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",
     "${ability_runtime_test_path}/mock/task_handler_wrap_mock/include",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_test_path}/moduletest/mock/include",
+    "${ability_runtime_test_path}/mock/mock_appmgr_service",
     "mock/include",
   ]
 
   sources = [
+    "${ability_runtime_services_path}/appmgr/src/child_process_record.cpp",
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
     "${ability_runtime_test_path}/mock/task_handler_wrap_mock/src/mock_task_handler_wrap.cpp",
     "app_mgr_service_inner_second_test.cpp",
     "mock/src/mock_ipc_skeleton.cpp",
     "mock/src/mock_my_flag.cpp",
+    "mock/src/mock_parameters.cpp",
     "mock/src/mock_permission_verification.cpp",
   ]
 
@@ -51,9 +56,12 @@ ohos_unittest("AppMgrServiceInnerSecondTest") {
 
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/appmgr:libappms",
+    "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:task_handler_wrap",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -62,6 +70,7 @@ ohos_unittest("AppMgrServiceInnerSecondTest") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
+    "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
