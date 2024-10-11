@@ -2551,7 +2551,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     if (!IsCallerInStatusBar() && (sessionInfo->processOptions != nullptr &&
         !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
-        return ERR_CAN_NOT_SHOW_HIDE;
+        return ERR_START_OPTIONS_CHECK_FAILED;
     }
     if (sessionInfo->processOptions == nullptr ||
         (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
@@ -2559,7 +2559,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
         auto ret = DoCallerProcessAttachment(abilityRecord);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
-            return ERR_CAN_NOT_SHOW_HIDE;
+            return ERR_START_OPTIONS_CHECK_FAILED;
         }
     }
     auto callerSessionInfo = abilityRecord->GetSessionInfo();

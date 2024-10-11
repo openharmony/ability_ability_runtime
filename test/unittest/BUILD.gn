@@ -628,6 +628,7 @@ group("unittest") {
         "mission_test:unittest",
         "specified_mission_list_test:unittest",
         "start_option_display_id_test:unittest",
+        "status_bar_delegate_manager_test:unittest",
         "ui_ability_lifecycle_manager_test:unittest",
       ]
     }
