@@ -894,15 +894,9 @@ void AbilityManagerService::SetReserveInfo(const std::string &linkString, Abilit
         return;
     }
 
-    std::string reservedBundleName = "";
 #ifdef SUPPORT_SCREEN
-    if (DeepLinkReserveConfig::GetInstance().isLinkReserved(linkString, reservedBundleName)) {
-        abilityRequest.uriReservedFlag = true;
-        abilityRequest.reservedBundleName = reservedBundleName;
-    } else {
-        abilityRequest.uriReservedFlag = false;
-        abilityRequest.reservedBundleName = reservedBundleName;
-    }
+    abilityRequest.uriReservedFlag =
+        DeepLinkReserveConfig::GetInstance().isLinkReserved(linkString, abilityRequest.reservedBundleName);
 #endif // SUPPORT_SCREEN
 }
 
@@ -2083,6 +2077,25 @@ int32_t AbilityManagerService::OpenAtomicService(AAFwk::Want& want, const StartO
     return StartUIAbilityForOptionWrap(want, options, callerToken, false, userId, requestCode);
 }
 
+int AbilityManagerService::SetWantForSessionInfo(sptr<SessionInfo> sessionInfo)
+{
+    if (!(sessionInfo->want).GetElement().GetAbilityName().empty() &&
+        !(sessionInfo->want).GetElement().GetModuleName().empty()) {
+        return ERR_OK;
+    }
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, ERR_INVALID_VALUE);
+    Want launchWant;
+    auto errCode = IN_PROCESS_CALL(bundleMgrHelper->GetLaunchWantForBundle(
+        (sessionInfo->want).GetBundle(), launchWant, GetValidUserId(sessionInfo->userId)));
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "getLaunchWantForBundle returns %{public}d", errCode);
+        return errCode;
+    }
+    (sessionInfo->want).SetElement(launchWant.GetElement());
+    return ERR_OK;
+}
+
 int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -2115,28 +2128,16 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
     FreeInstallInfo taskInfo;
     if (!freeInstallManager_->GetFreeInstallTaskInfo(sessionId, taskInfo)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "failed find free install task");
-        if ((sessionInfo->want).GetElement().GetAbilityName().empty() ||
-            (sessionInfo->want).GetElement().GetModuleName().empty()) {
-            auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-            CHECK_POINTER_AND_RETURN(bundleMgrHelper, ERR_INVALID_VALUE);
-            Want launchWant;
-            auto errCode = IN_PROCESS_CALL(bundleMgrHelper->GetLaunchWantForBundle(
-                (sessionInfo->want).GetBundle(), launchWant, GetValidUserId(sessionInfo->userId)));
-            if (errCode != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "getLaunchWantForBundle returns %{public}d", errCode);
-                return errCode;
-            }
-            (sessionInfo->want).SetElement(launchWant.GetElement());
+        auto err = SetWantForSessionInfo(sessionInfo);
+        if (err != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "SetWantForSessionInfo failed");
+            return err;
         }
         auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         if (uiAbilityManager->GetUIAbilityRecordBySessionInfo(sessionInfo) == nullptr) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "first time open");
-            auto err = StartUIAbilityByPreInstallInner(sessionInfo, 0, sceneFlag, isColdStart);
-            if (err != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "startUIAbilityByPreInstallInner failed");
-            }
-            return err;
+            return StartUIAbilityByPreInstallInner(sessionInfo, 0, sceneFlag, isColdStart);
         }
         return StartUIAbilityBySCBDefault(sessionInfo, sceneFlag, isColdStart);
     }
@@ -2149,11 +2150,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
             return taskInfo.resultCode;
         }
         TAG_LOGI(AAFwkTag::ABILITYMGR, "free install succeeds");
-        auto err = StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, sceneFlag, isColdStart);
-        if (err != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "startUIAbilityByPreInstallInner failed");
-        }
-        return err;
+        return StartUIAbilityByPreInstallInner(sessionInfo, taskInfo.specifyTokenId, sceneFlag, isColdStart);
     }
 
     {
@@ -6962,9 +6959,7 @@ std::shared_ptr<UIAbilityLifecycleManager> AbilityManagerService::GetUIAbilityMa
 void AbilityManagerService::StartResidentApps(int32_t userId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartResidentApps %{public}d", userId);
-    ConnectBmsService();
-    auto bms = AbilityUtil::GetBundleManagerHelper();
-    CHECK_POINTER_IS_NULLPTR(bms);
+    ConnectServices();
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     if (!DelayedSingleton<ResidentProcessManager>::GetInstance()->GetResidentBundleInfosForUser(bundleInfos, userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get resident bundleinfos failed");
@@ -7114,9 +7109,8 @@ void AbilityManagerService::RemoveScreenUnlockInterceptor()
     interceptorExecuter_->RemoveInterceptor("ScreenUnlock");
 }
 
-void AbilityManagerService::ConnectBmsService()
+void AbilityManagerService::ConnectServices()
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "waiting appMgr service run completed");
     while (!DelayedSingleton<AppScheduler>::GetInstance()->Init(shared_from_this())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed init appScheduler");
@@ -7124,19 +7118,11 @@ void AbilityManagerService::ConnectBmsService()
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "waiting bundleMgr service run completed");
-    /* wait until connected to bundle manager service */
-    std::lock_guard<ffrt::mutex> guard(globalLock_);
-    while (iBundleManager_ == nullptr) {
-        sptr<IRemoteObject> bundle_obj =
-            OHOS::DelayedSingleton<SaMgrClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-        if (bundle_obj == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "failed get bundle manager service");
-            usleep(REPOLL_TIME_MICRO_SECONDS);
-            continue;
-        }
-        iBundleManager_ = iface_cast<AppExecFwk::IBundleMgr>(bundle_obj);
+    while (AbilityUtil::GetBundleManagerHelper() == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundle manager helper failed");
+        usleep(REPOLL_TIME_MICRO_SECONDS);
     }
-
+    AbilityUtil::GetBundleManagerHelper()->ConnectTillSuccess();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "bms success");
 }
 
@@ -8077,7 +8063,7 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
     SwitchManagers(userId);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         PauseOldUser(oldUserId);
-        ConnectBmsService();
+        ConnectServices();
         StartUserApps();
     }
     callback->OnStartUserDone(userId, ERR_OK);
@@ -11838,6 +11824,7 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
 
     int32_t appIndex = 0;
     if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s GetAppIndex failed", __func__);
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, callerToken);
