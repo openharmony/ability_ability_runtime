@@ -33,7 +33,7 @@ constexpr const char* STAGE_RES = "STAGE_RES";
 constexpr const char* TO_CALL_PKG = "TO_CALL_PKG";
 constexpr const char* ERROR_CODE = "ERROR_CODE";
 constexpr char APP_CONTINUE_DOMAIN[] = "APP_CONTINUE";
-static constexpr unsigned int FLAG_ABILITY_CONTINUATION = 0x00000008;
+static constexpr uint32_t FLAG_ABILITY_CONTINUATION = 0x00000008;
 }
 ContinueRadar &ContinueRadar::GetInstance()
 {
