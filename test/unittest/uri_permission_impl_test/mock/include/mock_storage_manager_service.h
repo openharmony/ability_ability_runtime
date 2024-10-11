@@ -61,13 +61,13 @@ public:
         return E_OK;
     }
 
-    virtual int32_t NotifyMtpMounted(std::string &id, std::string &path,
-        std::string &desc) override
+    virtual int32_t NotifyMtpMounted(const std::string &id, const std::string &path,
+    const std::string &desc) override
     {
         return E_OK;
     }
 
-    virtual int32_t NotifyMtpUnmounted(std::string &id, std::string &path) override
+    virtual int32_t NotifyMtpUnmounted(const std::string &id, const std::string &path) override
     {
         return E_OK;
     }
