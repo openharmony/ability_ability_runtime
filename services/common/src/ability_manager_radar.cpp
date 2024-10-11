@@ -33,7 +33,7 @@ constexpr const char* STAGE_RES = "STAGE_RES";
 constexpr const char* TO_CALL_PKG = "TO_CALL_PKG";
 constexpr const char* ERROR_CODE = "ERROR_CODE";
 constexpr char APP_CONTINUE_DOMAIN[] = "APP_CONTINUE";
-static constexpr uint32_t FLAG_ABILITY_CONTINUATION = 0x00000008;
+static constexpr unsigned int FLAG_ABILITY_CONTINUATION = 0x00000008;
 }
 ContinueRadar &ContinueRadar::GetInstance()
 {
@@ -59,7 +59,7 @@ bool ContinueRadar::ClickIconContinue(const std::string& func)
     return true;
 }
 
-bool ContinueRadar::ClickIconStartAbility(const std::string& func, uint32_t flags, int32_t errCode)
+bool ContinueRadar::ClickIconStartAbility(const std::string& func, unsigned int flags, int32_t errCode)
 {
     if ((flags & FLAG_ABILITY_CONTINUATION) == 0) {
         TAG_LOGD(AAFwkTag::DEFAULT, "StartAbility not support continuation!");
