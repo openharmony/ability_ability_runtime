@@ -2915,7 +2915,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetRestartCount_001, TestSize.Level1)
     EXPECT_EQ(result, restartCount);
 }
 
-
 /*
  * Feature: AbilityRecord
  * Function: LoadAbility
@@ -2977,11 +2976,11 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_005, TestSize.Leve
 
 /*
  * Feature: AbilityRecord
- * Function: ForegroundUIExtensionAbility
- * SubFunction: ForegroundUIExtensionAbility
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundUIExtensionAbility
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
  */
 HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1)
 {

@@ -546,7 +546,6 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityByFreeInstall_001, TestSiz
     auto ret = abilityMs_->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
     EXPECT_EQ(ret, ERR_INVALID_CALLER);
 
-
     want.SetParam(START_ABILITY_TYPE, false);
     want.AddFlags(Want::FLAG_ABILITY_CONTINUATION);
     auto ret1 = abilityMs_->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
@@ -556,7 +555,6 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityByFreeInstall_001, TestSiz
     want.RemoveFlags(Want::FLAG_ABILITY_CONTINUATION);
     auto ret2 = abilityMs_->StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
     EXPECT_EQ(ret2, ERR_INVALID_CALLER);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartAbilityByFreeInstall_001 part 3 end");
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartAbilityByFreeInstall_001 end");
 }
 
