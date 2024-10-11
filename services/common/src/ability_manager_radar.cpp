@@ -59,7 +59,7 @@ bool ContinueRadar::ClickIconContinue(const std::string& func)
     return true;
 }
 
-bool ContinueRadar::ClickIconStartAbility(const std::string& func, uint flags, int32_t errCode)
+bool ContinueRadar::ClickIconStartAbility(const std::string& func, unsigned int flags, int32_t errCode)
 {
     if ((flags & FLAG_ABILITY_CONTINUATION) == 0) {
         TAG_LOGE(AAFwkTag::DEFAULT, "StartAbility not support continuation!");
