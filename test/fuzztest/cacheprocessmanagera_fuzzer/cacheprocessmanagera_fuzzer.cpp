@@ -155,8 +155,8 @@ void CacheProcessManagerFuzztestFunc3(bool boolParam, std::string &stringParam, 
     std::shared_ptr<CacheProcessManager> mgr = std::make_shared<CacheProcessManager>();
     std::shared_ptr<AppMgrServiceInner> serviceInner1;
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
-    mgr->SetAppMgr(serviceInner1);
     std::shared_ptr<AppRunningRecord> appRecord1 = std::make_shared<AppRunningRecord>(appInfo, int32Param, stringParam);
+    mgr->SetAppMgr(serviceInner1);
     mgr->IsAppShouldCache(nullptr); // called.
     mgr->maxProcCacheNum_ = int32Param;
     mgr->IsAppShouldCache(appRecord1); // not ccached called.

@@ -144,7 +144,7 @@ inline const char* GetDomainName3(AAFwkLogTag tag)
 inline const char* GetDomainName4(AAFwkLogTag tag)
 {
     const char* tagNames[] = { "Ext", "AutoFillExt", "ServiceExt", "FormExt", "ShareExt",
-        "UIExt", "ActionExt", "EmbeddedExt"};
+        "UIExt", "ActionExt", "EmbeddedExt" };
     uint32_t offset = GetOffset(tag, AAFwkLogTag::EXT);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";

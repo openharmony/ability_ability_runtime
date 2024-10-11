@@ -1521,7 +1521,7 @@ public:
         return 0;
     }
 
-    /*
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
