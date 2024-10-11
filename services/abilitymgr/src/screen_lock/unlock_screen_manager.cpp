@@ -61,6 +61,7 @@ bool UnlockScreenManager::UnlockScreen()
 #endif
 #endif
 
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "UnlockScreen begin");
 #ifdef SUPPORT_POWER
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "isScreenOn: %{public}d", isScreenOn);
@@ -76,6 +77,7 @@ bool UnlockScreenManager::UnlockScreen()
             OHOS::ScreenLock::Action::UNLOCKSCREEN, listener));
     }
 #endif
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "UnlockScreen end");
     return true;
 }
 } // namespace AbilityRuntime

@@ -72,11 +72,6 @@ bool CacheProcessManager::QueryEnableProcessCache()
     return maxProcCacheNum_ > 0 || warmStartProcesEnable_;
 }
 
-bool CacheProcessManager::QueryEnableProcessCacheFromKits()
-{
-    return maxProcCacheNum_ > 0;
-}
-
 bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -99,6 +94,9 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
         std::lock_guard<ffrt::recursive_mutex> queueLock(cacheQueueMtx);
         cachedAppRecordQueue_.push_back(appRecord);
         AddToApplicationSet(appRecord);
+        if (warmStartProcesEnable_) {
+            appRecord->SetProcessCaching(true);
+        }
     }
     ShrinkAndKillCache();
     TAG_LOGI(AAFwkTag::APPMGR, "Pending %{public}s success, %{public}s", appRecord->GetName().c_str(),
@@ -125,6 +123,8 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
             appRecord->GetName().c_str());
         return true;
     }
+    appRecord->ScheduleCacheProcess();
+    appRecord->SetProcessCaching(false);
     auto appInfo = appRecord->GetApplicationInfo();
     HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_VERSION_CODE, appInfo->versionCode, EVENT_KEY_VERSION_NAME, appInfo->versionName,
@@ -171,6 +171,7 @@ bool CacheProcessManager::CheckAndNotifyCachedState(const std::shared_ptr<AppRun
         }
         notifyRecord = *(sameAppSet[bundleName][uid].begin());
     }
+    appRecord->SetProcessCaching(false);
     appMgrSptr->OnAppCacheStateChanged(notifyRecord, ApplicationState::APP_STATE_CACHED);
     TAG_LOGI(AAFwkTag::APPMGR, "notified: %{public}s, uid:%{public}d", bundleName.c_str(), uid);
     return true;
@@ -250,6 +251,7 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
             appRecord->SetEnableProcessCache(false);
         }
     }
+    appRecord->SetProcessCaching(false);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     TAG_LOGI(AAFwkTag::APPMGR, "app none cached state is notified: %{public}s, uid: %{public}d, %{public}s",
         appRecord->GetBundleName().c_str(), appRecord->GetUid(), PrintCacheQueue().c_str());
@@ -355,8 +357,8 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
     }
-    if (warmStartProcesEnable_) {
-        return appRecord->GetEnableProcessCache();
+    if (warmStartProcesEnable_ && !appRecord->GetEnableProcessCache()) {
+        return false;
     }
     auto supportState = appRecord->GetSupportProcessCacheState();
     switch (supportState) {
@@ -471,6 +473,7 @@ bool CacheProcessManager::KillProcessByRecord(const std::shared_ptr<AppRunningRe
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return false;
     }
+    appRecord->SetProcessCaching(false);
     // notify before kill
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     // this uses ScheduleProcessSecurityExit

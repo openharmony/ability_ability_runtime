@@ -23,7 +23,12 @@ ohos_unittest("insight_intent_utils_test") {
     cfi_cross_dso = true
     debug = false
   }
-  include_dirs = [ "${ability_runtime_services_path}/abilitymgr/include" ]
+
+  include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_test_path}/mock/common/include",
+    "${ability_runtime_test_path}/mock/services_appmgr_test/include",
+  ]
 
   sources = [
     "${ability_runtime_path}/frameworks/native/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",

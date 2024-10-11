@@ -137,7 +137,9 @@ abilityms_files = [
   "src/utils/dump_utils.cpp",
   "src/utils/ability_permission_util.cpp",
   "src/utils/modal_system_dialog_util.cpp",
+  "src/utils/multi_app_utils.cpp",
   "src/utils/multi_instance_utils.cpp",
+  "src/utils/update_caller_info_util.cpp",
 ]
 
 if (ability_runtime_graphics) {

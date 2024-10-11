@@ -368,7 +368,12 @@ public:
      */
     void AddAbilityStage();
 
-    void AddAbilityStageBySpecifiedAbility(const std::string &bundleName);
+    /**
+     * AddAbilityStageBySpecifiedAbility, Notify application to ability stage.
+     *
+     * @return If the abilityStage need to be add, return true.
+     */
+    bool AddAbilityStageBySpecifiedAbility(const std::string &bundleName);
 
     void AddAbilityStageBySpecifiedProcess(const std::string &bundleName);
 
@@ -500,7 +505,7 @@ public:
      *
      * @return
      */
-    void TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce);
+    void TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce, bool isTimeout = false);
 
     /**
      * AbilityTerminated, terminate the ability.
@@ -933,6 +938,9 @@ public:
     void SetProcessCacheBlocked(bool isBlocked);
     bool GetProcessCacheBlocked();
 
+    void SetProcessCaching(bool isCaching);
+    bool IsCaching();
+
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
      *
@@ -1042,6 +1050,7 @@ private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
     bool isTerminating = false;
+    bool isCaching_ = false;
     std::string signCode_;  // the sign of this hap
     std::string jointUserId_;
     std::map<std::string, std::shared_ptr<ApplicationInfo>> appInfos_;

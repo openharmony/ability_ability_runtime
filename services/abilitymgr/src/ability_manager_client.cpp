@@ -422,6 +422,7 @@ ErrCode AbilityManagerClient::MoveAbilityToBackground(sptr<IRemoteObject> token)
 
 ErrCode AbilityManagerClient::MoveUIAbilityToBackground(const sptr<IRemoteObject> token)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "MoveUIAbilityToBackground call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->MoveUIAbilityToBackground(token);

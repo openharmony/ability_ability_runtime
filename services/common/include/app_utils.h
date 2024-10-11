@@ -64,6 +64,7 @@ public:
     int32_t GetCollaboratorBrokerUID();
     int32_t GetCollaboratorBrokerReserveUID();
     int32_t MaxChildProcess();
+    std::string GetMigrateClientBundleName();
 
 private:
     void LoadResidentProcessInExtremeMemory();
@@ -98,6 +99,7 @@ private:
     volatile DeviceConfiguration<int32_t> collaboratorBrokerUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerReserveUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> maxChildProcess_ = {false, DEFAULT_MAX_CHILD_PROCESS};
+    DeviceConfiguration<std::string> migrateClientBundleName_ = {true, "com.huwei.hmos.migratecilent"};
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk

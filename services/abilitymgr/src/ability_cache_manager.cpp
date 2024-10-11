@@ -55,7 +55,6 @@ void AbilityCacheManager::RemoveAbilityRecInDevList(std::shared_ptr<AbilityRecor
 
 void AbilityCacheManager::RemoveAbilityRecInProcList(std::shared_ptr<AbilityRecord> abilityRecord)
 {
-    const Want want = abilityRecord->GetWant();
     uint32_t accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
     auto findProcInfo = procLruMap_.find(accessTokenId);
     if (findProcInfo == procLruMap_.end()) {

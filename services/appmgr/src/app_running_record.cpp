@@ -530,11 +530,11 @@ void AppRunningRecord::AddAbilityStage()
     }
 }
 
-void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
+bool AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
 {
     if (!eventHandler_) {
         TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
-        return;
+        return false;
     }
 
     HapModuleInfo hapModuleInfo;
@@ -547,10 +547,12 @@ void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
         }
         if (appLifeCycleDeal_ == nullptr) {
             TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
-            return;
+            return false;
         }
         appLifeCycleDeal_->AddAbilityStage(hapModuleInfo);
+        return true;
     }
+    return false;
 }
 
 void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bundleName)
@@ -1157,7 +1159,7 @@ void AppRunningRecord::PopForegroundingAbilityTokens()
     }
 }
 
-void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce)
+void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce, bool isTimeout)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "isForce: %{public}d", static_cast<int>(isForce));
 
@@ -1168,8 +1170,10 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     }
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
-    StateChangedNotifyObserver(
-        abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
+    if (!isTimeout) {
+        StateChangedNotifyObserver(
+            abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
+    }
     moduleRecord->TerminateAbility(shared_from_this(), token, isForce);
 }
 
@@ -2536,6 +2540,16 @@ void AppRunningRecord::SetUIAbilityLaunched(bool hasLaunched)
 bool AppRunningRecord::HasUIAbilityLaunched()
 {
     return hasUIAbilityLaunched_;
+}
+
+void AppRunningRecord::SetProcessCaching(bool isCaching)
+{
+    isCaching_ = isCaching;
+}
+
+bool AppRunningRecord::IsCaching()
+{
+    return isCaching_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

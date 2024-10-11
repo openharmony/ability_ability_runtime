@@ -696,12 +696,6 @@ int ContextImpl::GetCurrentActiveAccountId() const
         TAG_LOGE(AAFwkTag::APPKIT, "no accounts");
         return 0;
     }
-
-    if (accountIds.size() > 1) {
-        TAG_LOGE(AAFwkTag::APPKIT, "no current now");
-        return 0;
-    }
-
     return accountIds[0];
 }
 
@@ -1239,11 +1233,10 @@ int32_t ContextImpl::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo
     return result;
 }
 
-int32_t ContextImpl::GetAllRunningInstanceKeys(const std::string& bundleName,
-    std::vector<std::string> &instanceKeys)
+int32_t ContextImpl::GetAllRunningInstanceKeys(std::vector<std::string> &instanceKeys)
 {
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
-    auto result = appMgrClient->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    auto result = appMgrClient->GetAllRunningInstanceKeysBySelf(instanceKeys);
     TAG_LOGD(AAFwkTag::APPKIT, "result is %{public}d", result);
     return result;
 }

@@ -32,7 +32,7 @@ public:
 
     void FilterUriWithPermissionDms(Want &want, uint32_t tokenId);
 
-    bool CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest);
+    int32_t CheckNonImplicitShareFileUri(const Want &want, int32_t userId, uint32_t specifyTokenId);
 
     std::vector<Uri> GetPermissionedUriList(const std::vector<std::string> &uriVec,
         const std::vector<bool> &checkResults, Want &want);
