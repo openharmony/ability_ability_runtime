@@ -267,17 +267,17 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetDataAbilityManagerByToken_001, TestS
 
 /*
  * Feature: AbilityManagerService
- * Function: ConnectBmsService
+ * Function: ConnectServices
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService ConnectBmsService
+ * FunctionPoints: AbilityManagerService ConnectServices
  */
-HWTEST_F(AbilityManagerServiceThirdTest, ConnectBmsService_001, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, ConnectServices_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ConnectBmsService_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ConnectServices_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs_, nullptr);
-    abilityMs_->ConnectBmsService();
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ConnectBmsService_001 end");
+    abilityMs_->ConnectServices();
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ConnectServices_001 end");
 }
 
 /*
