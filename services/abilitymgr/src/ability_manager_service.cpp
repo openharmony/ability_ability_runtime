@@ -512,7 +512,7 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
         return checkFileShareRet;
     }
     int32_t ret = StartAbilityWrap(want, nullptr, requestCode, false, userId);
-    AAFWK::ContinueRadar::GetInstance().ClickIconStartAbility("StartAbilityWrap", ret);
+    AAFWK::ContinueRadar::GetInstance().ClickIconStartAbility("StartAbilityWrap", want.GetFlags(), ret);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
