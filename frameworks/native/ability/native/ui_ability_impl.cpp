@@ -407,8 +407,12 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
         auto applicationContext = abilityContext->GetApplicationContext();
 #ifdef CJ_FRONTEND
         auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
-        auto &cjAbility = static_cast<CJUIAbility &>(*(impl->ability_));
-        if (appContext != nullptr && !appContext->IsAbilityLifecycleCallbackEmpty()) {
+        bool hasCJLifecycleCallback = false;
+        if (appContext != nullptr) {
+            hasCJLifecycleCallback = !(appContext->IsAbilityLifecycleCallbackEmpty());
+        }
+        if (appContext != nullptr && hasCJLifecycleCallback) {
+            auto &cjAbility = static_cast<CJUIAbility &>(*(impl->ability_));
             if (focuseMode) {
                 appContext->DispatchWindowStageFocus(cjAbility.GetCjAbilityId(), cjAbility.GetCjWindowStagePtr());
             } else {
