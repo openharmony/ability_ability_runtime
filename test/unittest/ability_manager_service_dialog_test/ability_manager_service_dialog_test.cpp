@@ -16,11 +16,13 @@
 #include <gtest/gtest.h>
 
 #define private public
-#include "implicit_start_processor.h"
+#define protected public
 #include "ability_info.h"
 #include "ability_record.h"
+#include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #undef private
+#undef protected
 #include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "scene_board_judgement.h"
@@ -216,6 +218,213 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialog_0900, TestSize.Lev
     auto ret = implicitStartProcessor_->IsImplicitStartAction(want);
     EXPECT_EQ(ret, true);
     TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialog_0900 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1000
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1000, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1000 start");
+    DialogPosition position;
+    position.height = 0;
+    const float densityPixels = 1.50;
+    const int lineNums = 9;
+    systemDialogScheduler_->DialogPortraitPositionAdaptive(position, densityPixels, lineNums);
+    EXPECT_NE(position.height, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1000 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1100
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1100 start");
+    DialogPosition position;
+    position.height = 0;
+    const float densityPixels = 1.50;
+    const int lineNums = 5;
+    systemDialogScheduler_->DialogPortraitPositionAdaptive(position, densityPixels, lineNums);
+    EXPECT_NE(position.height, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1100 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1200
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1200 start");
+    DialogPosition position;
+    position.height = 0;
+    const float densityPixels = 1.50;
+    const int lineNums = 1;
+    systemDialogScheduler_->DialogPortraitPositionAdaptive(position, densityPixels, lineNums);
+    EXPECT_NE(position.height, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1200 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1300
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1300 start");
+    DialogPosition position;
+    position.height = 0;
+    const float densityPixels = 1.50;
+    const int lineNums = 9;
+    systemDialogScheduler_->DialogLandscapePositionAdaptive(position, densityPixels, lineNums);
+    EXPECT_NE(position.height, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1300 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1400
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1400 start");
+    DialogPosition position;
+    position.height = 0;
+    const float densityPixels = 1.50;
+    const int lineNums = 5;
+    systemDialogScheduler_->DialogLandscapePositionAdaptive(position, densityPixels, lineNums);
+    EXPECT_NE(position.height, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1400 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1500
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1500 start");
+    DialogPosition position;
+    position.height = 0;
+    const float densityPixels = 1.50;
+    const int lineNums = 1;
+    systemDialogScheduler_->DialogLandscapePositionAdaptive(position, densityPixels, lineNums);
+    EXPECT_NE(position.height, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1500 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1600
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1600 start");
+    DialogPosition position;
+    position.height = 0;
+    position.offsetX = 0;
+    const int32_t height = 500;
+    const int32_t width = 320;
+    const int lineNums = 1;
+    const float densityPixels = 1.50;
+    systemDialogScheduler_->GetSelectorDialogPortraitPosition(position, height, width, lineNums, densityPixels);
+    EXPECT_NE(position.height, 0);
+    EXPECT_NE(position.offsetX, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1600 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1700
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1700, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1700 start");
+    DialogPosition position;
+    position.height = 0;
+    position.offsetX = 0;
+    const int32_t height = 100;
+    const int32_t width = 100;
+    const int lineNums = 1;
+    const float densityPixels = 1.50;
+    systemDialogScheduler_->GetSelectorDialogPortraitPosition(position, height, width, lineNums, densityPixels);
+    EXPECT_EQ(position.oversizeHeight, true);
+    EXPECT_NE(position.offsetX, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1700 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1700
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1800, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1800 start");
+    DialogPosition position;
+    position.height = 0;
+    position.offsetX = 0;
+    const int32_t height = 500;
+    const int32_t width = 320;
+    const int lineNums = 1;
+    const float densityPixels = 1.50;
+    systemDialogScheduler_->GetSelectorDialogLandscapePosition(position, height, width, lineNums, densityPixels);
+    EXPECT_NE(position.height, 0);
+    EXPECT_NE(position.offsetX, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1800 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_1900
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_1900, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1900 start");
+    DialogPosition position;
+    position.height = 1000;
+    position.offsetX = 0;
+    const int32_t height = 500;
+    const int32_t width = 700;
+    const int lineNums = 1;
+    const float densityPixels = 1.50;
+    systemDialogScheduler_->GetSelectorDialogLandscapePosition(position, height, width, lineNums, densityPixels);
+    EXPECT_TRUE(position.oversizeHeight);
+    EXPECT_NE(position.offsetX, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_1900 end");
+}
+
+/*
+ * @tc.number    : AbilityMgrServiceDialogTest_2000
+ * @tc.name      : AbilityMgrServiceDialogTest
+ * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
+ */
+HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2000, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_2000 start");
+    DialogPosition position;
+    position.height = 1000;
+    position.offsetX = 0;
+    const int32_t height = 500;
+    const int32_t width = 700;
+    const int lineNums = 1;
+    const float densityPixels = 1.50;
+    systemDialogScheduler_->GetSelectorDialogLandscapePosition(position, height, width, lineNums, densityPixels);
+    EXPECT_TRUE(position.oversizeHeight);
+    EXPECT_NE(position.offsetX, 0);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialogTest_2000 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
