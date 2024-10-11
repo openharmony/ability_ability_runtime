@@ -216,6 +216,7 @@ constexpr const char* ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohosSpecifiedProcessFlag";
 constexpr const char* VERIFY_DOMINATE_SCREEN = "persist.sys.abilityms.verify_start_ability_without_caller_token";
 constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
+constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 
 constexpr char ASSERT_FAULT_DETAIL[] = "assertFaultDialogDetail";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
@@ -5980,6 +5981,7 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     if (abilityRecord && abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX &&
         abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
         (const_cast<Want &>(want)).SetParam(AbilityRuntime::ServerConstant::DLP_INDEX, abilityRecord->GetAppIndex());
+        (const_cast<Want &>(want)).SetParam(DLP_PARAMS_SECURITY_FLAG, abilityRecord->GetSecurityFlag());
     }
 
     if (abilityRecord != nullptr) {
@@ -6055,6 +6057,7 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
     if (abilityRecord && abilityRecord->GetAppIndex() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX &&
         abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
         (const_cast<Want &>(want)).SetParam(AbilityRuntime::ServerConstant::DLP_INDEX, abilityRecord->GetAppIndex());
+        (const_cast<Want &>(want)).SetParam(DLP_PARAMS_SECURITY_FLAG, abilityRecord->GetSecurityFlag());
     }
     request.want = want;
     request.callerToken = callerToken;
