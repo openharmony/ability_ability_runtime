@@ -237,7 +237,7 @@ int32_t AppMgrProxy::GetAllRunningInstanceKeysBySelf(std::vector<std::string> &i
 }
 
 int32_t AppMgrProxy::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
-    std::vector<std::string> &instanceKeys)
+    std::vector<std::string> &instanceKeys, int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -246,6 +246,7 @@ int32_t AppMgrProxy::GetAllRunningInstanceKeysByBundleName(const std::string &bu
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_UTIL_WRITE_RET_INT(data, String, bundleName);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, userId);
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_BUNDLENAME, data, reply, option);
     if (!reply.ReadStringVector(&instanceKeys)) {

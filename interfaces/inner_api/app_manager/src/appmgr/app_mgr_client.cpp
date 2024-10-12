@@ -69,6 +69,7 @@ private:
         if (remote_ == remote.promote()) {
             remote_->RemoveDeathRecipient(deathRecipient_);
             remote_ = nullptr;
+            deathRecipient_ = nullptr;
         }
     }
 
@@ -77,6 +78,10 @@ private:
         if (!serviceManager_) {
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
+        if (remote_) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        TAG_LOGI(AAFwkTag::APPMGR, "get AppMgrRemote object");
         remote_ = serviceManager_->GetAppMgrService();
         if (!remote_) {
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
@@ -432,11 +437,11 @@ AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysBySelf(std::vector<std::
 }
 
 AppMgrResultCode AppMgrClient::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
-    std::vector<std::string> &instanceKeys)
+    std::vector<std::string> &instanceKeys, int32_t userId)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        int32_t result = service->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+        int32_t result = service->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }

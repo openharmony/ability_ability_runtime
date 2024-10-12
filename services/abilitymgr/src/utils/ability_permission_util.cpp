@@ -20,8 +20,8 @@
 #include "ability_util.h"
 #include "app_utils.h"
 #include "accesstoken_kit.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
-#include "implicit_start_processor.h"
 #include "insight_intent_execute_param.h"
 #include "ipc_skeleton.h"
 #include "multi_instance_utils.h"
@@ -111,20 +111,18 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
 int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t userId, int32_t appIndex,
     sptr<IRemoteObject> callerToken)
 {
-    if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
-        return ERR_OK;
-    }
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
     AppExecFwk::ApplicationInfo appInfo;
     auto isSupportMultiInstance = AppUtils::GetInstance().IsSupportMultiInstance();
     if (isSupportMultiInstance) {
         if (!StartAbilityUtils::GetApplicationInfo(want.GetBundle(), userId, appInfo)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "can't get applicationInfo through bundleName");
-            return RESOLVE_ABILITY_ERR;
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start");
+            return ERR_OK;
         }
         if (appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::UNSPECIFIED) {
-            if (!instanceKey.empty() || isCreating || appIndex != 0) {
+            if (!instanceKey.empty() || isCreating ||
+                (appIndex != 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX)) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "Not support multi-instance or appClone");
                 return ERR_MULTI_APP_NOT_SUPPORTED;
             }
@@ -156,7 +154,7 @@ int32_t AbilityPermissionUtil::CheckMultiInstance(Want &want, sptr<IRemoteObject
     }
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     std::vector<std::string> instanceKeyArray;
-    auto result = appMgr->GetAllRunningInstanceKeysByBundleName(want.GetBundle(), instanceKeyArray);
+    auto result = IN_PROCESS_CALL(appMgr->GetAllRunningInstanceKeysByBundleName(want.GetBundle(), instanceKeyArray));
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "Failed to get instance key");
         return ERR_INVALID_VALUE;

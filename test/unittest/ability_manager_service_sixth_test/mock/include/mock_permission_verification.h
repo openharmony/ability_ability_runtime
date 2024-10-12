@@ -69,7 +69,7 @@ struct VerificationInfo {
 
     int CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const;
 
-    int CheckCallAbilityPermission(const VerificationInfo &verificationInfo) const;
+    int CheckCallAbilityPermission(const VerificationInfo &verificationInfo, bool isCallByShortcut) const;
 
     int CheckCallServiceExtensionPermission(const VerificationInfo &verificationInfo) const;
 

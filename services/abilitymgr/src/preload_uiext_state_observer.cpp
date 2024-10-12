@@ -41,5 +41,22 @@ void PreLoadUIExtStateObserver::OnProcessDied(const AppExecFwk::ProcessData &pro
         TAG_LOGW(AAFwkTag::ABILITYMGR, "extensionRecord null");
     }
 }
+
+void PreLoadUIExtStateObserver::OnAppCacheStateChanged(const AppExecFwk::AppStateData &appStateData)
+{
+    auto extensionRecord = extensionRecord_.lock();
+    if (extensionRecord != nullptr) {
+        auto hostPid = extensionRecord->hostPid_;
+        int32_t cachePid = appStateData.pid;
+        if (static_cast<int32_t>(hostPid) != cachePid ||
+            appStateData.state != static_cast<int32_t>(AppExecFwk::ApplicationState::APP_STATE_CACHED)) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "appStateData.state = %{public}d", appStateData.state);
+            return;
+        }
+        extensionRecord->UnloadUIExtensionAbility();
+    } else {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "extensionRecord null");
+    }
+}
 } // namespace AAFwk
 } // namespace OHOS

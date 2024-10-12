@@ -61,6 +61,10 @@ friend class TaskHandle;
 public:
     static std::shared_ptr<TaskHandlerWrap> CreateQueueHandler(const std::string &queueName,
         TaskQoS queueQos = TaskQoS::DEFAULT);
+
+    static std::shared_ptr<TaskHandlerWrap> CreateConcurrentQueueHandler(const std::string &queueName,
+        int32_t concurrentNum, TaskQoS queueQos = TaskQoS::DEFAULT);
+
     static std::shared_ptr<TaskHandlerWrap> GetFfrtHandler();
 
     TaskHandlerWrap(TaskHandlerWrap &) = delete;

@@ -264,38 +264,11 @@ ErrCode ServiceExtensionContext::PreStartMission(const std::string& bundleName, 
     return err;
 }
 
-int ServiceExtensionContext::GenerateCurRequestCode()
-{
-    std::lock_guard lock(requestCodeMutex_);
-    curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
-    return curRequestCode_;
-}
-
-void ServiceExtensionContext::InsertResultCallbackTask(int requestCode, RuntimeTask &&task)
-{
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    {
-        std::lock_guard<std::mutex> lock(mutexlock_);
-        resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
-    }
-}
-
-void ServiceExtensionContext::RemoveResultCallbackTask(int requestCode)
-{
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    {
-        std::lock_guard<std::mutex> lock(mutexlock_);
-        resultCallbacks_.erase(requestCode);
-    }
-}
-
 ErrCode ServiceExtensionContext::OpenLink(const AAFwk::Want& want, int requestCode)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
 }
 
-int32_t ServiceExtensionContext::curRequestCode_ = 0;
-std::mutex ServiceExtensionContext::requestCodeMutex_;
 }  // namespace AbilityRuntime
 }  // namespace OHOS

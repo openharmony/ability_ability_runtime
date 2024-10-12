@@ -32,7 +32,6 @@ class CacheProcessManager {
     DECLARE_DELAYED_SINGLETON(CacheProcessManager);
 public:
     bool QueryEnableProcessCache();
-    bool QueryEnableProcessCacheFromKits();
     void SetAppMgr(const std::weak_ptr<AppMgrServiceInner> &appMgr);
     bool PenddingCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool CheckAndCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord);

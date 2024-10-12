@@ -603,6 +603,10 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     bool isProcCache = false;
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey);
+    if (appRecord && appRecord->IsCaching()) {
+        appRecord->SetProcessCacheBlocked(true);
+        appRecord = nullptr;
+    }
     if (appRecord && abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
         NotifyMemMgrPriorityChanged(appRecord);
     }
@@ -1178,7 +1182,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     }
     appRecord->PopForegroundingAbilityTokens();
 
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s is foreground", appRecord->GetBundleName().c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "ApplicationForegrounded, bundle: %{public}s", appRecord->GetBundleName().c_str());
     if (appRecord->GetApplicationPendingState() == ApplicationPendingState::BACKGROUNDING) {
         appRecord->ScheduleBackgroundRunning();
     } else if (appRecord->GetApplicationPendingState() == ApplicationPendingState::FOREGROUNDING) {
@@ -1226,7 +1230,7 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         appRecord->SetApplicationPendingState(ApplicationPendingState::READY);
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s is background", appRecord->GetBundleName().c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "ApplicationBackgrounded, bundle: %{public}s", appRecord->GetBundleName().c_str());
     auto eventInfo = BuildEventInfo(appRecord);
     AAFwk::EventReport::SendAppBackgroundEvent(AAFwk::EventName::APP_BACKGROUND, eventInfo);
 }
@@ -1856,27 +1860,29 @@ int32_t AppMgrServiceInner::GetAllRunningInstanceKeysBySelf(std::vector<std::str
     std::string bundleName;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     auto ret = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callingUid, bundleName));
-    if (!ret) {
+    if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetNameForUid failed, ret=%{public}d", ret);
         return AAFwk::ERR_BUNDLE_NOT_EXIST;
     }
-    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys);
+    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, currentUserId_);
 }
 
 int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
-    std::vector<std::string> &instanceKeys)
+    std::vector<std::string> &instanceKeys, int32_t userId)
 {
-    auto userId = GetUserIdByUid(IPCSkeleton::GetCallingUid());
+    if (userId == -1) {
+        userId = currentUserId_;
+    }
     if (VerifyAccountPermission(AAFwk::PermissionConstants::PERMISSION_GET_RUNNING_INFO, userId) ==
         ERR_PERMISSION_DENIED) {
         TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Permission verification fail", __func__);
         return ERR_PERMISSION_DENIED;
     }
-    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys);
+    return GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, userId);
 }
 
 int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
-    std::vector<std::string> &instanceKeys)
+    std::vector<std::string> &instanceKeys, int32_t userId)
 {
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "bundlename null");
@@ -1893,7 +1899,7 @@ int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleNameInner(const std
     }
     ApplicationInfo appInfo;
     auto queryRet = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
-        ApplicationFlag::GET_BASIC_APPLICATION_INFO, currentUserId_, appInfo));
+        ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo));
     if (!queryRet) {
         TAG_LOGE(AAFwkTag::APPMGR, "bundle unexist");
         return AAFwk::ERR_BUNDLE_NOT_EXIST;
@@ -1912,7 +1918,7 @@ int32_t AppMgrServiceInner::GetAllRunningInstanceKeysByBundleNameInner(const std
         if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
             continue;
         }
-        if (GetUserIdByUid(appRecord->GetUid()) != currentUserId_) {
+        if (GetUserIdByUid(appRecord->GetUid()) != userId) {
             continue;
         }
         GetRunningMultiInstanceKeys(appRecord, instanceKeys);
@@ -7648,7 +7654,7 @@ int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
         return ERR_INVALID_VALUE;
     }
 
-    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCacheFromKits()) {
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
         TAG_LOGE(AAFwkTag::APPMGR, "process cache feature is disabled.");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }

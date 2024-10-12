@@ -437,7 +437,7 @@ HWTEST_F(AppMgrServiceModuleTest, GetAllRunningInstanceKeysByBundleName_001, Tes
     std::string testBundleName = "testBundleName";
     std::vector<std::string> testInstanceKeys;
 
-    EXPECT_CALL(*mockAppMgrServiceInner_, GetAllRunningInstanceKeysByBundleName(_, _))
+    EXPECT_CALL(*mockAppMgrServiceInner_, GetAllRunningInstanceKeysByBundleName(_, _, _))
         .Times(1).WillOnce(Return(ERR_OK));
 
     auto result = appMgrService_->GetAllRunningInstanceKeysByBundleName(testBundleName, testInstanceKeys);

@@ -37,22 +37,6 @@
 namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
-namespace {
-#ifdef __aarch64__
-constexpr uint32_t OBJECT_MASK = 0xffffffff;
-#else
-constexpr uint32_t OBJECT_MASK = 0xffffff;
-#endif
-
-uint32_t ConvertAddr(const void *ptr)
-{
-    if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ptr is null");
-        return 0;
-    }
-    return static_cast<uint32_t>((reinterpret_cast<uintptr_t>(ptr)) & OBJECT_MASK);
-}
-}
 
 AppMgrStub::AppMgrStub() {}
 
@@ -372,12 +356,6 @@ int32_t AppMgrStub::HandleAttachApplication(MessageParcel &data, MessageParcel &
     if (client == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "remote object null");
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "remote: %{public}u", ConvertAddr(client.GetRefPtr()));
-    IPCObjectProxy *proxy = reinterpret_cast<IPCObjectProxy *>(client.GetRefPtr());
-    if (proxy != nullptr) {
-        int32_t pid = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
-        TAG_LOGI(AAFwkTag::APPMGR, "handle:%{public}u, callingPid:%{public}d", proxy->GetHandle(), pid);
-    }
     AttachApplication(client);
     return NO_ERROR;
 }
@@ -515,8 +493,9 @@ int32_t AppMgrStub::HandleGetAllRunningInstanceKeysBySelf(MessageParcel &data, M
 int32_t AppMgrStub::HandleGetAllRunningInstanceKeysByBundleName(MessageParcel &data, MessageParcel &reply)
 {
     std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
     std::vector<std::string> instanceKeys;
-    int32_t result = GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    int32_t result = GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     if (!reply.WriteStringVector(instanceKeys)) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed to write isntanceKeys");
         return ERR_INVALID_VALUE;

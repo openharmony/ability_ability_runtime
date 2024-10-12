@@ -17,6 +17,7 @@
 
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
+#include "bundle_mgr_client.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
@@ -179,6 +180,21 @@ bool UPMSUtils::CheckIsSystemAppByTokenId(uint32_t tokenId)
     return false;
 }
 
+bool UPMSUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName)
+{
+    auto bmsClient = DelayedSingleton<AppExecFwk::BundleMgrClient>::GetInstance();
+    if (bmsClient == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "bundleMgrClient is nullptr.");
+        return false;
+    }
+    auto bmsRet = bmsClient->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dirName);
+    if (bmsRet != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "GetDirByBundleNameAndAppIndex failed, ret:%{public}d", bmsRet);
+        return false;
+    }
+    return true;
+}
+
 bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
 {
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
@@ -189,8 +205,7 @@ bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName
             TAG_LOGE(AAFwkTag::URIPERMMGR, "GetHapTokenInfo failed, ret:%{public}d", ret);
             return false;
         }
-        bundleName = hapInfo.bundleName;
-        return true;
+        return GetDirByBundleNameAndAppIndex(hapInfo.bundleName, hapInfo.instIndex, bundleName);
     }
     return false;
 }
@@ -210,32 +225,6 @@ int32_t UPMSUtils::GetAppIdByBundleName(const std::string &bundleName, std::stri
         return INNER_ERR;
     }
     return ERR_OK;
-}
-
-std::string UPMSUtils::GetCallerNameByTokenId(uint32_t tokenId)
-{
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        // for SA, return process name
-        Security::AccessToken::NativeTokenInfo nativeInfo;
-        auto result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeInfo);
-        if (result != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "GetNativeTokenInfo failed, tokenId:%{public}u", tokenId);
-            return "";
-        }
-        return nativeInfo.processName;
-    }
-    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
-        // for application, return bundle name
-        Security::AccessToken::HapTokenInfo hapInfo;
-        auto ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(tokenId, hapInfo);
-        if (ret != Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "GetHapTokenInfo failed, ret:%{public}d", ret);
-            return "";
-        }
-        return hapInfo.bundleName;
-    }
-    return "";
 }
 
 int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t appIndex, uint32_t &tokenId)

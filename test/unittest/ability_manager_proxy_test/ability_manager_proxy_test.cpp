@@ -2765,5 +2765,24 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_ChangeUIAbilityVisibilityB
 
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: TerminateMission
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService TerminateMission
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of TerminateMission
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_TerminateMission_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    int32_t missionId = 1;
+    auto res = proxy_->TerminateMission(missionId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::TERMINATE_MISSION), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS

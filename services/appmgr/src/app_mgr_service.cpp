@@ -52,6 +52,7 @@ constexpr const size_t VALID_DUMP_FFRT_ARG_SIZE = 2;
 constexpr const int MAX_DUMP_FFRT_PID_NUMBER = 3;
 constexpr const int BASE_TEN = 10;
 constexpr const char SIGN_TERMINAL = '\0';
+constexpr int32_t DEFAULT_CONCURRENT_NUMBER = 1;
 namespace {
 using namespace std::chrono_literals;
 constexpr const char* TASK_INIT_APPMGRSERVICEINNER = "InitAppMgrServiceInnerTask";
@@ -145,7 +146,8 @@ ErrCode AppMgrService::Init()
         return ERR_INVALID_OPERATION;
     }
 
-    taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("app_mgr_task_queue");
+    taskHandler_ = AAFwk::TaskHandlerWrap::CreateConcurrentQueueHandler("app_mgr_task_queue",
+        DEFAULT_CONCURRENT_NUMBER);
     eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrServiceInner_);
     appMgrServiceInner_->SetTaskHandler(taskHandler_);
     appMgrServiceInner_->SetEventHandler(eventHandler_);
@@ -404,12 +406,12 @@ int32_t AppMgrService::GetAllRunningInstanceKeysBySelf(std::vector<std::string> 
 }
 
 int32_t AppMgrService::GetAllRunningInstanceKeysByBundleName(const std::string &bundleName,
-    std::vector<std::string> &instanceKeys)
+    std::vector<std::string> &instanceKeys, int32_t userId)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    return appMgrServiceInner_->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
 }
 
 int32_t AppMgrService::GetRunningProcessesByBundleType(BundleType bundleType,

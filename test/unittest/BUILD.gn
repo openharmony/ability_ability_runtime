@@ -346,6 +346,7 @@ group("unittest") {
       "ability_interceptor_third_test:unittest",
       "ability_manager_client_branch_second_test:unittest",
       "ability_manager_client_branch_test:unittest",
+      "ability_manager_collaborator_proxy_test:unittest",
       "ability_manager_event_subscriber_test:unittest",
       "ability_manager_proxy_test:unittest",
       "ability_manager_service_dialog_test:unittest",
@@ -369,12 +370,11 @@ group("unittest") {
       "ability_service_log_test:unittest",
       "ability_service_start_test:unittest",
       "ability_stage_context_test:unittest",
-      "ability_timeout_test",
+      "ability_timeout_test:unittest",
       "ability_token_proxy_test:unittest",
       "ability_token_stub_test:unittest",
       "acquire_share_data_callback_proxy_test:unittest",
       "advanced_security_mode_manager_test:unittest",
-      "ag_convert_callback_impl_test:unittest",
       "ams_ability_running_record_test:unittest",
       "ams_app_death_recipient_test:unittest",
       "ams_app_life_cycle_test:unittest",
@@ -425,6 +425,7 @@ group("unittest") {
       "app_scheduler_host_test:unittest",
       "app_scheduler_proxy_test:unittest",
       "app_scheduler_test:unittest",
+      "app_spawn_client_second_test:unittest",
       "app_spawn_client_test:unittest",
       "app_state_observer_manager_test:unittest",
       "app_utils_test:unittest",
@@ -488,6 +489,7 @@ group("unittest") {
       "dataobs_mgr_stub_test:unittest",
       "deeplink_reserve_config_test:unittest",
       "dfr_test:unittest",
+      "dialog_session_info_test:unittest",
       "dialog_session_manager_test:unittest",
       "dlp_state_item_test:unittest",
       "dlp_utils_test:unittest",
@@ -535,6 +537,7 @@ group("unittest") {
       "mission_listener_proxy_test:unittest",
       "mission_listener_stub_test:unittest",
       "mission_listener_test:unittest",
+      "multi_app_utils_test:unittest",
       "multi_instance_utils_test:unittest",
       "napi_base_context_test:unittest",
       "native_runtime_test:unittest",
@@ -590,6 +593,7 @@ group("unittest") {
       "ui_service_proxy_test:unittest",
       "ui_service_stub_test:unittest",
       "unlock_screen_test:unittest",
+      "update_caller_info_util_test:unittest",
       "uri_perm_mgr_test:unittest",
       "uri_permission_impl_test:unittest",
       "uri_permission_manager_test:unittest",
@@ -606,7 +610,6 @@ group("unittest") {
       "want_sender_info_test:unittest",
       "want_sender_proxy_test:unittest",
       "want_sender_stub_test:unittest",
-      "want_utils_test:unittest",
       "wants_info_test:unittest",
       "window_config_test:unittest",
       "window_focus_changed_listener_test:unittest",
@@ -626,7 +629,15 @@ group("unittest") {
         "mission_test:unittest",
         "specified_mission_list_test:unittest",
         "start_option_display_id_test:unittest",
+        "status_bar_delegate_manager_test:unittest",
         "ui_ability_lifecycle_manager_test:unittest",
+      ]
+    }
+
+    if (include_app_domain_verify) {
+      deps += [
+        "ag_convert_callback_impl_test:unittest",
+        "want_utils_test:unittest",
       ]
     }
   }
