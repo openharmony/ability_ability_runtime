@@ -167,12 +167,6 @@ public:
      */
     int32_t OnShare(WantParams &wantParams) override;
 
-    /**
-     * @brief Get JsAbility
-     * @return Return the JsAbility
-     */
-    int64_t GetCjAbilityId();
-
 #ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN
 public:
@@ -227,6 +221,12 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnBackground() override;
+    
+    /**
+     * @brief Called after window stage focused or unfocused
+     * You can override this function to implement your own processing logic.
+     */
+    void OnAfterFocusedCommon(bool isFocused) override;
 
     /**
      * Called when back press is dispatched.
@@ -267,12 +267,6 @@ public:
     void ExecuteInsightIntentMoveToForeground(const Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
-
-    /**
-     * @brief Get CjWindow Stage
-     * @return Returns the current WindowStagePtr.
-     */
-    WindowStagePtr GetCjWindowStagePtr();
 
 protected:
     void DoOnForeground(const Want &want) override;

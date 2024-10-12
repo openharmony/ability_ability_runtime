@@ -103,16 +103,6 @@ CJUIAbility::~CJUIAbility()
     }
 }
 
-int64_t CJUIAbility::GetCjAbilityId()
-{
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (cjAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
-        return -1;
-    }
-    return cjAbilityObj_->GetId();
-}
-
 void CJUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     const std::shared_ptr<OHOSApplication> application, std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
@@ -336,16 +326,6 @@ void CJUIAbility::OnSceneCreated()
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
-WindowStagePtr CJUIAbility::GetCjWindowStagePtr()
-{
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (cjWindowStage_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null cjWindowStage_");
-        return nullptr;
-    }
-    return reinterpret_cast<WindowStagePtr>(cjWindowStage_.GetRefPtr());
-}
-
 void CJUIAbility::OnSceneRestored()
 {
     UIAbility::OnSceneRestored();
@@ -524,6 +504,26 @@ void CJUIAbility::OnBackground()
         }
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
+}
+
+void CJUIAbility::OnAfterFocusedCommon(bool isFocused)
+{
+    if (!cjAbilityObj_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj");
+        return;
+    }
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
+        if (appContext != nullptr && !(appContext->IsAbilityLifecycleCallbackEmpty())) {
+            WindowStagePtr windowStage = reinterpret_cast<WindowStagePtr>(cjWindowStage_.GetRefPtr());
+            if (isFocused) {
+                appContext->DispatchWindowStageFocus(cjAbilityObj_->GetId(), windowStage);
+            } else {
+                appContext->DispatchWindowStageUnfocus(cjAbilityObj_->GetId(), windowStage);
+            }
+        }
+    }
 }
 
 bool CJUIAbility::OnBackPress()

@@ -666,6 +666,12 @@ void UIAbility::OnBackground()
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONBACKGROUND, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
+void UIAbility::OnAfterFocusedCommon(bool isFocused)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    return;
+}
+
 bool UIAbility::OnPrepareTerminate()
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
