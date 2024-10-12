@@ -8156,7 +8156,7 @@ void AbilityManagerService::UpdateSignatureInfo(std::string bundleName, Want& wa
     }
 }
 
-void UpdateCallerInfoUtil::UpdateDmsCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
+void AbilityManagerService::UpdateDmsCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
