@@ -55,7 +55,7 @@ bool PermissionVerification::VerifyCallingPermission(
     const std::string &permissionName, const uint32_t specifyTokenId) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::DEFAULT, "VerifyCallingPermission permission %{public}s, specifyTokenId is %{public}u",
+    TAG_LOGD(AAFwkTag::DEFAULT, "permission %{public}s, specifyTokenId: %{public}u",
         permissionName.c_str(), specifyTokenId);
     auto callerToken = specifyTokenId == 0 ? GetCallingTokenID() : specifyTokenId;
     TAG_LOGD(AAFwkTag::DEFAULT, "Token: %{public}u", callerToken);
@@ -528,10 +528,10 @@ bool PermissionVerification::VerifyPreStartAtomicServicePermission() const
 bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
 {
     if (IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_KILL_PROCESS_DEPENDED_ON_WEB)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "Permission granted");
+        TAG_LOGD(AAFwkTag::APPMGR, "Permission verfication succeeded.");
         return true;
     }
-    TAG_LOGW(AAFwkTag::APPMGR, "Permission denied");
+    TAG_LOGW(AAFwkTag::APPMGR, "Permission verfication failed");
     return false;
 }
 }  // namespace AAFwk
