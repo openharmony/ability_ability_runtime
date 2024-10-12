@@ -4621,6 +4621,9 @@ void AppMgrServiceInner::InitGlobalConfiguration()
     auto language = OHOS::Global::I18n::LocaleConfig::GetSystemLocale();
     TAG_LOGI(AAFwkTag::APPMGR, "current global language: %{public}s", language.c_str());
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+    std::string sysHour = OHOS::Global::I18n::LocaleConfig::GetSystemHour();
+    TAG_LOGI(AAFwkTag::APPMGR, "current 24 hour clock: %{public}s", sysHour.c_str());
+    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_HOUR, sysHour);
 #endif
 
     // Assign to default colorMode "light"
