@@ -1337,7 +1337,11 @@ void JSServiceExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null methodOnConnect");
         return;
     }
-    napi_call_function(env_, obj, methodOnConnect, ARGC_TWO, argv, nullptr);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Call onConnect");
+    napi_status status = napi_call_function(env_, obj, methodOnConnect, ARGC_TWO, argv, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "call js func failed %{public}d", status);
+    }
 }
 
 void JSServiceExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
@@ -1403,7 +1407,11 @@ void JSServiceExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFw
                 AAFwkTag::SERVICE_EXT, "OnAbilityDisconnectDone erase g_connects.size:%{public}zu", g_connects.size());
         }
     }
-    napi_call_function(env_, obj, method, ARGC_ONE, argv, nullptr);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Call onDisconnect");
+    napi_status status = napi_call_function(env_, obj, method, ARGC_ONE, argv, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "call js func failed %{public}d", status);
+    }
 }
 
 void JSServiceExtensionConnection::SetJsConnectionObject(napi_value jsConnectionObject)
