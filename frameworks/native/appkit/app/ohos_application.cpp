@@ -635,6 +635,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
+
         auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
         if (autoStartupCallback != nullptr) {
             abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
@@ -1006,22 +1007,24 @@ bool OHOSApplication::isUpdateFontSize(Configuration &config, AbilityRuntime::Se
         return false;
     }
 
-    auto preLevle = ApplicationConfigurationManager::GetInstance().GetFontSetLevel();
-    if (level < preLevle) {
+    auto preLevel = ApplicationConfigurationManager::GetInstance().GetFontSetLevel();
+    if (level < preLevel) {
         config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+        TAG_LOGW(AAFwkTag::APPKIT, "low level");
         return false;
     }
 
-    std::string globalFontFollowSysteme = configuration_->GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
-    if (level == preLevle && !globalFontFollowSysteme.empty()) {
-        if (globalFontFollowSysteme.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
+    std::string globalFontFollowSystem = configuration_->GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    if (level == preLevel && !globalFontFollowSystem.empty()) {
+        TAG_LOGW(AAFwkTag::APPKIT, "same level");
+        if (globalFontFollowSystem.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
             return true;
         }
         config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
         return false;
     }
 
-    // level > preLevle
+    // level > preLevel
     configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     ApplicationConfigurationManager::GetInstance().SetfontSetLevel(level);
     return true;
@@ -1058,7 +1061,7 @@ bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::st
     if (processType == ProcessType::NORMAL) {
         return true;
     }
-    
+
     std::string processName = processInfo->GetProcessName();
     if (processName == bundleName || processName == process) {
         return true;
