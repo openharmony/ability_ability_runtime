@@ -7574,6 +7574,32 @@ void AppMgrServiceInner::GetPidsByAccessTokenId(const uint32_t accessTokenId, st
     }
 }
 
+bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr) {
+        return false;
+    }
+    
+    auto abilityRecordList = appRecord->GetAbilities();
+
+    for (auto it = abilityRecordList.begin(); it != abilityRecordList.end(); ++it) {
+        if (it->second == nullptr) {
+            return false;
+        }
+        auto abilityInfo = it->second->GetAbilityInfo();
+        if (abilityInfo == nullptr) {
+            return false;
+        }
+        
+        bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE);
+        if (!isUIAbility) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool AppMgrServiceInner::IsProcessAttached(sptr<IRemoteObject> token) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
