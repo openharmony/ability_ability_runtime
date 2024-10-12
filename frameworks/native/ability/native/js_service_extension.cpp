@@ -633,7 +633,11 @@ napi_value JsServiceExtension::CallOnConnect(const AAFwk::Want &want)
         return nullptr;
     }
     napi_value remoteNative = nullptr;
-    napi_call_function(env, obj, method, ARGC_ONE, argv, &remoteNative);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Call onConnect");
+    napi_status status = napi_call_function(env, obj, method, ARGC_ONE, argv, &remoteNative);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "call js func failed %{public}d", status);
+    }
     if (remoteNative == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null remoteNative");
     }
@@ -664,13 +668,19 @@ napi_value JsServiceExtension::CallOnDisconnect(const AAFwk::Want &want, bool wi
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "get onDisconnect from ServiceExtension obj failed");
         return nullptr;
     }
-
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Call onDisconnect");
     if (withResult) {
         napi_value result = nullptr;
-        napi_call_function(env, obj, method, ARGC_ONE, argv, &result);
+        napi_status status = napi_call_function(env, obj, method, ARGC_ONE, argv, &result);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "call js func failed %{public}d", status);
+        }
         return handleEscape.Escape(result);
     } else {
-        napi_call_function(env, obj, method, ARGC_ONE, argv, nullptr);
+        napi_status status = napi_call_function(env, obj, method, ARGC_ONE, argv, nullptr);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "call js func failed %{public}d", status);
+        }
         return nullptr;
     }
 }
