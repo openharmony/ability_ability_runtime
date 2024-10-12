@@ -1345,7 +1345,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
 #ifdef CJ_FRONTEND
         if (!entryHapModuleInfo.abilityInfos.empty()) {
-            isCJApp = AbilityRuntime::CJRuntime::IsCJAbility(entryHapModuleInfo.abilityInfos.front().srcEntrance);
+            auto srcEntrancenName = entryHapModuleInfo.abilityInfos.front().srcEntrance;
+            isCJApp = AbilityRuntime::CJRuntime::IsCJAbility(srcEntrancenName);
+            AbilityRuntime::CJRuntime::SetPackageName(srcEntrancenName);
         }
 #endif
         moduelJson = entryHapModuleInfo.isModuleJson;
