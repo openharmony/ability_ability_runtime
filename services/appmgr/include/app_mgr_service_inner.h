@@ -683,6 +683,8 @@ public:
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration();
 
+    std::string GetSystemTwentyFourHourClock();
+
     int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer);
 
     int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver>& observer);

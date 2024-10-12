@@ -4645,6 +4645,12 @@ std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration(
     return configuration_;
 }
 
+std::string AppMgrServiceInner::GetSystemTwentyFourHourClock()
+{
+    bool is24Hour = OHOS::Global::I18n::LocaleConfig::Is24HourClock();
+    return is24Hour ? "true" : "false";
+}
+
 void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Kill application by appRecord.");

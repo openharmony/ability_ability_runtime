@@ -1007,8 +1007,7 @@ int32_t AppMgrService::GetConfiguration(Configuration& config)
         return ERR_INVALID_OPERATION;
     }
     config = *(appMgrServiceInner_->GetConfiguration());
-    bool is24Hour = OHOS::Global::I18n::LocaleConfig::Is24HourClock();
-    std::string hourStr = is24Hour ? "true" : "false";
+    std::string hourStr = appMgrServiceInner_->GetSystemTwentyFourHourClock();
     TAG_LOGI(AAFwkTag::APPMGR, "current 24 hour clock: %{public}s", hourStr.c_str());
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_HOUR, hourStr);
     return ERR_OK;
