@@ -230,6 +230,12 @@ ohos_shared_library("abilityms") {
     external_deps += [ "power_manager:powermgr_client" ]
   }
 
+  if (ability_runtime_graphics &&
+      ability_runtime_start_window_options_with_pixelmap) {
+    defines += [ "START_WINDOW_OPTIONS_WITH_PIXELMAP" ]
+    external_deps += [ "image_framework:image_native" ]
+  }
+
   version_script = "libabilityms.map"
   subsystem_name = "ability"
   innerapi_tags = [ "platformsdk_indirect" ]

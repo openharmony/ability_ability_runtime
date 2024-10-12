@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-    class Configuration;
+class Configuration;
 }
 }
 
@@ -131,12 +131,6 @@ public:
 
     /**
      * @brief Update mission info to real element by broker.
-     * @param info info of mission.
-     */
-    virtual void UpdateMissionInfo(InnerMissionInfoDto &info) = 0;
-
-    /**
-     * @brief Update mission info to real element by broker.
      * @param sessionInfo sessionInfo.
      */
     virtual void UpdateMissionInfo(sptr<SessionInfo> &sessionInfo) = 0;
@@ -191,8 +185,7 @@ public:
         NOTIFY_TERMINATE_MISSION,
         NOTIFY_CLEAR_MISSION,
         NOTIFY_REMOVE_SHELL_PROCESS,
-        UPDATE_MISSION_INFO,
-        NOTIFY_MISSION_CREATED_BY_SCB,
+        NOTIFY_MISSION_CREATED_BY_SCB = 10,
         NOTIFY_LOAD_ABILITY_BY_SCB,
         UPDATE_MISSION_INFO_BY_SCB,
         NOTIFY_PRELOAD_ABILITY,

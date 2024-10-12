@@ -169,12 +169,6 @@ public:
     using SelfType = ServiceExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
 
-    int GenerateCurRequestCode();
-
-    void InsertResultCallbackTask(int requestCode, RuntimeTask&& task);
-
-    void RemoveResultCallbackTask(int requestCode);
-
     ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
 
 protected:
@@ -186,10 +180,6 @@ protected:
 private:
     static int ILLEGAL_REQUEST_CODE;
     std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
-    std::map<int, RuntimeTask> resultCallbacks_;
-    static int32_t curRequestCode_;
-    static std::mutex requestCodeMutex_;
-    std::mutex mutexlock_;
 
     /**
      * @brief Get Current Ability Type

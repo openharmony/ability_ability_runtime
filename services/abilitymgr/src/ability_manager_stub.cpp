@@ -1751,7 +1751,9 @@ int AbilityManagerStub::GetWantSenderInner(MessageParcel &data, MessageParcel &r
     if (data.ReadBool()) {
         callerToken = data.ReadRemoteObject();
     }
-    sptr<IWantSender> wantSender = GetWantSender(*wantSenderInfo, callerToken);
+
+    int32_t uid = data.ReadInt32();
+    sptr<IWantSender> wantSender = GetWantSender(*wantSenderInfo, callerToken, uid);
     if (!reply.WriteRemoteObject(((wantSender == nullptr) ? nullptr : wantSender->AsObject()))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed reply wantSender to client, for write parcel error");
         return ERR_INVALID_VALUE;

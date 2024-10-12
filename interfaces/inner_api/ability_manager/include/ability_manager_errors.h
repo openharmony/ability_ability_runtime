@@ -651,11 +651,6 @@ enum {
      */
     ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED = 2097278,
 
-    /*
-    * Result (2097279) for can not show or hide
-     */
-    ERR_CAN_NOT_SHOW_HIDE = 2097279,
-
     /**
      * Native error(3000000) for target bundle not exist.
      */

@@ -18,5 +18,8 @@
 namespace OHOS {
 namespace AAFwk {
 int MyFlag::flag_ = 0;
+int MyFlag::systemAppFlag_ = 1;
+int MyFlag::abilityCallFlag_ = 0;
+int MyFlag::systemCallFlag_ = 1;
 } // namespace AAFwk
 } // namespace OHOS

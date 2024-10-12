@@ -350,37 +350,8 @@ HWTEST_F(FreeInstallTest, FreeInstall_AddFreeInstallObserver_001, TestSize.Level
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
 
-    const sptr<IRemoteObject> callerToken = MockToken();
-    freeInstallManager_->AddFreeInstallObserver(nullptr, nullptr);
-
-    freeInstallManager_->AddFreeInstallObserver(callerToken, nullptr);
-}
-
-/**
- * @tc.number: FreeInstall_RemoveFreeInstallInfo_001
- * @tc.name: RemoveFreeInstallInfo
- * @tc.desc: Test RemoveFreeInstallInfo.
- */
-HWTEST_F(FreeInstallTest, FreeInstall_RemoveFreeInstallInfo_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
-
-    freeInstallManager_->RemoveFreeInstallInfo("com.ix.hiservcie", "ServiceAbility", "2024-7-17 00:00:00");
-}
-
-/**
- * @tc.number: FreeInstall_GetFreeInstallTaskInfo_001
- * @tc.name: GetFreeInstallTaskInfo
- * @tc.desc: Test GetFreeInstallTaskInfo.
- */
-HWTEST_F(FreeInstallTest, FreeInstall_GetFreeInstallTaskInfo_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
-
-    FreeInstallInfo  freeInstallInfo;
-    freeInstallManager_->GetFreeInstallTaskInfo("sessionId", freeInstallInfo);
+    auto ret = freeInstallManager_->AddFreeInstallObserver(nullptr, nullptr);
+    EXPECT_EQ(CHECK_PERMISSION_FAILED, ret);
 }
 
 /**
@@ -394,6 +365,10 @@ HWTEST_F(FreeInstallTest, FreeInstall_SetSCBCallStatus_001, TestSize.Level1)
     freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
 
     freeInstallManager_->SetSCBCallStatus("com.ix.hiservcie", "ServiceAbility", "2024-7-17 00:00:00", false);
+    FreeInstallInfo freeInstallInfo;
+    freeInstallManager_->GetFreeInstallTaskInfo("com.ix.hiservcie", "ServiceAbility",
+        "2024-7-17 00:00:00", freeInstallInfo);
+    EXPECT_EQ(freeInstallInfo.isStartUIAbilityBySCBCalled, false);
 }
 
 /**
@@ -408,6 +383,10 @@ HWTEST_F(FreeInstallTest, FreeInstall_SetPreStartMissionCallStatus_001, TestSize
 
     freeInstallManager_->SetPreStartMissionCallStatus("com.ix.hiservcie", "ServiceAbility",
         "2024-7-17 00:00:00", false);
+    FreeInstallInfo freeInstallInfo;
+    freeInstallManager_->GetFreeInstallTaskInfo("com.ix.hiservcie", "ServiceAbility",
+        "2024-7-17 00:00:00", freeInstallInfo);
+    EXPECT_EQ(freeInstallInfo.isPreStartMissionCalled, false);
 }
 
 /**
@@ -420,8 +399,33 @@ HWTEST_F(FreeInstallTest, FreeInstall_SetFreeInstallTaskSessionId_001, TestSize.
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
 
+    Want want;
+    ElementName element("", "com.ix.hiservcie", "ServiceAbility");
+    want.SetElement(element);
+
+    std::string startTime = "2024-7-17 00:00:00";
+    want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
+    const int32_t userId = 1;
+    const int requestCode = 0;
+    // mock callerToken
+    const sptr<IRemoteObject> callerToken = MockToken();
+    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, callerToken, false);
+    {
+        std::lock_guard<ffrt::mutex> lock(freeInstallManager_->freeInstallListLock_);
+        freeInstallManager_->freeInstallList_.push_back(info);
+    }
+
     freeInstallManager_->SetFreeInstallTaskSessionId("com.ix.hiservcie", "ServiceAbility",
         "2024-7-17 00:00:00", "sessionId");
+    FreeInstallInfo freeInstallInfo;
+    bool ret = freeInstallManager_->GetFreeInstallTaskInfo("sessionId", freeInstallInfo);
+    EXPECT_EQ(true, ret);
+
+    freeInstallManager_->RemoveFreeInstallInfo("com.ix.hiservcie", "ServiceAbility", "2024-7-17 00:00:00");
+    ret = freeInstallManager_->GetFreeInstallTaskInfo("com.ix.hiservcie", "ServiceAbility",
+        "2024-7-17 00:00:00", freeInstallInfo);
+    EXPECT_EQ(false, ret);
+    freeInstallManager_->OnInstallFinished(-1, 1, want, userId, false);
 }
 
 /**

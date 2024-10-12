@@ -2541,5 +2541,15 @@ bool AppRunningRecord::HasUIAbilityLaunched()
 {
     return hasUIAbilityLaunched_;
 }
+
+void AppRunningRecord::SetProcessCaching(bool isCaching)
+{
+    isCaching_ = isCaching;
+}
+
+bool AppRunningRecord::IsCaching()
+{
+    return isCaching_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

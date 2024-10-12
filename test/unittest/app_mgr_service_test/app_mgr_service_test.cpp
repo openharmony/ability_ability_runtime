@@ -1801,6 +1801,138 @@ HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Lev
     int32_t ret = appMgrService->GetRunningMultiAppInfoByBundleName(bundleName, info);
     EXPECT_NE(ret, ERR_OK);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysBySelf
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllRunningInstanceKeysBySelf
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllRunningInstanceKeysBySelf
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysBySelf_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysBySelf
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllRunningInstanceKeysBySelf
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllRunningInstanceKeysBySelf
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysBySelf_002, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    std::vector<std::string> instanceKeys;
+    int32_t ret = appMgrService->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetAllRunningInstanceKeysBySelf_003
+ * @tc.desc: Start native child process.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysBySelf_003, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "GetAllRunningInstanceKeysBySelf_003 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, GetAllRunningInstanceKeysBySelf(_))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysBySelf(instanceKeys);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysByBundleName
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllRunningInstanceKeysByBundleName
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllRunningInstanceKeysByBundleName
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysByBundleName_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+
+    std::string bundleName = "testBundle";
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: GetAllRunningInstanceKeysByBundleName
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService GetAllRunningInstanceKeysByBundleName
+ * EnvConditions: NA
+ * CaseDescription: Verify GetAllRunningInstanceKeysByBundleName
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysByBundleName_002, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    std::string bundleName = "testBundle";
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: GetAllRunningInstanceKeysByBundleName_003
+ * @tc.desc: Start native child process.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysByBundleName_003, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_003 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, GetAllRunningInstanceKeysByBundleName(_, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    std::string bundleName = "testBundle";
+    std::vector<std::string> instanceKeys;
+    int32_t res = appMgrService->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    EXPECT_EQ(res, ERR_OK);
+}
+
 /**
  * @tc.name: StartNativeChildProcess_0100
  * @tc.desc: Start native child process.

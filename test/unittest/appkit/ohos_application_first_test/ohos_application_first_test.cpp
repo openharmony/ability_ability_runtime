@@ -403,7 +403,8 @@ HWTEST_F(OHOSApplicationFirstTest, AppExecFwk_OHOSApplicationTest_OnConfiguratio
     ohosApplication_->configuration_->AddItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA, "value");
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info =  nullptr;
-    std::shared_ptr<AbilityLocalRecord> abilityRecord =  std::make_shared<AbilityLocalRecord>(info, token);
+    auto want = std::make_shared<Want>();
+    std::shared_ptr<AbilityLocalRecord> abilityRecord =  std::make_shared<AbilityLocalRecord>(info, token, want, 0);
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, abilityRecord);
     sptr<AbilityThread> abilityThread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
     abilityRecord->SetAbilityThread(abilityThread);

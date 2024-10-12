@@ -15,7 +15,7 @@
 
 #ifndef OHOS_ABILITY_RUNTIME_MEDIA_PERMISSION_MANAGER_H
 #define OHOS_ABILITY_RUNTIME_MEDIA_PERMISSION_MANAGER_H
- 
+
 #include <sys/types.h>
 #include <vector>
 
@@ -26,22 +26,15 @@ namespace AAFwk {
 class MediaPermissionManager {
 public:
     static MediaPermissionManager &GetInstance();
-
     std::vector<bool> CheckUriPermission(const std::vector<Uri> &uriVec, uint32_t callerTokenId, uint32_t flag);
-
     ~MediaPermissionManager() {};
-
     MediaPermissionManager(const MediaPermissionManager &mediaPermissionManager) = delete;
-
     const MediaPermissionManager &operator=(const MediaPermissionManager &mediaPermissionManager) = delete;
 
 private:
     std::mutex mutex_;
-
     MediaPermissionManager();
-
     Media::MediaLibraryManager *GetMediaLibraryManager();
-
     Media::MediaLibraryManager *mediaLibraryManager_ = nullptr;
 };
 

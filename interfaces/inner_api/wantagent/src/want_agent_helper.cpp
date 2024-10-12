@@ -142,7 +142,7 @@ ErrCode WantAgentHelper::GetWantAgent(
     return ERR_OK;
 }
 
-std::shared_ptr<WantAgent> WantAgentHelper::GetWantAgent(const WantAgentInfo &paramsInfo, int32_t userId)
+std::shared_ptr<WantAgent> WantAgentHelper::GetWantAgent(const WantAgentInfo &paramsInfo, int32_t userId, int32_t uid)
 {
     std::vector<std::shared_ptr<Want>> wants = paramsInfo.GetWants();
     if (wants.empty()) {
@@ -170,7 +170,7 @@ std::shared_ptr<WantAgent> WantAgentHelper::GetWantAgent(const WantAgentInfo &pa
     wantSenderInfo.type = static_cast<int32_t>(paramsInfo.GetOperationType());
     wantSenderInfo.userId = userId;
     sptr<IWantSender> target = nullptr;
-    WantAgentClient::GetInstance().GetWantSender(wantSenderInfo, nullptr, target);
+    WantAgentClient::GetInstance().GetWantSender(wantSenderInfo, nullptr, target, uid);
     if (target == nullptr) {
         return nullptr;
     }
@@ -375,7 +375,7 @@ std::string WantAgentHelper::ToString(const std::shared_ptr<WantAgent> &agent)
     return jsonObject.dump();
 }
 
-std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonString)
+std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonString, int32_t uid)
 {
     if (jsonString.empty()) {
         return nullptr;
@@ -420,7 +420,7 @@ std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonSt
     }
     WantAgentInfo info(requestCode, operationType, flagsVec, wants, extraInfo);
 
-    return GetWantAgent(info);
+    return GetWantAgent(info, INVLID_WANT_AGENT_USER_ID, uid);
 }
 
 std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(nlohmann::json jsonObject)

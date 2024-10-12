@@ -23,6 +23,7 @@
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
 #include "assert_fault_callback_death_mgr.h"
+#include "global_constant.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
 #include "multi_instance_utils.h"
@@ -120,7 +121,8 @@ int AbilityConnectManager::TerminateAbilityInner(const sptr<IRemoteObject> &toke
             TAG_LOGD(AAFwkTag::ABILITYMGR, "exist connection, don't terminate");
             return ERR_OK;
         } else if (abilityRecord->IsAbilityState(AbilityState::FOREGROUND) ||
-            abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING)) {
+            abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING) ||
+            abilityRecord->IsAbilityState(AbilityState::BACKGROUNDING)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "current ability is active");
             DoBackgroundAbilityWindow(abilityRecord, abilityRecord->GetSessionInfo());
             MoveToTerminatingMap(abilityRecord);
@@ -1821,7 +1823,7 @@ void AbilityConnectManager::DoBackgroundAbilityWindow(const std::shared_ptr<Abil
         abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "exist initial or foregrounding task");
         abilityRecord->DoBackgroundAbilityWindowDelayed(true);
-    } else {
+    } else if (!abilityRecord->IsAbilityState(AbilityState::BACKGROUNDING)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid ability state");
     }
 }

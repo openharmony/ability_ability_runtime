@@ -2241,7 +2241,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartUIAbilityByPreInstallInner_001, Te
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    FreeInstallInfo  taskInfo;
+    FreeInstallInfo taskInfo;
     auto result2 = abilityMs_->StartUIAbilityByPreInstall(taskInfo);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StartUIAbilityByPreInstallInner_001 result2 %{public}d",
         result2);
@@ -2303,22 +2303,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, NotifyFrozenProcessByRSS_001, TestSize.
     int32_t  UID = 1000;
     abilityMs_->NotifyFrozenProcessByRSS(pidList, UID);
 }
-
-/*
- * Feature: AbilityManagerService
- * Function: GetRunningMultiAppIndex
- * FunctionPoints: GetRunningMultiAppIndex
- */
-HWTEST_F(AbilityManagerServiceThirdTest, GetRunningMultiAppIndex_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
-
-    int32_t  UID = 1000;
-    int32_t  APPINDEX = 28;
-    abilityMs_->GetRunningMultiAppIndex("com.ix.hiservcie", UID, APPINDEX);
-}
-
 
 /*
  * Feature: AbilityManagerService

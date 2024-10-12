@@ -71,7 +71,8 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) {return WMError::WM_OK;}
     virtual WMError SetFullScreen(bool status) {return WMError::WM_OK;}
     virtual WMError Destroy() {return WMError::WM_OK;}
-    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false) {return WMError::WM_OK;}
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
+        bool withFocus = true) {return WMError::WM_OK;}
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false,
         bool isFromInnerkits = true) {return WMError::WM_OK;}
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) {return WMError::WM_OK;}

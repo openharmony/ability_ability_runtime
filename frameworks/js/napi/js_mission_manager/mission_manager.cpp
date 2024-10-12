@@ -681,8 +681,7 @@ private:
 
         NapiAsyncTask::CompleteCallback complete =
             [missionIds, topMissionId](napi_env env, NapiAsyncTask &task, int32_t status) {
-                auto ret =
-                    AAFwk::AbilityManagerClient::GetInstance()->MoveMissionsToForeground(missionIds, topMissionId);
+                auto ret = AbilityManagerClient::GetInstance()->MoveMissionsToForeground(missionIds, topMissionId);
                 if (ret == 0) {
                     task.ResolveWithNoError(env, CreateJsUndefined(env));
                 } else {
@@ -690,7 +689,6 @@ private:
                         CreateJsErrorByNativeErr(env, ret, PermissionConstants::PERMISSION_MANAGE_MISSION));
                 }
             };
-
         napi_value lastParam = (argc > unwrapArgc) ? argv[unwrapArgc] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("MissionManager::OnMoveMissionsToForeground", env,
