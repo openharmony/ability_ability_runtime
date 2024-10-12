@@ -404,6 +404,12 @@ public:
     virtual void OnBackground();
 
     /**
+     * @brief Called after window stage focused or unfocused
+     * You can override this function to implement your own processing logic.
+     */
+    virtual void OnAfterFocusedCommon(bool isFocused);
+
+    /**
      * @brief Called when ability prepare terminate.
      * @return Return true if ability need to stop terminating; return false if ability need to terminate.
      */
