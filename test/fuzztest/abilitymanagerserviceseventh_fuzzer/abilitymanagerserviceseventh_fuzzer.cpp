@@ -94,7 +94,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     // fuzz for AbilityManagerService
     auto abilityms = std::make_shared<AbilityManagerService>();
     abilityms->GetDataAbilityManagerByToken(token);
-    abilityms->ConnectBmsService();
+    abilityms->ConnectServices();
     sptr<IWantSender> target;
     std::shared_ptr<WantSenderInfo> wantSenderInfo;
     abilityms->GetWantSenderInfo(target, wantSenderInfo);

@@ -214,6 +214,14 @@ std::string BundleMgrHelper::GetAppIdByBundleName(const std::string &bundleName,
     return bundleMgr->GetAppIdByBundleName(bundleName, userId);
 }
 
+void BundleMgrHelper::ConnectTillSuccess()
+{
+    while (Connect() == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "connect failed, now retry");
+        usleep(REPOLL_TIME_MICRO_SECONDS);
+    }
+}
+
 sptr<IBundleMgr> BundleMgrHelper::Connect()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
