@@ -21,6 +21,8 @@
 #include "bundle_mgr_interface.h"
 
 namespace OHOS {
+constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
+
 namespace AppExecFwk {
 using Want = OHOS::AAFwk::Want;
 
@@ -28,6 +30,7 @@ class BundleMgrHelper : public std::enable_shared_from_this<BundleMgrHelper> {
 public:
     DISALLOW_COPY_AND_MOVE(BundleMgrHelper);
     void PreConnect();
+    void ConnectTillSuccess();
     ErrCode GetNameForUid(const int32_t uid, std::string &name);
     ErrCode GetNameAndIndexForUid(const int32_t uid, std::string &bundleName, int32_t &appIndex);
     bool GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId);
