@@ -24,8 +24,6 @@
 #include <singleton.h>
 #include <thread_ex.h>
 #include <unordered_map>
-#include <chrono>
-#include <cstdint>
 
 #include "ability_auto_startup_service.h"
 #include "ability_bundle_event_callback.h"
@@ -1927,8 +1925,7 @@ private:
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
     void InitWindowVisibilityChangedListener();
     void FreeWindowVisibilityChangedListener();
-    bool CheckVisibilityWindowInfo(const int32_t pid, AbilityState currentState);
-    int64_t CurrentTimeMillis();
+    bool CheckProcessIsBackground(int32_t pid, AbilityState currentState);
 
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
@@ -2332,21 +2329,13 @@ private:
     std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;
-
-    int64_t desktopInForegroundTime_;
-    struct WindowVisibilityStateInfos {
-        int32_t uid;
-        int32_t pid;
-        int64_t curTime;
-        int64_t windowVisibleTime;
-        int32_t visibilityState;
-    };
-    std::map<int32_t, WindowVisibilityStateInfos> windowVisibilityStateInfos_;
+    std::unordered_set<int32_t> windowVisibleList_;
 
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;
     ffrt::mutex preStartSessionMapLock_;
+    ffrt::mutex windowVisibleListLock_;
 
     std::multimap<std::string, std::string> timeoutMap_;
     std::map<std::string, sptr<SessionInfo>> preStartSessionMap_;
