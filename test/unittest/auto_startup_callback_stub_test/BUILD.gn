@@ -20,10 +20,7 @@ ohos_unittest("auto_startup_callback_stub_test") {
 
   include_dirs = [ "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include" ]
 
-  sources = [
-    "${ability_runtime_native_path}/ability/native/auto_startup_callback_stub.cpp",
-    "auto_startup_callback_stub_test.cpp",
-  ]
+  sources = [ "auto_startup_callback_stub_test.cpp" ]
 
   configs = []
 
