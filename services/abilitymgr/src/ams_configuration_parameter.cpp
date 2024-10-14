@@ -217,6 +217,7 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
 
     LoadSystemConfiguration(amsJson);
     LoadBackToCallerConfig(amsJson);
+    LoadSupportSCBCrashRebootConfig(amsJson);
     SetPickerJsonObject(amsJson);
     LoadResidentWhiteListConfig(amsJson);
     amsJson.clear();
@@ -288,6 +289,23 @@ int32_t AmsConfigurationParameter::LoadBackToCallerConfig(nlohmann::json& Object
 bool AmsConfigurationParameter::IsSupportBackToCaller() const
 {
     return supportBackToCaller_;
+}
+
+int32_t AmsConfigurationParameter::LoadSupportSCBCrashRebootConfig(nlohmann::json& Object)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "load scb_crash_reboot_config config");
+    if (Object.contains(AmsConfig::SUPPORT_SCB_CRASH_REBOOT) &&
+        Object.at(AmsConfig::SUPPORT_SCB_CRASH_REBOOT).is_boolean()) {
+        supportSceneboardCrashReboot_ = Object.at(AmsConfig::SUPPORT_SCB_CRASH_REBOOT).get<bool>();
+        return READ_OK;
+    }
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "load scb_crash_reboot_config failed");
+    return READ_FAIL;
+}
+
+bool AmsConfigurationParameter::IsSupportSCBCrashReboot() const
+{
+    return supportSceneboardCrashReboot_;
 }
 
 bool AmsConfigurationParameter::CheckServiceConfigEnable(nlohmann::json& Object, const std::string &configName,

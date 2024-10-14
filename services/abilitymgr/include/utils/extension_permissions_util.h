@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
-#include "ability_token_stub.h"
+#ifndef OHOS_EXTENSION_PERMISSIONS_UTIL_H
+#define OHOS_EXTENSION_PERMISSIONS_UTIL_H
 
-#include "hilog_tag_wrapper.h"
+#include "extension_ability_info.h"
 
 namespace OHOS {
 namespace AAFwk {
-AbilityTokenStub::AbilityTokenStub()
-{}
+class ExtensionPermissionsUtil final {
+public:
+    static bool CheckSAPermission(const AppExecFwk::ExtensionAbilityType &extensionType);
+    static bool CheckSAPermissionMore(const AppExecFwk::ExtensionAbilityType &extensionType);
+};
 
-AbilityTokenStub::~AbilityTokenStub()
-{}
-
-void AbilityTokenRecipient::OnRemoteDied(const wptr<IRemoteObject> &__attribute__((unused)) remote)
-{
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "recv AbilityTokenRecipient death notice");
-}
-}  // namespace AAFwk
-}  // namespace OHOS
+} // namespace AAFwk
+} // namespace OHOS
+#endif // OHOS_EXTENSION_PERMISSIONS_UTIL_H

@@ -1163,6 +1163,8 @@ public:
 
     bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
 
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
+
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
 private:
