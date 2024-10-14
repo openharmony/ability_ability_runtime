@@ -24,6 +24,7 @@
 #include "ability_stage.h"
 #include "app_context.h"
 #include "context.h"
+#include "ability_stage_context.h"
 #include "application_configuration_manager.h"
 
 namespace OHOS {
@@ -147,7 +148,9 @@ public:
      * @param hapModuleInfo
      * @return Returns true on success, false on failure
      */
-    bool AddAbilityStage(const AppExecFwk::HapModuleInfo &hapModuleInfo);
+    bool AddAbilityStage(
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void()> &callback, bool &isAsyncCallback);
 
     /**
      * @brief remove the ability stage when all of the abilities in the hap have been removed
@@ -214,6 +217,9 @@ public:
 
     void AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName);
+        
+    void AutoStartupDone(const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo);
 
     void CleanEmptyAbilityStage();
 
@@ -226,6 +232,10 @@ private:
         const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
         const std::shared_ptr<AbilityLocalRecord> abilityRecord,
         const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback);
+    const std::function<void()> CreateAutoStartupCallback(
+        const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void()>& callback);
     bool IsMainProcess(const std::string &bundleName, const std::string &process);
 
 private:
