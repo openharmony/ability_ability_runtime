@@ -462,7 +462,7 @@ private:
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
     bool isSCBRecovery_ = false;
-    std::unordered_set<int32_t> codeStartInSCBRecovery_;
+    std::unordered_set<int32_t> coldStartInSCBRecovery_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
