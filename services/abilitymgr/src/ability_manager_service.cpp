@@ -11965,9 +11965,7 @@ ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> ca
     std::string callerBundleName;
     Want convertedWant = want;
     if (!WantUtils::IsAtomicServiceUrl(want) ||
-        WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK ||
-        WantUtils::ConvertToExplicitWant(convertedWant) != ERR_OK ||
-        freeInstallManager_ == nullptr) {
+        WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability by default");
         int retCode = StartAbility(want, callerToken, userId, requestCode);
         CHECK_RET_RETURN_RET(retCode, "startAbility failed");
@@ -11976,6 +11974,14 @@ ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> ca
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "callerBundleName=%{public}s", callerBundleName.c_str());
     convertedWant.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    if (WantUtils::ConvertToExplicitWant(convertedWant) != ERR_OK ||
+        freeInstallManager_ == nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability by default");
+        int retCode = StartAbility(want, callerToken, userId, requestCode);
+        CHECK_RET_RETURN_RET(retCode, "startAbility failed");
+        return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
+    }
+
     convertedWant.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "convertedWant=%{private}s", convertedWant.ToString().c_str());
     ErrCode retCode = freeInstallManager_->StartFreeInstall(convertedWant, GetValidUserId(userId),
