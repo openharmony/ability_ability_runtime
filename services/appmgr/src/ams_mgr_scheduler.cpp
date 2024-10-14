@@ -710,6 +710,20 @@ bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token
     }
     return amsMgrServiceInner_->CleanAbilityByUserRequest(token);
 }
+bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t procPid = getprocpid();
+    if (callingPid != procPid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessContainsOnlyUIAbility(pid);
+}
 
 bool AmsMgrScheduler::IsProcessAttached(sptr<IRemoteObject> token)
 {
