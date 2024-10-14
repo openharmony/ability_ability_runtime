@@ -27,6 +27,7 @@
 #include "app_mgr_util.h"
 #include "recovery_info_timer.h"
 #include "assert_fault_callback_death_mgr.h"
+#include "concurrent_task_client.h"
 #include "connection_state_manager.h"
 #include "display_manager.h"
 #include "distributed_client.h"
@@ -300,6 +301,10 @@ void AbilityManagerService::OnStart()
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
 #endif
     TAG_LOGI(AAFwkTag::ABILITYMGR, "onStart success");
+    auto pid = getpid();
+    std::unordered_map<std::string, std::string> payload;
+    payload["pid"] = std::to_string(pid);
+    OHOS::ConcurrentTask::ConcurrentTaskClient::GetInstance().RequestAuth(payload);
 }
 
 bool AbilityManagerService::Init()
