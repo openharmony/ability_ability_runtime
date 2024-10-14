@@ -1776,5 +1776,22 @@ HWTEST_F(AbilityManagerServiceSecondTest, ShouldPreventStartAbility_001, TestSiz
     EXPECT_FALSE(abilityMs_->ShouldPreventStartAbility(abilityRequest));
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ShouldPreventStartAbility_001 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Name: UpdateKeepAliveEnableState_001
+ * Function: CheckProcessOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UpdateKeepAliveEnableState
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, UpdateKeepAliveEnableState_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UpdateKeepAliveEnableState_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto ret = abilityMs_->UpdateKeepAliveEnableState("bundle", "entry", "mainAbility", true, 0);
+    EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UpdateKeepAliveEnableState_001 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS
