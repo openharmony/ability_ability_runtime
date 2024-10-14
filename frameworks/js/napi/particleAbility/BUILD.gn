@@ -64,6 +64,7 @@ ohos_shared_library("particleability") {
   if (ability_runtime_relational) {
     include_dirs += [ "../featureAbility/data_ability/include" ]
     sources += [
+      "../featureAbility/data_ability/js_df_manager.cpp",
       "../featureAbility/data_ability/js_utils.cpp",
       "../featureAbility/data_ability/napi_data_ability_predicates.cpp",
       "../featureAbility/data_ability/napi_rdb_js_utils.cpp",

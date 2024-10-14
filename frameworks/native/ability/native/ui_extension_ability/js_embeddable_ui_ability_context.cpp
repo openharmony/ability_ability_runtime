@@ -95,6 +95,11 @@ napi_value JsEmbeddableUIAbilityContext::TerminateSelfWithResult(napi_env env, n
     GET_NAPI_INFO_AND_CALL(env, info, JsEmbeddableUIAbilityContext, OnTerminateSelfWithResult);
 }
 
+napi_value JsEmbeddableUIAbilityContext::BackToCallerAbilityWithResult(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsEmbeddableUIAbilityContext, OnBackToCallerAbilityWithResult);
+}
+
 napi_value JsEmbeddableUIAbilityContext::StartAbilityAsCaller(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsEmbeddableUIAbilityContext, OnStartAbilityAsCaller);
@@ -280,6 +285,17 @@ napi_value JsEmbeddableUIAbilityContext::OnTerminateSelfWithResult(napi_env env,
     }
     CHECK_POINTER_RETURN(env, jsAbilityContext_);
     return jsAbilityContext_->OnTerminateSelfWithResult(env, info);
+}
+
+napi_value JsEmbeddableUIAbilityContext::OnBackToCallerAbilityWithResult(napi_env env, NapiCallbackInfo& info)
+{
+    if (screenMode_ == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "BackToCallerAbilityWithResult in embedded screen mode");
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
+        return CreateJsUndefined(env);
+    }
+    CHECK_POINTER_RETURN(env, jsAbilityContext_);
+    return jsAbilityContext_->OnBackToCallerAbilityWithResult(env, info);
 }
 
 napi_value JsEmbeddableUIAbilityContext::OnStartAbilityAsCaller(napi_env env, NapiCallbackInfo& info)
@@ -609,7 +625,7 @@ void JsEmbeddableUIAbilityContext::WrapJsUIExtensionContext(napi_env env,
 napi_value JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(napi_env env,
     std::shared_ptr<AbilityContext> uiAbiContext, std::shared_ptr<UIExtensionContext> uiExtContext, int32_t screenMode)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "Create JS embeddable UIAbility context begin");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     napi_value objValue = nullptr;
     if (screenMode == AAFwk::JUMP_SCREEN_MODE) {
         WrapJsUIAbilityContext(env, uiAbiContext, objValue, screenMode);
@@ -625,6 +641,7 @@ napi_value JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(napi
     BindNativeFunction(env, objValue, "disconnectServiceExtensionAbility", moduleName, DisconnectAbility);
     BindNativeFunction(env, objValue, "terminateSelf", moduleName, TerminateSelf);
     BindNativeFunction(env, objValue, "terminateSelfWithResult", moduleName, TerminateSelfWithResult);
+    BindNativeFunction(env, objValue, "backToCallerAbilityWithResult", moduleName, BackToCallerAbilityWithResult);
     BindNativeFunction(env, objValue, "startAbilityAsCaller", moduleName, StartAbilityAsCaller);
     BindNativeFunction(env, objValue, "startAbilityWithAccount", moduleName, StartAbilityWithAccount);
     BindNativeFunction(env, objValue, "startAbilityByCall", moduleName, StartAbilityByCall);

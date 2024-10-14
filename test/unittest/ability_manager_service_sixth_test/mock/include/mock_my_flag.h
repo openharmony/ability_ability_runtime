@@ -25,6 +25,9 @@ public:
         IS_SA_AND_SHELL_CALL,
     };
     static int flag_;
+    static int systemAppFlag_;
+    static int systemCallFlag_;
+    static int abilityCallFlag_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

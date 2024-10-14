@@ -42,6 +42,8 @@
 #include "mock_prepare_terminate_callback.h"
 #include "mock_sa_call.h"
 #include "scene_board_judgement.h"
+#include "string_wrapper.h"
+#include "utils/window_options_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -859,23 +861,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, DelegatorMoveMissionToFront_001, TestSi
     abilityMs_->subManagersHelper_->currentMissionListManager_.reset();
     EXPECT_EQ(abilityMs_->DelegatorMoveMissionToFront(1), ERR_NO_INIT);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest DelegatorMoveMissionToFront_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: UpdateCallerInfo
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService UpdateCallerInfo
- */
-HWTEST_F(AbilityManagerServiceFirstTest, UpdateCallerInfo_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest UpdateCallerInfo_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    Want want;
-    sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
-    ASSERT_NE(abilityMs_, nullptr);
-    abilityMs_->UpdateCallerInfo(want, callerToken);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest UpdateCallerInfo_001 end");
 }
 
 /*
@@ -2052,44 +2037,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, HandleInactiveTimeOut_0100, TestSize.Le
 }
 
 /**
- * @tc.name: AbilityManagerServiceFirstTest_UpdateAsCallerInfoFromCallerRecord_0001
- * @tc.desc: Test the state of QueryAllAutoStartupApplications
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceFirstTest, UpdateAsCallerInfoFromCallerRecord_0001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityManagerService> abilityMs = std::make_shared<AbilityManagerService>();
-    Want want;
-    sptr<IRemoteObject> callerToken = nullptr;
-    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
-    callerToken = abilityRecord->GetToken();
-
-    abilityMs->UpdateAsCallerInfoFromCallerRecord(want, callerToken);
-    EXPECT_NE(callerToken, nullptr);
-}
-
-/**
- * @tc.name: AbilityManagerServiceFirstTest_UpdateCallerInfoFromToken_0001
- * @tc.desc: Test the state of UpdateCallerInfoFromToken
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerServiceFirstTest, UpdateCallerInfoFromToken_0001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityManagerService> abilityMs = std::make_shared<AbilityManagerService>();
-    Want want;
-    sptr<IRemoteObject> callerToken = nullptr;
-    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
-    callerToken = abilityRecord->GetToken();
-
-    abilityMs->UpdateCallerInfoFromToken(want, callerToken);
-    EXPECT_NE(abilityRecord, nullptr);
-
-    abilityRecord = nullptr;
-    abilityMs->UpdateCallerInfoFromToken(want, callerToken);
-    EXPECT_EQ(abilityRecord, nullptr);
-}
-
-/**
  * @tc.name: AbilityManagerServiceFirstTest_JudgeMultiUserConcurrency_0001
  * @tc.desc: Test the state of JudgeMultiUserConcurrency
  * @tc.type: FUNC
@@ -2375,6 +2322,107 @@ HWTEST_F(AbilityManagerServiceFirstTest, GetDialogSessionInfo_0100, TestSize.Lev
     auto abilityMs = std::make_shared<AbilityManagerService>();
     auto res = abilityMs->GetDialogSessionInfo(dialogSessionId, dialogSessionInfo);
     EXPECT_EQ(res, INNER_ERR);
+}
+
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_UpdateWantToSetDisplayID_0100
+ * @tc.desc: Test it when asCallerSourceToken and callerToken is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0100, TestSize.Level1)
+{
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+
+    WindowOptionsUtils::UpdateWantToSetDisplayID(want, callerToken);
+    auto displayId = want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
+    std::string expectDisplayId = "0";
+    EXPECT_EQ(displayId, expectDisplayId);
+}
+
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_UpdateWantToSetDisplayID_0200
+ * @tc.desc: Test it when only asCallerSourceToken is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0200, TestSize.Level1)
+{
+    Want want;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    
+    WindowOptionsUtils::UpdateWantToSetDisplayID(want, callerToken);
+    auto displayId = want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
+    std::string expectDisplayId = "0";
+    EXPECT_EQ(displayId, expectDisplayId);
+}
+
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_UpdateWantToSetDisplayID_0300
+ * @tc.desc: Test it when only asCallerSourceToken is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0300, TestSize.Level1)
+{
+    WantParams params;
+    Want setWant;
+    std::string testDisplayId = "1";
+    params.SetParam(Want::PARAM_RESV_DISPLAY_ID, AAFwk::String::Box(testDisplayId));
+    setWant.SetParams(params);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    auto record = std::make_shared<AbilityRecord>(setWant, abilityInfo, applicationInfo);
+    record->Init();
+    sptr<IRemoteObject> token = record->GetToken();
+
+    Want want;
+    WindowOptionsUtils::UpdateWantToSetDisplayID(want, token);
+    auto displayId = want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
+    EXPECT_EQ(displayId, testDisplayId);
+}
+
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_UpdateStartOptionsToSetDisplayID_0100
+ * @tc.desc: Test UpdateStartOptionsToSetDisplayID when displayId is not effective.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, UpdateStartOptionsToSetDisplayID_0100, TestSize.Level1)
+{
+    WantParams params;
+    auto testDisplayId = "1";
+    params.SetParam(Want::PARAM_RESV_DISPLAY_ID, AAFwk::String::Box(testDisplayId));
+    Want setWant;
+    setWant.SetParams(params);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.process = "process_name";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    auto record = std::make_shared<AbilityRecord>(setWant, abilityInfo, applicationInfo);
+    record->Init();
+    sptr<IRemoteObject> token = record->GetToken();
+
+    StartOptions startOptions;
+    startOptions.SetDisplayID(0);
+    WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(startOptions, token);
+    int32_t expectDisplayId = 0;
+    EXPECT_NE(startOptions.GetDisplayID(), expectDisplayId);
+}
+
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_UpdateStartOptionsToSetDisplayID_0200
+ * @tc.desc: Test UpdateStartOptionsToSetDisplayIDToSetDisplayID when displayId is not effective.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, UpdateStartOptionsToSetDisplayID_0200, TestSize.Level1)
+{
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
+    
+    StartOptions startOptions;
+    startOptions.SetDisplayID(0);
+    WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(startOptions, callerToken);
+    int32_t expectDisplayId = 0;
+    EXPECT_EQ(startOptions.GetDisplayID(), expectDisplayId);
 }
 } // namespace AAFwk
 } // namespace OHOS

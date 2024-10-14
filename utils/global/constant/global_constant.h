@@ -48,6 +48,8 @@ constexpr int32_t TYPE_RESERVE = 1;
 constexpr int32_t TYPE_OTHERS = 2;
 #endif
 
+constexpr int32_t MIGRATE_CLIENT_TIMEOUT_MULTIPLE = 3;
+
 constexpr int32_t GetLoadTimeOutBase()
 {
     return TIMEOUT_UNIT_TIME * LOAD_TIMEOUT_MULTIPLE;

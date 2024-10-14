@@ -37,7 +37,6 @@ public:
     MOCK_METHOD1(NotifyTerminateMission, int32_t(int32_t missionId));
     MOCK_METHOD1(NotifyClearMission, int32_t(int32_t missionId));
     MOCK_METHOD3(NotifyRemoveShellProcess, int32_t(int32_t pid, int32_t type, const std::string &reason));
-    MOCK_METHOD1(UpdateMissionInfo, void(InnerMissionInfoDto &info));
     MOCK_METHOD1(UpdateMissionInfo, void(sptr<SessionInfo> &sessionInfo));
     sptr<IRemoteObject> AsObject() override
     {

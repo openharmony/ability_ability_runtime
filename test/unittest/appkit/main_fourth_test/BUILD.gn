@@ -133,5 +133,8 @@ ohos_unittest("main_fourth_by_mock_bms_test") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":main_fourth_by_mock_bms_test" ]
+  deps = [
+    ":main_fourth_by_mock_bms_test",
+    ":main_fourth_test",
+  ]
 }

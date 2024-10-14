@@ -118,12 +118,6 @@ public:
 
     /**
      * @brief Update mission info to real element by broker.
-     * @param info info of mission.
-     */
-    virtual void UpdateMissionInfo(InnerMissionInfoDto &info) override;
-
-    /**
-     * @brief Update mission info to real element by broker.
      * @param sessionInfo sessionInfo.
      */
     virtual void UpdateMissionInfo(sptr<SessionInfo> &sessionInfo) override;

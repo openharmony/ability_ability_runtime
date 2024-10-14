@@ -58,7 +58,6 @@
 #include "parameters.h"
 #include "extractor.h"
 #include "system_ability_definition.h"
-#include "systemcapability.h"
 #include "source_map.h"
 #include "source_map_operator.h"
 
@@ -68,6 +67,7 @@
 #include "declarative_module_preloader.h"
 #endif //SUPPORT_SCREEN
 
+#include "syscap_ts.h"
 
 using namespace OHOS::AbilityBase;
 using Extractor = OHOS::AbilityBase::Extractor;
@@ -107,45 +107,6 @@ static auto PermissionCheckFunc = []() {
         return false;
     }
 };
-
-napi_value CanIUse(napi_env env, napi_callback_info info)
-{
-    if (env == nullptr || info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env or info");
-        return nullptr;
-    }
-    napi_value undefined = CreateJsUndefined(env);
-
-    size_t argc = 1;
-    napi_value argv[1] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "invalid argc");
-        return undefined;
-    }
-
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv[0], &valueType);
-    if (valueType != napi_string) {
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "invalid type");
-        return undefined;
-    }
-
-    char syscap[SYSCAP_MAX_SIZE] = { 0 };
-
-    size_t strLen = 0;
-    napi_get_value_string_utf8(env, argv[0], syscap, sizeof(syscap), &strLen);
-
-    bool ret = HasSystemCapability(syscap);
-    return CreateJsValue(env, ret);
-}
-
-void InitSyscapModule(napi_env env, napi_value globalObject)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    const char *moduleName = "JsRuntime";
-    BindNativeFunction(env, globalObject, "canIUse", moduleName, CanIUse);
-}
 
 int32_t PrintVmLog(int32_t, int32_t, const char*, const char*, const char* message)
 {
@@ -701,7 +662,7 @@ bool JsRuntime::Initialize(const Options& options)
         CHECK_POINTER_AND_RETURN(globalObj, false);
 
         if (!preloaded_) {
-            InitSyscapModule(env, globalObj);
+            InitSyscapModule(env);
 
             // Simple hook function 'isSystemplugin'
             const char* moduleName = "JsRuntime";
