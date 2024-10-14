@@ -188,8 +188,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         AddUIExtWindowDeathRecipient(remoteObj);
     }
 
-    auto &abilityInfo = abilityRequest.abilityInfo;
-    ret = ReportXiaoYiToRSSIfNeeded(abilityInfo);
+    ret = ReportXiaoYiToRSSIfNeeded(abilityRequest.abilityInfo);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -949,6 +948,7 @@ int AbilityConnectManager::AbilityWindowConfigTransactionDone(const sptr<IRemote
 void AbilityConnectManager::ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const
 {
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER(record);
     CHECK_POINTER(bundleMgrHelper);
     auto abilityInfo = record->GetAbilityInfo();
     Want want;
@@ -1321,12 +1321,6 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensionBySessionInf
     CHECK_POINTER_AND_RETURN(sessionInfo, nullptr);
     auto sessionToken = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
     CHECK_POINTER_AND_RETURN(sessionToken, nullptr);
-    std::string descriptor = Str16ToStr8(sessionToken->GetDescriptor());
-    if (descriptor != "OHOS.ISession") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "token not a sessionToken, token->GetDescriptor(): %{public}s",
-            descriptor.c_str());
-        return nullptr;
-    }
 
     std::lock_guard guard(uiExtensionMapMutex_);
     auto it = uiExtensionMap_.find(sessionToken->AsObject());
@@ -1756,6 +1750,7 @@ void AbilityConnectManager::ResumeConnectAbility(const std::shared_ptr<AbilityRe
 void AbilityConnectManager::CommandAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    CHECK_POINTER(abilityRecord);
     if (taskHandler_ != nullptr) {
         // first connect ability, There is at most one connect record.
         int recordId = abilityRecord->GetRecordId();
