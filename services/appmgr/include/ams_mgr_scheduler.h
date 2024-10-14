@@ -334,6 +334,12 @@ public:
      */
     virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
 
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid) override;
+
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
 private:
