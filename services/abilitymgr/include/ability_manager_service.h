@@ -24,6 +24,8 @@
 #include <singleton.h>
 #include <thread_ex.h>
 #include <unordered_map>
+#include <chrono>
+#include <cstdint>
 
 #include "ability_auto_startup_service.h"
 #include "ability_bundle_event_callback.h"
@@ -75,6 +77,7 @@ class IStatusBarDelegate;
 }
 namespace Rosen {
 class FocusChangeInfo;
+class WindowVisibilityInfo;
 }
 
 namespace AAFwk {
@@ -87,6 +90,7 @@ constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 using OHOS::AppExecFwk::IAbilityController;
 struct StartAbilityInfo;
 class WindowFocusChangedListener;
+class WindowVisibilityChangedListener;
 
 /**
  * @class AbilityManagerService
@@ -1197,6 +1201,9 @@ public:
 
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
+    void HandleWindowVisibilityChanged(
+        const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
+
     virtual int GetDialogSessionInfo(const std::string &dialogSessionId,
         sptr<DialogSessionInfo> &dialogSessionInfo) override;
 
@@ -1918,6 +1925,10 @@ private:
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
     int StartAbilityPrechainInterceptor(StartAbilityParams &params);
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
+    void InitWindowVisibilityChangedListener();
+    void FreeWindowVisibilityChangedListener();
+    bool CheckVisibilityWindowInfo(const int32_t pid, AbilityState currentState);
+    int64_t CurrentTimeMillis();
 
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
@@ -2309,6 +2320,7 @@ private:
 
     bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
 
+    sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
@@ -2320,6 +2332,17 @@ private:
     std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;
+
+    int64_t desktopInForegroundTime_;
+    struct WindowVisibilityStateInfos {
+        int32_t uid;
+        int32_t pid;
+        int64_t curTime;
+        int64_t windowVisibleTime;
+        int32_t visibilityState;
+    };
+    std::map<int32_t, WindowVisibilityStateInfos> windowVisibilityStateInfos_;
+
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;

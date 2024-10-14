@@ -91,6 +91,7 @@
 #include "session_manager_lite.h"
 #include "window_focus_changed_listener.h"
 #endif
+#include "window_visibility_changed_listener.h"
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -299,6 +300,7 @@ void AbilityManagerService::OnStart()
 #ifdef SUPPORT_SCREEN
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
 #endif
+    AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "onStart success");
 }
 
@@ -309,6 +311,7 @@ bool AbilityManagerService::Init()
     eventHandler_ = std::make_shared<AbilityEventHandler>(taskHandler_, weak_from_this());
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
+    desktopInForegroundTime_ = CurrentTimeMillis();
 
     // init user controller.
     userController_ = std::make_shared<UserController>();
@@ -2500,6 +2503,10 @@ void AbilityManagerService::OnAddSystemAbility(int32_t systemAbilityId, const st
             break;
         }
 #endif
+        case WINDOW_MANAGER_SERVICE_ID: {
+            InitWindowVisibilityChangedListener();
+            break;
+        }
         default:
             break;
     }
@@ -2519,6 +2526,10 @@ void AbilityManagerService::OnRemoveSystemAbility(int32_t systemAbilityId, const
         }
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID: {
             UnsubscribeBundleEventCallback();
+            break;
+        }
+        case WINDOW_MANAGER_SERVICE_ID: {
+            FreeWindowVisibilityChangedListener();
             break;
         }
         default:
@@ -11353,6 +11364,92 @@ bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToke
     return erms->DoProcess(want, GetUserId());
 }
 
+int64_t AbilityManagerService::CurrentTimeMillis()
+{
+    auto now = std::chrono::system_clock::now();
+    auto milliSecs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    return milliSecs.count();
+}
+
+bool AbilityManagerService::CheckVisibilityWindowInfo(const int32_t pid, AbilityState currentState)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, currentState:%{public}d", pid, currentState);
+    std::map<int32_t, WindowVisibilityStateInfos>::iterator iter = windowVisibilityStateInfos_.find(pid);
+    if (iter != windowVisibilityStateInfos_.end()) {
+        if (!(iter->second.visibilityState == Rosen::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION &&
+            iter->second.curTime > desktopInForegroundTime_ &&
+            desktopInForegroundTime_ > iter->second.windowVisibleTime)) {
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "Scenes other than this combination will not be intercepted.");
+                return true;
+        } else {
+            return false;
+        }
+    }
+
+    if (currentState != AAFwk::AbilityState::BACKGROUND) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
+        return true;
+    }
+    return false;
+}
+
+void AbilityManagerService::InitWindowVisibilityChangedListener()
+{
+    if (windowVisibilityChangedListener_ != nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "visibility already initiate");
+        return;
+    }
+
+    windowVisibilityChangedListener_ =
+        new (std::nothrow) WindowVisibilityChangedListener(weak_from_this(), taskHandler_);
+    if (windowVisibilityChangedListener_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "window visibility changed listener null");
+        return;
+    }
+
+    Rosen::WindowManager::GetInstance().RegisterVisibilityChangedListener(windowVisibilityChangedListener_);
+}
+
+void AbilityManagerService::FreeWindowVisibilityChangedListener()
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    if (windowVisibilityChangedListener_ == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "visibility listener already free");
+        return;
+    }
+    Rosen::WindowManager::GetInstance().UnregisterVisibilityChangedListener(windowVisibilityChangedListener_);
+}
+
+void AbilityManagerService::HandleWindowVisibilityChanged(
+    const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    if (windowVisibilityInfos.empty()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "window visibility info empty");
+        return;
+    }
+    for (count auto &info : windowVisibilityInfos) {
+        if (info == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null info");
+            continue;
+        }
+        if (info->windowType_ == Rosen::WindowType::WINDOW_TYPE_DESKTOP &&
+            info->visibilityState_ == Rosen::WINDOW_VISIBILITY_STATE_NO_OCCUSION) {
+            desktopInForegroundTime_ = CurrentTimeMillis();
+        }
+
+        WindowVisibilityStateInfos windowVisibilityStateInfo;
+        windowVisibilityStateInfo.uid = info->uid_;
+        windowVisibilityStateInfo.pid = info->pid_;
+        windowVisibilityStateInfo.visibilityState = info->visibilityState_;
+        windowVisibilityStateInfo.curTime = CurrentTimeMillis();
+        if (info->visibilityState_ == Rosen::WINDOW_VISIBILITY_STATE_NO_OCCUSION) {
+            windowVisibilityStateInfo.windowVisibleTime = CurrentTimeMillis();
+        }
+        windowVisibilityStateInfos_[info->pid_] = windowVisibilityStateInfo;
+    }
+}
+
 bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abilityRequest)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
@@ -11387,8 +11484,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
         return false;
     }
-    if (abilityRecord->GetAbilityState() != AAFwk::AbilityState::BACKGROUND) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
+    if (CheckVisibilityWindowInfo(abilityRecord->GetPid(), abilityRecord->GetAbilityState())) {
         return false;
     }
     if (continuousFlag) {
