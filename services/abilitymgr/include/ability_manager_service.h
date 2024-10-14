@@ -1872,8 +1872,9 @@ private:
     void UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken);
     bool UpdateAsCallerInfoFromDialog(Want& want);
     void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
-    void UpdateSignatureInfo(std::string bundleName, Want& want);
+    void UpdateSignatureInfo(std::string bundleName, Want& want, bool isRemote = false);
     void UpdateCallerInfoFromToken(Want& want, const sptr<IRemoteObject> &token);
+    void UpdateDmsCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
     int StartAbilityPrechainInterceptor(StartAbilityParams &params);
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
@@ -2309,6 +2310,8 @@ private:
     std::list<std::string> exportWhiteList_;
 
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
+
+    void PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo);
 
     bool IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
         const std::string &calleeAbilityName);

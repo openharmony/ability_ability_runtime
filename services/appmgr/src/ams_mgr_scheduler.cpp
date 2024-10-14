@@ -207,7 +207,7 @@ void AmsMgrScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token
     }
 
     if (amsMgrServiceInner_->VerifyKillProcessPermission(token) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission verify failed");
         return;
     }
 
@@ -233,7 +233,7 @@ void AmsMgrScheduler::KillProcessesByUserId(int32_t userId)
     auto permission = AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES;
     if (!isCallingFromFoundation &&
         amsMgrServiceInner_->VerifyAccountPermission(permission, userId) == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission verify failed");
         return;
     }
 
@@ -709,6 +709,20 @@ bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token
         return false;
     }
     return amsMgrServiceInner_->CleanAbilityByUserRequest(token);
+}
+bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t procPid = getprocpid();
+    if (callingPid != procPid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessContainsOnlyUIAbility(pid);
 }
 
 bool AmsMgrScheduler::IsProcessAttached(sptr<IRemoteObject> token)
