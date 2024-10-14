@@ -106,7 +106,10 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
         amsHandler_->SubmitTask(timeoutTask, TASK_SCENE_BOARD_ATTACH_TIMEOUT, SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME);
     }
 
-    amsHandler_->SubmitTask(loadAbilityFunc);
+    amsHandler_->SubmitTask(loadAbilityFunc, AAFwk::TaskAttribute{
+        .taskName_ = "LoadAbilityTask",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 void AmsMgrScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state)
