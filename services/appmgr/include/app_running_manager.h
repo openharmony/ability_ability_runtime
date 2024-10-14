@@ -238,7 +238,7 @@ public:
     void SetAbilityForegroundingFlagToAppRecord(const pid_t pid);
 
     void HandleTerminateTimeOut(int64_t eventId);
-    void HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token);
+    void HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token, std::shared_ptr<AppMgrServiceInner> serviceInner);
     std::shared_ptr<AppRunningRecord> GetAppRunningRecord(const int64_t eventId);
     void TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag,
         std::shared_ptr<AppMgrServiceInner> appMgrServiceInner);

@@ -42,6 +42,7 @@
 #include "mock_iapp_state_callback.h"
 #include "mock_render_scheduler.h"
 #include "mock_system_ability_manager.h"
+#include "param.h"
 #include "refbase.h"
 #include "ui_extension_utils.h"
 #include "window_visibility_info.h"
@@ -181,8 +182,10 @@ std::shared_ptr<AppRunningRecord> AmsAppRunningRecordTest::StartLoadAbility(cons
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
     service_->SetAppSpawnClient(mockClientPtr);
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(newPid), Return(ERR_OK)));
-
-    service_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    service_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
 
     BundleInfo bundleInfo;
     bundleInfo.appId = "com.ohos.test.helloworld_code123";
@@ -1097,8 +1100,10 @@ HWTEST_F(AmsAppRunningRecordTest, LaunchAbilityForApp_004, TestSize.Level1)
     EXPECT_EQ(record->GetState(), ApplicationState::APP_STATE_READY);
 
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchApplication(_, _)).Times(0);
-    sptr<IRemoteObject> token2 = new (std::nothrow) MockAbilityToken();
-    service_->LoadAbility(token2, nullptr, abilityInfo2, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = new (std::nothrow) MockAbilityToken();
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    service_->LoadAbility(abilityInfo2, appInfo, nullptr, loadParamPtr);
     TAG_LOGI(AAFwkTag::TEST, "AmsAppRunningRecordTest LaunchAbilityForApp_004 end");
 }
 
@@ -2228,11 +2233,6 @@ HWTEST_F(AmsAppRunningRecordTest, NewAppRunningRecord_001, TestSize.Level1)
 
     appRunningRecord1->SetState(ApplicationState::APP_STATE_READY);
     EXPECT_EQ(appRunningRecord1->GetState(), ApplicationState::APP_STATE_READY);
-
-    std::string reason = "test_reason";
-    appRunningRecord1->ForceKillApp(reason);
-    std::string description = "test_description";
-    appRunningRecord1->ScheduleAppCrash(description);
 }
 
 /*

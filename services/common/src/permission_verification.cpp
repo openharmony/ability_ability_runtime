@@ -31,8 +31,8 @@ const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 namespace {
 const int32_t SHELL_START_EXTENSION_FLOOR = 0; // FORM
 const int32_t SHELL_START_EXTENSION_CEIL = 21; // EMBEDDED_UI
-const int32_t TOKEN_ID_BIT_SIZE = 32;
 const int32_t BROKER_UID = 5557;
+const int32_t TOKEN_ID_BIT_SIZE = 32;
 const std::string FOUNDATION_PROCESS_NAME = "foundation";
 const std::set<std::string> OBSERVER_NATIVE_CALLER = {
     "memmgrservice",
@@ -55,7 +55,7 @@ bool PermissionVerification::VerifyCallingPermission(
     const std::string &permissionName, const uint32_t specifyTokenId) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::DEFAULT, "VerifyCallingPermission permission %{public}s, specifyTokenId is %{public}u",
+    TAG_LOGD(AAFwkTag::DEFAULT, "permission %{public}s, specifyTokenId: %{public}u",
         permissionName.c_str(), specifyTokenId);
     auto callerToken = specifyTokenId == 0 ? GetCallingTokenID() : specifyTokenId;
     TAG_LOGD(AAFwkTag::DEFAULT, "Token: %{public}u", callerToken);
@@ -528,10 +528,10 @@ bool PermissionVerification::VerifyPreStartAtomicServicePermission() const
 bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
 {
     if (IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_KILL_PROCESS_DEPENDED_ON_WEB)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "Permission granted");
+        TAG_LOGD(AAFwkTag::APPMGR, "Permission verfication succeeded.");
         return true;
     }
-    TAG_LOGW(AAFwkTag::APPMGR, "Permission denied");
+    TAG_LOGW(AAFwkTag::APPMGR, "Permission verfication failed");
     return false;
 }
 }  // namespace AAFwk

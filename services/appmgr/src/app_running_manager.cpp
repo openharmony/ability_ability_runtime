@@ -528,7 +528,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecord(const i
     return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
 }
 
-void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token)
+void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token,
+    std::shared_ptr<AppMgrServiceInner> serviceInner)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (token == nullptr) {
@@ -543,19 +544,31 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
     }
 
     std::shared_ptr<AbilityRunningRecord> abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
+    bool isSCB = false;
     if (abilityRecord) {
         abilityRecord->SetTerminating();
+        isSCB = abilityRecord->IsSceneBoard();
+        if (isSCB && appRecord->GetPriorityObject() && serviceInner != nullptr) {
+            pid_t pid = appRecord->GetPriorityObject()->GetPid();
+            (void)serviceInner->KillProcessByPid(pid, "AttachTimeoutKillSCB");
+        }
+        appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(
+            AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
 
-    if (appRecord->IsLastAbilityRecord(token) && (!appRecord->IsKeepAliveApp() ||
+    if ((isSCB || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
         appRecord->SetTerminating();
     }
 
-    auto timeoutTask = [appRecord, token]() {
-        if (appRecord) {
-            appRecord->TerminateAbility(token, true);
+    std::weak_ptr<AppRunningRecord> appRecordWptr(appRecord);
+    auto timeoutTask = [appRecordWptr, token]() {
+        auto appRecord = appRecordWptr.lock();
+        if (appRecord == nullptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
+            return;
         }
+        appRecord->TerminateAbility(token, true, true);
     };
     appRecord->PostTask("DELAY_KILL_ABILITY", AMSEventHandler::KILL_PROCESS_TIMEOUT, timeoutTask);
 }

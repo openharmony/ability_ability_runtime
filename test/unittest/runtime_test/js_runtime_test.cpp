@@ -1257,8 +1257,8 @@ HWTEST_F(JsRuntimeTest, GetPkgContextInfoListMap_0100, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0100 start");
 
     std::map<std::string, std::string> modulePkgContentMap;
-    std::string pkgContentJsonString = R"({"library": {"packageName": "library", "bundleName": "com.xxx.xxxx",
-        "moduleName": "library", "version": "1.0.0", "entryPath": "", "isSO": false}})";
+    std::string pkgContentJsonString = R"({"library":{"packageName":"library","bundleName":"com.xxx.xxxx","moduleName":
+            "library","version":"1.0.0","entryPath":"","isSO":false}})";
     modulePkgContentMap["entry"] = pkgContentJsonString;
 
     AbilityRuntime::Runtime::Options options;
@@ -1291,12 +1291,12 @@ HWTEST_F(JsRuntimeTest, GetPkgContextInfoListMap_0200, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0200 start");
 
     std::map<std::string, std::string> modulePkgContentMap;
-    std::string pkgContentJsonString = R"({"library": {"packageName": "library", "bundleName":
-        "com.xxx.xxxx", "moduleName": "library", "version": "1.0.0", "entryPath": "", "isSO": false}})";
+    std::string pkgContentJsonString = R"({"library":{"packageName":"library","bundleName":"com.xxx.xxxx","moduleName":
+            "library","version":"1.0.0","entryPath":"","isSO":false}})";
     modulePkgContentMap["entry"] = pkgContentJsonString;
 
-    std::string libraryString = R"({"library": {"packageName": "library","bundleName": "com.xxx.xxxx", "moduleName":
-        "library", "version": "1.0.0", "entryPath": "", "isSO": false}})";
+    std::string libraryString = R"({"library":{"packageName":"library","bundleName":"com.xxx.xxxx","moduleName":
+            "library","version":"1.0.0","entryPath":"","isSO":false}})";
     modulePkgContentMap["library"] = libraryString;
 
     AbilityRuntime::Runtime::Options options;

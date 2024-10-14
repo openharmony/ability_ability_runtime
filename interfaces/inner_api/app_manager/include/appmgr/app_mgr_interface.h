@@ -697,14 +697,14 @@ public:
         return 0;
     }
 
-    virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
-
     /**
      * Set application assertion pause state.
      *
      * @param flag assertion pause state.
      */
     virtual void SetAppAssertionPauseState(bool flag) {}
+
+    virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) = 0;
 

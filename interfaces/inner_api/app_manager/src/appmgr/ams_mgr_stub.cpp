@@ -26,6 +26,7 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
+#include "param.h"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -210,6 +211,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleCleanAbilityByUserRequest(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID):
             return HandleKillProcessesByAccessTokenId(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_ATTACHED):
+            return HandleIsProcessAttached(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -217,14 +220,6 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
 ErrCode AmsMgrStub::HandleLoadAbility(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    sptr<IRemoteObject> token = nullptr;
-    sptr<IRemoteObject> preToke = nullptr;
-    if (data.ReadBool()) {
-        token = data.ReadRemoteObject();
-    }
-    if (data.ReadBool()) {
-        preToke = data.ReadRemoteObject();
-    }
     std::shared_ptr<AbilityInfo> abilityInfo(data.ReadParcelable<AbilityInfo>());
     if (!abilityInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<AbilityInfo> failed");
@@ -242,9 +237,13 @@ ErrCode AmsMgrStub::HandleLoadAbility(MessageParcel &data, MessageParcel &reply)
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable want failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
-    int32_t abilityRecordId = data.ReadInt32();
+    std::shared_ptr<AbilityRuntime::LoadParam> loadParam(data.ReadParcelable<AbilityRuntime::LoadParam>());
+    if (!loadParam) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable loadParam failed");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
 
-    LoadAbility(token, preToke, abilityInfo, appInfo, want, abilityRecordId);
+    LoadAbility(abilityInfo, appInfo, want, loadParam);
     return NO_ERROR;
 }
 
@@ -369,7 +368,6 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
-
     int32_t result = KillApplication(bundleName);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -798,18 +796,6 @@ ErrCode AmsMgrStub::HandleBlockProcessCacheByPids(MessageParcel &data, MessagePa
     return NO_ERROR;
 }
 
-ErrCode AmsMgrStub::HandleCleanAbilityByUserRequest(MessageParcel &data, MessageParcel &reply)
-{
-    HITRACE_METER(HITRACE_TAG_APP);
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    auto result = CleanAbilityByUserRequest(token);
-    if (!reply.WriteBool(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "fail to write the result.");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
 int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -822,6 +808,30 @@ int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParc
     auto result = IsKilledForUpgradeWeb(bundleName);
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+ErrCode AmsMgrStub::HandleCleanAbilityByUserRequest(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto result = CleanAbilityByUserRequest(token);
+    if (!reply.WriteBool(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write the result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsProcessAttached(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto isAttached = IsProcessAttached(token);
+    if (!reply.WriteBool(isAttached)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
