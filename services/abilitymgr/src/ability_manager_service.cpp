@@ -11214,7 +11214,7 @@ int32_t AbilityManagerService::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
 
 int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call: %{public}d", isAppRecovery);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "RestartApp, isAppRecovery: %{public}d", isAppRecovery);
     int result = CheckRestartAppWant(want);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "checkRestartAppWant error");
@@ -11225,7 +11225,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
     int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
     int64_t now = time(nullptr);
     RestartAppKeyType key(bundleName, userId);
-    if (RestartAppManager::GetInstance().IsRestartAppFrequent(key, now)) {
+    if (!isAppRecovery && RestartAppManager::GetInstance().IsRestartAppFrequent(key, now)) {
         return AAFwk::ERR_RESTART_APP_FREQUENT;
     }
 
@@ -11253,7 +11253,9 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility error");
         return result;
     }
-    RestartAppManager::GetInstance().AddRestartAppHistory(key, now);
+    if (!isAppRecovery) {
+        RestartAppManager::GetInstance().AddRestartAppHistory(key, now);
+    }
     return result;
 }
 
