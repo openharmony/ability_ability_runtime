@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-#include "dialogsessioninfo_fuzzer.h"
+#include "extension_permissions_util.h"
 
 #include <cstddef>
 #include <cstdint>
 
-#include "dialog_session_info.h"
-
 #include "ability_record.h"
+#define private public
+#include "extension_config.h"
+#define private public
+#include "mock_my_flag.h"
+#include "mock_permission_verification.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -48,16 +51,11 @@ uint32_t GetU32Data(const char* ptr)
 
 bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
 {
-    Parcel parcel;
-    auto dialogSessionInfo = std::make_shared<DialogSessionInfo>();
-    dialogSessionInfo->ReadFromParcel(parcel);
-    dialogSessionInfo->Marshalling(parcel);
-    DialogSessionInfo::Unmarshalling(parcel);
-
-    std::string str(data, size);
-    auto dialogAbilityInfo = std::make_shared<DialogAbilityInfo>();
-    dialogAbilityInfo->GetURI();
-
+    std::string strParam(data, size);
+    MyFlag::flag_ = MyFlag::IS_SA_CALL;
+    auto extensionPermissionsUtil = std::make_shared<ExtensionPermissionsUtil>();
+    auto extensionType = GetU32Data(data) % static_cast<uint32_t>(ExtensionAbilityType::RECENT_PHOTO);
+    extensionPermissionsUtil->CheckSAPermission(static_cast<ExtensionAbilityType>(extensionType));
     return true;
 }
 } // namespace OHOS
