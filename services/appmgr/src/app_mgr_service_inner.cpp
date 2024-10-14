@@ -1227,13 +1227,14 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         TAG_LOGW(AAFwkTag::APPMGR, "app name(%{public}s), app state(%{public}d)",
             appRecord->GetName().c_str(), static_cast<ApplicationState>(appRecord->GetState()));
     }
-    if (appRecord->GetApplicationPendingState() == ApplicationPendingState::FOREGROUNDING) {
+    auto pendingState = appRecord->GetApplicationPendingState();
+    TAG_LOGI(AAFwkTag::APPMGR, "app backgrounded: %{public}s, pState: %{public}d", appRecord->GetBundleName().c_str(),
+        pendingState);
+    if (pendingState == ApplicationPendingState::FOREGROUNDING) {
         appRecord->ScheduleForegroundRunning();
-    } else if (appRecord->GetApplicationPendingState() == ApplicationPendingState::BACKGROUNDING) {
+    } else if (pendingState == ApplicationPendingState::BACKGROUNDING) {
         appRecord->SetApplicationPendingState(ApplicationPendingState::READY);
     }
-
-    TAG_LOGI(AAFwkTag::APPMGR, "ApplicationBackgrounded, bundle: %{public}s", appRecord->GetBundleName().c_str());
     auto eventInfo = BuildEventInfo(appRecord);
     AAFwk::EventReport::SendAppBackgroundEvent(AAFwk::EventName::APP_BACKGROUND, eventInfo);
 }

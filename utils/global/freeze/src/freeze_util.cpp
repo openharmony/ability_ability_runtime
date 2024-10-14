@@ -29,11 +29,24 @@ void FreezeUtil::AddLifecycleEvent(const LifecycleFlow &flow, const std::string 
 {
     auto newEntry = TimeUtil::DefaultCurrentTimeStr() + "; " + entry;
     std::lock_guard lock(mutex_);
-    if (lifecycleFlow_.count(flow)) {
-        lifecycleFlow_[flow] = lifecycleFlow_[flow] + "\n" + newEntry;
+    auto iter = lifecycleFlow_.find(flow);
+    if (iter != lifecycleFlow_.end()) {
+        iter->second += "\n" + newEntry;
     } else {
-        lifecycleFlow_[flow] = newEntry;
+        lifecycleFlow_.emplace(flow, newEntry);
     }
+}
+
+bool FreezeUtil::AppendLifecycleEvent(const LifecycleFlow &flow, const std::string &entry)
+{
+    std::lock_guard lock(mutex_);
+    auto iter = lifecycleFlow_.find(flow);
+    if (iter == lifecycleFlow_.end()) {
+        return false;
+    }
+    auto newEntry = TimeUtil::DefaultCurrentTimeStr() + "; " + entry;
+    iter->second += "\n" + newEntry;
+    return true;
 }
 
 std::string FreezeUtil::GetLifecycleEvent(const LifecycleFlow &flow)

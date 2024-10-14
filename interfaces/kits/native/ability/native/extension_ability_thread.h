@@ -63,7 +63,7 @@ public:
      * @param targetState Indicates the lifecycle state.
      * @param sessionInfo Indicates the session info.
      */
-    void ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &targetState,
+    bool ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &targetState,
         sptr<AAFwk::SessionInfo> sessionInfo = nullptr) override;
 
     /**

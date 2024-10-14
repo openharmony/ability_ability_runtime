@@ -98,16 +98,16 @@ void AppLifeCycleDeal::ScheduleTerminate(bool isLastProcess)
     appThread->ScheduleTerminateApplication(isLastProcess);
 }
 
-void AppLifeCycleDeal::ScheduleForegroundRunning()
+bool AppLifeCycleDeal::ScheduleForegroundRunning()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
-        return;
+        return false;
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    appThread->ScheduleForegroundApplication();
+    return appThread->ScheduleForegroundApplication();
 }
 
 void AppLifeCycleDeal::ScheduleBackgroundRunning()
