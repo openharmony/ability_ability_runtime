@@ -446,12 +446,6 @@ void AppRunningRecord::RemoveModuleRecord(
     }
 }
 
-void AppRunningRecord::ForceKillApp([[maybe_unused]] const std::string &reason) const
-{}
-
-void AppRunningRecord::ScheduleAppCrash([[maybe_unused]] const std::string &description) const
-{}
-
 void AppRunningRecord::LaunchApplication(const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -472,6 +466,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
         }
     }
     ProcessInfo processInfo(processName_, GetPriorityObject()->GetPid());
+    processInfo.SetProcessType(processType_);
     launchData.SetProcessInfo(processInfo);
     launchData.SetRecordId(appRecordId_);
     launchData.SetUId(mainUid_);
@@ -1144,7 +1139,7 @@ void AppRunningRecord::PopForegroundingAbilityTokens()
     }
 }
 
-void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce)
+void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce, bool isTimeout)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "isForce: %{public}d", static_cast<int>(isForce));
 
@@ -1155,8 +1150,10 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     }
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
-    StateChangedNotifyObserver(
-        abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
+    if (!isTimeout) {
+        StateChangedNotifyObserver(
+            abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
+    }
     moduleRecord->TerminateAbility(shared_from_this(), token, isForce);
 }
 
@@ -2452,6 +2449,14 @@ void AppRunningRecord::SetUserRequestCleaning()
 bool AppRunningRecord::IsUserRequestCleaning() const
 {
     return isUserRequestCleaning_;
+}
+
+bool AppRunningRecord::IsProcessAttached() const
+{
+    if (appLifeCycleDeal_ == nullptr) {
+        return false;
+    }
+    return appLifeCycleDeal_->GetApplicationClient() != nullptr;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

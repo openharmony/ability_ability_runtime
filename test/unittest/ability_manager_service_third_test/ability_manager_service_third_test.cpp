@@ -61,8 +61,8 @@ public:
 
     AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
         const std::string& appName, const std::string& bundleName, const std::string& moduleName);
-public:
 
+public:
     AbilityRequest abilityRequest_{};
     Want want_{};
 };
@@ -1260,19 +1260,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, PreStartMission_001, TestSize.Level1)
 
     auto result = abilityMs_->PreStartMission("com.ix.hiservcie", "entry", "ServiceAbility", "2024-07-16 10:00:00");
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest PreStartMission_001 call result %{public}d", result);
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: HandleRestartResidentProcessDependedOnWeb
- * FunctionPoints: HandleRestartResidentProcessDependedOnWeb
- */
-HWTEST_F(AbilityManagerServiceThirdTest, HandleRestartResidentProcessDependedOnWeb_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
-
-    abilityMs_->HandleRestartResidentProcessDependedOnWeb();
 }
 
 /*

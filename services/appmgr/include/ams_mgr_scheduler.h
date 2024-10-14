@@ -50,9 +50,9 @@ public:
      * @param appInfo, the app information.
      * @param want, the starting information.
      */
-    virtual void LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId) override;
+    virtual void LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const std::shared_ptr<ApplicationInfo> &appInfo,
+        const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam) override;
 
     /**
      * TerminateAbility, call TerminateAbility() through the proxy object, terminate the token ability.
@@ -319,6 +319,14 @@ public:
     virtual void BlockProcessCacheByPids(const std::vector<int32_t> &pids) override;
 
     /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
+    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
+
+    /**
      * Request to clean uiability from user.
      *
      * @param token the token of ability.
@@ -326,13 +334,7 @@ public:
      */
     virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
 
-    /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
-     */
-    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
+    virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
 private:
     /**

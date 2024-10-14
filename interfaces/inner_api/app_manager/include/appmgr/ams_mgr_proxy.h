@@ -36,9 +36,9 @@ public:
      * @param appInfo, the app information.
      * @return
      */
-    virtual void LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId) override;
+    virtual void LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const std::shared_ptr<ApplicationInfo> &appInfo,
+        const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam) override;
 
     /**
      * TerminateAbility, call TerminateAbility() through the proxy object, terminate the token ability.
@@ -326,6 +326,8 @@ public:
      * @return Returns true is killed for upgrade web, others return false.
      */
     virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
+
+    virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

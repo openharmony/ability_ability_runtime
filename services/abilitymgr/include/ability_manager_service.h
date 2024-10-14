@@ -1742,8 +1742,6 @@ public:
      */
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
 
-    void HandleRestartResidentProcessDependedOnWeb();
-
     /**
      * Open atomic service window prior to finishing free install.
      *
@@ -1760,6 +1758,8 @@ public:
 
     void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
         const std::string& reason);
+
+    void HandleRestartResidentProcessDependedOnWeb();
 
     /**
      * Judge if Caller-Application is in background state.
@@ -2181,6 +2181,7 @@ private:
         const int32_t oriValidUserId);
 
     void InitInterceptor();
+    void InitInterceptorForScreenUnlock();
     void InitPushTask();
     void InitDeepLinkReserve();
 
@@ -2243,6 +2244,9 @@ private:
 
     void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
         const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
+
+    void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
+        const Want& want, uint32_t specifyTokenId);
     
     void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 

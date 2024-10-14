@@ -34,6 +34,7 @@
 #include "mock_native_token.h"
 #include "mock_render_scheduler.h"
 #include "mock_sa_call.h"
+#include "param.h"
 #include "parameters.h"
 #include "render_state_observer_stub.h"
 #include "window_manager.h"
@@ -399,18 +400,21 @@ HWTEST_F(AppMgrServiceInnerTest, LoadAbility_001, TestSize.Level0)
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->LoadAbility(token, nullptr, abilityInfo_, applicationInfo_, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
 
     auto appMgrServiceInner1 = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner1, nullptr);
 
     appMgrServiceInner1->remoteClientManager_->SetBundleManagerHelper(nullptr);
-    appMgrServiceInner1->LoadAbility(token, nullptr, abilityInfo_, applicationInfo_, nullptr, 0);
+    appMgrServiceInner1->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
 
     auto appMgrServiceInner2 = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner2, nullptr);
 
-    appMgrServiceInner2->LoadAbility(token, nullptr, abilityInfo_, applicationInfo_, nullptr, 0);
+    appMgrServiceInner2->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
     TAG_LOGI(AAFwkTag::TEST, "LoadAbility_001 end");
 }
 
@@ -3463,7 +3467,6 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-
     int32_t pid = 0;
     int32_t uid = 0;
     std::string bundleName = "test_processName";

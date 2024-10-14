@@ -454,6 +454,8 @@ public:
 
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
 
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
     /**
      * Request to clean uiability from user.
      *
@@ -462,7 +464,7 @@ public:
      */
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
-    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
 protected:
     /**

@@ -25,6 +25,8 @@ namespace OHOS {
 namespace AAFwk {
 class WindowOptionsUtils final {
 public:
+    static void SetWindowPositionAndSize(Want& want,
+        const sptr<IRemoteObject>& callerToken, const StartOptions& startOptions);
     static std::pair<bool, AppExecFwk::SupportWindowMode> WindowModeMap(int32_t windowMode);
 };
 }  // namespace AAFwk

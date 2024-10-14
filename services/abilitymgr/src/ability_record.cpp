@@ -82,6 +82,7 @@ const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbili
 const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 constexpr const char* PARAM_SEND_RESULT_CALLER_BUNDLENAME = "ohos.anco.param.sendResultCallderBundleName";
 constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendResultCallerTokenId";
+constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 // Developer mode param
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
@@ -215,6 +216,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
     abilityRecord->SetAppIndex(appIndex);
+    abilityRecord->SetSecurityFlag(abilityRequest.want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
     abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
     abilityRecord->sessionInfo_ = abilityRequest.sessionInfo;
     if (!abilityRecord->Init()) {
@@ -326,7 +328,6 @@ int AbilityRecord::LoadAbility()
 
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
-    want_.SetParam("ohos.ability.launch.reason", static_cast<int>(lifeCycleStateInfo_.launchParam.launchReason));
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         token_, callerToken_, abilityInfo_, applicationInfo_, want_, recordId_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
@@ -496,13 +497,13 @@ void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
     switch (messageId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG: {
             uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-                LOAD_TIMEOUT_MULTIPLE;
+                static_cast<uint32_t>(LOAD_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             break;
         }
         case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
             uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-                FOREGROUND_TIMEOUT_MULTIPLE;
+                static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
                 timeout);

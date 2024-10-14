@@ -29,6 +29,9 @@
 #include "running_process_info.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace AppExecFwk {
 class IAmsMgr : public IRemoteBroker {
 public:
@@ -43,9 +46,9 @@ public:
      * @param appInfo, the app information.
      * @return
      */
-    virtual void LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId) {};
+    virtual void LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const std::shared_ptr<ApplicationInfo> &appInfo,
+        const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam) {};
 
     /**
      * TerminateAbility, call TerminateAbility() through the proxy object, terminate the token ability.
@@ -369,6 +372,11 @@ public:
         return true;
     }
 
+    virtual bool IsProcessAttached(sptr<IRemoteObject> token)
+    {
+        return false;
+    }
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -419,6 +427,7 @@ public:
         FORCE_KILL_APPLICATION,
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
+        IS_PROCESS_ATTACHED,
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
     };
 };

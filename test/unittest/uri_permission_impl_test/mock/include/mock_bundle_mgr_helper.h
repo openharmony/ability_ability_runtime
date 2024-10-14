@@ -31,7 +31,7 @@ public:
     ErrCode GetSandboxBundleInfo(const std::string &bundleName, int32_t appIndex, int32_t userId, BundleInfo &info);
 
     bool GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId);
-        
+
     bool GetApplicationInfo(const std::string &appName, uint32_t flags, int32_t userId, ApplicationInfo &appInfo);
 
     ErrCode GetCloneBundleInfo(const std::string &bundleName, int32_t flags, int32_t appCloneIndex,

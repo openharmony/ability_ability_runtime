@@ -42,6 +42,9 @@
 #include "app_jsheap_mem_info.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace AppExecFwk {
 class AppServiceManager;
 class Configuration;
@@ -54,16 +57,14 @@ public:
     /**
      * Load ability.
      *
-     * @param token Ability identify.
-     * @param preToken Ability identify of caller.
      * @param abilityInfo Ability information.
      * @param appInfo Application information.
      * @param want Want.
+     * @param loadParam load ability param.
      * @return Returns RESULT_OK on success, others on failure.
      */
-    virtual AppMgrResultCode LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-        const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo, const AAFwk::Want &want,
-        int32_t abilityRecordId);
+    virtual AppMgrResultCode LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
+        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam);
 
     /**
      * Terminate ability.
@@ -805,6 +806,14 @@ public:
     virtual AppMgrResultCode BlockProcessCacheByPids(const std::vector<int32_t> &pids);
 
     /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
+    /**
      * Request to clean uiability from user.
      *
      * @param token the token of ability.
@@ -812,13 +821,7 @@ public:
      */
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
-    /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
-     */
-    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

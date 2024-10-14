@@ -71,6 +71,10 @@ const std::string HELP_MSG_START =
     "  [-U <URI>] "
     "  [-e <entity>] "
     "  [-t <mime-type>] "
+    "  [--wl <window-left>] "
+    "  [--wt <window-top>] "
+    "  [--wh <window-height>] "
+    "  [--ww <window-width>] "
     "  start ability with an element name\n";
 
 const std::string HELP_MSG_STOP_SERVICE =
@@ -197,6 +201,7 @@ const std::string PERFCMD_FIRST_PROFILE = "profile";
 const std::string PERFCMD_FIRST_DUMPHEAP = "dumpheap";
 
 const std::string STRING_TEST_REGEX_INTEGER_NUMBERS = "^(0|[1-9][0-9]*|-[1-9][0-9]*)$";
+const std::string STRING_REGEX_ALL_NUMBERS = "^(-)?([0-9]|[1-9][0-9]+)([\\.][0-9]+)?$";
 }  // namespace
 
 class AbilityManagerShellCommand : public ShellCommand {
