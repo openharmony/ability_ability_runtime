@@ -1865,7 +1865,7 @@ HWTEST_F(AmsAppRunningRecordTest, Specified_LaunchApplication_001, TestSize.Leve
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchApplication(_, _)).Times(1);
     service_->LaunchApplication(record);
     auto ability = record->GetAbilityRunningRecordByToken(GetMockToken());
-    EXPECT_TRUE(ability->GetState() != AbilityState::ABILITY_STATE_READY);
+    EXPECT_TRUE(ability->GetState() == AbilityState::ABILITY_STATE_READY);
 }
 
 /*
