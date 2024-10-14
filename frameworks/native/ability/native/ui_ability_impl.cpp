@@ -400,6 +400,7 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
             return;
         }
+        impl->ability_->OnAfterFocusedCommon(focuseMode);
         auto applicationContext = abilityContext->GetApplicationContext();
         if (applicationContext == nullptr || applicationContext->IsAbilityLifecycleCallbackEmpty()) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null applicationContext or lifecycleCallback");
