@@ -3338,5 +3338,19 @@ HWTEST_F(AbilityConnectManagerTest, AbilityWindowConfigTransactionDone_0100, Tes
     auto ret = connectManager->AbilityWindowConfigTransactionDone(serviceToken_, windowConfig);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: UpdateKeepAliveEnableState_0100
+ * @tc.desc: UpdateKeepAliveEnableState
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, UpdateKeepAliveEnableState_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    auto ret = connectManager->UpdateKeepAliveEnableState("bundle", "entry", "mainAbility", true);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
