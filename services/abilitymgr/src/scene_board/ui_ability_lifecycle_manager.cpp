@@ -142,7 +142,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         isColdStart = true;
         UpdateProcessName(abilityRequest, uiAbilityRecord);
         if (isSCBRecovery_) {
-            codeStartInSCBRecovery_.insert(sessionInfo->persistentId);
+            coldStartInSCBRecovery_.insert(sessionInfo->persistentId);
         }
         auto abilityInfo = abilityRequest.abilityInfo;
         MoreAbilityNumbersSendEventInfo(
@@ -2610,11 +2610,11 @@ int32_t UIAbilityLifecycleManager::UpdateSessionInfoBySCB(std::list<SessionInfo>
                     break;
                 }
             }
-            if (!isFind && codeStartInSCBRecovery_.count(sessionId) == 0) {
+            if (!isFind && coldStartInSCBRecovery_.count(sessionId) == 0) {
                 abilitySet.emplace(abilityRecord);
             }
         }
-        codeStartInSCBRecovery_.clear();
+        coldStartInSCBRecovery_.clear();
     }
     for (const auto &info : sessionInfos) {
         sessionIds.emplace_back(info.persistentId);
@@ -2726,7 +2726,7 @@ void UIAbilityLifecycleManager::EnableListForSCBRecovery()
 {
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     isSCBRecovery_ = true;
-    codeStartInSCBRecovery_.clear();
+    coldStartInSCBRecovery_.clear();
 }
 }  // namespace AAFwk
 }  // namespace OHOS
