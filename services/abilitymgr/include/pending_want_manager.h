@@ -184,9 +184,17 @@ private:
 
     bool CheckWindowState(int32_t pid);
 
+    void EraseBundleRecord(const std::vector<WantsInfo> &wantsInfos, std::shared_ptr<PendingWantKey> key);
+
+    void InsertBundleRecord(const std::vector<WantsInfo> &wantsInfos, std::shared_ptr<PendingWantKey> key);
+
+    bool QueryRecordByBundle(const std::string &bundleName);
+
 private:
     std::map<std::shared_ptr<PendingWantKey>, sptr<PendingWantRecord>> wantRecords_;
+    std::map<std::string, std::vector<std::shared_ptr<PendingWantKey>>> bundleRecords_;
     ffrt::mutex mutex_;
+    ffrt::mutex bundleRecordsMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
