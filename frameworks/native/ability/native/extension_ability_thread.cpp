@@ -373,7 +373,7 @@ void ExtensionAbilityThread::HandleExtensionUpdateConfiguration(const AppExecFwk
     TAG_LOGD(AAFwkTag::EXT, "End");
 }
 
-void ExtensionAbilityThread::ScheduleAbilityTransaction(
+bool ExtensionAbilityThread::ScheduleAbilityTransaction(
     const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -381,11 +381,11 @@ void ExtensionAbilityThread::ScheduleAbilityTransaction(
         want.GetElement().GetAbilityName().c_str(), lifeCycleStateInfo.state, lifeCycleStateInfo.isNewWant);
     if (token_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null token_");
-        return;
+        return false;
     }
     if (abilityHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null abilityHandler_");
-        return;
+        return false;
     }
     wptr<ExtensionAbilityThread> weak = this;
     auto task = [weak, want, lifeCycleStateInfo, sessionInfo]() {
@@ -399,7 +399,9 @@ void ExtensionAbilityThread::ScheduleAbilityTransaction(
     bool ret = abilityHandler_->PostTask(task, AppExecFwk::EventQueue::Priority::HIGH);
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
+        return false;
     }
+    return true;
 }
 
 void ExtensionAbilityThread::ScheduleConnectAbility(const Want &want)

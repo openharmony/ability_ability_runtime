@@ -30,7 +30,7 @@ public:
     AbilityScheduler();
     virtual ~AbilityScheduler();
 
-    void ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
+    bool ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
         sptr<SessionInfo> sessionInfo = nullptr) override;
 
     void ScheduleShareData(const int32_t &uniqueId) override;

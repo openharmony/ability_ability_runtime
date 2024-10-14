@@ -134,7 +134,7 @@ public:
      * @brief Schedule the foreground lifecycle of application.
      *
      */
-    void ScheduleForegroundApplication() override;
+    bool ScheduleForegroundApplication() override;
 
     /**
      *

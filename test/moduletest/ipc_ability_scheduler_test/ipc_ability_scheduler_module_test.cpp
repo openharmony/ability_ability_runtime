@@ -93,7 +93,8 @@ HWTEST_F(IpcAbilitySchedulerModuleTest, ScheduleAbilityTransaction_001, TestSize
             sem.Post();
         };
 
-        EXPECT_CALL(*stub, ScheduleAbilityTransaction(_, _, _)).Times(1).WillOnce(Invoke(stubHandler));
+        EXPECT_CALL(*stub, ScheduleAbilityTransaction(_, _, _)).Times(1)
+            .WillOnce(testing::DoAll(Invoke(stubHandler), testing::Return(true)));
 
         proxy->ScheduleAbilityTransaction(proxyState.want, proxyState.lifeCycleStateInfo);
 

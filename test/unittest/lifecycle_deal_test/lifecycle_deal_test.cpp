@@ -60,7 +60,7 @@ HWTEST_F(LifecycleDealTest, LifecycleDeal_oprator_001, TestSize.Level1)
     LifeCycleStateInfo val;
     EXPECT_CALL(*abilityScheduler_, ScheduleAbilityTransaction(::testing::_, ::testing::_, ::testing::_))
         .Times(1)
-        .WillOnce(testing::SaveArg<1>(&val));
+        .WillOnce(testing::DoAll(testing::SaveArg<1>(&val), testing::Return(true)));
 
     const Want want;
     CallerInfo caller;
@@ -92,7 +92,7 @@ HWTEST_F(LifecycleDealTest, LifecycleDeal_oprator_002, TestSize.Level1)
     LifeCycleStateInfo val;
     EXPECT_CALL(*abilityScheduler_, ScheduleAbilityTransaction(::testing::_, ::testing::_, ::testing::_))
         .Times(1)
-        .WillOnce(testing::SaveArg<1>(&val));
+        .WillOnce(testing::DoAll(testing::SaveArg<1>(&val), testing::Return(true)));
 
     const Want want;
     CallerInfo caller;
@@ -124,7 +124,7 @@ HWTEST_F(LifecycleDealTest, LifecycleDeal_oprator_003, TestSize.Level1)
     LifeCycleStateInfo val;
     EXPECT_CALL(*abilityScheduler_, ScheduleAbilityTransaction(::testing::_, ::testing::_, ::testing::_))
         .Times(1)
-        .WillOnce(testing::SaveArg<1>(&val));
+        .WillOnce(testing::DoAll(testing::SaveArg<1>(&val), testing::Return(true)));
 
     const Want want;
     CallerInfo caller;
