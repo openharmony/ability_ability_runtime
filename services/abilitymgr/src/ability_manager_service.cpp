@@ -6668,7 +6668,7 @@ std::shared_ptr<UIAbilityLifecycleManager> AbilityManagerService::GetCurrentUIAb
     return subManagersHelper_->GetCurrentUIAbilityManager();
 }
 
-std::shared_ptr<UIAbilityLifecycleManager> AbilityManagerService::GetUIAbilityManagerByUserId(int32_t userId)
+std::shared_ptr<UIAbilityLifecycleManager> AbilityManagerService::GetUIAbilityManagerByUserId(int32_t userId) const
 {
     CHECK_POINTER_AND_RETURN(subManagersHelper_, nullptr);
     return subManagersHelper_->GetUIAbilityManagerByUserId(userId);
@@ -11907,6 +11907,13 @@ void AbilityManagerService::SendStartAbilityOtherExtensionEvent(const AppExecFwk
             eventInfo.bundleName.c_str(), eventInfo.extensionType);
         EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
     }
+}
+
+void AbilityManagerService::EnableListForSCBRecovery(int32_t userId) const
+{
+    auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
+    CHECK_POINTER_LOG(uiAbilityManager, "UIAbilityMgr not exist.");
+    uiAbilityManager->EnableListForSCBRecovery();
 }
 }  // namespace AAFwk
 }  // namespace OHOS
