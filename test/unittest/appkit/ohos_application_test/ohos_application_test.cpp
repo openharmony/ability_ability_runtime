@@ -547,9 +547,11 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_080
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_0800 start.";
     HapModuleInfo hapModuleInfo;
-    ohosApplication_->AddAbilityStage(hapModuleInfo);
+    auto callback = []() {};
+    bool isAsyncCallback = false;
+    ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback);
     EXPECT_TRUE(ohosApplication_->abilityRuntimeContext_ == nullptr);
-    EXPECT_FALSE(ohosApplication_->AddAbilityStage(hapModuleInfo));
+    EXPECT_FALSE(ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback));
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_0800 end.";
 }
 
@@ -562,10 +564,12 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_090
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_0900 start.";
     HapModuleInfo hapModuleInfo;
+    auto callback = []() {};
+    bool isAsyncCallback = false;
     ohosApplication_->abilityRuntimeContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
-    ohosApplication_->AddAbilityStage(hapModuleInfo);
+    ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback);
     EXPECT_TRUE(ohosApplication_->runtime_ == nullptr);
-    EXPECT_FALSE(ohosApplication_->AddAbilityStage(hapModuleInfo));
+    EXPECT_FALSE(ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback));
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_0900 end.";
 }
 
@@ -578,14 +582,16 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_010
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_01000 start.";
     HapModuleInfo hapModuleInfo;
+    auto callback = []() {};
+    bool isAsyncCallback = false;
     std::string moduleName = "entry";
     ohosApplication_->runtime_ = std::make_unique<AbilityRuntime::MockRuntime>();
     std::shared_ptr<AbilityRuntime::AbilityStage> abilityStages = std::make_shared<AbilityRuntime::AbilityStage>();
     ohosApplication_->abilityStages_.emplace(moduleName, abilityStages);
     ohosApplication_->abilityRuntimeContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
-    ohosApplication_->AddAbilityStage(hapModuleInfo);
+    ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback);
     EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
-    EXPECT_FALSE(ohosApplication_->AddAbilityStage(hapModuleInfo));
+    EXPECT_FALSE(ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback));
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_01000 end.";
 }
 
@@ -598,17 +604,19 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_011
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_01100 start.";
     HapModuleInfo hapModuleInfo;
+    auto callback = []() {};
+    bool isAsyncCallback = false;
     ohosApplication_->runtime_ = std::make_unique<AbilityRuntime::MockRuntime>();
     ohosApplication_->abilityRuntimeContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     ohosApplication_->abilityRuntimeContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
-    ohosApplication_->AddAbilityStage(hapModuleInfo);
+    ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback);
     auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
     auto appInfo = std::make_shared<ApplicationInfo>();
     appInfo->multiProjects = true;
     contextImpl->SetApplicationInfo(appInfo);
     ohosApplication_->abilityRuntimeContext_->AttachContextImpl(contextImpl);
-    ohosApplication_->AddAbilityStage(hapModuleInfo);
+    ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback);
     EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_01100 end.";
 }
@@ -622,17 +630,19 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_012
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_01200 start.";
     HapModuleInfo hapModuleInfo;
+    auto callback = []() {};
+    bool isAsyncCallback = false;
     ohosApplication_->runtime_ = std::make_unique<AbilityRuntime::MockRuntime>();
     ohosApplication_->abilityRuntimeContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     ohosApplication_->abilityRuntimeContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
-    ohosApplication_->AddAbilityStage(hapModuleInfo);
+    ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback);
     auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
     auto appInfo = std::make_shared<ApplicationInfo>();
     appInfo->multiProjects = false;
     contextImpl->SetApplicationInfo(appInfo);
     ohosApplication_->abilityRuntimeContext_->AttachContextImpl(contextImpl);
-    ohosApplication_->AddAbilityStage(hapModuleInfo);
+    ohosApplication_->AddAbilityStage(hapModuleInfo, callback, isAsyncCallback);
     EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_AddAbilityStage_01200 end.";
 }
