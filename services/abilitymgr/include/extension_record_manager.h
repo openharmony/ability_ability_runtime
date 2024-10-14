@@ -100,7 +100,7 @@ public:
         const std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey);
 
     bool RemovePreloadUIExtensionRecordById(
-        const std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey,
+        const std::tuple<std::string, std::string, std::string, std::string> &extensionRecordMapKey,
         int32_t extensionRecordId);
 
     int32_t GetOrCreateExtensionRecord(const AAFwk::AbilityRequest &abilityRequest, const std::string &hostBundleName,
