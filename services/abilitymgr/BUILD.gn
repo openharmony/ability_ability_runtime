@@ -164,6 +164,7 @@ ohos_shared_library("abilityms") {
     "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "qos_manager:concurrent_task_client",
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
     "relational_store:native_rdb",

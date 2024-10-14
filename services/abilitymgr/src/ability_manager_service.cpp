@@ -29,6 +29,7 @@
 #include "app_exit_reason_data_manager.h"
 #include "application_util.h"
 #include "assert_fault_callback_death_mgr.h"
+#include "concurrent_task_client.h"
 #include "connection_state_manager.h"
 #include "display_manager.h"
 #include "distributed_client.h"
@@ -309,6 +310,10 @@ void AbilityManagerService::OnStart()
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
 #endif
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability manager service start success.");
+    auto pid = getpid();
+    std::unordered_map<std::string, std::string> payload;
+    payload["pid"] = std::to_string(pid);
+    OHOS::ConcurrentTask::ConcurrentTaskClient::GetInstance().RequestAuth(payload);
 }
 
 bool AbilityManagerService::Init()
@@ -2717,7 +2722,7 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
     }
     EventInfo eventInfo = BuildEventInfo(want, userId);
     eventInfo.extensionType = static_cast<int32_t>(extensionType);
-    
+
     int result;
 #ifdef WITH_DLP
     result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::START_EXTENSION_ERROR);
@@ -3121,7 +3126,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     }
     EventInfo eventInfo = BuildEventInfo(want, userId);
     eventInfo.extensionType = static_cast<int32_t>(extensionType);
-    
+
     int result;
 #ifdef WITH_DLP
     result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::STOP_EXTENSION_ERROR);
@@ -3792,7 +3797,7 @@ int AbilityManagerService::ConnectAbilityCommon(
         CHECK_CALLER_IS_SYSTEM_APP;
     }
     EventInfo eventInfo = BuildEventInfo(want, userId);
-    
+
     int result;
 #ifdef WITH_DLP
     result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::CONNECT_SERVICE_ERROR);
@@ -3904,7 +3909,7 @@ int AbilityManagerService::ConnectUIExtensionAbility(const Want &want, const spt
         EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CALLER;
     }
-    
+
     int result;
 #ifdef WITH_DLP
     result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::CONNECT_SERVICE_ERROR);
@@ -11340,7 +11345,7 @@ void AbilityManagerService::PrintStartAbilityInfo(AppExecFwk::AbilityInfo caller
         static_cast<int32_t>(calledInfo.extensionAbilityType),
         calledInfo.moduleName.c_str(),
         calledInfo.applicationName.c_str());
-    
+
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityInfo toString: "
         "callerUid is: %{public}d, "

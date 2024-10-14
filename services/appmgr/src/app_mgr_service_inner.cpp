@@ -3027,7 +3027,7 @@ int32_t AppMgrServiceInner::CreateStartMsg(const std::string &processName, uint3
 
     AAFwk::AutoSyncTaskHandle autoSync(otherTaskHandler_->SubmitTask([&]() {
         AddMountPermission(bundleInfo.applicationInfo.accessTokenId, startMsg.permissions);
-    }));
+        }, AAFwk::TaskQoS::USER_INTERACTIVE));
 
     HspList hspList;
     auto ret = bundleMgrHelper->GetBaseSharedBundleInfos(bundleInfo.name, hspList,
