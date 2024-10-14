@@ -240,6 +240,7 @@ constexpr const char* BOOTEVENT_BOOT_ANIMATION_READY = "bootevent.bootanimation.
 constexpr const char* NEED_STARTINGWINDOW = "ohos.ability.NeedStartingWindow";
 constexpr const char* PERMISSIONMGR_BUNDLE_NAME = "com.ohos.permissionmanager";
 constexpr const char* PERMISSIONMGR_ABILITY_NAME = "com.ohos.permissionmanager.GrantAbility";
+constexpr const char* SCENEBOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 constexpr const char* IS_CALL_BY_SCB = "isCallBySCB";
 constexpr const char* SPECIFY_TOKEN_ID = "specifyTokenId";
 constexpr const char* PROCESS_SUFFIX = "embeddable";
@@ -311,7 +312,6 @@ bool AbilityManagerService::Init()
     eventHandler_ = std::make_shared<AbilityEventHandler>(taskHandler_, weak_from_this());
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
-    desktopInForegroundTime_ = CurrentTimeMillis();
 
     // init user controller.
     userController_ = std::make_shared<UserController>();
@@ -11364,33 +11364,21 @@ bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToke
     return erms->DoProcess(want, GetUserId());
 }
 
-int64_t AbilityManagerService::CurrentTimeMillis()
-{
-    auto now = std::chrono::system_clock::now();
-    auto milliSecs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    return milliSecs.count();
-}
-
-bool AbilityManagerService::CheckVisibilityWindowInfo(const int32_t pid, AbilityState currentState)
+bool AbilityManagerService::CheckProcessIsBackground(int32_t pid, AbilityState currentState)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, currentState:%{public}d", pid, currentState);
-    std::map<int32_t, WindowVisibilityStateInfos>::iterator iter = windowVisibilityStateInfos_.find(pid);
-    if (iter != windowVisibilityStateInfos_.end()) {
-        if (!(iter->second.visibilityState == Rosen::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION &&
-            iter->second.curTime > desktopInForegroundTime_ &&
-            desktopInForegroundTime_ > iter->second.windowVisibleTime)) {
-                TAG_LOGD(AAFwkTag::ABILITYMGR, "Scenes other than this combination will not be intercepted.");
-                return true;
-        } else {
-            return false;
-        }
+    std::lock_guard<ffrt::mutex> myLockGuard(windowVisibleListLock_);
+    if (currentState == AAFwk::AbilityState::BACKGROUND &&
+        windowVisibleList_.find(pid) != windowVisibleList_.end()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process window is occluded");
+        return false;
     }
 
     if (currentState != AAFwk::AbilityState::BACKGROUND) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 void AbilityManagerService::InitWindowVisibilityChangedListener()
@@ -11418,6 +11406,7 @@ void AbilityManagerService::FreeWindowVisibilityChangedListener()
         return;
     }
     Rosen::WindowManager::GetInstance().UnregisterVisibilityChangedListener(windowVisibilityChangedListener_);
+    windowVisibilityChangedListener_ = nullptr;
 }
 
 void AbilityManagerService::HandleWindowVisibilityChanged(
@@ -11428,25 +11417,25 @@ void AbilityManagerService::HandleWindowVisibilityChanged(
         TAG_LOGW(AAFwkTag::ABILITYMGR, "window visibility info empty");
         return;
     }
-    for (count auto &info : windowVisibilityInfos) {
+    std::lock_guard<ffrt::mutex> myLockGuard(windowVisibleListLock_);
+    for (const auto &info : windowVisibilityInfos) {
         if (info == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "null info");
             continue;
         }
+        int uid = 0;
+        std::string bundleName;
         if (info->windowType_ == Rosen::WindowType::WINDOW_TYPE_DESKTOP &&
-            info->visibilityState_ == Rosen::WINDOW_VISIBILITY_STATE_NO_OCCUSION) {
-            desktopInForegroundTime_ = CurrentTimeMillis();
+            info->visibilityState_ == Rosen::WINDOW_VISIBILITY_STATE_NO_OCCLUSION) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "desktop is visible clear windowVisibleList_");
+            windowVisibleList_.clear();
+            continue;
         }
-
-        WindowVisibilityStateInfos windowVisibilityStateInfo;
-        windowVisibilityStateInfo.uid = info->uid_;
-        windowVisibilityStateInfo.pid = info->pid_;
-        windowVisibilityStateInfo.visibilityState = info->visibilityState_;
-        windowVisibilityStateInfo.curTime = CurrentTimeMillis();
-        if (info->visibilityState_ == Rosen::WINDOW_VISIBILITY_STATE_NO_OCCUSION) {
-            windowVisibilityStateInfo.windowVisibleTime = CurrentTimeMillis();
+        DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(info->pid_, bundleName, uid);
+        if (info->visibilityState_ == Rosen::WINDOW_VISIBILITY_STATE_NO_OCCLUSION &&
+            bundleName != SCENEBOARD_BUNDLE_NAME) {
+            windowVisibleList_.insert(info->pid_);
         }
-        windowVisibilityStateInfos_[info->pid_] = windowVisibilityStateInfo;
     }
 }
 
@@ -11484,7 +11473,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
         return false;
     }
-    if (CheckVisibilityWindowInfo(abilityRecord->GetPid(), abilityRecord->GetAbilityState())) {
+    if (!CheckProcessIsBackground(abilityRecord->GetPid(), abilityRecord->GetAbilityState())) {
         return false;
     }
     if (continuousFlag) {
