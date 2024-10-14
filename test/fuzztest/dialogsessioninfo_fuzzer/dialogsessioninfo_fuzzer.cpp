@@ -52,6 +52,12 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     auto dialogSessionInfo = std::make_shared<DialogSessionInfo>();
     dialogSessionInfo->ReadFromParcel(parcel);
     dialogSessionInfo->Marshalling(parcel);
+    DialogSessionInfo::Unmarshalling(parcel);
+
+    std::string str(data, size);
+    auto dialogAbilityInfo = std::make_shared<DialogAbilityInfo>();
+    dialogAbilityInfo->GetURI();
+
     return true;
 }
 } // namespace OHOS

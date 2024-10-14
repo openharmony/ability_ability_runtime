@@ -880,7 +880,7 @@ public:
         int32_t appIndex = 0) override;
 
     virtual sptr<IWantSender> GetWantSender(
-        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) override;
+        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid = -1) override;
 
     virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) override;
 
@@ -1791,6 +1791,8 @@ public:
 
     int32_t BlockAllAppStart(bool flag) override;
 
+    int SetWantForSessionInfo(sptr<SessionInfo> sessionInfo);
+
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         uint32_t sceneFlag, bool &isColdStart);
 
@@ -1806,6 +1808,8 @@ public:
      * @return Returns ERR_OK on check success, others on check failure.
      */
     int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall, bool isData = false);
+
+    void EnableListForSCBRecovery(int32_t userId) const;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1876,7 +1880,7 @@ private:
      * connect bms.
      *
      */
-    void ConnectBmsService();
+    void ConnectServices();
 
     /**
      * Determine whether it is a system APP
@@ -1888,8 +1892,6 @@ private:
      *
      */
     void InitGlobalConfiguration();
-
-    sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
 
     int StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
         const sptr<IRemoteObject> &callerToken);
@@ -1913,13 +1915,6 @@ private:
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
     int PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId);
     void PreLoadAppDataAbilitiesTask(const std::string &bundleName, const int32_t userId);
-    void UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObject> asCallerSourceToken, sptr<IRemoteObject> callerToken);
-    void UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteObject> asCallerSourceToken);
-    void UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken);
-    bool UpdateAsCallerInfoFromDialog(Want& want);
-    void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
-    void UpdateSignatureInfo(std::string bundleName, Want& want);
-    void UpdateCallerInfoFromToken(Want& want, const sptr<IRemoteObject> &token);
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
     int StartAbilityPrechainInterceptor(StartAbilityParams &params);
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
@@ -2007,7 +2002,7 @@ private:
     std::shared_ptr<MissionListManagerInterface> GetCurrentMissionListManager();
     std::unordered_map<int, std::shared_ptr<UIAbilityLifecycleManager>> GetUIAbilityManagers();
     std::shared_ptr<UIAbilityLifecycleManager> GetCurrentUIAbilityManager();
-    std::shared_ptr<UIAbilityLifecycleManager> GetUIAbilityManagerByUserId(int32_t userId);
+    std::shared_ptr<UIAbilityLifecycleManager> GetUIAbilityManagerByUserId(int32_t userId) const;
     std::shared_ptr<UIAbilityLifecycleManager> GetUIAbilityManagerByUid(int32_t uid);
     bool JudgeSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
     bool IsAppSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -2259,9 +2254,6 @@ private:
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
 
-    void GetRunningMultiAppIndex(const std::string &bundleName, int32_t uid, int32_t &appIndex);
-    ErrCode ConvertToExplicitWant(Want& want);
-
     int CheckUIExtensionUsage(AppExecFwk::UIExtensionUsage uiExtensionUsage,
         AppExecFwk::ExtensionAbilityType extensionType);
 
@@ -2315,13 +2307,11 @@ private:
      */
     void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
 
-    constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
+    bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
 
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
-    sptr<AppExecFwk::IBundleMgr> iBundleManager_;
-    sptr<OHOS::AppExecFwk::IAppMgr> appMgr_ { nullptr };
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
 
@@ -2398,8 +2388,6 @@ private:
 
     void ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
         const AppExecFwk::AbilityInfo &abilityInfo);
-
-    void UpdateBackToCallerFlag(const sptr<IRemoteObject> &callerToken, Want &want, int32_t requestCode, bool backFlag);
 
     void SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType);
 

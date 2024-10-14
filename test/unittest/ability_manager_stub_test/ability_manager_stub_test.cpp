@@ -3688,5 +3688,21 @@ HWTEST_F(AbilityManagerStubTest, ChangeUIAbilityVisibilityBySCB_0100, TestSize.L
 
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: TerminateMissionInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService TerminateMissionInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function TerminateMissionInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_TerminateMissionInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->TerminateMissionInner(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -26,10 +26,7 @@ ohos_unittest("auto_startup_callback_proxy_test") {
     "${ability_runtime_test_path}/unittest/auto_startup_callback_stub_test",
   ]
 
-  sources = [
-    "${ability_runtime_native_path}/ability/native/auto_startup_callback_proxy.cpp",
-    "auto_startup_callback_proxy_test.cpp",
-  ]
+  sources = [ "auto_startup_callback_proxy_test.cpp" ]
 
   configs = []
 

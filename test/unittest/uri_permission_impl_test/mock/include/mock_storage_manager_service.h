@@ -61,6 +61,17 @@ public:
         return E_OK;
     }
 
+    virtual int32_t NotifyMtpMounted(const std::string &id, const std::string &path,
+    const std::string &desc) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t NotifyMtpUnmounted(const std::string &id, const std::string &path) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t GetFreeSizeOfVolume(std::string volumeUuid, int64_t &freeSize) override
     {
         return E_OK;
@@ -200,6 +211,15 @@ public:
         return E_OK;
     }
 
+    virtual int32_t UpdateUseAuthWithRecoveryKey(const std::vector<uint8_t> &authToken,
+                                                 const std::vector<uint8_t> &newSecret,
+                                                 uint64_t secureUid,
+                                                 uint32_t userId,
+                                                 std::vector<std::vector<uint8_t>> &plainText) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t ActiveUserKey(uint32_t userId,
                                   const std::vector<uint8_t> &token,
                                   const std::vector<uint8_t> &secret) override
@@ -239,7 +259,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetFileEncryptStatus(uint32_t userId, bool &isEncrypted) override
+    virtual int32_t GetFileEncryptStatus(uint32_t userId, bool &isEncrypted, bool needCheckDirMount) override
     {
         return E_OK;
     }

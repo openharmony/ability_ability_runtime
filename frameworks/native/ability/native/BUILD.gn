@@ -1621,8 +1621,8 @@ ohos_shared_library("auto_startup_callback") {
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error" ]
 
   sources = [
-    "${ability_runtime_native_path}/ability/native/auto_startup_callback_proxy.cpp",
-    "${ability_runtime_native_path}/ability/native/auto_startup_callback_stub.cpp",
+    "${ability_runtime_native_path}/ability/native/auto_startup_callback/auto_startup_callback_proxy.cpp",
+    "${ability_runtime_native_path}/ability/native/auto_startup_callback/auto_startup_callback_stub.cpp",
   ]
 
   deps = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager" ]

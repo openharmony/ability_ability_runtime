@@ -59,9 +59,15 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
 
     WantSenderInfo info = wantSenderInfo;
 
-    if (!isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
-        info.allWants.size() > 0) {
-        info.allWants.back().want.RemoveParam("ohos.extra.param.key.appCloneIndex");
+    if (wantSenderInfo.type != static_cast<int32_t>(OperationType::SEND_COMMON_EVENT) &&
+        !isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        for (auto it = info.allWants.begin(); it != info.allWants.end(); ++it) {
+            if (info.bundleName != it->want.GetBundle()) {
+                info.allWants.erase(it);
+            } else {
+                it->want.RemoveParam("ohos.extra.param.key.appCloneIndex");
+            }
+        }
     }
         
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
@@ -754,7 +760,7 @@ int32_t PendingWantManager::GetAllRunningInstanceKeysByBundleName(
         return OBJECT_NULL;
     }
 
-    return appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec);
+    return IN_PROCESS_CALL(appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

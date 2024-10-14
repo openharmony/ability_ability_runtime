@@ -71,7 +71,7 @@ public:
      * @return Returns the created WantAgent object.
      */
     static std::shared_ptr<WantAgent> GetWantAgent(const WantAgentInfo &paramsInfo,
-        int32_t userId = INVLID_WANT_AGENT_USER_ID);
+        int32_t userId = INVLID_WANT_AGENT_USER_ID, int32_t uid = -1);
 
     /**
      * Obtains an WantAgent object operation type.
@@ -178,7 +178,7 @@ public:
      * @param jsonString Json string.
      * @return WantAgentInfo object.
      */
-    static std::shared_ptr<WantAgent> FromString(const std::string &jsonString);
+    static std::shared_ptr<WantAgent> FromString(const std::string &jsonString, int32_t uid = -1);
 
 private:
     WantAgentHelper();
