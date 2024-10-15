@@ -34,7 +34,6 @@
 #include "test_observer_stub.h"
 #include "test_observer.h"
 #include "test_runner.h"
-
 #include "want.h"
 #include "scene_board_judgement.h"
 
