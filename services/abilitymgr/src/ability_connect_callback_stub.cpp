@@ -161,7 +161,7 @@ int AbilityConnectionStub::OnRemoteRequest(
     }
 }
 
-void AbilityConnectCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &__attribute__((unused)) remote)
+void AbilityConnectCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (handler_) {

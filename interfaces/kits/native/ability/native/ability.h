@@ -1349,7 +1349,6 @@ private:
 
     std::shared_ptr<ContinuationHandler> continuationHandler_ = nullptr;
     std::shared_ptr<ContinuationManager> continuationManager_ = nullptr;
-    std::shared_ptr<ContinuationRegisterManager> continuationRegisterManager_ = nullptr;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
     std::shared_ptr<LifeCycle> lifecycle_ = nullptr;
     std::shared_ptr<AbilityLifecycleExecutor> abilityLifecycleExecutor_ = nullptr;

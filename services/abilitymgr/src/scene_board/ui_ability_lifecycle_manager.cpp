@@ -142,7 +142,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         isColdStart = true;
         UpdateProcessName(abilityRequest, uiAbilityRecord);
         if (isSCBRecovery_) {
-            codeStartInSCBRecovery_.insert(sessionInfo->persistentId);
+            coldStartInSCBRecovery_.insert(sessionInfo->persistentId);
         }
         auto abilityInfo = abilityRequest.abilityInfo;
         MoreAbilityNumbersSendEventInfo(
@@ -1100,10 +1100,7 @@ void UIAbilityLifecycleManager::NotifyAbilityToken(const sptr<IRemoteObject> &to
 
 void UIAbilityLifecycleManager::PrintTimeOutLog(std::shared_ptr<AbilityRecord> ability, uint32_t msgId, bool isHalf)
 {
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null ability");
-        return;
-    }
+    CHECK_POINTER_LOG(ability, "null ability");
     AppExecFwk::RunningProcessInfo processInfo = {};
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(ability->GetToken(), processInfo);
     if (processInfo.pid_ == 0) {
@@ -1120,9 +1117,8 @@ void UIAbilityLifecycleManager::PrintTimeOutLog(std::shared_ptr<AbilityRecord> a
 
     std::string eventName = isHalf ?
         AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT : AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT;
-    TAG_LOGW(AAFwkTag::ABILITYMGR,
-        "%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, abilityName: %{public}s,"
-        "msg: %{public}s",
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, "
+        "abilityName: %{public}s, msg: %{public}s",
         eventName.c_str(), processInfo.uid_, processInfo.pid_, ability->GetAbilityInfo().bundleName.c_str(),
         ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
 
@@ -1133,8 +1129,8 @@ void UIAbilityLifecycleManager::PrintTimeOutLog(std::shared_ptr<AbilityRecord> a
         .bundleName = ability->GetAbilityInfo().bundleName,
     };
     FreezeUtil::TimeoutState state = MsgId2State(msgId);
+    FreezeUtil::LifecycleFlow flow;
     if (state != FreezeUtil::TimeoutState::UNKNOWN) {
-        FreezeUtil::LifecycleFlow flow;
         if (ability->GetToken() != nullptr) {
             flow.token = ability->GetToken()->AsObject();
             flow.state = state;
@@ -1143,10 +1139,13 @@ void UIAbilityLifecycleManager::PrintTimeOutLog(std::shared_ptr<AbilityRecord> a
         if (!isHalf) {
             FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
         }
-        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
     } else {
         info.msg = msgContent;
-        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info);
+    }
+    if (ability->GetFreezeStrategy() == FreezeStrategy::NOTIFY_FREEZE_MGR) {
+        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
+    } else {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s", info.msg.c_str());
     }
 }
 
@@ -2612,11 +2611,11 @@ int32_t UIAbilityLifecycleManager::UpdateSessionInfoBySCB(std::list<SessionInfo>
                     break;
                 }
             }
-            if (!isFind && codeStartInSCBRecovery_.count(sessionId) == 0) {
+            if (!isFind && coldStartInSCBRecovery_.count(sessionId) == 0) {
                 abilitySet.emplace(abilityRecord);
             }
         }
-        codeStartInSCBRecovery_.clear();
+        coldStartInSCBRecovery_.clear();
     }
     for (const auto &info : sessionInfos) {
         sessionIds.emplace_back(info.persistentId);
@@ -2728,7 +2727,7 @@ void UIAbilityLifecycleManager::EnableListForSCBRecovery()
 {
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     isSCBRecovery_ = true;
-    codeStartInSCBRecovery_.clear();
+    coldStartInSCBRecovery_.clear();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -65,6 +65,8 @@ struct CJAbilityFuncs {
     VectorStringHandle (*cjAbilityDump)(int64_t id, VectorStringHandle params);
     int32_t (*cjAbilityOnContinue)(int64_t id, const char* params);
     void (*cjAbilityInit)(int64_t id, void* ability);
+    bool (*cjAbilityOnBackPress)(int64_t id);
+    void (*cjAbilityOnSceneWillDestroy)(int64_t id, WindowStagePtr cjWindowStage);
 };
 
 CJ_EXPORT void RegisterCJAbilityFuncs(void (*registerFunc)(CJAbilityFuncs*));
@@ -87,14 +89,17 @@ public:
     void OnStop() const;
     void OnSceneCreated(OHOS::Rosen::CJWindowStageImpl* cjWindowStage) const;
     void OnSceneRestored(OHOS::Rosen::CJWindowStageImpl* cjWindowStage) const;
+    void OnSceneWillDestroy(OHOS::Rosen::CJWindowStageImpl* cjWindowStage) const;
     void OnSceneDestroyed() const;
     void OnForeground(const AAFwk::Want& want) const;
     void OnBackground() const;
+    bool OnBackPress(bool defaultRet) const;
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration) const;
     void OnNewWant(const AAFwk::Want& want, const AAFwk::LaunchParam& launchParam) const;
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) const;
     int32_t OnContinue(AAFwk::WantParams &wantParams) const;
     void Init(AbilityHandle ability) const;
+    int64_t GetId() const;
 
 private:
     int64_t id_ = 0;

@@ -22,6 +22,7 @@
 
 #include "accesstoken_kit.h"
 #include "app_death_recipient.h"
+#include "app_exception_manager.h"
 #include "app_mgr_constants.h"
 #include "app_utils.h"
 #include "hilog_tag_wrapper.h"
@@ -733,6 +734,26 @@ bool AmsMgrScheduler::IsAppKilling(sptr<IRemoteObject> token)
         return false;
     }
     return amsMgrServiceInner_->IsAppKilling(token);
+}
+
+void AmsMgrScheduler::SetAppExceptionCallback(sptr<IRemoteObject> callback)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t procPid = getprocpid();
+    if (callingPid != procPid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not allow other process to call");
+        return;
+    }
+
+    if (callback == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "callback null");
+    }
+    auto exceptionCallback = iface_cast<IAppExceptionCallback>(callback);
+    return AppExceptionManager::GetInstance().SetExceptionCallback(exceptionCallback);
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

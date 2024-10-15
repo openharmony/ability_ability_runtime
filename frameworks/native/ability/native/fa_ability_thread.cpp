@@ -710,7 +710,7 @@ void FAAbilityThread::HandleExtensionUpdateConfiguration(const AppExecFwk::Confi
     extensionImpl_->ScheduleUpdateConfiguration(config);
 }
 
-void FAAbilityThread::ScheduleAbilityTransaction(
+bool FAAbilityThread::ScheduleAbilityTransaction(
     const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -723,11 +723,11 @@ void FAAbilityThread::ScheduleAbilityTransaction(
 
     if (token_ == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null token_");
-        return;
+        return false;
     }
     if (abilityHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
-        return;
+        return false;
     }
     wptr<FAAbilityThread> weak = this;
     auto task = [weak, want, lifeCycleStateInfo, sessionInfo]() {
@@ -747,7 +747,9 @@ void FAAbilityThread::ScheduleAbilityTransaction(
     bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:AbilityTransaction");
     if (!ret) {
         TAG_LOGE(AAFwkTag::FA, "PostTask error");
+        return false;
     }
+    return true;
 }
 
 void FAAbilityThread::ScheduleShareData(const int32_t &uniqueId)

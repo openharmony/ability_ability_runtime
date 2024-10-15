@@ -944,9 +944,9 @@ public:
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
      *
-     * @return
+     * @return bool operation status
      */
-    void ScheduleForegroundRunning();
+    bool ScheduleForegroundRunning();
 
     /**
      * ScheduleBackgroundRunning, Notify application to switch to background.

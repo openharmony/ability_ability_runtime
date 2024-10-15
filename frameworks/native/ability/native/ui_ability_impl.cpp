@@ -104,7 +104,7 @@ void UIAbilityImpl::Stop(bool &isAsyncCallback)
         isAsyncCallback = false;
         return;
     }
-    std::weak_ptr<UIAbilityImpl> weakPtr = shared_from_this();
+    std::weak_ptr<UIAbilityImpl> weakPtr = weak_from_this();
     auto asyncCallback = [abilityImplWeakPtr = weakPtr, state = AAFwk::ABILITY_STATE_INITIAL]() {
         auto abilityImpl = abilityImplWeakPtr.lock();
         if (abilityImpl == nullptr) {
@@ -400,6 +400,7 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
             return;
         }
+        impl->ability_->OnAfterFocusedCommon(focuseMode);
         auto applicationContext = abilityContext->GetApplicationContext();
         if (applicationContext == nullptr || applicationContext->IsAbilityLifecycleCallbackEmpty()) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null applicationContext or lifecycleCallback");
