@@ -2968,7 +2968,7 @@ int AbilityManagerProxy::MoveMissionsToBackground(const std::vector<int32_t>& mi
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback)
+int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -2987,7 +2987,10 @@ int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback)
             return ERR_INVALID_VALUE;
         }
     }
-
+    if (!data.WriteBool(isAppRecovery)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write isAppRecovery fail");
+        return IPC_PROXY_ERR;
+    }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::START_USER, data, reply, option);

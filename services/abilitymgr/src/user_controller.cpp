@@ -81,7 +81,7 @@ void UserController::ClearAbilityUserItems(int32_t userId)
     }
 }
 
-void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback)
+void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
     if (userId < 0 || userId == USER_ID_NO_HEAD) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUserId invalid:%{public}d", userId);
@@ -142,7 +142,7 @@ void UserController::StartUser(int32_t userId, sptr<IUserCallback> callback)
     }
 
     UserBootDone(userItem);
-    MoveUserToForeground(oldUserId, userId, callback);
+    MoveUserToForeground(oldUserId, userId, callback, isAppRecovery);
 }
 
 int32_t UserController::StopUser(int32_t userId)
@@ -285,13 +285,14 @@ void UserController::SetCurrentUserId(int32_t userId)
     DelayedSingleton<AppScheduler>::GetInstance()->SetCurrentUserId(userId);
 }
 
-void UserController::MoveUserToForeground(int32_t oldUserId, int32_t newUserId, sptr<IUserCallback> callback)
+void UserController::MoveUserToForeground(int32_t oldUserId, int32_t newUserId, sptr<IUserCallback> callback,
+    bool isAppRecovery)
 {
     auto manager = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (!manager) {
         return;
     }
-    manager->SwitchToUser(oldUserId, newUserId, callback);
+    manager->SwitchToUser(oldUserId, newUserId, callback, isAppRecovery);
     BroadcastUserBackground(oldUserId);
     BroadcastUserForeground(newUserId);
 }
