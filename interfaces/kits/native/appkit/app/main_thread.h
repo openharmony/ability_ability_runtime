@@ -37,7 +37,7 @@
 #include "native_engine/native_engine.h"
 #include "overlay_event_subscriber.h"
 #include "resource_manager.h"
-#include "runtime.h"
+#include "foundation/ability/ability_runtime/interfaces/inner_api/runtime/include/runtime.h"
 #include "watchdog.h"
 
 #ifdef CJ_FRONTEND
