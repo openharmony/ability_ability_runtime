@@ -65,7 +65,7 @@ std::vector<bool> MediaPermissionManager::CheckUriPermission(const std::vector<U
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::vector<std::string> uriStrVec;
-    std::vector<bool> results = std::vector<bool>(uriStrVec.size(), false);
+    std::vector<bool> results = std::vector<bool>(uriVec.size(), false);
     for (auto &uri: uriVec) {
         uriStrVec.emplace_back(uri.ToString());
     }
