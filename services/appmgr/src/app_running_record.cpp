@@ -14,6 +14,7 @@
  */
 
 #include "ability_window_configuration.h"
+#include "app_exception_manager.h"
 #include "app_running_record.h"
 #include "app_mgr_service_inner.h"
 #include "event_report.h"
@@ -661,12 +662,13 @@ void AppRunningRecord::LaunchPendingAbilities()
         moduleRecord->LaunchPendingAbilities();
     }
 }
-void AppRunningRecord::ScheduleForegroundRunning()
+bool AppRunningRecord::ScheduleForegroundRunning()
 {
     SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_FOREGROUNDING);
     if (appLifeCycleDeal_) {
-        appLifeCycleDeal_->ScheduleForegroundRunning();
+        return appLifeCycleDeal_->ScheduleForegroundRunning();
     }
+    return false;
 }
 
 void AppRunningRecord::ScheduleBackgroundRunning()
@@ -989,8 +991,8 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         return;
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "appState: %{public}d, bundle: %{public}s, ability: %{public}s",
-        curState_, mainBundleName_.c_str(), ability->GetName().c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "appState: %{public}d, pState: %{public}d, bundle: %{public}s, ability: %{public}s",
+        curState_, pendingState_, mainBundleName_.c_str(), ability->GetName().c_str());
     // We need schedule application to foregrounded when current application state is ready or background running.
     if (curState_ == ApplicationState::APP_STATE_FOREGROUND
         && pendingState_ != ApplicationPendingState::BACKGROUNDING) {
@@ -1010,11 +1012,14 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
     }
     if (curState_ == ApplicationState::APP_STATE_READY || curState_ == ApplicationState::APP_STATE_BACKGROUND
         || curState_ == ApplicationState::APP_STATE_FOREGROUND) {
-        TAG_LOGD(AAFwkTag::APPMGR, "application foregrounding.");
         auto pendingState = pendingState_;
         SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         if (pendingState == ApplicationPendingState::READY) {
-            ScheduleForegroundRunning();
+            if (!ScheduleForegroundRunning()) {
+                AppExceptionManager::GetInstance().ForegroundAppFailed(ability->GetToken(), "schedule failed");
+            }
+        } else {
+            AppExceptionManager::GetInstance().ForegroundAppWait(ability->GetToken(), "pendingState not ready");
         }
         foregroundingAbilityTokens_.insert(ability->GetToken());
         TAG_LOGD(AAFwkTag::APPMGR, "foregroundingAbility size: %{public}d",
@@ -2061,8 +2066,9 @@ void AppRunningRecord::OnWindowVisibilityChanged(
         }
     }
 
+    TAG_LOGI(AAFwkTag::APPMGR, "window id empty: %{public}d, pState: %{public}d, cState: %{public}d",
+        windowIds_.empty(), pendingState_, curState_);
     if (pendingState_ == ApplicationPendingState::READY) {
-        TAG_LOGD(AAFwkTag::APPMGR, "pending state is READY.");
         if (!windowIds_.empty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
             ScheduleForegroundRunning();
@@ -2072,7 +2078,6 @@ void AppRunningRecord::OnWindowVisibilityChanged(
             ScheduleBackgroundRunning();
         }
     } else {
-        TAG_LOGI(AAFwkTag::APPMGR, "not READY");
         if (!windowIds_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         }

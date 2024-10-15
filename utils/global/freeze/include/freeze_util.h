@@ -47,6 +47,7 @@ public:
     static FreezeUtil& GetInstance();
 
     void AddLifecycleEvent(const LifecycleFlow &flow, const std::string &entry);
+    bool AppendLifecycleEvent(const LifecycleFlow &flow, const std::string &entry);
     std::string GetLifecycleEvent(const LifecycleFlow &flow);
     void DeleteLifecycleEvent(const LifecycleFlow &flow);
     void DeleteLifecycleEvent(sptr<IRemoteObject> token);

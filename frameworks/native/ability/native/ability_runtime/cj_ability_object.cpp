@@ -115,6 +115,16 @@ void CJAbilityObject::OnSceneRestored(OHOS::Rosen::CJWindowStageImpl* cjWindowSt
     g_cjAbilityFuncs->cjAbilityOnSceneRestored(id_, windowStage);
 }
 
+void CJAbilityObject::OnSceneWillDestroy(OHOS::Rosen::CJWindowStageImpl* cjWindowStage) const
+{
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnSceneWillDestroy == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
+        return;
+    }
+    WindowStagePtr windowStage = reinterpret_cast<WindowStagePtr>(cjWindowStage);
+    g_cjAbilityFuncs->cjAbilityOnSceneWillDestroy(id_, windowStage);
+}
+
 void CJAbilityObject::OnSceneDestroyed() const
 {
     if (g_cjAbilityFuncs == nullptr) {
@@ -141,6 +151,15 @@ void CJAbilityObject::OnBackground() const
         return;
     }
     g_cjAbilityFuncs->cjAbilityOnBackground(id_);
+}
+
+bool CJAbilityObject::OnBackPress(bool defaultRet) const
+{
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnBackPress == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
+        return defaultRet;
+    }
+    return g_cjAbilityFuncs->cjAbilityOnBackPress(id_);
 }
 
 void CJAbilityObject::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration) const
@@ -203,6 +222,11 @@ void CJAbilityObject::Init(AbilityHandle ability) const
         return;
     }
     g_cjAbilityFuncs->cjAbilityInit(id_, ability);
+}
+
+int64_t CJAbilityObject::GetId() const
+{
+    return id_;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

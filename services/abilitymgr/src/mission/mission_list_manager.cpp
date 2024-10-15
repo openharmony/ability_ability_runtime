@@ -2212,11 +2212,7 @@ void MissionListManager::PostMissionLabelUpdateTask(int missionId) const
 #endif // SUPPORT_SCREEN
 void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId, bool isHalf)
 {
-    if (ability == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability null");
-        return;
-    }
-
+    CHECK_POINTER_LOG(ability, "ability null");
     AppExecFwk::RunningProcessInfo processInfo = {};
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(ability->GetToken(), processInfo);
     if (processInfo.pid_ == 0) {
@@ -2234,9 +2230,8 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
 
     std::string eventName = isHalf ?
         AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT : AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT;
-    TAG_LOGW(AAFwkTag::ABILITYMGR,
-        "%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, abilityName: %{public}s,"
-        "msg: %{public}s!",
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, "
+        "abilityName: %{public}s, msg: %{public}s!",
         eventName.c_str(), processInfo.uid_, processInfo.pid_, ability->GetAbilityInfo().bundleName.c_str(),
         ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
 
@@ -2246,8 +2241,8 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
         .eventName = eventName,
         .bundleName = ability->GetAbilityInfo().bundleName,
     };
+    FreezeUtil::LifecycleFlow flow;
     if (state != FreezeUtil::TimeoutState::UNKNOWN) {
-        FreezeUtil::LifecycleFlow flow;
         if (ability->GetToken() != nullptr) {
             flow.token = ability->GetToken()->AsObject();
             flow.state = state;
@@ -2256,10 +2251,13 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
         if (!isHalf) {
             FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
         }
-        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
     } else {
         info.msg = msgContent;
-        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info);
+    }
+    if (ability->GetFreezeStrategy() == FreezeStrategy::NOTIFY_FREEZE_MGR) {
+        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
+    } else {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s", info.msg.c_str());
     }
 }
 

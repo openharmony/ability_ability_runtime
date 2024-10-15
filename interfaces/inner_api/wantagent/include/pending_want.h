@@ -23,7 +23,6 @@
 #include "cancel_listener.h"
 #include "context/application_context.h"
 #include "completed_dispatcher.h"
-#include "event_handler.h"
 #include "want.h"
 #include "want_agent_constant.h"
 #include "want_params.h"

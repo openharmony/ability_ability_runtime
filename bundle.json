@@ -87,6 +87,7 @@
             "os_account",
             "power_manager",
             "preferences",
+            "qos_manager",
             "relational_store",
             "resource_management",
             "resource_schedule_service",

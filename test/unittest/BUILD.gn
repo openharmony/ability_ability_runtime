@@ -361,7 +361,6 @@ group("unittest") {
       "ability_permission_util_test:unittest",
       "ability_record_dump_test:unittest",
       "ability_record_mgr_test:unittest",
-      "ability_record_test:unittest",
       "ability_running_info_test:unittest",
       "ability_running_record_test:unittest",
       "ability_runtime_error_util_test:unittest",

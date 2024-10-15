@@ -39,9 +39,11 @@ public:
     AbilitySchedulerFuzzTest() = default;
     virtual ~AbilitySchedulerFuzzTest()
     {};
-    void ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
+    bool ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
         sptr<SessionInfo> sessionInfo = nullptr) override
-    {}
+    {
+        return true;
+    }
     void ScheduleShareData(const int32_t &uniqueId) override
     {}
     void SendResult(int requestCode, int resultCode, const Want& resultWant) override
