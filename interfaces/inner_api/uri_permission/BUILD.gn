@@ -40,7 +40,6 @@ ohos_shared_library("uri_permission_mgr") {
 
   external_deps = [
     "ability_base:zuri",
-    "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
