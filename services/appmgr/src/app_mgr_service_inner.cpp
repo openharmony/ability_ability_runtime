@@ -1112,6 +1112,11 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
     }
     appRecord->LaunchPendingAbilities();
     if (appRecord->IsStartSpecifiedAbility()) {
+        TAG_LOGI(AAFwkTag::APPMGR, "start specified ability");
+        auto moduleRecordList = appRecord->GetAllModuleRecord();
+        for (const auto &iter : moduleRecordList) {
+            iter->SetModuleRecordState(ModuleRecordState::INITIALIZED_STATE);
+        }
         appRecord->AddAbilityStageBySpecifiedAbility(appRecord->GetBundleName());
     }
 
