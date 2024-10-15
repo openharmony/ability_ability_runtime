@@ -25,14 +25,67 @@
 
 namespace OHOS {
 namespace AAFwk {
+/**
+ * @class MultiInstanceUtils
+ * provides multi-instance utilities.
+ */
 class MultiInstanceUtils {
 public:
+    /**
+     * GetInstanceKey, get instance key of the given want.
+     *
+     * @param want The want param.
+     * @return The instance key.
+     */
     static std::string GetInstanceKey(const Want& want);
+
+    /**
+     * GetValidExtensionInstanceKey, get valid extension instance key.
+     *
+     * @param abilityRequest The ability request.
+     * @return The instance key.
+     */
     static std::string GetValidExtensionInstanceKey(const AbilityRequest &abilityRequest);
+
+    /**
+     * GetValidExtensionInstanceKey, get valid extension instance key.
+     *
+     * @param abilityRequest The ability request.
+     * @return The instance key.
+     */
     static std::string GetSelfCallerInstanceKey(const AbilityRequest &abilityRequest);
+
+    /**
+     * IsDefaultInstanceKey, check if the key is the default instance key.
+     *
+     * @param key The key to be queried.
+     * @return Whether the instance key is the default.
+     */
     static bool IsDefaultInstanceKey(const std::string& key);
+
+    /**
+     * IsMultiInstanceApp, check if the app is the default multi-instance app.
+     *
+     * @param appInfo The app info to be queried.
+     * @return Whether the app is the default multi-instance app.
+     */
     static bool IsMultiInstanceApp(AppExecFwk::ApplicationInfo appInfo);
+
+    /**
+     * IsSupportedExtensionType, check if the type supports extension type.
+     *
+     * @param type The extension ability type.
+     * @return Whether the type supports extension type.
+     */
     static bool IsSupportedExtensionType(AppExecFwk::ExtensionAbilityType type);
+
+    /**
+     * IsInstanceKeyExist, check if the instance key exists.
+     *
+     * @param bundleName The bundle name.
+     * @param key The instance key to be queried.
+     * @return Whether the instance key exists.
+     */
     static bool IsInstanceKeyExist(const std::string& bundleName, const std::string& key);
 };
 }  // namespace AAFwk

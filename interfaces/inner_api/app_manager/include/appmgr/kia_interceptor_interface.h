@@ -22,12 +22,24 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+/**
+ * @class IKiaInterceptor
+ * IPC interface for KIA.
+ */
 class IKiaInterceptor : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.appexecfwk.IKiaInterceptor");
+
+    /**
+     * OnIntercept, processing method from KIA.
+     *
+     * @param want The param of openning the app.
+     * @return Error code of calling the function.
+     */
     virtual int OnIntercept(AAFwk::Want &want) = 0;
 
     enum {
+        // ipc code for calling OnIntercept
         KIA_INTERCEPTOR_ON_INTERCEPT = 0,
     };
 };
