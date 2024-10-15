@@ -20,8 +20,17 @@
 
 namespace OHOS {
 namespace AAFwk {
+/**
+ * @class AppMgrUtil
+ * provides appmgr utilities.
+ */
 class AppMgrUtil final {
 public:
+    /**
+     * GetAppMgr, get app mgr.
+     *
+     * @return AppMgr.
+     */
     static sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
 
 private:
