@@ -16,6 +16,7 @@
 #include "appfreeze_inner.h"
 #include "appfreeze_state.h"
 #include "hilog_tag_wrapper.h"
+#include "xcollie/watchdog.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -35,6 +36,7 @@ void AppFreezeState::SetAppFreezeState(uint32_t flag)
     appFreezeStateFlag_ |= flag;
     if (appFreezeStateFlag_ > 0) {
         inner->SetAppDebug(true);
+        OHOS::HiviewDFX::Watchdog::GetInstance().SetAppDebug(true);
     }
     TAG_LOGD(AAFwkTag::APPDFR, "App state flag: %{public}u, SetAppDebug true", appFreezeStateFlag_);
 }
@@ -50,6 +52,7 @@ void AppFreezeState::CancelAppFreezeState(uint32_t flag)
     appFreezeStateFlag_ &= ~flag;
     if (appFreezeStateFlag_ == 0) {
         inner->SetAppDebug(false);
+        OHOS::HiviewDFX::Watchdog::GetInstance().SetAppDebug(false);
     }
     TAG_LOGD(AAFwkTag::APPDFR, "App state flag: %{public}u, SetAppDebug false", appFreezeStateFlag_);
 }
