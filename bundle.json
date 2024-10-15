@@ -83,7 +83,6 @@
             "memory_utils",
             "napi",
             "netmanager_base",
-            "node",
             "os_account",
             "power_manager",
             "qos_manager",
