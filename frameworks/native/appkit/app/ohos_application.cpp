@@ -874,6 +874,8 @@ bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRunti
         return false;
     }
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(level);
+    config.AddItem(AAFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE,
+        level == AbilityRuntime::SetLevel::Application ? "1" : "0");
     return true;
 }
 
