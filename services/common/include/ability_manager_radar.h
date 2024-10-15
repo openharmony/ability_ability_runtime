@@ -58,7 +58,7 @@ public:
     static ContinueRadar &GetInstance();
 
     bool ClickIconContinue(const std::string& func);
-    bool ClickIconStartAbility(const std::string& func, int32_t errCode);
+    bool ClickIconStartAbility(const std::string& func, unsigned int flags, int32_t errCode);
     bool ClickIconRecvOver(const std::string& func);
     bool SaveDataContinue(const std::string& func);
     bool SaveDataRes(const std::string& func);
