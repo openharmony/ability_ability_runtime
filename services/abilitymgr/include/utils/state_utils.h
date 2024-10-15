@@ -23,10 +23,34 @@
 
 namespace OHOS {
 namespace AAFwk {
+/**
+ * @class StateUtils
+ * provides state utilities.
+ */
 class StateUtils final {
 public:
+    /**
+     * StateToStrMap, convert ability state to string.
+     *
+     * @param state The ability state.
+     * @return The string ability state.
+     */
     static std::string StateToStrMap(const AbilityState &state);
+
+    /**
+     * AppStateToStrMap, convert app state to string.
+     *
+     * @param state The app state.
+     * @return The string app state.
+     */
     static std::string AppStateToStrMap(const AppState &state);
+
+    /**
+     * ConvertStateMap, convert ability lifecycle state to string.
+     *
+     * @param state The ability lifecycle state.
+     * @return The string ability lifecycle state.
+     */
     static int ConvertStateMap(const AbilityLifeCycleState &state);
 };
 }  // namespace AAFwk

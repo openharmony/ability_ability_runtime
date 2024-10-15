@@ -25,10 +25,34 @@
 
 namespace OHOS {
 namespace AAFwk {
+/**
+ * @class WantUtils
+ * provides want utilities.
+ */
 class WantUtils final {
 public:
+    /**
+     * ConvertToExplicitWant, convert implicit want to explicit want.
+     *
+     * @param want The implicit want.
+     * @return Error code of calling the function.
+     */
     static int32_t ConvertToExplicitWant(Want& want);
+
+    /**
+     * GetCallerBundleName, get caller bundle name.
+     *
+     * @param callerBundleName The caller bundle name.
+     * @return Error code of calling the function.
+     */
     static int32_t GetCallerBundleName(std::string &callerBundleName);
+
+    /**
+     * IsAtomicServiceUrl, check if the want contains atomic service url.
+     *
+     * @param want The implicit want.
+     * @return Flag if the want contains atomic service url.
+     */
     static bool IsAtomicServiceUrl(const Want& want);
 };
 }  // namespace AAFwk
