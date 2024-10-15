@@ -2253,7 +2253,10 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
             TAG_LOGW(AAFwkTag::ABILITYMGR, "delay restart root launcher until switch user.");
             return;
         }
-        requestInfo.want.SetParam("ohos.app.recovery", true);
+        if (abilityRecord->IsSceneBoard()) {
+            requestInfo.want.SetParam("ohos.app.recovery", true);
+            DelayedSingleton<AbilityManagerService>::GetInstance()->EnableListForSCBRecovery(userId_);
+        }
         requestInfo.restartCount = abilityRecord->GetRestartCount();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "restart root launcher, number:%{public}d", requestInfo.restartCount);
         StartAbilityLocked(requestInfo);
