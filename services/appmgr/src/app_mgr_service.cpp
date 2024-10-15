@@ -34,7 +34,7 @@
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "system_ability_definition.h"
-#include "base/security/access_token/interfaces/innerkits/accesstoken/include/accesstoken_kit.h"
+#include "accesstoken_kit.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
 #include "cache_process_manager.h"
