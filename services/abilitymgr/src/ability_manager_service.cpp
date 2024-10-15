@@ -1666,7 +1666,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // prevent the app from dominating the screen
-    if (callerToken == nullptr && !IsCallerSceneBoard() &&
+    if (callerToken == nullptr && !IsCallerSceneBoard() && !isCallByShortcut &&
         AbilityPermissionUtil::GetInstance().IsDominateScreen(want, isPendingWantCaller)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller invalid");
         return ERR_INVALID_CALLER;
