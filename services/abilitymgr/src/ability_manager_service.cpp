@@ -6182,7 +6182,7 @@ int32_t AbilityManagerService::GetUserId() const
     return U0_USER_ID;
 }
 
-void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot)
+void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     auto bms = AbilityUtil::GetBundleManagerHelper();
@@ -6231,7 +6231,9 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
     // wait BOOT_ANIMATION_STARTED to start LAUNCHER
     WaitBootAnimationStart();
 #endif
-
+    if (isAppRecovery) {
+        abilityWant.SetParam("ohos.app.logout_recovery", true);
+    }
     /* note: OOBE APP need disable itself, otherwise, it will be started when restart system everytime */
     (void)StartAbility(abilityWant, userId, DEFAULT_INVAL_VALUE);
 }
@@ -7450,7 +7452,7 @@ int AbilityManagerService::JudgeAbilityVisibleControl(const AppExecFwk::AbilityI
     return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
 }
 
-int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback)
+int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "startUser in service:%{public}d", userId);
     if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
@@ -7462,7 +7464,7 @@ int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback)
     }
 
     if (userController_) {
-        userController_->StartUser(userId, callback);
+        userController_->StartUser(userId, callback, isAppRecovery);
     }
     return 0;
 }
@@ -8066,10 +8068,12 @@ void AbilityManagerService::UserStarted(int32_t userId)
     subManagersHelper_->InitSubManagers(userId, false);
 }
 
-void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback)
+void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback,
+    bool isAppRecovery)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "%{public}s, oldUserId:%{public}d, newUserId:%{public}d", __func__, oldUserId, userId);
+        "%{public}s, oldUserId:%{public}d, newUserId:%{public}d, isAppRecovery:%{public}d", __func__,
+        oldUserId, userId, isAppRecovery);
     SwitchManagers(userId);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         PauseOldUser(oldUserId);
@@ -8078,7 +8082,7 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
     }
     callback->OnStartUserDone(userId, ERR_OK);
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
-    StartHighestPriorityAbility(userId, isBoot);
+    StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
      if (taskHandler_) {
         taskHandler_->SubmitTask([abilityMs = shared_from_this(), userId]() {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "StartResidentApps userId:%{public}d", userId);
