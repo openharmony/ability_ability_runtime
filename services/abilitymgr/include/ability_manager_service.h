@@ -1760,6 +1760,8 @@ public:
         const std::string& reason);
 
     void HandleRestartResidentProcessDependedOnWeb();
+    
+    int32_t TerminateMission(int32_t missionId) override;
 
     /**
      * Judge if Caller-Application is in background state.
