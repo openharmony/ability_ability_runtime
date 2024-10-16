@@ -104,6 +104,7 @@ ohos_shared_library("runtime") {
     "config_policy:configpolicy_util",
     "ets_runtime:libark_jsruntime",
     "ets_utils:console",
+    "ets_utils:worker",
     "ets_utils:timer",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
