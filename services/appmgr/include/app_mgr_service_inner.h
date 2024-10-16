@@ -1639,9 +1639,10 @@ private:
      * kill all processes of a bundleName
      * @param bundleName bundleName of which to be killed
      * @param clearPageStack should schedule clearPage lifecycle
+     * @param reason caller function name
      */
-    int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearPageStack = false);
+    int32_t KillApplicationByBundleName(const std::string &bundleName, const bool clearPageStack = false,
+        const std::string& reason = "KillApplicationByBundleName");
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
