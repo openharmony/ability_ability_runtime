@@ -32,6 +32,7 @@ constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 constexpr int RESET_RATIO = 2;
 
 constexpr int32_t BACKGROUND_REPORT_COUNT_MAX = 5;
+constexpr int32_t WATCHDOG_REPORT_COUNT_MAX = 5;
 #ifdef SUPPORT_ASAN
 constexpr uint32_t CHECK_INTERVAL_TIME = 45000;
 #else
@@ -107,6 +108,7 @@ void Watchdog::AllowReportEvent()
     needReport_.store(true);
     isSixSecondEvent_.store(false);
     backgroundReportCount_.store(0);
+    watchdogReportCount_.store(0);
 }
 
 bool Watchdog::IsReportEvent()
@@ -139,7 +141,19 @@ void Watchdog::Timer()
         return;
     }
     if (!needReport_) {
-        TAG_LOGE(AAFwkTag::APPDFR, "timeout, wait to recover");
+        watchdogReportCount_++;
+        TAG_LOGE(AAFwkTag::APPDFR, "timeout, wait to recover, wait count: %{public}d",
+            watchdogReportCount_.load());
+        if (watchdogReportCount_.load() >= WATCHDOG_REPORT_COUNT_MAX) {
+#ifndef APP_NO_RESPONSE_DIALOG
+            AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandleOverReportCount(true);
+#endif
+            watchdogReportCount_.store(0);
+        } else if (watchdogReportCount_.load() >= (WATCHDOG_REPORT_COUNT_MAX - 1)) {
+#ifndef APP_NO_RESPONSE_DIALOG
+            AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandleOverReportCount(false);
+#endif
+        }
         return;
     }
 
