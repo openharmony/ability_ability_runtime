@@ -29,14 +29,14 @@
 #endif
 
 #include "ability_delegator_infos.h"
+#include "ability_lifecycle_executor.h"
+#include "context.h"
+#include "delegator_thread.h"
 #include "iability_monitor.h"
 #include "iability_stage_monitor.h"
-#include "delegator_thread.h"
 #include "shell_cmd_result.h"
 #include "test_runner.h"
 
-#include "ability_lifecycle_executor.h"
-#include "context.h"
 #include "want.h"
 
 namespace OHOS {
