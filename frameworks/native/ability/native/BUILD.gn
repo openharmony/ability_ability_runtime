@@ -646,11 +646,6 @@ ohos_shared_library("uiabilitykit_native") {
     "bundle_framework:appexecfwk_core",
     "libuv:uv",
     "napi:ace_napi",
-<<<<<<< HEAD
-    "node:node_header_notice",
-    "window_manager:libwm",
-=======
->>>>>>> master
   ]
 
   cflags_cc = []
