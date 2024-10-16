@@ -536,7 +536,8 @@ HWTEST_F(DistributedClientTest, RegisterOnListener_0100, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest RegisterOnListener_0100 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
-    int32_t result = client->RegisterOnListener("type", obj);
+    int32_t callingUid = 0;
+    int32_t result = client->RegisterOnListener("type", obj, callingUid);
     if (client->GetDmsProxy() != nullptr) {
         EXPECT_EQ(result, OHOS::AAFwk::DMS_PERMISSION_DENIED);
     } else {
@@ -556,7 +557,8 @@ HWTEST_F(DistributedClientTest, RegisterOnListener_0200, TestSize.Level3)
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
-    int32_t result = client->RegisterOnListener("type", obj);
+    int32_t callingUid = 0;
+    int32_t result = client->RegisterOnListener("type", obj, callingUid);
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
     GTEST_LOG_(INFO) << "DistributedClientTest RegisterOnListener_0200 end";
 }
@@ -571,7 +573,8 @@ HWTEST_F(DistributedClientTest, RegisterOffListener_0100, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest RegisterOffListener_0100 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
-    client->RegisterOnListener("type", obj);
+    int32_t callingUid = 0;
+    client->RegisterOnListener("type", obj, callingUid);
     int32_t result = client->RegisterOffListener("type", obj);
     if (client->GetDmsProxy() != nullptr) {
         EXPECT_EQ(result, OHOS::AAFwk::DMS_PERMISSION_DENIED);
@@ -591,7 +594,8 @@ HWTEST_F(DistributedClientTest, RegisterOffListener_0200, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest RegisterOffListener_0200 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
-    client->RegisterOnListener("type", obj);
+    int32_t callingUid = 0;
+    client->RegisterOnListener("type", obj, callingUid);
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
     int32_t result = client->RegisterOffListener("type", obj);
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
