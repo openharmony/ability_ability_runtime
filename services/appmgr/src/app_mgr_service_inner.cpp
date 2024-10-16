@@ -1374,7 +1374,7 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName, const
     }
 
     if (CheckCallerIsAppGallery()) {
-        return KillApplicationByBundleName(bundleName, clearPageStack);
+        return KillApplicationByBundleName(bundleName, clearPageStack, "KillApplicationByAppGallery");
     }
 
     auto result = VerifyKillProcessPermission(bundleName);
@@ -1383,7 +1383,7 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName, const
         return result;
     }
 
-    return KillApplicationByBundleName(bundleName, clearPageStack);
+    return KillApplicationByBundleName(bundleName, clearPageStack, "KillApplication");
 }
 
 int32_t AppMgrServiceInner::ForceKillApplication(const std::string &bundleName,
@@ -1580,11 +1580,11 @@ int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack)
         return ERR_INVALID_VALUE;
     }
     auto bundleName = appRecord->GetBundleName();
-    return KillApplicationByBundleName(bundleName, clearPageStack);
+    return KillApplicationByBundleName(bundleName, clearPageStack, "KillApplicationSelf");
 }
 
 int32_t AppMgrServiceInner::KillApplicationByBundleName(
-    const std::string &bundleName, const bool clearPageStack)
+    const std::string &bundleName, const bool clearPageStack, const std::string& reason)
 {
     int result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();
@@ -1600,7 +1600,7 @@ int32_t AppMgrServiceInner::KillApplicationByBundleName(
         return result;
     }
     for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        result = KillProcessByPid(*iter, "KillApplicationByBundleName");
+        result = KillProcessByPid(*iter, reason);
         if (result < 0) {
             TAG_LOGE(AAFwkTag::APPMGR, "killApplicationSelf fail for bundleName: %{public}s, pid: %{public}d",
                 bundleName.c_str(), *iter);
@@ -2304,7 +2304,12 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
             return AAFwk::ERR_KILL_FOUNDATION_UID;
         }
         ret = kill(pid, SIGNAL_KILL);
-        TAG_LOGI(AAFwkTag::APPMGR, "kill pid %{public}d, ret:%{public}d, %{public}s", pid, ret, killReason.c_str());
+        if (reason == "OnRemoteDied") {
+            TAG_LOGI(AAFwkTag::APPMGR, "application is dead, double check, pid=%{public}d", pid);
+        } else {
+            TAG_LOGI(AAFwkTag::APPMGR, "kill pid %{public}d, ret:%{public}d, %{public}s",
+                pid, ret, killReason.c_str());
+        }
     }
     AAFwk::EventInfo eventInfo;
     if (!appRecord) {
