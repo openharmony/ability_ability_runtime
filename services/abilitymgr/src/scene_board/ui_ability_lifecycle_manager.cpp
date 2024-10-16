@@ -852,7 +852,7 @@ bool UIAbilityLifecycleManager::IsAbilityStarted(AbilityRequest &abilityRequest,
 
 int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CallAbilityLocked");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
 
@@ -917,7 +917,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
 
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     CHECK_POINTER_LOG(sessionInfo, "sessionInfo is invalid.");
@@ -988,13 +988,15 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
         auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
         CheckCallerFromBackground(abilityRecord, sessionInfo);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by callerSession.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
+            sessionInfo->want.GetElement().GetAbilityName().c_str());
         return static_cast<int>(callerSession->PendingSessionActivation(sessionInfo));
     }
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
     CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
     sessionInfo->canStartAbilityFromBackground = true;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by rootSceneSession.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s",
+        sessionInfo->want.GetElement().GetAbilityName().c_str());
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
 }
 
@@ -1502,7 +1504,7 @@ void UIAbilityLifecycleManager::NotifySCBToHandleException(const std::shared_ptr
     CHECK_POINTER(sessionInfo);
     CHECK_POINTER(sessionInfo->sessionToken);
     auto session = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call notifySessionException");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBToHandleException reason: %{public}s", errorReason.c_str());
     sptr<SessionInfo> info = abilityRecord->GetSessionInfo();
     info->errorCode = errorCode;
     info->errorReason = errorReason;
@@ -1619,6 +1621,7 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
                 return;
             }
             if (!abilityRecord) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "OnAcceptWantResponse abilityRecord null");
                 return;
             }
             abilityRecord->SetWant(abilityRequest.want);

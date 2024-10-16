@@ -406,6 +406,7 @@ void AbilityManagerService::InitPushTask()
             handler->SubmitTask(task, "BootCompletedDelayTask", BOOTEVENT_COMPLETED_DELAY_TIME);
         } else {
             WatchParameter(BOOTEVENT_BOOT_COMPLETED, ApplicationUtil::AppFwkBootEventCallback, nullptr);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "init call, InitPushTask suc");
         }
     };
     if (!ParseJsonFromBoot(SUSPEND_SERVICE_CONFIG_FILE)) {
@@ -5806,7 +5807,8 @@ void AbilityManagerService::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER(abilityRecord);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "name is %{public}s", abilityRecord->GetAbilityInfo().name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnAbilityRequestDone, bundleName: %{public}s, abilityName: %{public}s",
+        abilityRecord->GetAbilityInfo().bundleName.c_str(), abilityRecord->GetAbilityInfo().name.c_str());
     auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
 
     auto type = abilityRecord->GetAbilityInfo().type;
