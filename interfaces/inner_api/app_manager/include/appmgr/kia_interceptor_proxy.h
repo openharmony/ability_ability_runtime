@@ -22,18 +22,43 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+/**
+ * @class KiaInterceptorProxy
+ * IPC proxy of IKiaInterceptor.
+ */
 class KiaInterceptorProxy : public IRemoteProxy<IKiaInterceptor> {
 public:
+    /**
+     * KiaInterceptorProxy, constructor.
+     *
+     * @param impl The implementation of IKiaInterceptor.
+     */
     explicit KiaInterceptorProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<IKiaInterceptor>(impl)
     {}
 
+    /**
+     * KiaInterceptorProxy, destructor.
+     *
+     */
     virtual ~KiaInterceptorProxy()
     {}
 
+    /**
+     * OnIntercept, processing method from KIA.
+     *
+     * @param want The param of openning the app.
+     */
     virtual int OnIntercept(AAFwk::Want &want) override;
 
 private:
+    /**
+     * WriteInterfaceToken.
+     *
+     * @param data The message parcel data.
+     * @return Flag whether write is successful.
+     */
     bool WriteInterfaceToken(MessageParcel &data);
+
     static inline BrokerDelegator<KiaInterceptorProxy> delegator_;
 };
 }  // namespace AppExecFwk
