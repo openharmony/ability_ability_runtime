@@ -27,7 +27,6 @@ config("ability_manager_public_config") {
     "include/",
     "include/status_bar_delegate",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/distributed",
     "${bundlefwk_inner_api_path}/appexecfwk_base/include",
