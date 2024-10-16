@@ -1772,6 +1772,8 @@ public:
      */
     int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall, bool isData = false);
 
+    void EnableListForSCBRecovery(int32_t userId) const;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1872,8 +1874,9 @@ private:
     void UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken);
     bool UpdateAsCallerInfoFromDialog(Want& want);
     void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
-    void UpdateSignatureInfo(std::string bundleName, Want& want);
+    void UpdateSignatureInfo(std::string bundleName, Want& want, bool isRemote = false);
     void UpdateCallerInfoFromToken(Want& want, const sptr<IRemoteObject> &token);
+    void UpdateDmsCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
     int StartAbilityPrechainInterceptor(StartAbilityParams &params);
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
@@ -1960,7 +1963,7 @@ private:
     std::shared_ptr<MissionListManagerInterface> GetCurrentMissionListManager();
     std::unordered_map<int, std::shared_ptr<UIAbilityLifecycleManager>> GetUIAbilityManagers();
     std::shared_ptr<UIAbilityLifecycleManager> GetCurrentUIAbilityManager();
-    std::shared_ptr<UIAbilityLifecycleManager> GetUIAbilityManagerByUserId(int32_t userId);
+    std::shared_ptr<UIAbilityLifecycleManager> GetUIAbilityManagerByUserId(int32_t userId) const;
     std::shared_ptr<UIAbilityLifecycleManager> GetUIAbilityManagerByUid(int32_t uid);
     bool JudgeSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
     bool IsAppSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -2309,6 +2312,8 @@ private:
     std::list<std::string> exportWhiteList_;
 
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
+
+    void PrintStartAbilityInfo(AppExecFwk::AbilityInfo callerInfo, AppExecFwk::AbilityInfo calledInfo);
 
     bool IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
         const std::string &calleeAbilityName);

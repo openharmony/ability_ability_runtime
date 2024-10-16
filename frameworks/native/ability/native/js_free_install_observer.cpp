@@ -70,8 +70,15 @@ void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, con
     const std::string &startTime, napi_value abilityResult)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
-    for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
-        if ((it->bundleName == bundleName) && (it->abilityName == abilityName) && (it->startTime == startTime)) {
+    std::vector<napi_deferred> promises;
+    std::vector<napi_ref> callbacks;
+    {
+        std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
+        for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
+            if ((it->bundleName != bundleName) || (it->abilityName != abilityName) || (it->startTime != startTime)) {
+                it++;
+                continue;
+            }
             if (it->callback == nullptr && it->deferred == nullptr) {
                 it++;
                 continue;
@@ -81,17 +88,23 @@ void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, con
                 continue;
             }
             if (it->deferred != nullptr) {
-                CallPromise(it->deferred, abilityResult);
+                promises.emplace_back(it->deferred);
             } else {
-                CallCallback(it->callback, abilityResult);
+                callbacks.emplace_back(it->callback);
             }
-            FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
             it = jsObserverObjectList_.erase(it);
             TAG_LOGD(AAFwkTag::FREE_INSTALL,
                 "jsObserverObjectList_ size:%{public}zu", jsObserverObjectList_.size());
-        } else {
-            it++;
         }
+    }
+
+    for (const napi_deferred& promise : promises) {
+        CallPromise(promise, abilityResult);
+        FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
+    }
+    for (const napi_ref& callback : callbacks) {
+        CallCallback(callback, abilityResult);
+        FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
 }
 
@@ -99,26 +112,39 @@ void JsFreeInstallObserver::HandleOnInstallFinished(const std::string &bundleNam
     const std::string &startTime, const int &resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
-    for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
-        if ((it->bundleName != bundleName) || (it->abilityName != abilityName) || (it->startTime != startTime)) {
-            it++;
-            continue;
+    std::vector<napi_deferred> promises;
+    std::vector<napi_ref> callbacks;
+    {
+        std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
+        for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
+            if ((it->bundleName != bundleName) || (it->abilityName != abilityName) || (it->startTime != startTime)) {
+                it++;
+                continue;
+            }
+            if (it->callback == nullptr && it->deferred == nullptr) {
+                it++;
+                continue;
+            }
+            if (it->isAbilityResult && resultCode == ERR_OK) {
+                it++;
+                continue;
+            }
+            if (it->deferred != nullptr) {
+                promises.emplace_back(it->deferred);
+            } else {
+                callbacks.emplace_back(it->callback);
+            }
+            it = jsObserverObjectList_.erase(it);
         }
-        if (it->callback == nullptr && it->deferred == nullptr) {
-            it++;
-            continue;
-        }
-        if (it->isAbilityResult && resultCode == ERR_OK) {
-            it++;
-            continue;
-        }
-        if (it->deferred != nullptr) {
-            CallPromise(it->deferred, resultCode);
-        } else {
-            CallCallback(it->callback, resultCode);
-        }
+    }
+
+    for (const napi_deferred& promise : promises) {
+        CallPromise(promise, resultCode);
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
-        it = jsObserverObjectList_.erase(it);
+    }
+    for (const napi_ref& callback : callbacks) {
+        CallCallback(callback, resultCode);
+        FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
 }
 
@@ -126,26 +152,39 @@ void JsFreeInstallObserver::HandleOnInstallFinishedByUrl(const std::string &star
     const int &resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
-    for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
-        if ((it->startTime != startTime) || (it->url != url)) {
-            it++;
-            continue;
+    std::vector<napi_deferred> promises;
+    std::vector<napi_ref> callbacks;
+    {
+        std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
+        for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
+            if ((it->startTime != startTime) || (it->url != url)) {
+                it++;
+                continue;
+            }
+            if (it->callback == nullptr && it->deferred == nullptr) {
+                it++;
+                continue;
+            }
+            if (it->isAbilityResult && resultCode == ERR_OK) {
+                it++;
+                continue;
+            }
+            if (it->deferred != nullptr) {
+                promises.emplace_back(it->deferred);
+            } else {
+                callbacks.emplace_back(it->callback);
+            }
+            it = jsObserverObjectList_.erase(it);
         }
-        if (it->callback == nullptr && it->deferred == nullptr) {
-            it++;
-            continue;
-        }
-        if (it->isAbilityResult && resultCode == ERR_OK) {
-            it++;
-            continue;
-        }
-        if (it->deferred != nullptr) {
-            CallPromise(it->deferred, resultCode);
-        } else {
-            CallCallback(it->callback, resultCode);
-        }
+    }
+
+    for (const napi_deferred& promise : promises) {
+        CallPromise(promise, resultCode);
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
-        it = jsObserverObjectList_.erase(it);
+    }
+    for (const napi_ref& callback : callbacks) {
+        CallCallback(callback, resultCode);
+        FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
 }
 
@@ -212,11 +251,14 @@ void JsFreeInstallObserver::AddJsObserverObject(const std::string &bundleName, c
     const std::string &startTime, napi_value jsObserverObject, napi_value* result, bool isAbilityResult)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
-    for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end(); ++it) {
-        if (it->bundleName == bundleName && it->abilityName == abilityName &&
-            it->startTime == startTime) {
-            TAG_LOGW(AAFwkTag::FREE_INSTALL, "The jsObject has been added");
-            return;
+    {
+        std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
+        for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end(); ++it) {
+            if (it->bundleName == bundleName && it->abilityName == abilityName &&
+                it->startTime == startTime) {
+                TAG_LOGW(AAFwkTag::FREE_INSTALL, "The jsObject has been added");
+                return;
+            }
         }
     }
 
@@ -232,10 +274,13 @@ void JsFreeInstallObserver::AddJsObserverObject(const std::string &startTime, co
     napi_value jsObserverObject, napi_value* result, bool isAbilityResult)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
-    for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end(); ++it) {
-        if (it->startTime == startTime && it->url == url) {
-            TAG_LOGW(AAFwkTag::FREE_INSTALL, "The jsObject has been added");
-            return;
+    {
+        std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
+        for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end(); ++it) {
+            if (it->startTime == startTime && it->url == url) {
+                TAG_LOGW(AAFwkTag::FREE_INSTALL, "The jsObject has been added");
+                return;
+            }
         }
     }
 
@@ -265,6 +310,7 @@ void JsFreeInstallObserver::AddJsObserverCommon(JsFreeInstallObserverObject &obj
         object.deferred = nullptr;
         object.callback = ref;
     }
+    std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
     jsObserverObjectList_.emplace_back(object);
 }
 } // namespace AbilityRuntime
