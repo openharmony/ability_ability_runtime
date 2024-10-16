@@ -4612,7 +4612,7 @@ int AbilityManagerService::RegisterOnListener(const std::string &type,
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
-    int32_t callingUid = IPCSkeleton::GetCallingUid()
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
     return dmsClient.RegisterOnListener(type, listener->AsObject(), callingUid);
 }
 
@@ -4626,7 +4626,7 @@ int AbilityManagerService::RegisterOffListener(const std::string &type,
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
-    int32_t callingUid = IPCSkeleton::GetCallingUid()
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
     return dmsClient.RegisterOffListener(type, listener->AsObject(), callingUid);
 }
 
