@@ -47,7 +47,6 @@ ohos_shared_library("wantagent") {
     "ipc:ipc_core",
     "libuv:uv",
     "napi:ace_napi",
-    "node:node_header_notice",
   ]
 
   cflags_cc = []
