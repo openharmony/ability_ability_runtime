@@ -575,7 +575,7 @@ HWTEST_F(DistributedClientTest, RegisterOffListener_0100, TestSize.Level3)
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
     int32_t callingUid = 0;
     client->RegisterOnListener("type", obj, callingUid);
-    int32_t result = client->RegisterOffListener("type", obj);
+    int32_t result = client->RegisterOffListener("type", obj, callingUid);
     if (client->GetDmsProxy() != nullptr) {
         EXPECT_EQ(result, OHOS::AAFwk::DMS_PERMISSION_DENIED);
     } else {
@@ -597,7 +597,7 @@ HWTEST_F(DistributedClientTest, RegisterOffListener_0200, TestSize.Level3)
     int32_t callingUid = 0;
     client->RegisterOnListener("type", obj, callingUid);
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
-    int32_t result = client->RegisterOffListener("type", obj);
+    int32_t result = client->RegisterOffListener("type", obj, callingUid);
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
     GTEST_LOG_(INFO) << "DistributedClientTest RegisterOffListener_0200 end";
 }
