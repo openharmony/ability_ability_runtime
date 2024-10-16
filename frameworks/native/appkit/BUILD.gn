@@ -232,7 +232,7 @@ ohos_shared_library("appkit_native") {
   }
 
 
-  if (ohos_indep_compiler_enable){ memory_utils_purgeable_ashmem_enable = true}
+  memory_utils_purgeable_ashmem_enable = true
   
   if (memory_utils_purgeable_ashmem_enable && defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_memmgr_override)) {
