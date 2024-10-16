@@ -866,7 +866,9 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityVirtualFunc_0200, TestSize.Level1)
     bool ret = ability->OnStartContinuation();
     EXPECT_EQ(ret, false);
     WantParams data;
-    ability->OnContinue(data);
+    AppExecFwk::AbilityInfo abilityInfo;
+    bool isAsyncOnContinue = false;
+    ability->OnContinue(data, isAsyncOnContinue, abilityInfo);
     uint32_t verCode = 0;
     ability->ContinueAbilityWithStack("", verCode);
     ret = ability->OnSaveData(data);
