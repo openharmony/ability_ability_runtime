@@ -207,6 +207,10 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
 
 AbilityRecord::~AbilityRecord()
 {
+    if (token_) {
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(token_->AsObject());
+    }
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
     if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
         auto object = scheduler_->AsObject();
         if (object != nullptr) {
@@ -1471,11 +1475,8 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         if (schedulerObject == nullptr || !schedulerObject->AddDeathRecipient(schedulerDeathRecipient_)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient failed");
         }
-        if (IsSceneBoard()) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Sceneboard DeathRecipient Added");
-        }
         pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
-        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid());
+        AfterLoaded();
         // add collaborator mission bind pid
         NotifyMissionBindPid();
 #ifdef WITH_DLP
@@ -1495,6 +1496,15 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         }
         scheduler_ = scheduler;
         pid_ = 0;
+    }
+}
+
+void AbilityRecord::AfterLoaded()
+{
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
+    ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid());
+    if (IsSceneBoard()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Sceneboard Added");
     }
 }
 
@@ -2557,7 +2567,6 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 #endif // WITH_DLP
     NotifyRemoveShellProcess(CollaboratorType::RESERVE_TYPE);
     NotifyRemoveShellProcess(CollaboratorType::OTHERS_TYPE);
-    FreezeUtil::GetInstance().DeleteLifecycleEvent(object);
 }
 
 void AbilityRecord::OnProcessDied()

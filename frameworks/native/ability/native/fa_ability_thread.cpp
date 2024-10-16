@@ -320,6 +320,7 @@ void FAAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
         return;
     }
     FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
 }
 
 void FAAbilityThread::AttachExtension(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
