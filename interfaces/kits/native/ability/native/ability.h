@@ -31,10 +31,10 @@
 #include "continuation_handler.h"
 #include "continuation_state.h"
 #include "dummy_notification_request.h"
-#include "fa_ability_context.h"
 #include "free_install_observer_interface.h"
 #include "iability_callback.h"
 #include "want_agent.h"
+#include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
 
 #include "appexecfwk_errors.h"
 #include "iremote_object.h"
