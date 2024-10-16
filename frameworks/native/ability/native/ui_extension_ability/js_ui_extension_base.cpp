@@ -230,10 +230,6 @@ void JsUIExtensionBase::OnStop()
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
-#ifdef SUPPORT_GRAPHICS
-    UnregisterDisplayInfoChangedListener();
-#endif // SUPPORT_GRAPHICS
-
     OnStopCallBack();
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
@@ -286,7 +282,8 @@ void JsUIExtensionBase::OnStopCallBack()
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityDestroy(jsObj_);
+        std::shared_ptr<NativeReference> sharedJsObj = std::move(jsObj_);
+        applicationContext->DispatchOnAbilityDestroy(sharedJsObj);
     }
 }
 
@@ -635,7 +632,6 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
         option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
         option->SetParentId(sessionInfo->hostWindowId);
-        option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
         auto uiWindow = Rosen::Window::Create(option, context_, sessionInfo->sessionToken);
         if (uiWindow == nullptr) {
