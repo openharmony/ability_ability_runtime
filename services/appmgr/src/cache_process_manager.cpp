@@ -279,6 +279,11 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
     }
+    if (!appRecord->HasUIAbilityLaunched()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s has not created uiability before.",
+            appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
+        return false;
+    }
     return true;
 }
 
@@ -348,12 +353,6 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
     }
     if (appRecord->GetProcessCacheBlocked()) {
         TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s 's process cache temporarily blocked.",
-            appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
-        return false;
-    }
-    if (!appRecord->HasUIAbilityLaunched() &&
-        !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
-        TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s has not created uiability before.",
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
     }
