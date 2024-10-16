@@ -1794,6 +1794,8 @@ void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
     CHECK_POINTER(scheduler_);
     auto result = GetResult();
     CHECK_POINTER(result);
+    UriUtils::GetInstance().CheckUriPermissionForUIExtension(result->resultWant_,
+        abilityInfo_.extensionAbilityType);
     GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId);
     scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
     // reset result to avoid send result next time
@@ -3288,8 +3290,7 @@ void AbilityRecord::GrantUriPermissionInner(Want &want, std::vector<std::string>
     }
     uint32_t flag = want.GetFlags();
     std::vector<Uri> permissionUris;
-    if (abilityInfo_.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE &&
-        abilityInfo_.extensionAbilityType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+    if (!UriUtils::GetInstance().IsPermissionPreCheckedType(abilityInfo_.extensionAbilityType)) {
         auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
             uriVec, flag, callerTokenId));
         permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
