@@ -858,6 +858,9 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
     }
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "init window scene failed");
+        FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, FreezeUtil::TimeoutState::FOREGROUND };
+        FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            std::string("ERROR JsUIAbility::DoOnForegroundForSceneIsNull: ") + std::to_string(static_cast<int>(ret)));
         return;
     }
 
