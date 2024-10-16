@@ -45,6 +45,7 @@ ohos_shared_library("js_environment") {
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "ets_utils:console",
+    "ets_utils:worker",
     "eventhandler:libeventhandler",
     "faultloggerd:libunwinder",
     "ffrt:libffrt",
