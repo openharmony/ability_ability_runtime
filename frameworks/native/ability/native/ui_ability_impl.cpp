@@ -179,6 +179,12 @@ void UIAbilityImpl::HandleAbilityTransaction(
             AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
                 token_, targetState.state, GetRestoreData());
         }
+        if (ability_ != nullptr && targetState.state == AAFwk::ABILITY_STATE_BACKGROUND_NEW) {
+            TAG_LOGW(AAFwkTag::UIABILITY, "OnBackground is called when current state is already background");
+            Background();
+            AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
+                token_, targetState.state, GetRestoreData());
+        }
         TAG_LOGE(AAFwkTag::UIABILITY, "Org lifeCycleState equals to dst lifeCycleState");
         return;
     }
