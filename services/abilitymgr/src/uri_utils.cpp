@@ -23,6 +23,7 @@
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
+#include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
 
 namespace OHOS {
@@ -245,6 +246,22 @@ void UriUtils::CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::Ext
         extensionAbilityType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         return;
     }
+    CheckUriPermissionForExtension(want);
+    return;
+}
+
+void UriUtils::CheckUriPermissionForUIExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckUriPermissionForUIExtension called.");
+    if (!UIExtensionUtils::IsUIExtension(extensionAbilityType)) {
+        return;
+    }
+    CheckUriPermissionForExtension(want);
+    return;
+}
+
+void UriUtils::CheckUriPermissionForExtension(Want &want)
+{
     uint32_t flag = want.GetFlags();
     if (!IsGrantUriPermissionFlag(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "No grant uri flag: %{public}u.", flag);
@@ -264,5 +281,11 @@ void UriUtils::CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::Ext
     return;
 }
 
+bool UriUtils::IsPermissionPreCheckedType(AppExecFwk::ExtensionAbilityType extensionAbilityType)
+{
+    return extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
+        extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE ||
+        UIExtensionUtils::IsUIExtension(extensionAbilityType);
+}
 } // AAFwk
 } // OHOS

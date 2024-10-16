@@ -3237,7 +3237,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     }
     ReportEventToRSS(abilityRequest.abilityInfo, abilityRequest.callerToken);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "name:%{public}s", abilityInfo.name.c_str());
-    UriUtils::GetInstance().CheckUriPermissionForServiceExtension(abilityRequest.want,
+    UriUtils::GetInstance().CheckUriPermissionForUIExtension(abilityRequest.want,
         abilityRequest.abilityInfo.extensionAbilityType);
     eventInfo.errCode = connectManager->StartAbility(abilityRequest);
     if (eventInfo.errCode != ERR_OK) {
