@@ -157,8 +157,6 @@ AAFwk::UserStatus AssertFaultTaskThread::HandleAssertCallback(const std::string 
             TAG_LOGE(AAFwkTag::APPKIT, "Request assert fault dialog failed");
             break;
         }
-
-        assertResultCV_.wait(assertResultMutex_);
         assertResult = assertFaultCallback->GetAssertResult();
     } while (false);
 
