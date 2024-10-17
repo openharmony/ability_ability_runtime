@@ -1298,15 +1298,9 @@ int UIAbilityLifecycleManager::CloseUIAbility(const std::shared_ptr<AbilityRecor
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    return CloseUIAbilityInner(abilityRecord, resultCode, resultWant, isClearSession);
-}
-
-int UIAbilityLifecycleManager::CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord,
-    int resultCode, const Want *resultWant, bool isClearSession)
-{
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call, from ability: %{public}s", element.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CloseUIAbility call: %{public}s", element.c_str());
     if (abilityRecord->IsTerminating() && !abilityRecord->IsForeground()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ability on terminating");
         return ERR_OK;
@@ -1324,6 +1318,13 @@ int UIAbilityLifecycleManager::CloseUIAbilityInner(std::shared_ptr<AbilityRecord
         abilityRecord->SaveResultToCallers(-1, &want);
     }
     EraseAbilityRecord(abilityRecord);
+    return CloseUIAbilityInner(abilityRecord, resultCode, resultWant, isClearSession);
+}
+
+int UIAbilityLifecycleManager::CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord,
+    int resultCode, const Want *resultWant, bool isClearSession)
+{
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     if (abilityRecord->GetAbilityState() == AbilityState::INITIAL) {
         if (abilityRecord->GetScheduler() == nullptr) {
             auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
@@ -1341,8 +1342,13 @@ int UIAbilityLifecycleManager::CloseUIAbilityInner(std::shared_ptr<AbilityRecord
         return abilityRecord->TerminateAbility();
     }
 
-    if (abilityRecord->IsAbilityState(FOREGROUND) || abilityRecord->IsAbilityState(FOREGROUNDING)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "current ability is active");
+    if (abilityRecord->IsAbilityState(FOREGROUND) || abilityRecord->IsAbilityState(FOREGROUNDING) ||
+        abilityRecord->IsAbilityState(BACKGROUNDING)) {
+        if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
+            abilityRecord->SetPendingState(AbilityState::BACKGROUND);
+            return ERR_OK;
+        }
         abilityRecord->SetPendingState(AbilityState::BACKGROUND);
         MoveToBackground(abilityRecord);
         return ERR_OK;
