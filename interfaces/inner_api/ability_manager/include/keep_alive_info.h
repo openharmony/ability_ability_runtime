@@ -38,7 +38,7 @@ enum class KeepAliveSetter : int32_t {
  */
 enum class KeepAliveAppType : int32_t {
     UNSPECIFIED = 0,
-    APP = 1,
+    THIRD_PARTY = 1,
     SYSTEM = 2,
 };
 
@@ -60,7 +60,7 @@ public:
 
 struct KeepAliveStatus {
     int32_t code;
-    bool isKeepAlive;
+    KeepAliveSetter setter;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

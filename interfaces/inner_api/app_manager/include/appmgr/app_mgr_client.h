@@ -676,6 +676,14 @@ public:
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     /**
+     * @brief Set non-resident keep-alive process status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
+     */
+    void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid);
+
+    /**
      * Register application or process state observer.
      * @param observer, ability token.
      * @param bundleNameList, the list of bundle names.
@@ -892,6 +900,17 @@ public:
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
     bool IsAppKilling(sptr<IRemoteObject> token) const;
+
+    /**
+     * Check whether the bundle is running.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param appCloneIndex the appindex of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return Return ERR_OK if success, others fail.
+     */
+    virtual AppMgrResultCode IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+        bool &isRunning);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

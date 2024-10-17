@@ -1458,9 +1458,19 @@ bool AppRunningRecord::IsKeepAliveApp() const
     return true;
 }
 
+bool AppRunningRecord::IsKeepAliveDkv() const
+{
+    return isKeepAliveDkv_;
+}
+
 void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 {
     isKeepAliveRdb_ = isKeepAliveEnable;
+}
+
+void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
+{
+    isKeepAliveDkv_ = isKeepAliveDkv;
 }
 
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)

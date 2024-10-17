@@ -339,6 +339,14 @@ public:
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid) override;
 
     /**
+     * @brief Set non-resident keep-alive process status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
+     */
+    void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid) override;
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.

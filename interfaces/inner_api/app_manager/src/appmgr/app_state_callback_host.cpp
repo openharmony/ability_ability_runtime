@@ -56,6 +56,8 @@ int AppStateCallbackHost::OnRemoteRequest(
             return HandleOnAppRemoteDied(data, reply);
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_PRE_CACHE):
             return HandleNotifyAppPreCache(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_START_KEEP_ALIVE_PROCESS):
+            return HandleNotifyStartKeepAliveProcess(data, reply);
     }
 
     TAG_LOGD(AAFwkTag::APPMGR, "AppStateCallbackHost::OnRemoteRequest end");
@@ -82,6 +84,11 @@ void AppStateCallbackHost::NotifyConfigurationChange(const AppExecFwk::Configura
 }
 
 void AppStateCallbackHost::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+}
+
+void AppStateCallbackHost::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
@@ -145,6 +152,26 @@ int32_t AppStateCallbackHost::HandleNotifyStartResidentProcess(MessageParcel &da
         bundleInfos.emplace_back(*bundleInfo);
     }
     NotifyStartResidentProcess(bundleInfos);
+    return NO_ERROR;
+}
+
+int32_t AppStateCallbackHost::HandleNotifyStartKeepAliveProcess(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    int32_t infoSize = data.ReadInt32();
+    if (infoSize > CYCLE_LIMIT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "infoSize is too large");
+        return ERR_INVALID_VALUE;
+    }
+    for (int32_t i = 0; i < infoSize; i++) {
+        std::unique_ptr<AppExecFwk::BundleInfo> bundleInfo(data.ReadParcelable<AppExecFwk::BundleInfo>());
+        if (!bundleInfo) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Read Parcelable infos failed.");
+            return ERR_INVALID_VALUE;
+        }
+        bundleInfos.emplace_back(*bundleInfo);
+    }
+    NotifyStartKeepAliveProcess(bundleInfos);
     return NO_ERROR;
 }
 

@@ -73,8 +73,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string keys(data, size);
     std::string values(data, size);
     bool checkEmpty = *data % ENABLE;
-    abilityAutoStartupDataManager->IsEqual(jsonObject, keys, values, checkEmpty);
-    abilityAutoStartupDataManager->IsEqual(jsonObject, keys, values);
     abilityAutoStartupDataManager->IsEqual(key, info);
     abilityAutoStartupDataManager->IsEqual(key, strParam);
     abilityAutoStartupDataManager->IsEqual(key, in32Param);
