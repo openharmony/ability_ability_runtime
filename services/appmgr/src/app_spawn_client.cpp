@@ -539,7 +539,7 @@ int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg
     }
     TAG_LOGI(AAFwkTag::APPMGR, "status = [%{public}d]", status);
 
-    return status;
+    return ret;
 }
 
 int32_t AppSpawnClient::SetChildProcessTypeStartFlag(const AppSpawnReqMsgHandle &reqHandle,
