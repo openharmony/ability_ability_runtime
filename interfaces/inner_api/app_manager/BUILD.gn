@@ -127,7 +127,6 @@ ohos_shared_library("app_manager") {
   ]
 
   external_deps = [
-    "ability_base:configuration",
     "c_utils:utils",
     "faultloggerd:libdfx_dumpcatcher",
     "faultloggerd:libfaultloggerd",
