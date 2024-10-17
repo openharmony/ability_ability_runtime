@@ -14,7 +14,7 @@
 import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-import("//build/config/components/ace_engine/ace_gen_obj.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_abc_js_mock") {
   js_mock_path =
