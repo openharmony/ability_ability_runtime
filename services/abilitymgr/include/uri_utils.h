@@ -43,7 +43,8 @@ public:
 
     void CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType);
 
-    void CheckUriPermissionForUIExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType);
+    void CheckUriPermissionForUIExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType,
+        uint32_t tokenId = 0);
 
     bool IsPermissionPreCheckedType(AppExecFwk::ExtensionAbilityType extensionAbilityType);
 private:
@@ -52,7 +53,7 @@ private:
 
     std::vector<std::string> GetUriListFromWantDms(const Want &want);
 
-    void CheckUriPermissionForExtension(Want &want);
+    void CheckUriPermissionForExtension(Want &want, uint32_t tokenId);
 
     DISALLOW_COPY_AND_MOVE(UriUtils);
 };
