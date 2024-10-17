@@ -20,7 +20,7 @@
 #include "js_environment_impl.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "uncaught_exception_callback.h"
-#include "commonlibrary/ets_utils/js_sys_module/console/console.h"
+#include "console.h"
 
 namespace OHOS {
 namespace JsEnv {
