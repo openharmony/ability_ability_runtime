@@ -282,7 +282,8 @@ int32_t AmsMgrScheduler::KillProcessWithAccount(
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId, clearPageStack);
+    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId, clearPageStack,
+        "KillProcessWithAccount");
 }
 
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
@@ -359,21 +360,22 @@ int32_t AmsMgrScheduler::KillProcessesByAccessTokenId(const uint32_t accessToken
     return amsMgrServiceInner_->KillProcessesByAccessTokenId(accessTokenId);
 }
 
-int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid)
+int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid);
+    return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid, reason);
 }
 
-int32_t AmsMgrScheduler::KillApplicationSelf(const bool clearPageStack)
+int32_t AmsMgrScheduler::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationSelf(clearPageStack);
+    return amsMgrServiceInner_->KillApplicationSelf(clearPageStack, reason);
 }
 
 bool AmsMgrScheduler::IsReady() const
