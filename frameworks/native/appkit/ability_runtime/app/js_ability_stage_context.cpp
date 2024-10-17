@@ -16,6 +16,7 @@
 #include "js_ability_stage_context.h"
 
 #include "ability_runtime/context/context.h"
+#include "ability_stage_context.h"
 #include "hilog_tag_wrapper.h"
 #include "js_context_utils.h"
 #include "js_data_struct_converter.h"
@@ -64,6 +65,58 @@ napi_value CreateJsAbilityStageContext(napi_env env, std::shared_ptr<AbilityRunt
         napi_set_named_property(env, objValue, "config", CreateJsConfiguration(env, *configuration));
     }
     return objValue;
+}
+
+napi_value AttachAbilityStageContext(napi_env env, void *value, void *hint)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "attach ability stage context");
+    if (env == nullptr || value == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid params");
+        return nullptr;
+    }
+    auto ptr = reinterpret_cast<std::weak_ptr<AbilityStageContext> *>(value)->lock();
+    if (ptr == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid context");
+        return nullptr;
+    }
+
+    auto object = CreateJsAbilityStageContext(env, ptr);
+    if (object == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null ability stage object");
+        return nullptr;
+    }
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.AbilityStageContext", &object, 1);
+    if (systemModule == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "load ability stage context failed");
+        return nullptr;
+    }
+    auto contextObj = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
+        TAG_LOGW(AAFwkTag::APPKIT, "not napi object");
+        return nullptr;
+    }
+
+    auto status = napi_coerce_to_native_binding_object(
+        env, contextObj, DetachCallbackFunc, AttachAbilityStageContext, value, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGW(AAFwkTag::APPKIT, "coerce ability stage context failed: %{public}d", status);
+        return nullptr;
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(ptr);
+    status = napi_wrap(env, contextObj, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr ability stage context");
+            delete static_cast<std::weak_ptr<AbilityStageContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGW(AAFwkTag::APPKIT, "wrap ability stage context failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
+    return contextObj;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
