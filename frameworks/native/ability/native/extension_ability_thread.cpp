@@ -51,6 +51,7 @@ constexpr static char ENTERPRISE_ADMIN_EXTENSION[] = "EnterpriseAdminExtension";
 constexpr static char INPUTMETHOD_EXTENSION[] = "InputMethodExtensionAbility";
 constexpr static char APP_ACCOUNT_AUTHORIZATION_EXTENSION[] = "AppAccountAuthorizationExtension";
 constexpr static char FENCE_EXTENSION[] = "FenceExtension";
+constexpr static char CALLER_INFO_QUERY_EXTENSION[] = "CallerInfoQueryExtension";
 }
 
 const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_MAP = {
@@ -155,6 +156,9 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FENCE) {
         abilityName = FENCE_EXTENSION;
+    }
+    if (abilityInfo->extensionAbilityType == AppExecFwk::CALLER_INFO_QUERY) {
+        abilityName = CALLER_INFO_QUERY_EXTENSION;
     }
 #ifdef SUPPORT_GRAPHICS
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH) {

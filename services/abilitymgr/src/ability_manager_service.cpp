@@ -9420,6 +9420,16 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
         return CheckCallServiceExtensionPermission(abilityRequest);
     }
 
+    if (extensionType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
+        auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+            PermissionConstants::PERMISSION_GET_TELEPHONY_STATE);
+        if (!ret) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "permisssion deny for caller info query extension");
+            return CHECK_PERMISSION_FAILED;
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "can use caller info query extension");
+        return ERR_OK;
+    }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "not SA, can't start other extension");
     return CHECK_PERMISSION_FAILED;
 }
