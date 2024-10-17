@@ -627,6 +627,15 @@ void AmsMgrScheduler::SetKeepAliveEnableState(const std::string &bundleName, boo
     amsMgrServiceInner_->SetKeepAliveEnableState(bundleName, enable, uid);
 }
 
+void AmsMgrScheduler::SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return;
+    }
+    amsMgrServiceInner_->SetKeepAliveDkv(bundleName, enable, uid);
+}
+
 void AmsMgrScheduler::ClearProcessByToken(sptr<IRemoteObject> token)
 {
     if (!IsReady()) {

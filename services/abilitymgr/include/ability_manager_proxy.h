@@ -1499,6 +1499,44 @@ public:
     virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
         const std::list<std::string>& exportConfigs, int32_t flag) override;
 
+    /**
+     * Set keep-alive flag for application under a specific user.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAlive(const std::string &bundleName, int32_t userId, bool flag) override;
+
+    /**
+     * Get keep-alive applications.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplications(int32_t appType, int32_t userId,
+        std::vector<KeepAliveInfo> &list) override;
+
+    /**
+     * Set keep-alive flag for application under a specific user by EDM.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag) override;
+
+    /**
+     * Get keep-alive applications by EDM.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId,
+        std::vector<KeepAliveInfo> &list) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

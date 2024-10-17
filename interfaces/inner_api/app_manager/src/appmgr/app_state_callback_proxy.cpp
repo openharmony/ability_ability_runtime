@@ -137,6 +137,35 @@ void AppStateCallbackProxy::NotifyStartResidentProcess(std::vector<AppExecFwk::B
     }
 }
 
+void AppStateCallbackProxy::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteInt32(bundleInfos.size())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write bundle info size failed.");
+        return;
+    }
+
+    for (auto &bundleInfo : bundleInfos) {
+        if (!data.WriteParcelable(&bundleInfo)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "write bundle info failed");
+            return;
+        }
+    }
+    auto ret = SendTransactCmd(
+        static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_START_KEEP_ALIVE_PROCESS),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+    }
+}
+
 void AppStateCallbackProxy::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     MessageParcel data;

@@ -5711,5 +5711,147 @@ bool AbilityManagerProxy::UpdateAssociateConfigInner(const std::map<std::string,
     }
     return true;
 }
+
+int32_t AbilityManagerProxy::SetApplicationKeepAlive(const std::string &bundleName, int32_t userId, bool flag)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write bundleName");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write userID");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteBool(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write flag");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendRequest(AbilityManagerInterfaceCode::SET_APPLICATION_KEEP_ALLIVE,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::QueryKeepAliveApplications(int32_t appType, int32_t userId,
+    std::vector<KeepAliveInfo> &list)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteInt32(appType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write appType");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write userID");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendRequest(AbilityManagerInterfaceCode::GET_APPLICATIONS_KEEP_ALIVE,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+
+    ret = GetParcelableInfos<KeepAliveInfo>(reply, list);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetParcelableInfos error: %{public}d", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write bundleName");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write userID");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteBool(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write flag");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendRequest(AbilityManagerInterfaceCode::SET_APPLICATION_KEEP_ALLIVE_BY_EDM,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId,
+    std::vector<KeepAliveInfo> &list)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteInt32(appType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write appType");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write userID");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendRequest(AbilityManagerInterfaceCode::GET_APPLICATIONS_KEEP_ALIVE_BY_EDM,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+
+    ret = GetParcelableInfos<KeepAliveInfo>(reply, list);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetParcelableInfos error: %{public}d", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
 } // namespace AAFwk
 } // namespace OHOS

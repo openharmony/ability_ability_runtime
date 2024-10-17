@@ -28,9 +28,7 @@ ohos_unittest("multi_app_utils_test") {
   include_dirs = [
     "include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
-    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
-
     "${ability_runtime_services_path}/appmgr/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",

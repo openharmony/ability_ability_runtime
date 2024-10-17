@@ -2608,6 +2608,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
 
     appRecord->SetProcessAndExtensionType(abilityInfo);
     appRecord->SetKeepAliveEnableState(bundleInfo.isKeepAlive);
+    appRecord->SetKeepAliveDkv(loadParam->isKeepAlive);
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
@@ -4191,6 +4192,36 @@ bool AppMgrServiceInner::CheckRemoteClient()
         return false;
     }
     return true;
+}
+
+void AppMgrServiceInner::RestartKeepAliveProcess(std::shared_ptr<AppRunningRecord> appRecord)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "restart keep-alive process begins.");
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return;
+    }
+
+    if (!CheckRemoteClient() || !appRecord || !appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "restart keep-alive fail");
+        return;
+    }
+
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    BundleInfo bundleInfo;
+    auto userId = GetUserIdByUid(appRecord->GetUid());
+    auto flags = BundleFlag::GET_BUNDLE_DEFAULT | BundleFlag::GET_BUNDLE_WITH_REQUESTED_PERMISSION;
+    if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(
+        appRecord->GetBundleName(),
+        static_cast<BundleFlag>(flags),
+        bundleInfo, userId))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
+        return;
+    }
+    std::vector<BundleInfo> infos;
+    infos.emplace_back(bundleInfo);
+    TAG_LOGI(AAFwkTag::APPMGR, "keepAliveProcess %{public}s", appRecord->GetProcessName().c_str());
+    NotifyStartKeepAliveProcess(infos);
 }
 
 void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord)
@@ -6896,6 +6927,12 @@ void AppMgrServiceInner::ApplicationTerminatedSendProcessEvent(const std::shared
 
 void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    ClearResidentProcessAppRunningData(appRecord);
+    ClearNonResidentKeepAliveAppRunningData(appRecord);
+}
+
+void AppMgrServiceInner::ClearResidentProcessAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return;
@@ -6939,6 +6976,38 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
             TAG_LOGD(AAFwkTag::APPMGR, "Post restart resident process delay task.");
             taskHandler_->SubmitTask(restartProcess, "RestartResidentProcessDelayTask", RESTART_INTERVAL_TIME);
         }
+    }
+}
+
+void AppMgrServiceInner::ClearNonResidentKeepAliveAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
+        return;
+    }
+
+    auto userId = GetUserIdByUid(appRecord->GetUid());
+    if (appRecord->IsKeepAliveDkv() && (userId == 0 || userId == currentUserId_) &&
+        appRecord->GetBundleName() != SCENE_BOARD_BUNDLE_NAME) {
+        if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
+            TAG_LOGI(AAFwkTag::APPMGR, "is killed for upgrade web");
+            return;
+        }
+        if (!IsMemorySizeSufficient()) {
+            TAG_LOGI(AAFwkTag::APPMGR, "memory size insufficient");
+            return;
+        }
+        TAG_LOGI(AAFwkTag::APPMGR, "memory size sufficient");
+        auto restartProcess = [appRecord, innerService = shared_from_this()]() {
+            TAG_LOGI(AAFwkTag::APPMGR, "restarting keep-alive process.");
+            innerService->RestartKeepAliveProcess(appRecord);
+        };
+        if (taskHandler_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ null");
+            return;
+        }
+        TAG_LOGI(AAFwkTag::APPMGR, "submit restart keep-alive process task.");
+        taskHandler_->SubmitTask(restartProcess, "RestartKeepAliveProcess");
     }
 }
 
@@ -7741,6 +7810,7 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
         ExitResidentProcessManager::GetInstance().QueryExitBundleInfos(exitProcessInfos, exitBundleInfos);
 
         innerServicer->NotifyStartResidentProcess(exitBundleInfos);
+        innerServicer->NotifyStartKeepAliveProcess(exitBundleInfos);
     };
     taskHandler_->SubmitTask(StartExitKeepAliveProcessTask, "startexitkeepaliveprocess");
     return ERR_OK;
@@ -7771,6 +7841,16 @@ void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::Bund
     }
 }
 
+void AppMgrServiceInner::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->NotifyStartKeepAliveProcess(bundleInfos);
+        }
+    }
+}
+
 void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -7797,6 +7877,36 @@ void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, 
             TAG_LOGD(AAFwkTag::APPMGR, "%{public}s update state: %{public}d",
                 bundleName.c_str(), static_cast<int32_t>(enable));
             appRecord->SetKeepAliveEnableState(enable);
+        }
+    }
+}
+
+void AppMgrServiceInner::SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundle name empty");
+        return;
+    }
+
+    if (appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "running manager error");
+        return;
+    }
+
+    auto callerUid = IPCSkeleton::GetCallingUid();
+    if (callerUid != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not foundation call");
+        return;
+    }
+
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        if (appRecord != nullptr && appRecord->GetBundleName() == bundleName &&
+            (uid == 0 || appRecord->GetUid() == uid)) {
+            TAG_LOGD(AAFwkTag::APPMGR, "%{public}s update state: %{public}d",
+                bundleName.c_str(), static_cast<int32_t>(enable));
+            appRecord->SetKeepAliveDkv(enable);
         }
     }
 }
@@ -8059,6 +8169,7 @@ void AppMgrServiceInner::RestartResidentProcessDependedOnWeb()
         ExitResidentProcessManager::GetInstance().QueryExitBundleInfos(bundleNames, exitBundleInfos);
 
         innerServicer->NotifyStartResidentProcess(exitBundleInfos);
+        innerServicer->NotifyStartKeepAliveProcess(exitBundleInfos);
     };
     taskHandler_->SubmitTask(RestartResidentProcessDependedOnWebTask, "RestartResidentProcessDependedOnWeb");
 }

@@ -376,6 +376,14 @@ public:
     virtual void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid) {};
 
     /**
+     * @brief Set non-resident keep-alive process status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
+     */
+    virtual void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid) {};
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
@@ -502,6 +510,7 @@ public:
         IS_APP_KILLING,
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
         SET_APP_EXCEPTION_CALLBACK,
+        SET_KEEP_ALIVE_DKV,
         // Add enumeration values above
         END
     };

@@ -77,6 +77,9 @@ constexpr const char* ERROR_MSG_NOT_SUPPORT_CROSS_APP_START =
     "Redirection to a third-party application is not allowed in API version 11 or later.";
 constexpr const char* ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT = "No matching ability is found.";
 constexpr const char* ERROR_MSG_TARGET_BUNDLE_NOT_EXIST = "The bundle does not exist or no patch has been applied.";
+constexpr const char* ERROR_MSG_NO_MAIN_ABILITY = "The target bundle has no main ability.";
+constexpr const char* ERROR_MSG_NO_STATUS_BAR_ABILITY = "The target app has no status-bar ability.";
+constexpr const char* ERROR_MSG_NOT_ATTACHED_TO_STATUS_BAR = "The target app is not attached to a status bar.";
 constexpr const char* ERROR_MSG_NO_RESIDENT_PERMISSION =
     "The caller application can only set the resident status of the configured process.";
 constexpr const char* ERROR_MSG_MULTI_APP_NOT_SUPPORTED = "App clone or multi-instance is not supported.";
@@ -148,6 +151,9 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_CROSS_APP_START, ERROR_MSG_NOT_SUPPORT_CROSS_APP_START },
     { AbilityErrorCode::ERROR_CODE_CANNOT_MATCH_ANY_COMPONENT, ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT },
     { AbilityErrorCode::ERROR_CODE_TARGET_BUNDLE_NOT_EXIST, ERROR_MSG_TARGET_BUNDLE_NOT_EXIST },
+    { AbilityErrorCode::ERROR_CODE_NO_MAIN_ABILITY, ERROR_MSG_NO_MAIN_ABILITY },
+    { AbilityErrorCode::ERROR_CODE_NO_STATUS_BAR_ABILITY, ERROR_MSG_NO_STATUS_BAR_ABILITY },
+    { AbilityErrorCode::ERROR_CODE_NOT_ATTACHED_TO_STATUS_BAR, ERROR_MSG_NOT_ATTACHED_TO_STATUS_BAR },
     { AbilityErrorCode::ERROR_CODE_NO_RESIDENT_PERMISSION, ERROR_MSG_NO_RESIDENT_PERMISSION },
     { AbilityErrorCode::ERROR_CODE_MULTI_APP_NOT_SUPPORTED, ERROR_MSG_MULTI_APP_NOT_SUPPORTED },
     { AbilityErrorCode::ERROR_NOT_APP_CLONE, ERROR_MSG_NOT_APP_CLONE },
@@ -219,6 +225,9 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_INVALID_ID},
     {ERR_START_OTHER_APP_FAILED, AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_CROSS_APP_START},
     {ERR_TARGET_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_TARGET_BUNDLE_NOT_EXIST},
+    {ERR_NO_MAIN_ABILITY, AbilityErrorCode::ERROR_CODE_NO_MAIN_ABILITY},
+    {ERR_NO_STATUS_BAR_ABILITY, AbilityErrorCode::ERROR_CODE_NO_STATUS_BAR_ABILITY},
+    {ERR_NOT_ATTACHED_TO_STATUS_BAR, AbilityErrorCode::ERROR_CODE_NOT_ATTACHED_TO_STATUS_BAR},
     {ERR_NO_RESIDENT_PERMISSION, AbilityErrorCode::ERROR_CODE_NO_RESIDENT_PERMISSION},
     {ERR_MULTI_APP_NOT_SUPPORTED, AbilityErrorCode::ERROR_CODE_MULTI_APP_NOT_SUPPORTED},
     {ERR_APP_CLONE_INDEX_INVALID, AbilityErrorCode::ERROR_APP_CLONE_INDEX_INVALID},

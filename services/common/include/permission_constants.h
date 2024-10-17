@@ -67,6 +67,8 @@ constexpr const char* PERMISSION_BLOCK_ALL_APP_START = "ohos.permission.BLOCK_AL
 constexpr const char* PERMISSION_START_UIABILITY_TO_HIDDEN = "ohos.permission.START_UIABILITY_TO_HIDDEN";
 constexpr const char* PERMISSION_SUPERVISE_KIA_SERVICE = "ohos.permission.SUPERVISE_KIA_SERVICE";
 constexpr const char* PERMISSION_GET_TELEPHONY_STATE = "ohos.permission.GET_TELEPHONY_STATE";
+constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE = "ohos.permission.MANAGE_APP_KEEP_ALIVE";
+constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE_INTERNAL = "ohos.permission.MANAGE_APP_KEEP_ALIVE_INTERNAL";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS

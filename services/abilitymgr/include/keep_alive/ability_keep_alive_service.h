@@ -26,12 +26,9 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-class AbilityKeepAliveService : public std::enable_shared_from_this<AbilityKeepAliveService> {
+class AbilityKeepAliveService {
 public:
-    explicit AbilityKeepAliveService();
-
-    virtual ~AbilityKeepAliveService();
-
+    static AbilityKeepAliveService &GetInstance();
     /**
      * @brief Set every application keep alive state.
      * @param info The keep-alive info,include bundle name, module name, ability name.
@@ -50,30 +47,12 @@ public:
     int32_t QueryKeepAliveApplications(int32_t userId, int32_t appType, std::vector<KeepAliveInfo> &infoList);
 
     /**
-     * @brief Set application keep alive state by EDM.
-     * @param info The keep-alive info, include bundle name, module name, ability name.
-     * @param flag Indicates whether to keep alive for application.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t SetApplicationKeepAliveByEDM(KeepAliveInfo &info, bool flag);
-
-    /**
-     * @brief Query keep-alive applications by EDM.
-     * @param userId User id.
-     * @param appType App type.
-     * @param infoList Output parameters, return keep-alive info list.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t QueryKeepAliveApplicationsByEDM(int32_t userId, int32_t appType, std::vector<KeepAliveInfo> &infoList);
-
-    /**
      * @brief Query if bundle is keep-alive.
      * @param bundleName The bundle name.
      * @param userId User id.
-     * @param isKeepAlive The return flag indicates whether the bundle is keep-alive.
-     * @return Returns ERR_OK on success, others on failure.
+     * @return Returns true on app keep alive, false otherwise.
      */
-    int32_t GetKeepAliveProcessEnable(const std::string &bundleName, int32_t userId, bool &isKeepAlive);
+    bool IsKeepAliveApp(const std::string &bundleName, int32_t userId);
 
     /**
      * @brief Get keep-alive applications without permissions.
@@ -83,12 +62,24 @@ public:
      */
     int32_t GetKeepAliveApplications(int32_t userId, std::vector<KeepAliveInfo> &infoList);
 
+    /**
+     * @brief Query if bundle is keep-alive.
+     * @param bundleName The bundle name.
+     * @param userId User id.
+     * @param isByEDM The flag indicates whether it's user or system who sets the flag.
+     * @param isKeepAlive The return flag indicates whether the bundle is keep-alive.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    bool CanSetKeepAlive(const std::string &bundleName, int32_t userId, bool isByEDM, bool &isKeepAlive);
+
 private:
-    int32_t CheckPermission();
-    int32_t CheckPermissionForEDM();
+    AbilityKeepAliveService();
+    ~AbilityKeepAliveService();
+
     void GetValidUserId(int32_t &userId);
     int32_t SetKeepAliveTrue(const KeepAliveInfo &info);
     int32_t CancelKeepAlive(const KeepAliveInfo &info);
+    DISALLOW_COPY_AND_MOVE(AbilityKeepAliveService);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

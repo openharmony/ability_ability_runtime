@@ -40,6 +40,7 @@
 #include "insight_intent_execute_param.h"
 #include "insight_intent_execute_result.h"
 #include "iprepare_terminate_callback_interface.h"
+#include "keep_alive_info.h"
 #include "mission_info.h"
 #include "mission_listener_interface.h"
 #include "mission_snapshot.h"
@@ -73,6 +74,7 @@ class IStatusBarDelegate;
 }
 
 namespace AAFwk {
+using KeepAliveInfo = AbilityRuntime::KeepAliveInfo;
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
 using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
@@ -1892,6 +1894,54 @@ public:
      */
     virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
         const std::list<std::string>& exportConfigs, int32_t flag)
+    {
+        return 0;
+    }
+
+    /**
+     * Set keep-alive flag for application under a specific user.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAlive(const std::string &bundleName, int32_t userId, bool flag)
+    {
+        return 0;
+    }
+
+    /**
+     * Get keep-alive applications.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplications(int32_t appType, int32_t userId, std::vector<KeepAliveInfo> &list)
+    {
+        return 0;
+    }
+
+    /**
+     * Set keep-alive flag for application under a specific user by EDM.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag)
+    {
+        return 0;
+    }
+
+    /**
+     * Get keep-alive applications by EDM.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId, std::vector<KeepAliveInfo> &list)
     {
         return 0;
     }
