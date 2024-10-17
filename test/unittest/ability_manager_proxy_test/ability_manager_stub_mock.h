@@ -314,8 +314,9 @@ public:
         uint64_t intentId, int32_t userId));
     MOCK_METHOD5(StartAbilityAsCaller, int(const Want &want, const sptr<IRemoteObject> &callerToken,
         sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
-    MOCK_METHOD2(
-        GetWantSender, sptr<IWantSender>(const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken));
+    MOCK_METHOD3(
+        GetWantSender, sptr<IWantSender>(const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken,
+        int32_t uid));
     MOCK_METHOD2(SendWantSender, int(sptr<IWantSender> target, const SenderInfo& senderInfo));
     MOCK_METHOD1(CancelWantSender, void(const sptr<IWantSender>& sender));
     MOCK_METHOD1(GetPendingWantUid, int(const sptr<IWantSender>& target));
