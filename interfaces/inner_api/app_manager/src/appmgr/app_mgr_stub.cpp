@@ -345,6 +345,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleRegisterKiaInterceptor(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::CHECK_IS_KIA_PROCESS):
             return HandleCheckIsKiaProcess(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_INDEX_BY_PID):
+            return HandleGetAppIndexByPid(data, reply);
     }
     return INVALID_FD;
 }
@@ -1465,8 +1467,8 @@ int32_t AppMgrStub::HandleUpdateRenderState(MessageParcel &data, MessageParcel &
 int32_t AppMgrStub::HandleSignRestartAppFlag(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::string bundleName = data.ReadString();
-    auto ret = SignRestartAppFlag(bundleName);
+    auto uid = data.ReadInt32();
+    auto ret = SignRestartAppFlag(uid);
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
@@ -1686,6 +1688,23 @@ int32_t AppMgrStub::HandleCheckIsKiaProcess(MessageParcel &data, MessageParcel &
         return result;
     }
     reply.WriteBool(isKia);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAppIndexByPid(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    auto pid = data.ReadInt32();
+    int32_t appIndex = -1;
+    int32_t result = GetAppIndexByPid(pid, appIndex);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write GetAppIndexByPid result.");
+        return IPC_STUB_ERR;
+    }
+    if (!reply.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write appIndex.");
+        return IPC_STUB_ERR;
+    }
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

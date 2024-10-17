@@ -682,11 +682,11 @@ public:
 
     /**
      * @brief mark a process which is going restart.
-     * @param bundleName the bundleName of the process.
+     * @param uid the uid of the process.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t SignRestartAppFlag(const std::string &bundleName) override;
+    int32_t SignRestartAppFlag(int32_t uid) override;
 
     /**
      * Get appRunningUniqueId by pid.
@@ -771,6 +771,8 @@ public:
      * Restart resident process depended on web.
      */
     virtual void RestartResidentProcessDependedOnWeb() override;
+
+    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) override;
 private:
     /**
      * Init, Initialize application services.
