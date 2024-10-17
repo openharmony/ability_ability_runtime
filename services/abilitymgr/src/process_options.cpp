@@ -98,5 +98,10 @@ bool ProcessOptions::IsNoAttachmentMode(ProcessMode value)
 {
     return (value == ProcessMode::NO_ATTACHMENT);
 }
+
+bool ProcessOptions::IsAttachToStatusBarItemMode(ProcessMode value)
+{
+    return (value == ProcessMode::ATTACH_TO_STATUS_BAR_ITEM);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
