@@ -20,6 +20,10 @@
 #include "napi_common_want.h"
 #include "int_wrapper.h"
 #include "process_options.h"
+#include "start_window_option.h"
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
+#include "pixel_map_napi.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -59,11 +63,72 @@ bool UnwrapProcessOptions(napi_env env, napi_value param, std::shared_ptr<AAFwk:
     return true;
 }
 
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
+bool UnwrapPixelMapFromJS(napi_env env, napi_value param, std::shared_ptr<Media::PixelMap> &value)
+{
+    auto pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, param);
+    if (!pixelMap) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap pixelMap failed");
+        return false;
+    }
+    value = pixelMap;
+    return true;
+}
+
+bool UnwrapPixelMapByPropertyName(
+    napi_env env, napi_value jsObject, const char *propertyName, std::shared_ptr<Media::PixelMap> &value)
+{
+    napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_object);
+    if (jsValue == nullptr) {
+        return false;
+    }
+
+    return UnwrapPixelMapFromJS(env, jsValue, value);
+}
+#endif
+
+bool UnwrapStartWindowOption(napi_env env, napi_value param,
+    std::shared_ptr<AAFwk::StartWindowOption> &startWindowOption)
+{
+    auto option = std::make_shared<AAFwk::StartWindowOption>();
+    std::string startWindowBackgroundColor;
+    if (IsExistsByPropertyName(env, param, "startWindowBackgroundColor")) {
+        if (!UnwrapStringByPropertyName(env, param, "startWindowBackgroundColor", startWindowBackgroundColor)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowBackgroundColor failed");
+            return false;
+        }
+        option->startWindowBackgroundColor = startWindowBackgroundColor;
+    }
+    if (!startWindowBackgroundColor.empty()) {
+        option->hasStartWindow = true;
+    }
+
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
+    std::shared_ptr<Media::PixelMap> startWindowIcon = nullptr;
+    if (IsExistsByPropertyName(env, param, "startWindowIcon")) {
+        if (!UnwrapPixelMapByPropertyName(env, param, "startWindowIcon", startWindowIcon)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowIcon failed");
+            return false;
+        }
+        option->startWindowIcon = startWindowIcon;
+    }
+    if (startWindowIcon != nullptr) {
+        option->hasStartWindow = true;
+    }
+#endif
+    startWindowOption = option;
+    return true;
+}
+
 bool UnwrapStartOptionsWithProcessOption(napi_env env, napi_value param, AAFwk::StartOptions &startOptions)
 {
     UnwrapStartOptions(env, param, startOptions);
     if (!UnwrapProcessOptions(env, param, startOptions.processOptions)) {
         TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap processOptions failed");
+        return false;
+    }
+    if (!UnwrapStartWindowOption(env, param, startOptions.startWindowOption)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Unwrap startWindowOption failed");
         return false;
     }
     return true;
