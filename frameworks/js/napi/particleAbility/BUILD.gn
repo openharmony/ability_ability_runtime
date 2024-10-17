@@ -58,6 +58,7 @@ ohos_shared_library("particleability") {
     "jsoncpp:jsoncpp",
     "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (ability_runtime_relational) {

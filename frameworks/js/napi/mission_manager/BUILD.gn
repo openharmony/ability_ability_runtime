@@ -109,6 +109,7 @@ ohos_shared_library("distributedmissionmanager") {
     "ipc:ipc_napi",
     "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "samgr:samgr_proxy",
   ]
 
