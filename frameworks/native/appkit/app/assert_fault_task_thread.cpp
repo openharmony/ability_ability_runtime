@@ -150,7 +150,6 @@ AAFwk::UserStatus AssertFaultTaskThread::HandleAssertCallback(const std::string 
             break;
         }
 
-        std::unique_lock<std::mutex> lockAssertResult(assertResultMutex_);
         AAFwk::WantParams wantParams;
         wantParams.SetParam(ASSERT_FAULT_DETAIL, AAFwk::String::Box(exprStr));
         auto err = amsClient->RequestAssertFaultDialog(assertFaultCallback->AsObject(), wantParams);
@@ -159,7 +158,7 @@ AAFwk::UserStatus AssertFaultTaskThread::HandleAssertCallback(const std::string 
             break;
         }
 
-        assertResultCV_.wait(lockAssertResult);
+        assertResultCV_.wait(assertResultMutex_);
         assertResult = assertFaultCallback->GetAssertResult();
     } while (false);
 
