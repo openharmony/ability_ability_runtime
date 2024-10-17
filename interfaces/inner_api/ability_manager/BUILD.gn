@@ -164,7 +164,6 @@ ohos_shared_library("ability_manager") {
     deps += []
     external_deps += [
       "ability_base:session_info",
-      "graphic_2d:color_manager",
       "image_framework:image_native",
       "window_manager:libwsutils",
       "window_manager:session_manager_lite",
