@@ -176,11 +176,13 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplicationByUid(const std::string &bundleName, const int uid) override;
+    virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") override;
 
-    virtual int KillApplicationSelf() override;
+    virtual int KillApplicationSelf(const std::string& reason = "KillApplicationSelf") override;
 
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug) override;
 
