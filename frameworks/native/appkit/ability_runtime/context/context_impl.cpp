@@ -1019,13 +1019,15 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
     }
 #endif
     resConfig->SetDeviceType(GetDeviceType());
-    std::string mcc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
-    std::string mnc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
-    try {
-        resConfig->SetMcc(static_cast<uint32_t>(std::stoi(mcc)));
-        resConfig->SetMnc(static_cast<uint32_t>(std::stoi(mnc)));
-    } catch (...) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Set mcc,mnc failed mcc:%{public}s mnc:%{public}s", mcc.c_str(), mnc.c_str());
+    if (config_) {
+        std::string mcc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
+        std::string mnc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
+        try {
+            resConfig->SetMcc(static_cast<uint32_t>(std::stoi(mcc)));
+            resConfig->SetMnc(static_cast<uint32_t>(std::stoi(mnc)));
+        } catch (...) {
+            TAG_LOGD(AAFwkTag::APPKIT, "Set mcc,mnc failed mcc:%{public}s mnc:%{public}s", mcc.c_str(), mnc.c_str());
+        }
     }
     resourceManager->UpdateResConfig(*resConfig);
 }
