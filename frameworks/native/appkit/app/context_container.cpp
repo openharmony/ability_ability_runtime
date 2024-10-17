@@ -213,7 +213,7 @@ std::string ContextContainer::GetAppType()
     }
 }
 
-void ContextContainer::SetPattern(int patternId)
+void ContextContainer::SetPattern(int32_t patternId)
 {
     if (baseContext_ != nullptr) {
         baseContext_->SetPattern(patternId);

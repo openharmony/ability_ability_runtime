@@ -79,20 +79,23 @@ void ApplicationCleaner::ClearTempData()
         TAG_LOGE(AAFwkTag::APPKIT, "Get root dir error");
         return;
     }
-    auto cleanTemp = [self = shared_from_this(), rootDir]() {
-        if (self == nullptr || self->context_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Invalid shared pointer");
-            return;
-        }
-        std::vector<std::string> temps;
-        if (self->GetObsoleteBundleTempPath(rootDir, temps) != RESULT_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Get bundle temp file list is false");
-            return;
-        }
+    auto weak_this = weak_from_this();
+    auto cleanTemp = [weak_this, rootDir]() {
+        if(auto shared_this = weak_this.lock()) {
+            if (shared_this == nullptr || shared_this->context_ == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "Invalid shared pointer");
+                return;
+            }
+            std::vector<std::string> temps;
+            if (shared_this->GetObsoleteBundleTempPath(rootDir, temps) != RESULT_OK) {
+                TAG_LOGE(AAFwkTag::APPKIT, "Get bundle temp file list is false");
+                return;
+            }
 
-        for (const auto &temp : temps) {
-            if (self->RemoveDir(temp) == false) {
-                TAG_LOGE(AAFwkTag::APPKIT, "Clean bundle data dir failed, path: %{private}s", temp.c_str());
+            for (const auto &temp : temps) {
+                if (shared_this->RemoveDir(temp) == false) {
+                    TAG_LOGE(AAFwkTag::APPKIT, "Clean bundle data dir failed, path: %{private}s", temp.c_str());
+                }
             }
         }
     };
