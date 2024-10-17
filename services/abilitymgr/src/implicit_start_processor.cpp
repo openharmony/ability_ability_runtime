@@ -43,6 +43,23 @@ const std::string HTTP_SCHEME_NAME = "http";
 const std::string HTTPS_SCHEME_NAME = "https";
 const std::string APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 
+void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+{
+    auto instance_ = DelayedSingleton<AbilityManagerService>::GetInstance();
+    if (instance_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "instance null.");
+        return;
+    }
+    auto taskHandler = instance_->GetTaskHandler();
+    if (taskHandler == nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "task handler null.");
+        return;
+    }
+    taskHandler->SubmitTask([eventName, type, eventInfo]() {
+        EventReport::SendAbilityEvent(eventName, type, eventInfo);
+    });
+}
+
 bool ImplicitStartProcessor::IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type)
 {
     switch (type) {
@@ -447,6 +464,13 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     if (abilityInfos.size() == 1) {
         auto skillUri =  abilityInfos.front().skillUri;
         SetTargetLinkInfo(skillUri, request.want);
+        if (abilityInfos.front().linkType == AppExecFwk::LinkType::APP_LINK) {
+            EventInfo eventInfo;
+            eventInfo.bundleName = abilityInfos.front().bundleName;
+            eventInfo.callerBundleName = request.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+            eventInfo.uri = request.want.GetUriString();
+            SendAbilityEvent(EventName::START_ABILITY_BY_APP_LINKING, HiSysEventType::BEHAVIOR, eventInfo);
+        }
     }
 
     {
@@ -669,7 +693,7 @@ int ImplicitStartProcessor::CallStartAbilityInner(int32_t userId,
     eventInfo.abilityName = want.GetElement().GetAbilityName();
 
     if (callType == AbilityCallType::INVALID_TYPE) {
-        EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+        SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s, bundle:%{public}s", eventInfo.abilityName.c_str(),
@@ -679,7 +703,7 @@ int ImplicitStartProcessor::CallStartAbilityInner(int32_t userId,
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         if (callType == AbilityCallType::INVALID_TYPE) {
-            EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+            SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         }
     }
     return ret;
