@@ -91,7 +91,7 @@ sptr<Rosen::WindowOption> UIServiceExtension::GetWindowOption(
         }
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         option->SetParentId(hostWindowId);
-        option->SetExtensionTag(true);
+        option->SetIsUIExtFirstSubWindow(true);
         option->SetSubWindowTitle(extensionWindowConfig->subWindowOptions.title);
         option->SetSubWindowDecorEnable(extensionWindowConfig->subWindowOptions.decorEnabled);
         if (extensionWindowConfig->subWindowOptions.isModal) {
