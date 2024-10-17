@@ -1159,9 +1159,9 @@ public:
 
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
 
-    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
-
     bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
+
+    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
     bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
@@ -1385,8 +1385,7 @@ private:
 
     bool CheckGetRunningInfoPermission() const;
 
-    int32_t KillApplicationByBundleName(
-        const std::string &bundleName);
+    int32_t KillApplicationByBundleName(const std::string &bundleName);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -1538,7 +1537,6 @@ private:
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     ffrt::mutex configurationObserverLock_;
     std::vector<ConfigurationObserverWithUserId> configurationObservers_;
-
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
@@ -1566,6 +1564,7 @@ private:
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
+
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
 };
 }  // namespace AppExecFwk

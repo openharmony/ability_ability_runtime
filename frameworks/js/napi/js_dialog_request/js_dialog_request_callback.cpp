@@ -58,7 +58,7 @@ private:
         }
 
         if (!CheckTypeForNapiValue(env, info.argv[0], napi_object)) {
-            TAG_LOGE(AAFwkTag::DIALOG, "param type mismatch");
+            TAG_LOGE(AAFwkTag::DIALOG, "param type error");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return CreateJsUndefined(env);
         }
