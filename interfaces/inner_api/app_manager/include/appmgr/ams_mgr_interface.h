@@ -173,16 +173,18 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  userId, userId.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplicationByUid(const std::string &bundleName, const int uid) = 0;
+    virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") = 0;
 
     /**
      * Kill the application self.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillApplicationSelf()
+    virtual int KillApplicationSelf(const std::string& reason = "KillApplicationSelf")
     {
         return ERR_OK;
     }
