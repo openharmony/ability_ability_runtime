@@ -1231,9 +1231,11 @@ public:
     int32_t UpdateRenderState(pid_t renderPid, int32_t state);
 
     /**
-     * Mark processes of a bundleName as the app is going to be restarted.
+     * Mark processes of the uid as the app is going to be restarted.
      */
-    int32_t SignRestartAppFlag(const std::string &bundleName);
+    int32_t SignRestartAppFlag(int32_t uid);
+
+    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) const;
 
     /**
      * Set application assertion pause state.
