@@ -1577,7 +1577,7 @@ int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack, const
     auto callingUid = IPCSkeleton::GetCallingUid();
     TAG_LOGI(AAFwkTag::APPMGR, "uid value: %{public}d", callingUid);
     std::list<pid_t> pids;
-    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, callingUid, pids)) {
+    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, callingUid, pids, clearPageStack)) {
         TAG_LOGI(AAFwkTag::APPMGR, "unstart");
         return ERR_OK;
     }

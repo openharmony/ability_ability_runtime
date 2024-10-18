@@ -114,7 +114,9 @@ abilityms_files = [
   "src/free_install_observer_manager.cpp",
 
   "src/background_task_observer.cpp",
-  "src/resident_process_manager.cpp",
+
+  #resident_process
+  "src/resident_process/resident_process_manager.cpp",
 
   "src/ability_bundle_event_callback.cpp",
   "src/ability_event_util.cpp",
@@ -135,6 +137,7 @@ abilityms_files = [
   "src/utils/state_utils.cpp",
   "src/utils/extension_permissions_util.cpp",
   "src/utils/app_mgr_util.cpp",
+  "src/utils/main_element_utils.cpp",
   "src/utils/dump_utils.cpp",
   "src/utils/ability_permission_util.cpp",
   "src/utils/modal_system_dialog_util.cpp",
