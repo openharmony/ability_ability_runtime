@@ -1913,7 +1913,8 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
         callerUid = IPCSkeleton::GetCallingUid();
         accessToken = IPCSkeleton::GetCallingTokenID();
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Try to SendResult");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Try to SendResult, callerUid = %{public}d, AccessTokenId = %{public}d",
+        callerUid, accessToken);
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CallerToken is nullptr");
         return;
@@ -3554,6 +3555,11 @@ bool AbilityRecord::GetRestartAppFlag() const
     return isRestartApp_;
 }
 
+void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
+{
+    specifyTokenId_ = specifyTokenId;
+}
+
 void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
 {
     if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
@@ -3570,11 +3576,6 @@ void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
         want_.RemoveParam(UIEXTENSION_ROOT_HOST_PID);
     }
     want_.SetParam(UIEXTENSION_ROOT_HOST_PID, wantParams.GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1));
-}
-
-void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
-{
-    specifyTokenId_ = specifyTokenId;
 }
 
 void AbilityRecord::SetDebugAppByWaitingDebugFlag()

@@ -94,7 +94,7 @@ public:
     static napi_value KillProcessesByBundleName(napi_env env, napi_callback_info info)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
-        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnKillProcessByBundleName);
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnkillProcessByBundleName);
     }
 
     static napi_value ClearUpApplicationData(napi_env env, napi_callback_info info)
@@ -310,23 +310,24 @@ private:
         return result;
     }
 
-    napi_value OnKillProcessByBundleName(napi_env env, size_t argc, napi_value* argv)
+    napi_value OnkillProcessByBundleName(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::APPMGR, "called");
+        TAG_LOGD(AAFwkTag::APPMGR, "OnkillProcessByBundleName called");
         int32_t errCode = 0;
         std::string bundleName;
 
-        // only support 1 or 2 or 3 params
+        // only support 1 or 2 params
         if (argc != ARGC_ONE && argc != ARGC_TWO) {
             TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             errCode = ERR_NOT_OK;
         } else {
-            if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "convert bundleName failed");
+            if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
                 errCode = ERR_NOT_OK;
             }
         }
 
+        TAG_LOGI(AAFwkTag::APPMGR, "kill process [%{public}s]", bundleName.c_str());
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task,
                 int32_t status) {
@@ -349,7 +350,7 @@ private:
 
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
-        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessByBundleName",
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnkillProcessByBundleName",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -381,7 +382,7 @@ private:
                 return;
             }
             if (appManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
+                TAG_LOGW(AAFwkTag::APPMGR, "null appManager");
                 task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "appManager nullptr"));
                 return;
             }
@@ -437,6 +438,7 @@ private:
                     task.Reject(env, CreateJsError(env, ret, "Kill processes failed."));
                 }
             };
+
         napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessWithAccount",
@@ -460,7 +462,7 @@ private:
                     return;
                 }
                 if (abilityManager == nullptr) {
-                    TAG_LOGW(AAFwkTag::APPMGR, "null abilityManager");
+                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
                     task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
                     return;
                 }
