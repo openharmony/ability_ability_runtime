@@ -19,6 +19,7 @@
 #include "ability_handler.h"
 #include "ability_loader.h"
 #include "ability_manager_client.h"
+#include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ui_extension_utils.h"
@@ -263,6 +264,7 @@ void ExtensionAbilityThread::HandleAttachInner(const std::shared_ptr<AppExecFwk:
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::EXT, "Attach err: %{public}d", err);
     }
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
 }
 
 void ExtensionAbilityThread::HandleExtensionTransaction(

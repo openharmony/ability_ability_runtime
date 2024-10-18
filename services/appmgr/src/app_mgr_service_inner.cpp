@@ -1003,6 +1003,7 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid:%{public}d", pid);
         return;
     }
+    AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(pid, "ServiceInner::AttachApplication");
     auto appRecord = GetAppRunningRecordByPid(pid);
     CHECK_POINTER_AND_RETURN_LOG(appRecord, "no such appRecord");
     auto applicationInfo = appRecord->GetApplicationInfo();
@@ -1069,10 +1070,8 @@ void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord>
 
 void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
-        return;
-    }
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord null");
+    appRecord->AddAppLifecycleEvent("ServiceInner::LaunchApplication");
     auto applicationInfo = appRecord->GetApplicationInfo();
     std::string bundleName = "";
     if (!applicationInfo) {
@@ -1168,6 +1167,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         TAG_LOGE(AAFwkTag::APPMGR, "get appRecord fail");
         return;
     }
+    appRecord->AddAppLifecycleEvent("ServiceInner::AppForegrounded");
     // Prevent forged requests from changing the app's state.
     if (appRecord->GetApplicationScheduleState() != ApplicationScheduleState::SCHEDULE_FOREGROUNDING) {
         TAG_LOGE(AAFwkTag::APPMGR, "app is not scheduling to foreground");
@@ -1216,6 +1216,7 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         return;
     }
     // Prevent forged requests from changing the app's state.
+    appRecord->AddAppLifecycleEvent("ServiceInner::ForeForegrounded");
     if (appRecord->GetApplicationScheduleState() != ApplicationScheduleState::SCHEDULE_BACKGROUNDING) {
         TAG_LOGE(AAFwkTag::APPMGR, "app is not scheduling to background");
         return;
@@ -2499,6 +2500,8 @@ void AppMgrServiceInner::UpdateAbilityState(const sptr<IRemoteObject> &token, co
         return;
     }
 
+    AbilityRuntime::FreezeUtil::LifecycleFlow flow{token, AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND};
+    AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow, "ServiceInner::UpdateAbilityState");
     auto appRecord = GetAppRunningRecordByAbilityToken(token);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "app unexist");
@@ -7966,7 +7969,7 @@ bool AppMgrServiceInner::CleanAbilityByUserRequest(const sptr<IRemoteObject> &to
         TAG_LOGD(AAFwkTag::APPMGR, "pid:%{public}d killed", targetPid);
     };
     delayKillTaskHandler_->SubmitTask(delayKillTask, "delayKillUIAbility", delayTime);
-    
+
     return true;
 }
 
