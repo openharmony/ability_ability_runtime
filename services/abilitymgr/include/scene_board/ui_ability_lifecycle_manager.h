@@ -56,7 +56,7 @@ public:
         }
     };
 
-    void SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery = false);
+    void SignRestartAppFlag(int32_t uid, bool isAppRecovery = false);
 
     /**
      * StartUIAbility with request.
