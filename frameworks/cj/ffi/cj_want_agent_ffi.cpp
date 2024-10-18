@@ -102,7 +102,7 @@ int32_t CJWantAgent::UnWrapTriggerInfoParam(CJTriggerInfo cjTriggerInfo, std::fu
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     if (cjTriggerInfo.extraInfos != nullptr) {
         extraInfo = std::make_shared<AAFwk::WantParams>(
-            OHOS::AAFwk::WantParamWrapper::ParseWantParams(cjTriggerInfo.extraInfos));
+            OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(cjTriggerInfo.extraInfos));
     }
     std::shared_ptr<AAFwk::StartOptions> startOptions = std::make_shared<AAFwk::StartOptions>();
     
@@ -137,7 +137,7 @@ extern "C" {
 int64_t FfiWantAgentGetWantAgent(CJWantAgentInfo info, int32_t *errCode)
 {
     std::shared_ptr<AAFwk::WantParams> extraInfo =
-        std::make_shared<AAFwk::WantParams>(OHOS::AAFwk::WantParamWrapper::ParseWantParams(info.extraInfos));
+        std::make_shared<AAFwk::WantParams>(OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(info.extraInfos));
     std::vector<WantAgentConstant::Flags> wantAgentFlags;
     for (int64_t i = 0; i < info.actionFlags.size; i++) {
         wantAgentFlags.emplace_back(static_cast<WantAgentConstant::Flags>(info.actionFlags.head[i]));
