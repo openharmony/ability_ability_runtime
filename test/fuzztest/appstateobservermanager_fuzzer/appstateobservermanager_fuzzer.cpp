@@ -53,7 +53,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     appStateObserverManager->RegisterApplicationStateObserver(observer, bundleNameList);
     appStateObserverManager->UnregisterApplicationStateObserver(observer);
     std::shared_ptr<AppRunningRecord> appRecord;
-    appStateObserverManager->HandleOnAppProcessCreated(appRecord);
+    appStateObserverManager->HandleOnAppProcessCreated(appRecord, false);
     ApplicationState state = ApplicationState::APP_STATE_CREATE;
     bool needNotifyApp = *data % ENABLE;
     bool isFromWindowFocusChanged = *data % ENABLE;
@@ -63,7 +63,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     appStateObserverManager->HandleOnRenderProcessCreated(renderRecord);
     appStateObserverManager->HandleOnRenderProcessDied(renderRecord);
     ProcessData processData;
-    appStateObserverManager->HandleOnProcessCreated(processData);
+    appStateObserverManager->HandleOnProcessCreated(processData, false);
     appStateObserverManager->HandleOnProcessStateChanged(appRecord);
     appStateObserverManager->HandleOnProcessDied(processData);
     AbilityStateData abilityStateData;

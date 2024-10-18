@@ -3218,7 +3218,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         AddUIExtensionLauncherItem(want, appRecord, token);
     }
     OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, false, false);
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessCreated(appRecord);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessCreated(appRecord, isPreload);
     if (!appExistFlag) {
         OnAppStarted(appRecord);
     }

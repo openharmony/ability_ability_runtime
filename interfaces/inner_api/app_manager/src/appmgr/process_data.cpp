@@ -56,6 +56,7 @@ bool ProcessData::ReadFromParcel(Parcel &parcel)
     exitReason = parcel.ReadInt32();
     exitMsg = Str16ToStr8(parcel.ReadString16());
     childUid = parcel.ReadInt32();
+    isPreload = parcel.ReadBool();
     return true;
 }
 
