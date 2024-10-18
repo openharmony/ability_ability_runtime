@@ -1811,6 +1811,12 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED &&
+        !ProcessOptions::IsAttachToStatusBarItemMode(startOptions.processOptions->processMode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "processMode is not attach to status bar item.");
+        return ERR_START_OPTIONS_CHECK_FAILED;
+    }
+
     result = CheckStaticCfgPermission(abilityRequest, isStartAsCaller,
         abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0), false, false, isImplicit);
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
@@ -10430,8 +10436,9 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
 
     auto abilityRecords = uiAbilityManager->GetAbilityRecordsByName(element);
     if (!abilityRecords.empty() && abilityRecords[0] &&
-        abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::STANDARD) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "if not STANDARD mode, repeated starts not allowed");
+        abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::STANDARD &&
+        abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::SPECIFIED) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "if not STANDARD or SPECIFIED mode, repeated starts not allowed");
         return ERR_ABILITY_ALREADY_RUNNING;
     }
 
