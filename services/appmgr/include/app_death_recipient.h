@@ -52,6 +52,14 @@ private:
     std::weak_ptr<AAFwk::TaskHandlerWrap> handler_;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
 };
+
+class AppStateCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    AppStateCallbackDeathRecipient(std::weak_ptr<AppMgrServiceInner> appMgrServiceInner);
+    void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
+private:
+    std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
+};
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_APP_DEATH_RECIPIENT_H
