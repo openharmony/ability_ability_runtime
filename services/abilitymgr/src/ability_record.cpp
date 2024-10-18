@@ -1795,7 +1795,7 @@ void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
     auto result = GetResult();
     CHECK_POINTER(result);
     UriUtils::GetInstance().CheckUriPermissionForUIExtension(result->resultWant_,
-        abilityInfo_.extensionAbilityType);
+        abilityInfo_.extensionAbilityType, tokeId);
     GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId);
     scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
     // reset result to avoid send result next time
