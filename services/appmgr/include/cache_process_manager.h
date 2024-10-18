@@ -44,6 +44,7 @@ public:
     std::string PrintCacheQueue();
     void PrepareActivateCache(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnAppProcessCacheBlocked(const std::shared_ptr<AppRunningRecord> &appRecord);
+    bool CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord);
 private:
     bool IsAppAbilitiesEmpty(const std::shared_ptr<AppRunningRecord> &appRecord);
     int GetCurrentCachedProcNum();

@@ -246,10 +246,8 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return true;
     }
-    if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
-        if (appRecord->GetEnableProcessCache()) {
-            appRecord->SetEnableProcessCache(false);
-        }
+    if (appRecord->GetEnableProcessCache()) {
+        appRecord->SetEnableProcessCache(false);
     }
     appRecord->SetProcessCaching(false);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
@@ -287,13 +285,10 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
     return true;
 }
 
-bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRunningRecord> &appRecord)
+bool CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    if (appRecord == nullptr) {
+    if (appRecord == nullptr || !warmStartProcesEnable_) {
         return false;
-    }
-    if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
-        return true;
     }
     auto enable = appRecord->GetEnableProcessCache();
     if (enable) {
@@ -333,9 +328,6 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
         return false;
     }
     if (maxProcCacheNum_ > 0 && !IsProcessSupportHotStart(appRecord)) {
-        return false;
-    }
-    if (warmStartProcesEnable_ && !IsProcessSupportWarmStart(appRecord)) {
         return false;
     }
     return IsAppSupportProcessCacheInnerFirst(appRecord);
