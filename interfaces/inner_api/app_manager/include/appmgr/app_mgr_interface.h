@@ -729,11 +729,11 @@ public:
 
     /**
      * @brief mark a process which is going restart.
-     * @param bundleName the bundleName of the process.
+     * @param uid the uid of the process.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t SignRestartAppFlag(const std::string &bundleName)
+    virtual int32_t SignRestartAppFlag(int32_t uid)
     {
         return 0;
     }
@@ -854,6 +854,17 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList) = 0;
+
+    /**
+     * Get appIndex of pid.
+     * @param pid The pid.
+     * @param appIndex appIndex of pid.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+    {
+        return 0;
+    }
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
