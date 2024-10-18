@@ -973,6 +973,7 @@ public:
         return isKia_;
     }
 
+    void AddAppLifecycleEvent(const std::string &msg);
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.

@@ -19,6 +19,7 @@
 #include "app_mgr_service_inner.h"
 #include "event_report.h"
 #include "exit_resident_process_manager.h"
+#include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "ui_extension_utils.h"
@@ -495,6 +496,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
+    AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
     appLifeCycleDeal_->LaunchApplication(launchData, config);
 }
 
@@ -651,7 +653,7 @@ void AppRunningRecord::ScheduleTerminate()
 void AppRunningRecord::LaunchPendingAbilities()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Launch pending abilities.");
-
+    AddAppLifecycleEvent("AppRunningRecord::LaunchPendingAbilities");
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "empty moduleRecordList");
@@ -666,6 +668,7 @@ bool AppRunningRecord::ScheduleForegroundRunning()
 {
     SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_FOREGROUNDING);
     if (appLifeCycleDeal_) {
+        AddAppLifecycleEvent("AppRunningRecord::ScheduleForegroundRunning");
         return appLifeCycleDeal_->ScheduleForegroundRunning();
     }
     return false;
@@ -691,6 +694,7 @@ void AppRunningRecord::ScheduleBackgroundRunning()
     }
     PostTask(taskName, AMSEventHandler::BACKGROUND_APPLICATION_TIMEOUT, appbackgroundtask);
     if (appLifeCycleDeal_) {
+        AddAppLifecycleEvent("AppRunningRecord::ScheduleBackgroundRunning");
         appLifeCycleDeal_->ScheduleBackgroundRunning();
     }
     isAbilityForegrounding_.store(false);
@@ -984,6 +988,7 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null ability");
         return;
     }
+
     AbilityState curAbilityState = ability->GetState();
     if (curAbilityState != AbilityState::ABILITY_STATE_READY &&
         curAbilityState != AbilityState::ABILITY_STATE_BACKGROUND) {
@@ -1002,6 +1007,7 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
             TAG_LOGE(AAFwkTag::APPMGR, "null moduleRecord");
             return;
         }
+
         moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
         StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true, false);
         auto serviceInner = appMgrServiceInner_.lock();
@@ -1448,6 +1454,10 @@ bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
 void AppRunningRecord::SetTerminating()
 {
     isTerminating = true;
+    auto prioObject = GetPriorityObject();
+    if (prioObject) {
+        AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(prioObject->GetPid());
+    }
 }
 
 bool AppRunningRecord::IsTerminating()
@@ -2041,6 +2051,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    AddAppLifecycleEvent("AppRunningRecord::OnWindowVisibilityChanged");
     if (windowVisibilityInfos.empty()) {
         TAG_LOGW(AAFwkTag::APPMGR, "empty info");
         return;
@@ -2555,6 +2566,14 @@ void AppRunningRecord::SetProcessCaching(bool isCaching)
 bool AppRunningRecord::IsCaching()
 {
     return isCaching_;
+}
+
+void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
+{
+    auto prioObject = GetPriorityObject();
+    if (prioObject && prioObject->GetPid() != 0) {
+        AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(prioObject->GetPid(), msg);
+    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

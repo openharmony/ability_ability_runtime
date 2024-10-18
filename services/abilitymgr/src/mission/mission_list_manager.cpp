@@ -1257,6 +1257,7 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     abilityRecord->RemoveForegroundTimeoutTask();
     g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::FOREGROUND);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     auto self(weak_from_this());
     auto taskHandler = AbilityManagerService::GetPubInstance()->GetTaskHandler();
     CHECK_POINTER_AND_RETURN_LOG(taskHandler, ERR_INVALID_VALUE, "Fail to get AbilityTaskHandler.");
@@ -1394,6 +1395,7 @@ int MissionListManager::DispatchBackground(const std::shared_ptr<AbilityRecord> 
     // remove background timeout task.
     handler->CancelTask("background_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::BACKGROUND);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     auto self(shared_from_this());
     auto task = [self, abilityRecord]() { self->CompleteBackground(abilityRecord); };
     handler->SubmitTask(task);
@@ -2247,9 +2249,11 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
             flow.token = ability->GetToken()->AsObject();
             flow.state = state;
         }
-        info.msg = msgContent + "\nserver:\n" + FreezeUtil::GetInstance().GetLifecycleEvent(flow);
+        info.msg = msgContent + "\nserver:\n" + FreezeUtil::GetInstance().GetLifecycleEvent(flow)
+            + "\nserver app:\n" + FreezeUtil::GetInstance().GetAppLifecycleEvent(processInfo.pid_);
         if (!isHalf) {
             FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+            FreezeUtil::GetInstance().DeleteAppLifecycleEvent(ability->GetPid());
         }
     } else {
         info.msg = msgContent;

@@ -6451,6 +6451,10 @@ int AbilityManagerService::StopServiceAbility(const Want &want, int32_t userId, 
 void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
+    if (abilityRecord->GetToken()) {
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(abilityRecord->GetToken()->AsObject());
+    }
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         if (abilityRecord->GetAbilityInfo().type == AbilityType::PAGE) {
             auto uiAbilityManager = GetUIAbilityManagerByUserId(abilityRecord->GetOwnerMissionUserId());

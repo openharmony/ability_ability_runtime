@@ -23,6 +23,7 @@
 #include "app_utils.h"
 #include "common_event_support.h"
 #include "exit_resident_process_manager.h"
+#include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "os_account_manager_wrapper.h"
@@ -445,6 +446,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
             if (appMgrServiceInner != nullptr) {
                 appMgrServiceInner->KillProcessByPid(priorityObject->GetPid(), "OnRemoteDied");
             }
+            AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(priorityObject->GetPid());
         }
     }
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
@@ -478,6 +480,7 @@ void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
 
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
         RemoveUIExtensionLauncherItem(appRecord->GetPriorityObject()->GetPid());
+        AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(appRecord->GetPriorityObject()->GetPid());
     }
 }
 
