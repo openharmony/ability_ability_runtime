@@ -603,7 +603,8 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
     }
 }
 
-void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload)
+void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord,
+    bool isPreload)
 {
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
