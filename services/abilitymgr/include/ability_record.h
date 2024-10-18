@@ -1061,6 +1061,8 @@ public:
 
     void RemoveConnectWant();
 
+    void UpdateDmsCallerInfo(Want &want);
+
     void SetSecurityFlag(bool securityFlag)
     {
         securityFlag_ = securityFlag;

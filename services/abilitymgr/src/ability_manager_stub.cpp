@@ -15,20 +15,10 @@
 
 #include "ability_manager_stub.h"
 
-#include "errors.h"
-#include "string_ex.h"
-
-#include "ability_connect_callback_proxy.h"
-#include "ability_connect_callback_stub.h"
-#include "ability_manager_collaborator_proxy.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_radar.h"
-#include "ability_scheduler_proxy.h"
-#include "ability_scheduler_stub.h"
-#include "configuration.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "session_info.h"
 #include "status_bar_delegate_interface.h"
 
 namespace OHOS {
@@ -747,6 +737,9 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     }
     if (interfaceCode == AbilityManagerInterfaceCode::OPEN_LINK) {
         return OpenLinkInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::TERMINATE_MISSION) {
+        return TerminateMissionInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -1712,7 +1705,9 @@ int AbilityManagerStub::GetWantSenderInner(MessageParcel &data, MessageParcel &r
     if (data.ReadBool()) {
         callerToken = data.ReadRemoteObject();
     }
-    sptr<IWantSender> wantSender = GetWantSender(*wantSenderInfo, callerToken);
+
+    int32_t uid = data.ReadInt32();
+    sptr<IWantSender> wantSender = GetWantSender(*wantSenderInfo, callerToken, uid);
     if (!reply.WriteRemoteObject(((wantSender == nullptr) ? nullptr : wantSender->AsObject()))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to reply wantSender instance to client, for write parcel error");
         return ERR_INVALID_VALUE;
@@ -3969,6 +3964,17 @@ int32_t AbilityManagerStub::OpenLinkInner(MessageParcel &data, MessageParcel &re
     int requestCode = data.ReadInt32();
 
     int32_t result = OpenLink(*want, callerToken, userId, requestCode);
+    if (result != NO_ERROR && result != ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "OpenLink failed.");
+    }
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t AbilityManagerStub::TerminateMissionInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t missionId = data.ReadInt32();
+    int32_t result = TerminateMission(missionId);
     if (result != NO_ERROR && result != ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "OpenLink failed.");
     }

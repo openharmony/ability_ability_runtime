@@ -15,14 +15,9 @@
 
 #include "app_scheduler.h"
 
-#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
-#include "ability_record.h"
 #include "ability_util.h"
-#include "appmgr/app_mgr_constants.h"
 #include "hitrace_meter.h"
-#include "hilog_tag_wrapper.h"
-#include "in_process_call_wrapper.h"
 #include "param.h"
 #include "utils/state_utils.h"
 
@@ -638,6 +633,14 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
         return false;
     }
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
+}
+bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsProcessContainsOnlyUIAbility(pid);
 }
 
 bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const

@@ -1458,16 +1458,16 @@ void JsRuntime::InitWorkerModule(const Options& options)
     jsEnv_->InitWorkerModule(workerInfo);
 }
 
-void JsRuntime::ReInitJsEnvImpl(const Options& options)
-{
-    CHECK_POINTER(jsEnv_);
-    jsEnv_->ReInitJsEnvImpl(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
-}
-
 void JsRuntime::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const
 {
     CHECK_POINTER(jsEnv_);
     jsEnv_->SetModuleLoadChecker(moduleCheckerDelegate);
+}
+
+void JsRuntime::ReInitJsEnvImpl(const Options& options)
+{
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->ReInitJsEnvImpl(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
 }
 
 void JsRuntime::SetRequestAotCallback()
