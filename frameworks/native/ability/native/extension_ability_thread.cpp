@@ -157,7 +157,7 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FENCE) {
         abilityName = FENCE_EXTENSION;
     }
-    if (abilityInfo->extensionAbilityType == AppExecFwk::CALLER_INFO_QUERY) {
+    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
         abilityName = CALLER_INFO_QUERY_EXTENSION;
     }
 #ifdef SUPPORT_GRAPHICS
