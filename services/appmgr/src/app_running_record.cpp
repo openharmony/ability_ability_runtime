@@ -2092,7 +2092,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
         if (!windowIds_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         }
-        if (windowIds_.empty() && IsAbilitiesBackground()) {
+        if (windowIds_.empty() && IsAbilitiesBackground() && foregroundingAbilityTokens_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
         }
     }
