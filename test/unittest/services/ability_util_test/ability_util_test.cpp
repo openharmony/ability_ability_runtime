@@ -131,7 +131,6 @@ HWTEST_F(AbilityUtilTest, HandleDlpApp_0600, TestSize.Level0)
     bool result = AbilityUtil::HandleDlpApp(want);
     EXPECT_FALSE(result);
 }
-#endif // WITH_DLP
 
 /**
  * @tc.name: ProcessWindowMode_0100
@@ -186,5 +185,6 @@ HWTEST_F(AbilityUtilTest, ProcessWindowMode_0300, TestSize.Level0)
     int32_t getWindowMode = Integer::Unbox(IInteger::Query(want.GetParams().GetParam(Want::PARAM_RESV_WINDOW_MODE)));
     EXPECT_EQ(windowMode, getWindowMode);
 }
+#endif // WITH_DLP
 }  // namespace AAFwk
 }  // namespace OHOS

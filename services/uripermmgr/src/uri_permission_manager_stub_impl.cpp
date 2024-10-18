@@ -842,7 +842,7 @@ std::vector<bool> UriPermissionManagerStubImpl::CheckUriPermission(TokenIdPermis
     }
     if (!mediaUris.empty()) {
         auto mediaUriResult = MediaPermissionManager::GetInstance().CheckUriPermission(mediaUris, tokenId, flag);
-        for (size_t i = 0; i < mediaUris.size(); i++) {
+        for (size_t i = 0; i < mediaUriResult.size(); i++) {
             result[mediaUriIndexs[i]] = mediaUriResult[i];
         }
     }

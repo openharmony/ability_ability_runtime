@@ -552,6 +552,8 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
             pid_t pid = appRecord->GetPriorityObject()->GetPid();
             (void)serviceInner->KillProcessByPid(pid, "AttachTimeoutKillSCB");
         }
+        appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(
+            AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
 
     if ((isSCB || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
@@ -559,10 +561,14 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         appRecord->SetTerminating();
     }
 
-    auto timeoutTask = [appRecord, token]() {
-        if (appRecord) {
-            appRecord->TerminateAbility(token, true);
+    std::weak_ptr<AppRunningRecord> appRecordWptr(appRecord);
+    auto timeoutTask = [appRecordWptr, token]() {
+        auto appRecord = appRecordWptr.lock();
+        if (appRecord == nullptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
+            return;
         }
+        appRecord->TerminateAbility(token, true, true);
     };
     appRecord->PostTask("DELAY_KILL_ABILITY", AMSEventHandler::KILL_PROCESS_TIMEOUT, timeoutTask);
 }
