@@ -192,7 +192,7 @@ HWTEST_F(MissionListManagerFirstTest, ClearAllMissions_001, TestSize.Level1)
 HWTEST_F(MissionListManagerFirstTest, ClearAllMissionsLocked_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "ClearAllMissionsLocked_001 start");
-    int userId = 3;
+    int userId = 3; // 3 means user id
     auto missionListManager = std::make_shared<MissionListManager>(userId);
     EXPECT_NE(missionListManager, nullptr);
     missionListManager->Init();
@@ -205,10 +205,12 @@ HWTEST_F(MissionListManagerFirstTest, ClearAllMissionsLocked_001, TestSize.Level
     missionList.push_front(mission);
     bool searchActive = true;
     missionListManager->ClearAllMissionsLocked(missionList, foregroundAbilities, searchActive);
+    EXPECT_FALSE(missionList.empty()); // locked mission not be cleared.
     std::shared_ptr<Mission> missions = nullptr;
     std::list<std::shared_ptr<Mission>> missionLists;
     missionLists.push_front(missions);
     missionListManager->ClearAllMissionsLocked(missionLists, foregroundAbilities, searchActive);
+    EXPECT_FALSE(missionList.empty()); // nullptr mission can't be cleared.
     TAG_LOGI(AAFwkTag::TEST, "ClearAllMissionsLocked_001 end");
 }
 
@@ -243,6 +245,7 @@ HWTEST_F(MissionListManagerFirstTest, ClearAllMissionsLocked_002, TestSize.Level
     std::list<std::shared_ptr<Mission>> missionList1;
     missionList1.push_front(mission1);
     missionListManager->ClearAllMissionsLocked(missionList1, foregroundAbilities, searchActive);
+    EXPECT_FALSE(foregroundAbilities.empty()); // get foreground ability
     TAG_LOGI(AAFwkTag::TEST, "ClearAllMissionsLocked_002 end");
 }
 
@@ -273,6 +276,8 @@ HWTEST_F(MissionListManagerFirstTest, ClearAllMissionsLocked_003, TestSize.Level
     missionLists.push_front(missions);
     bool searchActive = true;
     missionListManager->ClearAllMissionsLocked(missionLists, foregroundAbilities, searchActive);
+    EXPECT_FALSE(foregroundAbilities.empty()); // get forground ability record
+    foregroundAbilities.clear();
     searchActive = false;
     int32_t int32Param = 3;
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(int32Param, abilityRecord);
@@ -281,6 +286,7 @@ HWTEST_F(MissionListManagerFirstTest, ClearAllMissionsLocked_003, TestSize.Level
     std::list<std::shared_ptr<Mission>> missionList1;
     missionList1.push_front(mission);
     missionListManager->ClearAllMissionsLocked(missionList1, foregroundAbilities, searchActive);
+    EXPECT_TRUE(foregroundAbilities.empty()); // searchActive false, get no Foreground Ability
     TAG_LOGI(AAFwkTag::TEST, "ClearAllMissionsLocked_003 end");
 }
 
@@ -312,6 +318,8 @@ HWTEST_F(MissionListManagerFirstTest, ClearAllMissionsLocked_004, TestSize.Level
     missionLists.push_front(missions);
     bool searchActive = true;
     missionListManager->ClearAllMissionsLocked(missionLists, foregroundAbilities, searchActive);
+    EXPECT_FALSE(foregroundAbilities.empty()); // get Foreground Ability
+    foregroundAbilities.clear();
     searchActive = false;
     int32_t int32Param = 3;
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(int32Param, abilityRecord);
@@ -320,6 +328,7 @@ HWTEST_F(MissionListManagerFirstTest, ClearAllMissionsLocked_004, TestSize.Level
     std::list<std::shared_ptr<Mission>> missionList1;
     missionList1.push_front(mission);
     missionListManager->ClearAllMissionsLocked(missionList1, foregroundAbilities, searchActive);
+    EXPECT_TRUE(foregroundAbilities.empty()); // searchActive false, get no Foreground Ability
     TAG_LOGI(AAFwkTag::TEST, "ClearAllMissionsLocked_004 end");
 }
 
@@ -336,11 +345,11 @@ HWTEST_F(MissionListManagerFirstTest, UpdateSnapShot_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "UpdateSnapShot_001 start");
     int userId = 3;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
-    EXPECT_NE(missionListManager, nullptr);
     missionListManager->Init();
     sptr<IRemoteObject> token = nullptr;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     missionListManager->UpdateSnapShot(token, pixelMap);
+    EXPECT_NE(missionListManager, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "UpdateSnapShot_001 end");
 }
 
@@ -426,19 +435,21 @@ HWTEST_F(MissionListManagerFirstTest, GetContentAndTypeId_001, TestSize.Level1)
     uint32_t msgId = INPUT_ZERO;
     std::string msgContent = "msgContent";
     int typeId = 0;
-    missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    auto ret = missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
     msgId = INPUT_ONE;
-    missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    ret = missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
     msgId = INPUT_TWO;
-    missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    ret = missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
     msgId = INPUT_FIFTH;
-    missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    ret = missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
     msgId = INPUT_SIX;
-    missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    ret = missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
     msgId = INPUT_FOUR;
-    missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    ret = missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    EXPECT_TRUE(ret);
     msgId = INPUT_EIGHT;
-    missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    ret = missionListManager->GetContentAndTypeId(msgId, msgContent, typeId);
+    EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "GetContentAndTypeId_001 end");
 }
 
@@ -566,7 +577,7 @@ HWTEST_F(MissionListManagerFirstTest, OnTimeOut_001, TestSize.Level1)
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->OnTimeOut(msgId, eventId);
-    missionListManager.reset();
+    EXPECT_NE(missionListManager, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "MissionListManagerFirstTest OnTimeOut_001 end");
 }
 

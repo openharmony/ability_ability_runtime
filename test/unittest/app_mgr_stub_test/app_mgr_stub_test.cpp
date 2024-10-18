@@ -539,8 +539,8 @@ HWTEST_F(AppMgrStubTest, HandleSignRestartAppFlag_0100, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    std::string bundleName = "testBundleName";
-    data.WriteString(bundleName);
+    int32_t uid = 0;
+    data.WriteInt32(uid);
     auto res = mockAppMgrService_->HandleSignRestartAppFlag(data, reply);
     EXPECT_EQ(res, NO_ERROR);
 }

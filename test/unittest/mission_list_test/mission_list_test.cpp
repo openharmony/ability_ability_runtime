@@ -1095,24 +1095,25 @@ HWTEST_F(MissionListTest, SignRestartAppFlag_0100, TestSize.Level1)
     auto missionList = std::make_shared<MissionList>();
     missionList->missions_.push_back(nullptr);
     std::string bundleName("testbundlename");
-    missionList->SignRestartAppFlag(bundleName);
+    int32_t userId = 100;
+    missionList->SignRestartAppFlag(userId);
     EXPECT_EQ(*missionList->missions_.begin(), nullptr);
 
     missionList->missions_.clear();
     missionList->missions_.push_back(mission);
-    missionList->SignRestartAppFlag(bundleName);
+    missionList->SignRestartAppFlag(userId);
     EXPECT_NE(*missionList->missions_.begin(), nullptr);
     EXPECT_EQ((*missionList->missions_.begin())->GetAbilityRecord(), nullptr);
 
     missionList->missions_.clear();
     mission = std::make_shared<Mission>(1, abilityRecord, "bundle");
     missionList->missions_.push_back(mission);
-    missionList->SignRestartAppFlag(bundleName);
+    missionList->SignRestartAppFlag(userId);
     EXPECT_NE(*missionList->missions_.begin(), nullptr);
     auto ai = (*missionList->missions_.begin())->GetAbilityRecord();
     EXPECT_NE(ai->GetApplicationInfo().bundleName, bundleName);
 
-    missionList->SignRestartAppFlag("");
+    missionList->SignRestartAppFlag(0);
     EXPECT_EQ(*missionList->missions_.begin(), nullptr);
 }
 }  // namespace AAFwk

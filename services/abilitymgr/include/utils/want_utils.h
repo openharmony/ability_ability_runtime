@@ -54,6 +54,14 @@ public:
      * @return Flag if the want contains atomic service url.
      */
     static bool IsAtomicServiceUrl(const Want& want);
+
+    /**
+     * Get app index.
+     *
+     * @param want The want.
+     * @return AppIndex if the want contains app index.
+     */
+    static int32_t GetAppIndex(const Want& want);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

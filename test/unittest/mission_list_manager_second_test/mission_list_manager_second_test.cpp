@@ -154,7 +154,7 @@ HWTEST_F(MissionListManagerSecondTest, SignRestartAppFlag_001, TestSize.Level1)
 {
     int userId = 0;
     auto missionListManager = std::make_shared<MissionListManager>(userId);
-    std::string bundleName = "com.example.unittest";
+    int32_t uid = 100;
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     std::shared_ptr<Mission> mission = std::make_shared<Mission>(1, abilityRecord, "missionName");
     std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
@@ -162,17 +162,17 @@ HWTEST_F(MissionListManagerSecondTest, SignRestartAppFlag_001, TestSize.Level1)
     missionList->missions_.push_front(mission);
     missionListManager->currentMissionLists_.push_front(missionList);
     missionListManager->currentMissionLists_.push_front(missionList2);
-    missionListManager->SignRestartAppFlag(bundleName);
+    missionListManager->SignRestartAppFlag(uid);
     auto result = missionListManager->currentMissionLists_.size();
     EXPECT_EQ(2, result);
 
     missionListManager->defaultStandardList_ = missionList;
-    missionListManager->SignRestartAppFlag(bundleName);
+    missionListManager->SignRestartAppFlag(uid);
     result = missionListManager->defaultStandardList_->missions_.size();
     EXPECT_EQ(0, result);
 
     missionListManager->defaultSingleList_ = missionList;
-    missionListManager->SignRestartAppFlag(bundleName);
+    missionListManager->SignRestartAppFlag(uid);
     result = missionListManager->defaultSingleList_->missions_.size();
     EXPECT_EQ(0, result);
 }

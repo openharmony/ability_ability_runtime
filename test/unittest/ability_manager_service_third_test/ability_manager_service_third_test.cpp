@@ -1096,7 +1096,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckRestartAppWant_001, TestSize.Level
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
     AAFwk::Want want;
-    int32_t res = abilityMs->CheckRestartAppWant(want);
+    int32_t res = abilityMs->CheckRestartAppWant(want, 0);
     EXPECT_EQ(res, AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY);
 }
 
@@ -2468,7 +2468,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SignRestartAppFlag_001, TestSize.Level1
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    abilityMs_->SignRestartAppFlag(USER_ID_U100, "com.ix.hiservcie");
+    abilityMs_->SignRestartAppFlag(USER_ID_U100, 1);
 }
 
 /*
