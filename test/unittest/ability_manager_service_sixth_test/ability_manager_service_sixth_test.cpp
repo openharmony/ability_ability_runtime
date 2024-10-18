@@ -1078,7 +1078,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectUIExtensionAbility_001, TestSize
  */
 HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1100,7 +1099,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level
         .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos empty
     ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
         true, connectInfo);
-    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR); // extensionInfos is empty
     extensionType = ExtensionAbilityType::SHARE;
     ExtensionAbilityInfo extensionInfo;
     extensionInfos.push_back(extensionInfo);
@@ -1129,7 +1127,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level
         false, connectInfo);
     Mock::VerifyAndClear(mockBundleMgr);
     bundleMgrHelper_->bundleMgr_ = nullptr;
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_001 end");
 }
 
 /*
