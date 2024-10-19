@@ -9425,7 +9425,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
 int AbilityManagerService::CheckCallerInfoQueryExtensionPermission(const AbilityRequest &abilityRequest)
 {
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
-    PermissionConstants::PERMISSION_GET_TELEPHONY_STATE);
+        PermissionConstants::PERMISSION_GET_TELEPHONY_STATE);
     if (!ret) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission deny for callerInfoQueryExtension");
         return CHECK_PERMISSION_FAILED;
@@ -9437,7 +9437,7 @@ int AbilityManagerService::CheckCallerInfoQueryExtensionPermission(const Ability
 int AbilityManagerService::CheckFileAccessExtensionPermission(const AbilityRequest &abilityRequest)
 {
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
-            PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER);
+        PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER);
     if (!ret) {
         return CHECK_PERMISSION_FAILED;
     }
