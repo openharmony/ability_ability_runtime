@@ -266,9 +266,11 @@ public:
      *
      * @param bundleName name of bundle.
      * @param uid uid of bundle.
+     * @param  reason, caller function name.
      * @return 0 if success.
      */
-    int KillApplicationByUid(const std::string &bundleName, int32_t uid);
+    int KillApplicationByUid(const std::string &bundleName, int32_t uid,
+        const std::string& reason = "KillApplicationByUid");
 
      /**
      * update the application info after new module installed.
