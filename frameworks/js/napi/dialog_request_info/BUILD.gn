@@ -19,6 +19,8 @@ config("dialog_request_info_external_config") {
 }
 
 ohos_shared_library("dialog_request_info") {
+  branch_protector_ret = "pac_ret"
+
   sources = [ "request_info.cpp" ]
 
   public_configs = [ ":dialog_request_info_external_config" ]
