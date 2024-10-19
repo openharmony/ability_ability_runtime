@@ -9437,7 +9437,7 @@ int AbilityManagerService::CheckCallerInfoQueryExtensionPermission(const Ability
 int AbilityManagerService::CheckFileAccessExtensionPermission(const AbilityRequest &abilityRequest)
 {
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
-            PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER)
+            PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER);
     if (!ret) {
         return CHECK_PERMISSION_FAILED;
     }
