@@ -6257,7 +6257,11 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
         (const_cast<Want &>(want)).SetParam(DLP_PARAMS_SECURITY_FLAG, abilityRecord->GetSecurityFlag());
     }
 
-    if (abilityRecord != nullptr) {
+    int32_t appIndex = 0;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
+    if (abilityRecord != nullptr &&
+        abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName() &&
+        abilityRecord->GetAppIndex() == appIndex) {
         (const_cast<Want &>(want)).SetParam(DEBUG_APP, abilityRecord->IsDebugApp());
     }
 
