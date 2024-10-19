@@ -16,19 +16,17 @@
 #include <gtest/gtest.h>
 
 #define private public
-#include "iservice_registry.h"
+#include "bundle_mgr_helper.h"
 #undef private
 #include "ability_manager_errors.h"
-#include "bundle_mgr_helper.h"
 #include "hilog_tag_wrapper.h"
 #include "want_params_wrapper.h"
 #include "insight_intent_utils.h"
 #include "int_wrapper.h"
 #include "insight_intent_profile.h"
+#include "mock_bundle_manager_proxy.h"
 #include "string_wrapper.h"
 #include "want.h"
-#include "mock_system_ability_manager.h"
-#include "mock_bundle_manager_service.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -90,8 +88,6 @@ const std::string TEST_JSON_STR_ARRAY = "{"
     "]"
 "}";
 
-constexpr int32_t BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
-sptr<MockBundleManagerService> mockBundleMgr = new (std::nothrow) MockBundleManagerService();
 }
 class InsightIntentUtilsTest : public testing::Test {
 public:
@@ -99,11 +95,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    void MockBundleInstallerAndSA();
-    void MockBundleInstaller();
-    sptr<ISystemAbilityManager> iSystemAbilityMgr_ = nullptr;
-    sptr<AppExecFwk::MockSystemAbilityManager> mockSystemAbility_ = nullptr;
     std::shared_ptr<BundleMgrHelper> bundleMgrHelper_{ nullptr };
+    sptr<MockBundleManagerProxy> mockBundleMgr_ = nullptr;
 };
 
 void InsightIntentUtilsTest::SetUpTestCase(void)
@@ -114,29 +107,11 @@ void InsightIntentUtilsTest::TearDownTestCase(void)
 
 void InsightIntentUtilsTest::SetUp()
 {
-    mockSystemAbility_ = new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
-    iSystemAbilityMgr_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
-    MockBundleInstallerAndSA();
-}
-
-void InsightIntentUtilsTest::MockBundleInstallerAndSA()
-{
-    auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
-        if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
-            return bms->AsObject();
-        } else {
-            return saMgr->GetSystemAbility(systemAbilityId);
-        }
-    };
-    EXPECT_CALL(*mockSystemAbility_, CheckSystemAbility(testing::_))
-        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
+    bundleMgrHelper_ = DelayedSingleton<BundleMgrHelper>::GetInstance();
 }
 
 void InsightIntentUtilsTest::TearDown()
-{
-    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = iSystemAbilityMgr_;
-}
+{}
 
 /**
  * @tc.name: GetSrcEntry_0100
@@ -147,6 +122,8 @@ void InsightIntentUtilsTest::TearDown()
 HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest GetSrcEntry_0100 start");
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, GetJsonProfile(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(Return(ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR));
     AbilityRuntime::InsightIntentUtils utils;
@@ -163,6 +140,8 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0100, TestSize.Level1)
     AppExecFwk::ElementName element4("", "", TEST_BUNDLE_NAME, TEST_MODULE_NAME);
     result = utils.GetSrcEntry(element4, TEST_INTENT_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY, TEST_SRC_ENTRY);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0100 end.");
 }
 
@@ -174,9 +153,11 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0100, TestSize.Level1)
 HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest GetSrcEntry_0200 start");
-    AbilityRuntime::InsightIntentUtils utils;
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, GetJsonProfile(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(Return(ERR_OK));
+    AbilityRuntime::InsightIntentUtils utils;
     AppExecFwk::ElementName element1("", TEST_ABILITY_NAME, TEST_BUNDLE_NAME, TEST_MODULE_NAME);
     auto result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
@@ -186,6 +167,8 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0200, TestSize.Level1)
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
     EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0200 end.");
 }
 
@@ -197,13 +180,17 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0200, TestSize.Level1)
 HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest GetSrcEntry_0300 start");
-    AbilityRuntime::InsightIntentUtils utils;
-    AppExecFwk::ElementName element1("", TEST_BUNDLE_NAME, "ability1", TEST_MODULE_NAME);
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, GetJsonProfile(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<3>(TEST_JSON_STR_ARRAY), Return(ERR_OK)));
+    AbilityRuntime::InsightIntentUtils utils;
+    AppExecFwk::ElementName element1("", TEST_BUNDLE_NAME, "ability1", TEST_MODULE_NAME);
     auto result = utils.GetSrcEntry(element1, TEST_BUNDLE_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
     EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0300 end.");
 }
 
@@ -215,6 +202,8 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0300, TestSize.Level1)
 HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0400, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest GetSrcEntry_0400 start");
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, GetJsonProfile(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<3>(TEST_JSON_STR_ARRAY), Return(ERR_OK)));
     AbilityRuntime::InsightIntentUtils utils;
@@ -235,6 +224,8 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0400, TestSize.Level1)
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, static_cast<ExecuteMode>(INT_MAX),
         TEST_SRC_ENTRY);
     EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0400 end.");
 }
 } // namespace AAFwk

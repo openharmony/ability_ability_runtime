@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_MOCK_BUNDLE_MANAGER_SERVICE_H
-#define OHOS_MOCK_BUNDLE_MANAGER_SERVICE_H
+#ifndef OHOS_MOCK_BUNDLE_MANAGER_PROXY_H
+#define OHOS_MOCK_BUNDLE_MANAGER_PROXY_H
 
 #include "bundle_installer_interface.h"
-#include "bundle_mgr_interface.h"
+#include "bundle_mgr_proxy.h"
 #include "gmock/gmock.h"
 #include "iremote_object.h"
 #include "iremote_stub.h"
@@ -25,13 +25,11 @@
 #include "mock_overlay_manager.h"
 
 namespace OHOS {
-namespace {
 constexpr int32_t BASE_USER_RANGE = 200000;
-}
-class MockBundleManagerService : public IRemoteStub<AppExecFwk::IBundleMgr> {
+class MockBundleManagerProxy : public AppExecFwk::BundleMgrProxy {
 public:
-    MockBundleManagerService() {};
-    virtual ~MockBundleManagerService() {};
+    MockBundleManagerProxy(const sptr<IRemoteObject> &impl) : AppExecFwk::BundleMgrProxy(impl) {};
+    virtual ~MockBundleManagerProxy() {};
     MOCK_METHOD0(GetBundleInstaller, sptr<AppExecFwk::IBundleInstaller>());
     MOCK_METHOD2(
         GetHapModuleInfo, bool(const AppExecFwk::AbilityInfo &abilityInfo, AppExecFwk::HapModuleInfo &hapModuleInfo));
@@ -115,4 +113,4 @@ public:
     }
 };
 } // namespace OHOS
-#endif // OHOS_MOCK_BUNDLE_MANAGER_SERVICE_H
+#endif // OHOS_MOCK_BUNDLE_MANAGER_PROXY_H
