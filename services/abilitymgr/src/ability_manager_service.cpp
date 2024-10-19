@@ -6590,7 +6590,7 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
 
     CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
     subManagersHelper_->UninstallApp(bundleName, uid);
-    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplicationByUid(bundleName, uid);
+    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplicationByUid(bundleName, uid, "UninstallApp");
     if (ret != ERR_OK) {
         return UNINSTALL_APP_FAILED;
     }
@@ -11271,7 +11271,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
         TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error");
         return result;
     }
-    result = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf();
+    result = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf(false, "RestartApp");
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "killApplicationSelf error");
         return result;
