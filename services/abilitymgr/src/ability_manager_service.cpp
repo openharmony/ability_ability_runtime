@@ -9438,11 +9438,11 @@ int AbilityManagerService::CheckFileAccessExtensionPermission(const AbilityReque
 {
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
             PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER)
-    if (ret) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Temporary, FILEACCESS_EXTENSION use serviceExtension start-up rule.");
-        return CheckCallServiceExtensionPermission(abilityRequest);
+    if (!ret) {
+        return CHECK_PERMISSION_FAILED;
     }
-    return CHECK_PERMISSION_FAILED;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Temporary, FILEACCESS_EXTENSION use serviceExtension start-up rule.");
+    return CheckCallServiceExtensionPermission(abilityRequest);
 }
 
 int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abilityRequest)
