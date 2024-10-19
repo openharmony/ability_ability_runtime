@@ -9412,10 +9412,8 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (extensionType == AppExecFwk::ExtensionAbilityType::VPN) {
         return ERR_OK;
     }
-    if (extensionType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION &&
-        AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Temporary, FILEACCESS_EXTENSION use serviceExtension start-up rule.");
-        return CheckCallServiceExtensionPermission(abilityRequest);
+    if (extensionType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION) {
+        return CheckFileAccessExtensionPermission(abilityRequest);
     }
     if (extensionType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
         return CheckCallerInfoQueryExtensionPermission(abilityRequest);
@@ -9424,7 +9422,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     return CHECK_PERMISSION_FAILED;
 }
 
-int CheckCallerInfoQueryExtensionPermission(const AbilityRequest &abilityRequest)
+int AbilityManagerService::CheckCallerInfoQueryExtensionPermission(const AbilityRequest &abilityRequest)
 {
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
     PermissionConstants::PERMISSION_GET_TELEPHONY_STATE);
@@ -9433,6 +9431,17 @@ int CheckCallerInfoQueryExtensionPermission(const AbilityRequest &abilityRequest
         return CHECK_PERMISSION_FAILED;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "check permission success");
+    return ERR_OK;
+}
+
+int AbilityManagerService::CheckFileAccessExtensionPermission(const AbilityRequest &abilityRequest)
+{
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+            PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER)
+    if (ret) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Temporary, FILEACCESS_EXTENSION use serviceExtension start-up rule.");
+        return CheckCallServiceExtensionPermission(abilityRequest);
+    }
     return ERR_OK;
 }
 
