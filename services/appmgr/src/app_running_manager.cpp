@@ -696,7 +696,7 @@ void AppRunningManager::ProcessAppRecordWhenIsLastAbility(const std::shared_ptr<
             if (clearMissionFlag) {
                 NotifyAppPreCache(appRecord, appMgrServiceInner);
             }
-            return;                     
+            return;               
         }
     }
     TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
