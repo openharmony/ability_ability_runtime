@@ -1014,5 +1014,107 @@ HWTEST_F(MissionListTest, mission_list_get_ability_records_by_name_001, TestSize
     missionList->GetAbilityRecordsByName(element2, records);
     EXPECT_FALSE(records.empty());
 }
+
+/*
+ * Feature: MissionList
+ * Function: GetActiveAbilityList
+ * SubFunction: NA
+ * FunctionPoints: MissionList GetActiveAbilityList
+ */
+HWTEST_F(MissionListTest, GetActiveAbilityList_0100, TestSize.Level1)
+{
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    abilityInfo.deviceId = "deviceId1";
+    abilityInfo.bundleName = "bundle";
+    abilityInfo.name = "name";
+    abilityInfo.moduleName = "bundle";
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto mission = std::make_shared<Mission>(1, nullptr, "name");
+    auto missionList = std::make_shared<MissionList>();
+    missionList->missions_.push_back(nullptr);
+    int32_t uid = 1;
+    std::vector<std::string> abilityList;
+    int32_t pid = 1;
+    missionList->GetActiveAbilityList(uid, abilityList, pid);
+    EXPECT_EQ(*missionList->missions_.begin(), nullptr);
+
+    missionList->missions_.clear();
+    missionList->missions_.push_back(mission);
+    missionList->GetActiveAbilityList(uid, abilityList, pid);
+    EXPECT_NE(*missionList->missions_.begin(), nullptr);
+    EXPECT_EQ((*missionList->missions_.begin())->GetAbilityRecord(), nullptr);
+
+    missionList->missions_.clear();
+    mission = std::make_shared<Mission>(1, abilityRecord, "name");
+    missionList->missions_.push_back(mission);
+    missionList->GetActiveAbilityList(uid, abilityList, pid);
+    EXPECT_NE(*missionList->missions_.begin(), nullptr);
+    EXPECT_NE((*missionList->missions_.begin())->GetAbilityRecord()->GetPid(), pid);
+
+    pid = NO_PID;
+    missionList->missions_.clear();
+    mission = std::make_shared<Mission>(1, abilityRecord, "name");
+    missionList->missions_.push_back(mission);
+    uid = -1;
+    missionList->GetActiveAbilityList(uid, abilityList, pid);
+    EXPECT_NE(*missionList->missions_.begin(), nullptr);
+    auto ai = (*missionList->missions_.begin())->GetAbilityRecord()->GetAbilityInfo();
+    EXPECT_EQ(ai.applicationInfo.uid, uid);
+
+    missionList->missions_.clear();
+    uid = 2;
+    mission = std::make_shared<Mission>(1, abilityRecord, "name");
+    missionList->missions_.push_back(mission);
+    missionList->GetActiveAbilityList(uid, abilityList, pid);
+    EXPECT_NE(*missionList->missions_.begin(), nullptr);
+    ai = (*missionList->missions_.begin())->GetAbilityRecord()->GetAbilityInfo();
+    EXPECT_NE(ai.applicationInfo.uid, uid);
+}
+
+/*
+ * Feature: MissionList
+ * Function: SignRestartAppFlag
+ * SubFunction: NA
+ * FunctionPoints: MissionList SignRestartAppFlag
+ */
+HWTEST_F(MissionListTest, SignRestartAppFlag_0100, TestSize.Level1)
+{
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    abilityInfo.deviceId = "deviceId1";
+    abilityInfo.bundleName = "bundle";
+    abilityInfo.name = "name";
+    abilityInfo.moduleName = "bundle";
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto mission = std::make_shared<Mission>(1, nullptr, "name");
+    auto missionList = std::make_shared<MissionList>();
+    missionList->missions_.push_back(nullptr);
+    std::string bundleName("testbundlename");
+    int32_t userId = 100;
+    missionList->SignRestartAppFlag(userId);
+    EXPECT_EQ(*missionList->missions_.begin(), nullptr);
+
+    missionList->missions_.clear();
+    missionList->missions_.push_back(mission);
+    missionList->SignRestartAppFlag(userId);
+    EXPECT_NE(*missionList->missions_.begin(), nullptr);
+    EXPECT_EQ((*missionList->missions_.begin())->GetAbilityRecord(), nullptr);
+
+    missionList->missions_.clear();
+    mission = std::make_shared<Mission>(1, abilityRecord, "bundle");
+    missionList->missions_.push_back(mission);
+    missionList->SignRestartAppFlag(userId);
+    EXPECT_NE(*missionList->missions_.begin(), nullptr);
+    auto ai = (*missionList->missions_.begin())->GetAbilityRecord();
+    EXPECT_NE(ai->GetApplicationInfo().bundleName, bundleName);
+
+    missionList->SignRestartAppFlag(0);
+    EXPECT_EQ(*missionList->missions_.begin(), nullptr);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

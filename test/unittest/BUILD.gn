@@ -623,6 +623,8 @@ group("unittest") {
         "mission_info_test:unittest",
         "mission_list_dump_test:unittest",
         "mission_list_manager_dump_test:unittest",
+        "mission_list_manager_first_test:unittest",
+        "mission_list_manager_second_test:unittest",
         "mission_list_manager_test:unittest",
         "mission_list_manager_ut_test:unittest",
         "mission_list_test:unittest",
