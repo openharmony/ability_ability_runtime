@@ -359,8 +359,6 @@ private:
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
     void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
         const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
-    void ProcessAppRecordWhenIsLastAbility(const std::shared_ptr<AppRunningRecord>& appRecord,
-        const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner, bool clearMissionFlag);
 
 private:
     std::mutex runningRecordMapMutex_;
