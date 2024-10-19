@@ -121,6 +121,8 @@ config("abilitykit_utils_public_config") {
 }
 
 ohos_shared_library("abilitykit_utils") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
@@ -185,6 +187,8 @@ ohos_shared_library("abilitykit_utils") {
 }
 
 ohos_shared_library("abilitykit_native") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [ "${ability_runtime_path}/utils/global/time/include" ]
 
   sources = [
@@ -807,6 +811,8 @@ ohos_shared_library("service_extension") {
 }
 
 ohos_shared_library("continuation_ipc") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = []
 
   sources = [
@@ -969,6 +975,8 @@ config("ability_business_error_public_config") {
 }
 
 ohos_shared_library("ability_business_error") {
+  branch_protector_ret = "pac_ret"
+
   sources = [ "${ability_runtime_native_path}/ability/native/ability_business_error/ability_business_error.cpp" ]
 
   configs = [ ":ability_business_error_config" ]
@@ -993,6 +1001,8 @@ config("dialog_request_callback_public_config") {
 }
 
 ohos_shared_library("dialog_request_callback") {
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "${ability_runtime_native_path}/ability/native/dialog_request_callback/dialog_request_callback_proxy.cpp",
     "${ability_runtime_native_path}/ability/native/dialog_request_callback/dialog_request_callback_stub.cpp",
@@ -1279,6 +1289,8 @@ ohos_shared_library("share_extension_module") {
 }
 
 ohos_shared_library("auto_startup_callback") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error" ]
 
   sources = [
