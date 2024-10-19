@@ -246,10 +246,8 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return true;
     }
-    if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
-        if (appRecord->GetEnableProcessCache()) {
-            appRecord->SetEnableProcessCache(false);
-        }
+    if (appRecord->GetEnableProcessCache()) {
+        appRecord->SetEnableProcessCache(false);
     }
     appRecord->SetProcessCaching(false);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
@@ -287,29 +285,25 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
     return true;
 }
 
-bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRunningRecord> &appRecord)
+void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    if (appRecord == nullptr) {
-        return false;
+    if (appRecord == nullptr || !warmStartProcesEnable_) {
+        return;
     }
-    if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
-        return true;
-    }
-    auto enable = appRecord->GetEnableProcessCache();
-    if (enable) {
-        return true;
+    if (appRecord->GetEnableProcessCache()) {
+        return;
     }
     if (!appRecord->GetPriorityObject()) {
-        return false;
+        return;
     }
     bool forceKillProcess =
         AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
     if (!forceKillProcess) {
         appRecord->SetEnableProcessCache(true);
-        return true;
+        return;
     } else {
         appRecord->SetEnableProcessCache(false);
-        return false;
+        return;
     }
 }
 
@@ -333,9 +327,6 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
         return false;
     }
     if (maxProcCacheNum_ > 0 && !IsProcessSupportHotStart(appRecord)) {
-        return false;
-    }
-    if (warmStartProcesEnable_ && !IsProcessSupportWarmStart(appRecord)) {
         return false;
     }
     return IsAppSupportProcessCacheInnerFirst(appRecord);

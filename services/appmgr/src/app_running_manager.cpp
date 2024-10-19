@@ -612,11 +612,14 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient())) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
-        if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
-            cacheProcMgr->PenddingCacheProcess(appRecord);
-            TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s not supports terminate record",
-                appRecord->GetBundleName().c_str());
-            return;
+        if (cacheProcMgr != nullptr) {
+            cacheProcMgr->CheckAndSetProcessCacheEnable(appRecord);
+            if (cacheProcMgr->IsAppShouldCache(appRecord)) {
+                cacheProcMgr->PenddingCacheProcess(appRecord);
+                TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s not supports terminate record",
+                    appRecord->GetBundleName().c_str());
+                return;
+            }
         }
         TAG_LOGI(AAFwkTag::APPMGR, "ability is the last:%{public}s", appRecord->GetName().c_str());
         appRecord->SetTerminating();
@@ -674,6 +677,9 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
+        if (cacheProcMgr != nullptr) {
+            cacheProcMgr->CheckAndSetProcessCacheEnable(appRecord);
+        }
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
