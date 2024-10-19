@@ -9377,7 +9377,6 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
         AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         return ERR_OK;
     }
-
     auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "OtherExtension type: %{public}d.", static_cast<int32_t>(extensionType));
     if (system::GetBoolParameter(DEVELOPER_MODE_STATE, false) &&
