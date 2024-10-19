@@ -429,8 +429,7 @@ void JsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::S
         sessionInfo->persistentId, winCmd);
     Extension::OnCommandWindow(want, sessionInfo, winCmd);
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want) && winCmd == AAFwk::WIN_CMD_FOREGROUND) {
-        bool finish = ForegroundWindowWithInsightIntent(want, sessionInfo, false);
-        if (finish) {
+        if (ForegroundWindowWithInsightIntent(want, sessionInfo, false)) {
             return;
         }
     }
@@ -694,9 +693,13 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
 sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
     const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
-    sptr<Rosen::WindowOption> option = new (std::nothrow) Rosen::WindowOption();
     if (context == nullptr || context->GetAbilityInfo() == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        return nullptr;
+    }
+    auto option = sptr<Rosen::WindowOption>::MakeSptr();
+    if (option == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
         return nullptr;
     }
     option->SetWindowName(context->GetBundleName() + context->GetAbilityInfo()->name);
