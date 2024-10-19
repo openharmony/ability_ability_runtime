@@ -676,38 +676,28 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
     auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) && !isLauncherApp) {
-        ProcessAppRecordWhenIsLastAbility(appRecord, appMgrServiceInner, clearMissionFlag);
-    }
-}
-
-void AppRunningManager::ProcessAppRecordWhenIsLastAbility(const std::shared_ptr<AppRunningRecord>& appRecord,
-    const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner, bool clearMissionFlag)
-{
-    if (appMgrServiceInner == nullptr || appRecord == nullptr) {
-        return;
-    }
-    auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
-    if (cacheProcMgr != nullptr) {
-        cacheProcMgr->CheckAndSetProcessCacheEnable(appRecord);
-        if (cacheProcMgr->IsAppShouldCache(appRecord)) {
+        auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
+        if (cacheProcMgr != nullptr) {
+            cacheProcMgr->CheckAndSetProcessCacheEnable(appRecord);
+        }
+        if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
                 appRecord->GetBundleName().c_str());
             if (clearMissionFlag) {
                 NotifyAppPreCache(appRecord, appMgrServiceInner);
             }
-            return;               
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
+        appRecord->SetTerminating();
+        if (clearMissionFlag && appMgrServiceInner != nullptr) {
+            auto delayTime = appRecord->ExtensionAbilityRecordExists() ?
+                AMSEventHandler::DELAY_KILL_EXTENSION_PROCESS_TIMEOUT : AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT;
+            std::string taskName = std::string("DELAY_KILL_PROCESS_") + std::to_string(appRecord->GetRecordId());
+            appRecord->PostTask(taskName, delayTime, killProcess);
         }
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
-    appRecord->SetTerminating();
-    if (clearMissionFlag && appMgrServiceInner != nullptr) {
-        auto delayTime = appRecord->ExtensionAbilityRecordExists() ?
-            AMSEventHandler::DELAY_KILL_EXTENSION_PROCESS_TIMEOUT : AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT;
-        std::string taskName = std::string("DELAY_KILL_PROCESS_") + std::to_string(appRecord->GetRecordId());
-        appRecord->PostTask(taskName, delayTime, killProcess);
-    }
-    return;
 }
 
 void AppRunningManager::NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
