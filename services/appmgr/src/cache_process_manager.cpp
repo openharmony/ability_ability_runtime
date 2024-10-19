@@ -285,26 +285,25 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
     return true;
 }
 
-bool CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord)
+void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (appRecord == nullptr || !warmStartProcesEnable_) {
-        return false;
+        return;
     }
-    auto enable = appRecord->GetEnableProcessCache();
-    if (enable) {
-        return true;
+    if (appRecord->GetEnableProcessCache()) {
+        return;
     }
     if (!appRecord->GetPriorityObject()) {
-        return false;
+        return;
     }
     bool forceKillProcess =
         AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
     if (!forceKillProcess) {
         appRecord->SetEnableProcessCache(true);
-        return true;
+        return;
     } else {
         appRecord->SetEnableProcessCache(false);
-        return false;
+        return;
     }
 }
 
