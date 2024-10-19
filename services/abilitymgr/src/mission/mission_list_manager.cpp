@@ -3350,21 +3350,23 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 
     // new version started by call type
     auto ret = ResolveAbility(targetAbilityRecord, abilityRequest);
+    bool isStartToForeground = targetAbilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false);
     if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved.");
-        if (targetAbilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
+        if (isStartToForeground) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
             if (targetAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped");
                 targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
                 return ERR_OK;
             }
+            targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
 #ifdef SUPPORT_SCREEN
-                std::shared_ptr<StartOptions> startOptions = nullptr;
-                auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
-                targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility);
+            std::shared_ptr<StartOptions> startOptions = nullptr;
+            auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
+            targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility);
 #else
-                targetAbilityRecord->ProcessForegroundAbility(0);
+            targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
         }
         return ERR_OK;
@@ -3384,7 +3386,12 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
             targetAbilityRecord->SetLauncherRoot();
         }
     }
-
+    if (isStartToForeground) {
+        targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+    } else {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "set pending BACKGROUND");
+        targetAbilityRecord->SetPendingState(AbilityState::BACKGROUND);
+    }
     return targetAbilityRecord->LoadAbility();
 }
 
