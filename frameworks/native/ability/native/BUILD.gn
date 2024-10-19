@@ -382,6 +382,7 @@ ohos_shared_library("abilitykit_native") {
     include_dirs += [
       "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
       "${ability_runtime_path}/frameworks/cj/ffi",
+      "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     ]
     external_deps += [
       "napi:cj_bind_ffi",
