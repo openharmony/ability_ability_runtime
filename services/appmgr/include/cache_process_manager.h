@@ -44,7 +44,7 @@ public:
     std::string PrintCacheQueue();
     void PrepareActivateCache(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnAppProcessCacheBlocked(const std::shared_ptr<AppRunningRecord> &appRecord);
-    bool CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord);
 private:
     bool IsAppAbilitiesEmpty(const std::shared_ptr<AppRunningRecord> &appRecord);
     int GetCurrentCachedProcNum();
@@ -57,7 +57,6 @@ private:
     bool IsAppContainsSrvExt(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsAppSupportProcessCacheInnerFirst(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord);
-    bool IsProcessSupportWarmStart(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool warmStartProcesEnable_ = false;
     int32_t maxProcCacheNum_ = 0;
     std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
