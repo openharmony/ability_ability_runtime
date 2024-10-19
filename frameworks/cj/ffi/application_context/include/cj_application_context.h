@@ -19,13 +19,14 @@
 #include <cstdint>
 #include <shared_mutex>
 
+#include "application_context.h"
 #include "cj_macro.h"
 #include "cj_environment_callback.h"
 #include "cj_ability_lifecycle_callback.h"
 #include "cj_application_state_change_callback.h"
 #include "cj_common_ffi.h"
 #include "ffi_remote_data.h"
-#include "ability_delegator_registry.h"
+
 
 namespace OHOS {
 namespace ApplicationContextCJ {
@@ -74,11 +75,12 @@ public:
     void OnOffEnvironment(int32_t callbackId, int32_t *errCode);
     void OnOffAbilityLifecycle(int32_t callbackId, int32_t *errCode);
     void OnOffApplicationStateChange(int32_t callbackId, int32_t *errCode);
+    static CJApplicationContext* GetInstance();
     static CJApplicationContext* GetCJApplicationContext(
         std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext);
 private:
     std::weak_ptr<AbilityRuntime::ApplicationContext> applicationContext_;
-    std::shared_ptr<AbilityRuntime::CjAbilityLifecycleCallback> callback_;
+    std::shared_ptr<AbilityRuntime::CjAbilityLifecycleCallbackImpl> callback_;
     std::shared_ptr<AbilityRuntime::CjEnvironmentCallback> envCallback_;
     std::shared_ptr<CjApplicationStateChangeCallback> applicationStateCallback_;
     std::mutex applicationStateCallbackLock_;
