@@ -2141,7 +2141,6 @@ private:
      */
     int CheckUIExtensionPermission(const AbilityRequest &abilityRequest);
 
-
     /**
      * @brief Check CallerInfoQueryExtension permission
      *
