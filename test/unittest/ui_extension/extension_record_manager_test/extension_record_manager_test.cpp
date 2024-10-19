@@ -97,6 +97,7 @@ HWTEST_F(ExtensionRecordManagerTest, GetCallerTokenList_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "begin.");
     auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
 
     AAFwk::AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.unittest";
@@ -121,7 +122,8 @@ HWTEST_F(ExtensionRecordManagerTest, GetCallerTokenList_0100, TestSize.Level1)
 
     std::list<sptr<IRemoteObject>> callerList;
     extRecordMgr->GetCallerTokenList(abilityRecord, callerList);
-    ASSERT_NE(extRecordMgr, nullptr);
+    ASSERT_EQ(callerList.size(), 1);
+    ASSERT_EQ(callerList.front(), callerToken);
 
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }

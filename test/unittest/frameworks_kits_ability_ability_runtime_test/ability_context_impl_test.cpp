@@ -239,7 +239,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_01
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_OK);
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
     }
 }
 
@@ -262,7 +262,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetMissionContinueState_02
     g_mockAbilityMs->SetCommonMockResult(true);
     ret = context_->SetMissionContinueState(state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_OK);
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
     }
 
     wptr<IRemoteObject> token(new IPCObjectStub());

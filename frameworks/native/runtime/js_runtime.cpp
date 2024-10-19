@@ -68,7 +68,6 @@
 #include "declarative_module_preloader.h"
 #endif
 
-
 using namespace OHOS::AbilityBase;
 using Extractor = OHOS::AbilityBase::Extractor;
 
@@ -719,7 +718,7 @@ bool JsRuntime::Initialize(const Options& options)
             bundleName_ = options.bundleName;
             codePath_ = options.codePath;
             panda::JSNApi::SetSearchHapPathTracker(
-                vm, [options](const std::string moduleName, std::string &hapPath) -> bool {
+                vm, [options](const std::string moduleName, std::string& hapPath)-> bool {
                     if (options.hapModulePath.find(moduleName) == options.hapModulePath.end()) {
                         return false;
                     }
