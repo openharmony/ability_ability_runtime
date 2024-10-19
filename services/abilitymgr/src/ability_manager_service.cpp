@@ -9442,7 +9442,7 @@ int AbilityManagerService::CheckFileAccessExtensionPermission(const AbilityReque
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Temporary, FILEACCESS_EXTENSION use serviceExtension start-up rule.");
         return CheckCallServiceExtensionPermission(abilityRequest);
     }
-    return ERR_OK;
+    return CHECK_PERMISSION_FAILED;
 }
 
 int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abilityRequest)
