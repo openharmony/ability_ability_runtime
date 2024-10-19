@@ -55,6 +55,11 @@ private:
 
     void CheckUriPermissionForExtension(Want &want, uint32_t tokenId);
 
+    int32_t CheckNonImplicitShareFileUriInner(uint32_t callerTokenId, const std::string &targetBundleName,
+        int32_t userId);
+
+    bool IsSystemApplication(const std::string &bundleName, int32_t userId);
+
     DISALLOW_COPY_AND_MOVE(UriUtils);
 };
 } // namespace AAFwk
