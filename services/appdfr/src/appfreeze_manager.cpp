@@ -278,12 +278,14 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
         }
     }
 
-    if (!pids.empty()) {
-        std::string fileName = faultData.errorObject.name + "_" +
-            AbilityRuntime::TimeUtil::FormatTime("%Y%m%d%H%M%S") + "_" + std::to_string(appInfo.pid) + "_binder";
-        std::string fullStackPath = WriteToFile(fileName, binderInfo);
-        binderInfo = fullStackPath + "," + binderPidsStr;
+    if (pids.empty()) {
+        binderInfo +="PeerBinder pids is empty\n";
     }
+
+    std::string fileName = faultData.errorObject.name + "_" +
+        AbilityRuntime::TimeUtil::FormatTime("%Y%m%d%H%M%S") + "_" + std::to_string(appInfo.pid) + "_binder";
+    std::string fullStackPath = WriteToFile(fileName, binderInfo);
+    binderInfo = fullStackPath + "," + binderPidsStr;
 
     ret = NotifyANR(faultNotifyData, appInfo, binderInfo, memoryContent);
     return ret;
