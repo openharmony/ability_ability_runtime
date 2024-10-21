@@ -33,6 +33,7 @@ const std::string PROCESS_CACHE_API_CHECK_CONFIG = "persist.sys.abilityms.proces
 const std::string PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG = "persist.sys.abilityms.processCacheSetSupportCheck";
 constexpr int32_t API12 = 12;
 constexpr int32_t API_VERSION_MOD = 100;
+constexpr int32_t CACHE_PROCESS_TIMEOUT_TIME_MS = 1500; // 1500ms
 constexpr const char *EVENT_KEY_VERSION_NAME = "VERSION_NAME";
 constexpr const char *EVENT_KEY_VERSION_CODE = "VERSION_CODE";
 constexpr const char *EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
@@ -122,6 +123,10 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
         TAG_LOGD(AAFwkTag::APPMGR, "%{public}s not cache for abilities not empty",
             appRecord->GetName().c_str());
         return true;
+    }
+    if (warmStartProcesEnable_ && appRecord->GetPriorityObject()) {
+        AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PROCESS_CACHE_BEGIN,
+            appRecord->GetPriorityObject()->GetPid(), appRecord->GetUid(), CACHE_PROCESS_TIMEOUT_TIME_MS);
     }
     appRecord->ScheduleCacheProcess();
     appRecord->SetProcessCaching(false);
@@ -290,7 +295,7 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
     if (appRecord == nullptr || !warmStartProcesEnable_) {
         return;
     }
-    if (appRecord->GetEnableProcessCache()) {
+    if (appRecord->GetSupportProcessCacheState() != SupportProcessCacheState::SUPPORT) {
         return;
     }
     if (!appRecord->GetPriorityObject()) {
@@ -298,11 +303,8 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
     }
     bool forceKillProcess =
         AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
-    if (!forceKillProcess) {
-        appRecord->SetEnableProcessCache(true);
-        return;
-    } else {
-        appRecord->SetEnableProcessCache(false);
+    if (forceKillProcess) {
+        appRecord->SetProcessCacheBlocked(true);
         return;
     }
 }
@@ -347,9 +349,13 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
     }
-    if (warmStartProcesEnable_ && !appRecord->GetEnableProcessCache()) {
-        return false;
+    if (warmStartProcesEnable_) {
+        if (!appRecord->HasUIAbilityLaunched() &&
+            !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+            return false;
+        }
     }
+
     auto supportState = appRecord->GetSupportProcessCacheState();
     switch (supportState) {
         case SupportProcessCacheState::UNSPECIFIED:
