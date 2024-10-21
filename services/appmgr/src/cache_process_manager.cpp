@@ -125,7 +125,7 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
         return true;
     }
     if (warmStartProcesEnable_ && appRecord->GetPriorityObject()) {
-        AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(PROCESS_CACHE_BEGIN,
+        AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PROCESS_CACHE_BEGIN,
             appRecord->GetPriorityObject()->GetPid(), appRecord->GetUid(), CACHE_PROCESS_TIMEOUT_TIME_MS);
     }
     appRecord->ScheduleCacheProcess();
