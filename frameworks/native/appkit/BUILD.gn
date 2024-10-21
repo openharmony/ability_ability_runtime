@@ -467,7 +467,7 @@ ohos_shared_library("appkit_delegator") {
     defines = [ "CJ_FRONTEND" ]
   }
   if (ability_runtime_graphics) {
-    deps += [ "//third_party/icu/icu:shared_icuuc" ]
+    deps += [ "//third_party/icu/icu4c:shared_icuuc" ]
   }
 
   innerapi_tags = [ "platformsdk" ]
@@ -520,7 +520,7 @@ ohos_shared_library("appkit_manager_helper") {
   ]
 
   if (ability_runtime_graphics) {
-    deps += [ "//third_party/icu/icu:shared_icuuc" ]
+    deps += [ "//third_party/icu/icu4c:shared_icuuc" ]
   }
 
   innerapi_tags = [ "platformsdk" ]
