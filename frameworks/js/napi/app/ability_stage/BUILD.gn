@@ -52,7 +52,7 @@ ohos_shared_library("abilitystage") {
 }
 
 ohos_shared_library("abilitystage_napi") {
-  sources = [ "ability_stage_module.cpp" ]
+  sources = [ "ability_stage_napi_module.cpp" ]
 
   deps = [
     ":ability_stage_abc",
