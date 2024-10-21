@@ -1337,14 +1337,13 @@ int UIAbilityLifecycleManager::CloseUIAbilityInner(std::shared_ptr<AbilityRecord
         return abilityRecord->TerminateAbility();
     }
 
-    terminateAbilityList_.push_back(abilityRecord);
     abilityRecord->SendResultToCallers();
-
     if (abilityRecord->IsDebug() && isClearSession) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "notify AppMS terminate");
         return abilityRecord->TerminateAbility();
     }
 
+    terminateAbilityList_.push_back(abilityRecord);
     if (abilityRecord->IsAbilityState(FOREGROUND) || abilityRecord->IsAbilityState(FOREGROUNDING) ||
         abilityRecord->IsAbilityState(BACKGROUNDING)) {
         if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
