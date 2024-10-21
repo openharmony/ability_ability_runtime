@@ -36,7 +36,8 @@ enum class LoadingStage : int32_t {
     FOREGROUND_BEGIN,
     FOREGROUND_END,
     CONNECT_BEGIN,
-    CONNECT_END
+    CONNECT_END,
+    PROCESS_CACHE_BEGIN,
 };
 
 class ResSchedUtil final {
