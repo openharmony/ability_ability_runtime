@@ -43,6 +43,7 @@ config("abilityms_config") {
     "//prebuilts/jdk/jdk8/linux-x86/include",
     "//prebuilts/jdk/jdk8/linux-x86/include/linux",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${relational_store_innerapi_path}/rdb/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
     "${ability_runtime_path}/tools/aa/include",
     "${ability_runtime_innerkits_path}/wantagent/include",
@@ -129,6 +130,7 @@ ohos_shared_library("abilityms") {
     "${ability_runtime_services_path}/common:perm_verification",
     "${ability_runtime_services_path}/common:res_sched_util",
     "${ability_runtime_services_path}/common:task_handler_wrap",
+    "//third_party/icu/icu4c:shared_icuuc",
   ]
 
   external_deps = [
@@ -155,7 +157,6 @@ ohos_shared_library("abilityms") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
-    "icu:shared_icuuc",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -195,7 +196,6 @@ ohos_shared_library("abilityms") {
     external_deps += [
       "ability_base:session_info",
       "i18n:intl_util",
-      "icu:shared_icuuc",
       "image_framework:image_native",
       "input:libmmi-client",
       "resource_management:global_resmgr",
@@ -203,9 +203,6 @@ ohos_shared_library("abilityms") {
       "window_manager:libdm",
       "window_manager:libmodal_system_ui_extension_client",
       "window_manager:libwm",
-      "window_manager:libwsutils",
-      "window_manager:scene_session",
-      "window_manager:sms",
     ]
   }
 
