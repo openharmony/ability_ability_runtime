@@ -23,7 +23,7 @@
 #include "cj_lambda.h"
 
 namespace OHOS {
-namespace WantAgentCJ {
+namespace FfiWantAgent {
 
 using namespace OHOS::AbilityRuntime;
 
@@ -137,7 +137,8 @@ extern "C" {
 int64_t FfiWantAgentGetWantAgent(CJWantAgentInfo info, int32_t *errCode)
 {
     std::shared_ptr<AAFwk::WantParams> extraInfo =
-        std::make_shared<AAFwk::WantParams>(OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(info.extraInfos));
+        std::make_shared<AAFwk::WantParams>(
+            OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(info.extraInfos));
     std::vector<WantAgentConstant::Flags> wantAgentFlags;
     for (int64_t i = 0; i < info.actionFlags.size; i++) {
         wantAgentFlags.emplace_back(static_cast<WantAgentConstant::Flags>(info.actionFlags.head[i]));
@@ -244,5 +245,5 @@ bool FfiWantAgentEqual(int64_t cjWantAgentFirst, int64_t cjWantAgentSecond, int3
     return nativeWantAgentFirst->OnEqual(nativeWantAgentSecond->wantAgent_, errCode);
 }
 }
-} // namespace WantAgentCJ
+} // namespace FfiWantAgent
 } // namespace OHOS

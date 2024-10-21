@@ -28,7 +28,7 @@
 #include "ffi_remote_data.h"
 
 namespace OHOS {
-namespace WantAgentCJ {
+namespace FfiWantAgent {
 
 using namespace OHOS::AbilityRuntime::WantAgent;
 

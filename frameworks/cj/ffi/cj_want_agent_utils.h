@@ -24,7 +24,7 @@
 #include "cj_common_ffi.h"
 
 namespace OHOS {
-namespace WantAgentCJ {
+namespace FfiWantAgent {
 
 struct CJWantArr {
     WantHandle* head;
