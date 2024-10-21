@@ -85,11 +85,11 @@ private:
         auto me = shared_from_this();
         deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new AppMgrDeathRecipient(me));
         if (deathRecipient_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s :Failed to create AppMgrDeathRecipient!", __func__);
+            TAG_LOGE(AAFwkTag::APPMGR, "create AppMgrDeathRecipient failed");
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
         if ((remote_->IsProxyObject()) && (!remote_->AddDeathRecipient(deathRecipient_))) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s :Add death recipient to AppMgrService failed.", __func__);
+            TAG_LOGE(AAFwkTag::APPMGR, "AddDeathRecipient to AppMs failed");
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
 
@@ -333,13 +333,14 @@ AppMgrResultCode AppMgrClient::KillProcessesByAccessTokenId(const uint32_t acces
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleName, const int uid)
+AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->KillApplicationByUid(bundleName, uid);
+            int32_t result = amsService->KillApplicationByUid(bundleName, uid, reason);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }
@@ -349,13 +350,13 @@ AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleNam
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillApplicationSelf()
+AppMgrResultCode AppMgrClient::KillApplicationSelf(const std::string& reason)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->KillApplicationSelf();
+            int32_t result = amsService->KillApplicationSelf(reason);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }
@@ -520,6 +521,18 @@ AppMgrResultCode AppMgrClient::ConnectAppMgrService()
         return mgrHolder_->ConnectAppMgrService();
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+}
+
+bool AppMgrClient::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            return amsService->IsProcessContainsOnlyUIAbility(pid);
+        }
+    }
+    return false;
 }
 
 void AppMgrClient::SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr)

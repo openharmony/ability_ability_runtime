@@ -149,7 +149,7 @@ const std::string HELP_MSG_APPDEBUG_APP_DEBUG =
     "  -c, --cancel                                let application cancel wait debug\n"
     "  -g, --get                                   get wait debug mode application bundle name and persist flag\n";
 
-const std::string HELP_MSG_FORCE_STOP = "usage: aa force-stop <bundle-name>\n";
+const std::string HELP_MSG_FORCE_STOP = "usage: aa force-stop <bundle-name> [-p pid] [-r kill-reason]\n";
 const std::string HELP_MSG_FORCE_TIMEOUT =
     "usage: aa force-timeout <ability-name> <INITIAL|INACTIVE|COMMAND|FOREGROUND|BACKGROUND|TERMINATING>\n"
     "usage: aa force-timeout clean.";

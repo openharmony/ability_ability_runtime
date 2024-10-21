@@ -172,7 +172,6 @@ ohos_shared_library("appkit_native") {
     "ability_base:extractresourcemanager",
     "ability_base:string_utils",
     "ability_base:want",
-    "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -266,6 +265,8 @@ ohos_shared_library("appkit_native") {
 
 # build so
 ohos_shared_library("app_context") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
@@ -301,6 +302,7 @@ ohos_shared_library("app_context") {
 
   external_deps = [
     "ability_base:extractortool",
+    "ability_base:session_info",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
@@ -334,6 +336,8 @@ ohos_shared_library("app_context") {
 
 # build so
 ohos_shared_library("app_context_utils") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_napi_path}/ability_auto_startup_callback",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
@@ -395,6 +399,8 @@ ohos_shared_library("app_context_utils") {
 
 # build so
 ohos_shared_library("appkit_delegator") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
@@ -470,10 +476,15 @@ ohos_shared_library("appkit_delegator") {
 }
 
 config("application_context_manager_config") {
-  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context" ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "${ability_runtime_services_path}/common/include",
+  ]
 }
 
 ohos_shared_library("appkit_manager_helper") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
@@ -518,6 +529,8 @@ ohos_shared_library("appkit_manager_helper") {
 }
 
 ohos_shared_library("application_context_manager") {
+  branch_protector_ret = "pac_ret"
+
   sources = [ "${ability_runtime_native_path}/appkit/ability_runtime/context/application_context_manager.cpp" ]
 
   cflags = []
@@ -525,7 +538,10 @@ ohos_shared_library("application_context_manager") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
 
   public_configs = [ ":application_context_manager_config" ]
 

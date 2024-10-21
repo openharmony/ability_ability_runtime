@@ -16,20 +16,14 @@
 #include "dialog_session_manager.h"
 
 #include <random>
-#include <string>
-#include <chrono>
 #include "ability_manager_service.h"
-#include "ability_record.h"
 #include "ability_util.h"
-#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
 #include "modal_system_ui_extension.h"
-#include "parameters.h"
 #include "start_ability_utils.h"
 #include "string_wrapper.h"
 #include "want.h"
-#include "want_params_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -219,6 +213,7 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
         dialogCallerInfo->requestCode);
     if (ret == ERR_OK) {
         ClearDialogContext(dialogSessionId);
+        abilityMgr->RemoveSelectorIdentity(dialogCallerInfo->targetWant.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
     }
     return ret;
 }
@@ -384,6 +379,7 @@ bool DialogSessionManager::IsCreateCloneSelectorDialog(const std::string &bundle
 {
     if (StartAbilityUtils::isWantWithAppCloneIndex) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "want with app clone index.");
+        StartAbilityUtils::isWantWithAppCloneIndex = false;
         return false;
     }
     auto appIndexes = StartAbilityUtils::GetCloneAppIndexes(bundleName, userId);

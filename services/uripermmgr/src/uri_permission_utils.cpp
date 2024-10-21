@@ -30,6 +30,7 @@ namespace AAFwk {
 namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
+constexpr const char* NET_WORK_ID_MARK = "?networkid=";
 }
 
 std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::ConnectManagerHelper()
@@ -271,6 +272,11 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
     }
     tokenId = bundleInfo.applicationInfo.accessTokenId;
     return ERR_OK;
+}
+
+bool UPMSUtils::IsDocsCloudUri(Uri &uri)
+{
+    return (uri.GetAuthority() == "docs" && uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
 }
 
 std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::bundleMgrHelper_ = nullptr;

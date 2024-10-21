@@ -31,6 +31,7 @@ config("wantagent_innerkits_public_config") {
 
   include_dirs = [
     "${eventhandler_path}/interfaces/inner_api",
+    "${ability_base_kits_path}/configuration/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${global_path}/resource_management/interfaces/inner_api/include",
     "${ability_runtime_innerkits_path}/ability_manager/include",
@@ -47,6 +48,8 @@ config("wantagent_innerkits_public_config") {
 }
 
 ohos_shared_library("wantagent_innerkits") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
@@ -75,6 +78,7 @@ ohos_shared_library("wantagent_innerkits") {
   ]
 
   external_deps = [
+    "ability_base:session_info",
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",

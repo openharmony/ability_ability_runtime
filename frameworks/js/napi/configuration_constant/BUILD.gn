@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 ohos_shared_library("configurationconstant_napi") {
   include_dirs = []
 
-  sources = [ "configuration_constant_module.cpp" ]
+  sources = [ "configuration_constant_napi_module.cpp" ]
 
   deps = []
 

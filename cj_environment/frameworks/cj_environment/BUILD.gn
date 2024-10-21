@@ -24,6 +24,8 @@ config("cj_rt_public_config") {
 }
 
 ohos_shared_library("cj_environment") {
+  branch_protector_ret = "pac_ret"
+
   cflags_cc = [
     "-std=c++17",
     "-fvisibility=hidden",

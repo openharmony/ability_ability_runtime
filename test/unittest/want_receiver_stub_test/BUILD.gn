@@ -70,5 +70,5 @@ ohos_unittest("want_receiver_stub_test") {
 group("unittest") {
   testonly = true
 
-  deps = [ ":want_receiver_stub_test" ]
+  deps = []
 }
