@@ -443,7 +443,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     }
 
 #ifdef WITH_DLP
-    if (request.want.GetParams().HasParam(AbilityUtil::DLP_PARAMS_SANDBOX)) {
+    if (request.want.GetBoolParam(AbilityUtil::DLP_PARAMS_SANDBOX, false)) {
         Security::DlpPermission::DlpFileKits::ConvertAbilityInfoWithSupportDlp(request.want, abilityInfos);
         extensionInfos.clear();
     }
