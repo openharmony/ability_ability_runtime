@@ -290,7 +290,7 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
     if (appRecord == nullptr || !warmStartProcesEnable_) {
         return;
     }
-    if (appRecord->GetEnableProcessCache()) {
+    if (appRecord->GetSupportProcessCacheState() != SupportProcessCacheState::SUPPORT) {
         return;
     }
     if (!appRecord->GetPriorityObject()) {
@@ -298,11 +298,8 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
     }
     bool forceKillProcess =
         AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
-    if (!forceKillProcess) {
-        appRecord->SetEnableProcessCache(true);
-        return;
-    } else {
-        appRecord->SetEnableProcessCache(false);
+    if (forceKillProcess) {
+        appRecord->SetProcessCacheBlocked(true);
         return;
     }
 }
@@ -347,9 +344,13 @@ bool CacheProcessManager::IsAppSupportProcessCacheInnerFirst(const std::shared_p
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
         return false;
     }
-    if (warmStartProcesEnable_ && !appRecord->GetEnableProcessCache()) {
-        return false;
+    if (warmStartProcesEnable_) {
+        if (!appRecord->HasUIAbilityLaunched() &&
+            !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+            return false;
+        }
     }
+
     auto supportState = appRecord->GetSupportProcessCacheState();
     switch (supportState) {
         case SupportProcessCacheState::UNSPECIFIED:
