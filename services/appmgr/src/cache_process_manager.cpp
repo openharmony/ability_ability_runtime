@@ -33,6 +33,7 @@ const std::string PROCESS_CACHE_API_CHECK_CONFIG = "persist.sys.abilityms.proces
 const std::string PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG = "persist.sys.abilityms.processCacheSetSupportCheck";
 constexpr int32_t API12 = 12;
 constexpr int32_t API_VERSION_MOD = 100;
+constexpr int32_t CACHE_PROCESS_TIMEOUT_TIME_MS = 1500; // 1500ms
 constexpr const char *EVENT_KEY_VERSION_NAME = "VERSION_NAME";
 constexpr const char *EVENT_KEY_VERSION_CODE = "VERSION_CODE";
 constexpr const char *EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
@@ -125,7 +126,7 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
     }
     if (appRecord->GetPriorityObject()) {
         ReportLoadingEventToRss(PROCESS_CACHE_BEGIN,
-            appRecord->GetPriorityObject()->GetPid(), appRecord->GetUid());
+            appRecord->GetPriorityObject()->GetPid(), appRecord->GetUid(), CACHE_PROCESS_TIMEOUT_TIME_MS);
     }
     appRecord->ScheduleCacheProcess();
     appRecord->SetProcessCaching(false);
