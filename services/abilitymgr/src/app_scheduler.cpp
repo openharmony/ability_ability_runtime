@@ -160,7 +160,7 @@ void AppScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, con
 
 void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Kill process by ability token.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process by ability token.");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->KillProcessByAbilityToken(token);
 }
