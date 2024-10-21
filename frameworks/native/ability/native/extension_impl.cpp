@@ -274,6 +274,7 @@ void ExtensionImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleStat
  */
 sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension_");
@@ -290,6 +291,7 @@ sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want)
 
 sptr<IRemoteObject> ExtensionImpl::ConnectExtension(const Want &want, bool &isAsyncCallback)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension_");
@@ -344,6 +346,7 @@ void ExtensionImpl::ConnectExtensionCallback(sptr<IRemoteObject> &service)
  */
 void ExtensionImpl::DisconnectExtension(const Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension_");
@@ -356,6 +359,7 @@ void ExtensionImpl::DisconnectExtension(const Want &want)
 
 void ExtensionImpl::DisconnectExtension(const Want &want, bool &isAsyncCallback)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "called");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension_");
@@ -410,6 +414,7 @@ void ExtensionImpl::DisconnectExtensionCallback()
  */
 void ExtensionImpl::CommandExtension(const Want &want, bool restart, int startId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "call");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension_");
