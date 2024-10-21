@@ -140,7 +140,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     residentProcessManager->StartResidentProcessWithMainElement(bundleInfos, 0);
     AppExecFwk::HapModuleInfo hapModuleInfo;
     std::set<uint32_t> needEraseIndexSet;
-    residentProcessManager->CheckMainElement(hapModuleInfo, stringParam, stringParam, needEraseIndexSet, sizeParam);
 
     // fuzz for SaMgrClient
     auto saMgrClient = std::make_shared<SaMgrClient>();
