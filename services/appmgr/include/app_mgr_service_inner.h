@@ -838,6 +838,15 @@ public:
     int32_t NotifyAppFault(const FaultData &faultData);
 
     /**
+     * Transformed Notify Fault Data
+     *
+     * @param faultData Transformed the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+
+    int32_t TransformedNotifyAppFault(const AppFaultDataBySA &faultData);
+
+    /**
      * Notify Fault Data By SA
      *
      * @param faultData the fault data notified by SA.
