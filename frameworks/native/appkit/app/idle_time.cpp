@@ -134,7 +134,7 @@ IdleNotifyStatusCallback IdleTime::GetIdleNotifyFunc()
 {
     auto weak_this = weak_from_this();
     IdleNotifyStatusCallback cb = [weak_this](bool needStop) {
-        if (auto shared_this = weak_this.lock()){
+        if (auto shared_this = weak_this.lock()) {
             if (shared_this->GetNeedStop() == needStop) {
                 return;
             }

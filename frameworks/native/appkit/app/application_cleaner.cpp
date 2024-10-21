@@ -81,7 +81,7 @@ void ApplicationCleaner::ClearTempData()
     }
     auto weak_this = weak_from_this();
     auto cleanTemp = [weak_this, rootDir]() {
-        if(auto shared_this = weak_this.lock()) {
+        if (auto shared_this = weak_this.lock()) {
             if (shared_this == nullptr || shared_this->context_ == nullptr) {
                 TAG_LOGE(AAFwkTag::APPKIT, "Invalid shared pointer");
                 return;
