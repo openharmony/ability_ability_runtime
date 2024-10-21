@@ -450,7 +450,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<AppExecFwk::AbilityInfo> implicitAbilityInfos;
     std::vector<AppExecFwk::ExtensionAbilityInfo> implicitExtensionInfos;
     std::vector<std::string> infoNames;
-    if (!AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
+    if (!AppUtils::GetInstance().IsSelectorDialogDefaultPossion() && isMoreHapList) {
         IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->ImplicitQueryInfos(implicitwant, abilityInfoFlag, userId,
             withDefault, implicitAbilityInfos, implicitExtensionInfos));
         if (implicitAbilityInfos.size() != 0 && typeName != TYPE_ONLY_MATCH_WILDCARD) {
@@ -475,6 +475,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
 
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "for (const auto &info : abilityInfos)");
+        bool isExistDefaultApp = IsExistDefaultApp(userId, typeName);
         for (const auto &info : abilityInfos) {
             AddInfoParam param = {
                 .info = info,
@@ -483,7 +484,8 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
                 .isMoreHapList = isMoreHapList,
                 .withDefault = withDefault,
                 .typeName = typeName,
-                .infoNames = infoNames
+                .infoNames = infoNames,
+                .isExistDefaultApp = isExistDefaultApp
             };
             AddAbilityInfoToDialogInfos(param, dialogAppInfos);
         }
@@ -841,7 +843,7 @@ void ImplicitStartProcessor::AddAbilityInfoToDialogInfos(const AddInfoParam &par
         return;
     }
     if (!AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
-        bool isDefaultFlag = param.withDefault && IsExistDefaultApp(param.userId, param.typeName);
+        bool isDefaultFlag = param.withDefault && param.isExistDefaultApp;
         if (!param.isMoreHapList && !isDefaultFlag &&
             std::find(param.infoNames.begin(), param.infoNames.end(),
             (param.info.bundleName + "#" + param.info.moduleName + "#" + param.info.name)) != param.infoNames.end()) {
