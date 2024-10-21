@@ -2121,16 +2121,19 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "DoProcess failed or replaceWant not exist");
                 return result;
             }
-            auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
-            (const_cast<Want &>(newWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
-            (const_cast<Want &>(newWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);
-            return IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(newWant)) ?
-                ERR_ECOLOGICAL_CONTROL_STATUS : INNER_ERR;
+            return DialogSessionManager::GetInstance().HandleErmsResultBySCB(abilityRequest, newWant);
         }
     }
 
+    return StartUIAbilityBySCBDefaultCommon(abilityRequest, sessionInfo, sceneFlag, isColdStart);
+}
+
+int32_t AbilityManagerService::StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest,
+    sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool isColdStart)
+{
+    auto abilityInfo = abilityRequest.abilityInfo;
     if (!AbilityUtil::IsSystemDialogAbility(abilityInfo.bundleName, abilityInfo.name)) {
-        result = PreLoadAppDataAbilities(abilityInfo.bundleName, currentUserId);
+        int32_t result = PreLoadAppDataAbilities(abilityInfo.bundleName, IPCSkeleton::GetCallingUid() / BASE_USER_RANGE);
         if (result != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbility: App data ability preloading failed, '%{public}s', %{public}d",
                 abilityInfo.bundleName.c_str(), result);
@@ -2143,6 +2146,13 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
     return uiAbilityManager->StartUIAbility(abilityRequest, sessionInfo, sceneFlag, isColdStart);
+}
+
+int32_t AbilityManagerService::NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest)
+{
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+    return uiAbilityManager->NotifySCBToRecoveryAfterInterception(abilityRequest);
 }
 
 bool AbilityManagerService::CheckCallingTokenId(const std::string &bundleName, int32_t userId, int32_t appIndex)
@@ -3800,9 +3810,6 @@ int AbilityManagerService::ConnectAbilityCommon(
         auto bms = GetBundleManager();
         CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
 
-        abilityWant.SetParam("abilityConnectionObj", connect->AsObject());
-        abilityWant.RemoveParam("abilityConnectionObj");
-
         bool queryResult = IN_PROCESS_CALL(bms->QueryExtensionAbilityInfoByUri(uri, validUserId, extensionInfo));
         if (!queryResult || extensionInfo.name.empty() || extensionInfo.bundleName.empty()) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid extension ability info.");
@@ -3898,9 +3905,6 @@ int AbilityManagerService::ConnectUIExtensionAbility(const Want &want, const spt
         auto bms = GetBundleManager();
         CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
 
-        abilityWant.SetParam("abilityConnectionObj", connect->AsObject());
-        abilityWant.RemoveParam("abilityConnectionObj");
-
         bool queryResult = IN_PROCESS_CALL(bms->QueryExtensionAbilityInfoByUri(uri, validUserId, extensionInfo));
         if (!queryResult || extensionInfo.name.empty() || extensionInfo.bundleName.empty()) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid extension ability info.");
@@ -3982,8 +3986,6 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
 
     Want requestWant = want;
     CHECK_POINTER_AND_RETURN_LOG(connect, ERR_INVALID_VALUE, "connect is nullptr");
-    CHECK_POINTER_AND_RETURN_LOG(connect->AsObject(), ERR_INVALID_VALUE, "abilityConnectionObj is nullptr");
-    requestWant.SetParam("abilityConnectionObj", connect->AsObject());
     TAG_LOGD(AAFwkTag::ABILITYMGR, "requestWant SetParam success");
 
     if (result != ERR_OK) {
@@ -9945,7 +9947,7 @@ int32_t AbilityManagerService::ShareDataDone(
 int32_t AbilityManagerService::NotifySaveAsResult(const Want &want, int resultCode, int requestCode)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "requestCode is %{public}d.", requestCode);
-
+    CHECK_CALLER_IS_SYSTEM_APP;
 #ifdef WITH_DLP
     //caller check
     if (!DlpUtils::CheckCallerIsDlpManager(GetBundleManager())) {
