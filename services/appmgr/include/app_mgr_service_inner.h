@@ -597,6 +597,11 @@ public:
 
     void HandleTimeOut(const AAFwk::EventWrap &event);
 
+    void DecreaseWillKillPidsNum()
+    {
+        willKillPidsNum_ -= 1;
+    }
+
     void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler)
     {
         taskHandler_ = taskHandler;
@@ -1573,6 +1578,8 @@ private:
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
 
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
+    std::atomic<int32_t> willKillPidsNum_ = 0;
+    std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
