@@ -207,7 +207,7 @@ void AmsMgrScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token
     }
 
     if (amsMgrServiceInner_->VerifyKillProcessPermission(token) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission verify failed");
         return;
     }
 
@@ -233,7 +233,7 @@ void AmsMgrScheduler::KillProcessesByUserId(int32_t userId)
     auto permission = AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES;
     if (!isCallingFromFoundation &&
         amsMgrServiceInner_->VerifyAccountPermission(permission, userId) == ERR_PERMISSION_DENIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Permission verification failed", __func__);
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission verify failed");
         return;
     }
 
@@ -289,7 +289,8 @@ int32_t AmsMgrScheduler::KillProcessWithAccount(
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId);
+    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId,
+        "KillProcessWithAccount");
 }
 
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
@@ -366,21 +367,22 @@ int32_t AmsMgrScheduler::KillProcessesByAccessTokenId(const uint32_t accessToken
     return amsMgrServiceInner_->KillProcessesByAccessTokenId(accessTokenId);
 }
 
-int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid)
+int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid);
+    return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid, reason);
 }
 
-int32_t AmsMgrScheduler::KillApplicationSelf()
+int32_t AmsMgrScheduler::KillApplicationSelf(const std::string& reason)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationSelf();
+    return amsMgrServiceInner_->KillApplicationSelf(reason);
 }
 
 bool AmsMgrScheduler::IsReady() const
@@ -709,6 +711,20 @@ bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token
         return false;
     }
     return amsMgrServiceInner_->CleanAbilityByUserRequest(token);
+}
+bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t procPid = getprocpid();
+    if (callingPid != procPid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessContainsOnlyUIAbility(pid);
 }
 
 bool AmsMgrScheduler::IsProcessAttached(sptr<IRemoteObject> token)

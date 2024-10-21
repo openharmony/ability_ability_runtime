@@ -69,7 +69,7 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_CreateNativeChildProcess_001, TestSize
         EXPECT_EQ(ret, NCP_ERR_MULTI_PROCESS_DISABLED);
         return;
     } else if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess()) {
-        EXPECT_EQ(ret, NCP_ERR_NOT_SUPPORTED);
+        EXPECT_EQ(ret, NCP_ERR_SERVICE_ERROR);
         return;
     }
 

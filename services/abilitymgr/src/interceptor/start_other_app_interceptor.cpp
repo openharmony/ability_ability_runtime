@@ -16,12 +16,9 @@
 #include "interceptor/start_other_app_interceptor.h"
 
 #include "ability_record.h"
-#include "app_scheduler.h"
 #include "hilog_tag_wrapper.h"
-#include "ipc_skeleton.h"
 #include "parameters.h"
 #include "permission_verification.h"
-#include "running_process_info.h"
 #include "start_ability_utils.h"
 #include "tokenid_kit.h"
 
@@ -38,6 +35,7 @@ constexpr const char* OPEN_LINK_SCENE_IDENTIFICATION = "appLinkingOnly";
 ErrCode StartOtherAppInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     if (StartAbilityUtils::skipStartOther) {
+        StartAbilityUtils::skipStartOther = false;
         return ERR_OK;
     }
     std::string supportStart = OHOS::system::GetParameter(ABILITY_SUPPORT_START_OTHER_APP, "true");

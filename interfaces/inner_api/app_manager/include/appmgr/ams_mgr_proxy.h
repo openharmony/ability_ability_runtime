@@ -164,11 +164,13 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid) override;
+    virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") override;
 
-    virtual int KillApplicationSelf() override;
+    virtual int KillApplicationSelf(const std::string& reason = "KillApplicationSelf") override;
 
     virtual int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application,
         bool &debug) override;
@@ -312,6 +314,14 @@ public:
     virtual void BlockProcessCacheByPids(const std::vector<int32_t> &pids) override;
 
     /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
+    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
+
+    /**
      * Request to clean uiability from user.
      *
      * @param token the token of ability.
@@ -320,12 +330,10 @@ public:
     virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
 
     /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
      */
-    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
+    virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid) override;
 
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
