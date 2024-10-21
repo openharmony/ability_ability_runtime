@@ -295,7 +295,7 @@ ohos_shared_library("abilitykit_native") {
   ]
 
   cflags_cc = []
-  f (os_dlp_part_enabled) {
+  if (os_dlp_part_enabled) {
      cflags_cc += [ "-DWITH_DLP" ]
    }
 
