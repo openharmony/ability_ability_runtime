@@ -475,7 +475,10 @@ ohos_shared_library("appkit_delegator") {
 }
 
 config("application_context_manager_config") {
-  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context" ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "${ability_runtime_services_path}/common/include",
+  ]
 }
 
 ohos_shared_library("appkit_manager_helper") {
@@ -534,7 +537,10 @@ ohos_shared_library("application_context_manager") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
 
   public_configs = [ ":application_context_manager_config" ]
 
