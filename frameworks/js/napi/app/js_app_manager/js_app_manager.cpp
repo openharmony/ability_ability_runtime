@@ -19,7 +19,6 @@
 #include <mutex>
 
 #include "ability_manager_client.h"
-#include "ability_manager_interface.h"
 #include "ability_runtime_error_util.h"
 #include "app_mgr_interface.h"
 #include "application_info.h"

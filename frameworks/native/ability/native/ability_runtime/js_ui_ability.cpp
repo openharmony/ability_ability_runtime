@@ -1312,7 +1312,7 @@ napi_value JsUIAbility::CallObjectMethod(const char *name, napi_value const *arg
     bool showMethodNotFoundLog)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
-    TAG_LOGI(AAFwkTag::UIABILITY, "JsUIAbility call js, name: %{public}s", name);
+    TAG_LOGD(AAFwkTag::UIABILITY, "name %{public}s", name);
     if (jsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "not found ability.js");
         return nullptr;

@@ -1009,8 +1009,8 @@ bool OHOSApplication::isUpdateFontSize(Configuration &config, AbilityRuntime::Se
 
     auto preLevel = ApplicationConfigurationManager::GetInstance().GetFontSetLevel();
     if (level < preLevel) {
-        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
         TAG_LOGW(AAFwkTag::APPKIT, "low level");
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
         return false;
     }
 
@@ -1025,6 +1025,7 @@ bool OHOSApplication::isUpdateFontSize(Configuration &config, AbilityRuntime::Se
     }
 
     // level > preLevel
+    TAG_LOGW(AAFwkTag::APPKIT, "high level");
     configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     ApplicationConfigurationManager::GetInstance().SetfontSetLevel(level);
     return true;

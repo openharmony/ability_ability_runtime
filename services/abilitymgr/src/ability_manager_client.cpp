@@ -35,8 +35,8 @@ static std::unordered_map<Rosen::WSError, int32_t> SCB_TO_MISSION_ERROR_CODE_MAP
     { Rosen::WSError::WS_ERROR_INVALID_PARAM, INVALID_PARAMETERS_ERR },
 };
 }
-using OHOS::Rosen::SessionManagerLite;
 
+using OHOS::Rosen::SessionManagerLite;
 std::shared_ptr<AbilityManagerClient> AbilityManagerClient::instance_ = nullptr;
 std::once_flag AbilityManagerClient::singletonFlag_;
 #ifdef WITH_DLP
@@ -1238,7 +1238,7 @@ ErrCode AbilityManagerClient::SetMissionContinueState(sptr<IRemoteObject> token,
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "SetMissionContinueState called. state: %{public}d", state);
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         uint32_t value = static_cast<uint32_t>(state);
@@ -1384,6 +1384,7 @@ void AbilityManagerClient::EnableRecoverAbility(sptr<IRemoteObject> token)
 
 void AbilityManagerClient::ScheduleRecoverAbility(sptr<IRemoteObject> token, int32_t reason, const Want *want)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->ScheduleRecoverAbility(token, reason, want);
@@ -1538,7 +1539,7 @@ ErrCode AbilityManagerClient::ShareDataDone(
 
 ErrCode AbilityManagerClient::ForceExitApp(const int32_t pid, const ExitReason &exitReason)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "begin.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "begin.");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->ForceExitApp(pid, exitReason);
@@ -1801,15 +1802,6 @@ int32_t AbilityManagerClient::UpdateSessionInfoBySCB(std::list<SessionInfo> &ses
     return abms->UpdateSessionInfoBySCB(sessionInfos, userId, sessionIds);
 }
 
-ErrCode AbilityManagerClient::GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token,
-    UIExtensionHostInfo &hostInfo, int32_t userId)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get ui extension host info.");
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->GetUIExtensionRootHostInfo(token, hostInfo, userId);
-}
-
 ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject> token,
     UIExtensionSessionInfo &uiExtensionSessionInfo, int32_t userId)
 {
@@ -1822,10 +1814,19 @@ ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject
 int32_t AbilityManagerClient::RestartApp(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_INVALID_VALUE(abms);
     return abms->RestartApp(want);
+}
+
+ErrCode AbilityManagerClient::GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token,
+    UIExtensionHostInfo &hostInfo, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get ui extension host info.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetUIExtensionRootHostInfo(token, hostInfo, userId);
 }
 
 int32_t AbilityManagerClient::OpenAtomicService(Want& want, const StartOptions &options,
@@ -1919,15 +1920,14 @@ ErrCode AbilityManagerClient::OpenLink(const Want& want, sptr<IRemoteObject> cal
 
 ErrCode AbilityManagerClient::TerminateMission(int32_t missionId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "TerminateMission begin.");
 #ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, TerminateMission");
         auto err = sceneSessionManager->TerminateSessionByPersistentId(missionId);
         if (err != OHOS::Rosen::WMError::WM_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "TerminateMission failed, err: %{public}d.", static_cast<int32_t>(err));
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, TerminateMission err: %{public}d.", static_cast<int32_t>(err));
         }
         if (err == Rosen::WMError::WM_ERROR_INVALID_PERMISSION) {
             return CHECK_PERMISSION_FAILED;
