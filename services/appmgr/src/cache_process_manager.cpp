@@ -123,6 +123,10 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
             appRecord->GetName().c_str());
         return true;
     }
+    if (appRecord->GetPriorityObject()) {
+        ReportLoadingEventToRss(PROCESS_CACHE_BEGIN,
+            appRecord->GetPriorityObject()->GetPid(), appRecord->GetUid());
+    }
     appRecord->ScheduleCacheProcess();
     appRecord->SetProcessCaching(false);
     auto appInfo = appRecord->GetApplicationInfo();
