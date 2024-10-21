@@ -528,10 +528,10 @@ bool PermissionVerification::VerifyPreStartAtomicServicePermission() const
 bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
 {
     if (IsSACall() && VerifyCallingPermission(PermissionConstants::PERMISSION_KILL_PROCESS_DEPENDED_ON_WEB)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "Permission verfication succeeded.");
+        TAG_LOGD(AAFwkTag::APPMGR, "Permission verification succeeded.");
         return true;
     }
-    TAG_LOGW(AAFwkTag::APPMGR, "Permission verfication failed");
+    TAG_LOGW(AAFwkTag::APPMGR, "Permission verification failed");
     return false;
 }
 }  // namespace AAFwk
