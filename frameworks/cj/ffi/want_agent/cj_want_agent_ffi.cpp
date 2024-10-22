@@ -108,10 +108,10 @@ int32_t CJWantAgent::UnWrapTriggerInfoParam(CJTriggerInfo cjTriggerInfo, std::fu
     
     TriggerInfo triggerInfoData(permission, extraInfo, want, startOptions, cjTriggerInfo.code);
     triggerInfo = triggerInfoData;
-
-    triggerObj->SetCallbackInfo(callback);
-    triggerObj->SetWantAgentInstance(GetID());
-
+    if (triggerObj != nullptr) {
+        triggerObj->SetCallbackInfo(callback);
+        triggerObj->SetWantAgentInstance(GetID());
+    }
     return BUSINESS_ERROR_CODE_OK;
 }
 
