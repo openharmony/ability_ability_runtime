@@ -1514,6 +1514,20 @@ int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
     return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
 }
 
+int32_t AppMgrService::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not foundation");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->SetSupportedProcessCache(pid, isSupport);
+}
+
 void AppMgrService::SetAppAssertionPauseState(bool flag)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");

@@ -313,6 +313,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleNotifyMemorySizeStateChanged(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE_SELF):
             return HandleSetSupportedProcessCacheSelf(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE):
+            return HandleSetSupportedProcessCache(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_BUNDLE_TYPE):
             return HandleGetRunningProcessesByBundleType(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF):
