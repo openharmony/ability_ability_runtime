@@ -973,6 +973,16 @@ public:
         return isKia_;
     }
 
+    inline void ResetDelayConfiguration()
+    {
+        delayConfiguration_ = std::make_shared<Configuration>();
+    }
+
+    inline std::shared_ptr<Configuration> GetDelayConfiguration()
+    {
+        return delayConfiguration_;
+    }
+
     void AddAppLifecycleEvent(const std::string &msg);
 private:
     /**
@@ -1132,6 +1142,7 @@ private:
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
     bool isKia_ = false;
+    std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
 };
 
 }  // namespace AppExecFwk
