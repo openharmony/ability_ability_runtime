@@ -218,9 +218,14 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-    jsAbilityObj_ = jsRuntime_.LoadModule(
-        moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
-        false, abilityInfo->srcEntrance);
+    std::string key(moduleName);
+    key.append("::");
+    key.append(srcPath);
+    if (!jsRuntime_.GetPreloadObj(key, jsAbilityObj_)) {
+        jsAbilityObj_ = jsRuntime_.LoadModule(
+            moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
+            false, abilityInfo->srcEntrance);
+    }
     if (jsAbilityObj_ == nullptr || abilityContext_ == nullptr || want == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj_ or abilityContext_ or want");
         return;

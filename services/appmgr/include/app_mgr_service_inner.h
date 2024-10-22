@@ -1717,7 +1717,7 @@ private:
      */
     bool NotifyMemMgrPriorityChanged(const std::shared_ptr<AppRunningRecord> appRecord);
 
-    void HandlePreloadApplication(const PreloadRequest &request);
+    void HandlePreloadApplication(const PreloadRequest &request, AppExecFwk::PreloadMode preloadMode);
 
     std::string GetSpecifiedProcessFlag(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want);
 
