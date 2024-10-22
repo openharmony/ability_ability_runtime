@@ -1515,6 +1515,19 @@ int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, Mess
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    bool isSupport = data.ReadBool();
+    int32_t pid = data.ReadInt32();
+    auto ret = SetSupportedProcessCache(pid, isSupport);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
