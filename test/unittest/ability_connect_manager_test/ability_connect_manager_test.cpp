@@ -3306,5 +3306,19 @@ HWTEST_F(AbilityConnectManagerTest, UnloadUIExtensionAbility_0100, TestSize.Leve
     auto ret = connectManager->UnloadUIExtensionAbility(abilityRecord, hostBundleName);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: UpdateKeepAliveEnableState_0100
+ * @tc.desc: UpdateKeepAliveEnableState
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, UpdateKeepAliveEnableState_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    auto ret = connectManager->UpdateKeepAliveEnableState("bundle", "entry", "mainAbility", true);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

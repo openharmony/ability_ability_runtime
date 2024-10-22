@@ -3143,5 +3143,24 @@ void AbilityConnectManager::UninstallApp(const std::string &bundleName)
         }
     }
 }
+
+int32_t AbilityConnectManager::UpdateKeepAliveEnableState(const std::string &bundleName,
+    const std::string &moduleName, const std::string &mainElement, bool updateEnable)
+{
+    std::lock_guard lock(serviceMapMutex_);
+    for (const auto &[key, abilityRecord]: serviceMap_) {
+        CHECK_POINTER_AND_RETURN(abilityRecord, ERR_NULL_OBJECT);
+        if (abilityRecord->GetAbilityInfo().bundleName == bundleName &&
+            abilityRecord->GetAbilityInfo().name == mainElement &&
+            abilityRecord->GetAbilityInfo().moduleName == moduleName) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR,
+                "update keepAlive,bundle:%{public}s,module:%{public}s,ability:%{public}s,enable:%{public}d",
+                bundleName.c_str(), moduleName.c_str(), mainElement.c_str(), updateEnable);
+            abilityRecord->SetKeepAliveBundle(updateEnable);
+            return ERR_OK;
+        }
+    }
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
