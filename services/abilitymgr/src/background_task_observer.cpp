@@ -18,6 +18,7 @@
 #include "hilog_tag_wrapper.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
+#include "resource_type.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -56,6 +57,38 @@ void BackgroundTaskObserver::OnContinuousTaskStop(const std::shared_ptr<Backgrou
     }
 }
 
+void BackgroundTaskObserver::OnProcEfficiencyResourcesApply(
+    const std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo> &resourceInfo)
+{
+    if (!resourceInfo || (resourceInfo->GetResourceNumber() & BackgroundTaskMgr::ResourceType::WORK_SCHEDULER) == 0) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(efficiencyMutex_);
+    efficiencyUids_.push_back(resourceInfo->GetUid());
+}
+
+void BackgroundTaskObserver::OnProcEfficiencyResourcesReset(
+    const std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo> &resourceInfo)
+{
+    if (!resourceInfo || (resourceInfo->GetResourceNumber() & BackgroundTaskMgr::ResourceType::WORK_SCHEDULER) == 0) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(efficiencyMutex_);
+    efficiencyUids_.remove(resourceInfo->GetUid());
+}
+
+void BackgroundTaskObserver::OnAppEfficiencyResourcesApply(
+    const std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo> &resourceInfo)
+{
+    OnProcEfficiencyResourcesApply(resourceInfo);
+}
+
+void BackgroundTaskObserver::OnAppEfficiencyResourcesReset(
+    const std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo> &resourceInfo)
+{
+    OnProcEfficiencyResourcesReset(resourceInfo);
+}
+
 void BackgroundTaskObserver::GetContinuousTaskApps()
 {
     std::vector<std::shared_ptr<BackgroundTaskMgr::ContinuousTaskCallbackInfo>> continuousTasks;
@@ -71,11 +104,50 @@ void BackgroundTaskObserver::GetContinuousTaskApps()
     }
 }
 
+void BackgroundTaskObserver::GetEfficiencyResourcesTaskApps()
+{
+    std::vector<std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo>> appList;
+    std::vector<std::shared_ptr<BackgroundTaskMgr::ResourceCallbackInfo>> procList;
+    ErrCode result = BackgroundTaskMgr::BackgroundTaskMgrHelper::GetEfficiencyResourcesInfos(appList, procList);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to GetEfficiencyResourcesInfos, err: %{public}d", result);
+        return;
+    }
+    std::lock_guard<std::mutex> lock(efficiencyMutex_);
+    efficiencyUids_.clear();
+    for (auto& info : appList) {
+        if (info == nullptr) {
+            continue;
+        }
+        if ((info->GetResourceNumber() & BackgroundTaskMgr::ResourceType::WORK_SCHEDULER) != 0) {
+            efficiencyUids_.push_back(info->GetUid());
+        }
+    }
+    for (auto& info : procList) {
+        if (info == nullptr) {
+            continue;
+        }
+        if ((info->GetResourceNumber() & BackgroundTaskMgr::ResourceType::WORK_SCHEDULER) != 0) {
+            efficiencyUids_.push_back(info->GetUid());
+        }
+    }
+}
+
 bool BackgroundTaskObserver::IsBackgroundTaskUid(const int uid)
 {
     std::lock_guard<std::mutex> lock(bgTaskMutex_);
     auto iter = find(bgTaskUids_.begin(), bgTaskUids_.end(), uid);
     if (iter != bgTaskUids_.end()) {
+        return true;
+    }
+    return false;
+}
+
+bool BackgroundTaskObserver::IsEfficiencyResourcesTaskUid(const int uid)
+{
+    std::lock_guard<std::mutex> lock(efficiencyMutex_);
+    auto iter = std::find(efficiencyUids_.begin(), efficiencyUids_.end(), uid);
+    if (iter != efficiencyUids_.end()) {
         return true;
     }
     return false;
