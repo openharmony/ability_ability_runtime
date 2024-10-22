@@ -331,9 +331,6 @@ void AppMgrServiceInner::Init()
     if (securityModeManager_) {
         securityModeManager_->Init();
     }
-    if (configuration_) {
-        appRunningManager_->initConfig(*configuration_);
-    }
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
