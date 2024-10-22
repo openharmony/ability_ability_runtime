@@ -1762,7 +1762,7 @@ public:
         const std::string& reason);
 
     void HandleRestartResidentProcessDependedOnWeb();
-    
+
     int32_t TerminateMission(int32_t missionId) override;
 
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
@@ -2259,7 +2259,7 @@ private:
 
     void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
         const Want& want, uint32_t specifyTokenId);
-    
+
     void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;

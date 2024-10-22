@@ -19,7 +19,6 @@
 #include <mutex>
 
 #include "ability_manager_interface.h"
-#include "ability_manager_errors.h"
 #include "app_mgr_interface.h"
 #include "hilog_tag_wrapper.h"
 #include "js_runtime.h"
