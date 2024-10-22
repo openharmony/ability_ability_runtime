@@ -1811,7 +1811,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
-    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED &&
+    if (startOptions.processOptions != nullptr &&
+        abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED &&
         !ProcessOptions::IsAttachToStatusBarItemMode(startOptions.processOptions->processMode)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "processMode is not attach to status bar item.");
         return ERR_START_OPTIONS_CHECK_FAILED;
