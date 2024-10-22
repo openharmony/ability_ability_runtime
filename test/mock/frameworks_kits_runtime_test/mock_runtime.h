@@ -85,6 +85,16 @@ public:
     {
         return;
     }
+    void PreloadMainAbility(std::string& srcEntrance, std::string& moduleName, std::string& path,
+        std::string& hapPath, std::string& name, bool isModuleJson, std::string& package, bool isEsMode) override
+    {
+        return;
+    }
+    void PreloadModule(std::string& moduleName, std::string& path, std::string& name, bool isModuleJson,
+        bool isEsMode, bool useCommonTrunk, std::string& hapPath) override
+    {
+        return;
+    }
     bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false)
     {
         return true;
