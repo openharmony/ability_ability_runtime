@@ -68,6 +68,7 @@
             "hitrace",
             "hiview",
             "i18n",
+            "icu",
             "image_framework",
             "init",
             "input",
