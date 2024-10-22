@@ -635,7 +635,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::GetAppContext() const
     return abilityRuntimeContext_;
 }
 
-std::unique_ptr<AbilityRuntime::Runtime>& OHOSApplication::GetRuntime() const
+const std::unique_ptr<AbilityRuntime::Runtime>& OHOSApplication::GetRuntime() const
 {
     return runtime_;
 }
