@@ -172,7 +172,7 @@ public:
      *
      * @param runtime
      */
-    const std::unique_ptr<AbilityRuntime::Runtime>& GetRuntime();
+    std::unique_ptr<AbilityRuntime::Runtime>& GetRuntime() const;
 
     /*
      *
