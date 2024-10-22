@@ -1586,7 +1586,7 @@ ohos_shared_library("auto_fill_extension_module") {
   deps = [
     ":auto_fill_extension",
     "${ability_runtime_innerkits_path}/runtime:runtime",
-    "${ability_runtime_native_path}/appkit:appkit_natice",
+    "${ability_runtime_native_path}/appkit:appkit_native",
   ]
 
   external_deps = [
