@@ -76,6 +76,10 @@ public:
     void OnOffApplicationStateChange(int32_t callbackId, int32_t *errCode);
     static CJApplicationContext* GetCJApplicationContext(
         std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext);
+    std::shared_ptr<AbilityRuntime::ApplicationContext> GetApplicationContext()
+    {
+        return applicationContext_.lock();
+    }
 private:
     std::weak_ptr<AbilityRuntime::ApplicationContext> applicationContext_;
     std::shared_ptr<AbilityRuntime::CjAbilityLifecycleCallback> callback_;
