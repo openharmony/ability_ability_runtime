@@ -20,10 +20,10 @@
 
 #include "nocopyable.h"
 #include "session_info.h"
+#include "window.h"
 #include "window_option.h"
 #include "window_scene.h"
 #include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
-#include "window.h"
 
 #ifdef SUPPORT_GRAPHICS
 #include "pixel_map.h"

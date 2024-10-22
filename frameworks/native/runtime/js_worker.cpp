@@ -87,8 +87,8 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
         return;
     }
 
-    OHOS::JsSysModule::Console::InitConsoleModule(reinterpret_cast<napi_env>(nativeEngine));
     InitSyscapModule(reinterpret_cast<napi_env>(nativeEngine));
+    OHOS::JsSysModule::Console::InitConsoleModule(reinterpret_cast<napi_env>(nativeEngine));
     OHOS::Ace::DeclarativeModulePreloader::PreloadWorker(*nativeEngine);
 
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
@@ -102,7 +102,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
         std::string instanceName = "workerThread_" + std::to_string(instanceId);
         bool needBreakPoint = ConnectServerManager::Get().AddInstance(instanceId, instanceId, instanceName);
         if (g_nativeStart) {
-            TAG_LOGD(AAFwkTag::APPMGR, "native: true, set needBreakPoint: false");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "native: true, set needBreakPoint: false");
             needBreakPoint = false;
         }
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
