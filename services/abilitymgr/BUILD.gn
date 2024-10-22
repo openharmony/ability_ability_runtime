@@ -43,7 +43,6 @@ config("abilityms_config") {
     "//prebuilts/jdk/jdk8/linux-x86/include",
     "//prebuilts/jdk/jdk8/linux-x86/include/linux",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${relational_store_innerapi_path}/rdb/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
     "${ability_runtime_path}/tools/aa/include",
     "${ability_runtime_innerkits_path}/wantagent/include",
