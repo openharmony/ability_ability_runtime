@@ -1472,7 +1472,7 @@ private:
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
                       bool isPreload = false, const std::string &moduleName = "", const std::string &abilityName = "",
-                      bool strictMode = false, int32_t maxChildProcess = 0, sptr<IRemoteObject> token = nullptr,
+                      bool strictMode = false, sptr<IRemoteObject> token = nullptr,
                       std::shared_ptr<AAFwk::Want> want = nullptr,
                       ExtensionAbilityType ExtensionAbilityType = ExtensionAbilityType::UNSPECIFIED);
 
@@ -1619,7 +1619,8 @@ private:
 
     void KillAttachedChildProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    void PresetMaxChildProcess(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &maxChildProcess);
+    void PresetMaxChildProcess(std::shared_ptr<AppRunningRecord> appRecord,
+        int32_t &maxChildProcess);
 
     void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
