@@ -157,6 +157,7 @@ ohos_shared_library("abilityms") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "icu:shared_icuuc",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -196,6 +197,7 @@ ohos_shared_library("abilityms") {
     external_deps += [
       "ability_base:session_info",
       "i18n:intl_util",
+      "icu:shared_icuuc",
       "image_framework:image_native",
       "input:libmmi-client",
       "resource_management:global_resmgr",
