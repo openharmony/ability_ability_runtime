@@ -21,7 +21,9 @@ ohos_unittest("start_other_app_interceptor_test") {
 
   cflags_cc = []
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+
     "${ability_runtime_services_path}/appmgr/include",
   ]
 

@@ -29,7 +29,9 @@ ohos_unittest("app_scheduler_test") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+
     "${ability_runtime_test_path}/mock/mock_sa_call",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
     "${ability_runtime_test_path}/unittest/app_debug_listener_proxy_test",
