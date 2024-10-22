@@ -38,7 +38,6 @@ constexpr const char* VERSION_PREFIX = "v";
 constexpr const char* APPSPAWN_CLIENT_USER_NAME = "APP_MANAGER_SERVICE";
 constexpr int32_t RIGHT_SHIFT_STEP = 1;
 constexpr int32_t START_FLAG_TEST_NUM = 1;
-constexpr const char* MAX_CHILD_PROCESS = "MaxChildProcess";
 }
 AppSpawnClient::AppSpawnClient(bool isNWebSpawn)
 {
@@ -296,8 +295,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsg(const AppSpawnStartMsg &startMsg, AppS
     }
 
     if (!startMsg.atomicAccount.empty()) {
-        ret = AppSpawnReqMsgAddExtInfo(reqHandle, MSG_EXT_NAME_ACCOUNT_ID,
-            reinterpret_cast<const uint8_t*>(startMsg.atomicAccount.c_str()), startMsg.atomicAccount.size());
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_ACCOUNT_ID, startMsg.atomicAccount.c_str());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
@@ -320,8 +318,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
     }
 
     if (!startMsg.processType.empty()) {
-        ret = AppSpawnReqMsgAddExtInfo(reqHandle, MSG_EXT_NAME_PROCESS_TYPE,
-            reinterpret_cast<const uint8_t*>(startMsg.processType.c_str()), startMsg.processType.size());
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_PROCESS_TYPE, startMsg.processType.c_str());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
@@ -329,8 +326,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
     }
 
     std::string maxChildProcessStr = std::to_string(startMsg.maxChildProcess);
-    ret = AppSpawnReqMsgAddExtInfo(reqHandle, MAX_CHILD_PROCESS,
-        reinterpret_cast<const uint8_t*>(maxChildProcessStr.c_str()), maxChildProcessStr.size());
+    ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_MAX_CHILD_PROCCESS_MAX, maxChildProcessStr.c_str());
     if (ret) {
         TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
         return ret;

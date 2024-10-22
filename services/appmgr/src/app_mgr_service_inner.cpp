@@ -150,6 +150,7 @@ constexpr int REGISTER_PID_VISIBILITY_DELAY = 5000;
 constexpr int PHONE_MAX_RENDER_PROCESS_NUM = 40;
 constexpr int PROCESS_RESTART_MARGIN_MICRO_SECONDS = 2000;
 constexpr const int32_t API10 = 10;
+constexpr const int32_t API15 = 15;
 constexpr const int32_t API_VERSION_MOD = 100;
 constexpr const int32_t U0_USER_ID = 0;
 constexpr const char* CLASS_NAME = "ohos.app.MainThread";
@@ -883,11 +884,9 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     }
     bool strictMode = (want == nullptr) ? false : want->GetBoolParam(STRICT_MODE, false);
     appRecord->SetStrictMode(strictMode);
-    int32_t maxChildProcess = 0;
-    PresetMaxChildProcess(abilityInfo, maxChildProcess);
     StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord,
         appInfo->uid, bundleInfo, appInfo->bundleName, bundleIndex, appExistFlag, isPreload, abilityInfo->moduleName,
-        abilityInfo->name, strictMode, maxChildProcess, token, want, abilityInfo->extensionAbilityType);
+        abilityInfo->name, strictMode, token, want, abilityInfo->extensionAbilityType);
     if (isShellCall) {
         std::string perfCmd = (want == nullptr) ? "" : want->GetStringParam(PERF_CMD);
         bool isSandboxApp = (want == nullptr) ? false : want->GetBoolParam(ENTER_SANDBOX, false);
@@ -3251,8 +3250,12 @@ void AppMgrServiceInner::SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartM
     startMsg.apl = bundleInfo.applicationInfo.appPrivilegeLevel;
     startMsg.ownerId = bundleInfo.signatureInfo.appIdentifier;
     startMsg.provisionType = bundleInfo.applicationInfo.appProvisionType;
-    if (startMsg.maxChildProcess == 0) {
-        startMsg.maxChildProcess = bundleInfo.applicationInfo.maxChildProcess;
+    if (bundleInfo.applicationInfo.apiTargetVersion % API_VERSION_MOD < API15) {
+        startMsg.maxChildProcess = 0;
+    } else {
+        if (startMsg.maxChildProcess == 0) {
+            startMsg.maxChildProcess = bundleInfo.applicationInfo.maxChildProcess;
+        }
     }
     startMsg.setAllowInternet = setAllowInternet;
     startMsg.allowInternet = allowInternet;
@@ -3321,14 +3324,12 @@ int32_t AppMgrServiceInner::CreateStartMsg(const std::string &processName, uint3
     return ERR_OK;
 }
 
-void AppMgrServiceInner::PresetMaxChildProcess(const std::shared_ptr<AbilityInfo> &abilityInfo,
-    int32_t &maxChildProcess)
+void AppMgrServiceInner::PresetMaxChildProcess(std::shared_ptr<AppRunningRecord> appRecord, int32_t &maxChildProcess)
 {
-    auto type = abilityInfo->type;
-    auto extensionType = abilityInfo->extensionAbilityType;
-    if (type == AppExecFwk::AbilityType::EXTENSION &&
-        extensionType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
-        extensionType != AppExecFwk::ExtensionAbilityType::SERVICE) {
+    ProcessType processType = appRecord->GetProcessType();
+    ExtensionAbilityType extensionType = appRecord->GetExtensionType();
+    if (processType == ProcessType::EXTENSION && extensionType != ExtensionAbilityType::DATASHARE &&
+        extensionType != ExtensionAbilityType::SERVICE) {
         maxChildProcess = 1;
     }
 }
@@ -3379,8 +3380,8 @@ void AppMgrServiceInner::QueryExtensionSandBox(const std::string &moduleName, co
 void AppMgrServiceInner::StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
     std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
     const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag, bool isPreload,
-    const std::string &moduleName, const std::string &abilityName, bool strictMode, int32_t maxChildProcess,
-    sptr<IRemoteObject> token, std::shared_ptr<AAFwk::Want> want, ExtensionAbilityType ExtensionAbilityType)
+    const std::string &moduleName, const std::string &abilityName, bool strictMode, sptr<IRemoteObject> token,
+    std::shared_ptr<AAFwk::Want> want, ExtensionAbilityType ExtensionAbilityType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "bundleName: %{public}s, isPreload: %{public}d", bundleName.c_str(), isPreload);
@@ -3402,7 +3403,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     AppSpawnStartMsg startMsg;
     auto appInfo = appRecord->GetApplicationInfo();
     auto bundleType = appInfo ? appInfo->bundleType : BundleType::APP;
-    startMsg.maxChildProcess = maxChildProcess;
+    PresetMaxChildProcess(appRecord, startMsg.maxChildProcess);
     auto ret = CreateStartMsg(processName, startFlags, uid, bundleInfo, bundleIndex, bundleType, startMsg, want,
         moduleName, abilityName, strictMode);
     if (ret != ERR_OK) {
