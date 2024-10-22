@@ -2262,6 +2262,8 @@ private:
     
     void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
+    bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 

@@ -2420,6 +2420,7 @@ void AbilityManagerService::SubscribeBackgroundTask()
         return;
     }
     bgtaskObserver_->GetContinuousTaskApps();
+    bgtaskObserver_->GetEfficiencyResourcesTaskApps();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s success.", __func__);
 #endif
 }
@@ -2677,6 +2678,26 @@ int AbilityManagerService::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sess
     return uiAbilityManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow);
 }
 
+bool AbilityManagerService::CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid)
+{
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    std::unique_lock<ffrt::mutex> lock(bgtaskObserverMutex_);
+    if (bgtaskObserver_ && abilityRecord) {
+        auto callerAbilityInfo = abilityRecord->GetAbilityInfo();
+        if (callerAbilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::WORK_SCHEDULER) {
+            return true;
+        }
+
+        if (!bgtaskObserver_->IsEfficiencyResourcesTaskUid(uid)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission to start extension by WorkScheduler");
+            return false;
+        }
+    }
+#endif
+    return true;
+}
+
 int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType, bool checkSystemCaller, bool isImplicit,
     bool isDlp)
@@ -2757,6 +2778,9 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
         return ERR_SHARE_FILE_URI_NON_IMPLICITLY;
     }
 
+    if (!CheckWorkSchedulerPermission(callerToken, abilityRequest.abilityInfo.applicationInfo.uid)) {
+        return CHECK_PERMISSION_FAILED;
+    }
     auto abilityInfo = abilityRequest.abilityInfo;
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId is : %{public}d, singleton is : %{public}d",
