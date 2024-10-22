@@ -75,15 +75,17 @@ bool PermissionVerification::VerifyGetBundleInfoPrivilegedPermission() const
 }
 int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInfo &verificationInfo, bool isShell) const
 {
-    return MyFlag::flag_;
+    return 0;
 }
 int PermissionVerification::CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const
 {
     return MyFlag::flag_;
 }
-int PermissionVerification::CheckCallAbilityPermission(const VerificationInfo &verificationInfo) const
+
+int PermissionVerification::CheckCallAbilityPermission(const VerificationInfo &verificationInfo,
+    bool isCallByShortcut) const
 {
-    return MyFlag::flag_;
+    return MyFlag::abilityCallFlag_;
 }
 int PermissionVerification::CheckCallServiceExtensionPermission(const VerificationInfo &verificationInfo) const
 {
@@ -115,7 +117,7 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
 }
 bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 {
-    return true;
+    return MyFlag::systemAppFlag_;
 }
 bool PermissionVerification::VerifyPrepareTerminatePermission() const
 {
@@ -123,7 +125,7 @@ bool PermissionVerification::VerifyPrepareTerminatePermission() const
 }
 bool PermissionVerification::IsSystemAppCall() const
 {
-    return true;
+    return MyFlag::systemCallFlag_;
 }
 
 bool PermissionVerification::VerifySetProcessCachePermission() const

@@ -357,7 +357,7 @@ std::unique_ptr<AbilityRuntime::Runtime> ChildProcessManager::CreateRuntime(cons
     options.loadAce = true;
     options.jitEnabled = jitEnabled;
 
-    for (auto moduleItem : bundleInfo.hapModuleInfos) {
+    for (auto &moduleItem : bundleInfo.hapModuleInfos) {
         options.pkgContextInfoJsonStringMap[moduleItem.moduleName] = moduleItem.hapPath;
         options.packageNameList[moduleItem.moduleName] = moduleItem.packageName;
     }

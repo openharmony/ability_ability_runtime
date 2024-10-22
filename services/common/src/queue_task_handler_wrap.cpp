@@ -22,6 +22,14 @@ constexpr int32_t QUEUE_TIME_OUT = 500000; // us
 QueueTaskHandlerWrap::QueueTaskHandlerWrap(const std::string &queueName, TaskQoS queueQos)
     : taskQueue_(queueName.c_str(), ffrt::queue_attr().qos(Convert2FfrtQos(queueQos)).timeout(QUEUE_TIME_OUT))
 {}
+
+QueueTaskHandlerWrap::QueueTaskHandlerWrap(const std::string &queueName, int32_t concurrentNum, TaskQoS queueQos)
+    : taskQueue_(
+        ffrt::queue_type::queue_concurrent,
+        queueName.c_str(),
+        ffrt::queue_attr().qos(Convert2FfrtQos(queueQos)).timeout(QUEUE_TIME_OUT).max_concurrency(concurrentNum))
+{}
+
 std::shared_ptr<InnerTaskHandle> QueueTaskHandlerWrap::SubmitTaskInner(std::function<void()> &&task,
     const TaskAttribute &taskAttr)
 {

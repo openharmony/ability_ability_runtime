@@ -94,7 +94,7 @@ public:
      * @param targetState Indicates the lifecycle state.
      * @param sessionInfo Indicates the session info.
      */
-    void ScheduleAbilityTransaction(
+    bool ScheduleAbilityTransaction(
         const Want &want, const LifeCycleStateInfo &targetState, sptr<SessionInfo> sessionInfo = nullptr) override;
 
     /**

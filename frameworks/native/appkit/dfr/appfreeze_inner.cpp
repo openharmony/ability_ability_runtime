@@ -86,6 +86,63 @@ bool AppfreezeInner::IsHandleAppfreeze()
     return !isAppDebug_;
 }
 
+void AppfreezeInner::GetMainHandlerDump(std::string& msgContent)
+{
+    auto mainHandler = appMainHandler_.lock();
+    if (mainHandler == nullptr) {
+        msgContent += "mainHandler is destructed!";
+    } else {
+        MainHandlerDumper handlerDumper;
+        msgContent += "mainHandler dump is:\n";
+        mainHandler->Dump(handlerDumper);
+        msgContent += handlerDumper.GetDumpInfo();
+    }
+}
+
+void AppfreezeInner::ChangeFaultDateInfo(FaultData& faultData, const std::string& msgContent)
+{
+    faultData.errorObject.message += msgContent;
+    faultData.faultType = FaultDataType::APP_FREEZE;
+    faultData.notifyApp = false;
+    faultData.waitSaveState = false;
+    faultData.forceExit = false;
+    bool isExit = IsExitApp(faultData.errorObject.name);
+    if (isExit) {
+        faultData.forceExit = true;
+        faultData.waitSaveState = AppRecovery::GetInstance().IsEnabled();
+        AAFwk::ExitReason exitReason = {REASON_APP_FREEZE, "Kill Reason:" + faultData.errorObject.name};
+        AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+        SendProcessKillEvent("Kill Reason:" + faultData.errorObject.name);
+    }
+    NotifyANR(faultData);
+    if (isExit) {
+        AppFreezeRecovery();
+    }
+}
+
+void AppfreezeInner::AppfreezeHandleOverReportCount(bool isSixSecondEvent)
+{
+    FaultData faultData;
+    faultData.errorObject.message =
+        "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+    faultData.errorObject.message += "App main thread is not response!";
+    faultData.faultType = FaultDataType::APP_FREEZE;
+    faultData.timeoutMarkers = "";
+    if (isSixSecondEvent) {
+        faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
+    } else {
+        faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
+    }
+    if (!IsHandleAppfreeze()) {
+        NotifyANR(faultData);
+        return;
+    }
+    std::string msgContent;
+    GetMainHandlerDump(msgContent);
+    ChangeFaultDateInfo(faultData, msgContent);
+    return;
+}
+
 int AppfreezeInner::AppfreezeHandle(const FaultData& faultData, bool onlyMainThread)
 {
     if (!IsHandleAppfreeze()) {
@@ -140,16 +197,7 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeInner::AcquireStack name:%s", info.errorObject.name.c_str());
     std::string stack = "";
     std::string msgContent;
-
-    auto mainHandler = appMainHandler_.lock();
-    if (mainHandler == nullptr) {
-        msgContent += "mainHandler is destructed!";
-    } else {
-        MainHandlerDumper handlerDumper;
-        msgContent += "mainHandler dump is:\n";
-        mainHandler->Dump(handlerDumper);
-        msgContent += handlerDumper.GetDumpInfo();
-    }
+    GetMainHandlerDump(msgContent);
 
     std::lock_guard<std::mutex> lock(handlingMutex_);
     for (auto it = handlinglist_.begin(); it != handlinglist_.end(); it = handlinglist_.erase(it)) {
@@ -159,29 +207,14 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
         if (it->state != 0) {
             FreezeUtil::LifecycleFlow flow = { it->token, static_cast<FreezeUtil::TimeoutState>(it->state) };
             faultData.errorObject.message += "client:\n" +
-                FreezeUtil::GetInstance().GetLifecycleEvent(flow) + "\n";
+                FreezeUtil::GetInstance().GetLifecycleEvent(flow) + "\nclient app:\n" +
+                FreezeUtil::GetInstance().GetAppLifecycleEvent(0) + "\n";
         }
-        faultData.errorObject.message += msgContent;
         faultData.errorObject.stack = stack;
         faultData.errorObject.name = it->errorObject.name;
-        faultData.faultType = FaultDataType::APP_FREEZE;
         faultData.timeoutMarkers = it->timeoutMarkers;
-        faultData.notifyApp = false;
-        faultData.waitSaveState = false;
-        faultData.forceExit = false;
         faultData.eventId = it->eventId;
-        bool isExit = IsExitApp(it->errorObject.name);
-        if (isExit) {
-            faultData.forceExit = true;
-            faultData.waitSaveState = AppRecovery::GetInstance().IsEnabled();
-            AAFwk::ExitReason exitReason = {REASON_APP_FREEZE, "Kill Reason:" + faultData.errorObject.name};
-            AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
-            SendProcessKillEvent("Kill Reason:" + faultData.errorObject.name);
-        }
-        NotifyANR(faultData);
-        if (isExit) {
-            AppFreezeRecovery();
-        }
+        ChangeFaultDateInfo(faultData, msgContent);
     }
     return 0;
 }

@@ -23,15 +23,44 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+/**
+ * @class KiaInterceptorStub
+ * IPC stub of IKiaInterceptor.
+ */
 class KiaInterceptorStub : public IRemoteStub<IKiaInterceptor> {
 public:
+    /**
+     * KiaInterceptorStub, constructor.
+     *
+     */
     KiaInterceptorStub();
+
+    /**
+     * KiaInterceptorStub, destructor.
+     *
+     */
     virtual ~KiaInterceptorStub();
 
+    /**
+     * OnRemoteRequest, IPC method.
+     *
+     * @param code The IPC code.
+     * @param data The message parcel data.
+     * @param reply The message parcel reply.
+     * @param option The message parcel option.
+     * @return Error code of calling the function.
+     */
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
+    /**
+     * OnInterceptInner, inner processing method from KIA.
+     *
+     * @param data The message parcel data.
+     * @param reply The message parcel reply.
+     * @return Error code of calling the function.
+     */
     int OnInterceptInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AppExecFwk

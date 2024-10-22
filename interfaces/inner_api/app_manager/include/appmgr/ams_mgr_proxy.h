@@ -162,11 +162,14 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid) override;
+    virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") override;
 
-    virtual int KillApplicationSelf(const bool clearPageStack = false) override;
+    virtual int KillApplicationSelf(const bool clearPageStack = false,
+        const std::string& reason = "KillApplicationSelf") override;
 
     /**
      * Get application info by process id.
@@ -362,20 +365,20 @@ public:
     virtual void BlockProcessCacheByPids(const std::vector<int32_t> &pids) override;
 
     /**
-     * Request to clean uiability from user.
-     *
-     * @param token the token of ability.
-     * @return Returns true if clean success, others return false.
-     */
-    virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
-
-    /**
      * whether killed for upgrade web.
      *
      * @param bundleName the bundle name is killed for upgrade web.
      * @return Returns true is killed for upgrade web, others return false.
      */
     virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
 
     /**
      * whether the abilities of process specified by pid type only UIAbility.
@@ -389,6 +392,8 @@ public:
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
     virtual bool IsAppKilling(sptr<IRemoteObject> token) override;
+
+    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

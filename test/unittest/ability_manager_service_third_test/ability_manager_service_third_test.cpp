@@ -267,17 +267,17 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetDataAbilityManagerByToken_001, TestS
 
 /*
  * Feature: AbilityManagerService
- * Function: ConnectBmsService
+ * Function: ConnectServices
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService ConnectBmsService
+ * FunctionPoints: AbilityManagerService ConnectServices
  */
-HWTEST_F(AbilityManagerServiceThirdTest, ConnectBmsService_001, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, ConnectServices_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ConnectBmsService_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ConnectServices_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs_, nullptr);
-    abilityMs_->ConnectBmsService();
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ConnectBmsService_001 end");
+    abilityMs_->ConnectServices();
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest ConnectServices_001 end");
 }
 
 /*
@@ -1096,7 +1096,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckRestartAppWant_001, TestSize.Level
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
     AAFwk::Want want;
-    int32_t res = abilityMs->CheckRestartAppWant(want);
+    int32_t res = abilityMs->CheckRestartAppWant(want, 0);
     EXPECT_EQ(res, AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY);
 }
 
@@ -2241,7 +2241,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartUIAbilityByPreInstallInner_001, Te
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    FreeInstallInfo  taskInfo;
+    FreeInstallInfo taskInfo;
     auto result2 = abilityMs_->StartUIAbilityByPreInstall(taskInfo);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StartUIAbilityByPreInstallInner_001 result2 %{public}d",
         result2);
@@ -2468,7 +2468,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SignRestartAppFlag_001, TestSize.Level1
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    abilityMs_->SignRestartAppFlag(USER_ID_U100, "com.ix.hiservcie");
+    abilityMs_->SignRestartAppFlag(USER_ID_U100, 1);
 }
 
 /*

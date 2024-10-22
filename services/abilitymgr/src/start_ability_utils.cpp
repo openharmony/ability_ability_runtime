@@ -25,8 +25,6 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-constexpr const char* SCREENSHOT_BUNDLE_NAME = "com.huawei.ohos.screenshot";
-constexpr const char* SCREENSHOT_ABILITY_NAME = "com.huawei.ohos.screenshot.ServiceExtAbility";
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
 constexpr const char* PARAM_RESV_ANCO_CALLER_UID = "ohos.anco.param.callerUid";
 constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.callerBundleName";
@@ -145,13 +143,6 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
 {
     if (StartAbilityUtils::startAbilityInfo != nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "startAbilityInfo created");
-    }
-    // This is for special goal and could be removed later.
-    auto element = want.GetElement();
-    if (element.GetAbilityName() == SCREENSHOT_ABILITY_NAME &&
-        element.GetBundleName() == SCREENSHOT_BUNDLE_NAME) {
-        isExtension = true;
-        StartAbilityUtils::skipErms = true;
     }
     Want localWant = want;
     if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {

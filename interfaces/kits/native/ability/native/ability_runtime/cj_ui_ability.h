@@ -21,6 +21,7 @@
 #include "ui_ability.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window_stage_impl.h"
+#include "cj_ability_object.h"
 #endif
 
 namespace OHOS {
@@ -96,7 +97,8 @@ public:
      * @return If the ability is willing to continue and data saved successfully, it returns 0;
      * otherwise, it returns errcode.
      */
-    int32_t OnContinue(WantParams &wantParams) override;
+    int32_t OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
+        const AppExecFwk::AbilityInfo &abilityInfo) override;
 
     /**
      * @brief Update configuration
@@ -179,7 +181,13 @@ public:
      * @brief Called after ability stoped.
      * You can override this function to implement your own processing logic.
      */
-    void OnSceneDestroyed() ;
+    void OnSceneWillDestroy() override;
+
+    /**
+     * @brief Called after ability stoped.
+     * You can override this function to implement your own processing logic.
+     */
+    void onSceneDestroyed() override;
 
     /**
      * @brief Called after ability restored.
@@ -214,6 +222,12 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnBackground() override;
+    
+    /**
+     * @brief Called after window stage focused or unfocused
+     * You can override this function to implement your own processing logic.
+     */
+    void OnAfterFocusedCommon(bool isFocused) override;
 
     /**
      * Called when back press is dispatched.
@@ -279,6 +293,8 @@ private:
     void InitSceneDoOnForeground(std::shared_ptr<Rosen::WindowScene> scene, const Want &want);
     void AddLifecycleEventBeforeCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
     void AddLifecycleEventAfterCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
+    bool CheckSatisfyTargetAPIVersion(int32_t targetAPIVersion);
+    bool BackPressDefaultValue();
 
     CJRuntime &cjRuntime_;
     std::shared_ptr<CJAbilityObject> cjAbilityObj_;

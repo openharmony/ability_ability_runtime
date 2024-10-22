@@ -55,7 +55,7 @@ int LocalCallContainer::StartAbilityByCallInner(const Want& want, std::shared_pt
             return ERR_OK;
         }
     }
-    sptr<CallerConnection> connect = new (std::nothrow) CallerConnection();
+    sptr<CallerConnection> connect = sptr<CallerConnection>::MakeSptr();
     if (connect == nullptr) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "connection failed");
         return ERR_INVALID_VALUE;
@@ -221,7 +221,7 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info)
                 tempstr += "  state #REQUESTING";
             }
             info.emplace_back(tempstr);
-            }
+        }
     }
     return;
 }

@@ -28,7 +28,7 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
 
 bool UnwrapStartOptionsAndWant(napi_env env, napi_value param, AAFwk::StartOptions &startOptions, AAFwk::Want &want);
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 bool UnwrapPixelMapByPropertyName(
     napi_env env, napi_value jsObject, const char *propertyName, std::shared_ptr<Media::PixelMap> &value);
 

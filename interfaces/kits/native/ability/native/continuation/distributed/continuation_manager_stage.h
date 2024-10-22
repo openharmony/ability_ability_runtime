@@ -99,7 +99,7 @@ public:
      * @return If the ability is willing to continue and data saved successfully, it returns 0;
      * otherwise, it returns errcode.
      */
-    int32_t OnContinue(WantParams &wantParams);
+    int32_t OnContinue(WantParams &wantParams, bool &isAsyncOnContinue, const AppExecFwk::AbilityInfo &abilityInfo);
 
     /**
      * @brief OnStart And Save Data
@@ -121,7 +121,8 @@ public:
      * @param wantParams Indicates the user data.
      * @return An error code indicating the success or failure of the operation
      */
-    int32_t OnContinueAndGetContent(WantParams &wantParams);
+    int32_t OnContinueAndGetContent(WantParams &wantParams, bool &isAsyncOnContinue,
+        const AppExecFwk::AbilityInfo &abilityInfo);
 
     /**
      * @brief Save Data for continuation

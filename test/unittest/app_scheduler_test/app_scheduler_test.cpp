@@ -633,7 +633,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_KillApplication_002, TestSize.Level1)
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_KillApplicationByUid_001, TestSize.Level1)
 {
-    EXPECT_CALL(*clientMock_, KillApplicationByUid(_, _)).Times(1)
+    EXPECT_CALL(*clientMock_, KillApplicationByUid(_, _, _)).Times(1)
         .WillOnce(Return(AppMgrResultCode::ERROR_SERVICE_NOT_READY));
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     std::string bundleName = "bundleName";
@@ -652,7 +652,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_KillApplicationByUid_001, TestSize.Level
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_KillApplicationByUid_002, TestSize.Level1)
 {
-    EXPECT_CALL(*clientMock_, KillApplicationByUid(_, _)).Times(1)
+    EXPECT_CALL(*clientMock_, KillApplicationByUid(_, _, _)).Times(1)
         .WillOnce(Return(AppMgrResultCode::RESULT_OK));
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     std::string bundleName = "bundleName";
@@ -1085,7 +1085,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_UnregisterAppDebugListener_002, TestSize
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_AttachAppDebug_001, TestSize.Level1)
 {
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     std::string bundleName = "bundleName";
     int res = DelayedSingleton<AppScheduler>::GetInstance()->AttachAppDebug(bundleName);
     EXPECT_EQ(res, ERR_OK);

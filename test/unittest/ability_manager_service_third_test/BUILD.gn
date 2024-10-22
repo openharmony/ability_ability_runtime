@@ -38,7 +38,6 @@ ohos_unittest("ability_manager_service_third_test") {
   sources = [
     "${ability_runtime_innerkits_path}/uri_permission/src/uri_permission_load_callback.cpp",
     "${ability_runtime_innerkits_path}/uri_permission/src/uri_permission_manager_client.cpp",
-    "${ability_runtime_native_path}/ability/native/auto_startup_callback_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_bundle_event_callback.cpp",

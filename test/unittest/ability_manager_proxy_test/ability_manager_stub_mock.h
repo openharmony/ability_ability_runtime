@@ -236,7 +236,7 @@ public:
         return;
     }
 
-    int StartUser(int userId, sptr<IUserCallback> callback) override
+    int StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery) override
     {
         return 0;
     }
@@ -342,6 +342,7 @@ public:
         GetMissionInfos, int(const std::string& deviceId, int32_t numMax, std::vector<MissionInfo>& missionInfos));
     MOCK_METHOD3(GetMissionInfo, int(const std::string& deviceId, int32_t missionId, MissionInfo& missionInfo));
     MOCK_METHOD1(CleanMission, int(int32_t missionId));
+    MOCK_METHOD1(TerminateMission, int32_t(int32_t missionId));
     MOCK_METHOD0(CleanAllMissions, int());
     MOCK_METHOD1(MoveMissionToFront, int(int32_t missionId));
     MOCK_METHOD2(MoveMissionToFront, int(int32_t missionId, const StartOptions& startOptions));

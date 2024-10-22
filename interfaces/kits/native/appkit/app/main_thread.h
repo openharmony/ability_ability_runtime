@@ -134,7 +134,7 @@ public:
      * @brief Schedule the foreground lifecycle of application.
      *
      */
-    void ScheduleForegroundApplication() override;
+    bool ScheduleForegroundApplication() override;
 
     /**
      *
@@ -657,10 +657,10 @@ private:
     MainThreadState mainThreadState_ = MainThreadState::INIT;
     sptr<IAppMgr> appMgr_ = nullptr;  // appMgrService Handler
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
-    std::string aceApplicationName_ = "AceApplication";
     std::string pathSeparator_ = "/";
     std::string abilityLibraryType_ = ".so";
     static std::weak_ptr<OHOSApplication> applicationForDump_;
+    bool isDeveloperMode_ = false;
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**

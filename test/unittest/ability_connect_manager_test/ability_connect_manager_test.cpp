@@ -1251,7 +1251,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_024, TestSize.Level1)
         testing::Invoke(taskHandler_.get(), &MockTaskHandlerWrap::MockTaskHandler)));
     ConnectManager()->OnAbilityDied(abilityRecord, 0);
     auto list = abilityRecord->GetConnectRecordList();
-    EXPECT_EQ(static_cast<int>(list.size()), 2);
+    EXPECT_EQ(static_cast<int>(list.size()), 0);
 
     auto elementName1 = abilityRequest1_.want.GetElement();
     std::string elementNameUri1 = elementName1.GetURI();
@@ -1265,7 +1265,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_024, TestSize.Level1)
         testing::Invoke(taskHandler_.get(), &MockTaskHandlerWrap::MockTaskHandler)));
     ConnectManager()->OnAbilityDied(abilityRecord1, 0);
     auto list1 = abilityRecord1->GetConnectRecordList();
-    EXPECT_EQ(static_cast<int>(list1.size()), 2);
+    EXPECT_EQ(static_cast<int>(list1.size()), 0);
 }
 
 /*
@@ -2378,7 +2378,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_002, TestSize.Level1)
 
     // HandleTerminate
     ConnectManager()->HandleAbilityDiedTask(service, userId);
-    EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 1);
+    EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 0);
 }
 
 /*
@@ -2411,7 +2411,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_003, TestSize.Level1)
 
     // HandleTerminate
     ConnectManager()->HandleAbilityDiedTask(service, userId);
-    EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 1);
+    EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 0);
 }
 
 /*
@@ -3245,7 +3245,8 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_SignRestartAppFlag_001, Test
     std::shared_ptr<AbilityRecord> abilityRecord2 = AbilityRecord::CreateAbilityRecord(abilityRequest_);
     abilityRecord2->abilityInfo_.bundleName = "errTestBundleName";
     connectManager->serviceMap_.emplace("second", abilityRecord2);
-    connectManager->SignRestartAppFlag(bundleName);
+    int32_t uid = 100;
+    connectManager->SignRestartAppFlag(uid);
 }
 
 /*
@@ -3336,6 +3337,20 @@ HWTEST_F(AbilityConnectManagerTest, AbilityWindowConfigTransactionDone_0100, Tes
 
     WindowConfig windowConfig;
     auto ret = connectManager->AbilityWindowConfigTransactionDone(serviceToken_, windowConfig);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateKeepAliveEnableState_0100
+ * @tc.desc: UpdateKeepAliveEnableState
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, UpdateKeepAliveEnableState_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    auto ret = connectManager->UpdateKeepAliveEnableState("bundle", "entry", "mainAbility", true);
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace AAFwk

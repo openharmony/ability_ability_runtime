@@ -25,11 +25,12 @@ AbilityScheduler::AbilityScheduler()
 AbilityScheduler::~AbilityScheduler()
 {}
 
-void AbilityScheduler::ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
+bool AbilityScheduler::ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
     sptr<SessionInfo> sessionInfo)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityScheduler ScheduleAbilityTransaction %d", targetState.state);
     (void)want;
+    return true;
 }
 
 void AbilityScheduler::ScheduleShareData(const int32_t &uniqueId)

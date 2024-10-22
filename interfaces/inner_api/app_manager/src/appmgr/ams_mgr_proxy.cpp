@@ -466,7 +466,8 @@ int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleNam
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const int uid)
+int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -476,11 +477,15 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
         return ERR_INVALID_DATA;
     }
     if (!data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WriteString failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to write bundle name");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(uid)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to write uid");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(reason)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failedto write reason");
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =
@@ -492,7 +497,7 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack)
+int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
     MessageParcel data;
@@ -504,6 +509,11 @@ int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack)
 
     if (!data.WriteBool(clearPageStack)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(reason)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to write reason");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1319,6 +1329,28 @@ bool AmsMgrProxy::IsAppKilling(sptr<IRemoteObject> token)
         return false;
     }
     return reply.ReadBool();
+}
+
+void AmsMgrProxy::SetAppExceptionCallback(sptr<IRemoteObject> callback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return;
+    }
+    if (!data.WriteRemoteObject(callback.GetRefPtr())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write callback");
+        return;
+    }
+
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::SET_APP_EXCEPTION_CALLBACK),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, error code is %{public}d.", ret);
+        return;
+    }
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -1907,7 +1907,7 @@ HWTEST_F(AmsAppRunningRecordTest, Specified_LaunchApplication_001, TestSize.Leve
     EXPECT_CALL(*mockAppSchedulerClient_, ScheduleLaunchApplication(_, _)).Times(1);
     service_->LaunchApplication(record);
     auto ability = record->GetAbilityRunningRecordByToken(GetMockToken());
-    EXPECT_TRUE(ability->GetState() != AbilityState::ABILITY_STATE_READY);
+    EXPECT_TRUE(ability->GetState() == AbilityState::ABILITY_STATE_READY);
 }
 
 /*
@@ -3103,6 +3103,284 @@ HWTEST_F(AmsAppRunningRecordTest, AppRunningRecord_SendAppStartupTypeEvent_001, 
         std::make_shared<AbilityRunningRecord>(abilityInfo, nullptr, 0);
     appRunningRecord->SendAppStartupTypeEvent(abilityRecord, AppStartType::COLD);
     EXPECT_NE(appRunningRecord, nullptr);
+}
+
+/**
+ * @tc.name: IsLastAbilityRecord_001
+ * @tc.desc: verify that IsLastAbilityRecord works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, IsLastAbilityRecord_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsLastAbilityRecord_001 start.";
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+
+    bool ret = moduleRecord->IsLastAbilityRecord(nullptr);
+    EXPECT_FALSE(ret);
+    ret = moduleRecord->IsLastAbilityRecord(GetMockToken());
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "IsLastAbilityRecord_001 end.";
+}
+
+/**
+ * @tc.name: GetPageAbilitySize_001
+ * @tc.desc: verify that GetPageAbilitySize works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, GetPageAbilitySize_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetPageAbilitySize_001 start.";
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->name = GetTestAbilityName();
+    abilityInfo->type = AbilityType::PAGE;
+
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+
+    auto token = GetMockToken();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    EXPECT_NE(abilityRecord, nullptr);
+    moduleRecord->abilities_.emplace(token, abilityRecord);
+    int32_t ret = moduleRecord->GetPageAbilitySize();
+    EXPECT_NE(ret, ERR_OK);
+
+    moduleRecord->abilities_.clear();
+    abilityInfo->type = AbilityType::SERVICE;
+    auto abilityRecord1 = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    EXPECT_NE(abilityRecord1, nullptr);
+    moduleRecord->abilities_.emplace(token, abilityRecord1);
+    ret = moduleRecord->GetPageAbilitySize();
+    EXPECT_EQ(ret, ERR_OK);
+
+    moduleRecord->abilities_.clear();
+    ret = moduleRecord->GetPageAbilitySize();
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "GetPageAbilitySize_001 end.";
+}
+
+/**
+ * @tc.name: ExtensionAbilityRecordExists_001
+ * @tc.desc: verify that ExtensionAbilityRecordExists works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, ExtensionAbilityRecordExists_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ExtensionAbilityRecordExists_001 start.";
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->name = GetTestAbilityName();
+    abilityInfo->type = AbilityType::EXTENSION;
+
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+
+    auto token = GetMockToken();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    EXPECT_NE(abilityRecord, nullptr);
+    moduleRecord->abilities_.emplace(token, abilityRecord);
+    int32_t ret = moduleRecord->ExtensionAbilityRecordExists();
+    EXPECT_TRUE(ret);
+
+    abilityInfo->type = AbilityType::PAGE;
+    auto abilityRecord1 = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    EXPECT_NE(abilityRecord1, nullptr);
+    moduleRecord->abilities_.emplace(token, abilityRecord1);
+    ret = moduleRecord->ExtensionAbilityRecordExists();
+    EXPECT_FALSE(ret);
+
+    moduleRecord->abilities_.clear();
+    ret = moduleRecord->ExtensionAbilityRecordExists();
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "ExtensionAbilityRecordExists_001 end.";
+}
+
+/**
+ * @tc.name: IsAllAbilityReadyToCleanedByUserRequest_001
+ * @tc.desc: verify that ModuleRunningRecord correctly judges AllAbilityReadyToCleanedByUserRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, IsAllAbilityReadyToCleanedByUserRequest_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsAllAbilityReadyToCleanedByUserRequest_001 start.";
+    // 1. create AppInfo and AbilityInfo
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->name = GetTestAbilityName();
+    abilityInfo->type = AbilityType::PAGE;
+
+    // 2. create ModuleRunningRecord
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+
+    // 3. create AbilityRecord with AbilityInfo, add the record into ModuleRunningRecord
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, GetMockToken(), 0);
+    EXPECT_NE(abilityRecord, nullptr);
+
+    // 4. verify function
+    abilityRecord->SetUserRequestCleaningStatus();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_CONNECTED;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_FALSE(moduleRecord->IsAllAbilityReadyToCleanedByUserRequest());
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->SetUserRequestCleaningStatus();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_TERMINATED;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAllAbilityReadyToCleanedByUserRequest());
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->SetUserRequestCleaningStatus();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_END;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAllAbilityReadyToCleanedByUserRequest());
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->SetUserRequestCleaningStatus();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_BACKGROUND;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAllAbilityReadyToCleanedByUserRequest());
+    GTEST_LOG_(INFO) << "IsAllAbilityReadyToCleanedByUserRequest_001 end.";
+}
+
+/**
+ * @tc.name: IsAllAbilityReadyToCleanedByUserRequest_002
+ * @tc.desc: verify that ModuleRunningRecord correctly judges AllAbilityReadyToCleanedByUserRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, IsAllAbilityReadyToCleanedByUserRequest_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsAllAbilityReadyToCleanedByUserRequest_002 start.";
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->name = GetTestAbilityName();
+    abilityInfo->type = AbilityType::EXTENSION;
+
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, GetMockToken(), 0);
+    EXPECT_NE(abilityRecord, nullptr);
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_BACKGROUND;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAllAbilityReadyToCleanedByUserRequest());
+
+    moduleRecord->abilities_.clear();
+    moduleRecord->abilities_.emplace(GetMockToken(), nullptr);
+    EXPECT_TRUE(moduleRecord->IsAllAbilityReadyToCleanedByUserRequest());
+    GTEST_LOG_(INFO) << "IsAllAbilityReadyToCleanedByUserRequest_002 end.";
+}
+
+/**
+ * @tc.name: IsAbilitiesBackgrounded_002
+ * @tc.desc: verify that ModuleRunningRecord correctly judges Abilitiesbackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, IsAbilitiesBackgrounded_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsAbilitiesBackgrounded_002 start.";
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->name = GetTestAbilityName();
+    abilityInfo->type = AbilityType::SERVICE;
+
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, GetMockToken(), 0);
+    EXPECT_NE(abilityRecord, nullptr);
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAbilitiesBackgrounded());
+
+    moduleRecord->abilities_.clear();
+    moduleRecord->abilities_.emplace(GetMockToken(), nullptr);
+    EXPECT_TRUE(moduleRecord->IsAbilitiesBackgrounded());
+    GTEST_LOG_(INFO) << "IsAbilitiesBackgrounded_002 end.";
+}
+
+/**
+ * @tc.name: IsAbilitiesBackgrounded_003
+ * @tc.desc: verify that ModuleRunningRecord correctly judges Abilitiesbackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, IsAbilitiesBackgrounded_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsAbilitiesBackgrounded_003 start.";
+    // 1. create AppInfo and AbilityInfo
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->name = GetTestAbilityName();
+    abilityInfo->type = AbilityType::PAGE;
+
+    // 2. create ModuleRunningRecord
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+
+    // 3. create AbilityRecord with AbilityInfo, add the record into ModuleRunningRecord
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, GetMockToken(), 0);
+    EXPECT_NE(abilityRecord, nullptr);
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+
+    // 4. verify function
+    moduleRecord->abilities_.clear();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_BACKGROUND;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAbilitiesBackgrounded());
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_TERMINATED;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAbilitiesBackgrounded());
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_END;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAbilitiesBackgrounded());
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_CONNECTED;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_FALSE(moduleRecord->IsAbilitiesBackgrounded());
+    GTEST_LOG_(INFO) << "IsAbilitiesBackgrounded_003 end.";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

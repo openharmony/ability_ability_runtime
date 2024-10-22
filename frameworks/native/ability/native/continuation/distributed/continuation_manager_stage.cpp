@@ -156,7 +156,8 @@ bool ContinuationManagerStage::IsContinuePageStack(const WantParams &wantParams)
     return true;
 }
 
-int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams)
+int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams, bool &isAsyncOnContinue,
+    const AbilityInfo &abilityInfo)
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");
     std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
@@ -165,7 +166,7 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
         return ERR_INVALID_VALUE;
     }
 
-    int32_t status = ability->OnContinue(wantParams);
+    int32_t status = ability->OnContinue(wantParams, isAsyncOnContinue, abilityInfo);
     if (status != OnContinueResult::AGREE) {
         if (status == OnContinueResult::MISMATCH) {
             TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue version mismatch.");
@@ -187,7 +188,8 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
     return ERR_OK;
 }
 
-int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams)
+int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
+    const AbilityInfo &tmpAbilityInfo)
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");
     auto ability = ability_.lock();
@@ -201,7 +203,7 @@ int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams)
     if (!stageBased) {
         return OnStartAndSaveData(wantParams);
     }
-    return OnContinueAndGetContent(wantParams);
+    return OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
 }
 
 #ifdef SUPPORT_SCREEN

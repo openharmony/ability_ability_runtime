@@ -262,13 +262,20 @@ public:
      */
     virtual void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration);
 
+     /**
+     * @brief The async callback of OnContinue.
+     */
+    virtual int32_t OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+        const AppExecFwk::AbilityInfo &abilityInfo);
+
     /**
      * @brief Prepare user data of local Ability.
      * @param wantParams Indicates the user data to be saved.
      * @return If the ability is willing to continue and data saved successfully, it returns 0;
      * otherwise, it returns errcode.
      */
-    virtual int32_t OnContinue(AAFwk::WantParams &wantParams);
+    virtual int32_t OnContinue(AAFwk::WantParams &wantParams, bool &isAsyncOnContinue,
+        const AppExecFwk::AbilityInfo &abilityInfo);
 
     /**
      * @brief Migrates this ability to the given device on the same distributed network. The ability to migrate and its
@@ -402,6 +409,12 @@ public:
      * You can override this function to implement your own processing logic.
      */
     virtual void OnBackground();
+
+    /**
+     * @brief Called after window stage focused or unfocused
+     * You can override this function to implement your own processing logic.
+     */
+    virtual void OnAfterFocusedCommon(bool isFocused);
 
     /**
      * @brief Called when ability prepare terminate.

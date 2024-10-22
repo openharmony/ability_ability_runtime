@@ -696,12 +696,6 @@ int ContextImpl::GetCurrentActiveAccountId() const
         TAG_LOGE(AAFwkTag::APPKIT, "no accounts");
         return 0;
     }
-
-    if (accountIds.size() > 1) {
-        TAG_LOGE(AAFwkTag::APPKIT, "no current now");
-        return 0;
-    }
-
     return accountIds[0];
 }
 
@@ -1025,13 +1019,15 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
     }
 #endif
     resConfig->SetDeviceType(GetDeviceType());
-    std::string mcc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
-    std::string mnc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
-    try {
-        resConfig->SetMcc(static_cast<uint32_t>(std::stoi(mcc)));
-        resConfig->SetMnc(static_cast<uint32_t>(std::stoi(mnc)));
-    } catch (...) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Set mcc,mnc failed mcc:%{public}s mnc:%{public}s", mcc.c_str(), mnc.c_str());
+    if (config_) {
+        std::string mcc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
+        std::string mnc = config_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
+        try {
+            resConfig->SetMcc(static_cast<uint32_t>(std::stoi(mcc)));
+            resConfig->SetMnc(static_cast<uint32_t>(std::stoi(mnc)));
+        } catch (...) {
+            TAG_LOGD(AAFwkTag::APPKIT, "Set mcc,mnc failed mcc:%{public}s mnc:%{public}s", mcc.c_str(), mnc.c_str());
+        }
     }
     resourceManager->UpdateResConfig(*resConfig);
 }
@@ -1420,14 +1416,20 @@ void ContextImpl::OnOverlayChanged(const EventFwk::CommonEventData &data,
     }
 }
 
-void ContextImpl::ChangeToLocalPath(const std::string &bundleName,
-    const std::string &sourceDir, std::string &localPath)
+void ContextImpl::ChangeToLocalPath(const std::string& bundleName, const std::string& sourceDir, std::string& localPath)
 {
     std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleName);
     if (sourceDir.empty()) {
         return;
     }
-    if (std::regex_search(localPath, std::regex(bundleName))) {
+    bool isExist = false;
+    try {
+        isExist = std::regex_search(localPath, std::regex(bundleName));
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ChangeToLocalPath error localPath:%{public}s bundleName:%{public}s",
+            localPath.c_str(), bundleName.c_str());
+    }
+    if (isExist) {
         localPath = std::regex_replace(localPath, pattern, std::string(LOCAL_CODE_PATH));
     } else {
         localPath = std::regex_replace(localPath, std::regex(ABS_CODE_PATH), LOCAL_BUNDLES);

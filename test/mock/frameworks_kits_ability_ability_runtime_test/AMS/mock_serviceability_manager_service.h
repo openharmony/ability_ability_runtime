@@ -208,7 +208,7 @@ public:
         return 0;
     }
 
-    int StartUser(int accountId, sptr<IUserCallback> callback)
+    int StartUser(int accountId, sptr<IUserCallback> callback, bool isAppRecovery)
     {
         return 0;
     }

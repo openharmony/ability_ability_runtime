@@ -276,6 +276,7 @@ struct AbilityRequest {
     uint32_t specifyTokenId = 0;
     bool uriReservedFlag = false;
     std::string reservedBundleName;
+    bool isFromIcon = false;
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -1095,6 +1096,8 @@ public:
 
     void RemoveConnectWant();
 
+    void UpdateDmsCallerInfo(Want &want);
+
     inline std::string GetInstanceKey() const
     {
         return instanceKey_;
@@ -1103,6 +1106,26 @@ public:
     void SetInstanceKey(const std::string& key)
     {
         instanceKey_ = key;
+    }
+
+    void SetSecurityFlag(bool securityFlag)
+    {
+        securityFlag_ = securityFlag;
+    }
+
+    bool GetSecurityFlag() const
+    {
+        return securityFlag_;
+    }
+
+    FreezeStrategy GetFreezeStrategy() const
+    {
+        return freezeStrategy_;
+    }
+
+    void SetFreezeStrategy(FreezeStrategy value)
+    {
+        freezeStrategy_ = value;
     }
 
 protected:
@@ -1165,6 +1188,7 @@ private:
     void PublishFileOpenEvent(const Want &want);
 
     void SetDebugAppByWaitingDebugFlag();
+    void AfterLoaded();
 
 #ifdef SUPPORT_SCREEN
     std::shared_ptr<Want> GetWantFromMission() const;
@@ -1329,6 +1353,8 @@ private:
     bool isLaunching_ = true;
     LaunchDebugInfo launchDebugInfo_;
     std::string instanceKey_ = "";
+    bool securityFlag_ = false;
+    std::atomic<FreezeStrategy> freezeStrategy_{FreezeStrategy::NOTIFY_FREEZE_MGR};
 };
 }  // namespace AAFwk
 }  // namespace OHOS

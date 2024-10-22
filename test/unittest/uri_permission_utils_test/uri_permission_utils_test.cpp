@@ -164,19 +164,6 @@ HWTEST_F(UriPermissionUtilsTest, Upms_GetBundleNameByTokenId_001, TestSize.Level
 
 /*
  * Feature: UPMSUtils
- * Function: GetCallerNameByTokenId
- * SubFunction: NA
- * FunctionPoints: UPMSUtils GetCallerNameByTokenId
- */
-HWTEST_F(UriPermissionUtilsTest, Upms_GetCallerNameByTokenId_001, TestSize.Level1)
-{
-    uint32_t tokenId = 1001;
-    auto testCallerName = UPMSUtils::GetCallerNameByTokenId(tokenId);
-    EXPECT_STREQ(testCallerName.c_str(), "");
-}
-
-/*
- * Feature: UPMSUtils
  * Function: GetTokenIdByBundleName
  * SubFunction: NA
  * FunctionPoints: UPMSUtils GetTokenIdByBundleName

@@ -31,7 +31,7 @@ public:
     virtual ~AbilitySchedulerMock()
     {}
 
-    MOCK_METHOD3(ScheduleAbilityTransaction, void(const Want&, const LifeCycleStateInfo&, sptr<SessionInfo>));
+    MOCK_METHOD3(ScheduleAbilityTransaction, bool(const Want&, const LifeCycleStateInfo&, sptr<SessionInfo>));
     MOCK_METHOD3(SendResult, void(int, int, const Want&));
     MOCK_METHOD1(ScheduleConnectAbility, void(const Want&));
     MOCK_METHOD1(ScheduleDisconnectAbility, void(const Want&));

@@ -21,10 +21,13 @@
 #include "gmock/gmock.h"
 #include "iremote_object.h"
 #include "iremote_stub.h"
+#include "module_info.h"
 #include "mock_overlay_manager.h"
 
 namespace OHOS {
+namespace {
 constexpr int32_t BASE_USER_RANGE = 200000;
+}
 class MockBundleManagerService : public IRemoteStub<AppExecFwk::IBundleMgr> {
 public:
     MockBundleManagerService() {};
@@ -39,6 +42,20 @@ public:
         ErrCode(const std::string &bundleName, std::vector<AppExecFwk::BaseSharedBundleInfo> &baseSharedBundleInfos,
         AppExecFwk::GetDependentBundleInfoFlag flag));
     MOCK_METHOD2(GetBundleInfoForSelf, ErrCode(int32_t flags, AppExecFwk::BundleInfo &bundleInfo));
+    MOCK_METHOD4(GetBundleInfoV9, ErrCode(const std::string&, int32_t, AppExecFwk::BundleInfo&, int32_t));
+    MOCK_METHOD4(QueryAbilityInfo, bool(const Want &want, int32_t flags, int32_t userId,
+        AppExecFwk::AbilityInfo &abilityInfo));
+    MOCK_METHOD5(GetSandboxExtAbilityInfos, ErrCode(const Want &want, int32_t appIndex, int32_t flags,
+        int32_t userId, std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos));
+    MOCK_METHOD5(GetJsonProfile, ErrCode(AppExecFwk::ProfileType, const std::string&, const std::string&,
+        std::string&, int32_t));
+    MOCK_METHOD3(QueryExtensionAbilityInfoByUri, bool(const std::string &uri, int32_t userId,
+        AppExecFwk::ExtensionAbilityInfo &extensionAbilityInfo));
+    MOCK_METHOD4(QueryExtensionAbilityInfos, bool(const Want&, const int32_t&, const int32_t&,
+        std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos));
+    MOCK_METHOD3(QueryAbilityInfoByUri, bool(const std::string&, int32_t, AppExecFwk::AbilityInfo&));
+    MOCK_METHOD5(ImplicitQueryInfoByPriority, bool(const Want&, int32_t, int32_t, AppExecFwk::AbilityInfo&,
+        AppExecFwk::ExtensionAbilityInfo&));
 
     sptr<AppExecFwk::IOverlayManager> GetOverlayManagerProxy()
     {

@@ -58,7 +58,6 @@
 #include "parameters.h"
 #include "extractor.h"
 #include "system_ability_definition.h"
-#include "systemcapability.h"
 #include "source_map.h"
 #include "source_map_operator.h"
 
@@ -68,6 +67,7 @@
 #include "declarative_module_preloader.h"
 #endif //SUPPORT_SCREEN
 
+#include "syscap_ts.h"
 
 using namespace OHOS::AbilityBase;
 using Extractor = OHOS::AbilityBase::Extractor;
@@ -107,45 +107,6 @@ static auto PermissionCheckFunc = []() {
         return false;
     }
 };
-
-napi_value CanIUse(napi_env env, napi_callback_info info)
-{
-    if (env == nullptr || info == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env or info");
-        return nullptr;
-    }
-    napi_value undefined = CreateJsUndefined(env);
-
-    size_t argc = 1;
-    napi_value argv[1] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "invalid argc");
-        return undefined;
-    }
-
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv[0], &valueType);
-    if (valueType != napi_string) {
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "invalid type");
-        return undefined;
-    }
-
-    char syscap[SYSCAP_MAX_SIZE] = { 0 };
-
-    size_t strLen = 0;
-    napi_get_value_string_utf8(env, argv[0], syscap, sizeof(syscap), &strLen);
-
-    bool ret = HasSystemCapability(syscap);
-    return CreateJsValue(env, ret);
-}
-
-void InitSyscapModule(napi_env env, napi_value globalObject)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    const char *moduleName = "JsRuntime";
-    BindNativeFunction(env, globalObject, "canIUse", moduleName, CanIUse);
-}
 
 int32_t PrintVmLog(int32_t, int32_t, const char*, const char*, const char* message)
 {
@@ -560,10 +521,18 @@ bool JsRuntime::LoadScript(const std::string& path, std::vector<uint8_t>* buffer
     return jsEnv_->LoadScript(path, buffer, isBundle);
 }
 
-bool JsRuntime::LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle)
+bool JsRuntime::LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle,
+    const std::string& srcEntrance)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "path: %{private}s", path.c_str());
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
+    if (isOhmUrl_ && !moduleName_.empty()) {
+        auto vm = GetEcmaVm();
+        CHECK_POINTER_AND_RETURN(vm, false);
+        std::string srcFilename = "";
+        srcFilename = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
+        return panda::JSNApi::ExecuteSecureWithOhmUrl(vm, buffer, len, srcFilename, srcEntrance);
+    }
     return jsEnv_->LoadScript(path, buffer, len, isBundle);
 }
 
@@ -701,7 +670,7 @@ bool JsRuntime::Initialize(const Options& options)
         CHECK_POINTER_AND_RETURN(globalObj, false);
 
         if (!preloaded_) {
-            InitSyscapModule(env, globalObj);
+            InitSyscapModule(env);
 
             // Simple hook function 'isSystemplugin'
             const char* moduleName = "JsRuntime";
@@ -971,17 +940,23 @@ napi_value JsRuntime::LoadJsBundle(const std::string& path, const std::string& h
     return exportObj;
 }
 
-napi_value JsRuntime::LoadJsModule(const std::string& path, const std::string& hapPath)
+napi_value JsRuntime::LoadJsModule(const std::string& path, const std::string& hapPath, const std::string& srcEntrance)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!RunScript(path, hapPath, false)) {
+    if (!RunScript(path, hapPath, false, srcEntrance)) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to run script: %{private}s", path.c_str());
         return nullptr;
     }
 
     auto vm = GetEcmaVm();
     CHECK_POINTER_AND_RETURN(vm, nullptr);
-    panda::Local<panda::ObjectRef> exportObj = panda::JSNApi::GetExportObject(vm, path, "default");
+    panda::Local<panda::ObjectRef> exportObj;
+    if (isOhmUrl_) {
+        exportObj = panda::JSNApi::GetExportObjectFromOhmUrl(vm, srcEntrance, "default");
+    } else {
+        exportObj = panda::JSNApi::GetExportObject(vm, path, "default");
+    }
+
     if (exportObj->IsNull()) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Get export object failed");
         return nullptr;
@@ -993,7 +968,7 @@ napi_value JsRuntime::LoadJsModule(const std::string& path, const std::string& h
 }
 
 std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& moduleName, const std::string& modulePath,
-    const std::string& hapPath, bool esmodule, bool useCommonChunk)
+    const std::string& hapPath, bool esmodule, bool useCommonChunk, const std::string& srcEntrance)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Load module(%{public}s, %{private}s, %{private}s, %{public}s)",
@@ -1004,6 +979,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& module
     panda::JSNApi::NotifyLoadModule(vm);
     auto env = GetNapiEnv();
     CHECK_POINTER_AND_RETURN(env, std::unique_ptr<NativeReference>());
+    isOhmUrl_ = panda::JSNApi::IsOhmUrl(srcEntrance);
 
     HandleScope handleScope(*this);
 
@@ -1031,7 +1007,8 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& module
                 return std::unique_ptr<NativeReference>();
             }
         }
-        classValue = esmodule ? LoadJsModule(fileName, hapPath) : LoadJsBundle(fileName, hapPath, useCommonChunk);
+        classValue = esmodule ? LoadJsModule(fileName, hapPath, srcEntrance)
+            : LoadJsBundle(fileName, hapPath, useCommonChunk);
         if (classValue == nullptr) {
             return std::unique_ptr<NativeReference>();
         }
@@ -1082,7 +1059,8 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModule(
     return std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(resultRef));
 }
 
-bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath, bool useCommonChunk)
+bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath, bool useCommonChunk,
+    const std::string& srcEntrance)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto vm = GetEcmaVm();
@@ -1120,7 +1098,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "Get safeData abc file failed");
                 return false;
             }
-            return LoadScript(abcPath, safeData->GetDataPtr(), safeData->GetDataLen(), isBundle_);
+            return LoadScript(abcPath, safeData->GetDataPtr(), safeData->GetDataLen(), isBundle_, srcEntrance);
         } else {
             std::unique_ptr<uint8_t[]> data;
             size_t dataLen = 0;

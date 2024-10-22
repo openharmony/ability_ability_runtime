@@ -19,33 +19,10 @@
 #include "ability_resident_process_rdb.h"
 #include "ability_util.h"
 #include "ffrt.h"
+#include "main_element_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
-namespace {
-bool IsMainElementTypeOk(const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &mainElement,
-    int32_t userId)
-{
-    if (userId == 0) {
-        for (const auto &abilityInfo: hapModuleInfo.abilityInfos) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "compare ability: %{public}s", abilityInfo.name.c_str());
-            if (abilityInfo.name == mainElement) {
-                return abilityInfo.type != AppExecFwk::AbilityType::PAGE;
-            }
-        }
-        return true;
-    } else {
-        for (const auto &extensionInfo: hapModuleInfo.extensionInfos) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "compare extension: %{public}s", extensionInfo.name.c_str());
-            if (extensionInfo.name == mainElement) {
-                return extensionInfo.type == AppExecFwk::ExtensionAbilityType::SERVICE;
-            }
-        }
-        return false;
-    }
-}
-}
-
 ResidentAbilityInfoGuard::ResidentAbilityInfoGuard(const std::string &bundleName,
     const std::string &abilityName, int32_t userId)
 {
@@ -107,7 +84,8 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
         }
         for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {
             std::string mainElement;
-            if (!CheckMainElement(hapModuleInfo, processName, mainElement, needEraseIndexSet, i, userId)) {
+            if (!MainElementUtils::CheckMainElement(hapModuleInfo,
+                processName, mainElement, needEraseIndexSet, i, userId)) {
                 continue;
             }
 
@@ -120,6 +98,8 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
                 hapModuleInfo.bundleName.c_str(), mainElement.c_str());
             auto ret = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, userId,
                 DEFAULT_INVAL_VALUE);
+            MainElementUtils::UpdateMainElement(hapModuleInfo.bundleName,
+                hapModuleInfo.name, mainElement, true, userId);
             if (ret != ERR_OK) {
                 AddFailedResidentAbility(hapModuleInfo.bundleName, mainElement, userId);
             }
@@ -132,57 +112,22 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
     }
 }
 
-bool ResidentProcessManager::CheckMainElement(const AppExecFwk::HapModuleInfo &hapModuleInfo,
-    const std::string &processName, std::string &mainElement,
-    std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex, int32_t userId)
+void ResidentProcessManager::NotifyDisableResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    int32_t userId)
 {
-    if (!hapModuleInfo.isModuleJson) {
-        // old application model
-        mainElement = hapModuleInfo.mainAbility;
-        if (mainElement.empty()) {
-            return false;
-        }
-
-        // old application model, use ability 'process'
-        bool isAbilityKeepAlive = false;
-        for (auto abilityInfo : hapModuleInfo.abilityInfos) {
-            if (abilityInfo.process != processName || abilityInfo.name != mainElement) {
+    std::set<uint32_t> needEraseIndexSet; // no use
+    for (size_t i = 0; i < bundleInfos.size(); i++) {
+        std::string processName = bundleInfos[i].applicationInfo.process;
+        for (const auto &hapModuleInfo : bundleInfos[i].hapModuleInfos) {
+            std::string mainElement;
+            if (!MainElementUtils::CheckMainElement(hapModuleInfo,
+                processName, mainElement, needEraseIndexSet, i, userId)) {
                 continue;
             }
-            isAbilityKeepAlive = true;
-        }
-        if (!isAbilityKeepAlive) {
-            return false;
-        }
-
-        std::string uriStr;
-        bool getDataAbilityUri = DelayedSingleton<AbilityManagerService>::GetInstance()->GetDataAbilityUri(
-            hapModuleInfo.abilityInfos, mainElement, uriStr);
-        if (getDataAbilityUri) {
-            // dataability, need use AcquireDataAbility
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "call, mainElement: %{public}s, uri: %{public}s",
-                mainElement.c_str(), uriStr.c_str());
-            Uri uri(uriStr);
-            DelayedSingleton<AbilityManagerService>::GetInstance()->AcquireDataAbility(uri, true, nullptr);
-            needEraseIndexSet.insert(bundleInfoIndex);
-            return false;
-        }
-    } else {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "new mode: %{public}s", hapModuleInfo.bundleName.c_str());
-        // new application model
-        mainElement = hapModuleInfo.mainElementName;
-        if (mainElement.empty()) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "mainElement empty");
-            return false;
-        }
-
-        // new application model, user model 'process'
-        if (hapModuleInfo.process != processName) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "processName err: %{public}s", processName.c_str());
-            return false;
+            MainElementUtils::UpdateMainElement(hapModuleInfo.bundleName,
+                hapModuleInfo.name, mainElement, false, userId);
         }
     }
-    return IsMainElementTypeOk(hapModuleInfo, mainElement, userId);
 }
 
 int32_t ResidentProcessManager::SetResidentProcessEnabled(
@@ -256,13 +201,17 @@ void ResidentProcessManager::UpdateResidentProcessesStatus(
             break;
         }
 
-        // need start
         if (updateEnable && !localEnable) {
+            // need start
             std::vector<AppExecFwk::BundleInfo> bundleInfos{ bundleInfo };
             StartResidentProcessWithMainElement(bundleInfos, userId);
             if (!bundleInfos.empty()) {
                 StartResidentProcess(bundleInfos);
             }
+        } else if (!updateEnable && localEnable) {
+            // just update
+            std::vector<AppExecFwk::BundleInfo> bundleInfos{ bundleInfo };
+            NotifyDisableResidentProcess(bundleInfos, userId);
         }
     }
 }

@@ -34,7 +34,7 @@ void AbilityConnection::OnAbilityConnectDone(
         element.GetBundleName().c_str(), element.GetAbilityName().c_str(), resultCode);
     mutex_.lock();
     if (abilityConnectCallbackList_.empty()) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "empty abilityConnectCallbackList");
+        TAG_LOGW(AAFwkTag::CONNECTION, "empty callbackList");
         mutex_.unlock();
         return;
     }

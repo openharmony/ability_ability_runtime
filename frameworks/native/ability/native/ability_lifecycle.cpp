@@ -45,29 +45,27 @@ void LifeCycle::DispatchLifecycle(const LifeCycle::Event &event, const Want &wan
     }
 
     state_ = event;
-    if (callbacks_.size() != 0) {
-        for (auto &callback : callbacks_) {
-            switch (event) {
+    for (auto &callback : callbacks_) {
+        switch (event) {
 #ifdef SUPPORT_GRAPHICS
-                case ON_FOREGROUND: {
-                    if (callback != nullptr) {
-                        callback->OnForeground(want);
-                    }
-                    break;
+            case ON_FOREGROUND: {
+                if (callback != nullptr) {
+                    callback->OnForeground(want);
                 }
+                break;
+            }
 #endif
-                case ON_START: {
-                    if (callback != nullptr) {
-                        callback->OnStart(want);
-                    }
-                    break;
+            case ON_START: {
+                if (callback != nullptr) {
+                    callback->OnStart(want);
                 }
-                default:
-                    break;
+                break;
             }
-            if (callback != nullptr) {
-                callback->OnStateChanged(event, want);
-            }
+            default:
+                break;
+        }
+        if (callback != nullptr) {
+            callback->OnStateChanged(event, want);
         }
     }
 }
@@ -82,41 +80,39 @@ void LifeCycle::DispatchLifecycle(const LifeCycle::Event &event)
     }
 
     state_ = event;
-    if (callbacks_.size() != 0) {
-        for (auto &callback : callbacks_) {
-            switch (event) {
-                case ON_ACTIVE: {
-                    if (callback != nullptr) {
-                        callback->OnActive();
-                    }
-                    break;
+    for (auto &callback : callbacks_) {
+        switch (event) {
+            case ON_ACTIVE: {
+                if (callback != nullptr) {
+                    callback->OnActive();
                 }
+                break;
+            }
 #ifdef SUPPORT_GRAPHICS
-                case ON_BACKGROUND: {
-                    if (callback != nullptr) {
-                        callback->OnBackground();
-                    }
-                    break;
+            case ON_BACKGROUND: {
+                if (callback != nullptr) {
+                    callback->OnBackground();
                 }
+                break;
+            }
 #endif
-                case ON_INACTIVE: {
-                    if (callback != nullptr) {
-                        callback->OnInactive();
-                    }
-                    break;
+            case ON_INACTIVE: {
+                if (callback != nullptr) {
+                    callback->OnInactive();
                 }
-                case ON_STOP: {
-                    if (callback != nullptr) {
-                        callback->OnStop();
-                    }
-                    break;
+                break;
+            }
+            case ON_STOP: {
+                if (callback != nullptr) {
+                    callback->OnStop();
                 }
-                default:
-                    break;
+                break;
             }
-            if (callback != nullptr) {
-                callback->OnStateChanged(event);
-            }
+            default:
+                break;
+        }
+        if (callback != nullptr) {
+            callback->OnStateChanged(event);
         }
     }
 }

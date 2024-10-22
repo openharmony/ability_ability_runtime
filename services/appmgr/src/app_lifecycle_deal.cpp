@@ -18,7 +18,6 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "ipc_object_proxy.h"
 #include "time_util.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
@@ -40,12 +39,6 @@ void AppLifeCycleDeal::LaunchApplication(const AppLaunchData &launchData, const 
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto appThread = GetApplicationClient();
     if (appThread) {
-        auto remoteObject = appThread->AsObject();
-        IPCObjectProxy *proxy = reinterpret_cast<IPCObjectProxy *>(remoteObject.GetRefPtr());
-        if (proxy != nullptr) {
-            int32_t pid = static_cast<int32_t>(launchData.GetProcessInfo().GetPid());
-            TAG_LOGI(AAFwkTag::APPMGR, "handle:%{public}u, pid:%{public}d", proxy->GetHandle(), pid);
-        }
         appThread->ScheduleLaunchApplication(launchData, config);
     }
 }
@@ -105,16 +98,16 @@ void AppLifeCycleDeal::ScheduleTerminate(bool isLastProcess)
     appThread->ScheduleTerminateApplication(isLastProcess);
 }
 
-void AppLifeCycleDeal::ScheduleForegroundRunning()
+bool AppLifeCycleDeal::ScheduleForegroundRunning()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
-        return;
+        return false;
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    appThread->ScheduleForegroundApplication();
+    return appThread->ScheduleForegroundApplication();
 }
 
 void AppLifeCycleDeal::ScheduleBackgroundRunning()

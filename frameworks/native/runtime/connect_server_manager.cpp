@@ -106,8 +106,7 @@ void ConnectServerManager::StartConnectServer(const std::string& bundleName, int
     auto startServerForSocketPair =
         reinterpret_cast<StartServerForSocketPair>(dlsym(handlerConnectServerSo_, "StartServerForSocketPair"));
     if (startServerForSocketPair == nullptr) {
-        TAG_LOGE(
-            AAFwkTag::JSRUNTIME, "null startServerForSocketPair");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null startServerForSocketPair");
         return;
     }
     startServerForSocketPair(socketFd);

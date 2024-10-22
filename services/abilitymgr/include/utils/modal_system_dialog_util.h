@@ -20,6 +20,10 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+/**
+ * @class ModalSystemDialogUtil
+ * provides modal system dialog utilities.
+ */
 class ModalSystemDialogUtil final {
 public:
     /**

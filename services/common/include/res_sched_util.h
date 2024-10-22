@@ -36,7 +36,8 @@ enum class LoadingStage : int32_t {
     FOREGROUND_BEGIN,
     FOREGROUND_END,
     CONNECT_BEGIN,
-    CONNECT_END
+    CONNECT_END,
+    PROCESS_CACHE_BEGIN,
 };
 
 class ResSchedUtil final {
@@ -46,7 +47,8 @@ public:
     void ReportAbilityAssociatedStartInfoToRSS(
         const AbilityInfo &abilityInfo, int64_t resSchedType, int32_t callerUid, int32_t callerPid);
     void ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
-        const int32_t callerPid = -1);
+        const int32_t pid = -1, const int32_t callerPid = -1);
+    std::string GetThawReasonByAbilityType(const AbilityInfo &abilityInfo);
     void GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPids);
     bool CheckShouldForceKillProcess(int32_t pid);
     void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid, int64_t timeDuration = 0);

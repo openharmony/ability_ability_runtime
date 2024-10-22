@@ -63,6 +63,12 @@ std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::CreateQueueHandler(const std::
     return std::make_shared<QueueTaskHandlerWrap>(queueName, queueQos);
 }
 
+std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::CreateConcurrentQueueHandler(const std::string &queueName,
+    int32_t concurrentNum, TaskQoS queueQos)
+{
+    return std::make_shared<QueueTaskHandlerWrap>(queueName, concurrentNum, queueQos);
+}
+
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::GetFfrtHandler()
 {
     static auto ffrtHandler = std::make_shared<FfrtTaskHandlerWrap>();
@@ -188,6 +194,22 @@ ffrt::qos Convert2FfrtQos(TaskQoS taskqos)
 
     return ffrt::qos_inherit;
 }
+
+ffrt_queue_priority_t Convert2FfrtPriority(TaskQueuePriority taskPrio)
+{
+    switch (taskPrio) {
+        case TaskQueuePriority::IMMEDIATE:
+            return ffrt_queue_priority_t::ffrt_queue_priority_immediate;
+        case TaskQueuePriority::HIGH:
+            return ffrt_queue_priority_t::ffrt_queue_priority_high;
+        case TaskQueuePriority::LOW:
+            return ffrt_queue_priority_t::ffrt_queue_priority_low;
+        case TaskQueuePriority::IDLE:
+            return ffrt_queue_priority_t::ffrt_queue_priority_idle;
+    }
+    return ffrt_queue_priority_t::ffrt_queue_priority_low;
+}
+
 void BuildFfrtTaskAttr(const TaskAttribute &taskAttr, ffrt::task_attr &result)
 {
     if (taskAttr.delayMillis_ > 0) {
@@ -198,6 +220,9 @@ void BuildFfrtTaskAttr(const TaskAttribute &taskAttr, ffrt::task_attr &result)
     }
     if (taskAttr.taskQos_ != TaskQoS::DEFAULT) {
         result.qos(Convert2FfrtQos(taskAttr.taskQos_));
+    }
+    if (taskAttr.taskPriority_ != TaskQueuePriority::LOW) {
+        result.priority(Convert2FfrtPriority(taskAttr.taskPriority_));
     }
 }
 }  // namespace AAFWK

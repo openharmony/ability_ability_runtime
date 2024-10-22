@@ -364,6 +364,13 @@ void MainThread::Attach()
         return;
     }
     mainThreadState_ = MainThreadState::ATTACH;
+    isDeveloperMode_ = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
+    auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgrHelper is nullptr");
+        return;
+    }
+    bundleMgrHelper->PreConnect();
 }
 
 /**
@@ -403,9 +410,10 @@ std::shared_ptr<EventHandler> MainThread::GetMainHandler() const
  * @brief Schedule the foreground lifecycle of application.
  *
  */
-void MainThread::ScheduleForegroundApplication()
+bool MainThread::ScheduleForegroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ScheduleForegroundApplication");
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     wptr<MainThread> weak = this;
     auto task = [weak]() {
@@ -422,10 +430,10 @@ void MainThread::ScheduleForegroundApplication()
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
-        return;
+    } else {
+        tmpWatchdog->SetBackgroundStatus(false);
     }
-    tmpWatchdog->SetBackgroundStatus(false);
-    tmpWatchdog = nullptr;
+    return true;
 }
 
 /**
@@ -633,6 +641,7 @@ void MainThread::ScheduleLaunchApplication(const AppLaunchData &data, const Conf
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ScheduleLaunchApplication");
     wptr<MainThread> weak = this;
     auto task = [weak, data, config]() {
         auto appThread = weak.promote();
@@ -740,6 +749,8 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
 void MainThread::ScheduleCleanAbility(const sptr<IRemoteObject> &token, bool isCacheProcess)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called, with isCacheProcess =%{public}d.", isCacheProcess);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
     wptr<MainThread> weak = this;
     auto task = [weak, token, isCacheProcess]() {
         auto appThread = weak.promote();
@@ -793,15 +804,12 @@ void MainThread::ScheduleConfigurationUpdated(const Configuration &config)
 
 bool MainThread::CheckLaunchApplicationParam(const AppLaunchData &appLaunchData) const
 {
-    ApplicationInfo appInfo = appLaunchData.GetApplicationInfo();
-    ProcessInfo processInfo = appLaunchData.GetProcessInfo();
-
-    if (appInfo.name.empty()) {
+    if (appLaunchData.GetApplicationInfo().name.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "applicationName is empty");
         return false;
     }
 
-    if (processInfo.GetProcessName().empty()) {
+    if (appLaunchData.GetProcessInfo().GetProcessName().empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "processName is empty");
         return false;
     }
@@ -906,7 +914,7 @@ void MainThread::HandleProcessSecurityExit()
         TAG_LOGE(AAFwkTag::APPKIT, "application_ is null");
         return;
     }
-    std::vector<sptr<IRemoteObject>> tokens = (abilityRecordMgr_->GetAllTokens());
+    std::vector<sptr<IRemoteObject>> tokens = abilityRecordMgr_->GetAllTokens();
 
     for (auto iter = tokens.begin(); iter != tokens.end(); ++iter) {
         HandleCleanAbilityLocal(*iter);
@@ -1042,11 +1050,7 @@ void MainThread::OnStartAbility(const std::string &bundleName,
         loadPath = std::regex_replace(loadPath, pattern, std::string(LOCAL_CODE_PATH));
         TAG_LOGD(AAFwkTag::APPKIT, "ModuleResPath: %{public}s", loadPath.c_str());
         // getOverlayPath
-        auto res = GetOverlayModuleInfos(bundleName, entryHapModuleInfo.moduleName, overlayModuleInfos_);
-        if (res != ERR_OK) {
-            TAG_LOGW(AAFwkTag::APPKIT, "getOverlayPath failed");
-        }
-        if (overlayModuleInfos_.size() == 0) {
+        if (overlayModuleInfos_.empty()) {
             if (!resourceManager->AddResource(loadPath.c_str())) {
                 TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
             }
@@ -1160,7 +1164,7 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
     }
 
     // 2.add/remove overlay hapPath
-    if (loadPath.empty() || overlayModuleInfos.size() == 0) {
+    if (loadPath.empty() || overlayModuleInfos.empty()) {
         TAG_LOGW(AAFwkTag::APPKIT, "There is not any hapPath in overlayModuleInfo");
     } else {
         if (isEnable) {
@@ -1188,12 +1192,8 @@ bool IsNeedLoadLibrary(const std::string &bundleName)
         "com.ohos.formrenderservice"
     };
 
-    for (const auto &item : needLoadLibraryBundleNames) {
-        if (item == bundleName) {
-            return true;
-        }
-    }
-    return false;
+    return std::find(needLoadLibraryBundleNames.begin(), needLoadLibraryBundleNames.end(), bundleName)
+        != needLoadLibraryBundleNames.end();
 }
 
 bool GetBundleForLaunchApplication(std::shared_ptr<BundleMgrHelper> bundleMgrHelper, const std::string &bundleName,
@@ -1284,6 +1284,7 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
 void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication:begin");
     if (!CheckForHandleLaunchApplication(appLaunchData)) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckForHandleLaunchApplication failed");
         return;
@@ -1527,7 +1528,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             debugOption.perfCmd = perfCmd;
             runtime->StartProfiler(debugOption);
         } else {
-            runtime->StartDebugMode(debugOption);
+            if (isDeveloperMode_) {
+                runtime->StartDebugMode(debugOption);
+            }
         }
 
         std::vector<HqfInfo> hqfInfos = appInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
@@ -1676,11 +1679,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         entryHapModuleInfo.hapPath.empty() ? entryHapModuleInfo.resourcePath : entryHapModuleInfo.hapPath;
     std::regex inner_pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
     loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
-    std::vector<OverlayModuleInfo> overlayModuleInfos;
-    auto res = GetOverlayModuleInfos(bundleInfo.name, moduleName, overlayModuleInfos);
+    auto res = GetOverlayModuleInfos(bundleInfo.name, moduleName, overlayModuleInfos_);
     std::vector<std::string> overlayPaths;
     if (res == ERR_OK) {
-        overlayPaths = GetAddOverlayPaths(overlayModuleInfos);
+        overlayPaths = GetAddOverlayPaths(overlayModuleInfos_);
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     int32_t appType;
@@ -1728,6 +1730,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_->PerformAppReady failed");
         return;
     }
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication:end");
     // L1 needs to add corresponding interface
     ApplicationEnvImpl *pAppEvnIml = ApplicationEnvImpl::GetInstance();
 
@@ -1872,7 +1875,14 @@ void MainThread::ChangeToLocalPath(const std::string &bundleName,
     if (sourceDir.empty()) {
         return;
     }
-    if (std::regex_search(localPath, std::regex(bundleName))) {
+    bool isExist = false;
+    try {
+        isExist = std::regex_search(localPath, std::regex(bundleName));
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ChangeToLocalPath error localPath:%{public}s bundleName:%{public}s",
+            localPath.c_str(), bundleName.c_str());
+    }
+    if (isExist) {
         localPath = std::regex_replace(localPath, pattern, std::string(LOCAL_CODE_PATH));
     } else {
         localPath = std::regex_replace(localPath, std::regex(ABS_CODE_PATH), LOCAL_BUNDLES);
@@ -1897,7 +1907,20 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
         return;
     }
 
-    application_->AddAbilityStage(abilityStage);
+    wptr<MainThread> weak = this;
+    auto callback = [weak]() {
+        auto appThread = weak.promote();
+        if (!appThread->appMgr_ || !appThread->applicationImpl_) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+            return;
+        }
+        appThread->appMgr_->AddAbilityStageDone(appThread->applicationImpl_->GetRecordId());
+    };
+    bool isAsyncCallback = false;
+    application_->AddAbilityStage(abilityStage, callback, isAsyncCallback);
+    if (isAsyncCallback) {
+        return;
+    }
 
     if (!appMgr_ || !applicationImpl_) {
         TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
@@ -2055,7 +2078,8 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     Rosen::DisplayId defaultDisplayId = Rosen::DisplayManager::GetInstance().GetDefaultDisplayId();
     Rosen::DisplayId displayId = defaultDisplayId;
     if (abilityRecord->GetWant() != nullptr) {
-        displayId = abilityRecord->GetWant()->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId);
+        displayId = static_cast<uint64_t>(abilityRecord->GetWant()->GetIntParam(
+            AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId));
     }
     Rosen::DisplayManager::GetInstance().AddDisplayIdFromAms(displayId, abilityRecord->GetToken());
     TAG_LOGD(AAFwkTag::APPKIT, "add displayId: %{public}" PRIu64, displayId);
@@ -2176,6 +2200,7 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
 void MainThread::HandleForegroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleForegroundApplication");
     TAG_LOGI(AAFwkTag::APPKIT, "called");
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "handleForegroundApplication error!");
@@ -2183,6 +2208,7 @@ void MainThread::HandleForegroundApplication()
     }
 
     if (!applicationImpl_->PerformForeground()) {
+        FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleForegroundApplication fail");
         TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_->PerformForeground() failed");
     }
 
@@ -2204,7 +2230,7 @@ void MainThread::HandleBackgroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPKIT, "start");
-
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleBackgroundApplication");
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "error");
         return;
@@ -3243,12 +3269,12 @@ void MainThread::AssertFaultResumeMainThreadDetection()
 
 void MainThread::HandleInitAssertFaultTask(bool isDebugModule, bool isDebugApp)
 {
-    if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Unsupport assert fault dialog");
+    if (!isDeveloperMode_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Developer Mode is false");
         return;
     }
-    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Developer Mode is false");
+    if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
+        TAG_LOGD(AAFwkTag::APPKIT, "Unsupport assert fault dialog");
         return;
     }
     if (!isDebugApp) {
