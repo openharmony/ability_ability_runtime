@@ -168,16 +168,17 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
     }
 
     int32_t status = ability->OnContinue(wantParams, isAsyncOnContinue, abilityInfo);
-    switch(status){
+    switch (status)
+    {
         case OnContinueResult::AGREE:
 #ifdef SUPPORT_GRAPHICS
             if (IsContinuePageStack(wantParams)) {
-        bool ret = GetContentInfo(wantParams);
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed");
-            return CONTINUE_GET_CONTENT_FAILED;
-        }
-    }
+            bool ret = GetContentInfo(wantParams);
+                if (!ret) {
+                    TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed");
+                    return CONTINUE_GET_CONTENT_FAILED;
+                }
+            }
 #endif
             return ERR_OK;
         case OnContinueResult::MISMATCH:
