@@ -1516,6 +1516,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             };
             runtime->SetDeviceDisconnectCallback(cb);
         }
+        if (appLaunchData.NeedPreloadModule()) {
+            PreloadModule(entryHapModuleInfo, runtime);
+        }
         auto perfCmd = appLaunchData.GetPerfCmd();
         int32_t pid = -1;
         std::string processName = "";
@@ -1818,6 +1821,31 @@ void MainThread::HandleNWebPreload()
     TAG_LOGI(AAFwkTag::APPKIT, "postIdleTask success");
 }
 #endif
+}
+
+void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
+    std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "preload module %{public}s", entryHapModuleInfo.moduleName.c_str());
+    bool useCommonTrunk = false;
+    for (const auto &md : entryHapModuleInfo.metadata) {
+        if (md.name == "USE_COMMON_CHUNK") {
+            useCommonTrunk = md.value == "true";
+            break;
+        }
+    }
+    bool isEsmode = entryHapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    runtime->PreloadModule(entryHapModuleInfo.moduleName, entryHapModuleInfo.srcPath, entryHapModuleInfo.name,
+    entryHapModuleInfo.isModuleJson, isEsmode, useCommonTrunk, entryHapModuleInfo.hapPath);
+    for (const auto &info : entryHapModuleInfo.abilityInfos) {
+        if (info.name == entryHapModuleInfo.mainAbility) {
+            isEsmode = info.compileMode == AppExecFwk::CompileMode::ES_MODULE;
+            runtime->PreloadMainAbility(info.srcEntrance, info.moduleName, info.srcPath, info.hapPath, info.name,
+                info.isModuleJson, info.package, isEsmode);
+            return;
+        }
+    }
+}      
 
 #ifdef ABILITY_LIBRARY_LOADER
 void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::string &nativeLibraryPath)

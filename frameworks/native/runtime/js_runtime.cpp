@@ -1304,6 +1304,71 @@ void JsRuntime::PreloadSystemModule(const std::string& moduleName)
     napi_call_function(env, globalObj, refValue, 1, args, nullptr);
 }
 
+void JsRuntime::PreloadMainAbility(std::string& srcEntrance, std::string& moduleName, std::string& path,
+    std::string& hapPath, std::string& name, bool isModuleJson, std::string& package, bool isEsMode)
+{
+    std::string srcPath(package);
+    std::string module(moduleName);
+    if (!isModuleJson) {
+        /* temporary compatibility api8 + config.json */
+        srcPath.append("/assets/js/");
+        if (!srcPath.empty()) {
+            srcPath.append(path);
+        }
+        srcPath.append("/").append(name).append(".abc");
+    } else {
+        if (srcEntrance.empty()) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "empty srcEntrance");
+            return;
+        }
+        srcPath.append("/");
+        srcPath.append(srcEntrance);
+        srcPath.erase(srcPath.rfind("."));
+        srcPath.append(".abc");
+    }
+    module.append("::").append(name);
+    HandleScope handleScope(*this);
+    std::string key(module);
+    key.append("::");
+    key.append(srcPath);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadMainAbility srcPath: %{public}s", srcPath.c_str());
+    preloadList_[key] = LoadModule(module, srcPath, hapPath, isEsMode, false, srcEntrance);
+}
+
+void JsRuntime::PreloadModule(std::string& moduleName, std::string& path,
+    std::string& name, bool isModuleJson, bool isEsMode, bool useCommonTrunk, std::string& hapPath)
+{
+    std::string srcPath(name);
+    std::string module(moduleName);
+    module.append("::").append("AbilityStage");
+
+    if (!isModuleJson) {
+    /* temporary compatibility api8 + config.json */
+        srcPath.append("/assets/js/");
+        if (path.empty()) {
+            srcPath.append("AbilityStage.abc");
+        } else {
+            srcPath.append(path);
+            srcPath.append("/AbilityStage.abc");
+        }
+        std::string key(module);
+        key.append("::");
+        key.append(srcPath);
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadModule srcPath: %{public}s", srcPath.c_str());
+        preloadList_[key] = LoadModule(module, srcPath, hapPath, isEsMode, useCommonTrunk);
+    }
+}
+
+bool JsRuntime::GetPreloadObj(const std::string& key, std::shared_ptr<NativeReference>& obj)
+{
+    if (preloadList_.find(key) == preloadList_.end()) {
+        return false;
+    }
+    obj = preloadList_[key];
+    preloadList_.erase(key);
+    return true;
+}
+
 NativeEngine& JsRuntime::GetNativeEngine() const
 {
     return *GetNativeEnginePointer();

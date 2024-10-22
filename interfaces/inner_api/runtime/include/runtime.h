@@ -98,6 +98,10 @@ public:
     virtual bool SuspendVM(uint32_t tid) = 0;
     virtual void ResumeVM(uint32_t tid) = 0;
     virtual void PreloadSystemModule(const std::string& moduleName) = 0;
+    virtual void PreloadMainAbility(std::string& srcEntrance, std::string& moduleName, std::string& path,
+        std::string& hapPath, std::string& name, bool isModuleJson, std::string& package, bool isEsMode) = 0;
+    virtual void PreloadModule(std::string& moduleName, std::string& path, std::string& name, bool isModuleJson,
+        bool isEsMode, bool useCommonTrunk, std::string& hapPath) = 0;
     virtual void FinishPreload() = 0;
     virtual bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) = 0;
     virtual bool NotifyHotReloadPage() = 0;

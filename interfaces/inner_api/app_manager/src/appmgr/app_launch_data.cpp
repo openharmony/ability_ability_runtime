@@ -116,11 +116,15 @@ bool AppLaunchData::MarshallingExtend(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteString(isNeedPreloadModule_)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write instance key.");
+        return false;
+    }
+
     if (!parcel.WriteBool(isAllowedNWebPreload_)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write isAllowedNWebPreload.");
         return false;
     }
-
     return true;
 }
 
@@ -168,6 +172,7 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
     isMultiThread_ = parcel.ReadBool();
     isErrorInfoEnhance_ = parcel.ReadBool();
     instanceKey_ = parcel.ReadString();
+    isNeedPreloadModule_ = parcel.ReadBool();
     isAllowedNWebPreload_ = parcel.ReadBool();
     return true;
 }
@@ -258,6 +263,16 @@ void AppLaunchData::SetNativeStart(bool isNativeStart)
 bool AppLaunchData::isNativeStart() const
 {
     return isNativeStart_;
+}
+
+void AppLaunchData::SetIsNeedPreloadModule(bool isNeedPreloadModule)
+{
+    isNeedPreloadModule_ = isNeedPreloadModule;
+}
+
+bool AppLaunchData::IsNeedPreloadModule() const
+{
+    return isNeedPreloadModule_;
 }
 
 void AppLaunchData::SetNWebPreload(const bool isAllowedNWebPreload)

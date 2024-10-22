@@ -97,6 +97,7 @@ enum class AppStartType {
 enum class PreloadMode {
     PRESS_DOWN = 0,
     PRE_MAKE = 1,
+    PRELOAD_MODULE = 2,
 };
 
 enum class PreloadState {
