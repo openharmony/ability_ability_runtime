@@ -7322,10 +7322,29 @@ int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
         return ERR_INVALID_VALUE;
     }
 
-    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCacheFromKits()) {
         TAG_LOGE(AAFwkTag::APPMGR, "process cache feature is disabled.");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
+    appRecord->SetSupportedProcessCache(isSupport);
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, pid:%{public}d", pid);
+        return ERR_INVALID_VALUE;
+    }
+
     appRecord->SetSupportedProcessCache(isSupport);
     return ERR_OK;
 }

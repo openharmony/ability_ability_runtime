@@ -138,6 +138,7 @@ private:
     int32_t HandleNotifyMemorySizeStateChanged(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSaveBrowserChannel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleCheckCallingIsUserTestMode(MessageParcel &data, MessageParcel &reply);
     int32_t HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply);
