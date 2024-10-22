@@ -635,6 +635,16 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     }
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
 }
+
+void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return;
+    }
+    appMgrClient_->SetSupportedProcessCache(pid, isSupport);
+}
+
 bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     if (!appMgrClient_) {
