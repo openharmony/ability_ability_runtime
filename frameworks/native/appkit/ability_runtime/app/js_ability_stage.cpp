@@ -120,9 +120,17 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
             srcPath.append(hapModuleInfo.srcPath);
             srcPath.append("/AbilityStage.abc");
         }
-        auto moduleObj = jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
-            hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
-        return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
+        std::string key(moduleName);
+        key.append("::");
+        key.append(srcPath);
+        std::shared_ptr<NativeReference>> moduleObj = nullptr;
+        if (jsRuntime.GetPreloadObj(key, moduleObj)) {
+            return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
+        } else {
+            auto moduleObj = jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
+                hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
+            return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
+        }
     }
 
     std::unique_ptr<NativeReference> moduleObj;

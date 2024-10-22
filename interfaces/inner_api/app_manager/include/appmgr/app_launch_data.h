@@ -264,6 +264,19 @@ public:
     bool isNativeStart() const;
 
     /**
+     * @brief Setting is need preload module.
+     *
+     * @param isNeedPreloadModule, is need preload module.
+     */
+    void SetIsNeedPreloadModule(bool isNeedPreloadModule);
+    /**
+     * @brief Obtains  is need preload module..
+     *
+     * @return Returns  is need preload module..
+     */
+    bool IsNeedPreloadModule() const;
+
+    /**
      * @brief Setting if allow nweb preload.
      *
      * @param isAllowedNWebPreload, if allow nweb preload.
@@ -292,6 +305,7 @@ private:
     bool isErrorInfoEnhance_ = false;
     std::string appRunningUniqueId_;
     std::string instanceKey_;
+    bool isNeedPreloadModule_ = false;
     bool isAllowedNWebPreload_ = false;
 };
 }  // namespace AppExecFwk
