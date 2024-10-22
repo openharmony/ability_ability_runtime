@@ -5480,6 +5480,12 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         return ERR_OK;
     }
     std::string bundleName = appRecord->GetBundleName();
+    if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
+        TAG_LOGW(AAFwkTag::APPMGR,
+            "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s",
+            faultData.errorObject.name.c_str(), pid, bundleName.c_str());
+        return ERR_OK;
+    }
 
     if (faultData.faultType == FaultDataType::APP_FREEZE) {
         if (CheckAppFault(appRecord, faultData)) {
@@ -5508,13 +5514,6 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
             faultData.errorObject.name.c_str(), faultData.faultType,
             callerUid, pid, bundleName.c_str(), faultData.forceExit, faultData.waitSaveState);
     };
-
-    if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
-        TAG_LOGW(AAFwkTag::APPMGR,
-            "heap dump, don't reportEvent and kill:%{public}s, pid:%{public}d, bundleName:%{public}s.",
-            faultData.errorObject.name.c_str(), pid, bundleName.c_str());
-        return ERR_OK;
-    }
 
     if (!dfxTaskHandler_) {
         TAG_LOGW(AAFwkTag::APPMGR, "get dfx ffrt handler failed!");
@@ -5603,6 +5602,50 @@ void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
     }
 }
 
+int32_t AppMgrServiceInner::TransformedNotifyAppFault(const AppFaultDataBySA &faultData)
+{
+    int32_t pid = faultData.pid;
+    auto record = GetAppRunningRecordByPid(pid);
+    if (record == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no such AppRunningRecord");
+        return ERR_INVALID_VALUE;
+    }
+
+    FaultData transformedFaultData = ConvertDataTypes(faultData);
+    int32_t uid = record->GetUid();
+    std::string bundleName = record->GetBundleName();
+    if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
+        TAG_LOGW(AAFwkTag::APPMGR,
+            "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s.",
+            faultData.errorObject.name.c_str(), pid, bundleName.c_str());
+        return ERR_OK;
+    }
+    if (faultData.errorObject.name == "appRecovery") {
+        AppRecoveryNotifyApp(pid, bundleName, faultData.faultType, "appRecovery");
+        return ERR_OK;
+    }
+
+    if (transformedFaultData.timeoutMarkers.empty()) {
+        transformedFaultData.timeoutMarkers = "notifyFault:" + transformedFaultData.errorObject.name +
+            std::to_string(pid) + "-" + std::to_string(SystemTimeMillisecond());
+    }
+    const int64_t timeout = 1000;
+    if (faultData.faultType == FaultDataType::APP_FREEZE) {
+        if (!AppExecFwk::AppfreezeManager::GetInstance()->IsHandleAppfreeze(bundleName) || record->IsDebugging()) {
+            return ERR_OK;
+        }
+        auto timeoutNotifyApp = [this, pid, uid, bundleName, transformedFaultData]() {
+            this->TimeoutNotifyApp(pid, uid, bundleName, transformedFaultData);
+        };
+        dfxTaskHandler_->SubmitTask(timeoutNotifyApp, transformedFaultData.timeoutMarkers, timeout);
+    }
+    record->NotifyAppFault(transformedFaultData);
+    TAG_LOGW(AAFwkTag::APPMGR, "FaultDataBySA is: name: %{public}s, faultType: %{public}s, uid: %{public}d,"
+        "pid: %{public}d, bundleName: %{public}s, eventId: %{public}d", faultData.errorObject.name.c_str(),
+        FaultTypeToString(faultData.faultType).c_str(), uid, pid, bundleName.c_str(), faultData.eventId);
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
 {
     if (remoteClientManager_ == nullptr) {
@@ -5620,41 +5663,7 @@ int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData
 #else
     if ((AAFwk::PermissionVerification::GetInstance()->IsSACall()) || callerBundleName == SCENE_BOARD_BUNDLE_NAME) {
 #endif
-        int32_t pid = faultData.pid;
-        auto record = GetAppRunningRecordByPid(pid);
-        if (record == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "no such AppRunningRecord");
-            return ERR_INVALID_VALUE;
-        }
-
-        FaultData transformedFaultData = ConvertDataTypes(faultData);
-        int32_t uid = record->GetUid();
-        std::string bundleName = record->GetBundleName();
-
-        if (faultData.errorObject.name == "appRecovery") {
-            AppRecoveryNotifyApp(pid, bundleName, faultData.faultType, "appRecovery");
-            return ERR_OK;
-        }
-
-        if (transformedFaultData.timeoutMarkers.empty()) {
-            transformedFaultData.timeoutMarkers = "notifyFault:" + transformedFaultData.errorObject.name +
-                std::to_string(pid) + "-" + std::to_string(SystemTimeMillisecond());
-        }
-        const int64_t timeout = 1000;
-        if (faultData.faultType == FaultDataType::APP_FREEZE) {
-            if (!AppExecFwk::AppfreezeManager::GetInstance()->IsHandleAppfreeze(bundleName) || record->IsDebugging()) {
-                return ERR_OK;
-            }
-            auto timeoutNotifyApp = [this, pid, uid, bundleName, transformedFaultData]() {
-                this->TimeoutNotifyApp(pid, uid, bundleName, transformedFaultData);
-            };
-            dfxTaskHandler_->SubmitTask(timeoutNotifyApp, transformedFaultData.timeoutMarkers, timeout);
-        }
-        record->NotifyAppFault(transformedFaultData);
-        TAG_LOGW(AAFwkTag::APPMGR, "FaultDataBySA is: name: %{public}s, faultType: %{public}s, uid: %{public}d,"
-            "pid: %{public}d, bundleName: %{public}s, eventId: %{public}d", faultData.errorObject.name.c_str(),
-            FaultTypeToString(faultData.faultType).c_str(), uid, pid, bundleName.c_str(), faultData.eventId);
-        return ERR_OK;
+        return TransformedNotifyAppFault(faultData);
     }
     TAG_LOGD(AAFwkTag::APPMGR, "this is not called by SA.");
     return AAFwk::CHECK_PERMISSION_FAILED;
