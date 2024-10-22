@@ -809,7 +809,7 @@ ErrCode AmsMgrStub::HandleBlockProcessCacheByPids(MessageParcel &data, MessagePa
 
 int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     auto bundleName = data.ReadString();
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
