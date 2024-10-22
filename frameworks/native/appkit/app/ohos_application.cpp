@@ -434,6 +434,10 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
     const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback)
 {
     const std::shared_ptr<AbilityInfo> &abilityInfo = abilityRecord->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
+        return nullptr;
+    }
     if (!IsMainProcess(abilityInfo->bundleName, abilityInfo->applicationInfo.process)) {
         return nullptr;
     }
@@ -464,6 +468,10 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
     const std::function<void()>& callback)
 {
     auto applicationInfo = abilityRuntimeContext_->GetApplicationInfo();
+    if (applicationInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo");
+        return nullptr;
+    }
     if (!IsMainProcess(hapModuleInfo.bundleName, applicationInfo->process)) {
         return nullptr;
     }
