@@ -168,8 +168,7 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
     }
 
     int32_t status = ability->OnContinue(wantParams, isAsyncOnContinue, abilityInfo);
-    switch (status)
-    {
+    switch (status) {
         case OnContinueResult::AGREE:
 #ifdef SUPPORT_GRAPHICS
             if (IsContinuePageStack(wantParams)) {
