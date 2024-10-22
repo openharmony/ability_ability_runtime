@@ -610,7 +610,7 @@ bool UIAbilityImpl::AbilityTransaction(const AAFwk::Want &want, const AAFwk::Lif
                 Background();
             } else {
                 TAG_LOGD(AAFwkTag::UIABILITY, "handleExecuteInsightIntentBackground");
-                HandleExecuteInsightIntentBackground(want);
+                ret = HandleExecuteInsightIntentBackground(want);
             }
 #endif
             break;
@@ -776,7 +776,7 @@ void UIAbilityImpl::PostForegroundInsightIntent()
     }
 }
 
-void UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want, bool onlyExecuteIntent)
+bool UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want, bool onlyExecuteIntent)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
@@ -784,7 +784,7 @@ void UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want
     if (!ret && !onlyExecuteIntent) {
         TAG_LOGE(AAFwkTag::UIABILITY, "invalid params");
         Background();
-        return;
+        return true;
     }
 
     TAG_LOGD(AAFwkTag::UIABILITY,
@@ -798,14 +798,16 @@ void UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want
     if (intentCb == nullptr && !onlyExecuteIntent) {
         TAG_LOGE(AAFwkTag::UIABILITY, "create async callback failed");
         Background();
-        return;
+        return true;
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "lifecycleState_: %{public}d", lifecycleState_);
     if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL
         || lifecycleState_ == AAFwk::ABILITY_STATE_STARTED_NEW) {
         ExecuteInsightIntentBackgroundByColdBoot(want, executeParam, std::move(intentCb));
+        return false;
     } else {
         ExecuteInsightIntentBackgroundAlreadyStart(want, executeParam, std::move(intentCb));
+        return true;
     }
 }
 
@@ -824,6 +826,7 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundByColdBoot(const Want &want,
             }
             abilityImpl->Background();
             abilityImpl->ExecuteInsightIntentDone(intentId, result);
+            abilityImpl->AbilityTransactionCallback(AAFwk::ABILITY_STATE_BACKGROUND_NEW);
         };
     callback->Push(asyncCallback);
 
