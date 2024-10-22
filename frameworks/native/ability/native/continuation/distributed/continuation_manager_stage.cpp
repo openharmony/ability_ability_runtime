@@ -37,6 +37,7 @@ const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.
 const int32_t CONTINUE_ABILITY_REJECTED = 29360197;
 const int32_t CONTINUE_SAVE_DATA_FAILED = 29360198;
 const int32_t CONTINUE_ON_CONTINUE_FAILED = 29360199;
+const int32_t CONTINUE_ON_CONTINUE_HANDLE_FAILED = 29360200;
 const int32_t CONTINUE_ON_CONTINUE_MISMATCH = 29360204;
 #ifdef SUPPORT_GRAPHICS
 const int32_t CONTINUE_GET_CONTENT_FAILED = 29360200;
@@ -167,17 +168,10 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
     }
 
     int32_t status = ability->OnContinue(wantParams, isAsyncOnContinue, abilityInfo);
-    if (status != OnContinueResult::AGREE) {
-        if (status == OnContinueResult::MISMATCH) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue version mismatch.");
-            return CONTINUE_ON_CONTINUE_MISMATCH;
-        }
-        TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue failed");
-        return CONTINUE_ON_CONTINUE_FAILED;
-    }
-
+    switch(status){
+        case OnContinueResult::AGREE:
 #ifdef SUPPORT_GRAPHICS
-    if (IsContinuePageStack(wantParams)) {
+            if (IsContinuePageStack(wantParams)) {
         bool ret = GetContentInfo(wantParams);
         if (!ret) {
             TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed");
@@ -185,7 +179,17 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
         }
     }
 #endif
-    return ERR_OK;
+            return ERR_OK;
+        case OnContinueResult::MISMATCH:
+            TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue version mismatch.");
+            return CONTINUE_ON_CONTINUE_MISMATCH;
+        case expression:
+            TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue handle failed");
+            return CONTINUE_ON_CONTINUE_HANDLE_FAILED;
+        default:
+            TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue failed");
+            return CONTINUE_ON_CONTINUE_FAILED;
+    }
 }
 
 int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
