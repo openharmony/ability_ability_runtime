@@ -313,7 +313,7 @@ group("unittest") {
 
   deps = []
   if (!use_libfuzzer) {
-    deps += [
+    deps = [
       "ability_auto_startup_data_manager_test:unittest",
       "ability_auto_startup_service_test:unittest",
       "ability_bundle_event_callback_test:unittest",
