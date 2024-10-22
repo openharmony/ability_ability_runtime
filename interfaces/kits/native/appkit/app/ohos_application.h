@@ -84,7 +84,7 @@ public:
      *
      * @param config Indicates the new Configuration object.
      */
-    virtual void OnFontUpdated(Configuration config);
+    virtual void OnUpdateConfigurationForAll(Configuration config);
 
     /**
      *
