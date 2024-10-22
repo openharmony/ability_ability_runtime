@@ -25,6 +25,7 @@ ohos_unittest("AppMgrClientTest") {
   ]
 
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/appmgr/test/unittest/mocks",
     "${ability_runtime_test_path}/mock/common/include",

@@ -18,6 +18,7 @@ ohos_shared_library("wantagent_napi") {
   include_dirs = [
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "./",
     "../",
