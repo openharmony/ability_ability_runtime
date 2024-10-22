@@ -12060,5 +12060,17 @@ void AbilityManagerService::EnableListForSCBRecovery(int32_t userId) const
     CHECK_POINTER_LOG(uiAbilityManager, "UIAbilityMgr not exist.");
     uiAbilityManager->EnableListForSCBRecovery();
 }
+
+int32_t AbilityManagerService::UpdateKeepAliveEnableState(const std::string &bundleName,
+    const std::string &moduleName, const std::string &mainElement, bool updateEnable, int32_t userId)
+{
+    auto connectManager = GetConnectManagerByUserId(userId);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_NULL_OBJECT);
+    int32_t ret = connectManager->UpdateKeepAliveEnableState(bundleName, moduleName, mainElement, updateEnable);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "UpdateKeepAliveEnableState failed, err:%{public}d", ret);
+    }
+    return ret;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

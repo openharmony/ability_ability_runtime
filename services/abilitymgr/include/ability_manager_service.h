@@ -1783,6 +1783,9 @@ public:
 
     void EnableListForSCBRecovery(int32_t userId) const;
 
+    int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
+        const std::string &mainElement, bool updateEnable, int32_t userId);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
