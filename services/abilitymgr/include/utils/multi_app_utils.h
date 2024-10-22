@@ -20,8 +20,19 @@
 
 namespace OHOS {
 namespace AAFwk {
+/**
+ * @class MultiAppUtils
+ * provides multi-app utilities.
+ */
 class MultiAppUtils {
 public:
+    /**
+     * GetRunningMultiAppIndex, get multi-app running application index.
+     *
+     * @param bundleName The bundle name of the app.
+     * @param uid The calling uid.
+     * @param appIndex The resultant application index.
+     */
     static void GetRunningMultiAppIndex(const std::string &bundleName, int32_t uid, int32_t &appIndex);
 };
 }  // namespace AAFwk

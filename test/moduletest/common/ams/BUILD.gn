@@ -42,6 +42,7 @@ ohos_source_set("appmgr_mst_source") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/common:task_handler_wrap",
   ]

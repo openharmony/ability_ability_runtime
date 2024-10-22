@@ -33,6 +33,11 @@ BundleMgrHelper::~BundleMgrHelper()
     }
 }
 
+void BundleMgrHelper::PreConnect()
+{
+    Connect();
+}
+
 ErrCode BundleMgrHelper::GetNameForUid(const int32_t uid, std::string &name)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
@@ -204,9 +209,17 @@ std::string BundleMgrHelper::GetAppIdByBundleName(const std::string &bundleName,
         TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect.");
         return "";
     }
- 
+
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetAppIdByBundleName(bundleName, userId);
+}
+
+void BundleMgrHelper::ConnectTillSuccess()
+{
+    while (Connect() == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "connect failed, now retry");
+        usleep(REPOLL_TIME_MICRO_SECONDS);
+    }
 }
 
 sptr<IBundleMgr> BundleMgrHelper::Connect()

@@ -28,7 +28,6 @@ ohos_unittest("dialog_session_info_test") {
       [ "${ability_runtime_path}/interfaces/inner_api/ability_manager/include" ]
 
   sources = [
-    "${ability_runtime_native_path}/ability/native/auto_startup_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/dialog_session/dialog_session_info.cpp",
     "dialog_session_info_test.cpp",
   ]

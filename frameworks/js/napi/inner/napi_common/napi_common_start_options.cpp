@@ -21,7 +21,7 @@
 #include "int_wrapper.h"
 #include "process_options.h"
 #include "start_window_option.h"
-#ifdef SUPPORT_GRAPHICS
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 #include "pixel_map_napi.h"
 #endif
 
@@ -63,7 +63,7 @@ bool UnwrapProcessOptions(napi_env env, napi_value param, std::shared_ptr<AAFwk:
     return true;
 }
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 bool UnwrapPixelMapFromJS(napi_env env, napi_value param, std::shared_ptr<Media::PixelMap> &value)
 {
     auto pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, param);
@@ -103,7 +103,7 @@ bool UnwrapStartWindowOption(napi_env env, napi_value param,
         option->hasStartWindow = true;
     }
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
     std::shared_ptr<Media::PixelMap> startWindowIcon = nullptr;
     if (IsExistsByPropertyName(env, param, "startWindowIcon")) {
         if (!UnwrapPixelMapByPropertyName(env, param, "startWindowIcon", startWindowIcon)) {

@@ -29,7 +29,7 @@ class MockAppSchedulerClient : public AppSchedulerProxy {
 public:
     MockAppSchedulerClient(const sptr<IRemoteObject> &impl) : AppSchedulerProxy(impl) {}
     virtual ~MockAppSchedulerClient() = default;
-    MOCK_METHOD0(ScheduleForegroundApplication, void());
+    MOCK_METHOD0(ScheduleForegroundApplication, bool());
     MOCK_METHOD0(ScheduleBackgroundApplication, void());
     MOCK_METHOD1(ScheduleTerminateApplication, void(bool));
     MOCK_METHOD2(ScheduleLaunchApplication, void(const AppLaunchData&, const Configuration& config));

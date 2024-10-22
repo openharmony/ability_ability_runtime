@@ -92,7 +92,8 @@ public:
     void ResumeVM(uint32_t tid) override;
 
     bool RunSandboxScript(const std::string& path, const std::string& hapPath);
-    bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false);
+    bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false,
+        const std::string& srcEntrance = "");
 
     void PreloadSystemModule(const std::string& moduleName) override;
 
@@ -104,7 +105,8 @@ public:
     bool NotifyHotReloadPage() override;
     void RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo& uncaughtExceptionInfo);
     bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
-    bool LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle);
+    bool LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle,
+        const std::string& srcEntrance = "");
     bool StartDebugger(bool needBreakPoint, uint32_t instanceId);
     void StopDebugger();
 
@@ -130,7 +132,8 @@ public:
     static std::unique_ptr<NativeReference> LoadSystemModuleByEngine(napi_env env,
         const std::string& moduleName, const napi_value* argv, size_t argc);
     std::unique_ptr<NativeReference> LoadModule(const std::string& moduleName, const std::string& modulePath,
-        const std::string& hapPath, bool esmodule = false, bool useCommonChunk = false);
+        const std::string& hapPath, bool esmodule = false, bool useCommonChunk = false,
+        const std::string& srcEntrance = "");
     std::unique_ptr<NativeReference> LoadSystemModule(
         const std::string& moduleName, const napi_value* argv = nullptr, size_t argc = 0);
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override;
@@ -138,17 +141,16 @@ public:
 
 private:
     void FinishPreload() override;
-
     bool Initialize(const Options& options);
     void Deinitialize();
-
     int32_t JsperfProfilerCommandParse(const std::string &command, int32_t defaultValue);
 
     napi_value LoadJsBundle(const std::string& path, const std::string& hapPath, bool useCommonChunk = false);
-    napi_value LoadJsModule(const std::string& path, const std::string& hapPath);
+    napi_value LoadJsModule(const std::string& path, const std::string& hapPath, const std::string& srcEntrance = "");
 
     bool preloaded_ = false;
     bool isBundle_ = true;
+    bool isOhmUrl_ = false;
     std::string codePath_;
     std::string moduleName_;
     std::unique_ptr<NativeReference> methodRequireNapiRef_;

@@ -69,6 +69,7 @@ private:
         if (remote_ == remote.promote()) {
             remote_->RemoveDeathRecipient(deathRecipient_);
             remote_ = nullptr;
+            deathRecipient_ = nullptr;
         }
     }
 
@@ -77,6 +78,10 @@ private:
         if (!serviceManager_) {
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
+        if (remote_) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        TAG_LOGI(AAFwkTag::APPMGR, "get AppMgrRemote object");
         remote_ = serviceManager_->GetAppMgrService();
         if (!remote_) {
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
@@ -318,13 +323,14 @@ AppMgrResultCode AppMgrClient::KillProcessesByAccessTokenId(const uint32_t acces
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleName, const int uid)
+AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->KillApplicationByUid(bundleName, uid);
+            int32_t result = amsService->KillApplicationByUid(bundleName, uid, reason);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }
@@ -334,13 +340,13 @@ AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleNam
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillApplicationSelf(const bool clearPageStack)
+AppMgrResultCode AppMgrClient::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->KillApplicationSelf(clearPageStack);
+            int32_t result = amsService->KillApplicationSelf(clearPageStack, reason);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }

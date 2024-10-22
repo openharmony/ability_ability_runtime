@@ -34,6 +34,7 @@ ohos_shared_library("wantagent_napi") {
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
@@ -47,7 +48,6 @@ ohos_shared_library("wantagent_napi") {
     "ipc:ipc_core",
     "libuv:uv",
     "napi:ace_napi",
-    "node:node_header_notice",
   ]
 
   relative_install_dir = "module/app/ability"

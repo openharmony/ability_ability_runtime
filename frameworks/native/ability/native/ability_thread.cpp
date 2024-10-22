@@ -88,10 +88,11 @@ void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &ap
     TAG_LOGD(AAFwkTag::ABILITY, "end");
 }
 
-void AbilityThread::ScheduleAbilityTransaction(
+bool AbilityThread::ScheduleAbilityTransaction(
     const Want &want, const LifeCycleStateInfo &targetState, sptr<SessionInfo> sessionInfo)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
+    return true;
 }
 
 void AbilityThread::ScheduleShareData(const int32_t &requestCode)

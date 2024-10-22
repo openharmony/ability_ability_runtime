@@ -21,9 +21,22 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+/**
+ * @class FreeInstallObserverProxy
+ * IPC stub of IFreeInstallObserver.
+ */
 class FreeInstallObserverProxy : public IRemoteProxy<IFreeInstallObserver> {
 public:
+    /**
+     * FreeInstallObserverProxy, constructor.
+     *
+     */
     explicit FreeInstallObserverProxy(const sptr<IRemoteObject> &impl);
+
+    /**
+     * FreeInstallObserverProxy, destructor.
+     *
+     */
     virtual ~FreeInstallObserverProxy() = default;
 
     /**
@@ -48,7 +61,14 @@ public:
         const int &resultCode) override;
 
 private:
+    /**
+     * WriteInterfaceToken.
+     *
+     * @param data The message parcel data.
+     * @return Flag whether write is successful.
+     */
     bool WriteInterfaceToken(MessageParcel &data);
+
     static inline BrokerDelegator<FreeInstallObserverProxy> delegator_;
 };
 } // namespace AbilityRuntime

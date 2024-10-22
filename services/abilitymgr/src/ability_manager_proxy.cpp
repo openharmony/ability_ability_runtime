@@ -17,6 +17,7 @@
 
 #include "ability_scheduler_stub.h"
 #include "ability_util.h"
+#include "freeze_util.h"
 #include "hitrace_meter.h"
 #include "status_bar_delegate_interface.h"
 
@@ -971,7 +972,7 @@ int32_t AbilityManagerProxy::TerminateUIServiceExtensionAbility(const sptr<IRemo
             return INNER_ERR;
         }
     }
-    
+
     error = SendRequest(AbilityManagerInterfaceCode::TERMINATE_UI_SERVICE_EXTENSION_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
@@ -1307,6 +1308,7 @@ int AbilityManagerProxy::AttachAbilityThread(const sptr<IAbilityScheduler> &sche
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    AbilityRuntime::FreezeUtil::LifecycleFlow flow = {token, AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
     if (scheduler == nullptr) {
         return ERR_INVALID_VALUE;
     }
@@ -1321,6 +1323,8 @@ int AbilityManagerProxy::AttachAbilityThread(const sptr<IAbilityScheduler> &sche
     error = SendRequest(AbilityManagerInterfaceCode::ATTACH_ABILITY_THREAD, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            std::string("ERROR AttachAbilityThread failed IPC error") + std::to_string(error));
         return error;
     }
     return reply.ReadInt32();
@@ -1333,6 +1337,7 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
     MessageParcel reply;
     MessageOption option;
 
+    AbilityRuntime::FreezeUtil::LifecycleFlow flow = {token, AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND};
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
@@ -1342,12 +1347,16 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
     }
     if (!data.WriteParcelable(&saveData)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "saveData write fail");
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            "write saveData failed");
         return INNER_ERR;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::ABILITY_TRANSITION_DONE, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            std::string("ERROR AbilityTransitionDone failed IPC error") + std::to_string(error));
         return error;
     }
     return reply.ReadInt32();
@@ -2968,7 +2977,7 @@ int AbilityManagerProxy::MoveMissionsToBackground(const std::vector<int32_t>& mi
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback)
+int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -2987,7 +2996,10 @@ int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback)
             return ERR_INVALID_VALUE;
         }
     }
-
+    if (!data.WriteBool(isAppRecovery)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write isAppRecovery fail");
+        return IPC_PROXY_ERR;
+    }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::START_USER, data, reply, option);

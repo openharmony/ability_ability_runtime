@@ -16,6 +16,8 @@
 #ifndef ABILITY_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
 #define ABILITY_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
 
+#include <string>
+
 namespace OHOS {
 namespace AAFwk {
 struct PolicyInfo final {

@@ -24,17 +24,55 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+/**
+ * @class FreeInstallObserverStub
+ * IPC proxy of IFreeInstallObserver.
+ */
 class FreeInstallObserverStub : public IRemoteStub<IFreeInstallObserver> {
 public:
+    /**
+     * FreeInstallObserverStub, constructor.
+     *
+     */
     FreeInstallObserverStub();
+
+    /**
+     * FreeInstallObserverStub, destructor.
+     *
+     */
     virtual ~FreeInstallObserverStub();
 
+    /**
+     * OnRemoteRequest, IPC method.
+     *
+     * @param code The IPC code.
+     * @param data The message parcel data.
+     * @param reply The message parcel reply.
+     * @param option The message parcel option.
+     * @return Error code of calling the function.
+     */
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
     DISALLOW_COPY_AND_MOVE(FreeInstallObserverStub);
+
+    /**
+     * OnInstallFinishedInner, inner processing method for OnInstallFinished.
+     *
+     * @param data The message parcel data.
+     * @param reply The message parcel reply.
+     * @return Error code of calling the function.
+     */
     int OnInstallFinishedInner(MessageParcel &data, MessageParcel &reply);
+
+    /**
+     * OnInstallFinishedByUrlInner, inner processing method for OnInstallFinishedByUrl.
+     *
+     * @param data The message parcel data.
+     * @param reply The message parcel reply.
+     * @return Error code of calling the function.
+     */
     int OnInstallFinishedByUrlInner(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace AbilityRuntime

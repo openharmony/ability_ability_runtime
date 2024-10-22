@@ -73,6 +73,38 @@ ohos_fuzztest("AbilityManagerServiceBFuzzTest") {
       "window_manager:libwm",
     ]
   }
+
+  defines = []
+  if (os_dlp_part_enabled) {
+    defines += [ "WITH_DLP" ]
+  }
+  if (include_app_domain_verify) {
+    defines += [ "APP_DOMAIN_VERIFY_ENABLED" ]
+  }
+  if (ability_runtime_power) {
+    defines += [ "SUPPORT_POWER" ]
+  }
+  if (ability_command_for_test) {
+    defines += [ "ABILITY_COMMAND_FOR_TEST" ]
+  }
+  if (ability_fault_and_exit_test) {
+    defines += [ "ABILITY_FAULT_AND_EXIT_TEST" ]
+  }
+  if (ability_runtime_graphics) {
+    defines += [
+      "SUPPORT_GRAPHICS",
+      "SUPPORT_SCREEN",
+    ]
+  }
+  if (background_task_mgr_continuous_task_enable) {
+    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
+  if (resource_schedule_service_enable) {
+    defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+  }
+  if (is_asan || asan_detector) {
+    defines += [ "SUPPORT_ASAN" ]
+  }
 }
 
 ###############################################################################

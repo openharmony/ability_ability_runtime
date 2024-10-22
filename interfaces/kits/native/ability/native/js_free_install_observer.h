@@ -38,7 +38,16 @@ struct JsFreeInstallObserverObject {
 
 class JsFreeInstallObserver : public FreeInstallObserverStub {
 public:
+    /**
+     * JsFreeInstallObserver, constructor.
+     *
+     */
     explicit JsFreeInstallObserver(napi_env env);
+
+    /**
+     * JsFreeInstallObserver, destructor.
+     *
+     */
     ~JsFreeInstallObserver();
 
     /**
@@ -97,17 +106,71 @@ public:
         napi_value jsObserverObject, napi_value* result, bool isAbilityResult = false);
 
 private:
+    /**
+     * CallPromise, resolve promise.
+     *
+     * @param deferred The promise that is to be resolved.
+     * @param resultCode The result code of the promise.
+     */
     void CallPromise(napi_deferred deferred, int32_t resultCode);
+
+    /**
+     * CallPromise, resolve promise.
+     *
+     * @param deferred The promise that is to be resolved.
+     * @param abilityResult The ability result of the promise.
+     */
     void CallPromise(napi_deferred deferred, napi_value abilityResult);
+
+    /**
+     * CallCallback, call callback.
+     *
+     * @param callback The callback that is to be called.
+     * @param resultCode The result code of the promise.
+     */
     void CallCallback(napi_ref callback, int32_t resultCode);
+
+    /**
+     * CallCallback, call callback.
+     *
+     * @param callback The callback that is to be called.
+     * @param abilityResult The ability result of the promise.
+     */
     void CallCallback(napi_ref callback, napi_value abilityResult);
+
+    /**
+     * HandleOnInstallFinished, handle the event of free install upon finished.
+     *
+     * @param bundleName The bundle name of the app.
+     * @param abilityName The ability name of the app.
+     * @param startTime The start time.
+     * @param resultCode The result code.
+     */
     void HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
         const std::string &startTime, const int &resultCode);
+
+    /**
+     * HandleOnInstallFinishedByUrl, handle the event of free install upon finished.
+     *
+     * @param startTime The start time.
+     * @param url The url of the app.
+     * @param resultCode The result code.
+     */
     void HandleOnInstallFinishedByUrl(const std::string &startTime, const std::string &url,
         const int &resultCode);
+
+    /**
+     * AddJsObserverCommon, helper of AddJsObserverObject.
+     *
+     * @param object The free install observer object.
+     * @param jsObserverObject The js observer object.
+     * @param result The resultant object.
+     * @param isAbilityResult The flag of whether it is to return ability result.
+     */
     void AddJsObserverCommon(JsFreeInstallObserverObject &object,
         napi_value jsObserverObject, napi_value* result, bool isAbilityResult);
     napi_env env_;
+    std::mutex jsObserverObjectListLock_;
     std::vector<JsFreeInstallObserverObject> jsObserverObjectList_;
 };
 } // namespace AbilityRuntime

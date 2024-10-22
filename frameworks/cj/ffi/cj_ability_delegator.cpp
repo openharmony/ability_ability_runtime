@@ -150,7 +150,7 @@ int32_t FFIAbilityDelegatorApplicationContext(int64_t id)
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
         return INVALID_CODE;
     }
-    auto appContext = FFI::FFIData::Create<ApplicationContextCJ::CJApplicationContext>(cjDelegator->GetAppContext());
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(cjDelegator->GetAppContext());
     if (appContext == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null app context");
         return INVALID_CODE;

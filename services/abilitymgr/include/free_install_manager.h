@@ -234,7 +234,6 @@ private:
     void HandleFreeInstallResult(int32_t recordId, FreeInstallInfo &freeInstallInfo, int resultCode, bool isAsync);
     void HandleOnFreeInstallSuccess(int32_t recordId, FreeInstallInfo &freeInstallInfo, bool isAsync);
     void HandleOnFreeInstallFail(int32_t recordId, FreeInstallInfo &freeInstallInfo, int resultCode, bool isAsync);
-    void NotifySCBToHandleException(const FreeInstallInfo &info, int resultCode);
     void StartAbilityByConvertedWant(FreeInstallInfo &info, const std::string &startTime);
     void StartAbilityByOriginalWant(FreeInstallInfo &info, const std::string &startTime);
     bool VerifyStartFreeInstallPermission(const sptr<IRemoteObject> &callerToken);

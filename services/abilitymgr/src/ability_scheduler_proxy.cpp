@@ -39,7 +39,7 @@ bool AbilitySchedulerProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-void AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &stateInfo,
+bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &stateInfo,
     sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -50,26 +50,27 @@ void AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
-        return;
+        return false;
     }
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write want failed");
-        return;
+        return false;
     }
     data.WriteParcelable(&stateInfo);
     if (sessionInfo) {
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "write sessionInfo failed");
-            return;
+            return false;
         }
     } else {
         if (!data.WriteBool(false)) {
-            return;
+            return false;
         }
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_TRANSACTION, data, reply, option);
     if (err != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, err: %{public}d", err);
+        return false;
     }
     int64_t cost = std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count() - start;
@@ -82,6 +83,7 @@ void AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
             "ScheduleAbilityTransaction proxy cost %{public}" PRId64 "mirco seconds, data size: %{public}zu",
             cost, data.GetWritePosition());
     }
+    return true;
 }
 
 void AbilitySchedulerProxy::ScheduleShareData(const int32_t &uniqueId)

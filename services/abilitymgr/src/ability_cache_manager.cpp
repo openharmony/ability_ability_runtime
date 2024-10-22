@@ -40,6 +40,9 @@ void AbilityCacheManager::Init(uint32_t devCapacity, uint32_t procCapacity)
 
 void AbilityCacheManager::RemoveAbilityRecInDevList(std::shared_ptr<AbilityRecord> abilityRecord)
 {
+    if (abilityRecord == nullptr) {
+        return;
+    }
     auto it = devRecLru_.begin();
     uint32_t accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
     while (it != devRecLru_.end()) {
@@ -55,7 +58,9 @@ void AbilityCacheManager::RemoveAbilityRecInDevList(std::shared_ptr<AbilityRecor
 
 void AbilityCacheManager::RemoveAbilityRecInProcList(std::shared_ptr<AbilityRecord> abilityRecord)
 {
-    const Want want = abilityRecord->GetWant();
+    if (abilityRecord == nullptr) {
+        return;
+    }
     uint32_t accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
     auto findProcInfo = procLruMap_.find(accessTokenId);
     if (findProcInfo == procLruMap_.end()) {
@@ -80,6 +85,9 @@ void AbilityCacheManager::RemoveAbilityRecInProcList(std::shared_ptr<AbilityReco
 
 std::shared_ptr<AbilityRecord> AbilityCacheManager::AddToProcLru(std::shared_ptr<AbilityRecord> abilityRecord)
 {
+    if (abilityRecord == nullptr) {
+        return nullptr;
+    }
     auto findProcInfo = procLruMap_.find(abilityRecord->GetApplicationInfo().accessTokenId);
     if (findProcInfo == procLruMap_.end()) {
         std::list<std::shared_ptr<AbilityRecord>> recList;
@@ -148,7 +156,8 @@ void AbilityCacheManager::Remove(std::shared_ptr<AbilityRecord> abilityRecord)
 bool AbilityCacheManager::IsRecInfoSame(const AbilityRequest& abilityRequest,
     std::shared_ptr<AbilityRecord> abilityRecord)
 {
-    return abilityRequest.abilityInfo.moduleName == abilityRecord->GetAbilityInfo().moduleName &&
+    return abilityRecord != nullptr &&
+        abilityRequest.abilityInfo.moduleName == abilityRecord->GetAbilityInfo().moduleName &&
         abilityRequest.want.GetElement().GetAbilityName() == abilityRecord->GetWant().GetElement().GetAbilityName();
 }
 
@@ -275,13 +284,13 @@ void AbilityCacheManager::RemoveLauncherDeathRecipient()
     }
 }
 
-void AbilityCacheManager::SignRestartAppFlag(const std::string &bundleName)
+void AbilityCacheManager::SignRestartAppFlag(int32_t uid)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = devRecLru_.begin();
     while (it != devRecLru_.end()) {
         auto abilityRecord = *it;
-        if (abilityRecord != nullptr && abilityRecord->GetApplicationInfo().bundleName == bundleName) {
+        if (abilityRecord != nullptr && abilityRecord->GetUid() == uid) {
             abilityRecord->SetRestartAppFlag(true);
         }
         it++;

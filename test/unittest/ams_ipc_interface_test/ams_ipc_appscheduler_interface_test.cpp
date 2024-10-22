@@ -73,7 +73,10 @@ HWTEST_F(AmsIpcAppSchedulerInterfaceTest, Interface_001, TestSize.Level1)
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     client->ScheduleForegroundApplication();
     mockApplication->Wait();
     TAG_LOGD(AAFwkTag::TEST, "AppSchedulerInterfaceTest_001 end");

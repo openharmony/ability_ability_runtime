@@ -74,6 +74,7 @@ constexpr static char FILEACCESS_EXT_ABILITY[] = "FileAccessExtension";
 constexpr static char ENTERPRISE_ADMIN_EXTENSION[] = "EnterpriseAdminExtension";
 constexpr static char INPUTMETHOD_EXTENSION[] = "InputMethodExtensionAbility";
 constexpr static char APP_ACCOUNT_AUTHORIZATION_EXTENSION[] = "AppAccountAuthorizationExtension";
+constexpr static char CALLER_INFO_QUERY_EXTENSION[] = "CallerInfoQueryExtension";
 #ifdef WITH_DLP
 constexpr static char DLP_PARAMS_SANDBOX[] = "ohos.dlp.params.sandbox";
 #endif // WITH_DLP
@@ -187,6 +188,9 @@ void FAAbilityThread::CreateExtensionAbilityName(const std::shared_ptr<AppExecFw
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_ACCOUNT_AUTHORIZATION) {
         abilityName = APP_ACCOUNT_AUTHORIZATION_EXTENSION;
+    }
+    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
+        abilityName = CALLER_INFO_QUERY_EXTENSION;
     }
     CreateExtensionAbilityNameSupportGraphics(abilityInfo, abilityName);
     TAG_LOGD(AAFwkTag::FA, "extension abilityName: %{public}s", abilityName.c_str());
@@ -320,6 +324,7 @@ void FAAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
         return;
     }
     FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
 }
 
 void FAAbilityThread::AttachExtension(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
@@ -710,7 +715,7 @@ void FAAbilityThread::HandleExtensionUpdateConfiguration(const AppExecFwk::Confi
     extensionImpl_->ScheduleUpdateConfiguration(config);
 }
 
-void FAAbilityThread::ScheduleAbilityTransaction(
+bool FAAbilityThread::ScheduleAbilityTransaction(
     const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -723,11 +728,11 @@ void FAAbilityThread::ScheduleAbilityTransaction(
 
     if (token_ == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null token_");
-        return;
+        return false;
     }
     if (abilityHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
-        return;
+        return false;
     }
     wptr<FAAbilityThread> weak = this;
     auto task = [weak, want, lifeCycleStateInfo, sessionInfo]() {
@@ -747,7 +752,9 @@ void FAAbilityThread::ScheduleAbilityTransaction(
     bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:AbilityTransaction");
     if (!ret) {
         TAG_LOGE(AAFwkTag::FA, "PostTask error");
+        return false;
     }
+    return true;
 }
 
 void FAAbilityThread::ScheduleShareData(const int32_t &uniqueId)

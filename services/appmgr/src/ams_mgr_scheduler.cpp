@@ -22,7 +22,9 @@
 
 #include "accesstoken_kit.h"
 #include "app_death_recipient.h"
+#include "app_exception_manager.h"
 #include "app_mgr_constants.h"
+#include "app_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "perf_profile.h"
 #include "permission_constants.h"
@@ -50,6 +52,7 @@ constexpr const char* TASK_SCENE_BOARD_ATTACH_TIMEOUT = "sceneBoardAttachTimeout
 constexpr const char* TASK_ATTACHED_TO_STATUS_BAR = "AttachedToStatusBar";
 constexpr const char* TASK_BLOCK_PROCESS_CACHE_BY_PIDS = "BlockProcessCacheByPids";
 constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
+constexpr const char* TASK_LOAD_ABILITY = "LoadAbilityTask";
 };  // namespace
 
 AmsMgrScheduler::AmsMgrScheduler(
@@ -104,6 +107,15 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
             }
         };
         amsHandler_->SubmitTask(timeoutTask, TASK_SCENE_BOARD_ATTACH_TIMEOUT, SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME);
+    }
+
+    if (abilityInfo->bundleName == AAFwk::AppUtils::GetInstance().GetMigrateClientBundleName()) {
+        amsHandler_->SubmitTask(loadAbilityFunc, AAFwk::TaskAttribute{
+            .taskName_ = TASK_LOAD_ABILITY,
+            .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE,
+            .taskPriority_ = AAFwk::TaskQueuePriority::IMMEDIATE
+        });
+        return;
     }
 
     amsHandler_->SubmitTask(loadAbilityFunc);
@@ -270,7 +282,8 @@ int32_t AmsMgrScheduler::KillProcessWithAccount(
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId, clearPageStack);
+    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId, clearPageStack,
+        "KillProcessWithAccount");
 }
 
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
@@ -347,21 +360,22 @@ int32_t AmsMgrScheduler::KillProcessesByAccessTokenId(const uint32_t accessToken
     return amsMgrServiceInner_->KillProcessesByAccessTokenId(accessTokenId);
 }
 
-int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid)
+int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid);
+    return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid, reason);
 }
 
-int32_t AmsMgrScheduler::KillApplicationSelf(const bool clearPageStack)
+int32_t AmsMgrScheduler::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationSelf(clearPageStack);
+    return amsMgrServiceInner_->KillApplicationSelf(clearPageStack, reason);
 }
 
 bool AmsMgrScheduler::IsReady() const
@@ -722,6 +736,26 @@ bool AmsMgrScheduler::IsAppKilling(sptr<IRemoteObject> token)
         return false;
     }
     return amsMgrServiceInner_->IsAppKilling(token);
+}
+
+void AmsMgrScheduler::SetAppExceptionCallback(sptr<IRemoteObject> callback)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t procPid = getprocpid();
+    if (callingPid != procPid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not allow other process to call");
+        return;
+    }
+
+    if (callback == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "callback null");
+    }
+    auto exceptionCallback = iface_cast<IAppExceptionCallback>(callback);
+    return AppExceptionManager::GetInstance().SetExceptionCallback(exceptionCallback);
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

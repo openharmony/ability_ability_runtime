@@ -175,9 +175,11 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplicationByUid(const std::string &bundleName, const int uid) override;
+    virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") override;
 
     /**
      * KillApplicationSelf, this allows app to terminate itself.
@@ -185,7 +187,8 @@ public:
      * @param clearPageStack, the flag indicates if ClearPageStack lifecycle should be scheduled.
      * @return ERR_OK for success call, others for failure.
      */
-    virtual int KillApplicationSelf(const bool clearPageStack = false) override;
+    virtual int KillApplicationSelf(const bool clearPageStack = false,
+        const std::string& reason = "KillApplicationSelf") override;
 
     /**
      * Get application info by process id.
@@ -416,6 +419,8 @@ public:
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
     virtual bool IsAppKilling(sptr<IRemoteObject> token) override;
+
+    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) override;
 
 private:
     /**

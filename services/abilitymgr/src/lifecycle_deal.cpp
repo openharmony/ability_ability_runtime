@@ -126,17 +126,17 @@ void LifecycleDeal::RestoreAbilityState(const PacMap &inState)
     abilityScheduler->ScheduleRestoreAbilityState(inState);
 }
 
-void LifecycleDeal::ForegroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
+bool LifecycleDeal::ForegroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
     sptr<SessionInfo> sessionInfo)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     auto abilityScheduler = GetScheduler();
-    CHECK_POINTER(abilityScheduler);
+    CHECK_POINTER_AND_RETURN(abilityScheduler, false);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "caller %{public}s, %{public}s",
         stateInfo.caller.bundleName.c_str(),
         stateInfo.caller.abilityName.c_str());
     stateInfo.state = AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW;
-    abilityScheduler->ScheduleAbilityTransaction(want, stateInfo, sessionInfo);
+    return abilityScheduler->ScheduleAbilityTransaction(want, stateInfo, sessionInfo);
 }
 
 void LifecycleDeal::BackgroundNew(const Want &want, LifeCycleStateInfo &stateInfo,

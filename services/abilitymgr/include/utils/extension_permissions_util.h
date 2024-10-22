@@ -20,9 +20,26 @@
 
 namespace OHOS {
 namespace AAFwk {
+/**
+ * @class ExtensionPermissionsUtil
+ * provides extension permission utilities.
+ */
 class ExtensionPermissionsUtil final {
 public:
+    /**
+     * CheckSAPermission, check if it has SA permissions.
+     *
+     * @param extensionType The extension type.
+     * @return Whether it has SA permissions.
+     */
     static bool CheckSAPermission(const AppExecFwk::ExtensionAbilityType &extensionType);
+
+    /**
+     * CheckSAPermissionMore, check if it has SA permissions or more.
+     *
+     * @param extensionType The extension type.
+     * @return Whether it has SA permissions or more.
+     */
     static bool CheckSAPermissionMore(const AppExecFwk::ExtensionAbilityType &extensionType);
 };
 

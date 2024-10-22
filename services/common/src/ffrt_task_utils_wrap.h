@@ -39,6 +39,7 @@ private:
 
 void BuildFfrtTaskAttr(const TaskAttribute &taskAttr, ffrt::task_attr &result);
 ffrt::qos Convert2FfrtQos(TaskQoS taskqos);
+ffrt_queue_priority_t Convert2FfrtPriority(TaskQueuePriority taskPrio);
 } // namespace AAFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_FFRT_TASK_UTILS_WRAP_H

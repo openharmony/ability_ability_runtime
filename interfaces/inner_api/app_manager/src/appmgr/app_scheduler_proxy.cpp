@@ -15,6 +15,8 @@
 
 #include "app_scheduler_proxy.h"
 
+#include "app_exception_manager.h"
+#include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ipc_types.h"
@@ -35,14 +37,14 @@ bool AppSchedulerProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-void AppSchedulerProxy::ScheduleForegroundApplication()
+bool AppSchedulerProxy::ScheduleForegroundApplication()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "AppSchedulerProxy::ScheduleForegroundApplication start");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
-        return;
+        return false;
     }
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_FOREGROUND_APPLICATION_TRANSACTION),
@@ -51,7 +53,9 @@ void AppSchedulerProxy::ScheduleForegroundApplication()
             option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        return false;
     }
+    return true;
 }
 
 void AppSchedulerProxy::ScheduleBackgroundApplication()
@@ -189,7 +193,7 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
         return;
     }
     data.WriteParcelable(&info);
-
+    AbilityRuntime::FreezeUtil::LifecycleFlow flow = {token, AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
     if (token) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(token.GetRefPtr())) {
             TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag and token");
@@ -204,6 +208,8 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
 
     if (!data.WriteParcelable(want.get())) {
         TAG_LOGE(AAFwkTag::APPMGR, "write want fail.");
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            "ERROR AppLifeCycleDeal::LaunchAbility; write want fail");
         return;
     }
     if (!data.WriteInt32(abilityRecordId)) {
@@ -214,6 +220,8 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
         static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_LAUNCH_ABILITY_TRANSACTION), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        AppExceptionManager::GetInstance().LaunchAbilityFailed(token, std::string("SendRequest failed") +
+            std::to_string(ret));
     }
 }
 
@@ -252,7 +260,7 @@ void AppSchedulerProxy::ScheduleLaunchApplication(const AppLaunchData &launchDat
 
     if (!data.WriteParcelable(&launchData)) {
         TAG_LOGE(AAFwkTag::APPMGR, "WriteParcelable launchData failed");
-        return ;
+        return;
     }
 
     if (!data.WriteParcelable(&config)) {

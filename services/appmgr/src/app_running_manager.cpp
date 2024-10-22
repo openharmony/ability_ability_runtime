@@ -23,6 +23,7 @@
 #include "app_utils.h"
 #include "common_event_support.h"
 #include "exit_resident_process_manager.h"
+#include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "os_account_manager_wrapper.h"
@@ -445,6 +446,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
             if (appMgrServiceInner != nullptr) {
                 appMgrServiceInner->KillProcessByPid(priorityObject->GetPid(), "OnRemoteDied");
             }
+            AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(priorityObject->GetPid());
         }
     }
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
@@ -478,6 +480,7 @@ void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
 
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
         RemoveUIExtensionLauncherItem(appRecord->GetPriorityObject()->GetPid());
+        AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(appRecord->GetPriorityObject()->GetPid());
     }
 }
 
@@ -671,6 +674,9 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
+        if (cacheProcMgr != nullptr) {
+            cacheProcMgr->CheckAndSetProcessCacheEnable(appRecord);
+        }
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
@@ -1383,13 +1389,13 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
     return nullptr;
 }
 
-int32_t AppRunningManager::SignRestartAppFlag(const std::string &bundleName)
+int32_t AppRunningManager::SignRestartAppFlag(int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
+        if (appRecord == nullptr || appRecord->GetUid() != uid) {
             continue;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "sign");

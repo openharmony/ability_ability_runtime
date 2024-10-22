@@ -312,7 +312,7 @@ public:
      */
     int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
 
-    int32_t SignRestartAppFlag(const std::string &bundleName);
+    int32_t SignRestartAppFlag(int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 

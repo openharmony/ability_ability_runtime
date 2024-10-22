@@ -2325,7 +2325,8 @@ int AbilityManagerStub::StartUserInner(MessageParcel &data, MessageParcel &reply
         TAG_LOGE(AAFwkTag::ABILITYMGR, "callback invalid value");
         return ERR_INVALID_VALUE;
     }
-    int result = StartUser(userId, callback);
+    bool isAppRecovery = data.ReadBool();
+    int result = StartUser(userId, callback, isAppRecovery);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startUser fail");
         return ERR_INVALID_VALUE;

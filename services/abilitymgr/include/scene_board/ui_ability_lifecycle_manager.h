@@ -56,7 +56,7 @@ public:
         }
     };
 
-    void SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery = false);
+    void SignRestartAppFlag(int32_t uid, bool isAppRecovery = false);
 
     /**
      * StartUIAbility with request.
@@ -367,7 +367,7 @@ public:
     void NotifySCBToHandleAtomicServiceException(sptr<SessionInfo> sessionInfo, int32_t errorCode,
         const std::string& errorReason);
 
-    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool forceKill);
+    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     void EnableListForSCBRecovery();
 
@@ -463,7 +463,7 @@ private:
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
     bool isSCBRecovery_ = false;
-    std::unordered_set<int32_t> codeStartInSCBRecovery_;
+    std::unordered_set<int32_t> coldStartInSCBRecovery_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

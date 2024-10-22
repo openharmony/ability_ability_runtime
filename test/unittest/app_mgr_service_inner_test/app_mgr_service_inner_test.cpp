@@ -3871,6 +3871,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendAppLaunchEvent_001, TestSize.Level0)
     appMgrServiceInner->SendAppLaunchEvent(appRecord);
     TAG_LOGI(AAFwkTag::TEST, "SendAppLaunchEvent_001 end");
 }
+
 HWTEST_F(AppMgrServiceInnerTest, IsMainProcess_001, TestSize.Level0)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsMainProcess_001 start");
@@ -3881,7 +3882,7 @@ HWTEST_F(AppMgrServiceInnerTest, IsMainProcess_001, TestSize.Level0)
     hapModuleInfo.moduleName = "module123";
     applicationInfo_->process = "";
     EXPECT_EQ(appMgrServiceInner->IsMainProcess(nullptr, ""), true);
-    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, ""), true);
+    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, ""), false);
     EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, "processName1"), false);
     EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, applicationInfo_->bundleName), true);
     applicationInfo_->process = "processName2";

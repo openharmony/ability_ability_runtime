@@ -39,6 +39,7 @@ int AppSchedulerHost::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
 {
     TAG_LOGD(AAFwkTag::APPMGR, "AppSchedulerHost::OnReceived, code = %{public}u, flags= %{public}d.", code,
         option.GetFlags());
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::u16string descriptor = AppSchedulerHost::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
@@ -335,14 +336,13 @@ int32_t AppSchedulerHost::HandleScheduleClearPageStack(MessageParcel &data, Mess
 int32_t AppSchedulerHost::HandleScheduleAcceptWant(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
+    auto want = std::shared_ptr<AAFwk::Want>(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
     auto moduleName = data.ReadString();
     ScheduleAcceptWant(*want, moduleName);
-    delete want;
     return NO_ERROR;
 }
 
@@ -350,14 +350,13 @@ int32_t AppSchedulerHost::HandleScheduleNewProcessRequest(MessageParcel &data, M
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call.");
     HITRACE_METER(HITRACE_TAG_APP);
-    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
+    auto want = std::shared_ptr<AAFwk::Want>(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
     auto moduleName = data.ReadString();
     ScheduleNewProcessRequest(*want, moduleName);
-    delete want;
     return NO_ERROR;
 }
 

@@ -67,7 +67,7 @@ void LocalCallRecord::SetRemoteObject(const sptr<IRemoteObject>& call)
             }
             record->OnCallStubDied(remote);
         };
-        callRecipient_ = new CallRecipient(diedTask);
+        callRecipient_ = sptr<CallRecipient>::MakeSptr(diedTask);
     }
     remoteObject_->AddDeathRecipient(callRecipient_);
 }

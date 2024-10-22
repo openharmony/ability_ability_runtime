@@ -212,7 +212,10 @@ HWTEST_F(AmsAppRunningRecordModuleTest, ApplicationStart_001, TestSize.Level1)
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -419,7 +422,10 @@ HWTEST_F(AmsAppRunningRecordModuleTest, ApplicationStartAndQuit_005, TestSize.Le
 
         EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
             .Times(1)
-            .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+            .WillOnce([mockApplication]() {
+                mockApplication->Post();
+                return true;
+                });
         // set foreground and update foreground state
         record->ScheduleForegroundRunning();
         mockApplication->Wait();
@@ -490,7 +496,10 @@ HWTEST_F(AmsAppRunningRecordModuleTest, ApplicationStatusChange_006, TestSize.Le
     for (int i = 0; i < startCount; i++) {
         EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
             .Times(1)
-            .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+            .WillOnce([mockApplication]() {
+                mockApplication->Post();
+                return true;
+                });
         // set foreground and update foreground state
         record->ScheduleForegroundRunning();
         mockApplication->Wait();

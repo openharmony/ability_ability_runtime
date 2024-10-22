@@ -172,10 +172,13 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
+        entry = std::string("AbilityThread::Attach failed ipc error: ") + std::to_string(err);
+        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         TAG_LOGE(AAFwkTag::UIABILITY, "err: %{public}d", err);
         return;
     }
     FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
 }
 
 void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
@@ -306,7 +309,7 @@ void UIAbilityThread::HandleUpdateConfiguration(const AppExecFwk::Configuration 
     abilityImpl_->ScheduleUpdateConfiguration(config);
 }
 
-void UIAbilityThread::ScheduleAbilityTransaction(
+bool UIAbilityThread::ScheduleAbilityTransaction(
     const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -319,11 +322,11 @@ void UIAbilityThread::ScheduleAbilityTransaction(
 
     if (token_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null token_");
-        return;
+        return false;
     }
     if (abilityHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityHandler_");
-        return;
+        return false;
     }
     wptr<UIAbilityThread> weak = this;
     auto task = [weak, want, lifeCycleStateInfo, sessionInfo]() {
@@ -338,7 +341,9 @@ void UIAbilityThread::ScheduleAbilityTransaction(
     bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:AbilityTransaction");
     if (!ret) {
         TAG_LOGE(AAFwkTag::UIABILITY, "postTask error");
+        return false;
     }
+    return true;
 }
 
 void UIAbilityThread::ScheduleShareData(const int32_t &uniqueId)

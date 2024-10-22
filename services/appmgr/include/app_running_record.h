@@ -938,12 +938,15 @@ public:
     void SetProcessCacheBlocked(bool isBlocked);
     bool GetProcessCacheBlocked();
 
+    void SetProcessCaching(bool isCaching);
+    bool IsCaching();
+
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
      *
-     * @return
+     * @return bool operation status
      */
-    void ScheduleForegroundRunning();
+    bool ScheduleForegroundRunning();
 
     /**
      * ScheduleBackgroundRunning, Notify application to switch to background.
@@ -970,6 +973,7 @@ public:
         return isKia_;
     }
 
+    void AddAppLifecycleEvent(const std::string &msg);
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1047,6 +1051,7 @@ private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
     bool isTerminating = false;
+    bool isCaching_ = false;
     std::string signCode_;  // the sign of this hap
     std::string jointUserId_;
     std::map<std::string, std::shared_ptr<ApplicationInfo>> appInfos_;

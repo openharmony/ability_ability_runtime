@@ -505,7 +505,9 @@ HWTEST_F(CjUIAbilityTest, CJUIAbilityVirtualFunc_0200, TestSize.Level1)
     EXPECT_EQ(ret, false);
     ret = cjAbility_->OnRestoreData(data);
     EXPECT_EQ(ret, false);
-    int onContinueRet = cjAbility_->OnContinue(data);
+    AppExecFwk::AbilityInfo abilityInfo;
+    bool isAsyncOnContinue = false;
+    int onContinueRet = cjAbility_->OnContinue(data, isAsyncOnContinue, abilityInfo);
     int32_t reason = 0;
     EXPECT_EQ(cjAbility_->OnSaveState(reason, data), 0);
     int result = 0;
@@ -710,7 +712,9 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0400, TestSize.Level1)
 
     Want want;
     WantParams data;
-    int continueRet = initedCJUIAbility_->OnContinue(data);
+    AppExecFwk::AbilityInfo abilityInfoTmp;
+    bool isAsyncOnContinue = false;
+    int onContinueRet = initedCJUIAbility_->OnContinue(data, isAsyncOnContinue, abilityInfoTmp);
 
     initedCJUIAbility_->OnBackground();
 
@@ -747,9 +751,10 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0500, TestSize.Level1)
     EXPECT_NE(abilityLocalRecord, nullptr);
 
     Want want;
-
     WantParams data;
-    int continueRet = initedCJUIAbility_->OnContinue(data);
+    AppExecFwk::AbilityInfo abilityInfoTmp;
+    bool isAsyncOnContinue = false;
+    int onContinueRet = initedCJUIAbility_->OnContinue(data, isAsyncOnContinue, abilityInfoTmp);
 
     initedCJUIAbility_->OnBackground();
 
@@ -800,7 +805,7 @@ HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0600, TestSize.Level1)
 
     initedCJUIAbility_->OnSceneCreated();
     initedCJUIAbility_->OnSceneRestored();
-    initedCJUIAbility_->OnSceneDestroyed();
+    initedCJUIAbility_->onSceneDestroyed();
 }
 
 HWTEST_F(CjUIAbilityTest, InitedCJUIAbilityTest_0700, TestSize.Level1)

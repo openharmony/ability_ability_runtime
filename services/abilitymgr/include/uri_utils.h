@@ -32,7 +32,7 @@ public:
 
     void FilterUriWithPermissionDms(Want &want, uint32_t tokenId);
 
-    bool CheckNonImplicitShareFileUri(const AbilityRequest &abilityRequest);
+    int32_t CheckNonImplicitShareFileUri(const Want &want, int32_t userId, uint32_t specifyTokenId);
 
     std::vector<Uri> GetPermissionedUriList(const std::vector<std::string> &uriVec,
         const std::vector<bool> &checkResults, Want &want);
@@ -43,11 +43,22 @@ public:
 
     void CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType);
 
+    void CheckUriPermissionForUIExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType,
+        uint32_t tokenId = 0);
+
+    bool IsPermissionPreCheckedType(AppExecFwk::ExtensionAbilityType extensionAbilityType);
 private:
     UriUtils();
     ~UriUtils();
 
     std::vector<std::string> GetUriListFromWantDms(const Want &want);
+
+    void CheckUriPermissionForExtension(Want &want, uint32_t tokenId);
+
+    int32_t CheckNonImplicitShareFileUriInner(uint32_t callerTokenId, const std::string &targetBundleName,
+        int32_t userId);
+
+    bool IsSystemApplication(const std::string &bundleName, int32_t userId);
 
     DISALLOW_COPY_AND_MOVE(UriUtils);
 };

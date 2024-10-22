@@ -171,16 +171,19 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  userId, userId.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplicationByUid(const std::string &bundleName, const int uid) = 0;
+    virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") = 0;
 
     /**
      * Kill the application self.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillApplicationSelf(const bool clearPageStack = false)
+    virtual int KillApplicationSelf(const bool clearPageStack = false,
+        const std::string& reason = "KillApplicationSelf")
     {
         return ERR_OK;
     }
@@ -400,17 +403,6 @@ public:
     virtual void BlockProcessCacheByPids(const std::vector<int32_t> &pids) {}
 
     /**
-     * Request to clean uiability from user.
-     *
-     * @param token the token of ability.
-     * @return Returns true if clean success, others return false.
-     */
-    virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
-    {
-        return false;
-    }
-
-    /**
      * whether killed for upgrade web.
      *
      * @param bundleName the bundle name is killed for upgrade web.
@@ -419,6 +411,17 @@ public:
     virtual bool IsKilledForUpgradeWeb(const std::string &bundleName)
     {
         return true;
+    }
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
+    {
+        return false;
     }
 
     /**
@@ -442,6 +445,8 @@ public:
     {
         return false;
     }
+
+    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) {}
 
     enum class Message {
         LOAD_ABILITY = 0,
@@ -496,6 +501,7 @@ public:
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
         IS_PROCESS_ATTACHED,
         IS_APP_KILLING,
+        SET_APP_EXCEPTION_CALLBACK,
         // Add enumeration values above
         END
     };

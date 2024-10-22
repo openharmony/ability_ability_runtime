@@ -1,0 +1,316 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "utils/update_caller_info_util.h"
+
+#include "ability_util.h"
+#include "ability_record.h"
+#include "accesstoken_kit.h"
+#include "app_scheduler.h"
+#include "ams_configuration_parameter.h"
+#include "dialog_session_manager.h"
+#include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
+#include "ipc_skeleton.h"
+#include "scene_board_judgement.h"
+#include "start_ability_utils.h"
+#include "startup_util.h"
+
+namespace OHOS {
+namespace AAFwk {
+namespace {
+constexpr const char* DMS_CALLER_BUNDLE_NAME = "ohos.dms.param.sourceCallerBundleName";
+constexpr const char* DMS_CALLER_ABILITY_NAME = "ohos.dms.param.sourceCallerAbilityName";
+constexpr const char* DMS_CALLER_NATIVE_NAME = "ohos.dms.param.sourceCallerNativeName";
+constexpr const char* DMS_CALLER_APP_ID = "ohos.dms.param.sourceCallerAppId";
+constexpr const char* DMS_CALLER_APP_IDENTIFIER = "ohos.dms.param.sourceCallerAppIdentifier";
+constexpr const char* PARAM_RESV_ANCO_CALLER_UID = "ohos.anco.param.callerUid";
+constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.callerBundleName";
+constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
+constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
+}
+
+UpdateCallerInfoUtil &UpdateCallerInfoUtil::GetInstance()
+{
+    static UpdateCallerInfoUtil instance;
+    return instance;
+}
+
+void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
+        want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
+        want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
+    }
+    int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
+    want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_UID);
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
+    want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (!abilityRecord) {
+        std::string bundleName;
+        auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
+        if (bundleMgr != nullptr) {
+            IN_PROCESS_CALL(bundleMgr->GetNameForUid(callerUid, bundleName));
+        }
+        if (bundleName == "") {
+            std::string nativeName;
+            Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+            int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+            if (result == ERR_OK) {
+                nativeName = "_" + nativeTokenInfo.processName;
+            }
+            want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+            want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, nativeName);
+        }
+        want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+        want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, bundleName);
+        want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+        want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, std::string(""));
+        return;
+    }
+    std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
+    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
+    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateSignatureInfo(callerBundleName, want);
+}
+
+void UpdateCallerInfoUtil::UpdateSignatureInfo(std::string bundleName, Want& want, bool isRemote)
+{
+    auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
+    if (bundleMgr != nullptr) {
+        AppExecFwk::SignatureInfo signatureInfo;
+        IN_PROCESS_CALL(bundleMgr->GetSignatureInfoByBundleName(bundleName, signatureInfo));
+        std::string callerAppId = isRemote ? DMS_CALLER_APP_ID : Want::PARAM_RESV_CALLER_APP_ID;
+        std::string callerAppIdentifier = isRemote ? DMS_CALLER_APP_IDENTIFIER : Want::PARAM_RESV_CALLER_APP_IDENTIFIER;
+        want.RemoveParam(callerAppId);
+        want.SetParam(callerAppId, signatureInfo.appId);
+        want.RemoveParam(callerAppIdentifier);
+        want.SetParam(callerAppIdentifier, signatureInfo.appIdentifier);
+    }
+}
+
+void UpdateCallerInfoUtil::UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObject> asCallerSourceToken,
+    sptr<IRemoteObject> callerToken)
+{
+#ifdef SUPPORT_SCREEN
+    if (UpdateAsCallerInfoFromDialog(want)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Update as caller source info from dialog.");
+        return;
+    }
+#endif // SUPPORT_SCREEN
+    if (asCallerSourceToken != nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Update as caller source info from token.");
+        UpdateAsCallerInfoFromToken(want, asCallerSourceToken);
+    } else if (callerToken != nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Update as caller source info from callerRecord.");
+        UpdateAsCallerInfoFromCallerRecord(want, callerToken);
+    }
+}
+
+void UpdateCallerInfoUtil::UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteObject> asCallerSourceToken)
+{
+    if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(asCallerSourceToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
+        want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
+        want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
+    }
+    want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_UID);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(asCallerSourceToken);
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed update caller info from token");
+        return;
+    }
+    AppExecFwk::RunningProcessInfo processInfo = {};
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(asCallerSourceToken, processInfo);
+    int32_t tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+    want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, processInfo.uid_);
+    want.SetParam(Want::PARAM_RESV_CALLER_PID, processInfo.pid_);
+
+    std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
+    want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateSignatureInfo(callerBundleName, want);
+}
+
+void UpdateCallerInfoUtil::UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken)
+{
+    if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
+        want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
+        want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
+    }
+    want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_UID);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
+    auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
+    CHECK_POINTER(callerRecord);
+    auto sourceInfo = callerRecord->GetCallerInfo();
+    CHECK_POINTER(sourceInfo);
+    std::string callerBundleName = sourceInfo->callerBundleName;
+    want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, sourceInfo->callerTokenId);
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, sourceInfo->callerUid);
+    want.SetParam(Want::PARAM_RESV_CALLER_PID, sourceInfo->callerPid);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, sourceInfo->callerAbilityName);
+    if (callerBundleName == "") {
+        want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, sourceInfo->callerNativeName);
+        return;
+    }
+    UpdateSignatureInfo(callerBundleName, want);
+}
+
+bool UpdateCallerInfoUtil::UpdateAsCallerInfoFromDialog(Want& want)
+{
+    std::string dialogSessionId = want.GetStringParam("dialogSessionId");
+    auto dialogCallerInfo = DialogSessionManager::GetInstance().GetDialogCallerInfo(dialogSessionId);
+    if (dialogCallerInfo == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "failed get dialog caller info");
+        return false;
+    }
+    Want dialogCallerWant = dialogCallerInfo->targetWant;
+    int32_t tokenId = dialogCallerWant.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
+    int32_t uid = dialogCallerWant.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0);
+    int32_t pid = dialogCallerWant.GetIntParam(Want::PARAM_RESV_CALLER_PID, 0);
+    std::string callerBundleName = dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    std::string callerAbilityName = dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, uid);
+    want.SetParam(Want::PARAM_RESV_CALLER_PID, pid);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
+    if (callerBundleName == "") {
+        want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME,
+            dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME));
+        return true;
+    }
+    UpdateSignatureInfo(callerBundleName, want);
+    return true;
+}
+
+void UpdateCallerInfoUtil::UpdateCallerInfoFromToken(Want& want, const sptr<IRemoteObject> &token)
+{
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (!abilityRecord) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "caller abilityRecord null");
+        return;
+    }
+
+    int32_t tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+    int32_t callerUid = abilityRecord->GetUid();
+    int32_t callerPid = abilityRecord->GetPid();
+    want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
+    want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_UID);
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
+    want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
+
+    std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
+    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
+    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateSignatureInfo(callerBundleName, want);
+}
+
+void UpdateCallerInfoUtil::UpdateBackToCallerFlag(const sptr<IRemoteObject> &callerToken, Want &want,
+    int32_t requestCode, bool backFlag)
+{
+    if (want.HasParameter(CALLER_REQUEST_CODE)) {
+        want.RemoveParam(CALLER_REQUEST_CODE);
+    }
+    auto callerAbilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (requestCode > 0 && callerAbilityRecord != nullptr) {
+        // default return true on oh
+        if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+            backFlag = AmsConfigurationParameter::GetInstance().IsSupportBackToCaller();
+        }
+        auto fullRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(
+            callerAbilityRecord->GetPid(), backFlag, requestCode);
+        want.SetParam(CALLER_REQUEST_CODE, std::to_string(fullRequestCode));
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "pid: %{public}d, backFlag:%{private}d, requestCode: %{private}d, fullRequestCode: %{private}s",
+            callerAbilityRecord->GetPid(), backFlag, requestCode, std::to_string(fullRequestCode).c_str());
+    }
+}
+
+void UpdateCallerInfoUtil::UpdateDmsCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (!abilityRecord) {
+        std::string bundleName;
+        auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
+        if (bundleMgr != nullptr) {
+            IN_PROCESS_CALL(bundleMgr->GetNameForUid(callerUid, bundleName));
+        }
+        if (bundleName == "") {
+            std::string nativeName;
+            Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+            int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+            if (result == ERR_OK) {
+                nativeName = "_" + nativeTokenInfo.processName;
+            }
+            want.RemoveParam(DMS_CALLER_NATIVE_NAME);
+            want.SetParam(DMS_CALLER_NATIVE_NAME, nativeName);
+        }
+        want.RemoveParam(DMS_CALLER_BUNDLE_NAME);
+        want.SetParam(DMS_CALLER_BUNDLE_NAME, bundleName);
+        want.RemoveParam(DMS_CALLER_ABILITY_NAME);
+        want.SetParam(DMS_CALLER_ABILITY_NAME, std::string(""));
+        return;
+    }
+    std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
+    want.RemoveParam(DMS_CALLER_BUNDLE_NAME);
+    want.SetParam(DMS_CALLER_BUNDLE_NAME, callerBundleName);
+    std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
+    want.RemoveParam(DMS_CALLER_ABILITY_NAME);
+    want.SetParam(DMS_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateSignatureInfo(callerBundleName, want, true);
+}
+}  // namespace AAFwk
+}  // namespace OHOS
