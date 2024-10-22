@@ -183,7 +183,7 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
         case OnContinueResult::MISMATCH:
             TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue version mismatch.");
             return CONTINUE_ON_CONTINUE_MISMATCH;
-        case expression:
+        case OnContinueResult::ON_CONTINUE_ERR:
             TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue handle failed");
             return CONTINUE_ON_CONTINUE_HANDLE_FAILED;
         default:
