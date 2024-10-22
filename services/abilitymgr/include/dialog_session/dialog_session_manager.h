@@ -43,6 +43,10 @@ enum class SelectorType {
     APP_CLONR_SELECTOR = 1
 };
 
+struct StartupSessionInfo {
+    AbilityRequest abilityRequest;
+};
+
 class DialogSessionManager {
 public:
     static DialogSessionManager &GetInstance();
@@ -51,6 +55,8 @@ public:
     sptr<DialogSessionInfo> GetDialogSessionInfo(const std::string &dialogSessionId) const;
 
     std::shared_ptr<DialogCallerInfo> GetDialogCallerInfo(const std::string &dialogSessionId) const;
+
+    std::shared_ptr<StartupSessionInfo> GetStartupSessionInfo(const std::string &dialogSessionId) const;
 
     int SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed);
 
@@ -64,6 +70,8 @@ public:
 
     int HandleErmsResult(AbilityRequest &abilityRequest, int32_t userId, const Want &replaceWant);
 
+    int32_t HandleErmsResultBySCB(AbilityRequest &abilityRequest, const Want &replaceWant);
+
     bool IsCreateCloneSelectorDialog(const std::string &bundleName, int32_t userId);
 
 private:
@@ -72,6 +80,11 @@ private:
 
     void SetDialogSessionInfo(const std::string &dialogSessionId, sptr<DialogSessionInfo> &dilogSessionInfo,
         std::shared_ptr<DialogCallerInfo> &dialogCallerInfo);
+
+    void SetStartupSessionInfo(const std::string &dialogSessionId, const AbilityRequest &abilityRequest);
+
+    int32_t NotifySCBToRecoveryAfterInterception(const std::string &dialogSessionId,
+        const AbilityRequest &abilityRequest);
 
     void ClearDialogContext(const std::string &dialogSessionId);
 
@@ -97,6 +110,7 @@ private:
     mutable ffrt::mutex dialogSessionRecordLock_;
     std::unordered_map<std::string, sptr<DialogSessionInfo>> dialogSessionInfoMap_;
     std::unordered_map<std::string, std::shared_ptr<DialogCallerInfo>> dialogCallerInfoMap_;
+    std::unordered_map<std::string, std::shared_ptr<StartupSessionInfo>> startupSessionInfoMap_;
 
     DISALLOW_COPY_AND_MOVE(DialogSessionManager);
 };

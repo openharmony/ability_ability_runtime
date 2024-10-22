@@ -173,6 +173,11 @@ bool AbilityCallerInfo::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetExtensionAbilityType failed");
         return false;
     }
+
+    if (!parcel.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write userId failed");
+        return false;
+    }
     return true;
 }
 

@@ -44,6 +44,7 @@ struct AddInfoParam {
     bool withDefault = false;
     std::string typeName;
     std::vector<std::string> infoNames;
+    bool isExistDefaultApp = false;
 };
 using namespace OHOS::EcologicalRuleMgrService;
 using ErmsCallerInfo = OHOS::EcologicalRuleMgrService::AbilityCallerInfo;
