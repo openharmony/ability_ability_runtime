@@ -289,17 +289,18 @@ ohos_source_set("abilityms_test_source") {
       "${ability_runtime_services_path}/abilitymgr/src/system_dialog_scheduler.cpp",
       "${ability_runtime_services_path}/appdfr/src/application_anr_listener.cpp",
     ]
-    deps += [ "//third_party/libjpeg-turbo:turbojpeg_static" ]
+    deps += [
+      "${ace_engine_path}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+      "//third_party/icu/icu4c:shared_icuuc",
+      "//third_party/libjpeg-turbo:turbojpeg_static",
+    ]
     external_deps += [
       "i18n:intl_util",
-      "icu:shared_icuuc",
       "image_framework:image_native",
       "input:libmmi-client",
       "window_manager:libdm",
       "window_manager:libmodal_system_ui_extension_client",
       "window_manager:libwm",
-      "window_manager:libwsutils",
-      "window_manager:sms",
     ]
   }
 
