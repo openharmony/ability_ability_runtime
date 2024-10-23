@@ -62,6 +62,7 @@ ohos_unittest("AmsAppMgrClientTest") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "window_manager:libwm",
   ]
 
   if (ability_runtime_graphics) {
