@@ -8065,6 +8065,10 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
 void AppMgrServiceInner::MakeIsolateSandBoxProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
     const HapModuleInfo &hapModuleInfo, std::string &processName) const
 {
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo nullptr");
+        return;
+    }
     auto type = abilityInfo->type;
     auto extensionType = abilityInfo->extensionAbilityType;
     if (type != AppExecFwk::AbilityType::EXTENSION ||
@@ -8072,9 +8076,12 @@ void AppMgrServiceInner::MakeIsolateSandBoxProcessName(const std::shared_ptr<Abi
         extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
         return;
     }
-    for (auto extensionInfo: hapModuleInfo.extensionInfos) {
-        if (extensionInfo.name == abilityInfo->name && extensionInfo.needCreateSandbox) {
-            processName = (processName + ":" + abilityInfo->name);
+    for (const auto& extensionInfo: hapModuleInfo.extensionInfos) {
+        if (extensionInfo.name == abilityInfo->name) {
+            if (extensionInfo.needCreateSandbox) {
+                processName = (processName + ":" + abilityInfo->name);
+            }
+            return;
         }
     }
 }
