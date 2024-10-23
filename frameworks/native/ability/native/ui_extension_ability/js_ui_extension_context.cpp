@@ -104,11 +104,7 @@ bool CheckConnectionParam(napi_env env, napi_value value, sptr<JSUIExtensionConn
     key.want = want;
     connection->SetConnectionId(key.id);
     g_connects.emplace(key, connection);
-    if (g_serialNumber < INT32_MAX) {
-        g_serialNumber++;
-    } else {
-        g_serialNumber = 0;
-    }
+    g_serialNumber = (g_serialNumber + 1) % INT32_MAX;
     TAG_LOGD(AAFwkTag::UI_EXT, "not find connection, create a new connection");
     return true;
 }
@@ -338,7 +334,7 @@ napi_value JsUIExtensionContext::OnOpenLink(napi_env env, NapiCallbackInfo& info
     std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count());
     want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
-    
+
     int requestCode = -1;
     if (CheckTypeForNapiValue(env, info.argv[INDEX_TWO], napi_function)) {
         TAG_LOGD(AAFwkTag::UI_EXT, "completionHandler is used");
