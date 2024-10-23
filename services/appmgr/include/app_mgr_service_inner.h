@@ -1527,9 +1527,9 @@ private:
     // Test add the bundle manager instance.
     void SetBundleManagerHelper(const std::shared_ptr<BundleMgrHelper> &bundleMgrHelper);
 
-    void HandleTerminateApplicationTimeOut(const int64_t eventId);
+    void HandleTerminateApplicationTimeOut(std::shared_ptr<AppRunningRecord> appRecord);
 
-    void HandleAddAbilityStageTimeOut(const int64_t eventId);
+    void HandleAddAbilityStageTimeOut(std::shared_ptr<AppRunningRecord> appRecord);
 
     void ClipStringContent(const std::regex &re, const std::string &source, std::string &afterCutStr);
 
@@ -1544,9 +1544,9 @@ private:
     int StartEmptyProcess(const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &info,
         const std::string &processName, const int userId);
 
-    void HandleStartSpecifiedAbilityTimeOut(const int64_t eventId);
+    void HandleStartSpecifiedAbilityTimeOut(std::shared_ptr<AppRunningRecord> appRecord);
 
-    void HandleStartSpecifiedProcessTimeout(const int64_t eventId);
+    void HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppRunningRecord> appRecord);
 
     void InitGlobalConfiguration();
 
@@ -1788,7 +1788,7 @@ private:
     void NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId, const int32_t userId,
         const int32_t callerUid, const std::string &eventData);
     void UpdateAllProviderConfig(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void SendHiSysEvent(const int32_t innerEventId, const int64_t eventId);
+    void SendHiSysEvent(int32_t innerEventId, std::shared_ptr<AppRunningRecord> appRecord);
     int FinishUserTestLocked(
         const std::string &msg, const int64_t &resultCode, const std::shared_ptr<AppRunningRecord> &appRecord);
     int32_t GetCurrentAccountId() const;

@@ -16,6 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_EVENT_HANDLER_H
 #define OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_EVENT_HANDLER_H
 
+#include <list>
+#include <mutex>
+
 #include "event_handler_wrap.h"
 
 namespace OHOS {
@@ -37,6 +40,12 @@ public:
     static constexpr uint32_t START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG = 4;
     static constexpr uint32_t START_SPECIFIED_PROCESS_TIMEOUT_MSG = 5;
 
+    static constexpr uint32_t TERMINATE_ABILITY_HALF_TIMEOUT_MSG = 6;
+    static constexpr uint32_t TERMINATE_APPLICATION_HALF_TIMEOUT_MSG = 7;
+    static constexpr uint32_t ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG = 8;
+    static constexpr uint32_t START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG = 9;
+    static constexpr uint32_t START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG = 10;
+    static constexpr uint32_t START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG = 11;
 #ifdef SUPPORT_ASAN
     static constexpr uint32_t TERMINATE_ABILITY_TIMEOUT = 45000; // ms
     static constexpr uint32_t TERMINATE_APPLICATION_TIMEOUT = 150000; // ms
@@ -61,6 +70,33 @@ public:
     static constexpr uint32_t DELAY_NOTIFY_PROCESS_CACHED_STATE = 2000; // ms
 private:
     std::weak_ptr<AppMgrServiceInner> appMgr_;
+};
+
+class AppRunningRecord;
+struct AppEventData {
+    uint32_t eventId = 0;
+    int64_t param = 0;
+    std::weak_ptr<AppRunningRecord> appRecord;
+
+    AppEventData(uint32_t eventId, int64_t param, std::shared_ptr<AppRunningRecord> appRecord)
+        : eventId(eventId), param(param), appRecord(appRecord) {}
+};
+
+class AppEventUtil {
+public:
+    static AppEventUtil &GetInstance();
+
+    AppEventUtil() = default;
+    AppEventUtil(AppEventUtil &) = delete;
+    void operator=(AppEventUtil &) = delete;
+
+    void AddEvent(std::shared_ptr<AppRunningRecord> appRecord, uint32_t eventId, int64_t param);
+    bool HasEvent(std::shared_ptr<AppRunningRecord> appRecord, uint32_t eventId);
+    std::shared_ptr<AppRunningRecord> RemoveEvent(uint32_t eventId, int64_t param);
+    std::list<AppEventData> RemoveEvent(std::shared_ptr<AppRunningRecord> appRecord, uint32_t eventId);
+private:
+    std::mutex appEventListMutex_;
+    std::list<AppEventData> appEventList_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
