@@ -213,6 +213,9 @@ private:
      */
     AppExecFwk::AbilityType GetAbilityInfoType();
     void GetPermissionDes(const std::string &permissionName, std::string &des);
+    void SetElementNameProperties(std::shared_ptr<ElementName>& elementName,
+        const std::string& abilityName, const std::string& bundleName,
+        const std::string& deviceId, const std::string& moduleName);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
