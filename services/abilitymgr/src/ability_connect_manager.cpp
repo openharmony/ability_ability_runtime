@@ -993,8 +993,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
     std::string element = abilityRecord->GetURI();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called, Connect ability done, ability: %{public}s.",
-        __func__, element.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "connect done:%{public}s", element.c_str());
 
     if ((!abilityRecord->IsAbilityState(AbilityState::INACTIVE)) &&
         (!abilityRecord->IsAbilityState(AbilityState::ACTIVE))) {
@@ -1114,7 +1113,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     }
 
     std::string element = abilityRecord->GetURI();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleDisconnectAbilityDoneLocked called, service:%{public}s.",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "schedule disconnect %{public}s",
         element.c_str());
 
     // complete disconnect and remove record from conn map
@@ -1127,8 +1126,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
             AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "don't terminate uiservice");
         } else {
-            TAG_LOGI(AAFwkTag::ABILITYMGR,
-                "Service ability has no any connection, and not started, need terminate or cache.");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "need terminate or cache");
             TerminateOrCacheAbility(abilityRecord);
         }
     }
