@@ -634,8 +634,8 @@ void PendingWantManager::ClearPendingWantRecordTask(const std::string &bundleNam
                 }
             }
             if (hasBundle) {
-                iter = wantRecords_.erase(iter);
                 EraseBundleRecord(wantInfos, pendingRecord->GetKey());
+                iter = wantRecords_.erase(iter);
                 TAG_LOGI(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
             } else {
                 ++iter;
