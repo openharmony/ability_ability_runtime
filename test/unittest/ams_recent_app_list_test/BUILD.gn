@@ -93,7 +93,6 @@ ohos_unittest("AmsRecentAppListTest") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "kv_store:distributeddata_mgr",
-    "memmgr:memmgrclient",
     "memory_utils:libmeminfo",
     "resource_schedule_service:ressched_client",
     "window_manager:libwm",
@@ -102,12 +101,6 @@ ohos_unittest("AmsRecentAppListTest") {
 
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
-  }
-  if (ability_runtime_graphics) {
-    external_deps += [
-      "window_manager:libwm",
-      "window_manager:libwsutils",
-    ]
   }
 }
 
