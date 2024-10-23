@@ -1864,7 +1864,24 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
         return;
     }
 
-    application_->AddAbilityStage(abilityStage);
+    wptr<MainThread> weak = this;
+    auto callback = [weak]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            return;
+        }
+        if (!appThread->appMgr_ || !appThread->applicationImpl_) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+            return;
+        }
+        appThread->appMgr_->AddAbilityStageDone(appThread->applicationImpl_->GetRecordId());
+    };
+    bool isAsyncCallback = false;
+    application_->AddAbilityStage(abilityStage, callback, isAsyncCallback);
+    if (isAsyncCallback) {
+        return;
+    }
 
     if (!appMgr_ || !applicationImpl_) {
         TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
