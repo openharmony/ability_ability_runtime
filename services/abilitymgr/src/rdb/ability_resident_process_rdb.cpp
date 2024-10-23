@@ -199,6 +199,7 @@ int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundl
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Go to first row failed, ret: %{public}d", ret);
         return Rdb_Search_Record_Err;
     }
+
     std::string flag;
     ret = absSharedResultSet->GetString(INDEX_KEEP_ALIVE_ENABLE, flag);
     if (ret != NativeRdb::E_OK) {
@@ -209,9 +210,10 @@ int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundl
     auto res = std::from_chars(flag.c_str(), flag.c_str() + flag.size(), value);
     if (res.ec != std::errc()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "from_chars error flag:%{public}s", flag.c_str());
-        return Rdb_Parse_File_Err;
+        return Rdb_Search_Record_Err;
     }
     enable = static_cast<bool>(value);
+
     return Rdb_OK;
 }
 
