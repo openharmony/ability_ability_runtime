@@ -865,5 +865,41 @@ HWTEST_F(JsUIServiceExtensionTest, ListenWMS_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "ListenWMS_0100 end");
 }
 
+/**
+ * @tc.number: AbilityWindowConfigTransition_0100
+ * @tc.name: AbilityWindowConfigTransition
+ * @tc.desc: AbilityWindowConfigTransition
+ */
+HWTEST_F(JsUIServiceExtensionTest, AbilityWindowConfigTransition_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityWindowConfigTransition_0100 start");
+
+    sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+    uint32_t windowId = 1;
+
+    jsUIServiceExtension->AbilityWindowConfigTransition(option, windowId);
+
+    EXPECT_NE(jsUIServiceExtension->context_, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityWindowConfigTransition_0100 end");
+}
+
+/**
+ * @tc.number: OnSendData_0100
+ * @tc.name: OnSendData
+ * @tc.desc: OnSendData
+ */
+HWTEST_F(JsUIServiceExtensionTest, OnSendData_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnSendData_0100 start");
+
+    sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
+    AAFwk::WantParams params;
+    int32_t ret = jsUIServiceExtension->
+        OnSendData(token, params);
+    EXPECT_EQ(ret, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnSendData_0100 end");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
