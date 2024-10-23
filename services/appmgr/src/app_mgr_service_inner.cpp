@@ -310,7 +310,8 @@ AppMgrServiceInner::AppMgrServiceInner()
       appRunningStatusModule_(std::make_shared<AbilityRuntime::AppRunningStatusModule>()),
       securityModeManager_(std::make_shared<AdvancedSecurityModeManager>()),
       appPreloader_(std::make_shared<AppPreloader>(remoteClientManager_)),
-      multiUserConfigurationMgr_(std::make_shared<MultiUserConfigurationMgr>())
+      multiUserConfigurationMgr_(std::make_shared<MultiUserConfigurationMgr>()),
+      willKillPidsNum_(0)
 {
     appRunningManager_->SetMultiUserConfigurationMgr(multiUserConfigurationMgr_);
 }
@@ -326,7 +327,6 @@ void AppMgrServiceInner::Init()
     DelayedSingleton<RenderStateObserverManager>::GetInstance()->Init();
     dfxTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("dfx_freeze_task_queue");
     otherTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("other_app_mgr_task_queue");
-    willKillPidsNum_ = 0;
     delayKillTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("delay_kill_task_queue");
     if (securityModeManager_) {
         securityModeManager_->Init();
