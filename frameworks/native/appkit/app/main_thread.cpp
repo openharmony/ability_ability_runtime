@@ -1825,13 +1825,17 @@ void MainThread::LoadNativeLibrary(const BundleInfo &bundleInfo, std::string &na
         TAG_LOGW(AAFwkTag::APPKIT, "No native library");
         return;
     }
-
+    char resolvedPath[PATH_MAX] = {0};
     void *handleAbilityLib = nullptr;
     for (auto fileEntry : nativeFileEntries_) {
-        if (fileEntry.empty()) {
+        if (fileEntry.empty() || fileEntry.size() >= PATH_MAX) {
             continue;
         }
-        handleAbilityLib = dlopen(fileEntry.c_str(), RTLD_NOW | RTLD_GLOBAL);
+        if (realpath(fileEntry.c_str(), resolvedPath) == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get realpath, errno = %{public}d", errno);
+            continue;
+        }
+        handleAbilityLib = dlopen(resolvedPath, RTLD_NOW | RTLD_GLOBAL);
         if (handleAbilityLib == nullptr) {
             if (fileEntry.find("libformrender.z.so") == std::string::npos) {
                 TAG_LOGE(AAFwkTag::APPKIT, "fail to dlopen %{public}s, [%{public}s]",
