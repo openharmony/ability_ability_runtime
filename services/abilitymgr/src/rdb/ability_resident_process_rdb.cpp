@@ -17,6 +17,7 @@
 
 #include "hilog_tag_wrapper.h"
 #include "parser_util.h"
+#include <charconv>
 
 namespace OHOS {
 namespace AbilityRuntime {
