@@ -936,7 +936,7 @@ private:
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
-        
+
         int32_t missionId = 0;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], missionId)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get missionId wrong!");
@@ -1023,6 +1023,7 @@ private:
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
+
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[0], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Parse bundleName failed");
@@ -1042,7 +1043,7 @@ private:
         auto asyncTask = [appManager = appManager_, bundleName, accountId,
             env, task = napiAsyncTask.get()]() {
             if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "null appManager or amsMgr");
+                TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr or amsMgr is nullptr.");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 delete task;
                 return;
