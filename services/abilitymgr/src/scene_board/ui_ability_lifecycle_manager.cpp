@@ -950,6 +950,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
                 uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
                 return NotifySCBPendingActivation(sessionInfo, abilityRequest);
             }
+            uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
             uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId);
             return NotifySCBPendingActivation(sessionInfo, abilityRequest);
         }
@@ -1010,7 +1011,12 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
     sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     tmpAbilityMap_.erase(search);
     uiAbilityRecord->SetSessionInfo(sessionInfo);
-
+    if (sessionInfo->state == CallToState::BACKGROUND) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "set pending BACKGROUND");
+        uiAbilityRecord->SetPendingState(AbilityState::BACKGROUND);
+    } else {
+        uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+    }
     uiAbilityRecord->LoadAbility();
 }
 
