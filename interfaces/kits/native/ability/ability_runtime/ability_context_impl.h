@@ -316,6 +316,7 @@ private:
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
     sptr<IRemoteObject> GetSessionToken();
+    void AbilityContextImpl::SetWindowRectangleParams(AAFwk::Want &want);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

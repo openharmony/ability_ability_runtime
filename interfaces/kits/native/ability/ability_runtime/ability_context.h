@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +42,9 @@ namespace OHOS {
 namespace Ace {
 class UIContent;
 }
-
+namespace AppExecFwk {
+class ElementName;
+}
 namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 using PermissionRequestTask = std::function<void(const std::vector<std::string>&, const std::vector<int>&)>;
@@ -417,6 +420,10 @@ protected:
     {
         return contextTypeId == CONTEXT_TYPE_ID || Context::IsContext(contextTypeId);
     }
+private:
+    void SetElementNameProperties(std::shared_ptr<AppExecFwk::ElementName>& elementName,
+                                  const std::string& abilityName, const std::string& bundleName,
+                                  const std::string& deviceId, const std::string& moduleName);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -132,7 +132,17 @@ std::string AbilityContext::GetCallingBundle()
     return callingBundleName_;
 }
 
-std::shared_ptr<ElementName> AbilityContext::GetElementName()
+void AbilityContext::SetElementNameProperties(std::shared_ptr<AppExecFwk::ElementName>& elementName,
+    const std::string& abilityName, const std::string& bundleName,
+    const std::string& deviceId, const std::string& moduleName)
+{
+    elementName->SetAbilityName(abilityName);
+    elementName->SetBundleName(bundleName);
+    elementName->SetDeviceID(deviceId);
+    elementName->SetModuleName(moduleName);
+}
+
+std::shared_ptr<AppExecFwk::ElementName> AbilityContext::GetElementName()
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
@@ -141,23 +151,18 @@ std::shared_ptr<ElementName> AbilityContext::GetElementName()
         return nullptr;
     }
 
-    std::shared_ptr<ElementName> elementName = std::make_shared<ElementName>();
-    elementName->SetAbilityName(info->name);
-    elementName->SetBundleName(info->bundleName);
-    elementName->SetDeviceID(info->deviceId);
-    elementName->SetModuleName(info->moduleName);
+    std::shared_ptr<AppExecFwk::ElementName> elementName = std::make_shared<AppExecFwk::ElementName>();
+    SetElementNameProperties(elementName, info->name, info->bundleName, info->deviceId, info->moduleName);
     TAG_LOGD(AAFwkTag::CONTEXT, "end");
     return elementName;
 }
 
-std::shared_ptr<ElementName> AbilityContext::GetCallingAbility()
+std::shared_ptr<AppExecFwk::ElementName> AbilityContext::GetCallingAbility()
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-    std::shared_ptr<ElementName> elementName = std::make_shared<ElementName>();
-    elementName->SetAbilityName(callingAbilityName_);
-    elementName->SetBundleName(callingBundleName_);
-    elementName->SetDeviceID(callingDeviceId_);
-    elementName->SetModuleName(callingModuleName_);
+    std::shared_ptr<AppExecFwk::ElementName> elementName = std::make_shared<AppExecFwk::ElementName>();
+    SetElementNameProperties(elementName, callingAbilityName_,
+        callingBundleName_, callingDeviceId_, callingModuleName_);
     TAG_LOGD(AAFwkTag::CONTEXT, "end");
     return elementName;
 }
