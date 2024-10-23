@@ -50,12 +50,8 @@ HWTEST_F(PhotoEditorExtensionModuleLoaderTest, PhotoEditorExtensionModuleLoader_
 {
     GTEST_LOG_(INFO) << "PhotoEditorExtensionModuleLoader_0100 start";
     void *handle = dlopen("/system/lib/extensionability/libphoto_editor_extension_module.z.so", RTLD_LAZY);
-    if (handle != nullptr) {
-        auto obj =
-            reinterpret_cast<PhotoEditorExtensionModuleLoader *>(dlsym(handle, "OHOS_EXTENSION_GetExtensionModule"));
-        EXPECT_TRUE(obj != nullptr);
-    }
     dlclose(handle);
+    EXPECT_TRUE(handle != nullptr);
     GTEST_LOG_(INFO) << "PhotoEditorExtensionModuleLoader_0100 end";
 }
 
@@ -86,7 +82,7 @@ HWTEST_F(PhotoEditorExtensionModuleLoaderTest, PhotoEditorExtensionModuleLoader_
     std::string key = "type";
     auto finder = params.find(key);
     if (finder != params.end()) {
-        EXPECT_STREQ(finder->second.c_str(), "266");
+        EXPECT_STREQ(finder->second.c_str(), "23");
     }
 
     key = "name";

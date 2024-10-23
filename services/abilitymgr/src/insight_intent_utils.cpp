@@ -18,13 +18,9 @@
 #include "ability_manager_errors.h"
 #include "bundle_mgr_helper.h"
 #include "hilog_tag_wrapper.h"
-#include "if_system_ability_manager.h"
 #include "in_process_call_wrapper.h"
 #include "insight_intent_profile.h"
-#include "iservice_registry.h"
-#include "module_info.h"
 #include "os_account_manager_wrapper.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

@@ -90,6 +90,7 @@ enum class AAFwkLogTag : uint32_t {
     FREE_INSTALL,
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
+    FILE_MONITOR,
 
     END = 256,               // N.B. never use it
 };
@@ -166,7 +167,7 @@ inline const char* GetDomainName5(AAFwkLogTag tag)
 
 inline const char* GetDomainName6(AAFwkLogTag tag)
 {
-    const char* tagNames[] = { "LocalCall" };
+    const char* tagNames[] = { "LocalCall", "FileMonitor" };
     uint32_t offset = GetOffset(tag, AAFwkLogTag::LOCAL_CALL);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";

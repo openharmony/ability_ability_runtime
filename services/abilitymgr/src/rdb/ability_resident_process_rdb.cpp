@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <cstdlib>
-
 #include "ability_resident_process_rdb.h"
+
 #include "hilog_tag_wrapper.h"
 #include "parser_util.h"
+#include <charconv>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -199,15 +199,19 @@ int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundl
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Go to first row failed, ret: %{public}d", ret);
         return Rdb_Search_Record_Err;
     }
-
     std::string flag;
     ret = absSharedResultSet->GetString(INDEX_KEEP_ALIVE_ENABLE, flag);
     if (ret != NativeRdb::E_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get enable status failed, ret: %{public}d", ret);
         return Rdb_Search_Record_Err;
     }
-
-    enable = static_cast<bool>(std::stoul(flag));
+    unsigned long value = 0;
+    auto res = std::from_chars(flag.c_str(), flag.c_str() + flag.size(), value);
+    if (res.ec != std::errc()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "from_chars error flag:%{public}s", flag.c_str());
+        return Rdb_Parse_File_Err;
+    }
+    enable = static_cast<bool>(value);
     return Rdb_OK;
 }
 

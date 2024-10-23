@@ -453,7 +453,7 @@ HWTEST_F(ImplicitStartProcessorTest, AddIdentity_001, TestSize.Level1)
     int32_t  userId = 102;
     std::string  identity;
     processor->AddIdentity(userId, identity);
-    processor->ResetCallingIdentityAsCaller(userId);
+    processor->ResetCallingIdentityAsCaller(userId, true);
     AddInfoParam param;
     std::vector<DialogAppInfo> dialogAppInfos;
     param.isExtension = true;

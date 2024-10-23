@@ -257,9 +257,11 @@ public:
      *
      * @param bundleName name of bundle.
      * @param uid uid of bundle.
+     * @param  reason, caller function name.
      * @return 0 if success.
      */
-    int KillApplicationByUid(const std::string &bundleName, int32_t uid);
+    int KillApplicationByUid(const std::string &bundleName, int32_t uid,
+        const std::string& reason = "KillApplicationByUid");
 
      /**
      * update the application info after new module installed.
@@ -463,6 +465,12 @@ public:
      * @return Returns true if clean success, others return false.
      */
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
+
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 

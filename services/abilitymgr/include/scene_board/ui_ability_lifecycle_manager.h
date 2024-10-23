@@ -158,6 +158,8 @@ public:
     int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
         sptr<SessionInfo> &sessionInfo);
 
+    int32_t NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest);
+
     /**
      * @brief handle time out event
      *
@@ -357,6 +359,8 @@ public:
 
     int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
+    void EnableListForSCBRecovery();
+
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -430,6 +434,8 @@ private:
     void TerminateSession(std::shared_ptr<AbilityRecord> abilityRecord);
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
+    std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        bool &isColdStart);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -444,6 +450,8 @@ private:
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
+    bool isSCBRecovery_ = false;
+    std::unordered_set<int32_t> coldStartInSCBRecovery_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

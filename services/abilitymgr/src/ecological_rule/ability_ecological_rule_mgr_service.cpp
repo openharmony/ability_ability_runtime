@@ -17,7 +17,6 @@
 
 #include "ability_manager_errors.h"
 #include "iservice_registry.h"
-#include "iremote_broker.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 
@@ -117,14 +116,16 @@ int32_t AbilityEcologicalRuleMgrServiceClient::EvaluateResolveInfos(const AAFwk:
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int64_t start = GetCurrentTimeMicro();
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "want: %{private}s, callerInfo: %{public}s, type: %{private}d",
+    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "want: %{private}s, callerInfo: %{public}s, type: %{public}d",
         want.ToString().c_str(), callerInfo.ToString().c_str(), type);
     if (!CheckConnectService()) {
         return AAFwk::ERR_CONNECT_ERMS_FAILED;
     }
     int32_t res = ecologicalRuleMgrServiceProxy_->EvaluateResolveInfos(want, callerInfo, type, abilityInfos);
     int64_t cost = GetCurrentTimeMicro() - start;
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms", static_cast<long long>(cost));
+    TAG_LOGD(
+        AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms",
+        static_cast<long long>(cost));
     return res;
 }
 
@@ -143,11 +144,13 @@ int32_t AbilityEcologicalRuleMgrServiceClient::QueryStartExperience(const OHOS::
     if (rule.replaceWant != nullptr) {
         rule.replaceWant->SetParam(ERMS_ORIGINAL_TARGET, want.ToString());
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE,
-            "queryStart finish: resultCode = %{public}d, sceneCode = %{public}s, replaceWant = %{public}s",
+            "queryStart finish: resultCode = %{public}d, sceneCode = %{public}s, replaceWant = %{private}s",
             rule.resultCode, rule.sceneCode.c_str(), (*(rule.replaceWant)).ToString().c_str());
     }
     int64_t cost = GetCurrentTimeMicro() - start;
-    TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms", static_cast<long long>(cost));
+    TAG_LOGD(
+        AAFwkTag::ECOLOGICAL_RULE, "[ERMS-DFX] cost %{public}lld ms",
+        static_cast<long long>(cost));
     return res;
 }
 

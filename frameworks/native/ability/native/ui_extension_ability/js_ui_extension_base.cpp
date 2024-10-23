@@ -493,15 +493,20 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
     }
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
-        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
         if (context_ == nullptr || context_->GetAbilityInfo() == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+            return false;
+        }
+        auto option = sptr<Rosen::WindowOption>::MakeSptr();
+        if (option == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
             return false;
         }
         option->SetWindowName(context_->GetBundleName() + context_->GetAbilityInfo()->name);
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
         option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
         option->SetParentId(sessionInfo->hostWindowId);
+        option->SetRealParentId(sessionInfo->realHostWindowId);
         option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
         auto uiWindow = Rosen::Window::Create(option, context_, sessionInfo->sessionToken);
