@@ -26,7 +26,9 @@ ohos_unittest("assert_fault_callback_death_mgr_test") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+
     "${ability_runtime_test_path}/unittest/app_debug_listener_proxy_test",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
   ]

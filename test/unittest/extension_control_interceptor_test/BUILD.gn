@@ -22,7 +22,7 @@ ohos_unittest("extension_control_interceptor_test") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "extension_control_interceptor_test.cpp",
   ]

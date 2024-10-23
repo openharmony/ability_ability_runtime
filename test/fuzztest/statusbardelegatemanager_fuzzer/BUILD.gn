@@ -31,6 +31,7 @@ ohos_fuzztest("StatusBarDelegateManagerFuzzTest") {
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
   cflags = [
@@ -43,8 +44,8 @@ ohos_fuzztest("StatusBarDelegateManagerFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/status_bar_delegate_manager.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_window_option.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "statusbardelegatemanager_fuzzer.cpp",
   ]

@@ -37,7 +37,7 @@ ohos_fuzztest("StartAbilityUtilsFuzzTest") {
   ]
 
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "startabilityutils_fuzzer.cpp",
   ]
 
