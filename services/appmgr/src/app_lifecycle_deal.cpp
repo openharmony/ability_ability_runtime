@@ -69,12 +69,8 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
 {
     auto appThread = GetApplicationClient();
     if (appThread && ability) {
-        auto abilityInfo = ability->GetAbilityInfo();
-        if (abilityInfo == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "abilityInfo null.");
-            return;
-        }
-        if (abilityInfo->type == AbilityType::PAGE) {
+        auto &abilityInfo = ability->GetAbilityInfo();
+        if (abilityInfo != nullptr && abilityInfo->type == AbilityType::PAGE) {
             FreezeUtil::LifecycleFlow flow = {ability->GetToken(), FreezeUtil::TimeoutState::LOAD};
             auto entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
                 "; AppLifeCycleDeal::LaunchAbility; the LoadAbility lifecycle.";
