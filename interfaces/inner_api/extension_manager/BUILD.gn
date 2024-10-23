@@ -29,6 +29,7 @@ config("extension_manager_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/common/include",
   ]

@@ -29,7 +29,9 @@ ohos_unittest("implicit_start_processor_test") {
   include_dirs = [
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+
     "${ability_runtime_services_path}/abilitymgr/include/ecological_rule",
   ]
 

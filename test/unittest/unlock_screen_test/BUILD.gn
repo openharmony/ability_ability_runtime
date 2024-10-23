@@ -21,7 +21,9 @@ ohos_unittest("unlock_screen_test") {
 
   include_dirs = [
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+
     "${ability_runtime_services_path}/abilitymgr/include/screen_lock",
   ]
 

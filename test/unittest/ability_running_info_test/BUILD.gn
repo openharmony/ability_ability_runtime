@@ -21,6 +21,7 @@ ohos_unittest("ability_running_info_test") {
 
   include_dirs = [
     "${bundlefwk_inner_api_path}/appexecfwk_base/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
 
