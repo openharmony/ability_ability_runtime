@@ -188,16 +188,18 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid);
+    virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid");
 
     /**
      * Kill the application self.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillApplicationSelf();
+    virtual AppMgrResultCode KillApplicationSelf(const std::string& reason = "KillApplicationSelf");
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
@@ -820,6 +822,12 @@ public:
      * @return Returns true if clean success, others return false.
      */
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
+
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 

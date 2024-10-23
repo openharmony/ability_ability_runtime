@@ -22,6 +22,7 @@ AbilityManagerXCollie::AbilityManagerXCollie(const std::string &tag, uint32_t ti
 {
     tag_ = tag;
     id_ = HiviewDFX::XCollie::GetInstance().SetTimer(tag, timeoutSeconds, func, arg, flag);
+    isCanceled_ = false;
 }
 
 AbilityManagerXCollie::~AbilityManagerXCollie()

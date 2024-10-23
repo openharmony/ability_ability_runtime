@@ -1338,14 +1338,20 @@ napi_value JsUIAbility::CallObjectMethod(const char *name, napi_value const *arg
     TryCatch tryCatch(env);
     if (withResult) {
         napi_value result = nullptr;
-        napi_call_function(env, obj, methodOnCreate, argc, argv, &result);
+        napi_status withResultStatus = napi_call_function(env, obj, methodOnCreate, argc, argv, &result);
+        if (withResultStatus != napi_ok) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "JsUIAbility call js, withResult failed: %{public}d", withResultStatus);
+        }
         if (tryCatch.HasCaught()) {
             reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();
         }
         return handleEscape.Escape(result);
     }
     int64_t timeStart = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
-    napi_call_function(env, obj, methodOnCreate, argc, argv, nullptr);
+    napi_status status = napi_call_function(env, obj, methodOnCreate, argc, argv, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "JsUIAbility call js, failed: %{public}d", status);
+    }
     int64_t timeEnd = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
     if (tryCatch.HasCaught()) {
         reinterpret_cast<NativeEngine*>(env)->HandleUncaughtException();

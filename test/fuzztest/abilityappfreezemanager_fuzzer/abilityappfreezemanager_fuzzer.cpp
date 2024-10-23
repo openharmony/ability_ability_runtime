@@ -72,8 +72,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string stack(data, size);
     freeze->GetBinderPeerPids(stack, pid);
     std::string ret(data, size);
-    std::string msg(data, size);
-    freeze->FindStackByPid(ret, pid, msg);
+    freeze->FindStackByPid(ret, pid);
     std::string faultType(data, size);
     freeze->CatchJsonStacktrace(pid, faultType);
     freeze->CatcherStacktrace(pid);

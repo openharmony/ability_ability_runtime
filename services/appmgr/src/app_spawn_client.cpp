@@ -322,15 +322,6 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         }
     }
 
-    if (!startMsg.extensionSandboxPath.empty()) {
-        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_EXTENSION,
-            startMsg.extensionSandboxPath.c_str());
-        if (ret) {
-            TAG_LOGE(AAFwkTag::APPMGR, "SetExtraExtensionSandboxDirs failed, ret: %{public}d", ret);
-            return ret;
-        }
-    }
-
     std::string maxChildProcessStr = std::to_string(startMsg.maxChildProcess);
     ret = AppSpawnReqMsgAddExtInfo(reqHandle, MAX_CHILD_PROCESS,
         reinterpret_cast<const uint8_t*>(maxChildProcessStr.c_str()), maxChildProcessStr.size());
@@ -339,6 +330,15 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
         return ret;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "Send maxChildProcess %{public}s success", maxChildProcessStr.c_str());
+
+    if (!startMsg.extensionSandboxPath.empty()) {
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_EXTENSION,
+            startMsg.extensionSandboxPath.c_str());
+        if (ret) {
+            TAG_LOGE(AAFwkTag::APPMGR, "SetExtraExtensionSandboxDirs failed, ret: %{public}d", ret);
+            return ret;
+        }
+    }
 
     if (!startMsg.fds.empty()) {
         ret = SetExtMsgFds(reqHandle, startMsg.fds);
@@ -504,7 +504,7 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
         pid = result.pid;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "pid = [%{public}d]", pid);
-    return ret;
+    return result.result;
 }
 
 int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg &startMsg, int &status)

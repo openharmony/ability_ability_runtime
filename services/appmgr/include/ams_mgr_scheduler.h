@@ -176,11 +176,13 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplicationByUid(const std::string &bundleName, const int uid) override;
+    virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") override;
 
-    virtual int KillApplicationSelf() override;
+    virtual int KillApplicationSelf(const std::string& reason = "KillApplicationSelf") override;
 
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug) override;
 
@@ -333,6 +335,12 @@ public:
      * @return Returns true if clean success, others return false.
      */
     virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
+
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid) override;
 
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 

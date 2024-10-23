@@ -15,43 +15,25 @@
 
 #include "ability_record.h"
 
-#include <filesystem>
 #include <singleton.h>
-#include <vector>
-#include <unordered_map>
 
-#include "constants.h"
-#include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
 #include "ability_scheduler_stub.h"
-#include "ability_util.h"
 #include "app_exit_reason_data_manager.h"
 #include "app_utils.h"
-#include "appfreeze_manager.h"
 #include "array_wrapper.h"
 #include "accesstoken_kit.h"
-#include "bundle_mgr_client.h"
 #include "configuration_convertor.h"
 #include "connection_state_manager.h"
-#include "common_event_data.h"
 #include "common_event_manager.h"
-#include "common_event_support.h"
 #include "freeze_util.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
-#include "in_process_call_wrapper.h"
-#include "int_wrapper.h"
-#include "errors.h"
-#include "event_report.h"
-#include "hilog_tag_wrapper.h"
 #include "os_account_manager_wrapper.h"
-#include "parameters.h"
 #include "res_sched_util.h"
-#include "ui_extension_host_info.h"
 #include "scene_board_judgement.h"
-#include "start_ability_utils.h"
 #include "startup_util.h"
 #include "system_ability_token_callback.h"
 #include "ui_extension_utils.h"
@@ -63,7 +45,6 @@
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
 #include "locale_config.h"
-#include "mission_info_mgr.h"
 #endif
 
 namespace OHOS {
@@ -104,6 +85,11 @@ constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendRe
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 // Developer mode param
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
+constexpr const char* DMS_CALLER_BUNDLE_NAME = "ohos.dms.param.sourceCallerBundleName";
+constexpr const char* DMS_CALLER_ABILITY_NAME = "ohos.dms.param.sourceCallerAbilityName";
+constexpr const char* DMS_CALLER_NATIVE_NAME = "ohos.dms.param.sourceCallerNativeName";
+constexpr const char* DMS_CALLER_APP_ID = "ohos.dms.param.sourceCallerAppId";
+constexpr const char* DMS_CALLER_APP_IDENTIFIER = "ohos.dms.param.sourceCallerAppIdentifier";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -115,6 +101,7 @@ const int HALF_TIMEOUT = 2;
 const int MAX_URI_COUNT = 500;
 const int32_t BROKER_UID = 5557;
 const int RESTART_SCENEBOARD_DELAY = 500;
+constexpr int32_t DMS_UID = 5522;
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, FreezeUtil::TimeoutState state, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -401,7 +388,9 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     // earlier than above actions
     SetAbilityStateInner(AbilityState::FOREGROUNDING);
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
-    lifecycleDeal_->ForegroundNew(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
+    Want want = GetWant();
+    UpdateDmsCallerInfo(want);
+    lifecycleDeal_->ForegroundNew(want, lifeCycleStateInfo_, GetSessionInfo());
     lifeCycleStateInfo_.sceneFlag = 0;
     lifeCycleStateInfo_.sceneFlagBak = 0;
     {
@@ -1595,7 +1584,9 @@ void AbilityRecord::Inactivate()
     // schedule inactive after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     SetAbilityStateInner(AbilityState::INACTIVATING);
-    lifecycleDeal_->Inactivate(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
+    Want want = GetWant();
+    UpdateDmsCallerInfo(want);
+    lifecycleDeal_->Inactivate(want, lifeCycleStateInfo_, GetSessionInfo());
 }
 
 void AbilityRecord::Terminate(const Closure &task)
@@ -1644,12 +1635,14 @@ void AbilityRecord::ShareData(const int32_t &uniqueId)
 void AbilityRecord::ConnectAbility()
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s called.", __func__);
+    Want want = GetWant();
+    UpdateDmsCallerInfo(want);
     CHECK_POINTER(lifecycleDeal_);
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
     }
     GrantUriPermissionForServiceExtension();
-    lifecycleDeal_->ConnectAbility(GetWant());
+    lifecycleDeal_->ConnectAbility(want);
     isConnected = true;
 }
 
@@ -1680,8 +1673,10 @@ bool AbilityRecord::GrantUriPermissionForServiceExtension()
 void AbilityRecord::CommandAbility()
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "startId_:%{public}d.", startId_);
+    Want want = GetWant();
+    UpdateDmsCallerInfo(want);
     CHECK_POINTER(lifecycleDeal_);
-    lifecycleDeal_->CommandAbility(GetWant(), false, startId_);
+    lifecycleDeal_->CommandAbility(want, false, startId_);
 }
 
 void AbilityRecord::CommandAbilityWindow(const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd)
@@ -1918,7 +1913,8 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
         callerUid = IPCSkeleton::GetCallingUid();
         accessToken = IPCSkeleton::GetCallingTokenID();
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Try to SendResult");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Try to SendResult, callerUid = %{public}d, AccessTokenId = %{public}d",
+        callerUid, accessToken);
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CallerToken is nullptr");
         return;
@@ -3559,6 +3555,11 @@ bool AbilityRecord::GetRestartAppFlag() const
     return isRestartApp_;
 }
 
+void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
+{
+    specifyTokenId_ = specifyTokenId;
+}
+
 void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
 {
     if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
@@ -3575,11 +3576,6 @@ void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
         want_.RemoveParam(UIEXTENSION_ROOT_HOST_PID);
     }
     want_.SetParam(UIEXTENSION_ROOT_HOST_PID, wantParams.GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1));
-}
-
-void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
-{
-    specifyTokenId_ = specifyTokenId;
 }
 
 void AbilityRecord::SetDebugAppByWaitingDebugFlag()
@@ -3619,6 +3615,27 @@ void AbilityRecord::RemoveConnectWant()
 {
     std::lock_guard guard(connectWantLock_);
     connectWant_.reset();
+}
+
+void AbilityRecord::UpdateDmsCallerInfo(Want &want)
+{
+    if (want.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0) != DMS_UID) {
+        return;
+    }
+    want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, -1);
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, -1);
+    want.SetParam(Want::PARAM_RESV_CALLER_PID, -1);
+
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, want.GetStringParam(DMS_CALLER_BUNDLE_NAME));
+    want.RemoveParam(DMS_CALLER_BUNDLE_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, want.GetStringParam(DMS_CALLER_ABILITY_NAME));
+    want.RemoveParam(DMS_CALLER_ABILITY_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, want.GetStringParam(DMS_CALLER_NATIVE_NAME));
+    want.RemoveParam(DMS_CALLER_NATIVE_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_ID, want.GetStringParam(DMS_CALLER_APP_ID));
+    want.RemoveParam(DMS_CALLER_APP_ID);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_IDENTIFIER, want.GetStringParam(DMS_CALLER_APP_IDENTIFIER));
+    want.RemoveParam(DMS_CALLER_APP_IDENTIFIER);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
