@@ -752,7 +752,6 @@ private:
         AAFwk::Want want;
         int32_t accountId = 0;
         sptr<JSServiceExtensionConnection> connection = new JSServiceExtensionConnection(env);
-        size_t unwrapArgc = 0;
         if (!CheckStartAbilityWithAccountInputParam(env, info, want, accountId, connection)) {
             return CreateJsUndefined(env);
         }
