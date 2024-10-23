@@ -52,6 +52,7 @@ ohos_unittest("lifecycle_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "napi:ace_napi",
   ]
 
   if (ability_runtime_graphics) {
