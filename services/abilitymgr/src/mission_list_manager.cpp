@@ -4224,6 +4224,7 @@ void MissionListManager::SendKeyEvent(const AbilityRequest &abilityRequest)
 
 void MissionListManager::SignRestartAppFlag(const std::string &bundleName)
 {
+    std::lock_guard guard(managerLock_);
     for (const auto& missionList : currentMissionLists_) {
         if (!missionList) {
             continue;

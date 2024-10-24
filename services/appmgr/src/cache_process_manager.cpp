@@ -24,6 +24,7 @@
 
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
+const std::string RESOURCE_CACHE_PROCESS_ENABLE = "persist.sys.resource.warmStartProcessEnable";
 const std::string PROCESS_CACHE_API_CHECK_CONFIG = "persist.sys.abilityms.processCacheApiCheck";
 const std::string PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG = "persist.sys.abilityms.processCacheSetSupportCheck";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
@@ -39,6 +40,7 @@ CacheProcessManager::CacheProcessManager()
     maxProcCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_PROC_CACHE_NUM, 0);
     shouldCheckApi = OHOS::system::GetBoolParameter(PROCESS_CACHE_API_CHECK_CONFIG, true);
     shouldCheckSupport = OHOS::system::GetBoolParameter(PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG, true);
+    resourceCacheProcessEnable_ = OHOS::system::GetBoolParameter(RESOURCE_CACHE_PROCESS_ENABLE, false);
     TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum is =%{public}d", maxProcCacheNum_);
 }
 
@@ -59,6 +61,11 @@ void CacheProcessManager::RefreshCacheNum()
 }
 
 bool CacheProcessManager::QueryEnableProcessCache()
+{
+    return maxProcCacheNum_ > 0 || resourceCacheProcessEnable_;
+}
+
+bool CacheProcessManager::QueryEnableProcessCacheFromKits()
 {
     return maxProcCacheNum_ > 0;
 }
@@ -346,14 +353,14 @@ void CacheProcessManager::RemoveCacheRecord(const std::shared_ptr<AppRunningReco
 void CacheProcessManager::ShrinkAndKillCache()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called");
-    if (maxProcCacheNum_ <= 0) {
+    if (maxProcCacheNum_ <= 0 && !resourceCacheProcessEnable_) {
         TAG_LOGI(AAFwkTag::APPMGR, "Cache disabled.");
         return;
     }
     std::vector<std::shared_ptr<AppRunningRecord>> cleanList;
     {
         std::lock_guard<ffrt::recursive_mutex> queueLock(cacheQueueMtx);
-        while (GetCurrentCachedProcNum() > maxProcCacheNum_) {
+        while (GetCurrentCachedProcNum() > maxProcCacheNum_ && !resourceCacheProcessEnable_) {
             const auto& tmpAppRecord = cachedAppRecordQueue_.front();
             cachedAppRecordQueue_.pop_front();
             RemoveFromApplicationSet(tmpAppRecord);

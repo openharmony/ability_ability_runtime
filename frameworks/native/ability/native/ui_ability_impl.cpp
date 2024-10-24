@@ -425,7 +425,7 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
 void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:call");
+    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Call");
     auto owner = owner_.lock();
     if (owner == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null owner");
@@ -502,7 +502,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterUnfocused()
 
 void UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGE(AAFwkTag::UIABILITY, "scb call, ForegroundFailed");
     AppExecFwk::PacMap restoreData;
     switch (type) {
         case static_cast<int32_t>(OHOS::Rosen::WMError::WM_ERROR_INVALID_OPERATION): {

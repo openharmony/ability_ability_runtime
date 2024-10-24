@@ -14,10 +14,9 @@
  */
 
 #include "ui_extension_record.h"
+
 #include "ability_util.h"
-#include "extension_record_manager.h"
 #include "session/host/include/zidl/session_interface.h"
-#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

@@ -142,8 +142,7 @@ int32_t UriPermissionManagerStub::HandleGrantUriPermissionPrivileged(MessageParc
     auto appIndex = data.ReadInt32();
     auto initiatorTokenId = data.ReadUint32();
     auto abilityId = data.ReadInt32();
-    int32_t result = GrantUriPermissionPrivileged(uriVec, flag, targetBundleName, appIndex,
-        initiatorTokenId, abilityId);
+    int32_t result = GrantUriPermissionPrivileged(uriVec, flag, targetBundleName, appIndex, initiatorTokenId, abilityId);
     reply.WriteInt32(result);
     return ERR_OK;
 }

@@ -15,29 +15,18 @@
 
 #include "ability_connect_manager.h"
 
-#include <algorithm>
-#include <mutex>
 #include <regex>
 
-#include "ability_connect_callback_stub.h"
-#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
-#include "ability_util.h"
 #include "appfreeze_manager.h"
 #include "app_exit_reason_data_manager.h"
-#include "app_utils.h"
 #include "assert_fault_callback_death_mgr.h"
-#include "extension_config.h"
 #include "hitrace_meter.h"
-#include "hilog_tag_wrapper.h"
-#include "in_process_call_wrapper.h"
 #include "int_wrapper.h"
-#include "parameter.h"
 #include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
-#include "extension_record.h"
 #include "ui_extension_utils.h"
 #include "cache_extension_utils.h"
 #include "datetime_ex.h"
@@ -563,7 +552,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     bool isCallbackConnected = !connectRecordList.empty();
     // 3. If this service ability and callback has been connected, There is no need to connect repeatedly
     if (isLoadedAbility && (isCallbackConnected) && IsAbilityConnected(targetService, connectRecordList)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Service and callback was connected.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Service/callback connected");
         return ERR_OK;
     }
 
@@ -597,7 +586,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
         targetService->SetWant(abilityRequest.want);
         HandleActiveAbility(targetService, connectRecord);
     } else {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Target service is activating, wait for callback");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "TargetService activing");
         targetService->SaveConnectWant(abilityRequest.want);
     }
 
@@ -2059,7 +2048,7 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         return;
     }
 
-    if (abilityRecord->IsSceneBoard()) {
+    if (abilityRecord->IsSceneBoard() && AmsConfigurationParameter::GetInstance().IsSupportSCBCrashReboot()) {
         static int sceneBoardCrashCount = 0;
         static int64_t tickCount = GetTickCount();
         int64_t tickNow = GetTickCount();
@@ -2264,7 +2253,10 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
             TAG_LOGW(AAFwkTag::ABILITYMGR, "delay restart root launcher until switch user.");
             return;
         }
-        requestInfo.want.SetParam("ohos.app.recovery", true);
+        if (abilityRecord->IsSceneBoard()) {
+            requestInfo.want.SetParam("ohos.app.recovery", true);
+            DelayedSingleton<AbilityManagerService>::GetInstance()->EnableListForSCBRecovery(userId_);
+        }
         requestInfo.restartCount = abilityRecord->GetRestartCount();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "restart root launcher, number:%{public}d", requestInfo.restartCount);
         StartAbilityLocked(requestInfo);
@@ -3150,6 +3142,25 @@ void AbilityConnectManager::UninstallApp(const std::string &bundleName)
             abilityRecord->SetKeepAliveBundle(false);
         }
     }
+}
+
+int32_t AbilityConnectManager::UpdateKeepAliveEnableState(const std::string &bundleName,
+    const std::string &moduleName, const std::string &mainElement, bool updateEnable)
+{
+    std::lock_guard lock(serviceMapMutex_);
+    for (const auto &[key, abilityRecord]: serviceMap_) {
+        CHECK_POINTER_AND_RETURN(abilityRecord, ERR_NULL_OBJECT);
+        if (abilityRecord->GetAbilityInfo().bundleName == bundleName &&
+            abilityRecord->GetAbilityInfo().name == mainElement &&
+            abilityRecord->GetAbilityInfo().moduleName == moduleName) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR,
+                "update keepAlive,bundle:%{public}s,module:%{public}s,ability:%{public}s,enable:%{public}d",
+                bundleName.c_str(), moduleName.c_str(), mainElement.c_str(), updateEnable);
+            abilityRecord->SetKeepAliveBundle(updateEnable);
+            return ERR_OK;
+        }
+    }
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -27,7 +27,6 @@ config("ability_manager_public_config") {
     "include/",
     "include/status_bar_delegate",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/distributed",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
@@ -63,6 +62,8 @@ config("ability_manager_exception_config") {
 }
 
 ohos_shared_library("ability_manager") {
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "${ability_runtime_native_path}/ability/native/data_ability_operation.cpp",
     "${ability_runtime_native_path}/ability/native/data_ability_operation_builder.cpp",
@@ -133,6 +134,8 @@ ohos_shared_library("ability_manager") {
   ]
 
   external_deps = [
+    "ability_base:base",
+    "ability_base:session_info",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
@@ -149,7 +152,6 @@ ohos_shared_library("ability_manager") {
   }
 
   public_external_deps = [
-    "ability_base:base",
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
@@ -226,6 +228,8 @@ ohos_shared_library("ability_start_options") {
 }
 
 ohos_shared_library("mission_info") {
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/mission_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/mission_snapshot.cpp",
@@ -269,6 +273,8 @@ ohos_shared_library("ability_manager_c") {
 }
 
 ohos_shared_library("ability_start_setting") {
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/ability_start_setting.cpp",
   ]
@@ -326,6 +332,8 @@ ohos_shared_library("process_options") {
 }
 
 ohos_shared_library("ability_connect_callback_stub") {
+  branch_protector_ret = "pac_ret"
+
   defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
   include_dirs = [

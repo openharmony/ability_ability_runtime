@@ -54,38 +54,4 @@ void NAPI_app_ability_ServiceExtensionAbility_GetABCCode(const char **buf, int *
         *buflen = _binary_service_extension_ability_abc_end - _binary_service_extension_ability_abc_start;
     }
 }
-#else
-static napi_module _module = {
-    .nm_version = 0,
-    .nm_filename = "application/libserviceextensionability_napi.so/service_extension_ability.js",
-    .nm_modname = "application.ServiceExtensionAbility",
-};
-extern "C" __attribute__((constructor))
-void NAPI_application_ServiceExtensionAbility_AutoRegister()
-{
-    napi_module_register(&_module);
-}
-
-extern "C" __attribute__((visibility("default")))
-void NAPI_application_ServiceExtensionAbility_GetJSCode(const char **buf, int *bufLen)
-{
-    if (buf != nullptr) {
-        *buf = _binary_service_extension_ability_js_start;
-    }
-
-    if (bufLen != nullptr) {
-        *bufLen = _binary_service_extension_ability_js_end - _binary_service_extension_ability_js_start;
-    }
-}
-
-extern "C" __attribute__((visibility("default")))
-void NAPI_application_ServiceExtensionAbility_GetABCCode(const char **buf, int *buflen)
-{
-    if (buf != nullptr) {
-        *buf = _binary_service_extension_ability_abc_start;
-    }
-    if (buflen != nullptr) {
-        *buflen = _binary_service_extension_ability_abc_end - _binary_service_extension_ability_abc_start;
-    }
-}
 #endif

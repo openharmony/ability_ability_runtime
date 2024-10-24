@@ -142,34 +142,11 @@ bool AppMgrEventUtil::SendProcessStartFailedEvent(std::shared_ptr<AppRunningReco
     eventInfo.time = currentTime;
     eventInfo.callerUid = appRecord->GetCallerUid() == -1 ? IPCSkeleton::GetCallingUid() : appRecord->GetCallerUid();
     if (!appRecord->GetAbilities().empty()) {
-        auto abilityRecord = appRecord->GetAbilities().begin()->second;
-        if (!abilityRecord) {
-            TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord null");
-            return false;
-        }
-        auto abilityinfo = abilityRecord->GetAbilityInfo();
+        auto abilityinfo = appRecord->GetAbilities().begin()->second->GetAbilityInfo();
         UpdateStartupType(abilityinfo, eventInfo.abilityType, eventInfo.extensionType);
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "Abilities nullptr!");
     }
-    UpdateCallerInfo(eventInfo, callerAppRecord, appRecord);
-    if (!appRecord->GetBundleName().empty()) {
-        eventInfo.bundleName = appRecord->GetBundleName();
-    }
-    eventInfo.processName = appRecord->GetProcessName();
-    eventInfo.processType = static_cast<int32_t>(appRecord->GetProcessType());
-    if (!appRecord->GetPriorityObject()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord's priorityObject is null");
-    } else {
-        eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
-    }
-    AAFwk::EventReport::SendProcessStartFailedEvent(AAFwk::EventName::PROCESS_START_FAILED, eventInfo);
-    return true;
-}
-
-void AppMgrEventUtil::UpdateCallerInfo(AAFwk::EventInfo &eventInfo, std::shared_ptr<AppRunningRecord> callerAppRecord,
-    std::shared_ptr<AppRunningRecord> appRecord)
-{
     if (!callerAppRecord) {
         Security::AccessToken::NativeTokenInfo nativeTokenInfo = {};
         auto token = appRecord->GetCallerTokenId() == -1 ?
@@ -187,6 +164,18 @@ void AppMgrEventUtil::UpdateCallerInfo(AAFwk::EventInfo &eventInfo, std::shared_
         eventInfo.callerProcessName = callerAppRecord->GetProcessName();
         eventInfo.callerPid = GetCallerPid(callerAppRecord);
     }
+    if (!appRecord->GetBundleName().empty()) {
+        eventInfo.bundleName = appRecord->GetBundleName();
+    }
+    eventInfo.processName = appRecord->GetProcessName();
+    eventInfo.processType = static_cast<int32_t>(appRecord->GetProcessType());
+    if (!appRecord->GetPriorityObject()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord's priorityObject is null");
+    } else {
+        eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
+    }
+    AAFwk::EventReport::SendProcessStartFailedEvent(AAFwk::EventName::PROCESS_START_FAILED, eventInfo);
+    return true;
 }
 
 bool AppMgrEventUtil::SendChildProcessStartFailedEvent(std::shared_ptr<ChildProcessRecord> childRecord,

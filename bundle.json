@@ -99,6 +99,7 @@
             "zlib"
   ],
           "third_party": [
+	    "icu",
             "libjpeg-turbo"
           ]
       },
