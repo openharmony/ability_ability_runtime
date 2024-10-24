@@ -23,6 +23,7 @@ ohos_unittest("ability_debug_deal_test") {
     "${ability_runtime_path}/test/mock/services_appmgr_test/include",
     "${ability_runtime_path}/interfaces/inner_api/include",
     "${ability_runtime_path}/frameworks/native/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
 

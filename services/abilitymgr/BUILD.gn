@@ -256,6 +256,7 @@ ohos_shared_library("wantagent_manager") {
   branch_protector_ret = "pac_ret"
   include_dirs = [
     "${ability_runtime_services_path}/abilitymgr/data_ability/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
@@ -348,6 +349,7 @@ ohos_shared_library("mission_list") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_services_path}/abilitymgr/data_ability/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/abilitymgr/include/mission",
     "${ability_runtime_services_path}/common/include",
