@@ -57,6 +57,7 @@ public:
         return isUISchedulerStarted_;
     }
     bool StartUIScheduler();
+    bool CheckLoadCJLibrary();
     void StopUIScheduler();
     enum LibraryKind {
         SYSTEM,
@@ -86,6 +87,7 @@ private:
     bool LoadRuntimeApis();
     static CJRuntimeAPI lazyApis_;
     bool isRuntimeStarted_{false};
+    bool isLoadCJLibrary_{false};
     bool isUISchedulerStarted_{false};
     void* uiScheduler_ {nullptr};
     SanitizerKind sanitizerKind_ {SanitizerKind::NONE};
