@@ -191,5 +191,8 @@ ohos_unittest("ability_record_test_call") {
 group("unittest") {
   testonly = true
 
-  deps = []
+  deps = [
+    ":ability_record_test",
+    ":ability_record_test_call",
+  ]
 }
