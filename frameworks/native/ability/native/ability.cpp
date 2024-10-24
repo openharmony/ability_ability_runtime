@@ -870,7 +870,7 @@ void Ability::PostTask(std::function<void()> task, long delayTime)
 
 int32_t Ability::OnContinue(WantParams &wantParams)
 {
-    return ContinuationManager::OnContinueResult::REJECT;
+    return ContinuationManager::OnContinueResult::ON_CONTINUE_ERR;
 }
 
 void Ability::ContinueAbilityWithStack(const std::string &deviceId, uint32_t versionCode)
