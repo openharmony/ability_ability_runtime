@@ -25,6 +25,7 @@
 #include "app_death_recipient.h"
 #include "app_mgr_constants.h"
 #include "datetime_ex.h"
+#include "freeze_util.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -182,6 +183,8 @@ void AppMgrService::AttachApplication(const sptr<IRemoteObject> &app)
         return;
     }
 
+    AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(IPCSkeleton::GetCallingPid(),
+        "AppMgrService::AttachApplication");
     pid_t pid = IPCSkeleton::GetCallingPid();
     auto appScheduler = iface_cast<IAppScheduler>(app);
     if (appScheduler == nullptr) {
@@ -215,6 +218,8 @@ void AppMgrService::ApplicationForegrounded(const int32_t recordId)
     if (!JudgeAppSelfCalled(recordId)) {
         return;
     }
+    AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(IPCSkeleton::GetCallingPid(),
+        "AppMgrService::AppForegrounded");
     std::function<void()> applicationForegroundedFunc = [appMgrServiceInner = appMgrServiceInner_, recordId]() {
         appMgrServiceInner->ApplicationForegrounded(recordId);
     };
@@ -232,6 +237,8 @@ void AppMgrService::ApplicationBackgrounded(const int32_t recordId)
     if (!JudgeAppSelfCalled(recordId)) {
         return;
     }
+    AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(IPCSkeleton::GetCallingPid(),
+        "AppMgrService::AppBackgrounded");
     taskHandler_->CancelTask("appbackground_" + std::to_string(recordId));
     std::function<void()> applicationBackgroundedFunc = [appMgrServiceInner = appMgrServiceInner_, recordId]() {
         appMgrServiceInner->ApplicationBackgrounded(recordId);

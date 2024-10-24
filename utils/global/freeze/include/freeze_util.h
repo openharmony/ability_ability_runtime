@@ -47,10 +47,14 @@ public:
     static FreezeUtil& GetInstance();
 
     void AddLifecycleEvent(const LifecycleFlow &flow, const std::string &entry);
+    bool AppendLifecycleEvent(const LifecycleFlow &flow, const std::string &entry);
     std::string GetLifecycleEvent(const LifecycleFlow &flow);
     void DeleteLifecycleEvent(const LifecycleFlow &flow);
     void DeleteLifecycleEvent(sptr<IRemoteObject> token);
 
+    void AddAppLifecycleEvent(pid_t pid, const std::string &entry);
+    void DeleteAppLifecycleEvent(pid_t pid);
+    std::string GetAppLifecycleEvent(pid_t pid);
 private:
     FreezeUtil() = default;
     void DeleteLifecycleEventInner(const LifecycleFlow &flow);
@@ -65,6 +69,7 @@ private:
 
     std::mutex mutex_;
     std::unordered_map<LifecycleFlow, std::string, LifecycleFlowObjHash> lifecycleFlow_;
+    std::unordered_map<pid_t, std::string> appLifeCycleFlow_;
 };
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_FREEZE_UTIL_H

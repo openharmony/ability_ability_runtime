@@ -1134,6 +1134,7 @@ private:
     void PublishFileOpenEvent(const Want &want);
 
     void SetDebugAppByWaitingDebugFlag();
+    void AfterLoaded();
 
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
