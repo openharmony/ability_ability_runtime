@@ -111,13 +111,22 @@ napi_value CreateJsBaseContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(contextPtr);
-    auto status = napi_wrap(env, object, workContext,
+    auto status = napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachBaseContext,
+        workContext, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "coerce context failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
+    status = napi_wrap(env, object, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr context");
             delete static_cast<std::weak_ptr<Context> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "wrap context failed: %{public}d", status);
+        delete workContext;
         return nullptr;
     }
 
@@ -160,13 +169,22 @@ napi_value CreateJsApplicationContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
-    auto status = napi_wrap(env, object, workContext,
+    auto status = napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachApplicationContext,
+        workContext, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "coerce application context failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
+    status = napi_wrap(env, object, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr application context");
             delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "wrap application context failed: %{public}d", status);
+        delete workContext;
         return nullptr;
     }
 
@@ -209,13 +227,22 @@ napi_value CreateJsAbilityStageContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(abilitystageContext);
-    auto status = napi_wrap(env, object, workContext,
+    auto status = napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachAbilityStageContext,
+        workContext, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "coerce ability stage context failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
+    status = napi_wrap(env, object, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr ability stage context");
             delete static_cast<std::weak_ptr<AbilityStageContext> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "wrap ability stage context failed: %{public}d", status);
+        delete workContext;
         return nullptr;
     }
 
@@ -258,13 +285,22 @@ napi_value CreateJsUIAbilityContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(uiAbilityContext);
-    auto status = napi_wrap(env, object, workContext,
+    auto status = napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachJsUIAbilityContext,
+        workContext, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "coerce ui ability context failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
+    status = napi_wrap(env, object, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr ui ability context");
             delete static_cast<std::weak_ptr<AbilityContext> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "wrap ui ability context failed: %{public}d", status);
+        delete workContext;
         return nullptr;
     }
 
