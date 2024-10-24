@@ -76,7 +76,10 @@ HWTEST_F(AmsIpcAppSchedulerModuleTest, ExcuteApplicationIPCInterface_001, TestSi
 
         EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
             .Times(1)
-            .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+            .WillOnce([mockApplication]() {
+                mockApplication->Post();
+                return true;
+                });
         client->ScheduleForegroundApplication();
         mockApplication->Wait();
     }

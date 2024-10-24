@@ -832,9 +832,9 @@ public:
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
      *
-     * @return
+     * @return bool operation status
      */
-    void ScheduleForegroundRunning();
+    bool ScheduleForegroundRunning();
 
     /**
      * ScheduleBackgroundRunning, Notify application to switch to background.
@@ -848,6 +848,7 @@ public:
     bool IsAllAbilityReadyToCleanedByUserRequest();
     bool IsProcessAttached() const;
 
+    void AddAppLifecycleEvent(const std::string &msg);
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.

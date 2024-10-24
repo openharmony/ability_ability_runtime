@@ -409,9 +409,10 @@ std::shared_ptr<EventHandler> MainThread::GetMainHandler() const
  * @brief Schedule the foreground lifecycle of application.
  *
  */
-void MainThread::ScheduleForegroundApplication()
+bool MainThread::ScheduleForegroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ScheduleForegroundApplication");
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     wptr<MainThread> weak = this;
     auto task = [weak]() {
@@ -428,10 +429,10 @@ void MainThread::ScheduleForegroundApplication()
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
-        return;
+    } else {
+        tmpWatchdog->SetBackgroundStatus(false);
     }
-    tmpWatchdog->SetBackgroundStatus(false);
-    tmpWatchdog = nullptr;
+    return true;
 }
 
 /**
@@ -622,6 +623,7 @@ void MainThread::ScheduleLaunchApplication(const AppLaunchData &data, const Conf
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ScheduleLaunchApplication");
     wptr<MainThread> weak = this;
     auto task = [weak, data, config]() {
         auto appThread = weak.promote();
@@ -704,8 +706,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
         tmpWatchdog = nullptr;
     }
     FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; MainThread::ScheduleLaunchAbility; the load lifecycle.";
+    std::string entry = "MainThread::ScheduleLaunchAbility; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     wptr<MainThread> weak = this;
@@ -732,6 +733,8 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
 void MainThread::ScheduleCleanAbility(const sptr<IRemoteObject> &token, bool isCacheProcess)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called, with isCacheProcess =%{public}d.", isCacheProcess);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
     wptr<MainThread> weak = this;
     auto task = [weak, token, isCacheProcess]() {
         auto appThread = weak.promote();
@@ -1265,6 +1268,7 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
 void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication:begin");
     if (!CheckForHandleLaunchApplication(appLaunchData)) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckForHandleLaunchApplication failed");
         return;
@@ -1690,6 +1694,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_->PerformAppReady failed");
         return;
     }
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication:end");
     // L1 needs to add corresponding interface
     ApplicationEnvImpl *pAppEvnIml = ApplicationEnvImpl::GetInstance();
 
@@ -2002,8 +2007,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     auto abilityToken = abilityRecord->GetToken();
     CHECK_POINTER_LOG(abilityToken, "abilityRecord->GetToken failed");
     FreezeUtil::LifecycleFlow flow = { abilityToken, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; MainThread::HandleLaunchAbility; the load lifecycle.";
+    std::string entry = "MainThread::HandleLaunchAbility; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     abilityRecordMgr_->SetToken(abilityToken);
@@ -2167,6 +2171,7 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
 void MainThread::HandleForegroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleForegroundApplication");
     TAG_LOGI(AAFwkTag::APPKIT, "called");
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "handleForegroundApplication error!");
@@ -2174,6 +2179,7 @@ void MainThread::HandleForegroundApplication()
     }
 
     if (!applicationImpl_->PerformForeground()) {
+        FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleForegroundApplication fail");
         TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_->PerformForeground() failed");
     }
 
@@ -2195,7 +2201,7 @@ void MainThread::HandleBackgroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "start");
-
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleBackgroundApplication");
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "error");
         return;

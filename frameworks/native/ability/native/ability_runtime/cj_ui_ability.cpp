@@ -162,16 +162,14 @@ void CJUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
 void CJUIAbility::AddLifecycleEventBeforeCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
-    auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; CJUIAbility::" + methodName +
-        "; the " + methodName + " begin.";
+    auto entry = std::string("CJUIAbility::") + methodName + "; the " + methodName + " begin";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 
 void CJUIAbility::AddLifecycleEventAfterCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
     FreezeUtil::LifecycleFlow flow = { AbilityContext::token_, state };
-    auto entry = std::to_string(TimeUtil::SystemTimeMillisecond()) + "; CJUIAbility::" + methodName +
-        "; the " + methodName + " end";
+    auto entry = std::string("CJUIAbility::") + methodName + "; the " + methodName + " end.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 }
 

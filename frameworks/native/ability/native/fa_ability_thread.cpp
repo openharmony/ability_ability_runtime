@@ -313,8 +313,7 @@ void FAAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     // 4. ability attach : ipc
     TAG_LOGD(AAFwkTag::FA, "attach ability");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityThread::Attach; the load lifecycle.";
+    std::string entry = "AbilityThread::Attach; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
@@ -322,6 +321,7 @@ void FAAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
         return;
     }
     FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
 }
 
 void FAAbilityThread::AttachExtension(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
@@ -500,14 +500,12 @@ void FAAbilityThread::AddLifecycleEvent(uint32_t state, std::string &methodName)
     }
     if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-        std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-            "; AbilityThread::" + methodName + "; the foreground lifecycle.";
+        std::string entry = "AbilityThread::" + methodName + "; the foreground lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
     if (state == AAFwk::ABILITY_STATE_BACKGROUND_NEW) {
         FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-        std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-            "; AbilityThread::" + methodName + "; the background lifecycle.";
+        std::string entry = "AbilityThread::" + methodName + "; the background lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
 }
@@ -720,7 +718,7 @@ void FAAbilityThread::HandleExtensionUpdateConfiguration(const AppExecFwk::Confi
     extensionImpl_->ScheduleUpdateConfiguration(config);
 }
 
-void FAAbilityThread::ScheduleAbilityTransaction(
+bool FAAbilityThread::ScheduleAbilityTransaction(
     const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -733,11 +731,11 @@ void FAAbilityThread::ScheduleAbilityTransaction(
 
     if (token_ == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null token_");
-        return;
+        return false;
     }
     if (abilityHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null abilityHandler_");
-        return;
+        return false;
     }
     wptr<FAAbilityThread> weak = this;
     auto task = [weak, want, lifeCycleStateInfo, sessionInfo]() {
@@ -757,7 +755,9 @@ void FAAbilityThread::ScheduleAbilityTransaction(
     bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:AbilityTransaction");
     if (!ret) {
         TAG_LOGE(AAFwkTag::FA, "PostTask error");
+        return false;
     }
+    return true;
 }
 
 void FAAbilityThread::ScheduleShareData(const int32_t &uniqueId)
