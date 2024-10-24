@@ -73,6 +73,7 @@
 #include "xcollie/watchdog.h"
 #include "config_policy_utils.h"
 #include "utils/ability_permission_util.h"
+#include "utils/app_mgr_util.h"
 #include "utils/extension_permissions_util.h"
 #include "utils/dump_utils.h"
 #include "utils/window_options_utils.h"
@@ -11052,17 +11053,16 @@ int32_t AbilityManagerService::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
 int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "RestartApp, isAppRecovery: %{public}d", isAppRecovery);
-    int result = CheckRestartAppWant(want);
+    auto appIndex = GetAppIndex(want);
+    int result = CheckRestartAppWant(want, appIndex);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckRestartAppWant error.");
         return result;
     }
 
-    std::string bundleName = want.GetElement().GetBundleName();
-    int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
     int64_t now = time(nullptr);
-    RestartAppKeyType key(bundleName, userId);
-    if (!isAppRecovery && RestartAppManager::GetInstance().IsRestartAppFrequent(key, now)) {
+    if (!isAppRecovery && RestartAppManager::GetInstance().IsRestartAppFrequent(callerUid, now)) {
         return AAFwk::ERR_RESTART_APP_FREQUENT;
     }
 
@@ -11072,7 +11072,8 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
         return AAFwk::NOT_TOP_ABILITY;
     }
 
-    result = SignRestartAppFlag(userId, bundleName, isAppRecovery);
+    int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    result = SignRestartAppFlag(userId, callerUid, isAppRecovery);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "SignRestartAppFlag error.");
         return result;
@@ -11084,6 +11085,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
     }
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "RestartApp, start ability without CheckCallAbilityPermission.");
+    (const_cast<Want &>(want)).SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
     result = StartAbilityWrap(want, nullptr,
         DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, isForegroundToRestartApp);
     if (result != ERR_OK) {
@@ -11091,15 +11093,34 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
         return result;
     }
     if (!isAppRecovery) {
-        RestartAppManager::GetInstance().AddRestartAppHistory(key, now);
+        RestartAppManager::GetInstance().AddRestartAppHistory(callerUid, now);
     }
     return result;
 }
 
-int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want)
+int32_t AbilityManagerService::GetAppIndex(const Want& want)
+{
+    int32_t appIndex = want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    if (appIndex == -1) {
+        auto appMgr = AppMgrUtil::GetAppMgr();
+        if (appMgr == nullptr) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
+            return appIndex;
+        }
+        auto callingPid = IPCSkeleton::GetCallingPid();
+        auto ret = IN_PROCESS_CALL(appMgr->GetAppIndexByPid(callingPid, appIndex));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr GetAppIndexByPid error");
+        }
+    }
+    return appIndex;
+}
+
+int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex)
 {
     std::string bundleName = want.GetElement().GetBundleName();
-    if (!CheckCallingTokenId(bundleName)) {
+    auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    if (!CheckCallingTokenId(bundleName, userId, appIndex)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not itself called, not allowed.");
         return AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY;
     }
@@ -11107,37 +11128,36 @@ int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want)
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
     auto abilityInfoFlag = AbilityRuntime::StartupUtil::BuildAbilityInfoFlag();
-    auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
     AppExecFwk::AbilityInfo abilityInfo;
-    bool queryResult = IN_PROCESS_CALL(bms->QueryAbilityInfo(want, abilityInfoFlag, userId, abilityInfo));
-    if (!queryResult || abilityInfo.name.empty() ||
-        abilityInfo.bundleName.empty() || abilityInfo.type != AbilityType::PAGE) {
+    auto queryResult = IN_PROCESS_CALL(
+        bms->QueryCloneAbilityInfo(want.GetElement(), abilityInfoFlag, appIndex, abilityInfo, userId));
+    if (queryResult != ERR_OK || abilityInfo.name.empty() || abilityInfo.bundleName.empty() ||
+        abilityInfo.type != AbilityType::PAGE) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Ability is invalid or not UIAbility.");
         return AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY;
     }
     return ERR_OK;
 }
 
-int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::string &bundleName,
-    bool isAppRecovery)
+int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, int32_t uid, bool isAppRecovery)
 {
     auto appMgr = GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "GetAppMgr failed");
         return ERR_INVALID_VALUE;
     }
-    auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(bundleName));
+    auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(uid));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AppMgr SignRestartAppFlag error");
         return ret;
     }
 
     auto connectManager = GetConnectManagerByUserId(userId);
-    connectManager->SignRestartAppFlag(bundleName);
+    connectManager->SignRestartAppFlag(uid);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        uiAbilityManager->SignRestartAppFlag(bundleName, isAppRecovery);
+        uiAbilityManager->SignRestartAppFlag(uid, isAppRecovery);
         return ERR_OK;
     }
     auto missionListManager = GetMissionListManagerByUserId(userId);
@@ -11145,7 +11165,7 @@ int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, const std::str
         TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListManager is nullptr. userId:%{public}d", userId);
         return ERR_INVALID_VALUE;
     }
-    missionListManager->SignRestartAppFlag(bundleName);
+    missionListManager->SignRestartAppFlag(uid);
     return ERR_OK;
 }
 

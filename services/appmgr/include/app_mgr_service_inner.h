@@ -1112,7 +1112,9 @@ public:
 
     int32_t UpdateRenderState(pid_t renderPid, int32_t state);
 
-    int32_t SignRestartAppFlag(const std::string &bundleName);
+    int32_t SignRestartAppFlag(int32_t uid);
+
+    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) const;
 
     void SetAppAssertionPauseState(bool flag);
 
