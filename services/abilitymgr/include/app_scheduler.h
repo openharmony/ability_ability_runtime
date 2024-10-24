@@ -349,6 +349,15 @@ public:
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
 
     /**
+     *  Set the process cache status by process ID.
+     *
+     * @param pid The process id.
+     * @param isSupport The process is support cache.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    void SetProcessCacheStatus(int32_t pid, bool isSupport);
+
+    /**
      * Record process exit reason to appRunningRecord
      * @param pid pid
      * @param reason reason enum
