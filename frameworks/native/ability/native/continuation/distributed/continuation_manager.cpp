@@ -36,6 +36,7 @@ const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.
 const int32_t CONTINUE_ABILITY_REJECTED = 29360197;
 const int32_t CONTINUE_SAVE_DATA_FAILED = 29360198;
 const int32_t CONTINUE_ON_CONTINUE_FAILED = 29360199;
+const int32_t CONTINUE_ON_CONTINUE_HANDLE_FAILED = 29360300;
 const int32_t CONTINUE_ON_CONTINUE_MISMATCH = 29360204;
 #ifdef SUPPORT_GRAPHICS
 const int32_t CONTINUE_GET_CONTENT_FAILED = 29360200;
@@ -158,25 +159,31 @@ int32_t ContinuationManager::OnContinueAndGetContent(WantParams &wantParams)
     }
 
     int32_t status = ability->OnContinue(wantParams);
-    if (status != OnContinueResult::AGREE) {
-        if (status == OnContinueResult::MISMATCH) {
+    switch (status) {
+        case OnContinueResult::AGREE:
+#ifdef SUPPORT_GRAPHICS
+            if (IsContinuePageStack(wantParams)) {
+                bool ret = GetContentInfo(wantParams);
+                if (!ret) {
+                    TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed");
+                    return CONTINUE_GET_CONTENT_FAILED;
+                }
+            }
+#endif
+            return ERR_OK;
+        case OnContinueResult::REJECT:
+            TAG_LOGE(AAFwkTag::CONTINUATION, "app reject");
+            return CONTINUE_ON_CONTINUE_FAILED;
+        case OnContinueResult::MISMATCH:
             TAG_LOGE(AAFwkTag::CONTINUATION, "version mismatch");
             return CONTINUE_ON_CONTINUE_MISMATCH;
-        }
-        TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue failed");
-        return CONTINUE_ON_CONTINUE_FAILED;
+        case OnContinueResult::ON_CONTINUE_ERR:
+            TAG_LOGE(AAFwkTag::CONTINUATION, "OnContinue handle failed");
+            return CONTINUE_ON_CONTINUE_HANDLE_FAILED;
+        default:
+            TAG_LOGE(AAFwkTag::CONTINUATION, "invalid status");
+            return CONTINUE_ON_CONTINUE_HANDLE_FAILED;
     }
-
-#ifdef SUPPORT_GRAPHICS
-    if (IsContinuePageStack(wantParams)) {
-        bool ret = GetContentInfo(wantParams);
-        if (!ret) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed");
-            return CONTINUE_GET_CONTENT_FAILED;
-        }
-    }
-#endif
-    return ERR_OK;
 }
 
 int32_t ContinuationManager::OnContinue(WantParams &wantParams)

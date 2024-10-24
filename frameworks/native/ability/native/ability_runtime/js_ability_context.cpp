@@ -2046,6 +2046,58 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
     return object;
 }
 
+napi_value AttachJsUIAbilityContext(napi_env env, void *value, void *hint)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "attach uiability context");
+    if (env == nullptr || value == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "invalid params");
+        return nullptr;
+    }
+    auto ptr = reinterpret_cast<std::weak_ptr<AbilityContext> *>(value)->lock();
+    if (ptr == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "invalid context");
+        return nullptr;
+    }
+
+    auto object = CreateJsAbilityContext(env, ptr);
+    if (object == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null ability object");
+        return nullptr;
+    }
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.AbilityContext", &object, 1);
+    if (systemModule == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "load uiability context failed");
+        return nullptr;
+    }
+    auto contextObj = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "not napi object");
+        return nullptr;
+    }
+
+    auto status = napi_coerce_to_native_binding_object(
+        env, contextObj, DetachCallbackFunc, AttachJsUIAbilityContext, value, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "coerce ability context failed: %{public}d", status);
+        return nullptr;
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(ptr);
+    status = napi_wrap(env, contextObj, workContext,
+        [](napi_env, void *data, void*) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr ui ability context");
+            delete static_cast<std::weak_ptr<AbilityContext> *>(data);
+        },
+        nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "wrap ability context failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
+    return contextObj;
+}
+
 JSAbilityConnection::JSAbilityConnection(napi_env env) : env_(env) {}
 
 JSAbilityConnection::~JSAbilityConnection()

@@ -21,6 +21,7 @@ ohos_fuzztest("AbilityAppMgrRunningMultiInfoFuzzTest") {
   fuzz_config_file = "${ability_runtime_test_path}/fuzztest/abilityappmgrrunningmultiinfo_fuzzer"
   include_dirs = [
     "${ability_runtime_services_path}/appmgr/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
 
