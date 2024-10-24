@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
+
 class ApplicationStateChangeCallback {
   constructor() {}
 
   onApplicationForeground() {
-    console.log('onApplicationForeground');
+    hilog.sLogI(domainID, TAG, 'onApplicationForeground');
   }
 
   onApplicationBackground() {
-    console.log('onApplicationBackground');
+    hilog.sLogI(domainID, TAG, 'onApplicationBackground');
   }
 }
 

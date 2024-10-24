@@ -15,6 +15,10 @@
 
 let ExtensionContext = requireNapi('application.ExtensionContext');
 let Caller = requireNapi('application.Caller');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 const ERROR_CODE_INVALID_PARAM = 401;
 const ERROR_MSG_INVALID_PARAM = 'Invalid input parameter.';
@@ -31,82 +35,82 @@ class ServiceExtensionContext extends ExtensionContext {
   }
 
   startAbility(want, options, callback) {
-    console.log('startAbility');
+    hilog.sLogI(domainID, TAG, 'startAbility');
     return this.__context_impl__.startAbility(want, options, callback);
   }
 
   openLink(link, options) {
-    console.log('openLink');
+    hilog.sLogI(domainID, TAG, 'openLink');
     return this.__context_impl__.openLink(link, options);
   }
 
   startAbilityAsCaller(want, options, callback) {
-    console.log('startAbilityAsCaller');
+    hilog.sLogI(domainID, TAG, 'startAbilityAsCaller');
     return this.__context_impl__.startAbilityAsCaller(want, options, callback);
   }
 
   startRecentAbility(want, options, callback) {
-    console.log('startRecentAbility');
+    hilog.sLogI(domainID, TAG, 'startRecentAbility');
     return this.__context_impl__.startRecentAbility(want, options, callback);
   }
 
   connectServiceExtensionAbility(want, options) {
-    console.log('connectServiceExtensionAbility');
+    hilog.sLogI(domainID, TAG, 'connectServiceExtensionAbility');
     return this.__context_impl__.connectServiceExtensionAbility(want, options);
   }
 
   startAbilityWithAccount(want, accountId, options, callback) {
-    console.log('startAbilityWithAccount');
+    hilog.sLogI(domainID, TAG, 'startAbilityWithAccount');
     return this.__context_impl__.startAbilityWithAccount(want, accountId, options, callback);
   }
 
   startServiceExtensionAbility(want, callback) {
-    console.log('startServiceExtensionAbility');
+    hilog.sLogI(domainID, TAG, 'startServiceExtensionAbility');
     return this.__context_impl__.startServiceExtensionAbility(want, callback);
   }
 
   startUIServiceExtensionAbility(want, callback) {
-    console.log('startUIServiceExtensionAbility');
+    hilog.sLogI(domainID, TAG, 'startUIServiceExtensionAbility');
     return this.__context_impl__.startUIServiceExtensionAbility(want, callback);
   }
 
   startServiceExtensionAbilityWithAccount(want, accountId, callback) {
-    console.log('startServiceExtensionAbilityWithAccount');
+    hilog.sLogI(domainID, TAG, 'startServiceExtensionAbilityWithAccount');
     return this.__context_impl__.startServiceExtensionAbilityWithAccount(want, accountId, callback);
   }
 
   stopServiceExtensionAbility(want, callback) {
-    console.log('stopServiceExtensionAbility');
+    hilog.sLogI(domainID, TAG, 'stopServiceExtensionAbility');
     return this.__context_impl__.stopServiceExtensionAbility(want, callback);
   }
 
   stopServiceExtensionAbilityWithAccount(want, accountId, callback) {
-    console.log('stopServiceExtensionAbilityWithAccount');
+    hilog.sLogI(domainID, TAG, 'stopServiceExtensionAbilityWithAccount');
     return this.__context_impl__.stopServiceExtensionAbilityWithAccount(want, accountId, callback);
   }
 
   connectAbilityWithAccount(want, accountId, options) {
-    console.log('connectAbilityWithAccount');
+    hilog.sLogI(domainID, TAG, 'connectAbilityWithAccount');
     return this.__context_impl__.connectAbilityWithAccount(want, accountId, options);
   }
 
   connectServiceExtensionAbilityWithAccount(want, accountId, options) {
-    console.log('connectServiceExtensionAbilityWithAccount');
+    hilog.sLogI(domainID, TAG, 'connectServiceExtensionAbilityWithAccount');
     return this.__context_impl__.connectServiceExtensionAbilityWithAccount(want, accountId, options);
   }
 
   disconnectAbility(connection, callback) {
-    console.log('disconnectAbility');
+    hilog.sLogI(domainID, TAG, 'disconnectAbility');
     return this.__context_impl__.disconnectAbility(connection, callback);
   }
 
   disconnectServiceExtensionAbility(connection, callback) {
-    console.log('disconnectServiceExtensionAbility');
+    hilog.sLogI(domainID, TAG, 'disconnectServiceExtensionAbility');
     return this.__context_impl__.disconnectServiceExtensionAbility(connection, callback);
   }
 
   terminateSelf(callback) {
-    console.log('terminateSelf');
+    hilog.sLogI(domainID, TAG, 'terminateSelf');
     return this.__context_impl__.terminateSelf(callback);
   }
 
@@ -117,7 +121,7 @@ class ServiceExtensionContext extends ExtensionContext {
   startAbilityByCall(want) {
     return new Promise(async (resolve, reject) => {
       if (typeof want !== 'object' || want == null) {
-        console.log('ServiceExtensionContext::startAbilityByCall input param error');
+        hilog.sLogI(domainID, TAG, 'ServiceExtensionContext::startAbilityByCall input param error');
         reject(new ParamError());
         return;
       }
@@ -126,13 +130,13 @@ class ServiceExtensionContext extends ExtensionContext {
       try {
         callee = await this.__context_impl__.startAbilityByCall(want);
       } catch (error) {
-        console.log('ServiceExtensionContext::startAbilityByCall Obtain remoteObject failed');
+        hilog.sLogI(domainID, TAG, 'ServiceExtensionContext::startAbilityByCall Obtain remoteObject failed');
         reject(error);
         return;
       }
 
       resolve(new Caller(callee));
-      console.log('ServiceExtensionContext::startAbilityByCall success');
+      hilog.sLogI(domainID, TAG, 'ServiceExtensionContext::startAbilityByCall success');
       return;
     });
   }
@@ -140,7 +144,7 @@ class ServiceExtensionContext extends ExtensionContext {
   startAbilityByCallWithAccount(want, accountId) {
     return new Promise(async (resolve, reject) => {
       if (typeof want !== 'object' || want == null || typeof accountId !== 'number') {
-        console.log('ServiceExtensionContext::startAbilityByCall With accountId input param error');
+        hilog.sLogI(domainID, TAG, 'ServiceExtensionContext::startAbilityByCall With accountId input param error');
         reject(new ParamError());
         return;
       }
@@ -149,19 +153,19 @@ class ServiceExtensionContext extends ExtensionContext {
       try {
         callee = await this.__context_impl__.startAbilityByCall(want, accountId);
       } catch (error) {
-        console.log('ServiceExtensionContext::startAbilityByCall With accountId Obtain remoteObject failed');
+        hilog.sLogI(domainID, TAG, 'ServiceExtensionContext::startAbilityByCall With accountId Obtain remoteObject failed');
         reject(error);
         return;
       }
 
       resolve(new Caller(callee));
-      console.log('ServiceExtensionContext::startAbilityByCall With accountId success');
+      hilog.sLogI(domainID, TAG, 'ServiceExtensionContext::startAbilityByCall With accountId success');
       return;
     });
   }
 
   preStartMission(bundleName, moduleName, abilityName, startTime) {
-    console.log('preStartMission');
+    hilog.sLogI(domainID, TAG, 'preStartMission');
     return this.__context_impl__.preStartMission(bundleName, moduleName, abilityName, startTime);
   }
 }

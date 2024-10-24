@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 let rpc = requireNapi('rpc');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 const EVENT_CALL_NOTIFY = 1;
 const REQUEST_SUCCESS = 0;
@@ -56,7 +60,7 @@ class ThrowInvalidParamError extends Error {
 
 class Caller {
   constructor(obj) {
-    console.log('Caller::constructor obj is ' + typeof obj);
+    hilog.sLogI(domainID, TAG, 'Caller::constructor obj is ' + typeof obj);
     this.__call_obj__ = obj;
     this.releaseState = false;
   }
@@ -69,7 +73,7 @@ class Caller {
         return;
       }
 
-      console.log('Caller call msgData rpc.MessageSequence create');
+      hilog.sLogI(domainID, TAG, 'Caller call msgData rpc.MessageSequence create');
       let msgData = this.buildMsgData(method, data);
       let msgReply = rpc.MessageSequence.create();
 
@@ -77,16 +81,16 @@ class Caller {
       try {
         retData = await this.__call_obj__.callee.sendMessageRequest(EVENT_CALL_NOTIFY, msgData, msgReply,
           rpc.MessageOption());
-        console.log('Caller call msgData rpc.sendMessageRequest called');
+        hilog.sLogI(domainID, TAG, 'Caller call msgData rpc.sendMessageRequest called');
         if (retData.errCode !== 0) {
           msgData.reclaim();
           msgReply.reclaim();
-          console.log('Caller call return errCode ' + retData.errCode);
+          hilog.sLogI(domainID, TAG, 'Caller call return errCode ' + retData.errCode);
           reject(new BusinessError(retData.errCode));
           return;
         }
       } catch (e) {
-        console.log('Caller call msgData rpc.sendMessageRequest error ' + e);
+        hilog.sLogI(domainID, TAG, 'Caller call msgData rpc.sendMessageRequest error ' + e);
       }
 
       try {
@@ -96,21 +100,22 @@ class Caller {
           msgData.reclaim();
           msgReply.reclaim();
         } else {
-          console.log('Caller call retval is [' + retval + '], str [' + str + ']');
+          hilog.sLogD(domainID, TAG,
+            'Caller call retval is [' + retval + '], str [' + str + ']');
           msgData.reclaim();
           msgReply.reclaim();
           reject(new BusinessError(retval));
           return;
         }
       } catch (e) {
-        console.log('Caller call msgData sendMessageRequest retval error');
+        hilog.sLogI(domainID, TAG, 'Caller call msgData sendMessageRequest retval error');
         msgData.reclaim();
         msgReply.reclaim();
         reject(new BusinessError(ERROR_CODE_INNER_ERROR));
         return;
       }
 
-      console.log('Caller call msgData sendMessageRequest end');
+      hilog.sLogI(domainID, TAG, 'Caller call msgData sendMessageRequest end');
       resolve(undefined);
       return;
     });
@@ -118,14 +123,14 @@ class Caller {
 
   callWithResult(method, data) {
     return new Promise(async (resolve, reject) => {
-      console.log('Caller callWithResult method [' + method + ']');
+      hilog.sLogI(domainID, TAG, 'Caller callWithResult method [' + method + ']');
       const checkError = this.callCheck(method, data);
       if (checkError != null) {
         reject(checkError);
         return;
       }
 
-      console.log('Caller callWithResult msgData rpc.MessageSequence create');
+      hilog.sLogI(domainID, TAG, 'Caller callWithResult msgData rpc.MessageSequence create');
       let msgData = this.buildMsgData(method, data);
       let msgReply = rpc.MessageSequence.create();
 
@@ -134,16 +139,16 @@ class Caller {
       try {
         retData = await this.__call_obj__.callee.sendMessageRequest(EVENT_CALL_NOTIFY, msgData, msgReply,
           rpc.MessageOption());
-        console.log('Caller callWithResult msgData rpc.sendMessageRequest called');
+        hilog.sLogI(domainID, TAG, 'Caller callWithResult msgData rpc.sendMessageRequest called');
         if (retData.errCode !== 0) {
           msgData.reclaim();
           msgReply.reclaim();
-          console.log('Caller callWithResult return errCode ' + retData.errCode);
+          hilog.sLogI(domainID, TAG, 'Caller callWithResult return errCode ' + retData.errCode);
           reject(new BusinessError(retData.errCode));
           return;
         }
       } catch (e) {
-        console.log('Caller call msgData rpc.MessageSequence error ' + e);
+        hilog.sLogI(domainID, TAG, 'Caller call msgData rpc.MessageSequence error ' + e);
       }
 
       try {
@@ -153,35 +158,36 @@ class Caller {
           msgData.reclaim();
           reply = retData.reply;
         } else {
-          console.log('Caller callWithResult retval is [' + retval + '], str [' + str + ']');
+          hilog.sLogI(domainID, TAG,
+            'Caller callWithResult retval is [' + retval + '], str [' + str + ']');
           msgData.reclaim();
           msgReply.reclaim();
           reject(new BusinessError(retval));
           return;
         }
       } catch (e) {
-        console.log('Caller callWithResult msgData sendMessageRequest retval error');
+        hilog.sLogI(domainID, TAG, 'Caller callWithResult msgData sendMessageRequest retval error');
         msgData.reclaim();
         msgReply.reclaim();
         reject(new BusinessError(ERROR_CODE_INNER_ERROR));
         return;
       }
 
-      console.log('Caller callWithResult msgData sendMessageRequest end');
+      hilog.sLogI(domainID, TAG, 'Caller callWithResult msgData sendMessageRequest end');
       resolve(reply);
       return;
     });
   }
 
   release() {
-    console.log('Caller release js called.');
+    hilog.sLogI(domainID, TAG, 'Caller release js called.');
     if (this.releaseState === true) {
-      console.log('Caller release remoteObj releaseState is true');
+      hilog.sLogI(domainID, TAG, 'Caller release remoteObj releaseState is true');
       throw new BusinessError(ERROR_CODE_CALLER_RELEASED);
     }
 
     if (this.__call_obj__.callee == null) {
-      console.log('Caller release call remoteObj is released');
+      hilog.sLogI(domainID, TAG, 'Caller release call remoteObj is released');
       throw new BusinessError(ERROR_CODE_CLAAEE_INVALID);
     }
 
@@ -190,14 +196,14 @@ class Caller {
   }
 
   onRelease(callback) {
-    console.log('Caller onRelease jscallback called.');
+    hilog.sLogI(domainID, TAG, 'Caller onRelease jscallback called.');
     if (typeof callback !== 'function') {
-      console.log('Caller onRelease ' + typeof callback);
+      hilog.sLogI(domainID, TAG, 'Caller onRelease ' + typeof callback);
       throw new ThrowInvalidParamError('Parameter error: Failed to get callback, must be a function.');
     }
 
     if (this.releaseState === true) {
-      console.log('Caller onRelease remoteObj releaseState is true');
+      hilog.sLogI(domainID, TAG, 'Caller onRelease remoteObj releaseState is true');
       throw new BusinessError(ERROR_CODE_CALLER_RELEASED);
     }
 
@@ -205,14 +211,14 @@ class Caller {
   }
 
   onRemoteStateChange(callback) {
-    console.log('Caller onRemoteStateChange jscallback called.');
+    hilog.sLogI(domainID, TAG, 'Caller onRemoteStateChange jscallback called.');
     if (typeof callback !== 'function') {
-      console.log('Caller onRemoteStateChange ' + typeof callback);
+      hilog.sLogI(domainID, TAG, 'Caller onRemoteStateChange ' + typeof callback);
       throw new ThrowInvalidParamError('Parameter error: Failed to get callback, must be a function.');
     }
 
     if (this.releaseState === true) {
-      console.log('Caller onRemoteStateChange remoteObj releaseState is true');
+      hilog.sLogI(domainID, TAG, 'Caller onRemoteStateChange remoteObj releaseState is true');
       throw new BusinessError(ERROR_CODE_CALLER_RELEASED);
     }
 
@@ -220,20 +226,20 @@ class Caller {
   }
 
   on(type, callback) {
-    console.log('Caller onRelease jscallback called.');
+    hilog.sLogI(domainID, TAG, 'Caller onRelease jscallback called.');
     if (typeof type !== 'string' || type !== 'release') {
-      console.log(
+      hilog.sLogI(domainID, TAG,
         'Caller onRelease error, input [type] is invalid.');
       throw new ThrowInvalidParamError('Parameter error: Failed to get type, must be string type release.');
     }
 
     if (typeof callback !== 'function') {
-      console.log('Caller onRelease error ' + typeof callback);
+      hilog.sLogI(domainID, TAG, 'Caller onRelease error ' + typeof callback);
       throw new ThrowInvalidParamError('Parameter error: Failed to get callback, must be a function.');
     }
 
     if (this.releaseState === true) {
-      console.log('Caller onRelease error, remoteObj releaseState is true');
+      hilog.sLogI(domainID, TAG, 'Caller onRelease error, remoteObj releaseState is true');
       throw new BusinessError(ERROR_CODE_CALLER_RELEASED);
     }
 
@@ -242,13 +248,13 @@ class Caller {
 
   off(type, callback) {
     if (typeof type !== 'string' || type !== 'release') {
-      console.log(
-        'Caller onRelease error, input [type] is invalid.');
+      hilog.sLogI(domainID, TAG,
+         'Caller onRelease error, input [type] is invalid.');
       throw new ThrowInvalidParamError('Parameter error: Failed to get type, must be string type release.');
     }
 
     if (callback && typeof callback !== 'function') {
-      console.log('Caller onRelease error ' + typeof callback);
+      hilog.sLogI(domainID, TAG, 'Caller onRelease error ' + typeof callback);
       throw new ThrowInvalidParamError('Parameter error: Failed to get callback, must be a function.');
     }
     // Empty
@@ -256,23 +262,25 @@ class Caller {
 
   callCheck(method, data) {
     if (typeof method !== 'string' || typeof data !== 'object') {
-      console.log('Caller callCheck ' + typeof method + ' ' + typeof data);
+      hilog.sLogI(domainID, TAG,
+        'Caller callCheck ' + typeof method + ' ' + typeof data);
       return new ThrowInvalidParamError('Parameter error: Failed to get method or data, ' +
         'method must be a string, data must be a rpc.Parcelable');
     }
 
     if (method === '' || data == null) {
-      console.log('Caller callCheck ' + method + ', ' + data);
+      hilog.sLogI(domainID, TAG,
+        'Caller callCheck ' + method + ', ' + data);
       return new ThrowInvalidParamError('Parameter error: method or data is empty, Please check it.');
     }
 
     if (this.releaseState === true) {
-      console.log('Caller callCheck this.callee release');
+      hilog.sLogI(domainID, TAG, 'Caller callCheck this.callee release');
       return new BusinessError(ERROR_CODE_CALLER_RELEASED);
     }
 
     if (this.__call_obj__.callee == null) {
-      console.log('Caller callCheck this.callee is nullptr');
+      hilog.sLogI(domainID, TAG, 'Caller callCheck this.callee is nullptr');
       return new BusinessError(ERROR_CODE_CLAAEE_INVALID);
     }
     return null;

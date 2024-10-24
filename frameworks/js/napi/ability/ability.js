@@ -14,11 +14,15 @@
  */
 let Callee = requireNapi('application.Callee');
 let AbilityConstant = requireNapi('app.ability.AbilityConstant');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 class Ability {
   constructor() {
     this.callee = new Callee('rpc.application.callee');
-    console.log('Ability::constructor callee is ' + typeof this.callee + ' ' + this.callee);
+    hilog.sLogI(domainID, TAG, 'Ability::constructor callee is ' + typeof this.callee + ' ' + this.callee);
   }
   onCreate(want) { }
   onDestroy() { }
@@ -32,7 +36,7 @@ class Ability {
   onMemoryLevel(level) { }
   onWindowStageRestore(windowStage) { }
   onCallRequest() {
-    console.log('Ability::onCallRequest callee is ' + typeof this.callee + ' ' + this.callee);
+    hilog.sLogI(domainID, TAG, 'Ability::onCallRequest callee is ' + typeof this.callee + ' ' + this.callee);
     return this.callee;
   }
   onContinue(wantParams) { }

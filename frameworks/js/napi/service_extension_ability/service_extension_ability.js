@@ -14,26 +14,30 @@
  */
 
 let ExtensionAbility = requireNapi('app.ability.ExtensionAbility');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 class ServiceExtensionAbility extends ExtensionAbility {
   onCreate(want) {
-    console.log('onCreate, want:' + want.abilityName);
+    hilog.sLogI(domainID, TAG, 'onCreate, want:' + want.abilityName);
   }
 
   onRequest(want, startId) {
-    console.log('onRequest, want:' + want.abilityName + ', startId:' + startId);
+    hilog.sLogI(domainID, TAG, 'onRequest, want:' + want.abilityName + ', startId:' + startId);
   }
 
   onConnect(want) {
-    console.log('onConnect, want:' + want.abilityName);
+    hilog.sLogI(domainID, TAG, 'onConnect, want:' + want.abilityName);
   }
 
   onDisconnect(want) {
-    console.log('onDisconnect');
+    hilog.sLogI(domainID, TAG, 'onDisconnect');
   }
 
   onDestroy() {
-    console.log('onDestroy');
+    hilog.sLogI(domainID, TAG, 'onDestroy');
   }
 }
 
