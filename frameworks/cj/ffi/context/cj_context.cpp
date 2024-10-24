@@ -16,8 +16,8 @@
 #include "cj_context.h"
 
 #include "cj_utils_ffi.h"
-#include "hilog_tag_wrapper.h"
 #include "cj_ability_runtime_error.h"
+#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace FfiContext {
@@ -27,6 +27,18 @@ using namespace OHOS::AbilityRuntime;
 static constexpr int32_t ABILITY_CONTEXT = 0;
 static constexpr int32_t APPLICATION_CONTEXT = 1;
 static constexpr int32_t ABILITY_STAGE_CONTEXT = 2;
+static constexpr int32_t CJ_CONTEXT = 3;
+
+std::shared_ptr<AbilityRuntime::Context> GetCJContextFromCJ(int64_t id)
+{
+    auto cjContext = FFI::FFIData::GetData<CJContext>(id);
+    if (cjContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cj AbilityContext");
+        return nullptr;
+    }
+    auto context = cjContext->GetContext();
+    return context;
+}
 
 std::shared_ptr<AbilityRuntime::Context> GetAbilityContextFromCJ(int64_t id)
 {
@@ -69,107 +81,187 @@ std::shared_ptr<AbilityRuntime::Context> GetContextFromCJ(int64_t id, int32_t ty
         return GetApplicationContextFromCJ(id);
     } else if (type == ABILITY_STAGE_CONTEXT) {
         return GetAbilityStageContextFromCJ(id);
+    } else if (type == CJ_CONTEXT) {
+        return GetCJContextFromCJ(id);
     }
     return nullptr;
 }
 
-void FfiContextGetFilesDir(int64_t id, int32_t type, void(*accept)(const char*))
+void* FfiContextGetContext(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
+    }
+    return nativeContext.get();
+}
+
+RetApplicationInfo FfiContextGetApplicationInfo(int64_t id, int32_t type)
+{
+    RetApplicationInfo appInfo;
+    std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
+    if (nativeContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return appInfo;
+    }
+    auto applicationInfo = nativeContext->GetApplicationInfo();
+    if (applicationInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null applicationInfo");
+        return appInfo;
+    }
+    return ConvertApplicationInfo(*applicationInfo);
+}
+
+char* FfiContextGetFilesDir(int64_t id, int32_t type)
+{
+    std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
+    if (nativeContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return nullptr;
     }
     auto filesDir = nativeContext->GetFilesDir();
-    accept(filesDir.c_str());
+    return CreateCStringFromString(filesDir);
 }
 
-void FfiContextGetCacheDir(int64_t id, int32_t type, void(*accept)(const char*))
+char* FfiContextGetCacheDir(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
     }
     auto cacheDir = nativeContext->GetCacheDir();
-    accept(cacheDir.c_str());
+    return CreateCStringFromString(cacheDir);
 }
 
-void FfiContextGetTempDir(int64_t id, int32_t type, void(*accept)(const char*))
+char* FfiContextGetTempDir(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
     }
     auto tempDir = nativeContext->GetTempDir();
-    accept(tempDir.c_str());
+    return CreateCStringFromString(tempDir);
 }
 
-void FfiContextGetResourceDir(int64_t id, int32_t type, void(*accept)(const char*))
+char* FfiContextGetResourceDir(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
     }
     auto resourceDir = nativeContext->GetResourceDir();
-    accept(resourceDir.c_str());
+    return CreateCStringFromString(resourceDir);
 }
 
-void FfiContextGetDatabaseDir(int64_t id, int32_t type, void(*accept)(const char*))
+char* FfiContextGetDatabaseDir(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
     }
     auto databaseDir = nativeContext->GetDatabaseDir();
-    accept(databaseDir.c_str());
+    return CreateCStringFromString(databaseDir);
 }
 
-void FfiContextGetPreferencesDir(int64_t id, int32_t type, void(*accept)(const char*))
+char* FfiContextGetPreferencesDir(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
     }
     auto preferencesDir = nativeContext->GetPreferencesDir();
-    accept(preferencesDir.c_str());
+    return CreateCStringFromString(preferencesDir);
 }
 
-void FfiContextGetBundleCodeDir(int64_t id, int32_t type, void(*accept)(const char*))
+char* FfiContextGetBundleCodeDir(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
     }
     auto bundleCodeDir = nativeContext->GetBundleCodeDir();
-    accept(bundleCodeDir.c_str());
+    return CreateCStringFromString(bundleCodeDir);
 }
 
-void FfiContextGetDistributedFilesDir(int64_t id, int32_t type, void(*accept)(const char*))
+char* FfiContextGetDistributedFilesDir(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
     }
     auto distributedFilesDir = nativeContext->GetDistributedFilesDir();
-    accept(distributedFilesDir.c_str());
+    return CreateCStringFromString(distributedFilesDir);
 }
 
-void FfiContextGetCloudFileDir(int64_t id, int32_t type, void(*accept)(const char*))
+char* FfiContextGetCloudFileDir(int64_t id, int32_t type)
 {
     std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
     if (nativeContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return;
+        return nullptr;
     }
     auto cloudFileDir = nativeContext->GetCloudFileDir();
-    accept(cloudFileDir.c_str());
+    return CreateCStringFromString(cloudFileDir);
+}
+
+int32_t FfiContextGetArea(int64_t id, int32_t type)
+{
+    std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
+    if (nativeContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return -1;
+    }
+    return nativeContext->GetArea();
+}
+
+int64_t FfiContextGetApplicationContext()
+{
+    auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(
+        AbilityRuntime::Context::GetApplicationContext());
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null app context");
+        return -1;
+    }
+    return appContext->GetID();
+}
+
+char* FfiContextGetGroupDir(int64_t id, int32_t type, char* groupId)
+{
+    std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
+    if (nativeContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return nullptr;
+    }
+    auto groupDir = nativeContext->GetGroupDir(std::string(groupId));
+    return CreateCStringFromString(groupDir);
+}
+
+int64_t FfiContextCreateModuleContext(int64_t id, int32_t type, char* moduleName)
+{
+    std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id, type);
+    if (nativeContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return -1;
+    }
+    auto moduleContext = nativeContext->CreateModuleContext(std::string(moduleName));
+    if (moduleContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return -1;
+    }
+    auto cjContext = FFIData::Create<CJContext>(moduleContext);
+    if (cjContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return -1;
+    }
+    return cjContext->GetID();
 }
 
 }
