@@ -778,6 +778,8 @@ public:
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
+
     void SaveBrowserChannel(sptr<IRemoteObject> browser);
 
     /**
