@@ -37,7 +37,6 @@ config("ability_config") {
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_innerkits_path}/ability_manager/include/continuation",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app/task",
     "${ability_runtime_napi_path}/inner/napi_common",
