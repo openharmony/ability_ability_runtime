@@ -21,22 +21,41 @@
 #include "cj_macro.h"
 #include "cj_ability_stage_context.h"
 #include "cj_application_context.h"
+#include "cj_boundle_manager_utils.h"
 #include "ability_runtime/cj_ability_context.h"
 
 namespace OHOS {
 namespace FfiContext {
 using namespace OHOS::AbilityRuntime;
 
+class CJContext : public FFI::FFIData {
+public:
+    explicit CJContext(std::weak_ptr<AbilityRuntime::Context> &&context)
+        : context_(std::move(context)) {};
+    std::shared_ptr<AbilityRuntime::Context> GetContext()
+    {
+        return context_.lock();
+    }
+private:
+    std::weak_ptr<AbilityRuntime::Context> context_;
+};
+
 extern "C" {
-CJ_EXPORT void FfiContextGetFilesDir(int64_t id, int32_t type, void(*accept)(const char*));
-CJ_EXPORT void FfiContextGetCacheDir(int64_t id, int32_t type, void(*accept)(const char*));
-CJ_EXPORT void FfiContextGetTempDir(int64_t id, int32_t type, void(*accept)(const char*));
-CJ_EXPORT void FfiContextGetResourceDir(int64_t id, int32_t type, void(*accept)(const char*));
-CJ_EXPORT void FfiContextGetDatabaseDir(int64_t id, int32_t type, void(*accept)(const char*));
-CJ_EXPORT void FfiContextGetPreferencesDir(int64_t id, int32_t type, void(*accept)(const char*));
-CJ_EXPORT void FfiContextGetBundleCodeDir(int64_t id, int32_t type, void(*accept)(const char*));
-CJ_EXPORT void FfiContextGetDistributedFilesDir(int64_t id, int32_t type, void(*accept)(const char*));
-CJ_EXPORT void FfiContextGetCloudFileDir(int64_t id, int32_t type, void(*accept)(const char*));
+CJ_EXPORT void* FfiContextGetContext(int64_t id, int32_t type);
+CJ_EXPORT RetApplicationInfo FfiContextGetApplicationInfo(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetFilesDir(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetCacheDir(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetTempDir(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetResourceDir(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetDatabaseDir(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetPreferencesDir(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetBundleCodeDir(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetDistributedFilesDir(int64_t id, int32_t type);
+CJ_EXPORT char* FfiContextGetCloudFileDir(int64_t id, int32_t type);
+CJ_EXPORT int32_t FfiContextGetArea(int64_t id, int32_t type);
+CJ_EXPORT int64_t FfiContextGetApplicationContext();
+CJ_EXPORT char* FfiContextGetGroupDir(int64_t id, int32_t type, char* groupId);
+CJ_EXPORT int64_t FfiContextCreateModuleContext(int64_t id, int32_t type, char* moduleName);
 };
 }
 }

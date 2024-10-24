@@ -42,15 +42,20 @@ ohos_shared_library("cj_context_ffi") {
   ]
 
   external_deps = [
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
   ]
 
-  sources = [ "cj_context.cpp" ]
+  sources = [
+    "cj_boundle_manager_utils.cpp",
+    "cj_context.cpp",
+  ]
 
   cflags = [
     "-fstack-protector-all",
