@@ -2012,9 +2012,9 @@ HWTEST_F(AbilityManagerServiceThirdTest, RequestModalUIExtension_001, TestSize.L
     Want want;
     auto result = abilityMs->RequestModalUIExtension(want);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-    EXPECT_EQ(result, INNER_ERR);
-    }else {
-    EXPECT_EQ(result, ERR_OK);
+        EXPECT_EQ(result, INNER_ERR);
+    } else {
+        EXPECT_EQ(result, ERR_OK);
     }
 }
 
@@ -2029,9 +2029,9 @@ HWTEST_F(AbilityManagerServiceThirdTest, RequestModalUIExtensionInner_001, TestS
     Want want;
     auto result = abilityMs->RequestModalUIExtensionInner(want);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-    EXPECT_EQ(result, INNER_ERR);
-    }else {
-    EXPECT_EQ(result, ERR_OK);
+        EXPECT_EQ(result, INNER_ERR);
+    } else {
+        EXPECT_EQ(result, ERR_OK);
     }
 }
 
