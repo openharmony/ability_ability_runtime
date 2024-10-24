@@ -1079,12 +1079,12 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj_");
-        return AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "failed get ability");
-        return AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
@@ -1155,7 +1155,7 @@ int32_t JsUIAbility::OnContinueSyncCB(napi_value result, WantParams &wantParams,
     int32_t onContinueRes = 0;
     if (!ConvertFromJsValue(env, result, onContinueRes)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "'onContinue' is not implemented");
-        return AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     OHOS::AppExecFwk::UnwrapWantParams(env, jsWantParams, wantParams);
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();

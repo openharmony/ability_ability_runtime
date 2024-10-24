@@ -802,7 +802,7 @@ int32_t CJUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
 {
     if (!cjAbilityObj_) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
-        return AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
