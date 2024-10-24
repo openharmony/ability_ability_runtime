@@ -68,5 +68,5 @@ ohos_unittest("sender_info_test") {
 group("unittest") {
   testonly = true
 
-  deps = []
+  deps = [ ":sender_info_test" ]
 }

@@ -73,5 +73,5 @@ ohos_unittest("AmsAppMgrClientTest") {
 group("unittest") {
   testonly = true
 
-  deps = []
+  deps = [ ":AmsAppMgrClientTest" ]
 }

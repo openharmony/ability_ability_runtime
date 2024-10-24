@@ -79,5 +79,5 @@ ohos_unittest("uri_permission_impl_test") {
 group("unittest") {
   testonly = true
 
-  deps = []
+  deps = [ ":uri_permission_impl_test" ]
 }
