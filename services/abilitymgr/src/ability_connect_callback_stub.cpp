@@ -144,9 +144,9 @@ int AbilityConnectionStub::OnRemoteRequest(
         }
         case IAbilityConnection::ON_ABILITY_DISCONNECT_DONE: {
             auto resultCode = data.ReadInt32();
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE");
-            OnAbilityDisconnectDone(*element, resultCode);
             TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE");
+            OnAbilityDisconnectDone(*element, resultCode);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE end");
             return NO_ERROR;
         }
         case IAbilityConnection::ON_REMOTE_STATE_CHANGED: {

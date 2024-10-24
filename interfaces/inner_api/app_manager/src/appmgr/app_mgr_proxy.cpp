@@ -1839,6 +1839,23 @@ int32_t AppMgrProxy::SetSupportedProcessCacheSelf(bool isSupport)
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isSupport);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    MessageParcel reply;
+    MessageOption option;
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE, data, reply, option);
+    return reply.ReadInt32();
+}
+
 void AppMgrProxy::SetAppAssertionPauseState(bool flag)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");

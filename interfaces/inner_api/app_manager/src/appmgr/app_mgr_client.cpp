@@ -1245,6 +1245,17 @@ int32_t AppMgrClient::SetSupportedProcessCacheSelf(bool isSupport)
     return service->SetSupportedProcessCacheSelf(isSupport);
 }
 
+int32_t AppMgrClient::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->SetSupportedProcessCache(pid, isSupport);
+}
+
 void AppMgrClient::SaveBrowserChannel(sptr<IRemoteObject> browser)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());

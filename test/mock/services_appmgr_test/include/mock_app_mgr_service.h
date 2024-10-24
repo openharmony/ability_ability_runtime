@@ -106,6 +106,7 @@ public:
 
     MOCK_METHOD0(IsFinalAppProcess, bool());
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupport));
+    MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
 
