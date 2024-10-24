@@ -521,7 +521,7 @@ public:
 
     int32_t UpdateRenderState(pid_t renderPid, int32_t state) override;
 
-    int32_t SignRestartAppFlag(const std::string &bundleName) override;
+    int32_t SignRestartAppFlag(int32_t uid) override;
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId) override;
 
@@ -561,6 +561,8 @@ public:
     virtual void KillProcessDependedOnWeb() override;
 
     virtual void RestartResidentProcessDependedOnWeb() override;
+
+    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) override;
 private:
     /**
      * Init, Initialize application services.
