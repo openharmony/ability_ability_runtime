@@ -420,14 +420,12 @@ void AppfreezeManager::DeleteStack(int pid)
     }
 }
 
-void AppfreezeManager::FindStackByPid(std::string& ret, int pid, const std::string& msg) const
+void AppfreezeManager::FindStackByPid(std::string& ret, int pid) const
 {
     std::lock_guard<ffrt::mutex> lock(catchStackMutex_);
     auto it = catchStackMap_.find(pid);
     if (it != catchStackMap_.end()) {
         ret = it->second;
-    } else {
-        ret = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg;
     }
 }
 
@@ -438,9 +436,12 @@ std::string AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& fa
     std::string ret;
     std::string msg;
     size_t defaultMaxFaultNum = 256;
-    if (!dumplog.DumpCatch(pid, 0, msg, defaultMaxFaultNum, true)) {
+    if (dumplog.DumpCatchProcess(pid, msg, defaultMaxFaultNum, true) == -1) {
         TAG_LOGI(AAFwkTag::APPDFR, "appfreeze catch stack failed");
-        FindStackByPid(ret, pid, msg);
+        ret = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg;
+        if (faultType == AppFreezeType::APP_INPUT_BLOCK) {
+            FindStackByPid(ret, pid);
+        }
     } else {
         ret = msg;
         if (faultType == AppFreezeType::THREAD_BLOCK_3S) {
@@ -457,7 +458,7 @@ std::string AppfreezeManager::CatcherStacktrace(int pid) const
     HiviewDFX::DfxDumpCatcher dumplog;
     std::string ret;
     std::string msg;
-    if (!dumplog.DumpCatch(pid, 0, msg)) {
+    if (dumplog.DumpCatchProcess(pid, msg) == -1) {
         ret = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg;
     } else {
         ret = msg;
@@ -567,7 +568,7 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(int32_t pid)
         }
         return true;
     } else {
-        if (diff < FREEZE_TIME_LIMIT) {
+        if (currentTime > FREEZE_TIME_LIMIT && diff < FREEZE_TIME_LIMIT) {
             return true;
         }
         SetFreezeState(pid, AppFreezeState::APPFREEZE_STATE_FREEZE);

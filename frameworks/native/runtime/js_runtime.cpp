@@ -68,7 +68,6 @@
 #include "declarative_module_preloader.h"
 #endif
 
-
 using namespace OHOS::AbilityBase;
 using Extractor = OHOS::AbilityBase::Extractor;
 
@@ -719,7 +718,7 @@ bool JsRuntime::Initialize(const Options& options)
             bundleName_ = options.bundleName;
             codePath_ = options.codePath;
             panda::JSNApi::SetSearchHapPathTracker(
-                vm, [options](const std::string moduleName, std::string &hapPath) -> bool {
+                vm, [options](const std::string moduleName, std::string& hapPath)-> bool {
                     if (options.hapModulePath.find(moduleName) == options.hapModulePath.end()) {
                         return false;
                     }
@@ -1443,31 +1442,31 @@ void JsRuntime::InitWorkerModule(const Options& options)
 {
     CHECK_POINTER(jsEnv_);
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
-    workerInfo->codePath = options.codePath;
+    workerInfo->codePath = panda::panda_file::StringPacProtect(options.codePath);
     workerInfo->isDebugVersion = options.isDebugVersion;
     workerInfo->isBundle = options.isBundle;
     workerInfo->packagePathStr = options.packagePathStr;
     workerInfo->assetBasePathStr = options.assetBasePathStr;
-    workerInfo->hapPath = options.hapPath;
-    workerInfo->isStageModel = options.isStageModel;
+    workerInfo->hapPath = panda::panda_file::StringPacProtect(options.hapPath);
+    workerInfo->isStageModel = panda::panda_file::BoolPacProtect(options.isStageModel);
     workerInfo->moduleName = options.moduleName;
-    workerInfo->apiTargetVersion = options.apiTargetVersion;
+    workerInfo->apiTargetVersion = panda::panda_file::DataProtect(static_cast<uintptr_t>(options.apiTargetVersion));
     if (options.isJsFramework) {
         SetJsFramework();
     }
     jsEnv_->InitWorkerModule(workerInfo);
 }
 
-void JsRuntime::ReInitJsEnvImpl(const Options& options)
-{
-    CHECK_POINTER(jsEnv_);
-    jsEnv_->ReInitJsEnvImpl(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
-}
-
 void JsRuntime::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const
 {
     CHECK_POINTER(jsEnv_);
     jsEnv_->SetModuleLoadChecker(moduleCheckerDelegate);
+}
+
+void JsRuntime::ReInitJsEnvImpl(const Options& options)
+{
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->ReInitJsEnvImpl(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
 }
 
 void JsRuntime::SetRequestAotCallback()

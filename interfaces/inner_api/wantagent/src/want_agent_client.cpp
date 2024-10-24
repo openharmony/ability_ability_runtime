@@ -39,7 +39,8 @@ WantAgentClient::WantAgentClient() {}
 WantAgentClient::~WantAgentClient() {}
 
 ErrCode WantAgentClient::GetWantSender(
-    const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, sptr<IWantSender> &wantSender)
+    const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, sptr<IWantSender> &wantSender,
+    int32_t uid)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
@@ -63,6 +64,11 @@ ErrCode WantAgentClient::GetWantSender(
             TAG_LOGE(AAFwkTag::WANTAGENT, "flag write failed");
             return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         }
+    }
+
+    if (!data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uid write fail");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
 
     auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER),

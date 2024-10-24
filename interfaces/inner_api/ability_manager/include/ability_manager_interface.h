@@ -790,7 +790,7 @@ public:
     }
 
     virtual sptr<IWantSender> GetWantSender(
-        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) = 0;
+        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid = -1) = 0;
 
     virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) = 0;
 
@@ -1694,6 +1694,17 @@ public:
      */
     virtual int32_t PreStartMission(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const std::string& startTime)
+    {
+        return 0;
+    }
+
+    /**
+     * Terminate the mission.
+     *
+     * @param missionId, The mission id of the UIAbility need to be terminated.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateMission(int32_t missionId)
     {
         return 0;
     }

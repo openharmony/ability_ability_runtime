@@ -25,11 +25,10 @@
 #include "configuration.h"
 #include "context.h"
 #include "continuation_handler_stage.h"
-#include "fa_ability_context.h"
-#include "iability_callback.h"
+#include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
 #include "resource_config_helper.h"
+#include "iability_callback.h"
 #include "want.h"
-
 #ifdef SUPPORT_GRAPHICS
 #include "display_manager.h"
 #include "session_info.h"

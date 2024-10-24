@@ -206,7 +206,7 @@ group("unittest") {
   if (accessibility_enable) {
     deps += [
       ":accessibility_ability_command_test",
-      ":shell_command_executor_test",
+      ":shell_command_result_test",
     ]
   }
 }

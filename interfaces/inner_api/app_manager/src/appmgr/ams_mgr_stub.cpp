@@ -205,6 +205,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
     MessageParcel &reply, MessageOption &option)
 {
     switch (static_cast<uint32_t>(code)) {
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION):
+            return HandleIsProcessContainsOnlyUIAbility(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION):
             return HandleForceKillApplication(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::CLEAN_UIABILITY_BY_USER_REQUEST):
@@ -368,6 +370,11 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
+
+    TAG_LOGW(AAFwkTag::APPMGR,
+        "KillApplication,callingPid=%{public}d,bundleName=%{public}s",
+        IPCSkeleton::GetCallingPid(), bundleName.c_str());
+
     int32_t result = KillApplication(bundleName);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -405,7 +412,9 @@ ErrCode AmsMgrStub::HandleKillApplicationByUid(MessageParcel &data, MessageParce
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
     int uid = data.ReadInt32();
-    int32_t result = KillApplicationByUid(bundleName, uid);
+    std::string reason = data.ReadString();
+    TAG_LOGW(AAFwkTag::APPMGR, "KillApplicationByUid,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    int32_t result = KillApplicationByUid(bundleName, uid, reason);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -413,7 +422,9 @@ ErrCode AmsMgrStub::HandleKillApplicationByUid(MessageParcel &data, MessageParce
 ErrCode AmsMgrStub::HandleKillApplicationSelf(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    int32_t result = KillApplicationSelf();
+    TAG_LOGW(AAFwkTag::APPMGR, "KillApplicationSelf,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    std::string reason = data.ReadString();
+    int32_t result = KillApplicationSelf(reason);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "result write failed.");
         return ERR_INVALID_VALUE;
@@ -798,7 +809,7 @@ ErrCode AmsMgrStub::HandleBlockProcessCacheByPids(MessageParcel &data, MessagePa
 
 int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     auto bundleName = data.ReadString();
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
@@ -820,6 +831,18 @@ ErrCode AmsMgrStub::HandleCleanAbilityByUserRequest(MessageParcel &data, Message
     auto result = CleanAbilityByUserRequest(token);
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "fail to write the result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply)
+{
+    auto pid = data.ReadUint32();
+
+    auto result = IsProcessContainsOnlyUIAbility(pid);
+    if (!reply.WriteBool(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result in HandleIsProcessContainsOnlyUIAbility.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
