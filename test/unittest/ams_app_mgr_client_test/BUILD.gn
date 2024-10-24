@@ -64,14 +64,10 @@ ohos_unittest("AmsAppMgrClientTest") {
     "ipc:ipc_core",
     "window_manager:libwm",
   ]
-
-  if (ability_runtime_graphics) {
-    external_deps += [ "window_manager:libwm" ]
-  }
 }
 
 group("unittest") {
   testonly = true
 
-  deps = []
+  deps = [ ":AmsAppMgrClientTest" ]
 }
