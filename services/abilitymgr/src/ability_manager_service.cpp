@@ -5217,7 +5217,7 @@ void AbilityManagerService::DumpSysAbilityInner(
     }
     if (argList.size() >= MIN_DUMP_ARGUMENT_NUM) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "argList = %{public}s", argList[1].c_str());
-        std::vector<std::string> params(argList.begin()  + MIN_DUMP_ARGUMENT_NUM, argList.end());
+        std::vector<std::string> params(argList.begin() + MIN_DUMP_ARGUMENT_NUM, argList.end());
         try {
             auto abilityId = static_cast<int32_t>(std::stoi(argList[1]));
             targetManager->DumpMissionListByRecordId(info, isClient, abilityId, params);
@@ -5359,9 +5359,9 @@ void AbilityManagerService::DumpSysProcess(
         dumpInfo = "    AppRunningRecord ID #" + std::to_string(processInfoID);
         processInfoID++;
         info.push_back(dumpInfo);
-        dumpInfo = "      process name ["  +processInfo.processName_+  "]";
+        dumpInfo = "      process name ["  + processInfo.processName_ +  "]";
         info.push_back(dumpInfo);
-        dumpInfo = "      pid #" + std::to_string(processInfo.pid_) + 
+        dumpInfo = "      pid #" + std::to_string(processInfo.pid_) +
             "  uid #" + std::to_string(processInfo.uid_);
         info.push_back(dumpInfo);
         auto appState = static_cast<AppState>(processInfo.state_);
@@ -5423,7 +5423,7 @@ void AbilityManagerService::DumpUIExtensionProviderRunningInfos(pid_t hostPid, s
 
     std::string temp;
     for (size_t i = 0; i < providerPids.size(); i++) {
-        temp = "      uiextension provider #"  std::to_string(i);
+        temp = "      uiextension provider #" + std::to_string(i);
         info.push_back(temp);
         temp = "        pid #" + std::to_string(providerPids[i]);
         info.push_back(temp);
@@ -8135,7 +8135,7 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
             Security::AccessToken::NativeTokenInfo nativeTokenInfo;
             int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
             if (result == ERR_OK) {
-                nativeName = "_"  + nativeTokenInfo.processName;
+                nativeName = "_" + nativeTokenInfo.processName;
             }
             want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
             want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, nativeName);
@@ -8783,7 +8783,7 @@ ErrCode AbilityManagerService::ProcessMultiParam(std::vector<std::string>& argsS
     std::vector<std::string> dumpResults;
     DumpSysState(cmd, dumpResults, isClient, isUser, userID);
     for (auto it : dumpResults) {
-        result = it + "\n";
+        result += it + "\n";
     }
     return ERR_OK;
 }
@@ -11006,7 +11006,7 @@ int32_t AbilityManagerService::GenerateEmbeddableUIAbilityRequest(
         struct timespec time = {0, 0};
         clock_gettime(CLOCK_MONOTONIC, &time);
         int64_t times = static_cast<int64_t>(time.tv_sec);
-        request.abilityInfo.process = request.abilityInfo.bundleName + PROCESS_SUFFIX  std::to_string(times);
+        request.abilityInfo.process = request.abilityInfo.bundleName + PROCESS_SUFFIX + std::to_string(times);
     } else {
         result = GenerateExtensionAbilityRequest(want, request, callerToken, userId);
     }
@@ -11361,7 +11361,7 @@ bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, c
     const std::string &calleeAbilityName)
 {
     std::map<std::string, std::list<std::string>>::iterator iter = whiteListMap_.find(callerBundleName);
-    std::string uri = calleeBundleName  + "/" + calleeAbilityName;
+    std::string uri = calleeBundleName + "/" + calleeAbilityName;
     if (iter != whiteListMap_.end()) {
         if (std::find(std::begin(iter->second), std::end(iter->second), uri) != std::end(iter->second)) {
             return true;

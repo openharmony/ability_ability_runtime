@@ -55,7 +55,7 @@ int AppStateCallbackHost::OnRemoteRequest(
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_REMOTE_DIED):
             return HandleOnAppRemoteDied(data, reply);
         case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_PRE_CACHE):
-            return HandleNotifyAppPreCache(data, reply);        
+            return HandleNotifyAppPreCache(data, reply);
     }
 
     TAG_LOGD(AAFwkTag::APPMGR, "AppStateCallbackHost::OnRemoteRequest end");
@@ -184,6 +184,6 @@ int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, Messa
     }
     NotifyAppPreCache(pid, userId);
     return NO_ERROR;
-+}
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
