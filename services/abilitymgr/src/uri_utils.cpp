@@ -19,6 +19,7 @@
 #include "extension_ability_info.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
+#include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
 
 namespace OHOS {
@@ -213,6 +214,23 @@ void UriUtils::CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::Ext
     if (extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
         return;
     }
+    CheckUriPermissionForExtension(want, 0);
+    return;
+}
+
+void UriUtils::CheckUriPermissionForUIExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType,
+    uint32_t tokenId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckUriPermissionForUIExtension called.");
+    if (!UIExtensionUtils::IsUIExtension(extensionAbilityType)) {
+        return;
+    }
+    CheckUriPermissionForExtension(want, tokenId);
+    return;
+}
+
+void UriUtils::CheckUriPermissionForExtension(Want &want, uint32_t tokenId)
+{
     uint32_t flag = want.GetFlags();
     if (!IsGrantUriPermissionFlag(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "No grant uri flag: %{public}u.", flag);
@@ -223,7 +241,7 @@ void UriUtils::CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::Ext
         TAG_LOGW(AAFwkTag::ABILITYMGR, "No file uri neet grant.");
         return;
     }
-    auto callerTokenId = want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
+    auto callerTokenId = tokenId > 0 ? tokenId : want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
     // check uri permission
     auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
         uriVec, flag, callerTokenId));
@@ -232,5 +250,10 @@ void UriUtils::CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::Ext
     return;
 }
 
+bool UriUtils::IsPermissionPreCheckedType(AppExecFwk::ExtensionAbilityType extensionAbilityType)
+{
+    return extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
+        UIExtensionUtils::IsUIExtension(extensionAbilityType);
+}
 } // AAFwk
 } // OHOS
