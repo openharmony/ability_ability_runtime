@@ -161,8 +161,7 @@ if (accessibility_enable) {
 
     symlink_target_name = [ "ability_tool" ]
 
-    include_dirs =
-        [ "${access_token_path}/interfaces/innerkits/token_setproc/include/" ]
+    include_dirs = []
 
     configs = [ ":tools_ability_delegator_config" ]
 
