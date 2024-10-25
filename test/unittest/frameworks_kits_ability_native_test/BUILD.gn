@@ -2399,6 +2399,10 @@ ohos_unittest("ability_connection_manager_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
+
+  if (hichecker_enabled) {
+    external_deps += [ "hichecker:libhichecker" ]
+  }
 }
 
 ohos_unittest("abilityruntime_test") {
