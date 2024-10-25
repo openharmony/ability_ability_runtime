@@ -21,8 +21,8 @@
 #include "app_state_observer_manager.h"
 #include "app_mgr_service_inner.h"
 #include "cache_process_manager.h"
-+#include "res_sched_util.h"
-+#include "ui_extension_utils.h"
+#include "res_sched_util.h"
+#include "ui_extension_utils.h"
 
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
@@ -83,9 +83,9 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
         TAG_LOGE(AAFwkTag::APPMGR, "nullptr precheck failed");
         return false;
     }
-+    if (IsCachedProcess(appRecord)) {
-+        return false;
-+    }
+    if (IsCachedProcess(appRecord)) {
+        return false;
+    }
     if (appRecord->IsKeepAliveApp()) {
         TAG_LOGW(AAFwkTag::APPMGR, "Not cache keepalive process");
         return false;
