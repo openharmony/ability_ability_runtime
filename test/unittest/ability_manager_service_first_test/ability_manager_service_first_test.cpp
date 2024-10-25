@@ -1664,7 +1664,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, GenerateEmbeddableUIAbilityRequest_001,
     EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GenerateEmbeddableUIAbilityRequest_001 end");
 }
-
+ 
 /*
  * Feature: AbilityManagerService
  * Function: GenerateEmbeddableUIAbilityRequest

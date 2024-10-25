@@ -634,7 +634,6 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
-
         auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
         if (autoStartupCallback != nullptr) {
             abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);

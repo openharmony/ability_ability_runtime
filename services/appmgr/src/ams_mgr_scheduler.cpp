@@ -281,11 +281,9 @@ void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const 
     amsHandler_->SubmitTask(attachPidToParentFunc, TASK_ATTACH_PID_TO_PARENT);
 }
 
-int32_t AmsMgrScheduler::KillProcessWithAccount(
-    const std::string &bundleName, const int accountId)
+int32_t AmsMgrScheduler::KillProcessWithAccount(const std::string &bundleName, const int accountId)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d",
-        bundleName.c_str(), accountId);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d", bundleName.c_str(), accountId);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
@@ -336,8 +334,7 @@ int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundl
 
 int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s",
-        bundleName.c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s", bundleName.c_str());
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
