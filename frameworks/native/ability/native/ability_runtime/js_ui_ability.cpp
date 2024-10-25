@@ -229,10 +229,7 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     napi_value contextObj = nullptr;
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
     CreateJSContext(env, contextObj, screenMode);
-    if (shellContextRef_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null shellContextRef_");
-        return;
-    }
+    CHECK_POINTER(shellContextRef_);
     contextObj = shellContextRef_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get ability native object failed");
@@ -242,7 +239,11 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     CHECK_POINTER(workContext);
     screenModePtr_ = std::make_shared<int32_t>(screenMode);
     auto workScreenMode = new (std::nothrow) std::weak_ptr<int32_t>(screenModePtr_);
-    CHECK_POINTER(workScreenMode);
+    if (workScreenMode == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "workScreenMode nullptr");
+        delete workContext;
+        return;
+    }
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, workContext, workScreenMode);
     abilityContext_->Bind(jsRuntime_, shellContextRef_.get());

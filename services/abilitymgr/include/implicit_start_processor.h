@@ -110,6 +110,7 @@ private:
     int CheckImplicitCallPermission(const AbilityRequest& abilityRequest);
 
 private:
+    sptr<AppExecFwk::IBundleMgr> iBundleManager_;
     bool IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type);
     ffrt::mutex identityListLock_;
     std::list<IdentityNode> identityList_;

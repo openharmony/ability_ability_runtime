@@ -343,7 +343,7 @@ std::string ContextImpl::GetDistributedFilesDir()
             CONTEXT_DISTRIBUTEDFILES_BASE_MIDDLE + GetBundleName();
     } else {
         if (currArea_ == CONTEXT_ELS[1] || currArea_ == CONTEXT_ELS[AREA2] || currArea_ == CONTEXT_ELS[AREA3] ||
-        currArea_ == CONTEXT_ELS[AREA4]) {
+            currArea_ == CONTEXT_ELS[AREA4]) {
             // when areamode swith to el3/el4/el5, the distributedfiles dir should be always el2's
             // distributedfilesdir dir
             dir = CONTEXT_DATA_STORAGE + CONTEXT_ELS[1] + CONTEXT_FILE_SEPARATOR + CONTEXT_DISTRIBUTEDFILES;
@@ -1204,6 +1204,7 @@ void ContextImpl::AppHasDarkRes(bool &darkRes)
 
 void ContextImpl::KillProcessBySelf()
 {
+    TAG_LOGI(AAFwkTag::APPKIT, "call");
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     appMgrClient->KillApplicationSelf();
 }
@@ -1389,8 +1390,7 @@ void ContextImpl::OnOverlayChanged(const EventFwk::CommonEventData &data,
     }
 }
 
-void ContextImpl::ChangeToLocalPath(const std::string &bundleName,
-    const std::string &sourceDir, std::string &localPath)
+void ContextImpl::ChangeToLocalPath(const std::string& bundleName, const std::string &sourceDir, std::string &localPath)
 {
     std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleName);
     if (sourceDir.empty()) {
