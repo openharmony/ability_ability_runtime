@@ -54,6 +54,7 @@ ohos_fuzztest("AbilityManagerServiceSecondFuzzTest") {
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
