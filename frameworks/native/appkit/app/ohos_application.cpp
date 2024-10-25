@@ -440,12 +440,22 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
 
     auto autoStartupCallback = [weak, abilityStage, abilityRecord, callback]() {
         auto ohosApplication = weak.lock();
-
-        std::string moduleName = abilityRecord->GetAbilityInfo()->moduleName;
         if (ohosApplication == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null ohosApplication");
             return;
         }
+        if (abilityRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
+            return;
+        }
+
+        auto abilityInfo = abilityRecord->GetAbilityInfo();
+        if (abilityInfo == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
+            return;
+        }
+
+        std::string moduleName = abilityInfo->moduleName;
         ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
         if (callback == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null callback");
