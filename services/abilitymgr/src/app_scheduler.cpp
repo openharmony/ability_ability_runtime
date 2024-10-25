@@ -636,15 +636,6 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
 }
 
-void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
-{
-    if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
-        return;
-    }
-    appMgrClient_->SetSupportedProcessCache(pid, isSupport);
-}
-
 bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     if (!appMgrClient_) {
@@ -653,7 +644,6 @@ bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
     }
     return appMgrClient_->IsProcessContainsOnlyUIAbility(pid);
 }
-
 bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
 {
     if (!appMgrClient_) {
@@ -661,6 +651,15 @@ bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
         return false;
     }
     return appMgrClient_->IsProcessAttached(token);
+}
+
+void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return;
+    }
+    appMgrClient_->SetSupportedProcessCache(pid, isSupport);
 }
 } // namespace AAFwk
 }  // namespace OHOS

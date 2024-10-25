@@ -1372,7 +1372,6 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_029, TestSize.Level1)
     WaitUntilTaskDone(TaskHandler());
     EXPECT_EQ(0, result);
 
-    const sptr<IRemoteObject> remoteObject1 = nullptr;
     ConnectManager()->OnCallBackDied(nullptr);
     WaitUntilTaskDone(TaskHandler());
     auto connectMap = ConnectManager()->connectMap_;
