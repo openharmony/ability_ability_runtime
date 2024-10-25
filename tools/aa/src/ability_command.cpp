@@ -1386,7 +1386,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_WINDOW_LEFT: {
                     // 'aa start --wl' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wl' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wl' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1397,7 +1397,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_WINDOW_TOP: {
                     // 'aa start --wt' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wt' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wt' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1408,7 +1408,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_WINDOW_HEIGHT: {
                     // 'aa start --wh' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wh' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --wh' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1419,7 +1419,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 case OPTION_WINDOW_WIDTH: {
                     // 'aa start --ww' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --ww' with no argument.", cmd_.c_str());
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s --ww' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1723,11 +1723,8 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // app multi thread
                 isMultiThread = true;
                 TAG_LOGD(AAFwkTag::AA_TOOL, "isMultiThread");
-                break;
             }
             case 0: {
-                // 'aa start' with an unknown option: aa start -x
-                // 'aa start' with an unknown option: aa start -xxx
                 break;
             }
             default: {

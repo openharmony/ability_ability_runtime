@@ -1372,6 +1372,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_029, TestSize.Level1)
     WaitUntilTaskDone(TaskHandler());
     EXPECT_EQ(0, result);
 
+    const sptr<IRemoteObject> remoteObject1 = nullptr;
     ConnectManager()->OnCallBackDied(nullptr);
     WaitUntilTaskDone(TaskHandler());
     auto connectMap = ConnectManager()->connectMap_;
@@ -3267,6 +3268,20 @@ HWTEST_F(AbilityConnectManagerTest, UnloadUIExtensionAbility_0100, TestSize.Leve
     std::string hostBundleName = "com.ohos.uiextensionuser";
     auto ret = connectManager->UnloadUIExtensionAbility(abilityRecord, hostBundleName);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UpdateKeepAliveEnableState_0100
+ * @tc.desc: UpdateKeepAliveEnableState
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, UpdateKeepAliveEnableState_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    auto ret = connectManager->UpdateKeepAliveEnableState("bundle", "entry", "mainAbility", true);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
