@@ -956,7 +956,7 @@ int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_
 
 void AppMgrService::AttachRenderProcess(const sptr<IRemoteObject> &scheduler)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AttachRenderProcess failed, not ready.");
         return;
@@ -1514,6 +1514,20 @@ int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
     return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
 }
 
+int32_t AppMgrService::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not foundation");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->SetSupportedProcessCache(pid, isSupport);
+}
+
 void AppMgrService::SetAppAssertionPauseState(bool flag)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
@@ -1548,7 +1562,7 @@ int32_t AppMgrService::CheckCallingIsUserTestMode(const pid_t pid, bool &isUserT
 
 int32_t AppMgrService::NotifyProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     if (!appMgrServiceInner_) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_VALUE;
@@ -1558,7 +1572,7 @@ int32_t AppMgrService::NotifyProcessDependedOnWeb()
 
 void AppMgrService::KillProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyKillProcessDependedOnWebPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller have not permission.");
         return;
@@ -1571,7 +1585,7 @@ void AppMgrService::KillProcessDependedOnWeb()
 
 void AppMgrService::RestartResidentProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not foundation.");
         return;

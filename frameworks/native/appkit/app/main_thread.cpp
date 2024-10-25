@@ -146,6 +146,7 @@ constexpr char EVENT_KEY_HAPPEN_TIME[] = "HAPPEN_TIME";
 constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_JSVM[] = "JSVM";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
+constexpr char EVENT_KEY_PNAME[] = "PNAME";
 constexpr char EVENT_KEY_APP_RUNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
@@ -362,6 +363,13 @@ void MainThread::Attach()
         return;
     }
     mainThreadState_ = MainThreadState::ATTACH;
+    isDeveloperMode_ = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
+    auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgrHelper is nullptr");
+        return;
+    }
+    bundleMgrHelper->PreConnect();
 }
 
 /**
@@ -433,7 +441,7 @@ void MainThread::ScheduleForegroundApplication()
  */
 void MainThread::ScheduleBackgroundApplication()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     wptr<MainThread> weak = this;
     auto task = [weak]() {
@@ -1028,10 +1036,6 @@ void MainThread::OnStartAbility(const std::string &bundleName,
         loadPath = std::regex_replace(loadPath, pattern, std::string(LOCAL_CODE_PATH));
         TAG_LOGD(AAFwkTag::APPKIT, "ModuleResPath: %{public}s", loadPath.c_str());
         // getOverlayPath
-        auto res = GetOverlayModuleInfos(bundleName, entryHapModuleInfo.moduleName, overlayModuleInfos_);
-        if (res != ERR_OK) {
-            TAG_LOGW(AAFwkTag::APPKIT, "getOverlayPath failed");
-        }
         if (overlayModuleInfos_.size() == 0) {
             if (!resourceManager->AddResource(loadPath.c_str())) {
                 TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
@@ -1493,7 +1497,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             debugOption.perfCmd = perfCmd;
             runtime->StartProfiler(debugOption);
         } else {
-            runtime->StartDebugMode(debugOption);
+            if (isDeveloperMode_) {
+                runtime->StartDebugMode(debugOption);
+            }
         }
 
         std::vector<HqfInfo> hqfInfos = appInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
@@ -1533,6 +1539,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     EVENT_KEY_REASON, errorObj.name,
                     EVENT_KEY_JSVM, JSVM_TYPE,
                     EVENT_KEY_SUMMARY, summary,
+                    EVENT_KEY_PNAME, processName,
                     EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId);
                 ErrorObject appExecErrorObj = {
                     .name = errorObj.name,
@@ -1549,7 +1556,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 TAG_LOGI(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
                     " pid=%{public}d, processName=%{public}s, msg=%{public}s", result, pid, processName.c_str(),
                     KILL_REASON);
-    
+
                 if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
                     ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
                     return;
@@ -1632,11 +1639,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         entryHapModuleInfo.hapPath.empty() ? entryHapModuleInfo.resourcePath : entryHapModuleInfo.hapPath;
     std::regex inner_pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
     loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
-    std::vector<OverlayModuleInfo> overlayModuleInfos;
-    auto res = GetOverlayModuleInfos(bundleInfo.name, moduleName, overlayModuleInfos);
+    auto res = GetOverlayModuleInfos(bundleInfo.name, moduleName, overlayModuleInfos_);
     std::vector<std::string> overlayPaths;
     if (res == ERR_OK) {
-        overlayPaths = GetAddOverlayPaths(overlayModuleInfos);
+        overlayPaths = GetAddOverlayPaths(overlayModuleInfos_);
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     int32_t appType;
@@ -1858,7 +1864,24 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
         return;
     }
 
-    application_->AddAbilityStage(abilityStage);
+    wptr<MainThread> weak = this;
+    auto callback = [weak]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            return;
+        }
+        if (!appThread->appMgr_ || !appThread->applicationImpl_) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+            return;
+        }
+        appThread->appMgr_->AddAbilityStageDone(appThread->applicationImpl_->GetRecordId());
+    };
+    bool isAsyncCallback = false;
+    application_->AddAbilityStage(abilityStage, callback, isAsyncCallback);
+    if (isAsyncCallback) {
+        return;
+    }
 
     if (!appMgr_ || !applicationImpl_) {
         TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
@@ -2022,7 +2045,8 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     Rosen::DisplayId defaultDisplayId = Rosen::DisplayManager::GetInstance().GetDefaultDisplayId();
     Rosen::DisplayId displayId = defaultDisplayId;
     if (abilityRecord->GetWant() != nullptr) {
-        displayId = abilityRecord->GetWant()->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId);
+        displayId = abilityRecord->GetWant()->GetIntParam(
+            AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId);
     }
     Rosen::DisplayManager::GetInstance().AddDisplayIdFromAms(displayId, abilityRecord->GetToken());
     TAG_LOGD(AAFwkTag::APPKIT, "add displayId: %{public}" PRIu64, displayId);
@@ -3206,12 +3230,12 @@ void MainThread::AssertFaultResumeMainThreadDetection()
 
 void MainThread::HandleInitAssertFaultTask(bool isDebugModule, bool isDebugApp)
 {
-    if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Unsupport assert fault dialog");
+    if (!isDeveloperMode_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Developer Mode is false");
         return;
     }
-    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Developer Mode is false");
+    if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
+        TAG_LOGD(AAFwkTag::APPKIT, "Unsupport assert fault dialog");
         return;
     }
     if (!isDebugApp) {
@@ -3364,7 +3388,7 @@ void MainThread::HandleCacheProcess()
 
 int32_t MainThread::ScheduleDumpFfrt(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "pid:%{public}d", getprocpid());
+    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpFfrt::pid:%{public}d", getprocpid());
     return DumpFfrtHelper::DumpFfrt(result);
 }
 }  // namespace AppExecFwk

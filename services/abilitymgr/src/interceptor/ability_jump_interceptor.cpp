@@ -17,12 +17,8 @@
 
 #include "ability_util.h"
 #include "accesstoken_kit.h"
-#include "app_jump_control_rule.h"
-#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "in_process_call_wrapper.h"
 #include "permission_constants.h"
-#include "permission_verification.h"
 #include "start_ability_utils.h"
 #include "system_dialog_scheduler.h"
 
@@ -53,7 +49,9 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
         return ERR_OK;
     }
     AppExecFwk::AbilityInfo targetAbilityInfo;
-    if (StartAbilityUtils::startAbilityInfo != nullptr) {
+    if (StartAbilityUtils::startAbilityInfo != nullptr &&
+        StartAbilityUtils::startAbilityInfo->abilityInfo.bundleName == param.want.GetBundle() &&
+        StartAbilityUtils::startAbilityInfo->abilityInfo.name == param.want.GetElement().GetAbilityName()) {
         targetAbilityInfo = StartAbilityUtils::startAbilityInfo->abilityInfo;
     } else {
         IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(param.want,

@@ -313,6 +313,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleNotifyMemorySizeStateChanged(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE_SELF):
             return HandleSetSupportedProcessCacheSelf(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE):
+            return HandleSetSupportedProcessCache(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_BUNDLE_TYPE):
             return HandleGetRunningProcessesByBundleType(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF):
@@ -1506,6 +1508,19 @@ int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, Mess
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     bool isSupport = data.ReadBool();
     auto ret = SetSupportedProcessCacheSelf(isSupport);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    bool isSupport = data.ReadBool();
+    int32_t pid = data.ReadInt32();
+    auto ret = SetSupportedProcessCache(pid, isSupport);
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;

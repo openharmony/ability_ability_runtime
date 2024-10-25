@@ -44,7 +44,7 @@ public:
     MOCK_METHOD1(KillApplication, int32_t(const std::string& appName));
     MOCK_METHOD3(ForceKillApplication, int32_t(const std::string& appName, const int userId, const int appIndex));
     MOCK_METHOD1(KillProcessesByAccessTokenId, int32_t(const uint32_t accessTokenId));
-    MOCK_METHOD2(KillApplicationByUid, int(const std::string&, const int uid));
+    MOCK_METHOD3(KillApplicationByUid, int(const std::string&, const int uid, const std::string&));
     MOCK_METHOD1(IsBackgroundRunningRestricted, int(const std::string& bundleName));
     MOCK_METHOD1(GetAllRunningProcesses, int(std::vector<RunningProcessInfo>& info));
     MOCK_METHOD2(GetRunningProcessesByBundleType, int(const BundleType bundleType,
@@ -106,6 +106,7 @@ public:
 
     MOCK_METHOD0(IsFinalAppProcess, bool());
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupport));
+    MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
 

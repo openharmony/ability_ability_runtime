@@ -35,6 +35,8 @@ config("appmgr_core_config") {
 }
 
 ohos_shared_library("app_manager") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/dfr",
     "${ability_runtime_services_path}/appdfr/include",
@@ -141,7 +143,6 @@ ohos_shared_library("app_manager") {
   ]
   public_external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "image_framework:image_native",
