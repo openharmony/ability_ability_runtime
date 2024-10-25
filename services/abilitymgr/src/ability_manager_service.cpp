@@ -1812,10 +1812,15 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
     if (startOptions.processOptions != nullptr &&
-        abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED &&
-        !ProcessOptions::IsAttachToStatusBarItemMode(startOptions.processOptions->processMode)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "processMode is not attach to status bar item.");
-        return ERR_START_OPTIONS_CHECK_FAILED;
+        abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
+        auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+        CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
+        auto abilityRecords = uiAbilityManager->GetAbilityRecordsByName(want.GetElement());
+        if (!abilityRecords.empty() && abilityRecords[0] &&
+            !ProcessOptions::IsAttachToStatusBarItemMode(startOptions.processOptions->processMode)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "processMode is not attach to status bar item.");
+            return ERR_ABILITY_ALREADY_RUNNING;
+        }
     }
 
     result = CheckStaticCfgPermission(abilityRequest, isStartAsCaller,
