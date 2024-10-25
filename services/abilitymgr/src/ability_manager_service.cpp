@@ -5359,7 +5359,7 @@ void AbilityManagerService::DumpSysProcess(
         dumpInfo = "    AppRunningRecord ID #" + std::to_string(processInfoID);
         processInfoID++;
         info.push_back(dumpInfo);
-        dumpInfo = "      process name ["  + processInfo.processName_ +  "]";
+        dumpInfo = "      process name [" + processInfo.processName_ + "]";
         info.push_back(dumpInfo);
         dumpInfo = "      pid #" + std::to_string(processInfo.pid_) +
             "  uid #" + std::to_string(processInfo.uid_);
