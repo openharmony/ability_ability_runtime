@@ -151,7 +151,7 @@ std::shared_ptr<ElementName> AbilityContext::GetCallingAbility()
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     std::shared_ptr<ElementName> elementName = std::make_shared<ElementName>(
-            elementName, callingBundleName_, callingDeviceId_, callingModuleName_);
+            callingDeviceId_, callingBundleName_, callingAbilityName_, callingModuleName_);
     TAG_LOGD(AAFwkTag::CONTEXT, "end");
     return elementName;
 }
