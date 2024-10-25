@@ -295,11 +295,15 @@ HWTEST_F(UriPermissionImplTest, Upms_RevokeUriPermissionManually_001, TestSize.L
     std::string targetBundleName = "com.example.testB1002";
     GrantInfo info = { flagRead, fromTokenId, targetTokenId };
     std::list<GrantInfo> infoList = { info };
-    auto uriStr = "file://com.example.testA/data/storage/el2/base/haps/entry/files/test_A.txt";
+    auto uriStr = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_A.txt";
     auto uri = Uri(uriStr);
     upms->uriMap_.emplace(uriStr, infoList);
+    IPCSkeleton::callerTokenId = fromTokenId;
+    MyFlag::tokenInfos[1001] = TokenInfo(1001, MyATokenTypeEnum::TOKEN_HAP, "", "com.example.app1001");
     upms->RevokeUriPermissionManually(uri, targetBundleName, appIndex);
     auto ret = upms->VerifyUriPermission(uri, flagRead, targetTokenId);
+    IPCSkeleton::callerTokenId = 0;
+    MyFlag::tokenInfos.clear();
     ASSERT_EQ(ret, false);
 }
 
