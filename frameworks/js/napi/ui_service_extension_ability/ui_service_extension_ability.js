@@ -14,38 +14,42 @@
  */
 
 let ExtensionAbility = requireNapi('app.ability.ExtensionAbility');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 class UIServiceExtensionAbility extends ExtensionAbility {
   onCreate(want) {
-    console.log('onCreate, want:' + want.abilityName);
+    hilog.sLogI(domainID, TAG, 'onCreate, want:' + want.abilityName);
   }
 
   onRequest(want, startId) {
-    console.log('onRequest, want:' + want.abilityName + ', startId:' + startId);
+    hilog.sLogI(domainID, TAG, 'onRequest, want:' + want.abilityName + ', startId:' + startId);
   }
 
   onConnect(want, proxy) {
-    console.log('onConnect, want:' + want.abilityName + '');
+    hilog.sLogI(domainID, TAG, 'onConnect, want:' + want.abilityName + '');
   }
 
   onDisconnect(want, proxy) {
-    console.log('onDisconnect');
+    hilog.sLogI(domainID, TAG, 'onDisconnect');
   }
 
   onWindowWillCreate(config) {
-    console.log('onWindowStageWillCreate');
+    hilog.sLogI(domainID, TAG, 'onWindowStageWillCreate');
   }
 
   onWindowDidCreate(window) {
-    console.log('onWindowStageDidCreate');
+    hilog.sLogI(domainID, TAG, 'onWindowStageDidCreate');
   }
 
   onData(data) {
-    console.log('onData');
+    hilog.sLogI(domainID, TAG, 'onData');
   }
 
   onDestroy() {
-    console.log('onDestroy');
+    hilog.sLogI(domainID, TAG, 'onDestroy');
   }
 }
 
