@@ -132,16 +132,6 @@ std::string AbilityContext::GetCallingBundle()
     return callingBundleName_;
 }
 
-void AbilityContext::SetElementNameProperties(std::shared_ptr<ElementName>& elementName,
-    const std::string& abilityName, const std::string& bundleName,
-    const std::string& deviceId, const std::string& moduleName)
-{
-    elementName->SetAbilityName(abilityName);
-    elementName->SetBundleName(bundleName);
-    elementName->SetDeviceID(deviceId);
-    elementName->SetModuleName(moduleName);
-}
-
 std::shared_ptr<AppExecFwk::ElementName> AbilityContext::GetElementName()
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
@@ -151,8 +141,8 @@ std::shared_ptr<AppExecFwk::ElementName> AbilityContext::GetElementName()
         return nullptr;
     }
 
-    std::shared_ptr<ElementName> elementName = std::make_shared<ElementName>();
-    SetElementNameProperties(elementName, info->name, info->bundleName, info->deviceId, info->moduleName);
+    std::shared_ptr<ElementName> elementName =
+        std::make_shared<ElementName>(info->deviceId, info->bundleName, info->name, info->moduleName);
     TAG_LOGD(AAFwkTag::CONTEXT, "end");
     return elementName;
 }
@@ -160,9 +150,8 @@ std::shared_ptr<AppExecFwk::ElementName> AbilityContext::GetElementName()
 std::shared_ptr<ElementName> AbilityContext::GetCallingAbility()
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-    std::shared_ptr<ElementName> elementName = std::make_shared<ElementName>();
-    SetElementNameProperties(elementName, callingAbilityName_,
-        callingBundleName_, callingDeviceId_, callingModuleName_);
+    std::shared_ptr<ElementName> elementName = std::make_shared<ElementName>(
+            elementName, callingAbilityName_, callingBundleName_, callingDeviceId_, callingModuleName_);
     TAG_LOGD(AAFwkTag::CONTEXT, "end");
     return elementName;
 }
