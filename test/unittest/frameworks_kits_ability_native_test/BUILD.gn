@@ -2394,7 +2394,6 @@ ohos_unittest("ability_connection_manager_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "faultloggerd:libdfx_dumpcatcher",
-    "hichecker:libhichecker",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
