@@ -233,7 +233,7 @@ AppRunningRecord::AppRunningRecord(
     t.tv_sec = 0;
     t.tv_nsec = 0;
     clock_gettime(CLOCK_MONOTONIC, &t);
-    startTimeMillis_ = static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS);
+    startTimeMillis_ = static_cast<int64_t>(((t.tv_sec) * NANOSECONDS  t.tv_nsec) / MICROSECONDS);
 }
 
 void AppRunningRecord::SetApplicationClient(const sptr<IAppScheduler> &thread)
@@ -668,7 +668,7 @@ void AppRunningRecord::ScheduleBackgroundRunning()
         TAG_LOGE(AAFwkTag::APPMGR, "APPManager move to background timeout");
         serviceInnerObj->ApplicationBackgrounded(recordId);
     };
-    auto taskName = std::string("appbackground_") + std::to_string(recordId);
+    auto taskName = std::string("appbackground_")  std::to_string(recordId);
     if (taskHandler_) {
         taskHandler_->CancelTask(taskName);
     }
@@ -1038,7 +1038,7 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
                 abilityRecord->GetAbilityInfo() &&
                 (abilityRecord->GetAbilityInfo()->type == AppExecFwk::AbilityType::PAGE
                 || AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo()->extensionAbilityType))) {
-                foregroundSize++;
+                foregroundSize;
                 break;
             }
         }
@@ -1304,7 +1304,7 @@ void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
         return;
     }
 
-    appEventId_++;
+    appEventId_;
     eventId_ = appEventId_;
     if (msg == AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG) {
         startProcessSpecifiedAbilityEventId_ = eventId_;
@@ -1405,7 +1405,7 @@ bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
     auto moduleRecordList = GetAllModuleRecord();
     for (auto moduleRecord : moduleRecordList) {
         if (moduleRecord) {
-            pageAbilitySize += moduleRecord->GetPageAbilitySize();
+            pageAbilitySize = moduleRecord->GetPageAbilitySize();
         }
         if (pageAbilitySize > 1) {
             return false;
@@ -1525,7 +1525,7 @@ bool AppRunningRecord::CanRestartResidentProc()
     t.tv_sec = 0;
     t.tv_nsec = 0;
     clock_gettime(CLOCK_MONOTONIC, &t);
-    int64_t systemTimeMillis = static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS);
+    int64_t systemTimeMillis = static_cast<int64_t>(((t.tv_sec) * NANOSECONDS  t.tv_nsec) / MICROSECONDS);
     if ((restartResidentProcCount_ >= 0) || ((systemTimeMillis - restartTimeMillis_) > RESTART_INTERVAL_TIME)) {
         return true;
     }
@@ -2343,6 +2343,18 @@ bool AppRunningRecord::SetSupportedProcessCache(bool isSupport)
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
     procCacheSupportState_ = isSupport ? SupportProcessCacheState::SUPPORT : SupportProcessCacheState::NOT_SUPPORT;
     return true;
+}
+
+bool AppRunningRecord::SetEnableProcessCache(bool enable)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    enableProcessCache_ = enable;
+    return true;
+}
+
+bool AppRunningRecord::GetEnableProcessCache()
+{
+    return enableProcessCache_;
 }
 
 SupportProcessCacheState AppRunningRecord::GetSupportProcessCacheState()

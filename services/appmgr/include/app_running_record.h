@@ -789,6 +789,9 @@ public:
     void SetAttachedToStatusBar(bool isAttached);
     bool IsAttachedToStatusBar();
 
+    bool SetEnableProcessCache(bool enable);
+    bool GetEnableProcessCache();
+
     void ScheduleCacheProcess();
 
     void SetBrowserHost(sptr<IRemoteObject> browser);

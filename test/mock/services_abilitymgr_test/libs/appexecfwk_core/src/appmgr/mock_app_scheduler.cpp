@@ -145,6 +145,11 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAppRemoteDied()");
 }
 
+void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyAppPreCache()");
+}
+
 void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject>& token, const AppExecFwk::AbilityState state)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::UpdateAbilityState()");
