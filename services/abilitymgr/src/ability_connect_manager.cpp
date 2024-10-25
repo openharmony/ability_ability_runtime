@@ -546,15 +546,14 @@ int AbilityConnectManager::UnloadUIExtensionAbility(const std::shared_ptr<AAFwk:
 void AbilityConnectManager::ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
     const std::shared_ptr<AbilityRecord> abilityRecord, sptr<IRemoteObject> callerToken)
 {
-    if (taskHandler_ == nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "taskHandler_ null");
+    if (taskHandler_ == nullptr || abilityRecord == nullptr || abilityRecord->GetPid() <= 0) {
         return;
     }
 
     std::string reason = ResSchedUtil::GetInstance().GetThawReasonByAbilityType(abilityInfo);
     const int32_t uid = abilityInfo.applicationInfo.uid;
     const std::string bundleName = abilityInfo.applicationInfo.bundleName;
-    const int32_t pid = (abilityRecord->GetPid() > 0) ? abilityRecord->GetPid() : -1;
+    const int32_t pid = abilityRecord->GetPid();
     auto callerAbility = Token::GetAbilityRecordByToken(callerToken);
     const int32_t callerPid = (callerAbility != nullptr) ? callerAbility->GetPid() : IPCSkeleton::GetCallingPid();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}d_%{public}s_%{public}d reason=%{public}s callerPid=%{public}d", uid,
