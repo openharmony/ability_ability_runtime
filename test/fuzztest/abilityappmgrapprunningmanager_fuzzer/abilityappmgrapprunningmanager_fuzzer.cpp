@@ -77,7 +77,6 @@ void DoSomethingInterestingWithMyAPIadda(const char* data, size_t size)
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
     std::shared_ptr<AppMgrServiceInner> appMgrServiceInner;
     manager->HandleAbilityAttachTimeOut(token, appMgrServiceInner);
-    manager->GetAppRunningRecord(eventId);
     bool clearMissionFlag = *data % ENABLE;
     manager->TerminateAbility(token, clearMissionFlag, appMgrServiceInner);
     ApplicationInfo appInfos;

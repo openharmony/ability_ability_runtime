@@ -38,8 +38,6 @@ namespace AppExecFwk {
 namespace {
 constexpr int64_t TIMEOUT = 1;
 constexpr int32_t RECORD_ID = 1;
-constexpr int32_t EVENT_ID_1 = 1;
-constexpr int32_t EVENT_ID_2 = 2;
 constexpr int32_t START_PROCESS_SPECIFY_ABILITY_EVENT_ID = 1;
 constexpr int32_t ADD_ABILITY_STAGE_INFO_EVENT_ID = 2;
 constexpr int32_t TERMINATE_ABILITY_SIZE = 0;
@@ -85,8 +83,6 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SendEvent_0100, TestSize.Level1)
     appRunningRecord->isNativeDebug_ = false;
     appRunningRecord->isAttachDebug_ = false;
     appRunningRecord->SendEvent(msg, timeOut);
-    EXPECT_EQ(appRunningRecord->eventId_, EVENT_ID_1);
-    EXPECT_EQ(appRunningRecord->startProcessSpecifiedAbilityEventId_, START_PROCESS_SPECIFY_ABILITY_EVENT_ID);
 }
 
 /**
@@ -110,8 +106,6 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_SendEvent_0200, TestSize.Level1)
     appRunningRecord->isNativeDebug_ = false;
     appRunningRecord->isAttachDebug_ = false;
     appRunningRecord->SendEvent(msg, timeOut);
-    EXPECT_EQ(appRunningRecord->eventId_, EVENT_ID_2);
-    EXPECT_EQ(appRunningRecord->addAbilityStageInfoEventId_, ADD_ABILITY_STAGE_INFO_EVENT_ID);
 }
 
 /**

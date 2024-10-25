@@ -1911,7 +1911,7 @@ HWTEST_F(AppMgrServiceInnerTest, HandleTerminateApplicationTimeOut_001, TestSize
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->HandleTerminateApplicationTimeOut(0);
+    appMgrServiceInner->HandleTerminateApplicationTimeOut(nullptr);
 
     BundleInfo bundleInfo;
     std::string appName = "test_appName";
@@ -1921,18 +1921,13 @@ HWTEST_F(AppMgrServiceInnerTest, HandleTerminateApplicationTimeOut_001, TestSize
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
-    appRecord->eventId_ = 0;
-    appMgrServiceInner->HandleTerminateApplicationTimeOut(0);
 
     pid_t pid = 1;
     appRecord->GetPriorityObject()->SetPid(pid);
-    appMgrServiceInner->HandleTerminateApplicationTimeOut(0);
+    appMgrServiceInner->HandleTerminateApplicationTimeOut(appRecord);
 
     appMgrServiceInner->taskHandler_ = nullptr;
-    appMgrServiceInner->HandleTerminateApplicationTimeOut(0);
-
-    appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->HandleTerminateApplicationTimeOut(0);
+    appMgrServiceInner->HandleTerminateApplicationTimeOut(appRecord);
 
     TAG_LOGI(AAFwkTag::TEST, "HandleTerminateApplicationTimeOut_001 end");
 }
@@ -1949,7 +1944,7 @@ HWTEST_F(AppMgrServiceInnerTest, HandleAddAbilityStageTimeOut_001, TestSize.Leve
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->HandleAddAbilityStageTimeOut(0);
+    appMgrServiceInner->HandleAddAbilityStageTimeOut(nullptr);
 
     BundleInfo bundleInfo;
     std::string appName = "test_appName";
@@ -1959,18 +1954,13 @@ HWTEST_F(AppMgrServiceInnerTest, HandleAddAbilityStageTimeOut_001, TestSize.Leve
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
-    appRecord->eventId_ = 0;
-    appMgrServiceInner->HandleAddAbilityStageTimeOut(0);
 
     appRecord->specifiedRequestId_ = 1;
-    appMgrServiceInner->HandleAddAbilityStageTimeOut(0);
+    appMgrServiceInner->HandleAddAbilityStageTimeOut(appRecord);
 
     sptr<IStartSpecifiedAbilityResponse> response;
     appMgrServiceInner->startSpecifiedAbilityResponse_ = response;
-    appMgrServiceInner->HandleAddAbilityStageTimeOut(0);
-
-    appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->HandleAddAbilityStageTimeOut(0);
+    appMgrServiceInner->HandleAddAbilityStageTimeOut(appRecord);
 
     TAG_LOGI(AAFwkTag::TEST, "HandleAddAbilityStageTimeOut_001 end");
 }
@@ -2582,7 +2572,7 @@ HWTEST_F(AppMgrServiceInnerTest, HandleStartSpecifiedAbilityTimeOut_001, TestSiz
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(0);
+    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(nullptr);
 
     BundleInfo bundleInfo;
     std::string appName = "test_appName";
@@ -2592,21 +2582,16 @@ HWTEST_F(AppMgrServiceInnerTest, HandleStartSpecifiedAbilityTimeOut_001, TestSiz
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
-    appRecord->eventId_ = 0;
-    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(0);
 
     appRecord->specifiedRequestId_ = 1;
-    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(0);
+    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(appRecord);
 
     sptr<IStartSpecifiedAbilityResponse> response;
     appMgrServiceInner->startSpecifiedAbilityResponse_ = response;
-    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(0);
+    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(appRecord);
 
     appRecord->specifiedRequestId_ = -1;
-    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(0);
-
-    appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(0);
+    appMgrServiceInner->HandleStartSpecifiedAbilityTimeOut(appRecord);
 
     TAG_LOGI(AAFwkTag::TEST, "HandleStartSpecifiedAbilityTimeOut_001 end");
 }
@@ -2760,22 +2745,18 @@ HWTEST_F(AppMgrServiceInnerTest, SendHiSysEvent_001, TestSize.Level0)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->SendHiSysEvent(0, 0);
+    appMgrServiceInner->SendHiSysEvent(0, nullptr);
 
     BundleInfo bundleInfo;
     std::string processName = "test_processName";
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
-    appRecord->eventId_ = 0;
-    appMgrServiceInner->SendHiSysEvent(0, 0);
-    appMgrServiceInner->SendHiSysEvent(1, 0);
-    appMgrServiceInner->SendHiSysEvent(2, 0);
-    appMgrServiceInner->SendHiSysEvent(3, 0);
-    appMgrServiceInner->SendHiSysEvent(4, 0);
-
-    appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->SendHiSysEvent(0, 0);
+    appMgrServiceInner->SendHiSysEvent(0, appRecord);
+    appMgrServiceInner->SendHiSysEvent(1, appRecord);
+    appMgrServiceInner->SendHiSysEvent(2, appRecord);
+    appMgrServiceInner->SendHiSysEvent(3, appRecord);
+    appMgrServiceInner->SendHiSysEvent(4, appRecord);
 
     TAG_LOGI(AAFwkTag::TEST, "SendHiSysEvent_001 end");
 }
