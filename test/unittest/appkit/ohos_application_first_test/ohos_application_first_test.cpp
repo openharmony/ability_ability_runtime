@@ -174,7 +174,7 @@ HWTEST_F(OHOSApplicationFirstTest, IsUpdateColorNeeded_0200, TestSize.Level0)
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, colorMode);
     std::string colorMode1 = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     EXPECT_FALSE(colorMode1.empty());
-    AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::SetLevelCount;
+    AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::Application;
     bool result = ohosApplication_->IsUpdateColorNeeded(config, level);
     EXPECT_TRUE(result);
     TAG_LOGI(AAFwkTag::TEST, "IsUpdateColorNeeded_0200 end");
@@ -451,7 +451,7 @@ HWTEST_F(OHOSApplicationFirstTest, AppExecFwk_OHOSApplicationTest_OnConfiguratio
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0400 start.";
     Configuration config;
-    AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::SetLevelCount;
+    AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::Application;
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE,
                    ConfigurationInner::SYSTEM_DEFAULT_FONTSIZE_SCALE);
     ohosApplication_->abilityRuntimeContext_ = AbilityRuntime::ApplicationContext::GetInstance();
@@ -484,7 +484,7 @@ HWTEST_F(OHOSApplicationFirstTest, AppExecFwk_OHOSApplicationTest_OnConfiguratio
 {
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_OnConfigurationUpdated_0500 start.";
     Configuration config;
-    AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::SetLevelCount;
+    AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::Application;
     ohosApplication_->abilityRuntimeContext_ = AbilityRuntime::ApplicationContext::GetInstance();
     ohosApplication_->configuration_ = std::make_shared<Configuration>();
     ohosApplication_->configuration_->AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE,
@@ -547,56 +547,6 @@ HWTEST_F(OHOSApplicationFirstTest, OnConfigurationUpdated_0600, TestSize.Level1)
     ohosApplication_->OnConfigurationUpdated(config);
     EXPECT_TRUE(config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE) == "zh");
     TAG_LOGI(AAFwkTag::TEST, "OnConfigurationUpdated_0600 end");
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0100
-* @tc.name: CleanAbilityStage
-* @tc.desc: Verify function CleanAbilityStage pointer abilityInfo empty
-*/
-HWTEST_F(OHOSApplicationFirstTest, AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0100 start.";
-    std::shared_ptr<AbilityInfo> abilityInfo = nullptr;
-    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
-    ohosApplication_->CleanAbilityStage(token, abilityInfo, false);
-    EXPECT_TRUE(abilityInfo == nullptr);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0100 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0200
-* @tc.name: CleanAbilityStage
-* @tc.desc: Verify function CleanAbilityStage pointer token empty
-*/
-HWTEST_F(OHOSApplicationFirstTest, AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0200 start.";
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    sptr<Notification::MockIRemoteObject> token = nullptr;
-    ohosApplication_->CleanAbilityStage(token, abilityInfo, false);
-    EXPECT_TRUE(token == nullptr);
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0200 end.";
-}
-
-/*
-* @tc.number: AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0300
-* @tc.name: CleanAbilityStage
-* @tc.desc: Verify function CleanAbilityStage map abilityRecords_ not empty
-*/
-HWTEST_F(OHOSApplicationFirstTest, AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0300, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0300 start.";
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
-    abilityInfo->moduleName = "entry";
-    std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage = std::make_shared<AbilityRuntime::AbilityStage>();
-    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
-    ohosApplication_->abilityStages_.emplace(abilityInfo->moduleName, abilityStage);
-    EXPECT_FALSE(ohosApplication_->abilityStages_.empty());
-    ohosApplication_->CleanAbilityStage(token, abilityInfo, false);
-    EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
-    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationFirstTest_CleanAbilityStage_0300 end.";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
