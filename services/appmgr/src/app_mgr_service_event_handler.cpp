@@ -41,5 +41,67 @@ void AMSEventHandler::ProcessEvent(const AAFwk::EventWrap &event)
     }
     appManager->HandleTimeOut(event);
 }
+
+AppEventUtil &AppEventUtil::GetInstance()
+{
+    static AppEventUtil instance;
+    return instance;
+}
+
+void AppEventUtil::AddEvent(std::shared_ptr<AppRunningRecord> appRecord, uint32_t eventId, int64_t param)
+{
+    if (appRecord == nullptr) {
+        return;
+    }
+    std::lock_guard lock(appEventListMutex_);
+    appEventList_.emplace_back(eventId, param, appRecord);
+}
+
+bool AppEventUtil::HasEvent(std::shared_ptr<AppRunningRecord> appRecord, uint32_t eventId)
+{
+    if (appRecord == nullptr) {
+        return false;
+    }
+    std::lock_guard lock(appEventListMutex_);
+    for (const auto &item : appEventList_) {
+        if (item.appRecord.lock() == appRecord && item.eventId == eventId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::shared_ptr<AppRunningRecord> AppEventUtil::RemoveEvent(uint32_t eventId, int64_t param)
+{
+    std::lock_guard lock(appEventListMutex_);
+    for (auto it = appEventList_.begin(); it != appEventList_.end(); ++it) {
+        if (it->eventId == eventId && it->param == param) {
+            auto result = it->appRecord.lock();
+            appEventList_.erase(it);
+            return result;
+        }
+    }
+    return nullptr;
+}
+
+std::list<AppEventData> AppEventUtil::RemoveEvent(std::shared_ptr<AppRunningRecord> appRecord, uint32_t eventId)
+{
+    std::list<AppEventData> result;
+    std::lock_guard lock(appEventListMutex_);
+    for (auto it = appEventList_.begin(); it != appEventList_.end();) {
+        auto appRecordItem = it->appRecord.lock();
+        if (appRecordItem == nullptr) {
+            it = appEventList_.erase(it);
+            continue;
+        }
+        if (appRecordItem == appRecord && it->eventId == eventId) {
+            result.emplace_back(*it);
+            it = appEventList_.erase(it);
+            continue;
+        }
+        ++it;
+    }
+    return result;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

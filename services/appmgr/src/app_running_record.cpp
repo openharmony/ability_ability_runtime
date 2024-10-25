@@ -37,6 +37,7 @@ constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nano secon
 constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias second
 constexpr int32_t MAX_RESTART_COUNT = 3;
 constexpr int32_t RESTART_INTERVAL_TIME = 120000;
+constexpr int32_t HALF_TIMEOUT = 2;
 constexpr const char* LAUNCHER_NAME = "com.ohos.sceneboard";
 constexpr const char *EVENT_KEY_VERSION_NAME = "VERSION_NAME";
 constexpr const char *EVENT_KEY_VERSION_CODE = "VERSION_CODE";
@@ -522,7 +523,9 @@ void AppRunningRecord::AddAbilityStage()
     }
     HapModuleInfo abilityStage;
     if (GetTheModuleInfoNeedToUpdated(mainBundleName_, abilityStage)) {
-        SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT);
+        auto timeout = AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT;
+        SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
+        SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         TAG_LOGI(AAFwkTag::APPMGR, "Current module : [%{public}s] | bundle : [%{public}s]",
             abilityStage.moduleName.c_str(), mainBundleName_.c_str());
         if (appLifeCycleDeal_ == nullptr) {
@@ -542,11 +545,13 @@ bool AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
 
     HapModuleInfo hapModuleInfo;
     if (GetTheModuleInfoNeedToUpdated(bundleName, hapModuleInfo)) {
-        if (startProcessSpecifiedAbilityEventId_ == 0) {
+        if (!AppEventUtil::GetInstance().HasEvent(shared_from_this(),
+            AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG)) {
             TAG_LOGI(
-                AAFwkTag::APPMGR, "START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG not exist");
-            SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG,
-                AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT);
+                AAFwkTag::APPMGR, "ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG not exist");
+            auto timeout = AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT;
+            SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
+            SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         }
         if (appLifeCycleDeal_ == nullptr) {
             TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
@@ -568,8 +573,9 @@ void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bund
 
     HapModuleInfo hapModuleInfo;
     if (GetTheModuleInfoNeedToUpdated(bundleName, hapModuleInfo)) {
-        SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG,
-            AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT);
+        auto timeout = AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT;
+        SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
+        SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, timeout);
         if (appLifeCycleDeal_ == nullptr) {
             TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
             return;
@@ -580,26 +586,13 @@ void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bund
 
 void AppRunningRecord::AddAbilityStageDone()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s and eventId %{public}d", mainBundleName_.c_str(),
-        static_cast<int>(eventId_));
+    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
+    RemoveEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG);
+    RemoveEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG);
+    RemoveEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG);
+    RemoveEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG);
 
-    if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
-        return;
-    }
-
-    if (startProcessSpecifiedAbilityEventId_ != 0) {
-        eventHandler_->RemoveEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG,
-            startProcessSpecifiedAbilityEventId_);
-        startProcessSpecifiedAbilityEventId_ = 0;
-    }
-    if (addAbilityStageInfoEventId_ != 0) {
-        eventHandler_->RemoveEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG,
-            addAbilityStageInfoEventId_);
-        addAbilityStageInfoEventId_ = 0;
-    }
     // Should proceed to the next notification
-
     if (IsStartSpecifiedAbility()) {
         ScheduleAcceptWant(moduleName_);
         return;
@@ -637,7 +630,9 @@ void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
 
 void AppRunningRecord::ScheduleTerminate()
 {
-    SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT);
+    auto timeout = AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT;
+    SendEvent(AMSEventHandler::TERMINATE_APPLICATION_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT);
+    SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, timeout);
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return;
@@ -1291,9 +1286,11 @@ std::shared_ptr<PriorityObject> AppRunningRecord::GetPriorityObject()
     return priorityObject_;
 }
 
-void AppRunningRecord::SendEventForSpecifiedAbility(uint32_t msg, int64_t timeOut)
+void AppRunningRecord::SendEventForSpecifiedAbility()
 {
-    SendEvent(msg, timeOut);
+    auto timeOUt = AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT;
+    SendEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG, timeOUt / HALF_TIMEOUT);
+    SendEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG, timeOUt);
 }
 
 void AppRunningRecord::SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunningRecord> &ability,
@@ -1341,40 +1338,23 @@ void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
     }
 
     appEventId_++;
-    eventId_ = appEventId_;
-    if (msg == AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG) {
-        startProcessSpecifiedAbilityEventId_ = eventId_;
-    }
-    if (msg == AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG) {
-        addAbilityStageInfoEventId_ = eventId_;
-    }
+    auto param = appEventId_;
 
-    TAG_LOGI(AAFwkTag::APPMGR, "eventId %{public}d", static_cast<int>(eventId_));
-    eventHandler_->SendEvent(AAFwk::EventWrap(msg, eventId_), timeOut, false);
-    SendClearTask(msg, timeOut);
+    TAG_LOGI(AAFwkTag::APPMGR, "eventId %{public}d", static_cast<int>(param));
+    eventHandler_->SendEvent(AAFwk::EventWrap(msg, param), timeOut, false);
+    AppEventUtil::GetInstance().AddEvent(shared_from_this(), msg, param);
 }
 
-void AppRunningRecord::SendClearTask(uint32_t msg, int64_t timeOut)
+void AppRunningRecord::RemoveEvent(uint32_t msg)
 {
-    if (!taskHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null taskHandler_");
+    if (!eventHandler_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
         return;
     }
-    int64_t* eventId = nullptr;
-    if (msg == AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG) {
-        eventId = &startProcessSpecifiedAbilityEventId_;
-    } else if (msg == AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG) {
-        eventId = &addAbilityStageInfoEventId_;
-    } else {
-        TAG_LOGD(AAFwkTag::APPMGR, "Other msg: %{public}d", msg);
-        return;
+    auto eventList = AppEventUtil::GetInstance().RemoveEvent(shared_from_this(), msg);
+    for (const auto &eventData : eventList) {
+        eventHandler_->RemoveEvent(msg, eventData.param);
     }
-    taskHandler_->SubmitTask([wthis = weak_from_this(), eventId]() {
-        auto pthis = wthis.lock();
-        if (pthis) {
-            *eventId = 0;
-        }
-        }, timeOut);
 }
 
 void AppRunningRecord::PostTask(std::string msg, int64_t timeOut, const Closure &task)
@@ -1384,11 +1364,6 @@ void AppRunningRecord::PostTask(std::string msg, int64_t timeOut, const Closure 
         return;
     }
     taskHandler_->SubmitTask(task, msg, timeOut);
-}
-
-int64_t AppRunningRecord::GetEventId() const
-{
-    return eventId_;
 }
 
 void AppRunningRecord::SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler)
@@ -1667,8 +1642,9 @@ bool AppRunningRecord::IsStartSpecifiedAbility() const
 
 void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 {
-    SendEvent(
-        AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG, AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT);
+    auto timeOUt = AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT;
+    SendEvent(AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG, timeOUt / HALF_TIMEOUT);
+    SendEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG, timeOUt);
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return;
@@ -1678,21 +1654,16 @@ void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 
 void AppRunningRecord::ScheduleAcceptWantDone()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s and eventId %{public}d",
-        mainBundleName_.c_str(), static_cast<int>(eventId_));
+    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
 
-    if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
-        return;
-    }
-
-    eventHandler_->RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG, eventId_);
+    RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG);
 }
 
 void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
 {
-    SendEvent(
-        AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG, AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT);
+    auto timeOUt = AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT;
+    SendEvent(AMSEventHandler::START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG, timeOUt / HALF_TIMEOUT);
+    SendEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG, timeOUt);
     if (appLifeCycleDeal_ == nullptr) {
         TAG_LOGW(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return;
@@ -1702,28 +1673,16 @@ void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const 
 
 void AppRunningRecord::ScheduleNewProcessRequestDone()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s and eventId %{public}d",
-        mainBundleName_.c_str(), static_cast<int>(eventId_));
+    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
 
-    if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
-        return;
-    }
-
-    eventHandler_->RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG, eventId_);
+    RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG);
 }
 
 void AppRunningRecord::ApplicationTerminated()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Application terminated bundle %{public}s and eventId %{public}d",
-        mainBundleName_.c_str(), static_cast<int>(eventId_));
+    TAG_LOGD(AAFwkTag::APPMGR, "Application terminated bundle %{public}s", mainBundleName_.c_str());
 
-    if (!eventHandler_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null eventHandler_");
-        return;
-    }
-
-    eventHandler_->RemoveEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, eventId_);
+    RemoveEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG);
 }
 
 AAFwk::Want AppRunningRecord::GetSpecifiedWant() const

@@ -535,16 +535,6 @@ std::shared_ptr<AbilityRunningRecord> AppRunningManager::GetAbilityRunningRecord
     return nullptr;
 }
 
-std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecord(const int64_t eventId)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::lock_guard guard(runningRecordMapMutex_);
-    auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&eventId](const auto &pair) {
-        return pair.second->GetEventId() == eventId;
-    });
-    return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
-}
-
 void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token,
     std::shared_ptr<AppMgrServiceInner> serviceInner)
 {
