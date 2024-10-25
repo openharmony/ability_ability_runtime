@@ -1475,7 +1475,7 @@ int AppRunningManager::DumpIpcAllStart(std::string& result)
             appRecord->GetPriorityObject()->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStart(currentResult);
-        result += currentResult  "\n";
+        result += currentResult + "\n";
         if (errCode != DumpErrorCode::ERR_OK) {
             return errCode;
         }
@@ -1493,7 +1493,7 @@ int AppRunningManager::DumpIpcAllStop(std::string& result)
             appRecord->GetPriorityObject()->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStop(currentResult);
-        result += currentResult  "\n";
+        result += currentResult + "\n";
         if (errCode != DumpErrorCode::ERR_OK) {
             return errCode;
         }
@@ -1511,7 +1511,7 @@ int AppRunningManager::DumpIpcAllStat(std::string& result)
             appRecord->GetPriorityObject()->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStat(currentResult);
-        result += currentResult  "\n";
+        result += currentResult + "\n";
         if (errCode != DumpErrorCode::ERR_OK) {
             return errCode;
         }
@@ -1579,7 +1579,7 @@ int AppRunningManager::DumpFfrt(const std::vector<int32_t>& pids, std::string& r
         if (errCode != DumpErrorCode::ERR_OK) {
             continue;
         }
-        result += currentResult  "\n";
+        result += currentResult + "\n";
     }
     if (count == pids.size()) {
         TAG_LOGE(AAFwkTag::APPMGR, "no valid pid");
