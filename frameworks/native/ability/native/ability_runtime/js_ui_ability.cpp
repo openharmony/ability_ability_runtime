@@ -842,7 +842,7 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
             displayId = strtol(strDisplayId.c_str(), nullptr, BASE_DISPLAY_ID_NUM);
             TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}d", displayId);
         } else {
-            TAG_LOGE(AAFwkTag::UIABILITY, "formatRegex: [%{public}s] failed", strDisplayId.c_str());
+            TAG_LOGW(AAFwkTag::UIABILITY, "formatRegex: [%{public}s] failed", strDisplayId.c_str());
         }
     }
     auto option = GetWindowOption(want);
@@ -899,8 +899,12 @@ void JsUIAbility::RequestFocus(const Want &want)
 void JsUIAbility::ContinuationRestore(const Want &want)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (!IsRestoredInContinuation() || scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "is not in continuation or null scene_");
+    if (!IsRestoredInContinuation()) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "not in continuation");
+        return;
+    }
+    if (scene_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene_");
         return;
     }
     RestorePageStack(want);
