@@ -4780,7 +4780,7 @@ int AbilityManagerService::GetRemoteMissionInfo(const std::string& deviceId, int
     if (result != ERR_OK) {
         return result;
     }
-    for (auto iter = missionVector.begin(); iter != missionVector.end(); iter) {
+    for (auto iter = missionVector.begin(); iter != missionVector.end(); iter++) {
         if (iter->id == missionId) {
             missionInfo = *iter;
             return ERR_OK;
@@ -5099,7 +5099,7 @@ int AbilityManagerService::AttachAbilityThread(
         return dataAbilityManager->AttachAbilityThread(scheduler, token);
     } else {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis())  "; AbilityManagerService::AttachAbilityThread;" 
+        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) + "; AbilityManagerService::AttachAbilityThread;" +
             " the end of load lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         int32_t ownerMissionUserId = abilityRecord->GetOwnerMissionUserId();
@@ -5217,7 +5217,7 @@ void AbilityManagerService::DumpSysAbilityInner(
     }
     if (argList.size() >= MIN_DUMP_ARGUMENT_NUM) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "argList = %{public}s", argList[1].c_str());
-        std::vector<std::string> params(argList.begin()  MIN_DUMP_ARGUMENT_NUM, argList.end());
+        std::vector<std::string> params(argList.begin()  + MIN_DUMP_ARGUMENT_NUM, argList.end());
         try {
             auto abilityId = static_cast<int32_t>(std::stoi(argList[1]));
             targetManager->DumpMissionListByRecordId(info, isClient, abilityId, params);
@@ -5244,7 +5244,7 @@ void AbilityManagerService::DumpSysAbilityInnerBySCB(
     }
     if (argList.size() >= MIN_DUMP_ARGUMENT_NUM) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "argList = %{public}s", argList[1].c_str());
-        std::vector<std::string> params(argList.begin()  MIN_DUMP_ARGUMENT_NUM, argList.end());
+        std::vector<std::string> params(argList.begin() + MIN_DUMP_ARGUMENT_NUM, argList.end());
         try {
             auto abilityId = static_cast<int32_t>(std::stoi(argList[1]));
             auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
@@ -5290,7 +5290,7 @@ void AbilityManagerService::DumpSysStateInner(
         targetManager->DumpState(info, isClient);
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "uri = %{public}s", argList[1].c_str());
-        std::vector<std::string> params(argList.begin()  MIN_DUMP_ARGUMENT_NUM, argList.end());
+        std::vector<std::string> params(argList.begin() + MIN_DUMP_ARGUMENT_NUM, argList.end());
         targetManager->DumpStateByUri(info, isClient, argList[1], params);
     }
 }
@@ -5356,16 +5356,16 @@ void AbilityManagerService::DumpSysProcess(
             continue;
         }
 
-        dumpInfo = "    AppRunningRecord ID #"  std::to_string(processInfoID);
-        processInfoID;
+        dumpInfo = "    AppRunningRecord ID #" + std::to_string(processInfoID);
+        processInfoID++;
         info.push_back(dumpInfo);
-        dumpInfo = "      process name ["  processInfo.processName_  "]";
+        dumpInfo = "      process name ["  +processInfo.processName_+  "]";
         info.push_back(dumpInfo);
-        dumpInfo = "      pid #"  std::to_string(processInfo.pid_) 
-            "  uid #"  std::to_string(processInfo.uid_);
+        dumpInfo = "      pid #" + std::to_string(processInfo.pid_) + 
+            "  uid #" + std::to_string(processInfo.uid_);
         info.push_back(dumpInfo);
         auto appState = static_cast<AppState>(processInfo.state_);
-        dumpInfo = "      state #"  DelayedSingleton<AppScheduler>::GetInstance()->ConvertAppState(appState);
+        dumpInfo = "      state #" + DelayedSingleton<AppScheduler>::GetInstance()->ConvertAppState(appState);
         info.push_back(dumpInfo);
         DumpUIExtensionRootHostRunningInfos(processInfo.pid_, info);
         DumpUIExtensionProviderRunningInfos(processInfo.pid_, info);
@@ -5393,10 +5393,10 @@ void AbilityManagerService::DumpUIExtensionRootHostRunningInfos(pid_t pid, std::
     }
 
     std::string temp;
-    for (size_t i = 0; i < hostPids.size(); i) {
-        temp = "      root caller #"  std::to_string(i);
+    for (size_t i = 0; i < hostPids.size(); i++) {
+        temp = "      root caller #" + std::to_string(i);
         info.push_back(temp);
-        temp = "        pid #"  std::to_string(hostPids[i]);
+        temp = "        pid #" + std::to_string(hostPids[i]);
         info.push_back(temp);
     }
 }
@@ -5422,10 +5422,10 @@ void AbilityManagerService::DumpUIExtensionProviderRunningInfos(pid_t hostPid, s
     }
 
     std::string temp;
-    for (size_t i = 0; i < providerPids.size(); i) {
+    for (size_t i = 0; i < providerPids.size(); i++) {
         temp = "      uiextension provider #"  std::to_string(i);
         info.push_back(temp);
-        temp = "        pid #"  std::to_string(providerPids[i]);
+        temp = "        pid #" + std::to_string(providerPids[i]);
         info.push_back(temp);
     }
 }
@@ -5700,14 +5700,14 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
 
     if (targetState == AbilityState::BACKGROUND) {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::BACKGROUND };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) 
+        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) +
             "; AbilityManagerService::AbilityTransitionDone; the end of background lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     } else if (targetState != AbilityState::INITIAL) {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::FOREGROUND };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) 
+        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) +
             "; AbilityManagerService::AbilityTransitionDone; the end of foreground lifecycle.";
-        entry = " the end of foreground lifecycle.";
+        entry += " the end of foreground lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
 
@@ -5953,7 +5953,7 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT, userId,
         abilityInfo, extensionAbilityInfo))) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Waiting query highest priority ability info completed.");
-        attemptNums;
+        ++attemptNums;
         if (!isBoot && attemptNums > SWITCH_ACCOUNT_TRY) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Query highest priority ability failed.");
             return;
@@ -6227,7 +6227,7 @@ void AbilityManagerService::OnCallConnectDied(std::shared_ptr<CallRecord> callRe
 void AbilityManagerService::ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token)
 {
     std::lock_guard<ffrt::mutex> autoLock(abilityTokenLock_);
-    for (auto iter = callStubTokenMap_.begin(); iter != callStubTokenMap_.end(); iter) {
+    for (auto iter = callStubTokenMap_.begin(); iter != callStubTokenMap_.end(); iter++) {
         if (iter->second == token) {
             callStubTokenMap_.erase(iter);
             break;
@@ -6379,7 +6379,7 @@ void AbilityManagerService::PreLoadAppDataAbilitiesTask(const std::string &bundl
     AbilityRequest dataAbilityRequest;
     UpdateCallerInfo(dataAbilityRequest.want, nullptr);
     dataAbilityRequest.appInfo = bundleInfo.applicationInfo;
-    for (auto it = bundleInfo.abilityInfos.begin(); it != bundleInfo.abilityInfos.end(); it) {
+    for (auto it = bundleInfo.abilityInfos.begin(); it != bundleInfo.abilityInfos.end(); ++it) {
         if (it->type != AppExecFwk::AbilityType::DATA) {
             continue;
         }
@@ -6927,10 +6927,10 @@ int AbilityManagerService::GetAppMemorySize()
             return APP_MEMORY_SIZE;
         }
         int len = strlen(valueGet);
-        for (int i = 0; i < len; i) {
+        for (int i = 0; i < len; i++) {
             if (valueGet[i] >= '0' && valueGet[i] <= '9') {
                 resultInt *= SIZE_10;
-                resultInt = valueGet[i] - '0';
+                resultInt += valueGet[i] - '0';
             }
         }
         if (resultInt == 0) {
@@ -7578,7 +7578,7 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
         auto abilityInfo = record->GetAbilityInfo();
 
         if ((it != appRecoveryHistory_.end()) &&
-            (it->second  MIN_RECOVERY_TIME > now)) {
+            (it->second + MIN_RECOVERY_TIME > now)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR,
                 "%{public}s AppRecovery recover app more than once in one minute, just kill app(%{public}d).",
                 __func__, record->GetPid());
@@ -7617,7 +7617,7 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
                 }
                 bool isRestartPage = false;
                 auto abilityName = want->GetElement().GetAbilityName();
-                for (auto it = bundleInfo.abilityInfos.begin(); it != bundleInfo.abilityInfos.end(); it) {
+                for (auto it = bundleInfo.abilityInfos.begin(); it != bundleInfo.abilityInfos.end(); ++it) {
                     if ((abilityName.compare(it->name) == 0) && it->type == AppExecFwk::AbilityType::PAGE) {
                         isRestartPage = true;
                         break;
@@ -8135,7 +8135,7 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
             Security::AccessToken::NativeTokenInfo nativeTokenInfo;
             int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
             if (result == ERR_OK) {
-                nativeName = "_"  nativeTokenInfo.processName;
+                nativeName = "_"  + nativeTokenInfo.processName;
             }
             want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
             want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, nativeName);
@@ -8216,7 +8216,7 @@ void AbilityManagerService::UpdateDmsCallerInfo(Want& want, const sptr<IRemoteOb
             Security::AccessToken::NativeTokenInfo nativeTokenInfo;
             int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
             if (result == ERR_OK) {
-                nativeName = "_"  nativeTokenInfo.processName;
+                nativeName = "_" + nativeTokenInfo.processName;
             }
             want.RemoveParam(DMS_CALLER_NATIVE_NAME);
             want.SetParam(DMS_CALLER_NATIVE_NAME, nativeName);
@@ -8547,7 +8547,7 @@ int AbilityManagerService::CheckStaticCfgPermission(const AppExecFwk::AbilityReq
 
 bool AbilityManagerService::IsNeedTimeoutForTest(const std::string &abilityName, const std::string &state) const
 {
-    for (auto iter = timeoutMap_.begin(); iter != timeoutMap_.end(); iter) {
+    for (auto iter = timeoutMap_.begin(); iter != timeoutMap_.end(); iter++) {
         if (iter->first == state && iter->second == abilityName) {
             return true;
         }
@@ -8768,10 +8768,10 @@ ErrCode AbilityManagerService::ProcessMultiParam(std::vector<std::string>& argsS
             it = argsStr.erase(it);
             continue;
         }
-        it;
+        it++;
     }
     std::string cmd;
-    for (unsigned int i = 0; i < argsStr.size(); i) {
+    for (unsigned int i = 0; i < argsStr.size(); i++) {
         cmd.append(argsStr[i]);
         if (i != argsStr.size() - 1) {
             cmd.append(" ");
@@ -8783,7 +8783,7 @@ ErrCode AbilityManagerService::ProcessMultiParam(std::vector<std::string>& argsS
     std::vector<std::string> dumpResults;
     DumpSysState(cmd, dumpResults, isClient, isUser, userID);
     for (auto it : dumpResults) {
-        result = it  "\n";
+        result = it + "\n";
     }
     return ERR_OK;
 }
@@ -9062,7 +9062,7 @@ int AbilityManagerService::PrepareTerminateAbility(const sptr<IRemoteObject> &to
     int prepareTerminateTimeout =
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * PREPARE_TERMINATE_TIMEOUT_MULTIPLE;
     if (taskHandler_) {
-        taskHandler_->SubmitTask(timeoutTask, "PrepareTermiante_"  std::to_string(abilityRecord->GetAbilityRecordId()),
+        taskHandler_->SubmitTask(timeoutTask, "PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()),
             prepareTerminateTimeout);
     }
 
@@ -9071,7 +9071,7 @@ int AbilityManagerService::PrepareTerminateAbility(const sptr<IRemoteObject> &to
         callback->DoPrepareTerminate();
     }
     if (taskHandler_) {
-        taskHandler_->CancelTask("PrepareTermiante_"  std::to_string(abilityRecord->GetAbilityRecordId()));
+        taskHandler_->CancelTask("PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     }
     return ERR_OK;
 }
@@ -9951,7 +9951,7 @@ int32_t AbilityManagerService::AcquireShareData(
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<ffrt::mutex> guard(iAcquireShareDataMapLock_);
-    uniqueId_ = (uniqueId_ == INT_MAX) ? 0 : (uniqueId_  1);
+    uniqueId_ = (uniqueId_ == INT_MAX) ? 0 : (uniqueId_ + 1);
     std::pair<int64_t, const sptr<IAcquireShareDataCallback>> shareDataPair =
         std::make_pair(abilityRecord->GetAbilityRecordId(), shareData);
     iAcquireShareDataMap_.emplace(uniqueId_, shareDataPair);
@@ -11006,7 +11006,7 @@ int32_t AbilityManagerService::GenerateEmbeddableUIAbilityRequest(
         struct timespec time = {0, 0};
         clock_gettime(CLOCK_MONOTONIC, &time);
         int64_t times = static_cast<int64_t>(time.tv_sec);
-        request.abilityInfo.process = request.abilityInfo.bundleName  PROCESS_SUFFIX  std::to_string(times);
+        request.abilityInfo.process = request.abilityInfo.bundleName + PROCESS_SUFFIX  std::to_string(times);
     } else {
         result = GenerateExtensionAbilityRequest(want, request, callerToken, userId);
     }
@@ -11232,7 +11232,7 @@ bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToke
         TAG_LOGE(AAFwkTag::ABILITYMGR, "The caller not foreground.");
         return false;
     }
-    std::string bundleName = ATOMIC_SERVICE_PREFIX  appId;
+    std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
     Want want;
     want.SetBundle(bundleName);
     want.SetParam("send_to_erms_embedded", 1);
@@ -11361,7 +11361,7 @@ bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, c
     const std::string &calleeAbilityName)
 {
     std::map<std::string, std::list<std::string>>::iterator iter = whiteListMap_.find(callerBundleName);
-    std::string uri = calleeBundleName  "/"  calleeAbilityName;
+    std::string uri = calleeBundleName  + "/" + calleeAbilityName;
     if (iter != whiteListMap_.end()) {
         if (std::find(std::begin(iter->second), std::end(iter->second), uri) != std::end(iter->second)) {
             return true;
@@ -12029,7 +12029,7 @@ void AbilityManagerService::ReportCleanSession(const sptr<SessionInfo> &sessionI
     const auto &abilityInfo = abilityRecord->GetAbilityInfo();
     std::string abilityName = abilityInfo.name;
     if (abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD) {
-        abilityName = std::to_string(sessionInfo->persistentId);
+        abilityName += std::to_string(sessionInfo->persistentId);
     }
     (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
         DeleteAbilityRecoverInfo(abilityInfo.applicationInfo.accessTokenId, abilityInfo.moduleName, abilityName);
