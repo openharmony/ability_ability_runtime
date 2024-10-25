@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "ability_manager_client.h"
+#include "ability_manager_interface.h"
 #include "ability_runtime_error_util.h"
 #include "app_mgr_interface.h"
 #include "application_info.h"
@@ -120,7 +121,7 @@ public:
 
     static napi_value KillProcessesByBundleName(napi_env env, napi_callback_info info)
     {
-        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnKillProcessesByBundleName);
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnkillProcessesByBundleName);
     }
 
     static napi_value ClearUpApplicationData(napi_env env, napi_callback_info info)
@@ -655,7 +656,7 @@ private:
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [appManager = appManager_, env, task = napiAsyncTask.get()]() {
             if (appManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
+                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 delete task;
                 return;
@@ -815,7 +816,7 @@ private:
             task->Reject(env, CreateJsErrorByNativeErr(env, ret, "kill process failed."));
         }
     }
-    napi_value OnKillProcessesByBundleName(napi_env env, size_t argc, napi_value* argv)
+    napi_value OnkillProcessesByBundleName(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_ONE) {
@@ -823,6 +824,7 @@ private:
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
+
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[0], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get bundleName error");
@@ -830,6 +832,7 @@ private:
             return CreateJsUndefined(env);
         }
 
+        TAG_LOGE(AAFwkTag::APPMGR, "kill process [%{public}s]", bundleName.c_str());
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
@@ -889,7 +892,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "OnClearUpAppData called");
         if (argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::APPMGR, "arguments mismatch");
+            TAG_LOGE(AAFwkTag::APPMGR, "arguments not match");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }

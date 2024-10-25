@@ -238,6 +238,7 @@ bool AppUtils::IsSupportNativeChildProcess()
 
 bool AppUtils::IsAllowResidentInExtremeMemory(const std::string& bundleName, const std::string& abilityName)
 {
+    std::lock_guard lock(residentProcessInExtremeMemoryMutex_);
     if (!residentProcessInExtremeMemory_.isLoaded) {
         LoadResidentProcessInExtremeMemory();
         residentProcessInExtremeMemory_.isLoaded = true;
@@ -346,6 +347,7 @@ std::string AppUtils::GetCacheExtensionTypeList()
 
 bool AppUtils::IsAllowStartAbilityWithoutCallerToken(const std::string& bundleName, const std::string& abilityName)
 {
+    std::lock_guard lock(startAbilityWithoutCallerTokenMutex_);
     if (!startAbilityWithoutCallerToken_.isLoaded) {
         LoadStartAbilityWithoutCallerToken();
         startAbilityWithoutCallerToken_.isLoaded = true;
