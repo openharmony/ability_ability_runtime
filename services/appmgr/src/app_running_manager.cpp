@@ -77,7 +77,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     auto recordId = AppRecordId::Create();
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
 
-    std::regex rule("[a-zA-Z.]+[-_#]{1}");
+    std::regex rule("[a-zA-Z.][-_#]{1}");
     std::string signCode;
     bool isStageBasedModel = false;
     ClipStringContent(rule, bundleInfo.appId, signCode);
@@ -113,7 +113,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     TAG_LOGD(AAFwkTag::APPMGR,
         "appName: %{public}s, processName: %{public}s, uid: %{public}d, specifiedProcessFlag: %{public}s",
         appName.c_str(), processName.c_str(), uid, specifiedProcessFlag.c_str());
-    std::regex rule("[a-zA-Z.]+[-_#]{1}");
+    std::regex rule("[a-zA-Z.][-_#]{1}");
     std::string signCode;
     auto jointUserId = bundleInfo.jointUserId;
     TAG_LOGD(AAFwkTag::APPMGR, "jointUserId : %{public}s", jointUserId.c_str());
@@ -239,7 +239,7 @@ int32_t AppRunningManager::GetAllAppRunningRecordCountByBundleName(const std::st
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetBundleName() == bundleName) {
-            count++;
+            count;
         }
     }
 
@@ -658,8 +658,12 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
-            TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s is cached, not terminate app.",
-                appRecord->GetBundleName().c_str());
+            cacheProcMgr->PenddingCacheProcess(appRecord);
+             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
+                 appRecord->GetBundleName().c_str());
+            if (clearMissionFlag) {
+                NotifyAppPreCache(appRecord, appMgrServiceInner);
+            }
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
@@ -670,6 +674,24 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             appRecord->PostTask("DELAY_KILL_PROCESS", delayTime, killProcess);
         }
     }
+}
+
+void AppRunningManager::NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
+    const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner)
+{
+    if (appMgrServiceInner == nullptr || appRecord == nullptr ||
+        appRecord->GetPriorityObject() == nullptr) {
+        return;
+    }
+    int32_t pid = appRecord->GetPriorityObject()->GetPid();
+    int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
+    auto notifyAppPreCache = [pid, userId, inner = appMgrServiceInner]() {
+        if (inner == nullptr) {
+            return;
+        }
+        inner->NotifyAppPreCache(pid, userId);
+    };
+    appRecord->PostTask("NotifyAppPreCache", 0, notifyAppPreCache);
 }
 
 void AppRunningManager::GetRunningProcessInfoByToken(
@@ -739,7 +761,7 @@ void AppRunningManager::ClipStringContent(const std::regex &re, const std::strin
 {
     std::smatch basket;
     if (std::regex_search(source, basket, re)) {
-        afterCutStr = basket.prefix().str() + basket.suffix().str();
+        afterCutStr = basket.prefix().str()  basket.suffix().str();
     }
 }
 
@@ -1294,7 +1316,7 @@ bool AppRunningManager::IsChildProcessReachLimit(uint32_t accessTokenId)
             accessTokenId != appRecord->GetApplicationInfo()->accessTokenId) {
             continue;
         }
-        childCount += appRecord->GetChildProcessCount();
+        childCount = appRecord->GetChildProcessCount();
     }
     return childCount >= AAFwk::AppUtils::GetInstance().MaxChildProcess();
 }
@@ -1388,7 +1410,7 @@ int32_t AppRunningManager::GetAllUIExtensionRootHostPid(pid_t pid, std::vector<p
     }
     std::string hostPidStr = std::accumulate(hostPids.begin(), hostPids.end(), std::string(),
         [](const std::string& a, pid_t b) {
-            return a + std::to_string(b) + " ";
+            return a  std::to_string(b)  " ";
         });
     TAG_LOGD(AAFwkTag::APPMGR, "pid: %{public}s, hostPid: %{public}s.", std::to_string(pid).c_str(),
         hostPidStr.c_str());
@@ -1423,7 +1445,7 @@ int32_t AppRunningManager::RemoveUIExtensionLauncherItem(pid_t pid)
             it = uiExtensionLauncherMap_.erase(it);
             continue;
         }
-        it++;
+        it;
     }
 
     return ERR_OK;
@@ -1437,7 +1459,7 @@ int32_t AppRunningManager::RemoveUIExtensionLauncherItemById(int32_t uiExtension
             it = uiExtensionLauncherMap_.erase(it);
             continue;
         }
-        it++;
+        it;
     }
 
     return ERR_OK;
@@ -1453,7 +1475,7 @@ int AppRunningManager::DumpIpcAllStart(std::string& result)
             appRecord->GetPriorityObject()->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStart(currentResult);
-        result += currentResult + "\n";
+        result = currentResult  "\n";
         if (errCode != DumpErrorCode::ERR_OK) {
             return errCode;
         }
@@ -1471,7 +1493,7 @@ int AppRunningManager::DumpIpcAllStop(std::string& result)
             appRecord->GetPriorityObject()->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStop(currentResult);
-        result += currentResult + "\n";
+        result = currentResult  "\n";
         if (errCode != DumpErrorCode::ERR_OK) {
             return errCode;
         }
@@ -1489,7 +1511,7 @@ int AppRunningManager::DumpIpcAllStat(std::string& result)
             appRecord->GetPriorityObject()->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStat(currentResult);
-        result += currentResult + "\n";
+        result = currentResult  "\n";
         if (errCode != DumpErrorCode::ERR_OK) {
             return errCode;
         }
@@ -1549,7 +1571,7 @@ int AppRunningManager::DumpFfrt(const std::vector<int32_t>& pids, std::string& r
         const auto& appRecord = GetAppRunningRecordByPid(pid);
         if (!appRecord) {
             TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
-            ++count;
+            count;
             continue;
         }
         std::string currentResult;
@@ -1557,7 +1579,7 @@ int AppRunningManager::DumpFfrt(const std::vector<int32_t>& pids, std::string& r
         if (errCode != DumpErrorCode::ERR_OK) {
             continue;
         }
-        result += currentResult + "\n";
+        result = currentResult  "\n";
     }
     if (count == pids.size()) {
         TAG_LOGE(AAFwkTag::APPMGR, "no valid pid");
