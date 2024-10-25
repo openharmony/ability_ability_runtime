@@ -2399,6 +2399,7 @@ ohos_unittest("ability_connection_manager_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
+}
 
 ohos_unittest("abilityruntime_test") {
   module_out_path = module_output_path
