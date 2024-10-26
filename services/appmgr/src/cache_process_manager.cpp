@@ -26,7 +26,7 @@
 
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
-const std::string RESOURCE_CACHE_PROCESS_ENABLE = "persist.sys.resource.warmStartProcessEnable";
+const std::string RESOURCE_WARM_START_PROCESS_ENABLE = "persist.resourceschedule.enable_warm_start_process";
 const std::string PROCESS_CACHE_API_CHECK_CONFIG = "persist.sys.abilityms.processCacheApiCheck";
 const std::string PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG = "persist.sys.abilityms.processCacheSetSupportCheck";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
@@ -239,7 +239,6 @@ void CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
 bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (appRecord == nullptr) {
-        TAG_LOGI(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
         return false;
     }
     auto appInfo = appRecord->GetApplicationInfo();
