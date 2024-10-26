@@ -126,7 +126,9 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
             appRecord->GetName().c_str());
         return true;
     }
-    appRecord->ScheduleCacheProcess();
+    if (!warmStartProcesEnable_) {
+        appRecord->ScheduleCacheProcess();
+    }
     appRecord->SetProcessCaching(false);
     auto appInfo = appRecord->GetApplicationInfo();
     HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
