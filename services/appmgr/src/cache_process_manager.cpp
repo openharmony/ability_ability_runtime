@@ -254,10 +254,6 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return true;
     }
-    if (appRecord->GetEnableProcessCache()) {
-        appRecord->SetEnableProcessCache(false);
-    }
-    appRecord->SetProcessCaching(false);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     TAG_LOGI(AAFwkTag::APPMGR, "app none cached state is notified: %{public}s, uid: %{public}d, %{public}s",
         appRecord->GetBundleName().c_str(), appRecord->GetUid(), PrintCacheQueue().c_str());

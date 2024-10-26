@@ -661,7 +661,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     bool isProcCache = false;
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey);
-    if (appRecord && appRecord->IsCaching()) {
+    if (appRecord && appRecord->IsCaching()) {    
         appRecord->SetProcessCacheBlocked(true);
         appRecord = nullptr;
     }
