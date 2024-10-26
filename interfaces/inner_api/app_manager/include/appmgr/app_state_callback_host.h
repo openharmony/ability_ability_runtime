@@ -82,7 +82,7 @@ private:
     int32_t HandleNotifyConfigurationChange(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyStartResidentProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnAppRemoteDied(MessageParcel &data, MessageParcel &reply);
-
+    int32_t HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AppStateCallbackHost);
 };
 }  // namespace AppExecFwk
