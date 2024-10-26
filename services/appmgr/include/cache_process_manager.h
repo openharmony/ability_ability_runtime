@@ -59,6 +59,7 @@ private:
     bool IsProcessSupportHotStart(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool warmStartProcesEnable_ = false;
     int32_t maxProcCacheNum_ = 0;
+    int32_t allowedCacheNum_ = 0;
     std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
     ffrt::recursive_mutex cacheQueueMtx;
     std::weak_ptr<AppMgrServiceInner> appMgr_;
