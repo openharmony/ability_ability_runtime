@@ -1621,10 +1621,12 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
         TAG_LOGE(AAFwkTag::APPMGR, "null abilityRecord");
         return false;
     }
+
     abilityRecord->SetUserRequestCleaningStatus();
 
     bool canKill = appRecord->IsAllAbilityReadyToCleanedByUserRequest();
-    if (!canKill || appRecord->IsKeepAliveApp()) {
+    bool isProcessSupportCache = appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT;
+    if (!canKill || isAppSupportProcessCache ||appRecord->IsKeepAliveApp()) {
         return false;
     }
 
