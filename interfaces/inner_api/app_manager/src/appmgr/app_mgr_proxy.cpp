@@ -146,7 +146,7 @@ sptr<IAmsMgr> AppMgrProxy::GetAmsMgr()
 
 int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, const int32_t userId)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "Called.");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -1849,6 +1849,7 @@ int32_t AppMgrProxy::SetSupportedProcessCache(int32_t pid, bool isSupport)
     }
     PARCEL_UTIL_WRITE_RET_INT(data, Bool, isSupport);
     PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
     MessageParcel reply;
     MessageOption option;
 
