@@ -1188,6 +1188,8 @@ public:
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
+    void NotifyAppPreCache(int32_t pid, int32_t userId);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);

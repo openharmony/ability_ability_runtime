@@ -789,6 +789,9 @@ public:
     void SetAttachedToStatusBar(bool isAttached);
     bool IsAttachedToStatusBar();
 
+    bool SetEnableProcessCache(bool enable);
+    bool GetEnableProcessCache();
+
     void ScheduleCacheProcess();
 
     void SetBrowserHost(sptr<IRemoteObject> browser);
@@ -985,6 +988,7 @@ private:
     bool isErrorInfoEnhance_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
+    bool enableProcessCache_ = false;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     bool processCacheBlocked = false; // temporarily block process cache feature
     sptr<IRemoteObject> browserHost_;
