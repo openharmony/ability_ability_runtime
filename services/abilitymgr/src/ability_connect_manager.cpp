@@ -773,6 +773,7 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
 void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "state: %{public}d", state);
+    std::lock_guard guard(serialMutex_);
     AppAbilityState abilityState = DelayedSingleton<AppScheduler>::GetInstance()->ConvertToAppAbilityState(state);
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
         auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
@@ -788,7 +789,6 @@ void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
         std::string element = abilityRecord->GetURI();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability is %{public}s, start to foreground.", element.c_str());
         abilityRecord->GrantUriPermissionForUIExtension();
-        std::lock_guard guard(serialMutex_);
         abilityRecord->ForegroundUIExtensionAbility();
     }
 }
