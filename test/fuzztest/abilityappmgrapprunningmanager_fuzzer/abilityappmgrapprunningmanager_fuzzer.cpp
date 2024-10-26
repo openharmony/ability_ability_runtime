@@ -130,7 +130,8 @@ void DoSomethingInterestingWithMyAPIaddb(const char* data, size_t size)
     wptr<IRemoteObject> remote;
     manager->OnChildProcessRemoteDied(remote);
     manager->GetAllAppRunningRecordCountByBundleName(jsonStr);
-    manager->SignRestartAppFlag(jsonStr);
+    auto uid = static_cast<int32_t>(GetU32Data(data));
+    manager->SignRestartAppFlag(uid);
     manager->GetAppRunningUniqueIdByPid(pidApps, jsonStr);
     std::vector<pid_t> hostPids;
     manager->GetAllUIExtensionRootHostPid(pidApps, hostPids);

@@ -647,7 +647,7 @@ public:
      */
     virtual int32_t UpdateRenderState(pid_t renderPid, int32_t state) = 0;
 
-    virtual int32_t SignRestartAppFlag(const std::string &bundleName)
+    virtual int32_t SignRestartAppFlag(int32_t uid)
     {
         return 0;
     }
@@ -753,6 +753,17 @@ public:
     virtual void RestartResidentProcessDependedOnWeb()
     {
         return;
+    }
+
+    /**
+     * Get appIndex of pid.
+     * @param pid The pid.
+     * @param appIndex appIndex of pid.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+    {
+        return 0;
     }
 };
 }  // namespace AppExecFwk

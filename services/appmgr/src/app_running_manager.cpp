@@ -1368,13 +1368,13 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
     return nullptr;
 }
 
-int32_t AppRunningManager::SignRestartAppFlag(const std::string &bundleName)
+int32_t AppRunningManager::SignRestartAppFlag(int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
+        if (appRecord == nullptr || appRecord->GetUid() != uid) {
             continue;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "sign");

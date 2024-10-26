@@ -2556,12 +2556,12 @@ int32_t UIAbilityLifecycleManager::UpdateSessionInfoBySCB(std::list<SessionInfo>
     return ERR_OK;
 }
 
-void UIAbilityLifecycleManager::SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery)
+void UIAbilityLifecycleManager::SignRestartAppFlag(int32_t uid, bool isAppRecovery)
 {
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     auto tempSessionAbilityMap = sessionAbilityMap_;
     for (auto &[sessionId, abilityRecord] : tempSessionAbilityMap) {
-        if (abilityRecord == nullptr || abilityRecord->GetApplicationInfo().bundleName != bundleName) {
+        if (abilityRecord == nullptr || abilityRecord->GetUid() != uid) {
             continue;
         }
         abilityRecord->SetRestartAppFlag(true);

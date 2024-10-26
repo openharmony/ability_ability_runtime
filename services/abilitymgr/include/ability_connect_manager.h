@@ -315,7 +315,7 @@ public:
 
     void CloseAssertDialog(const std::string &assertSessionId);
 
-    void SignRestartAppFlag(const std::string &bundleName);
+    void SignRestartAppFlag(int32_t uid);
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
     void UninstallApp(const std::string &bundleName);

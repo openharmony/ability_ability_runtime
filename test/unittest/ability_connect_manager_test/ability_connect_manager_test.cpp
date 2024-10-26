@@ -3190,7 +3190,8 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_SignRestartAppFlag_001, Test
     std::shared_ptr<AbilityRecord> abilityRecord2 = AbilityRecord::CreateAbilityRecord(abilityRequest_);
     abilityRecord2->abilityInfo_.bundleName = "errTestBundleName";
     connectManager->serviceMap_.emplace("second", abilityRecord2);
-    connectManager->SignRestartAppFlag(bundleName);
+    int32_t uid = 100;
+    connectManager->SignRestartAppFlag(uid);
 }
 
 /*
