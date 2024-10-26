@@ -2345,6 +2345,18 @@ bool AppRunningRecord::SetSupportedProcessCache(bool isSupport)
     return true;
 }
 
+bool AppRunningRecord::SetEnableProcessCache(bool enable)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    enableProcessCache_ = enable;
+    return true;
+}
+
+bool AppRunningRecord::GetEnableProcessCache()
+{
+    return enableProcessCache_;
+}
+
 SupportProcessCacheState AppRunningRecord::GetSupportProcessCacheState()
 {
     return procCacheSupportState_;
