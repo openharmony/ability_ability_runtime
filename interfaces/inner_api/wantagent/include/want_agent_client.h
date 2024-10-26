@@ -35,7 +35,7 @@ public:
     static WantAgentClient &GetInstance();
 
     ErrCode GetWantSender(const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken,
-        sptr<IWantSender> &wantSender);
+        sptr<IWantSender> &wantSender, int32_t uid = -1);
 
     ErrCode SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo);
 

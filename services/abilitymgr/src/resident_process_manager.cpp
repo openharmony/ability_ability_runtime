@@ -120,12 +120,42 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
                 hapModuleInfo.bundleName.c_str(), mainElement.c_str());
             DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, userId,
                 DEFAULT_INVAL_VALUE);
+            UpdateMainElement(hapModuleInfo.bundleName, hapModuleInfo.name, mainElement, true, userId);
         }
     }
 
     // delete item which process has been started.
     for (auto iter = needEraseIndexSet.rbegin(); iter != needEraseIndexSet.rend(); iter++) {
         bundleInfos.erase(bundleInfos.begin() + *iter);
+    }
+}
+
+void ResidentProcessManager::NotifyDisableResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos,
+    int32_t userId)
+{
+    std::set<uint32_t> needEraseIndexSet; // no use
+    for (size_t i = 0; i < bundleInfos.size(); i++) {
+        std::string processName = bundleInfos[i].applicationInfo.process;
+        for (const auto &hapModuleInfo : bundleInfos[i].hapModuleInfos) {
+            std::string mainElement;
+            if (!CheckMainElement(hapModuleInfo, processName, mainElement, needEraseIndexSet, i, userId)) {
+                continue;
+            }
+            UpdateMainElement(hapModuleInfo.bundleName, hapModuleInfo.name, mainElement, false, userId);
+        }
+    }
+}
+
+void ResidentProcessManager::UpdateMainElement(const std::string &bundleName, const std::string &moduleName,
+    const std::string &mainElement, bool updateEnable, int32_t userId)
+{
+    auto abilityMs = DelayedSingleton<AbilityManagerService>::GetInstance();
+    CHECK_POINTER(abilityMs);
+    auto ret = abilityMs->UpdateKeepAliveEnableState(bundleName, moduleName, mainElement, updateEnable, userId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR,
+            "update keepAlive fail,bundle:%{public}s,mainElement:%{public}s,enable:%{public}d,userId:%{public}d",
+            bundleName.c_str(), mainElement.c_str(), updateEnable, userId);
     }
 }
 
@@ -253,13 +283,17 @@ void ResidentProcessManager::UpdateResidentProcessesStatus(
             break;
         }
 
-        // need start
         if (updateEnable && !localEnable) {
+            // need start
             std::vector<AppExecFwk::BundleInfo> bundleInfos{ bundleInfo };
             StartResidentProcessWithMainElement(bundleInfos, userId);
             if (!bundleInfos.empty()) {
                 StartResidentProcess(bundleInfos);
             }
+        } else if (!updateEnable && localEnable) {
+            // just update
+            std::vector<AppExecFwk::BundleInfo> bundleInfos{ bundleInfo };
+            NotifyDisableResidentProcess(bundleInfos, userId);
         }
     }
 }

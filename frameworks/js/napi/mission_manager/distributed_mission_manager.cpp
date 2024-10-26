@@ -963,6 +963,7 @@ napi_value NAPI_NotifyToOff(napi_env env, napi_callback_info info)
     return ret;
 }
 
+
 NAPIRemoteMissionListener::~NAPIRemoteMissionListener()
 {
     if (env_ == nullptr) {
@@ -2126,7 +2127,7 @@ void NAPIMissionContinue::OnContinueDone(int32_t result)
 
 napi_value DistributedMissionManagerExport(napi_env env, napi_value exports)
 {
-    TAG_LOGI(AAFwkTag::MISSION, "called");
+    TAG_LOGI(AAFwkTag::MISSION, "%{public}s,called", __func__);
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("startSyncRemoteMissions", NAPI_StartSyncRemoteMissions),
         DECLARE_NAPI_FUNCTION("stopSyncRemoteMissions", NAPI_StopSyncRemoteMissions),

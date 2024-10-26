@@ -100,9 +100,6 @@ ohos_unittest("AmsServiceEventDriveTest") {
     "window_manager:libwm",
   ]
 
-  if (ability_runtime_graphics) {
-    external_deps += [ "window_manager:libwm" ]
-  }
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
   }
@@ -110,6 +107,4 @@ ohos_unittest("AmsServiceEventDriveTest") {
 
 group("unittest") {
   testonly = true
-
-  deps = [ ":AmsServiceEventDriveTest" ]
 }

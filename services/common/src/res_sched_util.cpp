@@ -153,5 +153,22 @@ void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int3
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, type, eventParams);
 #endif
 }
+
+bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_SHOULD_FORCE_KILL_PROCESS;
+    nlohmann::json payload;
+    nlohmann::json reply;
+    payload.emplace("pid", pid);
+    ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    if (!reply.contains("ShouldForceKillProcess") || !reply["ShouldForceKillProcess"].is_number_integer()) {
+        return true;
+    }
+    return reply["ShouldForceKillProcess"].get<int32_t>() == 1;
+#else
+    return true;
+#endif
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -19,30 +19,28 @@
 #include <string>
 #include <signal.h>
 #include <mutex>
-
-#include "ability_record_mgr.h"
-#include "app_jsheap_mem_info.h"
-#include "app_malloc_info.h"
-#include "app_mgr_interface.h"
-#include "app_scheduler_host.h"
-#include "application_impl.h"
-#include "assert_fault_task_thread.h"
-#include "common_event_subscriber.h"
 #include "event_handler.h"
 #include "extension_config_mgr.h"
 #include "idle_time.h"
 #include "inner_event.h"
-#include "ipc_singleton.h"
-#include "js_runtime.h"
-#include "native_engine/native_engine.h"
-#include "overlay_event_subscriber.h"
+#include "app_scheduler_host.h"
+#include "app_mgr_interface.h"
+#include "ability_record_mgr.h"
+#include "application_impl.h"
+#include "assert_fault_task_thread.h"
+#include "common_event_subscriber.h"
 #include "resource_manager.h"
 #include "foundation/ability/ability_runtime/interfaces/inner_api/runtime/include/runtime.h"
-#include "watchdog.h"
-
+#include "ipc_singleton.h"
 #ifdef CJ_FRONTEND
 #include "cj_envsetup.h"
 #endif
+#include "js_runtime.h"
+#include "native_engine/native_engine.h"
+#include "overlay_event_subscriber.h"
+#include "watchdog.h"
+#include "app_malloc_info.h"
+#include "app_jsheap_mem_info.h"
 #define ABILITY_LIBRARY_LOADER
 
 class Runtime;

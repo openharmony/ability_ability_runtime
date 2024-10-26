@@ -552,7 +552,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     bool isCallbackConnected = !connectRecordList.empty();
     // 3. If this service ability and callback has been connected, There is no need to connect repeatedly
     if (isLoadedAbility && (isCallbackConnected) && IsAbilityConnected(targetService, connectRecordList)) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Service and callback was connected.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Service/callback connected");
         return ERR_OK;
     }
 
@@ -586,7 +586,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
         targetService->SetWant(abilityRequest.want);
         HandleActiveAbility(targetService, connectRecord);
     } else {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Target service is activating, wait for callback");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "TargetService activing");
         targetService->SaveConnectWant(abilityRequest.want);
     }
 
@@ -3142,6 +3142,25 @@ void AbilityConnectManager::UninstallApp(const std::string &bundleName)
             abilityRecord->SetKeepAliveBundle(false);
         }
     }
+}
+
+int32_t AbilityConnectManager::UpdateKeepAliveEnableState(const std::string &bundleName,
+    const std::string &moduleName, const std::string &mainElement, bool updateEnable)
+{
+    std::lock_guard lock(serviceMapMutex_);
+    for (const auto &[key, abilityRecord]: serviceMap_) {
+        CHECK_POINTER_AND_RETURN(abilityRecord, ERR_NULL_OBJECT);
+        if (abilityRecord->GetAbilityInfo().bundleName == bundleName &&
+            abilityRecord->GetAbilityInfo().name == mainElement &&
+            abilityRecord->GetAbilityInfo().moduleName == moduleName) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR,
+                "update keepAlive,bundle:%{public}s,module:%{public}s,ability:%{public}s,enable:%{public}d",
+                bundleName.c_str(), moduleName.c_str(), mainElement.c_str(), updateEnable);
+            abilityRecord->SetKeepAliveBundle(updateEnable);
+            return ERR_OK;
+        }
+    }
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

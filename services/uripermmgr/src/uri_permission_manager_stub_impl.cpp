@@ -77,8 +77,6 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
                 return true;
             }
         }
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri permission not exists.");
-        return false;
     }
     return VerifySubDirUriPermission(uriStr, newFlag, tokenId);
 }

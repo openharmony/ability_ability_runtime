@@ -623,9 +623,13 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
     }
     auto componentId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
-        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
         if (context_ == nullptr || context_->GetAbilityInfo() == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+            return false;
+        }
+        auto option = sptr<Rosen::WindowOption>::MakeSptr();
+        if (option == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
             return false;
         }
         option->SetWindowName(context_->GetBundleName() + context_->GetAbilityInfo()->name);

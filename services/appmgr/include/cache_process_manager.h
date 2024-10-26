@@ -32,6 +32,7 @@ class CacheProcessManager {
     DECLARE_DELAYED_SINGLETON(CacheProcessManager);
 public:
     bool QueryEnableProcessCache();
+    bool QueryEnableProcessCacheFromKits();
     void SetAppMgr(const std::weak_ptr<AppMgrServiceInner> &appMgr);
     bool PenddingCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool CheckAndCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -55,6 +56,7 @@ private:
     bool CheckAndNotifyCachedState(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsAppContainsSrvExt(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsAppSupportProcessCacheInnerFirst(const std::shared_ptr<AppRunningRecord> &appRecord);
+    bool resourceCacheProcessEnable_ = false;
     int32_t maxProcCacheNum_ = 0;
     std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
     ffrt::recursive_mutex cacheQueueMtx;

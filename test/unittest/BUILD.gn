@@ -289,17 +289,18 @@ ohos_source_set("abilityms_test_source") {
       "${ability_runtime_services_path}/abilitymgr/src/system_dialog_scheduler.cpp",
       "${ability_runtime_services_path}/appdfr/src/application_anr_listener.cpp",
     ]
-    deps += [ "//third_party/libjpeg-turbo:turbojpeg_static" ]
+    deps += [
+      "${ace_engine_path}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+      "//third_party/icu/icu4c:shared_icuuc",
+      "//third_party/libjpeg-turbo:turbojpeg_static",
+    ]
     external_deps += [
       "i18n:intl_util",
-      "icu:shared_icuuc",
       "image_framework:image_native",
       "input:libmmi-client",
       "window_manager:libdm",
       "window_manager:libmodal_system_ui_extension_client",
       "window_manager:libwm",
-      "window_manager:libwsutils",
-      "window_manager:sms",
     ]
   }
 
@@ -312,7 +313,7 @@ group("unittest") {
 
   deps = []
   if (!use_libfuzzer) {
-    deps += [
+    deps = [
       "ability_auto_startup_data_manager_test:unittest",
       "ability_auto_startup_service_test:unittest",
       "ability_bundle_event_callback_test:unittest",
@@ -336,15 +337,17 @@ group("unittest") {
       "ability_first_frame_state_observer_stub_test:unittest",
       "ability_foreground_state_observer_proxy_test:unittest",
       "ability_foreground_state_observer_stub_test:unittest",
-      "ability_interceptor_test:unittest",
       "ability_manager_client_branch_test:unittest",
       "ability_manager_proxy_test:unittest",
       "ability_manager_service_dialog_test:unittest",
       "ability_manager_service_first_test:unittest",
+      "ability_manager_service_fourth_test:unittest",
+      "ability_manager_service_second_test:unittest",
       "ability_manager_service_third_test:unittest",
       "ability_manager_stub_test:unittest",
       "ability_record_dump_test:unittest",
       "ability_record_mgr_test:unittest",
+      "ability_record_test:unittest",
       "ability_running_info_test:unittest",
       "ability_running_record_test:unittest",
       "ability_runtime_error_util_test:unittest",
@@ -371,6 +374,7 @@ group("unittest") {
       "ams_mgr_scheduler_test:unittest",
       "ams_mgr_stub_test:unittest",
       "ams_recent_app_list_test:unittest",
+      "ams_service_event_drive_test:unittest",
       "ams_service_load_ability_process_test:unittest",
       "ams_service_startup_test:unittest",
       "app_config_data_manager_test:unittest",
@@ -467,7 +471,6 @@ group("unittest") {
       "dynamic_loader_ohos_test:unittest",
       "event_report_test:unittest",
       "extension_config_mgr_test:unittest",
-      "extension_manager_client_test:unittest",
       "extension_permissions_util_test:unittest",
       "fault_data:unittest",
       "file_path_utils_test:unittest",
@@ -508,6 +511,7 @@ group("unittest") {
       "resident_process_manager_test:unittest",
       "running_infos_test:unittest",
       "runtime_test:unittest",
+      "sender_info_test:unittest",
       "service_extension_context_test:unittest",
       "service_router_mgr_service_test:unittest",
       "services/ability_util_test:unittest",
@@ -527,6 +531,7 @@ group("unittest") {
       "ui_extension_utils_test:unittest",
       "unlock_screen_test:unittest",
       "uri_perm_mgr_test:unittest",
+      "uri_permission_impl_test:unittest",
       "uri_permission_manager_test:unittest",
       "uri_permission_test:unittest",
       "user_controller_test:unittest",
@@ -537,11 +542,16 @@ group("unittest") {
       "want_agent_log_wrapper_test:unittest",
       "want_agent_test:unittest",
       "want_receiver_proxy_test:unittest",
+      "want_receiver_stub_test:unittest",
       "want_sender_info_test:unittest",
       "want_sender_proxy_test:unittest",
       "want_sender_stub_test:unittest",
       "wants_info_test:unittest",
     ]
+
+    if (ability_runtime_feature_sandboxmanager) {
+      deps += [ "uri_permission_impl_test:unittest" ]
+    }
 
     if (ability_runtime_graphics) {
       deps += [
