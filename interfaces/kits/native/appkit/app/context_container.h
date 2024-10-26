@@ -180,7 +180,7 @@ public:
      *
      * @param patternId Indicates the resource ID of the pattern to set.
      */
-    void SetPattern(int patternId) override;
+    void SetPattern(int32_t patternId) override;
 
     /**
      * @brief Obtains the HapModuleInfo object of the application.
