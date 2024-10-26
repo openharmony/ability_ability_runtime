@@ -266,7 +266,6 @@ bool CacheProcessManager::IsProcessSupportWarmStart(const std::shared_ptr<AppRun
         return false;
     }
     if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
-
         return true;
     }
     auto enable = appRecord->GetEnableProcessCache();
