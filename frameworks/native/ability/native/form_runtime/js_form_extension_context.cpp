@@ -32,6 +32,7 @@
 #include "napi_remote_object.h"
 #include "napi_form_util.h"
 #include "tokenid_kit.h"
+#include <charconv>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -112,12 +113,12 @@ private:
         std::string strFormId;
         ConvertFromJsValue(env, info.argv[0], strFormId);
         int64_t formId = 0;
-        try {
-            formId = strFormId.empty() ? -1 : std::stoll(strFormId);
-        }catch (...) {
-            TAG_LOGE(AAFwkTag::FORM_EXT, "stoll error strFormId:%{public}s", strFormId.c_str());
+        auto res = std::from_chars(strFormId.c_str(), strFormId.c_str() + strFormId.size(), formId);
+        if (res.ec != std::errc()) {
+            TAG_LOGE(AAFwkTag::FORM_EXT, "from_chars error strFormId:%{public}s", strFormId.c_str());
+            formId = -1;
         }
-        
+
         AppExecFwk::FormProviderData formProviderData;
         std::string formDataStr = "{}";
         if (CheckTypeForNapiValue(env, info.argv[1], napi_object)) {
