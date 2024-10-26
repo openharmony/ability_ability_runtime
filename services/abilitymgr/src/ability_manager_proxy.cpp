@@ -1897,7 +1897,7 @@ int32_t AbilityManagerProxy::UpgradeApp(const std::string &bundleName, const int
 }
 
 sptr<IWantSender> AbilityManagerProxy::GetWantSender(
-    const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken)
+    const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1920,6 +1920,12 @@ sptr<IWantSender> AbilityManagerProxy::GetWantSender(
             return nullptr;
         }
     }
+
+    if (!data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uid write fail");
+        return nullptr;
+    }
+
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
@@ -5457,6 +5463,29 @@ ErrCode AbilityManagerProxy::OpenLink(const Want& want, sptr<IRemoteObject> call
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
         return error;
     }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::TerminateMission(int32_t missionId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteInt32(missionId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appCloneIndex write failed.");
+        return INNER_ERR;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::TERMINATE_MISSION,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+
     return reply.ReadInt32();
 }
 } // namespace AAFwk

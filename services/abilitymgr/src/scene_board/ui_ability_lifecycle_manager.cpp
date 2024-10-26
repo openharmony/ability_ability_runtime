@@ -370,6 +370,45 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
     return ret;
 }
 
+int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    auto abilityInfo = abilityRequest.abilityInfo;
+    bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE && abilityInfo.isStageBasedModel);
+    // When 'processMode' is set to new process mode, the priority is higher than 'isolationProcess'.
+    bool isNewProcessMode = abilityRequest.processOptions &&
+        ProcessOptions::IsNewProcessMode(abilityRequest.processOptions->processMode);
+    if (!isNewProcessMode && abilityInfo.isolationProcess && AppUtils::GetInstance().IsStartSpecifiedProcess()
+        && isUIAbility) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess");
+        specifiedRequestMap_.emplace(specifiedRequestId_, abilityRequest);
+        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(abilityRequest.want, abilityInfo,
+            specifiedRequestId_);
+        ++specifiedRequestId_;
+        return ERR_OK;
+    }
+    auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
+    if (isSpecified) {
+        PreCreateProcessName(const_cast<AbilityRequest &>(abilityRequest));
+        specifiedRequestMap_.emplace(specifiedRequestId_, abilityRequest);
+        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(
+            abilityRequest.want, abilityRequest.abilityInfo, specifiedRequestId_);
+        ++specifiedRequestId_;
+        return ERR_OK;
+    }
+    auto sessionInfo = CreateSessionInfo(abilityRequest);
+    sessionInfo->requestCode = abilityRequest.requestCode;
+    sessionInfo->persistentId = GetPersistentIdByAbilityRequest(abilityRequest, sessionInfo->reuse);
+    sessionInfo->userId = userId_;
+    sessionInfo->isAtomicService = (abilityInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE);
+    TAG_LOGI(
+        AAFwkTag::ABILITYMGR, "Reused sessionId: %{public}d, userId: %{public}d.", sessionInfo->persistentId, userId_);
+    int ret = NotifySCBPendingActivation(sessionInfo, abilityRequest);
+    sessionInfo->want.CloseAllFd();
+    return ret;
+}
+
 void UIAbilityLifecycleManager::CancelSameAbilityTimeoutTask(const AppExecFwk::AbilityInfo &abilityInfo)
 {
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
@@ -852,7 +891,7 @@ bool UIAbilityLifecycleManager::IsAbilityStarted(AbilityRequest &abilityRequest,
 
 int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CallAbilityLocked");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
 
@@ -917,7 +956,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
 
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     CHECK_POINTER_LOG(sessionInfo, "sessionInfo is invalid.");
@@ -988,13 +1027,15 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
         auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
         CheckCallerFromBackground(abilityRecord, sessionInfo);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by callerSession.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
+            sessionInfo->want.GetElement().GetAbilityName().c_str());
         return static_cast<int>(callerSession->PendingSessionActivation(sessionInfo));
     }
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
     CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
     sessionInfo->canStartAbilityFromBackground = true;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by rootSceneSession.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s",
+        sessionInfo->want.GetElement().GetAbilityName().c_str());
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
 }
 
@@ -1502,7 +1543,7 @@ void UIAbilityLifecycleManager::NotifySCBToHandleException(const std::shared_ptr
     CHECK_POINTER(sessionInfo);
     CHECK_POINTER(sessionInfo->sessionToken);
     auto session = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call notifySessionException");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBToHandleException reason: %{public}s", errorReason.c_str());
     sptr<SessionInfo> info = abilityRecord->GetSessionInfo();
     info->errorCode = errorCode;
     info->errorReason = errorReason;
@@ -1578,8 +1619,10 @@ void UIAbilityLifecycleManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abi
 
     terminateAbilityList_.push_back(abilityRecord);
     abilityRecord->SetAbilityState(AbilityState::TERMINATING);
-    NotifySCBToHandleException(abilityRecord, static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_DIED),
-        "onAbilityDied");
+    if (!abilityRecord->GetRestartAppFlag()) {
+        NotifySCBToHandleException(abilityRecord, static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_DIED),
+            "onAbilityDied");
+    }
     DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
     DispatchTerminate(abilityRecord);
     EraseSpecifiedAbilityRecord(abilityRecord);
@@ -1619,6 +1662,7 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
                 return;
             }
             if (!abilityRecord) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "OnAcceptWantResponse abilityRecord null");
                 return;
             }
             abilityRecord->SetWant(abilityRequest.want);
@@ -2573,13 +2617,14 @@ int32_t UIAbilityLifecycleManager::GetAbilityStateByPersistentId(int32_t persist
     return ERR_INVALID_VALUE;
 }
 
-int32_t UIAbilityLifecycleManager::CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+int32_t UIAbilityLifecycleManager::CleanUIAbility(
+    const std::shared_ptr<AbilityRecord> &abilityRecord, bool forceKillProcess)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    {
-        std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    if (forceKillProcess) {
         std::string element = abilityRecord->GetElementName().GetURI();
         if (DelayedSingleton<AppScheduler>::GetInstance()->CleanAbilityByUserRequest(abilityRecord->GetToken())) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s success", element.c_str());

@@ -188,16 +188,18 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid);
+    virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid");
 
     /**
      * Kill the application self.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillApplicationSelf();
+    virtual AppMgrResultCode KillApplicationSelf(const std::string& reason = "KillApplicationSelf");
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
@@ -775,6 +777,8 @@ public:
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex = 0);
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
+
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
 
     void SaveBrowserChannel(sptr<IRemoteObject> browser);
 

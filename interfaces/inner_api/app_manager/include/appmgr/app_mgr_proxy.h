@@ -616,6 +616,8 @@ public:
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
 
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) override;
+
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
 
     /**

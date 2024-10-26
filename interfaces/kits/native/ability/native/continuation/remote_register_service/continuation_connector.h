@@ -26,7 +26,7 @@
 #include "continuation_request.h"
 #include "continuation/kits/continuation_device_callback_interface.h"
 #include "continuation/remote_register_service_interface.h"
-#include "context.h"
+#include "fa_context.h"
 #include "element_name.h"
 #include "extra_params.h"
 #include "iremote_broker.h"

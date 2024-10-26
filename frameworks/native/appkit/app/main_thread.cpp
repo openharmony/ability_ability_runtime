@@ -441,7 +441,7 @@ void MainThread::ScheduleForegroundApplication()
  */
 void MainThread::ScheduleBackgroundApplication()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     wptr<MainThread> weak = this;
     auto task = [weak]() {
@@ -1864,7 +1864,24 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
         return;
     }
 
-    application_->AddAbilityStage(abilityStage);
+    wptr<MainThread> weak = this;
+    auto callback = [weak]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            return;
+        }
+        if (!appThread->appMgr_ || !appThread->applicationImpl_) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+            return;
+        }
+        appThread->appMgr_->AddAbilityStageDone(appThread->applicationImpl_->GetRecordId());
+    };
+    bool isAsyncCallback = false;
+    application_->AddAbilityStage(abilityStage, callback, isAsyncCallback);
+    if (isAsyncCallback) {
+        return;
+    }
 
     if (!appMgr_ || !applicationImpl_) {
         TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
@@ -2028,7 +2045,8 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     Rosen::DisplayId defaultDisplayId = Rosen::DisplayManager::GetInstance().GetDefaultDisplayId();
     Rosen::DisplayId displayId = defaultDisplayId;
     if (abilityRecord->GetWant() != nullptr) {
-        displayId = abilityRecord->GetWant()->GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId);
+        displayId = abilityRecord->GetWant()->GetIntParam(
+            AAFwk::Want::PARAM_RESV_DISPLAY_ID, defaultDisplayId);
     }
     Rosen::DisplayManager::GetInstance().AddDisplayIdFromAms(displayId, abilityRecord->GetToken());
     TAG_LOGD(AAFwkTag::APPKIT, "add displayId: %{public}" PRIu64, displayId);
@@ -3370,7 +3388,7 @@ void MainThread::HandleCacheProcess()
 
 int32_t MainThread::ScheduleDumpFfrt(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "pid:%{public}d", getprocpid());
+    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpFfrt::pid:%{public}d", getprocpid());
     return DumpFfrtHelper::DumpFfrt(result);
 }
 }  // namespace AppExecFwk

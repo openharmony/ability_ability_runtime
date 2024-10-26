@@ -146,6 +146,7 @@ sptr<IAmsMgr> AppMgrProxy::GetAmsMgr()
 
 int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, const int32_t userId)
 {
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -162,6 +163,7 @@ int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, int32
 
 int32_t AppMgrProxy::ClearUpApplicationDataBySelf(int32_t userId)
 {
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -1232,7 +1234,7 @@ int32_t AppMgrProxy::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFw
 
 int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     MessageParcel data;
 
     if (!WriteInterfaceToken(data)) {
@@ -1254,7 +1256,7 @@ int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
 
 int32_t AppMgrProxy::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     MessageParcel data;
 
     if (!WriteInterfaceToken(data)) {
@@ -1834,6 +1836,23 @@ int32_t AppMgrProxy::SetSupportedProcessCacheSelf(bool isSupport)
     MessageOption option;
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE_SELF, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isSupport);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    MessageParcel reply;
+    MessageOption option;
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE, data, reply, option);
     return reply.ReadInt32();
 }
 
