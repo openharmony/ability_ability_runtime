@@ -29,6 +29,7 @@
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
 const std::string RESOURCE_WARM_START_PROCESS_ENABLE = "persist.resourceschedule.enable_warm_start_process";
+const std::string MAX_ALLOWED_CACHE_NUM = "const.resourceschedule.max_cached_process_nums";
 const std::string PROCESS_CACHE_API_CHECK_CONFIG = "persist.sys.abilityms.processCacheApiCheck";
 const std::string PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG = "persist.sys.abilityms.processCacheSetSupportCheck";
 constexpr int32_t API12 = 12;
@@ -49,8 +50,11 @@ CacheProcessManager::CacheProcessManager()
     shouldCheckApi = OHOS::system::GetBoolParameter(PROCESS_CACHE_API_CHECK_CONFIG, true);
     shouldCheckSupport = OHOS::system::GetBoolParameter(PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG, true);
     warmStartProcesEnable_ = OHOS::system::GetBoolParameter(RESOURCE_WARM_START_PROCESS_ENABLE, false);
-    allowedCacheNum_ = warmStartProcesEnable_ ? DEFAULT_ALLOWED_CACHE_NUM : maxProcCacheNum_;
-    TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum %{public}d", maxProcCacheNum_);
+    allowedCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_ALLOWED_CACHE_NUM, DEFAULT_ALLOWED_CACHE_NUM);
+    if (maxProcCacheNum_ > 0) {
+        allowedCacheNum_ = maxProcCacheNum_;
+    }
+    TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum_ %{public}d, allowedCacheNum_ %{public}d", allowedCacheNum_);
 }
 
 CacheProcessManager::~CacheProcessManager()
