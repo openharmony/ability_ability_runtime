@@ -598,7 +598,6 @@ group("unittest") {
       "unlock_screen_test:unittest",
       "update_caller_info_util_test:unittest",
       "uri_perm_mgr_test:unittest",
-      "uri_permission_impl_test:unittest",
       "uri_permission_manager_test:unittest",
       "uri_permission_test:unittest",
       "uri_permission_utils_test:unittest",
@@ -619,6 +618,10 @@ group("unittest") {
       "window_options_utils_test:unittest",
       "window_visibility_changed_listener_test:unittest",
     ]
+
+    if (ability_runtime_feature_sandboxmanager) {
+      deps += [ "uri_permission_impl_test:unittest" ]
+    }
 
     if (ability_runtime_graphics) {
       deps += [
