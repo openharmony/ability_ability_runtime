@@ -1625,7 +1625,7 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
 
     bool canKill = appRecord->IsAllAbilityReadyToCleanedByUserRequest();
     bool isProcessSupportCache = appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT;
-    if (!canKill || isAppSupportProcessCache ||appRecord->IsKeepAliveApp()) {
+    if (!canKill || isProcessSupportCache ||appRecord->IsKeepAliveApp()) {
         return false;
     }
 
