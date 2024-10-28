@@ -123,7 +123,7 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
         std::string key(moduleName);
         key.append("::");
         key.append(srcPath);
-        std::unique_ptr<NativeReference>> moduleObj = nullptr;
+        std::unique_ptr<NativeReference> moduleObj = nullptr;
         if (jsRuntime.PopPreloadObj(key, moduleObj)) {
             return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
         } else {
