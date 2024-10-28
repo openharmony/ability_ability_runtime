@@ -264,7 +264,7 @@ private:
     std::mutex lock_object;
     sptr<AAFwk::IWantSender> target_ = nullptr;
     sptr<AAFwk::IWantReceiver> cancelReceiver_ = nullptr;
-    sptr<IRemoteObject> allowListToken_ = nullptr;
+    sptr<IRemoteObject> allowlistToken_ = nullptr;
     std::vector<std::shared_ptr<CancelListener>> cancelListeners_;
 
     class CancelReceiver : public AAFwk::WantReceiverStub {
