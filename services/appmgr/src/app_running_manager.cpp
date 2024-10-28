@@ -50,19 +50,9 @@ namespace {
 using EventFwk::CommonEventSupport;
 
 AppRunningManager::AppRunningManager()
-    : configuration_(std::make_shared<Configuration>())
 {}
 AppRunningManager::~AppRunningManager()
 {}
-
-void AppRunningManager::initConfig(const Configuration &config)
-{
-    std::vector<std::string> changeKeyV;
-    configuration_->CompareDifferent(changeKeyV, config);
-    if (!changeKeyV.empty()) {
-        configuration_->Merge(changeKeyV, config);
-    }
-}
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo,
@@ -805,11 +795,6 @@ void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &lis
 int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, const int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::vector<std::string> changeKeyV;
-    configuration_->CompareDifferent(changeKeyV, config);
-    if (!changeKeyV.empty()) {
-        configuration_->Merge(changeKeyV, config);
-    }
 
     auto appRunningMap = GetAppRunningRecordMap();
     TAG_LOGD(AAFwkTag::APPMGR, "current app size %{public}zu", appRunningMap.size());
@@ -824,6 +809,9 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
                 appRecord->GetUid() / BASE_USER_RANGE == userId)) {
             continue;
         }
+        if (appRecord->GetDelayConfiguration() == nullptr) {
+            appRecord->ResetDelayConfiguration();
+        }
         if (appRecord && !isCollaboratorReserveType(appRecord)) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
             std::lock_guard guard(updateConfigurationDelayedLock_);
@@ -832,6 +820,10 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = false;
                 result = appRecord->UpdateConfiguration(config);
             } else {
+                auto delayConfig = appRecord->GetDelayConfiguration();
+                std::vector<std::string> diffVe;
+                delayConfig->CompareDifferent(diffVe, config);
+                delayConfig->Merge(diffVe, config);
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = true;
             }
         }
@@ -1668,14 +1660,10 @@ int32_t AppRunningManager::UpdateConfigurationDelayed(const std::shared_ptr<AppR
     int32_t result = ERR_OK;
     auto it = updateConfigurationDelayedMap_.find(appRecord->GetRecordId());
     if (it != updateConfigurationDelayedMap_.end() && it->second) {
-        int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
-        if (userId != 0) {
-            auto config = multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
-            std::vector<std::string> diffVe;
-            configuration_->CompareDifferent(diffVe, config);
-            configuration_->Merge(diffVe, config);
-        }
-        result = appRecord->UpdateConfiguration(*configuration_);
+        auto delayConfig = appRecord->GetDelayConfiguration();
+        TAG_LOGI(AAFwkTag::APPKIT, "delayConfig: %{public}s", delayConfig->GetName().c_str());
+        result = appRecord->UpdateConfiguration(*delayConfig);
+        appRecord->ResetDelayConfiguration();
         it->second = false;
     }
     return result;
