@@ -111,5 +111,8 @@ ohos_unittest("mission_list_test_call") {
 group("unittest") {
   testonly = true
 
-  deps = [ ":mission_list_test_call" ]
+  deps = [
+    ":mission_list_test",
+    ":mission_list_test_call",
+  ]
 }

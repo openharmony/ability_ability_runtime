@@ -466,7 +466,8 @@ int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleNam
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const int uid)
+int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -476,11 +477,15 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
         return ERR_INVALID_DATA;
     }
     if (!data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WriteString failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to write bundle name");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(uid)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to write uid");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(reason)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failedto write reason");
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =
@@ -492,7 +497,7 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack)
+int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
     MessageParcel data;
@@ -504,6 +509,11 @@ int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack)
 
     if (!data.WriteBool(clearPageStack)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(reason)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to write reason");
         return ERR_FLATTEN_OBJECT;
     }
 

@@ -23,6 +23,7 @@
 #include "app_utils.h"
 #include "common_event_support.h"
 #include "exit_resident_process_manager.h"
+#include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "os_account_manager_wrapper.h"
@@ -49,19 +50,9 @@ namespace {
 using EventFwk::CommonEventSupport;
 
 AppRunningManager::AppRunningManager()
-    : configuration_(std::make_shared<Configuration>())
 {}
 AppRunningManager::~AppRunningManager()
 {}
-
-void AppRunningManager::initConfig(const Configuration &config)
-{
-    std::vector<std::string> changeKeyV;
-    configuration_->CompareDifferent(changeKeyV, config);
-    if (!changeKeyV.empty()) {
-        configuration_->Merge(changeKeyV, config);
-    }
-}
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName, const BundleInfo &bundleInfo,
@@ -445,6 +436,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
             if (appMgrServiceInner != nullptr) {
                 appMgrServiceInner->KillProcessByPid(priorityObject->GetPid(), "OnRemoteDied");
             }
+            AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(priorityObject->GetPid());
         }
     }
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
@@ -478,6 +470,7 @@ void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
 
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
         RemoveUIExtensionLauncherItem(appRecord->GetPriorityObject()->GetPid());
+        AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(appRecord->GetPriorityObject()->GetPid());
     }
 }
 
@@ -530,16 +523,6 @@ std::shared_ptr<AbilityRunningRecord> AppRunningManager::GetAbilityRunningRecord
         }
     }
     return nullptr;
-}
-
-std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecord(const int64_t eventId)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::lock_guard guard(runningRecordMapMutex_);
-    auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&eventId](const auto &pair) {
-        return pair.second->GetEventId() == eventId;
-    });
-    return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
 }
 
 void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token,
@@ -671,6 +654,9 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
+        if (cacheProcMgr != nullptr) {
+            cacheProcMgr->CheckAndSetProcessCacheEnable(appRecord);
+        }
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "app %{public}s is not terminate app",
@@ -809,11 +795,6 @@ void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &lis
 int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, const int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::vector<std::string> changeKeyV;
-    configuration_->CompareDifferent(changeKeyV, config);
-    if (!changeKeyV.empty()) {
-        configuration_->Merge(changeKeyV, config);
-    }
 
     auto appRunningMap = GetAppRunningRecordMap();
     TAG_LOGD(AAFwkTag::APPMGR, "current app size %{public}zu", appRunningMap.size());
@@ -828,6 +809,9 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
                 appRecord->GetUid() / BASE_USER_RANGE == userId)) {
             continue;
         }
+        if (appRecord->GetDelayConfiguration() == nullptr) {
+            appRecord->ResetDelayConfiguration();
+        }
         if (appRecord && !isCollaboratorReserveType(appRecord)) {
             TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
             std::lock_guard guard(updateConfigurationDelayedLock_);
@@ -836,6 +820,10 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = false;
                 result = appRecord->UpdateConfiguration(config);
             } else {
+                auto delayConfig = appRecord->GetDelayConfiguration();
+                std::vector<std::string> diffVe;
+                delayConfig->CompareDifferent(diffVe, config);
+                delayConfig->Merge(diffVe, config);
                 updateConfigurationDelayedMap_[appRecord->GetRecordId()] = true;
             }
         }
@@ -1383,13 +1371,13 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
     return nullptr;
 }
 
-int32_t AppRunningManager::SignRestartAppFlag(const std::string &bundleName)
+int32_t AppRunningManager::SignRestartAppFlag(int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
+        if (appRecord == nullptr || appRecord->GetUid() != uid) {
             continue;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "sign");
@@ -1628,7 +1616,8 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
     abilityRecord->SetUserRequestCleaningStatus();
 
     bool canKill = appRecord->IsAllAbilityReadyToCleanedByUserRequest();
-    if (!canKill || appRecord->IsKeepAliveApp()) {
+    bool isProcessSupportCache = appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT;
+    if (!canKill || isProcessSupportCache ||appRecord->IsKeepAliveApp()) {
         return false;
     }
 
@@ -1671,14 +1660,10 @@ int32_t AppRunningManager::UpdateConfigurationDelayed(const std::shared_ptr<AppR
     int32_t result = ERR_OK;
     auto it = updateConfigurationDelayedMap_.find(appRecord->GetRecordId());
     if (it != updateConfigurationDelayedMap_.end() && it->second) {
-        int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
-        if (userId != 0) {
-            auto config = multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
-            std::vector<std::string> diffVe;
-            configuration_->CompareDifferent(diffVe, config);
-            configuration_->Merge(diffVe, config);
-        }
-        result = appRecord->UpdateConfiguration(*configuration_);
+        auto delayConfig = appRecord->GetDelayConfiguration();
+        TAG_LOGI(AAFwkTag::APPKIT, "delayConfig: %{public}s", delayConfig->GetName().c_str());
+        result = appRecord->UpdateConfiguration(*delayConfig);
+        appRecord->ResetDelayConfiguration();
         it->second = false;
     }
     return result;

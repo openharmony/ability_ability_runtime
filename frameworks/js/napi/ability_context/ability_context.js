@@ -15,6 +15,10 @@
 
 let Context = requireNapi('application.Context');
 let Caller = requireNapi('application.Caller');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 const ERROR_CODE_INVALID_PARAM = 401;
 const ERROR_MSG_INVALID_PARAM = 'Invalid input parameter.';
@@ -61,7 +65,7 @@ class AbilityContext extends Context {
   startAbilityByCall(want) {
     return new Promise(async (resolve, reject) => {
       if (typeof want !== 'object' || want == null) {
-        console.log('AbilityContext::startAbilityByCall input param error');
+        hilog.sLogI(domainID, TAG, 'AbilityContext::startAbilityByCall input param error');
         reject(new ParamError('Parse param want failed, want must be Want'));
         return;
       }
@@ -70,13 +74,13 @@ class AbilityContext extends Context {
       try {
         callee = await this.__context_impl__.startAbilityByCall(want);
       } catch (error) {
-        console.log('AbilityContext::startAbilityByCall Obtain remoteObject failed');
+        hilog.sLogI(domainID, TAG, 'AbilityContext::startAbilityByCall Obtain remoteObject failed');
         reject(error);
         return;
       }
 
       resolve(new Caller(callee));
-      console.log('AbilityContext::startAbilityByCall success');
+      hilog.sLogI(domainID, TAG, 'AbilityContext::startAbilityByCall success');
       return;
     });
   }
@@ -84,7 +88,7 @@ class AbilityContext extends Context {
   startAbilityByCallWithAccount(want, accountId) {
     return new Promise(async (resolve, reject) => {
       if (typeof want !== 'object' || want == null || typeof accountId !== 'number') {
-        console.log('AbilityContext::startAbilityByCall With accountId input param error');
+        hilog.sLogI(domainID, TAG, 'AbilityContext::startAbilityByCall With accountId input param error');
         reject(new ParamError(
           'Parse param want or accountId failed, want must be Want and accountId must be number'));
         return;
@@ -94,13 +98,13 @@ class AbilityContext extends Context {
       try {
         callee = await this.__context_impl__.startAbilityByCall(want, accountId);
       } catch (error) {
-        console.log('AbilityContext::startAbilityByCall With accountId Obtain remoteObject failed');
+        hilog.sLogI(domainID, TAG, 'AbilityContext::startAbilityByCall With accountId Obtain remoteObject failed');
         reject(error);
         return;
       }
 
       resolve(new Caller(callee));
-      console.log('AbilityContext::startAbilityByCall With accountId success');
+      hilog.sLogI(domainID, TAG, 'AbilityContext::startAbilityByCall With accountId success');
       return;
     });
   }

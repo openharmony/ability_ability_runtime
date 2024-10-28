@@ -117,6 +117,7 @@ enum class AppMgrInterfaceCode {
     CHECK_IS_KIA_PROCESS = 91,
     GET_All_RUNNING_INSTANCE_KEYS_BY_BUNDLENAME = 92,
     GET_All_RUNNING_INSTANCE_KEYS_BY_SELF = 93,
+    GET_APP_INDEX_BY_PID = 94,
 };
 } // AppExecFwk
 } // OHOS

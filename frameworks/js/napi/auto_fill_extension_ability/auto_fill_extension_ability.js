@@ -14,38 +14,42 @@
  */
 
 let ExtensionAbility = requireNapi('app.ability.ExtensionAbility');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 class AutoFillExtensionAbility extends ExtensionAbility {
   onCreate() {
-    console.log('onCreate');
+    hilog.sLogI(domainID, TAG, 'onCreate');
   }
 
   onFillRequest(session, request, callback) {
-    console.log('onFillRequest');
+    hilog.sLogI(domainID, TAG, 'onFillRequest');
   }
 
   onSaveRequest(session, request, callback) {
-    console.log('onSaveRequest');
+    hilog.sLogI(domainID, TAG, 'onSaveRequest');
   }
 
   onUpdateRequest(request) {
-    console.log('onUpdateRequest');
+    hilog.sLogI(domainID, TAG, 'onUpdateRequest');
   }
 
   onSessionDestroy(session) {
-    console.log('onSessionDestroy');
+    hilog.sLogI(domainID, TAG, 'onSessionDestroy');
   }
 
   onForeground() {
-    console.log('onForeground');
+    hilog.sLogI(domainID, TAG, 'onForeground');
   }
 
   onBackground() {
-    console.log('onBackground');
+    hilog.sLogI(domainID, TAG, 'onBackground');
   }
 
   onDestroy() {
-    console.log('onDestroy');
+    hilog.sLogI(domainID, TAG, 'onDestroy');
   }
 }
 

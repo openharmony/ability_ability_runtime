@@ -67,6 +67,10 @@ void ResourceConfigHelper::SetThemeId(std::string themeId)
 {
     themeId_ = themeId;
 }
+void ResourceConfigHelper::SetThemeIcon(std::string themeIcon)
+{
+    themeIcon_ = themeIcon;
+}
 
 void ResourceConfigHelper::UpdateResConfig(
     const AppExecFwk::Configuration &configuration, std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
@@ -147,6 +151,7 @@ void ResourceConfigHelper::UpdateResConfig(std::unique_ptr<Global::Resource::Res
             TAG_LOGD(AAFwkTag::ABILITY, "set themeId: %{public}u", resConfig->GetThemeId());
         }
     }
+    resConfig->SetThemeIcon(!themeIcon_.empty());
 }
 
 bool ResourceConfigHelper::ConvertStringToUint32(std::string source, uint32_t &result)

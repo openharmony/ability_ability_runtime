@@ -63,7 +63,7 @@ public:
         bool needNotifyApp, bool isFromWindowFocusChanged);
     void OnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload);
     void OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -85,7 +85,7 @@ private:
     void HandleOnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleStateChangedNotifyObserver(
         const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged);
-    void HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload);
     void HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord);
     void HandleOnChildProcessCreated(std::shared_ptr<ChildProcessRecord> childRecord);
     void HandleOnAppProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord);

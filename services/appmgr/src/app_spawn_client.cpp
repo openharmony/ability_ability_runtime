@@ -20,9 +20,11 @@
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
 #include "securec.h"
+#include "time_util.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+using namespace OHOS::AbilityRuntime;
 namespace {
 constexpr const char* HSPLIST_BUNDLES = "bundles";
 constexpr const char* HSPLIST_MODULES = "modules";
@@ -36,7 +38,6 @@ constexpr const char* VERSION_PREFIX = "v";
 constexpr const char* APPSPAWN_CLIENT_USER_NAME = "APP_MANAGER_SERVICE";
 constexpr int32_t RIGHT_SHIFT_STEP = 1;
 constexpr int32_t START_FLAG_TEST_NUM = 1;
-constexpr const char* MAX_CHILD_PROCESS = "MaxChildProcess";
 }
 AppSpawnClient::AppSpawnClient(bool isNWebSpawn)
 {
@@ -78,10 +79,15 @@ ErrCode AppSpawnClient::OpenConnection()
         return 0;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "call");
-    
+    int64_t startTime = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
     AppSpawnClientHandle handle = nullptr;
     ErrCode ret = 0;
     ret = AppSpawnClientInit(serviceName_.c_str(), &handle);
+    int64_t costTime = AbilityRuntime::TimeUtil::SystemTimeMillisecond() - startTime;
+    if (costTime > MAX_COST_TIME) {
+        TAG_LOGW(AAFwkTag::APPMGR, "appspawnclientInit cost %{public}" PRId64 "ms!", costTime);
+    }
+
     if (FAILED(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "appspawnclientInit failed");
         state_ = SpawnConnectionState::STATE_CONNECT_FAILED;
@@ -289,8 +295,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsg(const AppSpawnStartMsg &startMsg, AppS
     }
 
     if (!startMsg.atomicAccount.empty()) {
-        ret = AppSpawnReqMsgAddExtInfo(reqHandle, MSG_EXT_NAME_ACCOUNT_ID,
-            reinterpret_cast<const uint8_t*>(startMsg.atomicAccount.c_str()), startMsg.atomicAccount.size());
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_ACCOUNT_ID, startMsg.atomicAccount.c_str());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
@@ -313,8 +318,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
     }
 
     if (!startMsg.processType.empty()) {
-        ret = AppSpawnReqMsgAddExtInfo(reqHandle, MSG_EXT_NAME_PROCESS_TYPE,
-            reinterpret_cast<const uint8_t*>(startMsg.processType.c_str()), startMsg.processType.size());
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_PROCESS_TYPE, startMsg.processType.c_str());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
@@ -322,8 +326,7 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
     }
 
     std::string maxChildProcessStr = std::to_string(startMsg.maxChildProcess);
-    ret = AppSpawnReqMsgAddExtInfo(reqHandle, MAX_CHILD_PROCESS,
-        reinterpret_cast<const uint8_t*>(maxChildProcessStr.c_str()), maxChildProcessStr.size());
+    ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_MAX_CHILD_PROCCESS_MAX, maxChildProcessStr.c_str());
     if (ret) {
         TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
         return ret;
@@ -472,6 +475,7 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
 
     int32_t ret = 0;
     AppSpawnReqMsgHandle reqHandle = nullptr;
+    int64_t startTime = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
 
     ret = OpenConnection();
     if (ret != 0) {
@@ -492,6 +496,11 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
     TAG_LOGD(AAFwkTag::APPMGR, "AppspawnSendMsg");
     AppSpawnResult result = {0};
     ret = AppSpawnClientSendMsg(handle_, reqHandle, &result);
+
+    int64_t costTime = AbilityRuntime::TimeUtil::SystemTimeMillisecond() - startTime;
+    if (costTime > MAX_COST_TIME) {
+        TAG_LOGW(AAFwkTag::APPMGR, "StartProcess cost %{public}" PRId64 "ms!", costTime);
+    }
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "appspawn send msg fail");
         return ret;

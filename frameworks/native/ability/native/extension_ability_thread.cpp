@@ -19,6 +19,7 @@
 #include "ability_handler.h"
 #include "ability_loader.h"
 #include "ability_manager_client.h"
+#include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ui_extension_utils.h"
@@ -51,6 +52,7 @@ constexpr static char ENTERPRISE_ADMIN_EXTENSION[] = "EnterpriseAdminExtension";
 constexpr static char INPUTMETHOD_EXTENSION[] = "InputMethodExtensionAbility";
 constexpr static char APP_ACCOUNT_AUTHORIZATION_EXTENSION[] = "AppAccountAuthorizationExtension";
 constexpr static char FENCE_EXTENSION[] = "FenceExtension";
+constexpr static char CALLER_INFO_QUERY_EXTENSION[] = "CallerInfoQueryExtension";
 }
 
 const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_MAP = {
@@ -155,6 +157,9 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FENCE) {
         abilityName = FENCE_EXTENSION;
+    }
+    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::CALLER_INFO_QUERY) {
+        abilityName = CALLER_INFO_QUERY_EXTENSION;
     }
 #ifdef SUPPORT_GRAPHICS
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH) {
@@ -263,6 +268,7 @@ void ExtensionAbilityThread::HandleAttachInner(const std::shared_ptr<AppExecFwk:
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::EXT, "Attach err: %{public}d", err);
     }
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
 }
 
 void ExtensionAbilityThread::HandleExtensionTransaction(

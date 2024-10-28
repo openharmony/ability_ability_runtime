@@ -555,8 +555,6 @@ public:
     void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler);
     void SetEventHandler(const std::shared_ptr<AMSEventHandler> &handler);
 
-    int64_t GetEventId() const;
-
     /**
      * When the one process has no ability, it will go dying.
      */
@@ -721,7 +719,7 @@ public:
     void SetStartMsg(const AppSpawnStartMsg &msg);
     AppSpawnStartMsg GetStartMsg();
 
-    void SendEventForSpecifiedAbility(uint32_t msg, int64_t timeOut);
+    void SendEventForSpecifiedAbility();
 
     void SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunningRecord> &ability, const AppStartType startType);
     void SetKilling();
@@ -973,6 +971,17 @@ public:
         return isKia_;
     }
 
+    inline void ResetDelayConfiguration()
+    {
+        delayConfiguration_ = std::make_shared<Configuration>();
+    }
+
+    inline std::shared_ptr<Configuration> GetDelayConfiguration()
+    {
+        return delayConfiguration_;
+    }
+
+    void AddAppLifecycleEvent(const std::string &msg);
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1005,8 +1014,7 @@ private:
     bool AbilityUnfocused(const std::shared_ptr<AbilityRunningRecord> &ability);
 
     void SendEvent(uint32_t msg, int64_t timeOut);
-
-    void SendClearTask(uint32_t msg, int64_t timeOut);
+    void RemoveEvent(uint32_t msg);
 
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record, bool isExtensionDebug = false);
 
@@ -1039,9 +1047,6 @@ private:
     int32_t appRecordId_ = 0;
     std::string processName_;  // the name of this process
     std::string specifiedProcessFlag_; // the flag of specified Process
-    int64_t eventId_ = 0;
-    int64_t startProcessSpecifiedAbilityEventId_ = 0;
-    int64_t addAbilityStageInfoEventId_ = 0;
     std::unordered_set<sptr<IRemoteObject>, RemoteObjHash> foregroundingAbilityTokens_;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
     sptr<AppDeathRecipient> appDeathRecipient_ = nullptr;
@@ -1131,6 +1136,7 @@ private:
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
     bool isKia_ = false;
+    std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
 };
 
 }  // namespace AppExecFwk

@@ -162,11 +162,14 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid) override;
+    virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") override;
 
-    virtual int KillApplicationSelf(const bool clearPageStack = false) override;
+    virtual int KillApplicationSelf(const bool clearPageStack = false,
+        const std::string& reason = "KillApplicationSelf") override;
 
     /**
      * Get application info by process id.

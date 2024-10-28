@@ -677,7 +677,7 @@ void AbilityContextImpl::RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbil
     abilityCallback_ = abilityCallback;
 }
 
-ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want, RequestDialogResultTask &&task)
+void AbilityContextImpl::SetWindowRectangleParams(AAFwk::Want &want)
 {
     want.SetParam(RequestConstants::REQUEST_TOKEN_KEY, token_);
 #ifdef SUPPORT_SCREEN
@@ -691,6 +691,11 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_WIDTH_KEY, width);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_HEIGHT_KEY, height);
 #endif // SUPPORT_SCREEN
+}
+
+ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want, RequestDialogResultTask &&task)
+{
+    SetWindowRectangleParams(want);
     auto resultTask =
         [env, outTask = std::move(task)](int32_t resultCode, const AAFwk::Want &resultWant) {
         auto retData = new (std::nothrow) RequestResult();
@@ -740,17 +745,7 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
 
 ErrCode AbilityContextImpl::RequestDialogService(AAFwk::Want &want, RequestDialogResultTask &&task)
 {
-    want.SetParam(RequestConstants::REQUEST_TOKEN_KEY, token_);
-    int32_t left;
-    int32_t top;
-    int32_t width;
-    int32_t height;
-    GetWindowRect(left, top, width, height);
-    want.SetParam(RequestConstants::WINDOW_RECTANGLE_LEFT_KEY, left);
-    want.SetParam(RequestConstants::WINDOW_RECTANGLE_TOP_KEY, top);
-    want.SetParam(RequestConstants::WINDOW_RECTANGLE_WIDTH_KEY, width);
-    want.SetParam(RequestConstants::WINDOW_RECTANGLE_HEIGHT_KEY, height);
-
+    SetWindowRectangleParams(want);
     sptr<IRemoteObject> remoteObject = sptr<DialogRequestCallbackImpl>::MakeSptr(std::move(task));
     want.SetParam(RequestConstants::REQUEST_CALLBACK_KEY, remoteObject);
 
@@ -770,6 +765,12 @@ void AbilityContextImpl::RequestDialogResultJSThreadWorker(uv_work_t* work, int 
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     if (work == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null work");
+        return;
+    }
+    if (work->data == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null work data");
+        delete work;
+        work = nullptr;
         return;
     }
     RequestResult* retCB = static_cast<RequestResult*>(work->data);

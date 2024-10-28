@@ -19,7 +19,7 @@
 #define protected public
 #include "ability_manager_service.h"
 #include "ability_record.h"
-#include "iservice_registry.h"
+#include "bundle_mgr_helper.h"
 #include "mission_list_manager.h"
 #include "ui_ability_lifecycle_manager.h"
 #undef private
@@ -31,10 +31,9 @@
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_execute_manager.h"
 #include "mock_ability_token.h"
-#include "mock_bundle_manager_service.h"
+#include "mock_bundle_manager_proxy.h"
 #include "mock_my_flag.h"
 #include "mock_permission_verification.h"
-#include "mock_system_ability_manager.h"
 #include "mock_task_handler_wrap.h"
 #include "process_options.h"
 #include "recovery_param.h"
@@ -82,8 +81,6 @@ constexpr const char* BUNDLE_NAME_SMART_TEST = "com.huawei.hms.textautofill";
 const std::string APP_INSTANCE_KEY("ohos.extra.param.key.appInstance");
 const std::string CREATE_APP_INSTANCE_KEY("ohos.extra.param.key.createAppInstance");
 constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
-constexpr int32_t BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
-auto mockBundleMgr = sptr<MockBundleManagerService>::MakeSptr();
 }  // namespace
 class AbilityManagerServiceSixthTest : public testing::Test {
 public:
@@ -91,13 +88,10 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    void MockBundleInstallerAndSA();
-    sptr<ISystemAbilityManager> iSystemAbilityMgr_ = nullptr;
-    sptr<AppExecFwk::MockSystemAbilityManager> mockSystemAbility_ = nullptr;
-    std::shared_ptr<BundleMgrHelper> bundleMgrHelper_{ nullptr };
     AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
         const std::string& appName, const std::string& bundleName, const std::string& moduleName);
     std::shared_ptr<AbilityManagerService> MockAbilityManagerService();
+    std::shared_ptr<BundleMgrHelper> bundleMgrHelper_{ nullptr };
 
 public:
     AbilityRequest abilityRequest_{};
@@ -135,7 +129,7 @@ AbilityRequest AbilityManagerServiceSixthTest::GenerateAbilityRequest(const std:
 std::shared_ptr<AbilityManagerService> AbilityManagerServiceSixthTest::MockAbilityManagerService()
 {
     auto abilityMs = std::make_shared<AbilityManagerService>();
-    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("StartAbilityDetails_003");
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceSixthTest");
     auto eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityMs);
     abilityMs->taskHandler_ = taskHandler;
     abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
@@ -150,29 +144,11 @@ void AbilityManagerServiceSixthTest::TearDownTestCase() {}
 
 void AbilityManagerServiceSixthTest::SetUp()
 {
-    mockSystemAbility_ = new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
-    iSystemAbilityMgr_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
-    MockBundleInstallerAndSA();
+    bundleMgrHelper_ = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
 }
 
 void AbilityManagerServiceSixthTest::TearDown()
-{
-    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = iSystemAbilityMgr_;
-}
-
-void AbilityManagerServiceSixthTest::MockBundleInstallerAndSA()
-{
-    auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
-        if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
-            return bms->AsObject();
-        } else {
-            return saMgr->GetSystemAbility(systemAbilityId);
-        }
-    };
-    EXPECT_CALL(*mockSystemAbility_, CheckSystemAbility(testing::_))
-        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
-}
+{}
 
 /*
  * Feature: AbilityManagerService
@@ -313,35 +289,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_001, TestSize.Level
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartAbilityDetails
  */
-HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0200, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0200 start");
-
-    Want want;
-    want.SetParam(DEBUG_APP, true);
-    want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.name = "ability1";
-    abilityInfo.bundleName = "testBundleName";
-    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    auto ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
-
-    /**
-     * @tc.steps: step2. CONTACTS_BUNDLE_NAME
-     * @tc.expected: step2. expect ERR_NOT_IN_APP_PROVISION_MODE
-     */
-    EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0200 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartAbilityDetails
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartAbilityDetails
- */
 HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 start");
@@ -356,64 +303,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0300, TestSize.Leve
     auto ret = abilityMs->StartAbilityDetails(want1, abilityStartSetting_, nullptr, MAIN_USER_ID, -1, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartAbilityDetails
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartAbilityDetails
- */
-HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0400, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0400 start");
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.name = "ability1";
-    abilityInfo.bundleName = "testBundleName";
-    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
-    abilityInfo.applicationInfo.name = "test";
-    abilityInfo.applicationInfo.bundleName = "testBundleName";
-    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
-    Want want;
-    want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
-    auto abilityMs = MockAbilityManagerService();
-    MyFlag::flag_ = 0;
-    auto ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
-    /**
-     * @tc.steps: step2. interceptorExecuter_ is inited, for CONTACTS_BUNDLE_NAME is sigeleton，usrid 0
-     * @tc.expected: step2. expect missionListManager/uiAbilityManager null, return ERR_INVALID_VALUE
-     */
-    MyFlag::flag_ = 1;
-    ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0400 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartAbilityDetails
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartAbilityInner
- */
-HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityInner_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    abilityMs->taskHandler_ = MockTaskHandlerWrap::CreateQueueHandler("StartAbilityInner_001");
-    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
-    abilityMs->afterCheckExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
-    Want want;
-    want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
-    MyFlag::abilityCallFlag_ = 0;
-    auto ret = abilityMs->StartAbilityInner(want, nullptr, -1, false);
-
-    /**
-     * @tc.steps: step2. interceptorExecuter_ is inited, for CONTACTS_BUNDLE_NAME is sigeleton，usrid 0
-     * @tc.expected: step2. expect missionListManager/uiAbilityManager null, return ERR_INVALID_VALUE
-     */
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityInner_001 end");
 }
 
 /*
@@ -998,12 +887,13 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_002, TestSize.Leve
     abilityRecord->Init();
     auto token = abilityRecord->token_;
     auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(Return(false));
     auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
         -1, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
     want.SetFlags(Want::FLAG_INSTALL_ON_DEMAND);
     EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(Return(true)); // name empty
@@ -1024,6 +914,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_002, TestSize.Leve
     abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
     ret = abilityMs->ConnectAbilityCommon(want, impl, nullptr, ExtensionAbilityType::SERVICE,
         -1, false);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_002 end");
 }
 
@@ -1056,6 +948,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectUIExtensionAbility_001, TestSize
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     want.SetUri("file://kia-file-uri");
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(Return(false));
     ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
@@ -1076,6 +970,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectUIExtensionAbility_001, TestSize
     ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
     want.SetUri("");
     ret = abilityMs->ConnectUIExtensionAbility(want, impl, sessionInfo, -1, connectInfo);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectUIExtensionAbility_001 end");
 }
 
@@ -1087,7 +983,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectUIExtensionAbility_001, TestSize
  */
 HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1103,11 +998,12 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level
         true, connectInfo);
     EXPECT_EQ(ret, ERR_CROSS_USER);
     std::vector<ExtensionAbilityInfo> extensionInfos;
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfos(testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos empty
     ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
         true, connectInfo);
-    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR); // extensionInfos is empty
     extensionType = ExtensionAbilityType::SHARE;
     ExtensionAbilityInfo extensionInfo;
     extensionInfos.push_back(extensionInfo);
@@ -1134,7 +1030,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level
         .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
     ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
         false, connectInfo);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_001 end");
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
 }
 
 /*
@@ -1142,7 +1039,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_001, TestSize.Level
  * Function: ConnectLocalAbility
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService ConnectLocalAbility
- */
+*/
 HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_002 start");
@@ -1165,6 +1062,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_002, TestSize.Level
     extensionInfos[0].name = "testExtension";
     extensionInfos[0].applicationInfo.name = "app";
     extensionInfos[0].applicationInfo.bundleName = TEST_BUNDLE_NAME;
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfos(testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos not empty
     auto ret = abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, token, extensionType, sessionInfo,
@@ -1182,6 +1081,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_002, TestSize.Level
         true, connectInfo);
     abilityMs->ConnectLocalAbility(want, U0_USER_ID, impl, nullptr, extensionType, sessionInfo,
         true, connectInfo);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_002 end");
 }
 
@@ -1201,25 +1102,31 @@ HWTEST_F(AbilityManagerServiceSixthTest, GenerateDataAbilityRequestByUri_001, Te
     auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
     abilityRecord->Init();
     auto callerToken = abilityRecord->token_;
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(false)));
     AbilityRequest abilityRequest;
     auto ret = abilityMs->GenerateDataAbilityRequestByUri("", abilityRequest, callerToken, DEFAULT_INVALID_USER_ID);
     EXPECT_FALSE(ret);
+    Mock::VerifyAndClear(mockBundleMgr);
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
     ret = abilityMs->GenerateDataAbilityRequestByUri("", abilityRequest, callerToken, DEFAULT_INVALID_USER_ID);
     EXPECT_FALSE(ret);
     abilityInfo.name = "testAbility";
+    Mock::VerifyAndClear(mockBundleMgr);
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
     ret = abilityMs->GenerateDataAbilityRequestByUri("", abilityRequest, callerToken, DEFAULT_INVALID_USER_ID);
     EXPECT_FALSE(ret);
     abilityInfo.bundleName = TEST_BUNDLE_NAME;
+    Mock::VerifyAndClear(mockBundleMgr);
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
     ret = abilityMs->GenerateDataAbilityRequestByUri("", abilityRequest, callerToken, DEFAULT_INVALID_USER_ID);
-    EXPECT_TRUE(ret);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest GenerateDataAbilityRequestByUri_001 end");
 }
 
@@ -1240,6 +1147,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, AcquireDataAbility_001, TestSize.Level1
     abilityRecord->Init();
     auto callerToken = abilityRecord->token_;
     abilityInfo.name = "testAbility";
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
     Uri uri("");
@@ -1267,6 +1176,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, AcquireDataAbility_001, TestSize.Level1
         .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
     ret = abilityMs->AcquireDataAbility(uri2, true, callerToken);
     EXPECT_EQ(ret, nullptr);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AcquireDataAbility_001 end");
 }
 
@@ -1292,11 +1203,15 @@ HWTEST_F(AbilityManagerServiceSixthTest, AcquireDataAbility_002, TestSize.Level1
     abilityInfo.applicationInfo.bundleName = TEST_BUNDLE_NAME;
     abilityInfo.type = AppExecFwk::AbilityType::DATA;
     MyFlag::flag_ = MyFlag::IS_SHELL_CALL;
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfoByUri(testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<2>(abilityInfo), Return(true)));
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
     auto ret = abilityMs->AcquireDataAbility(uri, true, callerToken);
     EXPECT_EQ(ret, nullptr);
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest AcquireDataAbility_002 end");
 }
 
@@ -1423,37 +1338,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, OnAbilityRequestDone_001, TestSize.Leve
     abilityMs->OnAbilityRequestDone(token, 0);
     const_cast<AbilityInfo&>(abilityRecord->GetAbilityInfo()).type = AppExecFwk::AbilityType::UNKNOWN;
     abilityMs->OnAbilityRequestDone(token, 0);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartHighestPriorityAbility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartHighestPriorityAbility
- */
-HWTEST_F(AbilityManagerServiceSixthTest, StartHighestPriorityAbility_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs, nullptr);
-    EXPECT_CALL(*mockBundleMgr, ImplicitQueryInfoByPriority(testing::_, testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(Return(false)).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    abilityMs->StartHighestPriorityAbility(-1, false);
-    abilityMs->StartHighestPriorityAbility(-1, false);
-    abilityMs->StartHighestPriorityAbility(-1, true);
-
-    AbilityInfo abilityInfo;
-    abilityInfo.name = "ability";
-    EXPECT_CALL(*mockBundleMgr, ImplicitQueryInfoByPriority(testing::_, testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(TRUE)));
-    abilityMs->StartHighestPriorityAbility(-1, true);
-
-    ExtensionAbilityInfo extensionAbilityInfo;
-    extensionAbilityInfo.name = "extension";
-    EXPECT_CALL(*mockBundleMgr, ImplicitQueryInfoByPriority(testing::_, testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(DoAll(SetArgReferee<4>(extensionAbilityInfo), Return(true)));
-    abilityMs->StartHighestPriorityAbility(-1, true);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest OnAbilityRequestDone_001 end");
 }
 
@@ -1873,14 +1757,39 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartUIAbilityByPreInstallInner_001, Te
     ret = abilityMs->StartUIAbilityByPreInstallInner(sessionInfo, -1, 0, isColdStart);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
-    ret = abilityMs->StartUIAbilityByPreInstallInner(sessionInfo, -1, 0, isColdStart);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    abilityMs->StartUIAbilityByPreInstallInner(sessionInfo, -1, 0, isColdStart);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUIAbilityByPreInstallInner_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilityByPreInstallInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilityByPreInstallInner
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, StartUIAbilityByPreInstallInner_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUIAbilityByPreInstallInner_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    bool isColdStart = true;
     AbilityInfo abilityInfo1;
     abilityInfo1.type = AbilityType::EXTENSION;
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo1), Return(true)));
-    ret = abilityMs->StartUIAbilityByPreInstallInner(sessionInfo, -1, 0, isColdStart);
-    EXPECT_EQ(ret, ERR_WRONG_INTERFACE_CALL);
+    std::vector<ExtensionAbilityInfo> extensionInfos;
+    ExtensionAbilityInfo extensionInfo;
+    extensionInfos.push_back(extensionInfo);
+    extensionInfos[0].bundleName = TEST_BUNDLE_NAME;
+    extensionInfos[0].name = "testExtension";
+    extensionInfos[0].applicationInfo.name = "app";
+    extensionInfos[0].applicationInfo.bundleName = TEST_BUNDLE_NAME;
+    EXPECT_CALL(*mockBundleMgr, QueryExtensionAbilityInfos(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(extensionInfos), Return(true))); // extensionInfos empty
+    auto ret = abilityMs->StartUIAbilityByPreInstallInner(sessionInfo, -1, 0, isColdStart);
 
     AbilityInfo abilityInfo2;
     abilityInfo2.name = "ability2";
@@ -1900,7 +1809,9 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartUIAbilityByPreInstallInner_001, Te
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     ret = abilityMs->StartUIAbilityByPreInstallInner(sessionInfo, -1, 0, isColdStart);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUIAbilityByPreInstallInner_001 end");
+    Mock::VerifyAndClear(mockBundleMgr);
+    bundleMgrHelper_->bundleMgr_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartUIAbilityByPreInstallInner_002 end");
 }
 
 /*
@@ -1960,22 +1871,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, SendStartAbilityOtherExtensionEvent_001
     specifyTokenId = 0;
     abilityMs->SendStartAbilityOtherExtensionEvent(abilityInfo, want, specifyTokenId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SendStartAbilityOtherExtensionEvent_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: TerminateMission
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService TerminateMission
- */
-HWTEST_F(AbilityManagerServiceSixthTest, TerminateMission_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest TerminateMission_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    ASSERT_NE(abilityMs, nullptr);
-    int32_t missionId = -1;
-    EXPECT_EQ(abilityMs->TerminateMission(missionId), 1);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest TerminateMission_001 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

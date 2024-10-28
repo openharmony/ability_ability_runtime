@@ -240,7 +240,6 @@ public:
 
     void HandleTerminateTimeOut(int64_t eventId);
     void HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token, std::shared_ptr<AppMgrServiceInner> serviceInner);
-    std::shared_ptr<AppRunningRecord> GetAppRunningRecord(const int64_t eventId);
     void TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag,
         std::shared_ptr<AppMgrServiceInner> appMgrServiceInner);
 
@@ -264,7 +263,6 @@ public:
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
     int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info);
 
-    void initConfig(const Configuration &config);
     void ClipStringContent(const std::regex &re, const std::string &source, std::string &afterCutStr);
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByRenderPid(const pid_t pid);
     std::shared_ptr<RenderRecord> OnRemoteRenderDied(const wptr<IRemoteObject> &remote);
@@ -312,7 +310,7 @@ public:
      */
     int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
 
-    int32_t SignRestartAppFlag(const std::string &bundleName);
+    int32_t SignRestartAppFlag(int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -367,7 +365,6 @@ private:
     std::mutex uiExtensionMapLock_;
     std::map<int32_t, std::pair<pid_t, pid_t>> uiExtensionLauncherMap_;
 
-    std::shared_ptr<Configuration> configuration_;
     std::mutex updateConfigurationDelayedLock_;
     std::map<const int32_t, bool> updateConfigurationDelayedMap_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;

@@ -35,6 +35,7 @@ config("moduletest_include_dir") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_delegator/runner_runtime/",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "//third_party/googletest/googlemock/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app/",
