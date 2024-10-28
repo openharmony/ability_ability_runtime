@@ -29,8 +29,8 @@ enum InitStatus { NOT_EXECUTED, EXECUTED_SUCCESSFULLY };
 }
 class SourceMapOperator : public std::enable_shared_from_this<SourceMapOperator> {
 public:
-    SourceMapOperator(const std::string bundleName, bool isModular, bool isDebugVersion)
-        : bundleName_(bundleName), isModular_(isModular), isDebugVersion_(isDebugVersion), initStatus_(NOT_EXECUTED) {}
+    SourceMapOperator(const std::string bundleName, bool isModular, bool hasFile)
+        : bundleName_(bundleName), isModular_(isModular), hasFile_(hasFile), initStatus_(NOT_EXECUTED) {}
 
     ~SourceMapOperator() = default;
 
@@ -60,7 +60,7 @@ public:
         if (sourceMapObj_ == nullptr) {
             return "";
         }
-        if (isDebugVersion_) {
+        if (hasFile_) {
             return sourceMapObj_->TranslateBySourceMap(stackStr);
         } else {
             return NOT_FOUNDMAP + stackStr;
@@ -88,7 +88,7 @@ public:
 private:
     const std::string bundleName_;
     bool isModular_ = false;
-    bool isDebugVersion_ = false;
+    bool hasFile_ = false;
     std::shared_ptr<SourceMap> sourceMapObj_;
     InitStatus initStatus_;
 };
