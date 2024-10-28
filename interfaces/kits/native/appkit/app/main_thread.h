@@ -371,6 +371,8 @@ private:
     void PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
         std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 
+    void ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+
     /**
      *
      * @brief Schedule the application process exit safely.
