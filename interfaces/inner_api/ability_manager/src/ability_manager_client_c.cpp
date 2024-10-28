@@ -33,6 +33,6 @@ int RecordAppExitReason(int exitReason, const char *exitMsg)
     OHOS::AAFwk::ExitReason exitReasonData = { reason, exitMsgStr };
 
     auto instance = OHOS::AAFwk::AbilityManagerClient::GetInstance();
-    CHECK_POINTER_AND_RETURN_VALUE(instance, -1);
+    CHECK_POINTER_AND_RETURN(instance, -1);
     return instance->RecordAppExitReason(exitReasonData);
 }
