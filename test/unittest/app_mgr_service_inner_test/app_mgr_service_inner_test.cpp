@@ -4241,9 +4241,13 @@ HWTEST_F(AppMgrServiceInnerTest, AddUIExtensionLauncherItem_0100, TestSize.Level
  * @tc.name: PreloadApplication_0100
  * @tc.desc: Preload Application.
  * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0100, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0100 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     ASSERT_NE(appMgrServiceInner, nullptr);
 
@@ -4253,6 +4257,260 @@ HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0100, TestSize.Level1)
     int32_t appIndex = 0;
     int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0100 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_0200
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "";
+    int32_t userId = 100;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0200 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_0300
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = 100;
+    PreloadMode preloadMode = PreloadMode::PRESS_DOWN;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0300 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_0400
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0400 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "";
+    int32_t userId = 100;
+    PreloadMode preloadMode = PreloadMode::PRESS_DOWN;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0400 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_0500
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0500 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = 1;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0500 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_0600
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0600 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = 1;
+    PreloadMode preloadMode = PreloadMode::PRESS_DOWN;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0600 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_0700
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0700, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0700 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "";
+    int32_t userId = 1;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0700 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_0800
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0800, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0800 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "";
+    int32_t userId = 1;
+    PreloadMode preloadMode = PreloadMode::PRESS_DOWN;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0800 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_0900
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0900, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0900 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = 0;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 1;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_0900 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_1000
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_1000, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_1000 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "";
+    int32_t userId = 0;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 1;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_1000 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_1100
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_1100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_1100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = 0;
+    PreloadMode preloadMode = PreloadMode::PRESS_DOWN;
+    int32_t appIndex = 1;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_1100 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_1200
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadApplication
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_1200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_1200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "";
+    int32_t userId = 0;
+    PreloadMode preloadMode = PreloadMode::PRESS_DOWN;
+    int32_t appIndex = 1;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_1200 end");
 }
 
 /**
