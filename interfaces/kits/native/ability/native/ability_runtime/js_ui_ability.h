@@ -317,7 +317,7 @@ private:
     bool CheckSatisfyTargetAPIVersion(int32_t targetAPIVersion);
     bool BackPressDefaultValue();
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
-        const std::string &moduleName, const std::string &srcPath)
+        const std::string &moduleName, const std::string &srcPath);
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
