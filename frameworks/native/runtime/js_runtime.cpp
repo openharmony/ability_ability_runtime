@@ -1289,7 +1289,7 @@ void JsRuntime::PreloadModule(const std::string& moduleName, const std::string& 
     preloadList_[key] = LoadModule(moduleName, srcPath, hapPath, isEsMode, useCommonTrunk);
 }
 
-bool JsRuntime::PopPreloadObj(const std::string& key, std::shared_ptr<NativeReference>& obj)
+bool JsRuntime::PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj)
 {
     if (preloadList_.find(key) == preloadList_.end()) {
         return false;
