@@ -37,7 +37,7 @@ bool AppPreloader::PreCheck(const std::string &bundleName, PreloadMode preloadMo
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication PreCheck, bundleName: %{public}s, preloadMode:%{public}d",
         bundleName.c_str(), preloadMode);
-    if (preloadMode == PreloadMode::PRE_MAKE || preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE) {
+    if (preloadMode == PreloadMode::PRE_MAKE || preloadMode == PreloadMode::PRELOAD_MODULE) {
         return true;
     }
     int32_t mode = static_cast<int32_t>(preloadMode);
