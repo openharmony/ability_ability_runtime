@@ -325,7 +325,7 @@ public:
 
     void CloseAssertDialog(const std::string &assertSessionId);
 
-    void SignRestartAppFlag(const std::string &bundleName);
+    void SignRestartAppFlag(int32_t uid);
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
     void UninstallApp(const std::string &bundleName);
@@ -632,6 +632,8 @@ private:
 
     int32_t ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo);
     int32_t ReportAbilityStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
+    void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
+        const std::shared_ptr<AbilityRecord> abilityRecord, sptr<IRemoteObject> callerToken);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";

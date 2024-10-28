@@ -96,13 +96,9 @@ public:
     bool GetResidentBundleInfosForUser(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
     void StartFailedResidentAbilities();
 private:
-    bool CheckMainElement(const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &processName,
-        std::string &mainElement, std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex, int32_t userId = 0);
     void UpdateResidentProcessesStatus(const std::string &bundleName, bool localEnable, bool updateEnable);
     void AddFailedResidentAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
     void NotifyDisableResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
-    void UpdateMainElement(const std::string &bundleName, const std::string &moduleName,
-        const std::string &mainElement, bool updateEnable, int32_t userId);
 
     std::mutex residentAbilityInfoMutex_;
     std::list<ResidentAbilityInfo> residentAbilityInfos_;

@@ -132,14 +132,16 @@ bool IdleTime::GetNeedStop()
 
 IdleNotifyStatusCallback IdleTime::GetIdleNotifyFunc()
 {
-    IdleNotifyStatusCallback cb = [this](bool needStop) {
-        if (this->GetNeedStop() == needStop) {
+    auto weakThis = weak_from_this();
+    IdleNotifyStatusCallback cb = [weakThis](bool needStop) {
+        auto sharedThis = weakThis.lock();
+        if (sharedThis == nullptr || sharedThis->GetNeedStop() == needStop) {
             return;
         }
 
-        this->SetNeedStop(needStop);
+        sharedThis->SetNeedStop(needStop);
         if (needStop == false) {
-            this->Start();
+            sharedThis->Start();
         }
     };
     return cb;

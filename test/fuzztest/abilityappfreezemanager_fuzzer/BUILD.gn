@@ -23,6 +23,7 @@ ohos_fuzztest("AbilityAppFreezeManagerFuzzTest") {
       "${ability_runtime_test_path}/fuzztest/abilityappfreezemanager_fuzzer"
   include_dirs = [
     "${ability_runtime_services_path}/appmgr/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_path}/utils/global/freeze/include",

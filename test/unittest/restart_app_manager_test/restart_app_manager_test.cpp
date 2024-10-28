@@ -50,10 +50,9 @@ void RestartAppManagerTest::SetUp()
 HWTEST_F(RestartAppManagerTest, IsRestartAppFrequent_001, TestSize.Level1)
 {
     RestartAppManager &instance = RestartAppManager::GetInstance();
-    RestartAppKeyType key("com.example.app", 123);
     time_t time = 0;
-    instance.restartAppHistory_[key] = time;
-    auto res = instance.IsRestartAppFrequent(key, time);
+    instance.restartAppHistory_[1] = time;
+    auto res = instance.IsRestartAppFrequent(1, time);
     EXPECT_EQ(res, true);
 }
 
@@ -66,9 +65,8 @@ HWTEST_F(RestartAppManagerTest, IsRestartAppFrequent_001, TestSize.Level1)
 HWTEST_F(RestartAppManagerTest, IsRestartAppFrequent_002, TestSize.Level1)
 {
     RestartAppManager &instance = RestartAppManager::GetInstance();
-    RestartAppKeyType key("com.example.app", 123);
     time_t time = 20;
-    auto res = instance.IsRestartAppFrequent(key, time);
+    auto res = instance.IsRestartAppFrequent(1, time);
     EXPECT_EQ(res, false);
 }
 

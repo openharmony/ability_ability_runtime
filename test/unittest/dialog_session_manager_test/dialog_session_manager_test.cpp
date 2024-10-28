@@ -160,48 +160,6 @@ HWTEST_F(DialogSessionManagerTest, NotifySCBToRecoveryAfterInterceptionTest_0100
 }
 
 /**
- * @tc.name: CreateJumpModalDialogTest_0100
- * @tc.desc: Test CreateJumpModalDialog
- * @tc.type: FUNC
- */
-HWTEST_F(DialogSessionManagerTest, CreateJumpModalDialogTest_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "CreateJumpModalDialogTest_0100 start";
-    AbilityRequest abilityRequest;
-    Want replaceWant;
-    DialogSessionManager dialogSessionManager;
-
-    int32_t ret = dialogSessionManager.CreateJumpModalDialog(abilityRequest, TEST_USER_ID, replaceWant);
-    EXPECT_EQ(ret, INNER_ERR);
-    GTEST_LOG_(INFO) << "CreateJumpModalDialogTest_0100 end";
-}
-
-/**
- * @tc.name: CreateCloneSelectorModalDialogTest_0100
- * @tc.desc: Test CreateCloneSelectorModalDialog
- * @tc.type: FUNC
- */
-HWTEST_F(DialogSessionManagerTest, CreateCloneSelectorModalDialogTest_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "CreateCloneSelectorModalDialogTest_0100 start";
-    AbilityRequest abilityRequest;
-    std::string replaceWant = "replaceWant";
-    Want want;
-    std::vector<DialogAppInfo> dialogAppInfos;
-    DialogSessionManager dialogSessionManager;
-
-    int32_t ret = dialogSessionManager.CreateCloneSelectorModalDialog(abilityRequest,
-        want, TEST_USER_ID, dialogAppInfos, replaceWant);
-    EXPECT_EQ(ret, INNER_ERR);
-
-    replaceWant = "";
-    ret = dialogSessionManager.CreateCloneSelectorModalDialog(abilityRequest,
-        want, TEST_USER_ID, dialogAppInfos, replaceWant);
-    EXPECT_EQ(ret, INNER_ERR);
-    GTEST_LOG_(INFO) << "CreateCloneSelectorModalDialogTest_0100 end";
-}
-
-/**
  * @tc.name: CreateModalDialogCommonTest_0100
  * @tc.desc: Test CreateModalDialogCommon
  * @tc.type: FUNC
@@ -216,44 +174,6 @@ HWTEST_F(DialogSessionManagerTest, CreateModalDialogCommonTest_0100, TestSize.Le
     int32_t ret = dialogSessionManager.CreateModalDialogCommon(replaceWant, callerToken, TEST_DIALOG_SESSION_ID);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "CreateModalDialogCommonTest_0100 end";
-}
-
-/**
- * @tc.name: HandleErmsResultTest_0100
- * @tc.desc: Test HandleErmsResult
- * @tc.type: FUNC
- */
-HWTEST_F(DialogSessionManagerTest, HandleErmsResultTest_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "HandleErmsResultTest_0100 start";
-    AbilityRequest abilityRequest;
-    Want replaceWant;
-    DialogSessionManager dialogSessionManager;
-
-    int32_t ret = dialogSessionManager.HandleErmsResult(abilityRequest, TEST_USER_ID, replaceWant);
-    EXPECT_EQ(ret, INNER_ERR);
-
-    StartAbilityUtils::ermsResultCode = TEST_ERMS_ISALLOW_RESULTCODE;
-    ret = dialogSessionManager.HandleErmsResult(abilityRequest, TEST_USER_ID, replaceWant);
-    EXPECT_EQ(ret, INNER_ERR);
-    GTEST_LOG_(INFO) << "HandleErmsResultTest_0100 end";
-}
-
-/**
- * @tc.name: HandleErmsResultBySCBTest_0100
- * @tc.desc: Test HandleErmsResultBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(DialogSessionManagerTest, HandleErmsResultBySCBTest_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "HandleErmsResultBySCBTest_0100 start";
-    AbilityRequest abilityRequest;
-    Want replaceWant;
-    DialogSessionManager dialogSessionManager;
-
-    int32_t ret = dialogSessionManager.HandleErmsResultBySCB(abilityRequest, replaceWant);
-    EXPECT_EQ(ret, INNER_ERR);
-    GTEST_LOG_(INFO) << "HandleErmsResultBySCBTest_0100 end";
 }
 
 /**

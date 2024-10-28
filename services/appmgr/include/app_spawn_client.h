@@ -39,6 +39,7 @@ using DataGroupInfoList = std::vector<DataGroupInfo>;
 const int32_t MAX_FLAG_INDEX = 32;
 const int32_t MAX_PROC_NAME_LEN = 256;
 const int32_t START_FLAG_BASE = 1;
+const int32_t MAX_COST_TIME = 500;
 struct AppSpawnStartMsg {
     int32_t uid;
     int32_t gid;

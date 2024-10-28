@@ -12,96 +12,100 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 class AbilityLifecycleCallback {
   constructor() {}
 
   onAbilityCreate(ability) {
-    console.log('onAbilityCreate');
+    hilog.sLogI(domainID, TAG, 'onAbilityCreate');
   }
 
   onWindowStageCreate(ability, windowStage) {
-    console.log('onWindowStageCreate');
+    hilog.sLogI(domainID, TAG, 'onWindowStageCreate');
   }
 
   onWindowStageActive(ability, windowStage) {
-    console.log('onWindowStageActive');
+    hilog.sLogI(domainID, TAG, 'onWindowStageActive');
   }
 
   onWindowStageInactive(ability, windowStage) {
-    console.log('onWindowStageInactive');
+    hilog.sLogI(domainID, TAG, 'onWindowStageInactive');
   }
 
   onWindowStageDestroy(ability, windowStage) {
-    console.log('onWindowStageDestroy');
+    hilog.sLogI(domainID, TAG, 'onWindowStageDestroy');
   }
 
   onAbilityDestroy(ability) {
-    console.log('onAbilityDestroy');
+    hilog.sLogI(domainID, TAG, 'onAbilityDestroy');
   }
 
   onAbilityForeground(ability) {
-    console.log('onAbilityForeground');
+    hilog.sLogI(domainID, TAG, 'onAbilityForeground');
   }
 
   onAbilityBackground(ability) {
-    console.log('onAbilityBackground');
+    hilog.sLogI(domainID, TAG, 'onAbilityBackground');
   }
 
   onAbilityContinue(ability) {
-    console.log('onAbilityContinue');
+    hilog.sLogI(domainID, TAG, 'onAbilityContinue');
   }
 
   onNewWant(ability) {
-    console.log('onNewWant');
+    hilog.sLogI(domainID, TAG, 'onNewWant');
   }
 
   onWillNewWant(ability) {
-    console.log('onWillNewWant');
+    hilog.sLogI(domainID, TAG, 'onWillNewWant');
   }
 
   onAbilityWillCreate(ability) {
-    console.log('onAbilityWillCreate');
+    hilog.sLogI(domainID, TAG, 'onAbilityWillCreate');
   }
 
   onWindowStageWillCreate(ability, windowStage) {
-    console.log('onWindowStageWillCreate');
+    hilog.sLogI(domainID, TAG, 'onWindowStageWillCreate');
   }
 
   onWindowStageWillDestroy(ability, windowStage) {
-    console.log('onWindowStageWillDestroy');
+    hilog.sLogI(domainID, TAG, 'onWindowStageWillDestroy');
   }
 
   onAbilityWillDestroy(ability) {
-    console.log('onAbilityWillDestroy');
+    hilog.sLogI(domainID, TAG, 'onAbilityWillDestroy');
   }
 
   onAbilityWillForeground(ability) {
-    console.log('onAbilityWillForeground');
+    hilog.sLogI(domainID, TAG, 'onAbilityWillForeground');
   }
 
   onAbilityWillBackground(ability) {
-    console.log('onAbilityWillBackground');
+    hilog.sLogI(domainID, TAG, 'onAbilityWillBackground');
   }
 
   onAbilityWillContinue(ability) {
-    console.log('onAbilityWillContinue');
+    hilog.sLogI(domainID, TAG, 'onAbilityWillContinue');
   }
 
   onWindowStageWillRestore(ability, windowStage) {
-    console.log('onWindowStageWillRestore');
+    hilog.sLogI(domainID, TAG, 'onWindowStageWillRestore');
   }
 
   onWindowStageRestore(ability, windowStage) {
-    console.log('onWindowStageRestore');
+    hilog.sLogI(domainID, TAG, 'onWindowStageRestore');
   }
 
   onAbilityWillSaveState(ability) {
-    console.log('onAbilityWillSaveState');
+    hilog.sLogI(domainID, TAG, 'onAbilityWillSaveState');
   }
 
   onAbilitySaveState(ability) {
-    console.log('onAbilitySaveState');
+    hilog.sLogI(domainID, TAG, 'onAbilitySaveState');
   }
 }
 

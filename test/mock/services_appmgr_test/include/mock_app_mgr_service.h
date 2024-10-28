@@ -44,7 +44,7 @@ public:
     MOCK_METHOD2(KillApplication, int32_t(const std::string& appName, const bool clearPageStack));
     MOCK_METHOD3(ForceKillApplication, int32_t(const std::string& appName, const int userId, const int appIndex));
     MOCK_METHOD1(KillProcessesByAccessTokenId, int32_t(const uint32_t accessTokenId));
-    MOCK_METHOD2(KillApplicationByUid, int(const std::string&, const int uid));
+    MOCK_METHOD3(KillApplicationByUid, int(const std::string&, const int uid, const std::string&));
     MOCK_METHOD1(IsBackgroundRunningRestricted, int(const std::string& bundleName));
     MOCK_METHOD1(GetAllRunningProcesses, int(std::vector<RunningProcessInfo>& info));
     MOCK_METHOD2(GetRunningProcessesByBundleType, int(const BundleType bundleType,
@@ -181,7 +181,8 @@ public:
 
     virtual int32_t JudgeSandboxByPid(pid_t pid, bool &isSandbox)
     {
-        return 0;
+        isSandbox = isSandbox_;
+        return judgeSandboxByPidRet_;
     }
 
     void KillApplicationImpl(const std::string& data)
@@ -264,6 +265,10 @@ private:
     Semaphore sem_;
     std::string data_;
     sptr<IAppStateCallback> callback_;
+
+public:
+    uint32_t judgeSandboxByPidRet_ = 0;
+    bool isSandbox_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

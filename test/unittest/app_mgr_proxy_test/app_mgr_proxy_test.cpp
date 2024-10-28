@@ -554,8 +554,8 @@ HWTEST_F(AppMgrProxyTest, UpdateRenderState_0100, TestSize.Level1)
 HWTEST_F(AppMgrProxyTest, SignRestartAppFlag_0100, TestSize.Level1)
 {
     EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _)).Times(1);
-    std::string bundleName;
-    auto res = appMgrProxy_->SignRestartAppFlag(bundleName);
+    int32_t uid = 0;
+    auto res = appMgrProxy_->SignRestartAppFlag(uid);
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -758,6 +758,28 @@ HWTEST_F(AppMgrProxyTest, GetSupportedProcessCachePids_001, TestSize.Level0)
     std::vector<int32_t> pidList;
     appMgrProxy_->GetSupportedProcessCachePids(bundleName, pidList);
     EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS));
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: GetAppIndexByPid_001
+ * @tc.desc: Get app index of pid.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, GetAppIndexByPid_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
+
+    pid_t pid = 1;
+    int32_t appIndex = -1;
+    appMgrProxy_->GetAppIndexByPid(pid, appIndex);
+    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_INDEX_BY_PID));
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }

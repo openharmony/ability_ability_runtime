@@ -849,7 +849,7 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
             displayId = strtol(strDisplayId.c_str(), nullptr, BASE_DISPLAY_ID_NUM);
             TAG_LOGD(AAFwkTag::UIABILITY, "displayId: %{public}d", displayId);
         } else {
-            TAG_LOGE(AAFwkTag::UIABILITY, "formatRegex: [%{public}s] failed", strDisplayId.c_str());
+            TAG_LOGW(AAFwkTag::UIABILITY, "formatRegex: [%{public}s] failed", strDisplayId.c_str());
         }
     }
     auto option = GetWindowOption(want);
@@ -906,8 +906,12 @@ void JsUIAbility::RequestFocus(const Want &want)
 void JsUIAbility::ContinuationRestore(const Want &want)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (!IsRestoredInContinuation() || scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "is not in continuation or null scene_");
+    if (!IsRestoredInContinuation()) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "not in continuation");
+        return;
+    }
+    if (scene_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene_");
         return;
     }
     RestorePageStack(want);
@@ -1086,12 +1090,12 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj_");
-        return AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "failed get ability");
-        return AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
@@ -1162,7 +1166,7 @@ int32_t JsUIAbility::OnContinueSyncCB(napi_value result, WantParams &wantParams,
     int32_t onContinueRes = 0;
     if (!ConvertFromJsValue(env, result, onContinueRes)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "'onContinue' is not implemented");
-        return AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     OHOS::AppExecFwk::UnwrapWantParams(env, jsWantParams, wantParams);
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -1660,6 +1664,25 @@ bool JsUIAbility::CheckSatisfyTargetAPIVersion(int32_t version)
 bool JsUIAbility::BackPressDefaultValue()
 {
     return CheckSatisfyTargetAPIVersion(API12) ? true : false;
+}
+
+void JsUIAbility::OnAfterFocusedCommon(bool isFocused)
+{
+    auto abilityContext = GetAbilityContext();
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return;
+    }
+    auto applicationContext = abilityContext->GetApplicationContext();
+    if (applicationContext == nullptr || applicationContext->IsAbilityLifecycleCallbackEmpty()) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "null applicationContext or lifecycleCallback");
+        return;
+    }
+    if (isFocused) {
+        applicationContext->DispatchWindowStageFocus(GetJsAbility(), GetJsWindowStage());
+    } else {
+        applicationContext->DispatchWindowStageUnfocus(GetJsAbility(), GetJsWindowStage());
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

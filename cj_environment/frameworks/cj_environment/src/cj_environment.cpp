@@ -411,6 +411,7 @@ void* CJEnvironment::LoadCJLibrary(const char* dlName)
         return nullptr;
     }
 
+    isLoadCJLibrary_ = true;
     return handle;
 }
 
@@ -437,7 +438,13 @@ void* CJEnvironment::LoadCJLibrary(OHOS::CJEnvironment::LibraryKind kind, const 
         LOGE("load cj library failed: %{public}s", DynamicGetError());
         return nullptr;
     }
+    isLoadCJLibrary_ = true;
     return handle;
+}
+
+bool CJEnvironment::CheckLoadCJLibrary()
+{
+    return isLoadCJLibrary_;
 }
 
 void CJEnvironment::UnLoadCJLibrary(void* handle)
@@ -516,6 +523,9 @@ CJ_EXPORT extern "C" CJEnvMethods* OHOS_GetCJEnvInstance()
         },
         .setSanitizerKindRuntimeVersion = [](SanitizerKind kind) {
             return CJEnvironment::GetInstance()->SetSanitizerKindRuntimeVersion(kind);
+        },
+        .checkLoadCJLibrary = []() {
+            return CJEnvironment::GetInstance()->CheckLoadCJLibrary();
         }
     };
     return &gCJEnvMethods;

@@ -28,9 +28,9 @@ class AccessTokenKit {
 public:
     static ATokenTypeEnum GetTokenTypeFlag(AccessTokenID tokenID);
 
-    static int GetNativeTokenInfo(AccessTokenID tokenID, NativeTokenInfo& nativeTokenInfoRes);
+    static int GetNativeTokenInfo(AccessTokenID tokenID, NativeTokenInfo &nativeTokenInfoRes);
 
-    static int GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo& hapInfo);
+    static int GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo &hapInfo);
 };
 } // namespace AccessToken
 } // namespace Security

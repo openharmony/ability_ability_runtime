@@ -3076,20 +3076,6 @@ HWTEST_F(AmsAppRunningRecordTest, AddAbilityStageBySpecifiedProcess_001, TestSiz
 }
 
 /**
- * @tc.name: AppRunningRecord_SendEventForSpecifiedAbility_001
- * @tc.desc: verify that SendEventForSpecifiedAbility works.
- * @tc.type: FUNC
- */
-HWTEST_F(AmsAppRunningRecordTest, SendEventForSpecifiedAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<ApplicationInfo> appInfo;
-    std::shared_ptr<AppRunningRecord> appRunningRecord =
-        std::make_shared<AppRunningRecord>(appInfo, AppRecordId::Create(), GetTestProcessName());
-    appRunningRecord->SendEventForSpecifiedAbility(1, 100);
-    EXPECT_NE(appRunningRecord, nullptr);
-}
-
-/**
  * @tc.name: AppRunningRecord_SendAppStartupTypeEvent_001
  * @tc.desc: verify that SendAppStartupTypeEvent works.
  * @tc.type: FUNC
