@@ -1880,7 +1880,7 @@ void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleIn
             return;
         }
     }
-} 
+}
 
 #ifdef ABILITY_LIBRARY_LOADER
 void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::string &nativeLibraryPath)
