@@ -369,9 +369,9 @@ private:
     void HandleJsHeapMemory(const OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
     void PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
-        std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+        std::unique_ptr<AbilityRuntime::Runtime>& runtime);
 
-    void ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+    void ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<AbilityRuntime::Runtime>& runtime);
 
     /**
      *
