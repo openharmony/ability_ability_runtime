@@ -66,7 +66,7 @@ bool ParseUriAndType(napi_env env, napi_value &param, std::shared_ptr<Uri> &uri,
     // get uri property
     std::string uriStr("");
     if (!UnwrapStringByPropertyName(env, param, "uri", uriStr)) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, uri is not exist.", __func__);
+        TAG_LOGE(AAFwkTag::FA, "%{public}s", __func__);
         return false;
     }
     TAG_LOGI(AAFwkTag::FA, "%{public}s, uri:%{public}s", __func__, uriStr.c_str());
@@ -74,7 +74,7 @@ bool ParseUriAndType(napi_env env, napi_value &param, std::shared_ptr<Uri> &uri,
 
     // get type property
     if (!UnwrapInt32ByPropertyName(env, param, "type", type)) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, type:%{public}d is not exist.", __func__, type);
+        TAG_LOGE(AAFwkTag::FA, "%{public}s, type:%{public}d", __func__, type);
         return false;
     }
     TAG_LOGI(AAFwkTag::FA, "type:%{public}d", type);
@@ -85,7 +85,7 @@ bool ParseUriAndType(napi_env env, napi_value &param, std::shared_ptr<Uri> &uri,
 napi_value BuildDataAbilityOperation(
     std::shared_ptr<DataAbilityOperation> &dataAbilityOperation, napi_env env, napi_value param)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "%{public}s start", __func__);
     std::shared_ptr<Uri> uri = nullptr;
     int type = 0;
     if (!ParseUriAndType(env, param, uri, type)) {

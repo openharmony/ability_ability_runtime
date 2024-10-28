@@ -130,7 +130,7 @@ private:
             missionListener_->AddJsListenerObject(missionListenerId_, argv[0]);
             return CreateJsValue(env, missionListenerId_);
         } else {
-            TAG_LOGE(AAFwkTag::MISSION, "error, ret: %{public}d", ret);
+            TAG_LOGE(AAFwkTag::MISSION, "failed %{public}d", ret);
             missionListener_ = nullptr;
             if (ret == CHECK_PERMISSION_FAILED) {
                 ThrowNoPermissionError(env, PermissionConstants::PERMISSION_MANAGE_MISSION);
@@ -336,13 +336,13 @@ private:
         }
 
         if (!ConvertFromJsValue(env, argv[0], deviceId)) {
-            TAG_LOGE(AAFwkTag::MISSION, "missionSnapshot: Parse deviceId failed");
+            TAG_LOGE(AAFwkTag::MISSION, "parse deviceId failed");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return false;
         }
 
         if (!ConvertFromJsValue(env, argv[1], missionId)) {
-            TAG_LOGE(AAFwkTag::MISSION, "missionSnapshot: Parse missionId failed");
+            TAG_LOGE(AAFwkTag::MISSION, "parse missionId failed");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return false;
         }

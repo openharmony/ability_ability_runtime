@@ -50,13 +50,13 @@ napi_value JsApplication::OnGetApplicationContext(napi_env env, NapiCallbackInfo
     napi_value value = JsApplicationContextUtils::CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid systemModule.");
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid systemModule");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }
     napi_value object = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get context native object.");
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to get context native object");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }
@@ -322,7 +322,7 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Env or exportObj is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or exportObj");
         return nullptr;
     }
 

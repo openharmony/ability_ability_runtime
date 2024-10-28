@@ -263,11 +263,11 @@ napi_value JsParticleAbilityInit(napi_env env, napi_value exportObj)
     TAG_LOGD(AAFwkTag::FA, "called");
 
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "env or exportObj null");
+        TAG_LOGE(AAFwkTag::FA, "null env or exportObj");
         return nullptr;
     }
     if (!CheckTypeForNapiValue(env, exportObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::FA, "object null");
+        TAG_LOGE(AAFwkTag::FA, "null object");
         return nullptr;
     }
 

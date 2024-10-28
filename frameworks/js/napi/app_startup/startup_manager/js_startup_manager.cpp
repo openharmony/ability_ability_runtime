@@ -133,7 +133,7 @@ napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
         return CreateJsUndefined(env);
     }
     if (result->GetResultType() != StartupTaskResult::ResultType::JS) {
-        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s result type error", startupTask.c_str());
+        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s", startupTask.c_str());
         ThrowInvalidParamError(env, "Parameter error: The result type is not js.");
         return CreateJsUndefined(env);
     }
@@ -205,7 +205,7 @@ napi_value JsStartupManagerInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "Env or exportObj null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null env or exportObj");
         return nullptr;
     }
 
@@ -261,7 +261,7 @@ int32_t JsStartupManager::GetConfig(napi_env env, napi_value value, std::shared_
 {
     std::shared_ptr<JsStartupConfig> startupConfig = std::make_shared<JsStartupConfig>(env);
     if (startupConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "startupConfig null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null startupConfig");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     if (startupConfig->Init(value) != ERR_OK) {
@@ -293,16 +293,16 @@ int32_t JsStartupManager::RunStartupTask(napi_env env, NapiCallbackInfo &info,
     int32_t result = DelayedSingleton<StartupManager>::GetInstance()->BuildStartupTaskManager(dependencies,
         startupTaskManager);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::STARTUP, "failed to build startup task manager: %{public}d", result);
+        TAG_LOGE(AAFwkTag::STARTUP, "build manager failed: %{public}d", result);
         return result;
     }
     if (startupTaskManager == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "startupTaskManager null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null startupTaskMgr");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     result = startupTaskManager->Prepare();
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::STARTUP, "failed to prepare startup task manager: %{public}d", result);
+        TAG_LOGE(AAFwkTag::STARTUP, "prepare startup failed: %{public}d", result);
         return result;
     }
     if (config != nullptr) {

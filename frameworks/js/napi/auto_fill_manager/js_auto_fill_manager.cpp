@@ -58,7 +58,7 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
     }
     int32_t instanceId = -1;
     if (!ConvertFromJsValue(env, instanceIdValue, instanceId)) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Failed to parse type.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "failed to parse type");
         ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
             "Parameter error. Parse instance id failed.");
         return CreateJsUndefined(env);
@@ -66,7 +66,7 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
 
     auto saveCallback = GetCallbackByInstanceId(instanceId);
     if (saveCallback != nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "There are other requests in progress.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "there are other requests in progress");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
@@ -217,7 +217,7 @@ napi_value JsAutoFillManagerInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null Env or exportObj");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null env or exportObj");
         return nullptr;
     }
 

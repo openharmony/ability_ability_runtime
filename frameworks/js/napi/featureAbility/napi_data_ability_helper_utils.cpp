@@ -63,7 +63,7 @@ napi_value InsertPromise(napi_env env, DAHelperInsertCB *insertCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (insertCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null insertCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -180,7 +180,7 @@ napi_value NotifyChangePromise(napi_env env, DAHelperNotifyChangeCB *notifyChang
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (notifyChangeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null notifyChangeCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -296,7 +296,7 @@ napi_value GetTypePromise(napi_env env, DAHelperGetTypeCB *gettypeCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (gettypeCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null gettypeCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -413,7 +413,7 @@ napi_value GetFileTypesPromise(napi_env env, DAHelperGetFileTypesCB *getfiletype
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (getfiletypesCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null getfiletypesCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -501,7 +501,7 @@ void GetFileTypesPromiseCompleteCB(napi_env env, napi_status status, void *data)
 
 napi_value WrapGetFileTypesCB(napi_env env, const DAHelperGetFileTypesCB &getfiletypesCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "result.size:%{public}zu", getfiletypesCB.result.size());
+    TAG_LOGI(AAFwkTag::FA, "size:%{public}zu", getfiletypesCB.result.size());
     for (size_t i = 0; i < getfiletypesCB.result.size(); i++) {
         TAG_LOGI(
             AAFwkTag::FA, "result[%{public}zu]:%{public}s", i, getfiletypesCB.result.at(i).c_str());
@@ -555,7 +555,7 @@ napi_value NormalizeUriPromise(napi_env env, DAHelperNormalizeUriCB *normalizeur
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (normalizeuriCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null normalizeuriCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -673,7 +673,7 @@ napi_value DenormalizeUriPromise(napi_env env, DAHelperDenormalizeUriCB *denorma
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (denormalizeuriCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null denormalizeuriCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -793,7 +793,7 @@ napi_value DeletePromise(napi_env env, DAHelperDeleteCB *deleteCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (deleteCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null deleteCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -908,7 +908,7 @@ napi_value UpdatePromise(napi_env env, DAHelperUpdateCB *updateCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (updateCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null updateCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -1069,7 +1069,7 @@ napi_value CallErrorPromise(napi_env env, DAHelperErrorCB *errorCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (errorCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "param is null");
+        TAG_LOGE(AAFwkTag::FA, "null errorCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -1243,7 +1243,7 @@ napi_value CallPromise(napi_env env, DAHelperCallCB *callCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (callCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null callCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -1301,7 +1301,7 @@ napi_value OpenFilePromise(napi_env env, DAHelperOpenFileCB *openFileCB)
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (openFileCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null openFileCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -1417,7 +1417,7 @@ napi_value BatchInsertPromise(napi_env env, DAHelperBatchInsertCB *batchInsertCB
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (batchInsertCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null batchInsertCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -1622,7 +1622,7 @@ napi_value ExecuteBatchPromise(napi_env env, DAHelperExecuteBatchCB *executeBatc
 {
     TAG_LOGI(AAFwkTag::FA, "called");
     if (executeBatchCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null param");
+        TAG_LOGE(AAFwkTag::FA, "null executeBatchCB");
         return nullptr;
     }
     napi_value resourceName;
@@ -1653,7 +1653,7 @@ void ExecuteBatchExecuteCB(napi_env env, void *data)
     if (dataAbilityHelper != nullptr) {
         OHOS::Uri uri(executeBatchCB->uri);
         executeBatchCB->result = dataAbilityHelper->ExecuteBatch(uri, executeBatchCB->operations);
-        TAG_LOGI(AAFwkTag::FA, "%{public}s, dataAbilityHelper is not nullptr. %{public}zu",
+        TAG_LOGI(AAFwkTag::FA, "%{public}s dataAbilityHelper is not nullptr %{public}zu",
             __func__, executeBatchCB->result.size());
     }
     TAG_LOGI(AAFwkTag::FA, "end");

@@ -81,7 +81,7 @@ void JsMissionListener::CallJsMethod(const std::string &methodName, int32_t miss
 {
     TAG_LOGI(AAFwkTag::MISSION, "methodName: %{public}s", methodName.c_str());
     if (env_ == nullptr) {
-        TAG_LOGE(AAFwkTag::MISSION, "env_ null");
+        TAG_LOGE(AAFwkTag::MISSION, "null env_");
         return;
     }
 
@@ -106,7 +106,7 @@ void JsMissionListener::CallJsMethodInner(const std::string &methodName, int32_t
     for (auto &item : tmpMap) {
         napi_value obj = (item.second)->GetNapiValue();
         if (obj == nullptr) {
-            TAG_LOGE(AAFwkTag::MISSION, "Failed to get object");
+            TAG_LOGE(AAFwkTag::MISSION, "null obj");
             continue;
         }
         napi_value method = nullptr;
@@ -127,7 +127,7 @@ void JsMissionListener::OnMissionIconUpdated(int32_t missionId, const std::share
 {
     TAG_LOGI(AAFwkTag::MISSION, "missionId: %{public}d", missionId);
     if (env_ == nullptr) {
-        TAG_LOGE(AAFwkTag::MISSION, "env_ null");
+        TAG_LOGE(AAFwkTag::MISSION, "null env_");
         return;
     }
 
@@ -154,7 +154,7 @@ void JsMissionListener::OnMissionIconUpdated(int32_t missionId, const std::share
 void JsMissionListener::CallJsMissionIconUpdated(int32_t missionId, const std::shared_ptr<Media::PixelMap> &icon)
 {
     if (env_ == nullptr) {
-        TAG_LOGE(AAFwkTag::MISSION, "null env_, return");
+        TAG_LOGE(AAFwkTag::MISSION, "null env_");
         return;
     }
 
@@ -165,7 +165,7 @@ void JsMissionListener::CallJsMissionIconUpdated(int32_t missionId, const std::s
     for (auto &item : tmpMap) {
         napi_value obj = (item.second)->GetNapiValue();
         if (obj == nullptr) {
-            TAG_LOGE(AAFwkTag::MISSION, "get js obj failed");
+            TAG_LOGE(AAFwkTag::MISSION, "null obj");
             continue;
         }
         napi_value method = nullptr;
