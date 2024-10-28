@@ -228,7 +228,7 @@ private:
         }
         if (entryPoint.find(":") == std::string::npos) {
             TAG_LOGE(AAFwkTag::PROCESSMGR,
-                "param entryPoint must contains a colon to separate library name and entry function");
+                "Param entryPoint must contains a colon to separate library name and entry function.");
             ThrowInvalidParamError(env,
                 "Param entryPoint must contains a colon to separate library name and entry function.");
             return CreateJsUndefined(env);
@@ -305,7 +305,7 @@ napi_value JsChildProcessManagerInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "null env or exportObj");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "invalid params");
         return nullptr;
     }
 

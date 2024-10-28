@@ -62,7 +62,7 @@ napi_value CreateSendableContextObject(napi_env env, std::shared_ptr<Context> co
     // Sendable context has no property for now.
     status = napi_create_sendable_object_with_properties(env, 0, nullptr, &objValue);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "create failed:%{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed:%{public}d", status);
         return nullptr;
     }
 

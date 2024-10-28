@@ -133,7 +133,7 @@ napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
         return CreateJsUndefined(env);
     }
     if (result->GetResultType() != StartupTaskResult::ResultType::JS) {
-        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s", startupTask.c_str());
+        TAG_LOGE(AAFwkTag::STARTUP, "error:%{public}s", startupTask.c_str());
         ThrowInvalidParamError(env, "Parameter error: The result type is not js.");
         return CreateJsUndefined(env);
     }

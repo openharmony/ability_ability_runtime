@@ -531,7 +531,7 @@ private:
             return CreateJsUndefined(env);
         }
         if (!observer_->FindObserverByObserverId(observerId)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "observer:%{public}d", static_cast<int32_t>(observerId));
+            TAG_LOGE(AAFwkTag::APPMGR, "not find observer:%{public}d", static_cast<int32_t>(observerId));
             ThrowInvalidParamError(env, "not find observerId.");
             return CreateJsUndefined(env);
         }
@@ -575,7 +575,7 @@ private:
             return CreateJsUndefined(env);
         }
         if (!observerSync_->FindObserverByObserverId(observerId)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "observer:%{public}d", static_cast<int32_t>(observerId));
+            TAG_LOGE(AAFwkTag::APPMGR, "not find observer:%{public}d", static_cast<int32_t>(observerId));
             ThrowInvalidParamError(env, "not find observerId.");
             return CreateJsUndefined(env);
         }
