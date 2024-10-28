@@ -216,7 +216,8 @@ void JsUIAbility::UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
     const std::string &moduleName, const std::string &srcPath)
 {
     std::string key = moduleName + "::" + srcPath;
-    jsAbilityObj_ = jsRuntime_.PopPreloadObj(key, jsAbilityObj_) ? jsAbilityObj_ : jsRuntime_.LoadModule(
+    std::unique_ptr<NativeReference> moduleObj = nullptr;
+    jsAbilityObj_ = jsRuntime_.PopPreloadObj(key, moduleObj) ? std::move(moduleObj) : jsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
         false, abilityInfo->srcEntrance);
 }
