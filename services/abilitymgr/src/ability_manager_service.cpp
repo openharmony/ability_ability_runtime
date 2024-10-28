@@ -10560,26 +10560,6 @@ int AbilityManagerService::RegisterSessionHandler(const sptr<IRemoteObject> &obj
     return ERR_OK;
 }
 
-bool AbilityManagerService::CheckUserIdActive(int32_t userId)
-{
-    std::vector<int32_t> osActiveAccountIds;
-    auto ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
-        QueryActiveOsAccountIds(osActiveAccountIds);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "queryActiveOsAccountIds failed");
-        return false;
-    }
-    if (osActiveAccountIds.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "queryActiveOsAccountIds empty");
-        return false;
-    }
-    auto iter = std::find(osActiveAccountIds.begin(), osActiveAccountIds.end(), userId);
-    if (iter == osActiveAccountIds.end()) {
-        return false;
-    }
-    return true;
-}
-
 int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const StartOptions &startOptions, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

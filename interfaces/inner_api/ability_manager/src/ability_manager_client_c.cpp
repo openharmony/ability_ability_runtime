@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,5 +32,6 @@ int RecordAppExitReason(int exitReason, const char *exitMsg)
     OHOS::AAFwk::ExitReason exitReasonData = { reason, exitMsgStr };
 
     auto instance = OHOS::AAFwk::AbilityManagerClient::GetInstance();
+    CHECK_POINTER_RETURN_INVALID_VALUE(instance);
     return instance->RecordAppExitReason(exitReasonData);
 }

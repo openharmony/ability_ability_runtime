@@ -46,6 +46,10 @@ void AbilityCacheManager::RemoveAbilityRecInDevList(std::shared_ptr<AbilityRecor
     auto it = devRecLru_.begin();
     uint32_t accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
     while (it != devRecLru_.end()) {
+        if (!*it) {
+            it++;
+            continue;
+        }
         if ((*it)->GetRecordId() == abilityRecord->GetRecordId()) {
             devRecLru_.erase(it);
             devLruCnt_--;
@@ -70,6 +74,10 @@ void AbilityCacheManager::RemoveAbilityRecInProcList(std::shared_ptr<AbilityReco
     auto it = findProcInfo->second.recList.begin();
 
     while (it != findProcInfo->second.recList.end()) {
+        if (!*it) {
+            it++;
+            continue;
+        }
         if ((*it)->GetRecordId() == abilityRecord->GetRecordId()) {
             findProcInfo->second.recList.erase(it);
             findProcInfo->second.cnt--;
@@ -116,7 +124,7 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::AddToDevLru(std::shared_ptr<
         devLruCnt_++;
         return rec;
     }
-    if (devLruCnt_ == devLruCapacity_) {
+    if (devLruCnt_ == devLruCapacity_ && devLruCnt_ > 0) {
         rec = devRecLru_.front();
         RemoveAbilityRecInProcList(rec);
         devRecLru_.pop_front();
@@ -206,6 +214,10 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::FindRecordByToken(const sptr
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = devRecLru_.begin();
     while (it != devRecLru_.end()) {
+        if (!*it) {
+            it++;
+            continue;
+        }
         sptr<IRemoteObject> srcToken = (*it)->GetToken();
         if (srcToken == token) {
             std::shared_ptr<AbilityRecord> &abilityRecord = *it;
@@ -231,6 +243,10 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::FindRecordBySessionId(const 
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = devRecLru_.begin();
     while (it != devRecLru_.end()) {
+        if (!*it) {
+            it++;
+            continue;
+        }
         auto assertSessionStr = (*it)->GetWant().GetStringParam(Want::PARAM_ASSERT_FAULT_SESSION_ID);
         if (assertSessionStr == assertSessionId) {
             std::shared_ptr<AbilityRecord> &abilityRecord = *it;
@@ -250,6 +266,10 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::FindRecordByServiceKey(const
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = devRecLru_.begin();
     while (it != devRecLru_.end()) {
+        if (!*it) {
+            it++;
+            continue;
+        }
         std::string curServiceKey = (*it)->GetURI();
         if (FRS_BUNDLE_NAME == (*it)->GetAbilityInfo().bundleName) {
             curServiceKey = curServiceKey + std::to_string((*it)->GetWant().GetIntParam(FRS_APP_INDEX, 0));
