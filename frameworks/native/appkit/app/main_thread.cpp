@@ -1823,6 +1823,34 @@ void MainThread::HandleNWebPreload()
 #endif
 }
 
+void MainThread::ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+{
+    std::string srcPath(info.package);
+    if (!info.isModuleJson) {
+    /* temporary compatibility api8 + config.json */
+        srcPath.append("/assets/js/");
+        if (!info.srcPath.empty()) {
+            srcPath.append(info.srcPath);
+        }
+        srcPath.append("/").append(info.name).append(".abc");
+    } else {
+        if (info.srcEntrance.empty()) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "empty srcEntrance");
+            return;
+        }
+        srcPath.append("/");
+        srcPath.append(info.srcEntrance);
+        srcPath.erase(srcPath.rfind("."));
+        srcPath.append(".abc");
+        TAG_LOGD(AAFwkTag::UIABILITY, "jsAbility srcPath: %{public}s", srcPath.c_str());
+    }
+
+    std::string moduleName(info.moduleName);
+    moduleName.append("::").append(info.name);
+    isEsmode = info.compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    runtime->PreloadMainAbility(moduleName, srcPath, info.hapPath, isEsmode, info.srcEntrance);
+}
+
 void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
     std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
@@ -1835,13 +1863,20 @@ void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleIn
         }
     }
     bool isEsmode = entryHapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE;
-    runtime->PreloadModule(entryHapModuleInfo.moduleName, entryHapModuleInfo.srcPath, entryHapModuleInfo.name,
-    entryHapModuleInfo.isModuleJson, isEsmode, useCommonTrunk, entryHapModuleInfo.hapPath);
+    std::string srcPath(entryHapModuleInfo.name);
+    std::string moduleName(entryHapModuleInfo.moduleName);
+    moduleName.append("::").append("AbilityStage");
+    srcPath.append("/assets/js/");
+    if (entryHapModuleInfo.srcPath.empty()) {
+        srcPath.append("AbilityStage.abc");
+    } else {
+        srcPath.append(entryHapModuleInfo.srcPath);
+        srcPath.append("/AbilityStage.abc");
+    }
+    runtime->PreloadModule(moduleName,srcPath, entryHapModuleInfo.hapPath, isEsmode, useCommonTrunk);
     for (const auto &info : entryHapModuleInfo.abilityInfos) {
         if (info.name == entryHapModuleInfo.mainAbility) {
-            isEsmode = info.compileMode == AppExecFwk::CompileMode::ES_MODULE;
-            runtime->PreloadMainAbility(info.srcEntrance, info.moduleName, info.srcPath, info.hapPath, info.name,
-                info.isModuleJson, info.package, isEsmode);
+            ProcessMainAbility(info, runtime);
             return;
         }
     }
