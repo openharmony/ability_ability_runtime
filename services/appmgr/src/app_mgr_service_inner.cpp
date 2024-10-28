@@ -4946,7 +4946,6 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
     renderRecord->SetDeathRecipient(appDeathRecipient);
     renderRecord->RegisterDeathRecipient();
 
-    TAG_LOGI(AAFwkTag::APPMGR, "to NotifyBrowserFd");
     // notify fd to render process
     if (appRecord->GetBrowserHost() != nullptr && appRecord->GetIsGPU()) {
         TAG_LOGD(AAFwkTag::APPMGR, "GPU has host remote object");
@@ -5477,7 +5476,7 @@ void AppMgrServiceInner::AppRecoveryNotifyApp(int32_t pid, const std::string& bu
 
 int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(pid);
@@ -5621,7 +5620,7 @@ int32_t AppMgrServiceInner::TransformedNotifyAppFault(const AppFaultDataBySA &fa
         TAG_LOGE(AAFwkTag::APPMGR, "no such AppRunningRecord");
         return ERR_INVALID_VALUE;
     }
-
+ 
     FaultData transformedFaultData = ConvertDataTypes(faultData);
     int32_t uid = record->GetUid();
     std::string bundleName = record->GetBundleName();
@@ -5635,7 +5634,7 @@ int32_t AppMgrServiceInner::TransformedNotifyAppFault(const AppFaultDataBySA &fa
         AppRecoveryNotifyApp(pid, bundleName, faultData.faultType, "appRecovery");
         return ERR_OK;
     }
-
+ 
     if (transformedFaultData.timeoutMarkers.empty()) {
         transformedFaultData.timeoutMarkers = "notifyFault:" + transformedFaultData.errorObject.name +
             std::to_string(pid) + "-" + std::to_string(SystemTimeMillisecond());
@@ -5695,7 +5694,7 @@ bool AppMgrServiceInner::SetAppFreezeFilter(int32_t pid)
         callingPid = pid;
     } else {
         callingPid = IPCSkeleton::GetCallingPid();
-        waitTime = NORMAL_WAIT; //wait 2 min
+        waitTime = NORMAL_WAIT; // wait 2min
     }
     std::string bundleName = callerRecord->GetBundleName();
     if (callingPid == pid && AppExecFwk::AppfreezeManager::GetInstance()->IsValidFreezeFilter(pid, bundleName)) {
@@ -5869,7 +5868,6 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetModuleName().c_str(),
         want.GetElement().GetAbilityName().c_str());
-
     AbilityInfo abilityInfo;
     if (!CreateAbilityInfo(want, abilityInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "CreateAbilityInfo failed!");
@@ -5927,7 +5925,6 @@ int32_t AppMgrServiceInner::GetCurrentAccountId() const
         TAG_LOGE(AAFwkTag::APPMGR, "QueryActiveOsAccountIds empty");
         return DEFAULT_USER_ID;
     }
-
     return osActiveAccountIds.front();
 }
 
@@ -6427,7 +6424,6 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
         TAG_LOGE(AAFwkTag::APPMGR, "App record is nullptr.");
         return;
     }
-
     auto userId = GetUserIdByUid(appRecord->GetUid());
     if (appRecord->IsKeepAliveApp() && (userId == 0 || userId == currentUserId_)) {
         if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
@@ -6437,7 +6433,7 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
         if (!AAFwk::AppUtils::GetInstance().IsAllowResidentInExtremeMemory(appRecord->GetBundleName()) &&
             ExitResidentProcessManager::GetInstance().RecordExitResidentBundleName(appRecord->GetBundleName(),
                 appRecord->GetUid())) {
-            TAG_LOGI(AAFwkTag::APPMGR, "memory size is insufficent, record exit resident process info");
+            TAG_LOGI(AAFwkTag::APPMGR, "memory size insufficent");
             return;
         }
         TAG_LOGI(AAFwkTag::APPMGR, "memory size is sufficent, restart exit resident process");
@@ -7463,6 +7459,7 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     if (errCode != ERR_OK) {
         return errCode;
     }
+
     if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(IPCSkeleton::GetCallingUid()))) {
         TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
         return ERR_INVALID_OPERATION;
@@ -7555,7 +7552,7 @@ int32_t AppMgrServiceInner::NotifyProcessDependedOnWeb()
 
 void AppMgrServiceInner::KillProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
     CHECK_POINTER_AND_RETURN_LOG(appRunningManager_, "appRunningManager_ is nullptr");
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
@@ -7608,6 +7605,16 @@ void AppMgrServiceInner::BlockProcessCacheByPids(const std::vector<int32_t>& pid
     }
 }
 
+bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) const
+{
+    auto callerUid = IPCSkeleton::GetCallingUid();
+    if (callerUid != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return false;
+    }
+    return ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(bundleName);
+}
+
 bool AppMgrServiceInner::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
@@ -7646,16 +7653,6 @@ bool AppMgrServiceInner::CleanAbilityByUserRequest(const sptr<IRemoteObject> &to
     delayKillTaskHandler_->SubmitTask(delayKillTask, "delayKillUIAbility", delayTime);
 
     return true;
-}
-
-bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) const
-{
-    auto callerUid = IPCSkeleton::GetCallingUid();
-    if (callerUid != FOUNDATION_UID) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
-        return false;
-    }
-    return ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(bundleName);
 }
 
 void AppMgrServiceInner::CheckCleanAbilityByUserRequest(const std::shared_ptr<AppRunningRecord> &appRecord,
@@ -7725,7 +7722,7 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
     if (appRecord == nullptr) {
         return false;
     }
-
+    
     auto abilityRecordList = appRecord->GetAbilities();
 
     for (auto it = abilityRecordList.begin(); it != abilityRecordList.end(); ++it) {
@@ -7736,7 +7733,7 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIAbility(const pid_t pid)
         if (abilityInfo == nullptr) {
             return false;
         }
-
+        
         bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE);
         if (!isUIAbility) {
             return false;
