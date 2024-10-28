@@ -342,6 +342,12 @@ bool AutoFillManager::IsPreviousRequestFinished(Ace::UIContent *uiContent)
             extensionCallback->GetInstanceId() == uiContent->GetInstanceId()) {
             return false;
         }
+        if (extensionCallback->GetWindowType() == AutoFill::AutoFillWindowType::POPUP_WINDOW &&
+            extensionCallback->GetInstanceId() == uiContent->GetInstanceId()) {
+            TAG_LOGI(AAFwkTag::AUTOFILLMGR, "autofill popup window exist!");
+            extensionCallback->CloseUIExtension();
+            return true;
+        }
     }
     return true;
 }
