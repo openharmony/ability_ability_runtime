@@ -14,6 +14,10 @@
  */
 
 let ExtensionContext = requireNapi('application.ExtensionContext');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 const ERROR_CODE_INVALID_PARAM = 401;
 const ERROR_MSG_INVALID_PARAM = 'Invalid input parameter.';
@@ -30,12 +34,12 @@ class UIExtensionContext extends ExtensionContext {
   }
 
   startAbility(want, options, callback) {
-    console.log('startAbility');
+    hilog.sLogI(domainID, TAG, 'startAbility');
     return this.__context_impl__.startAbility(want, options, callback);
   }
 
   startUIServiceExtensionAbility(want, callback) {
-    console.log('startUIServiceExtensionAbility');
+    hilog.sLogI(domainID, TAG, 'startUIServiceExtensionAbility');
     return this.__context_impl__.startUIServiceExtensionAbility(want, callback);
   }
 
@@ -48,27 +52,27 @@ class UIExtensionContext extends ExtensionContext {
   }
 
   openLink(link, options, callback) {
-    console.log('openLink');
+    hilog.sLogI(domainID, TAG, 'openLink');
     return this.__context_impl__.openLink(link, options, callback);
   }
 
   terminateSelf(callback) {
-    console.log('terminateSelf');
+    hilog.sLogI(domainID, TAG, 'terminateSelf');
     return this.__context_impl__.terminateSelf(callback);
   }
 
   startAbilityForResult(want, options, callback) {
-    console.log('startAbilityForResult');
+    hilog.sLogI(domainID, TAG, 'startAbilityForResult');
     return this.__context_impl__.startAbilityForResult(want, options, callback);
   }
 
   startAbilityForResultAsCaller(want, options, callback) {
-    console.log('startAbilityForResultAsCaller');
+    hilog.sLogI(domainID, TAG, 'startAbilityForResultAsCaller');
     return this.__context_impl__.startAbilityForResultAsCaller(want, options, callback);
   }
 
   terminateSelfWithResult(abilityResult, callback) {
-    console.log('terminateSelfWithResult');
+    hilog.sLogI(domainID, TAG, 'terminateSelfWithResult');
     return this.__context_impl__.terminateSelfWithResult(abilityResult, callback);
   }
 

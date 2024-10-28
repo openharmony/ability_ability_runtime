@@ -26,6 +26,7 @@ ohos_fuzztest("DialogSessionManagerFuzzTest") {
       "${ability_runtime_test_path}/fuzztest/dialogsessionmanager_fuzzer"
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
   cflags = [
@@ -36,7 +37,7 @@ ohos_fuzztest("DialogSessionManagerFuzzTest") {
   ]
   sources = [
     "${ability_runtime_path}/services/abilitymgr/src/dialog_session/dialog_session_manager.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "dialogsessionmanager_fuzzer.cpp",
   ]
 
@@ -56,6 +57,7 @@ ohos_fuzztest("DialogSessionManagerFuzzTest") {
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:perm_verification",
     "//third_party/jsoncpp:jsoncpp",
     "//third_party/libjpeg-turbo:turbojpeg_static",

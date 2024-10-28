@@ -35,6 +35,7 @@ config("abilityms_config") {
     "include/dialog_session/",
     "include/mission/",
     "include/rdb/",
+    "include/resident_process/",
     "include/screen_lock/",
     "include/utils/",
     "${ability_runtime_innerkits_path}/ability_manager/include",
@@ -194,7 +195,10 @@ ohos_shared_library("abilityms") {
 
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
-    external_deps += [ "dlp_permission_service:libdlp_permission_sdk" ]
+    external_deps += [
+      "dlp_permission_service:libdlp_permission_sdk",
+      "dlp_permission_service:libdlpparse",
+    ]
   }
 
   defines = []
@@ -252,6 +256,7 @@ ohos_shared_library("wantagent_manager") {
   branch_protector_ret = "pac_ret"
   include_dirs = [
     "${ability_runtime_services_path}/abilitymgr/data_ability/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
@@ -344,6 +349,7 @@ ohos_shared_library("mission_list") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_services_path}/abilitymgr/data_ability/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/abilitymgr/include/mission",
     "${ability_runtime_services_path}/common/include",

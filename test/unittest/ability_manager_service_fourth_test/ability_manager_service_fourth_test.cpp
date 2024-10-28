@@ -970,7 +970,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     auto ret1 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
         callerBundleName);
-    EXPECT_EQ(ret1, ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret1, ERR_WRONG_INTERFACE_CALL);
 
     abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
     auto ret2 = abilityMs_->CheckCallPermission(

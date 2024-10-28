@@ -40,6 +40,7 @@ private:
 };
 
 napi_value CreateJsAbilityStageContext(napi_env env, std::shared_ptr<Context> context);
+napi_value AttachAbilityStageContext(napi_env env, void *value, void *hint);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_JS_ABILITY_STAGE_CONTEXT_H

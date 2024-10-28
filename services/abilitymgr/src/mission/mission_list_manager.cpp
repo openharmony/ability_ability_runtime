@@ -1257,6 +1257,7 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     abilityRecord->RemoveForegroundTimeoutTask();
     g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::FOREGROUND);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     auto self(weak_from_this());
     auto taskHandler = AbilityManagerService::GetPubInstance()->GetTaskHandler();
     CHECK_POINTER_AND_RETURN_LOG(taskHandler, ERR_INVALID_VALUE, "Fail to get AbilityTaskHandler.");
@@ -1394,6 +1395,7 @@ int MissionListManager::DispatchBackground(const std::shared_ptr<AbilityRecord> 
     // remove background timeout task.
     handler->CancelTask("background_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::BACKGROUND);
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     auto self(shared_from_this());
     auto task = [self, abilityRecord]() { self->CompleteBackground(abilityRecord); };
     handler->SubmitTask(task);
@@ -2247,9 +2249,11 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
             flow.token = ability->GetToken()->AsObject();
             flow.state = state;
         }
-        info.msg = msgContent + "\nserver:\n" + FreezeUtil::GetInstance().GetLifecycleEvent(flow);
+        info.msg = msgContent + "\nserver:\n" + FreezeUtil::GetInstance().GetLifecycleEvent(flow)
+            + "\nserver app:\n" + FreezeUtil::GetInstance().GetAppLifecycleEvent(processInfo.pid_);
         if (!isHalf) {
             FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+            FreezeUtil::GetInstance().DeleteAppLifecycleEvent(ability->GetPid());
         }
     } else {
         info.msg = msgContent;
@@ -3350,21 +3354,23 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 
     // new version started by call type
     auto ret = ResolveAbility(targetAbilityRecord, abilityRequest);
+    bool isStartToForeground = targetAbilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false);
     if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved.");
-        if (targetAbilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
+        if (isStartToForeground) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
             if (targetAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
                 TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped");
                 targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
                 return ERR_OK;
             }
+            targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
 #ifdef SUPPORT_SCREEN
-                std::shared_ptr<StartOptions> startOptions = nullptr;
-                auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
-                targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility);
+            std::shared_ptr<StartOptions> startOptions = nullptr;
+            auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
+            targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility);
 #else
-                targetAbilityRecord->ProcessForegroundAbility(0);
+            targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
         }
         return ERR_OK;
@@ -3384,7 +3390,12 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
             targetAbilityRecord->SetLauncherRoot();
         }
     }
-
+    if (isStartToForeground) {
+        targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+    } else {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "set pending BACKGROUND");
+        targetAbilityRecord->SetPendingState(AbilityState::BACKGROUND);
+    }
     return targetAbilityRecord->LoadAbility();
 }
 
@@ -4261,20 +4272,20 @@ void MissionListManager::SendKeyEvent(const AbilityRequest &abilityRequest)
     EventReport::SendKeyEvent(EventName::START_PRIVATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
-void MissionListManager::SignRestartAppFlag(const std::string &bundleName)
+void MissionListManager::SignRestartAppFlag(int32_t uid)
 {
     std::lock_guard guard(managerLock_);
     for (const auto& missionList : currentMissionLists_) {
         if (!missionList) {
             continue;
         }
-        missionList->SignRestartAppFlag(bundleName);
+        missionList->SignRestartAppFlag(uid);
     }
     if (defaultStandardList_) {
-        defaultStandardList_->SignRestartAppFlag(bundleName);
+        defaultStandardList_->SignRestartAppFlag(uid);
     }
     if (defaultSingleList_) {
-        defaultSingleList_->SignRestartAppFlag(bundleName);
+        defaultSingleList_->SignRestartAppFlag(uid);
     }
 }
 

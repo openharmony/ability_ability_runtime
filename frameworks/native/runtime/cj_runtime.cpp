@@ -69,6 +69,8 @@ CJEnvMethods* CJEnv::LoadInstance()
 }
 AppLibPathVec CJRuntime::appLibPaths_;
 
+std::string CJRuntime::packageName_;
+
 std::unique_ptr<CJRuntime> CJRuntime::Create(const Options& options)
 {
     auto instance = std::make_unique<CJRuntime>();
@@ -152,10 +154,13 @@ bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
         return false;
     }
     void* handle = nullptr;
+    // According to the OHOS rule, the format of the SO name is as follows
+    auto targetSoName = "lib" + packageName_ + ".so";
+
     for (const auto& libPath : appLibPaths) {
         for (auto& itor : std::filesystem::directory_iterator(libPath)) {
             // According to the convention, the names of cj generated products must contain the following keywords
-            if (itor.path().string().find("ohos_app_cangjie") == std::string::npos) {
+            if (itor.path().string().find(targetSoName) == std::string::npos) {
                 continue;
             }
             handle = cjEnv->loadCJLibrary(itor.path().c_str());
@@ -169,6 +174,13 @@ bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
     }
     appLibLoaded_ = true;
     return true;
+}
+
+void CJRuntime::SetPackageName(std::string srcEntryName)
+{
+    // According to the srcEntry rule in the Cangjie application,
+    // the last '.' The previous strings were all package names
+    packageName_ = srcEntryName.substr(0, srcEntryName.find_last_of("."));
 }
 
 void CJRuntime::SetSanitizerVersion(SanitizerKind kind)

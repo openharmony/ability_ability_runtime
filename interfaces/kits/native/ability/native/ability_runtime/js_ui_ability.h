@@ -167,6 +167,8 @@ public:
      */
     void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
+    void OnAfterFocusedCommon(bool isFocused) override;
+
     /**
      * @brief Get JsAbility
      * @return Return the JsAbility

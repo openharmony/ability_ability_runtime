@@ -104,11 +104,7 @@ bool CheckConnectionParam(napi_env env, napi_value value, sptr<JSUIExtensionConn
     key.want = want;
     connection->SetConnectionId(key.id);
     g_connects.emplace(key, connection);
-    if (g_serialNumber < INT32_MAX) {
-        g_serialNumber++;
-    } else {
-        g_serialNumber = 0;
-    }
+    g_serialNumber = (g_serialNumber + 1) % INT32_MAX;
     TAG_LOGD(AAFwkTag::UI_EXT, "not find connection, create a new connection");
     return true;
 }

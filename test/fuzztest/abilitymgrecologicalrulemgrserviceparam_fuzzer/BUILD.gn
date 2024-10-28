@@ -29,6 +29,7 @@ ohos_fuzztest("AbilityMgrEcologicalRuleMgrServiceParamFuzzTest") {
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
   cflags = [

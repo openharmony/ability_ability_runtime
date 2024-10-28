@@ -41,6 +41,9 @@ public:
     static void SetMainHandler(const std::shared_ptr<EventHandler>& eventHandler);
     void SetApplicationInfo(const std::shared_ptr<ApplicationInfo>& applicationInfo);
     void ThreadBlock(std::atomic_bool& isSixSecondEvent);
+    void ChangeFaultDateInfo(FaultData& faultData, const std::string& msgContent);
+    void AppfreezeHandleOverReportCount(bool isSixSecondEvent);
+    void GetMainHandlerDump(std::string& msgContent);
     int AppfreezeHandle(const FaultData& faultInfo, bool onlyMainThread);
     int AcquireStack(const FaultData& faultInfo, bool onlyMainThread);
     void SetAppDebug(bool isAppDebug);
@@ -48,7 +51,6 @@ private:
     static std::weak_ptr<EventHandler> appMainHandler_;
     std::weak_ptr<ApplicationInfo> applicationInfo_;
     void AppFreezeRecovery();
-    void SendProcessKillEvent(const std::string& killReason);
     int NotifyANR(const FaultData& faultData);
     bool IsExitApp(const std::string& name);
     bool IsHandleAppfreeze();

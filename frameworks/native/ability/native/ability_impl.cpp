@@ -640,6 +640,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
             AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW, restoreData);
         if (ret == ERR_OK) {
             FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+            FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
         }
     }
 }
@@ -662,6 +663,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);
     if (ret == ERR_OK) {
         FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+        FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
     }
 }
 

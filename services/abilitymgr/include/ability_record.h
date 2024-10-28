@@ -1188,6 +1188,7 @@ private:
     void PublishFileOpenEvent(const Want &want);
 
     void SetDebugAppByWaitingDebugFlag();
+    void AfterLoaded();
 
 #ifdef SUPPORT_SCREEN
     std::shared_ptr<Want> GetWantFromMission() const;

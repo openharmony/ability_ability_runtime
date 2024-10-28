@@ -1750,7 +1750,7 @@ int32_t AppMgrProxy::UpdateRenderState(pid_t renderPid, int32_t state)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::SignRestartAppFlag(const std::string &bundleName)
+int32_t AppMgrProxy::SignRestartAppFlag(int32_t uid)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -1760,7 +1760,7 @@ int32_t AppMgrProxy::SignRestartAppFlag(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
         return IPC_PROXY_ERR;
     }
-    PARCEL_UTIL_WRITE_RET_INT(data, String, bundleName);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, uid);
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SIGN_RESTART_APP_FLAG, data, reply, option);
     return reply.ReadInt32();
@@ -2070,6 +2070,27 @@ int32_t AppMgrProxy::CheckIsKiaProcess(pid_t pid, bool &isKia)
         return ret;
     }
     isKia = reply.ReadBool();
+    return ERR_OK;
+}
+
+int32_t AppMgrProxy::GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_VALUE;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_APP_INDEX_BY_PID, data, reply, option);
+    int32_t ret = reply.ReadInt32();
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed,ret=%{public}d.", ret);
+        return ret;
+    }
+    appIndex = reply.ReadInt32();
     return ERR_OK;
 }
 }  // namespace AppExecFwk

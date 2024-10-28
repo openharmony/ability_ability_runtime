@@ -51,6 +51,7 @@ public:
     static bool IsAttachToStatusBarMode(ProcessMode value);
     static bool IsValidProcessMode(ProcessMode value);
     static bool IsNoAttachmentMode(ProcessMode value);
+    static bool IsAttachToStatusBarItemMode(ProcessMode value);
 
     ProcessMode processMode = ProcessMode::UNSPECIFIED;
     StartupVisibility startupVisibility = StartupVisibility::UNSPECIFIED;

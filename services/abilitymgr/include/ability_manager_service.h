@@ -2141,6 +2141,16 @@ private:
      */
     int CheckUIExtensionPermission(const AbilityRequest &abilityRequest);
 
+    /**
+     * @brief Check CallerInfoQueryExtension permission
+     *
+     * @param abilityRequest The ability request.
+     * @return Returns ERR_OK when allowed, others when check failed.
+     */
+    int CheckCallerInfoQueryExtensionPermission(const AbilityRequest &abilityRequest);
+
+    int CheckFileAccessExtensionPermission(const AbilityRequest &abilityRequest);
+
     bool IsTargetPermission(const Want &want) const;
 
     bool IsDelegatorCall(const AppExecFwk::RunningProcessInfo &processInfo, const AbilityRequest &abilityRequest) const;
@@ -2245,8 +2255,8 @@ private:
 
     void WaitBootAnimationStart();
 
-    int32_t SignRestartAppFlag(int32_t userId, const std::string &bundleName, bool isAppRecovery = false);
-    int32_t CheckRestartAppWant(const AAFwk::Want &want);
+    int32_t SignRestartAppFlag(int32_t userId, int32_t uid, bool isAppRecovery = false);
+    int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex);
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
         bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
