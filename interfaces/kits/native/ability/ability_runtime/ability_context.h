@@ -16,14 +16,13 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_CONTEXT_H
 
-#include "foundation/ability/ability_runtime/interfaces/kits/native/appkit/ability_runtime/context/context.h"
-
 #include "ability_connect_callback.h"
 #include "ability_info.h"
 #include "ability_lifecycle_observer_interface.h"
 #include "caller_callback.h"
 #include "configuration.h"
 #include "free_install_observer_interface.h"
+#include "context.h"
 #include "iability_callback.h"
 #include "js_ui_extension_callback.h"
 #include "mission_info.h"
