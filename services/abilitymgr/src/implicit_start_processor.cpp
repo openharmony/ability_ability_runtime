@@ -220,7 +220,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
         int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
-            static_cast<int32_t>(IPCSkeleton::GetCallingTokenId()));
+            static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
         AddIdentity(tokenId, identity);
         return ret;
     }
