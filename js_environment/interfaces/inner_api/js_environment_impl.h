@@ -22,7 +22,7 @@
 
 #include "native_engine/native_engine.h"
 
-#include "data_protect.h"
+#include "libpandafile/data_protect.h"
 
 namespace OHOS {
 namespace JsEnv {

@@ -74,8 +74,8 @@
 #include "config_policy_utils.h"
 #include "utils/ability_permission_util.h"
 #include "utils/app_mgr_util.h"
-#include "utils/extension_permissions_util.h"
 #include "utils/dump_utils.h"
+#include "utils/extension_permissions_util.h"
 #include "utils/window_options_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #include "dialog_session_manager.h"

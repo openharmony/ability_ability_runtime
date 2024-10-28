@@ -72,15 +72,14 @@ void AppStateCallbackHost::OnAppStateChanged(const AppProcessData &)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
-void AppStateCallbackHost::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
-{
-}
-
 void AppStateCallbackHost::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
+void AppStateCallbackHost::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
+{
+}
 
 void AppStateCallbackHost::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
 {
@@ -168,7 +167,6 @@ int32_t AppStateCallbackHost::HandleOnAppRemoteDied(MessageParcel &data, Message
     OnAppRemoteDied(abilityTokens);
     return NO_ERROR;
 }
-
 
 int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply)
 {
