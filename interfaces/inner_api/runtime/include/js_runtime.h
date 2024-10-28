@@ -100,7 +100,7 @@ public:
     void PreloadMainAbility(const std::string& moduleName, const std::string& srcPath,
         const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) override;
     void PreloadModule(const std::string& moduleName, const std::string& srcPath,
-        std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
+        const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
     bool PopPreloadObj(const std::string& key, std::shared_ptr<NativeReference>& obj);
     void StartDebugMode(const DebugOption debugOption) override;
     void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);

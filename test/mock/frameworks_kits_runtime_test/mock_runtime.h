@@ -91,7 +91,7 @@ public:
         return;
     }
     void PreloadModule(const std::string& moduleName, const std::string& srcPath,
-        std::string& hapPath, bool isEsMode, bool useCommonTrunk) override
+        const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override
     {
         return;
     }

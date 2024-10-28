@@ -101,7 +101,7 @@ public:
     virtual void PreloadMainAbility(const std::string& moduleName, const std::string& srcPath,
         const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) = 0;
     virtual void PreloadModule(const std::string& moduleName, const std::string& srcPath,
-        std::string& hapPath, bool isEsMode, bool useCommonTrunk) = 0;
+        const std::string& hapPath, bool isEsMode, bool useCommonTrunk) = 0;
     virtual void FinishPreload() = 0;
     virtual bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) = 0;
     virtual bool NotifyHotReloadPage() = 0;

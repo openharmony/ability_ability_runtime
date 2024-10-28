@@ -1509,7 +1509,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             };
             runtime->SetDeviceDisconnectCallback(cb);
         }
-        if (appLaunchData.NeedPreloadModule()) {
+        if (appLaunchData.IsNeedPreloadModule()) {
             PreloadModule(entryHapModuleInfo, runtime);
         }
         auto perfCmd = appLaunchData.GetPerfCmd();
@@ -1794,7 +1794,7 @@ void MainThread::ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<Abi
 
     std::string moduleName(info.moduleName);
     moduleName.append("::").append(info.name);
-    isEsmode = info.compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    bool isEsmode = info.compileMode == AppExecFwk::CompileMode::ES_MODULE;
     runtime->PreloadMainAbility(moduleName, srcPath, info.hapPath, isEsmode, info.srcEntrance);
 }
 
