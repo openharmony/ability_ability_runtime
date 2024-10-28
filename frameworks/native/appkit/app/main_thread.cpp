@@ -1820,14 +1820,14 @@ void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleIn
         srcPath.append(entryHapModuleInfo.srcPath);
         srcPath.append("/AbilityStage.abc");
     }
-    runtime->PreloadModule(moduleName,srcPath, entryHapModuleInfo.hapPath, isEsmode, useCommonTrunk);
+    runtime->PreloadModule(moduleName, srcPath, entryHapModuleInfo.hapPath, isEsmode, useCommonTrunk);
     for (const auto &info : entryHapModuleInfo.abilityInfos) {
         if (info.name == entryHapModuleInfo.mainAbility) {
             ProcessMainAbility(info, runtime);
             return;
         }
     }
-}      
+}    
 
 #ifdef ABILITY_LIBRARY_LOADER
 void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::string &nativeLibraryPath)
