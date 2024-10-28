@@ -85,13 +85,13 @@ public:
     {
         return;
     }
-    void PreloadMainAbility(std::string& srcEntrance, std::string& moduleName, std::string& path,
-        std::string& hapPath, std::string& name, bool isModuleJson, std::string& package, bool isEsMode) override
+    void PreloadMainAbility(const std::string& moduleName, const std::string& srcPath,
+        const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) override
     {
         return;
     }
-    void PreloadModule(std::string& moduleName, std::string& path, std::string& name, bool isModuleJson,
-        bool isEsMode, bool useCommonTrunk, std::string& hapPath) override
+    void PreloadModule(const std::string& moduleName, const std::string& srcPath,
+        std::string& hapPath, bool isEsMode, bool useCommonTrunk) override
     {
         return;
     }
