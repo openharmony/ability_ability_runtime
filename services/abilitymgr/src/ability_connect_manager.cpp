@@ -1041,6 +1041,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     // There may be multiple callers waiting for the connection result
     auto connectRecordList = abilityRecord->GetConnectRecordList();
     for (auto &connectRecord : connectRecordList) {
+        CHECK_POINTER_CONTINUE(connectRecord);
         connectRecord->ScheduleConnectAbilityDone();
         if (abilityRecord->GetAbilityInfo().type == AbilityType::EXTENSION &&
             abilityRecord->GetAbilityInfo().extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {

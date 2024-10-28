@@ -30,11 +30,11 @@ namespace {
 }
 
 PendingWant::PendingWant(const sptr<AAFwk::IWantSender> &target)
-    : target_(target), cancelReceiver_(nullptr), whitelistToken_(nullptr)
+    : target_(target), cancelReceiver_(nullptr), allowlistToken_(nullptr)
 {}
 
-PendingWant::PendingWant(const sptr<AAFwk::IWantSender> &target, const sptr<IRemoteObject> whitelistToken)
-    : target_(target), cancelReceiver_(nullptr), whitelistToken_(whitelistToken)
+PendingWant::PendingWant(const sptr<AAFwk::IWantSender> &target, const sptr<IRemoteObject> allowlistToken)
+    : target_(target), cancelReceiver_(nullptr), allowlistToken_(allowlistToken)
 {}
 
 WantAgentConstant::OperationType PendingWant::GetType(sptr<AAFwk::IWantSender> target)
