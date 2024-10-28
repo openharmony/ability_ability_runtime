@@ -257,10 +257,11 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
         abilityRecovery_->SetJsAbility(reinterpret_cast<uintptr_t>(workContext));
     }
     napi_wrap(env, contextObj, workContext,
-        [](napi_env, void *data, void *) {
+        [](napi_env, void *data, void *hint) {
             TAG_LOGD(AAFwkTag::UIABILITY, "finalizer for weak_ptr ability context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
-        }, nullptr, nullptr);
+            delete static_cast<std::weak_ptr<int32_t> *>(hint);
+        }, workScreenMode, nullptr);
     TAG_LOGI(AAFwkTag::UIABILITY, "End");
 }
 
