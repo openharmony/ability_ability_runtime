@@ -1137,11 +1137,8 @@ private:
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
     bool isKia_ = false;
-<<<<<<< HEAD
     bool isNeedPreloadModule_ = false;
-=======
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
->>>>>>> refs/remotes/origin/master
 };
 
 }  // namespace AppExecFwk
