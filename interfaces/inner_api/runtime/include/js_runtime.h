@@ -166,7 +166,7 @@ private:
     int32_t apiTargetVersion_ = 0;
     std::map<std::string, std::string> pkgContextInfoJsonStringMap_;
     std::map<std::string, std::string> packageNameList_;
-    std::map<std::string, std::shared_ptr<NativeReference>> preloadList_;
+    std::map<std::string, std::unique_ptr<NativeReference>> preloadList_;
 
     static std::atomic<bool> hasInstance;
 
