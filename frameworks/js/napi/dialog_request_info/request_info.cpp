@@ -59,12 +59,12 @@ napi_value RequestInfo::WrapRequestInfo(napi_env env, RequestInfo *request)
     napi_value result = nullptr;
     napi_new_instance(env, requestInfoClass, 0, nullptr, &result);
     if (result == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create instance failed");
+        TAG_LOGE(AAFwkTag::DIALOG, "null result");
         return nullptr;
     }
 
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::DIALOG, "UnwrapRequestInfo result type error");
+        TAG_LOGE(AAFwkTag::DIALOG, "unwrapRequestInfo type error");
         return nullptr;
     }
 

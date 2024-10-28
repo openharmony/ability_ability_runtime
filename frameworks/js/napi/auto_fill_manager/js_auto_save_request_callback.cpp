@@ -87,7 +87,7 @@ void JsAutoSaveRequestCallback::JSCallFunctionWorker(const std::string &methodNa
 
     auto obj = callback_->GetNapiValue();
     if (obj == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Failed to get value.");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "failed to get value");
         return;
     }
 

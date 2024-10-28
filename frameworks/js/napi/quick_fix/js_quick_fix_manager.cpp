@@ -78,14 +78,14 @@ private:
     {
         TAG_LOGD(AAFwkTag::QUICKFIX, "called");
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::QUICKFIX, "The number of parameter is invalid");
+            TAG_LOGE(AAFwkTag::QUICKFIX, "invalid parameter number");
             ThrowInvalidParamError(env, "Parameter error: The number of parameter is invalid.");
             return CreateJsUndefined(env);
         }
 
         std::string bundleName;
         if (!OHOS::AppExecFwk::UnwrapStringFromJS2(env, info.argv[0], bundleName)) {
-            TAG_LOGE(AAFwkTag::QUICKFIX, "The bundleName is invalid");
+            TAG_LOGE(AAFwkTag::QUICKFIX, "invalid bundleName");
             ThrowInvalidParamError(env, "Parameter error: The bundleName is invalid, must be a string.");
             return CreateJsUndefined(env);
         }
@@ -112,7 +112,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::QUICKFIX, "called");
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::QUICKFIX, "The number of parameter is invalid");
+            TAG_LOGE(AAFwkTag::QUICKFIX, "invalid parameter number");
             ThrowInvalidParamError(env, "Parameter error: The number of parameter is invalid.");
             return CreateJsUndefined(env);
         }
@@ -145,14 +145,14 @@ private:
     {
         TAG_LOGD(AAFwkTag::QUICKFIX, "called");
         if (info.argc == ARGC_ZERO) {
-            TAG_LOGE(AAFwkTag::QUICKFIX, "The number of parameter is invalid");
+            TAG_LOGE(AAFwkTag::QUICKFIX, "invalid parameter number");
             ThrowInvalidParamError(env, "Parameter error: The number of parameter is invalid.");
             return CreateJsUndefined(env);
         }
 
         std::string bundleName;
         if (!ConvertFromJsValue(env, info.argv[ARGC_ZERO], bundleName)) {
-            TAG_LOGE(AAFwkTag::QUICKFIX, "The bundleName is invalid");
+            TAG_LOGE(AAFwkTag::QUICKFIX, "invalid bundleName");
             ThrowInvalidParamError(env, "Parameter error: The bundleName is invalid, must be a string.");
             return CreateJsUndefined(env);
         }
@@ -162,7 +162,7 @@ private:
             auto quickFixMgr = DelayedSingleton<AAFwk::QuickFixManagerClient>::GetInstance();
             if (quickFixMgr == nullptr) {
                 *retval = AAFwk::ERR_QUICKFIX_INTERNAL_ERROR;
-                TAG_LOGE(AAFwkTag::QUICKFIX, "mgr is nullptr");
+                TAG_LOGE(AAFwkTag::QUICKFIX, "null quickFixMgr");
                 return;
             }
 
@@ -173,7 +173,7 @@ private:
         auto complete = [retval = errCode](napi_env env, NapiAsyncTask &task, int32_t status) {
             TAG_LOGD(AAFwkTag::QUICKFIX, "Revoke quick fix complete called");
             if (*retval != AAFwk::ERR_OK) {
-                TAG_LOGE(AAFwkTag::QUICKFIX, "Revoke quick fix execution failed. retval is %{public}d", *retval);
+                TAG_LOGE(AAFwkTag::QUICKFIX, "retval %{public}d", *retval);
                 task.Reject(env, CreateJsErrorByErrorCode(env, *retval));
                 return;
             }
@@ -194,7 +194,7 @@ napi_value CreateJsQuickFixManager(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::QUICKFIX, "called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Input parameter is invalid");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "null env or exportObj");
         return nullptr;
     }
 

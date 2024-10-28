@@ -131,7 +131,7 @@ napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
     }
 
     if (dataAbilityHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "dataAbilityHelper is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null dataAbilityHelper");
         dataAbilityHelperStatus = false;
         return nullptr;
     }
@@ -752,7 +752,7 @@ void FindRegisterObs(napi_env env, DAHelperOnOffCB *data)
             }
             data->NotifyList.emplace_back(helper);
             iter = g_registerInstances.erase(iter);
-            TAG_LOGI(AAFwkTag::FA, "Instances erase size = %{public}zu", g_registerInstances.size());
+            TAG_LOGI(AAFwkTag::FA, "instances size = %{public}zu", g_registerInstances.size());
         }
     } else {
         TAG_LOGE(AAFwkTag::FA, "null uri");
@@ -1533,7 +1533,7 @@ napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *que
     std::vector<std::string> result;
     bool arrayStringbool = NapiValueToArrayStringUtf8(env, args[PARAM1], result);
     if (!arrayStringbool) {
-        TAG_LOGE(AAFwkTag::FA, "The return value of arraystringbool is false");
+        TAG_LOGE(AAFwkTag::FA, "arrayStringbool false");
     }
     queryCB->columns = result;
 
@@ -1553,7 +1553,7 @@ napi_value NAPI_ExecuteBatch(napi_env env, napi_callback_info info)
     TAG_LOGI(AAFwkTag::FA, "start");
     DAHelperExecuteBatchCB *executeBatchCB = new (std::nothrow) DAHelperExecuteBatchCB;
     if (executeBatchCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "invalid executeBatchCB");
+        TAG_LOGE(AAFwkTag::FA, "null executeBatchCB");
         return WrapVoidToJS(env);
     }
     executeBatchCB->cbBase.cbInfo.env = env;

@@ -759,7 +759,7 @@ void GetContextAsyncExecuteCB(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "wrong ability type");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type wrong");
         asyncCallbackInfo->errCode = NAPI_ERR_ABILITY_TYPE_INVALID;
         return;
     }
@@ -821,7 +821,7 @@ napi_value GetContextPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "promise");
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null param");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return nullptr;
     }
     napi_value resourceName = nullptr;
@@ -878,7 +878,7 @@ napi_value GetContextWrap(napi_env env, napi_callback_info, AsyncCallbackInfo *a
 
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "wrong ability type");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type wrong");
         asyncCallbackInfo->errCode = NAPI_ERR_ABILITY_TYPE_INVALID;
         return nullptr;
     }
@@ -995,7 +995,7 @@ napi_value NAPI_StopAbilityCommon(napi_env env, napi_callback_info info, Ability
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "create callbackInfo failed");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
@@ -1069,7 +1069,7 @@ napi_value AcquireDataAbilityHelperWrap(napi_env env, napi_callback_info info, D
     napi_status status = OHOS::AbilityRuntime::IsStageContext(env, args[0], stageMode);
     if (status == napi_ok) {
         uriIndex = PARAM1;
-        TAG_LOGI(AAFwkTag::JSNAPI, "argv[0] is a context, Stage Model: %{public}d", stageMode);
+        TAG_LOGI(AAFwkTag::JSNAPI, "Stage Model: %{public}d", stageMode);
     }
 
     if (!stageMode) {
@@ -1089,14 +1089,14 @@ napi_value AcquireDataAbilityHelperWrap(napi_env env, napi_callback_info info, D
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, args[uriIndex], &valuetype));
     if (valuetype != napi_string) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type");
+        TAG_LOGE(AAFwkTag::JSNAPI, "argument type wrong");
         return nullptr;
     }
     napi_value result = nullptr;
     NAPI_CALL(env, napi_new_instance(env, GetGlobalDataAbilityHelper(env), uriIndex + 1, &args[PARAM0], &result));
 
     if (!IsTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "result not object");
+        TAG_LOGE(AAFwkTag::JSNAPI, "not object");
         return nullptr;
     }
 

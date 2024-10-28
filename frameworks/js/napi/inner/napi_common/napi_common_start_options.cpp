@@ -150,7 +150,7 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
 
     int32_t displayId = 0;
     if (UnwrapInt32ByPropertyName(env, param, "displayId", displayId)) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "get display id ok displayId %{public}d", displayId);
+        TAG_LOGI(AAFwkTag::JSNAPI, "get displayId %{public}d ok", displayId);
         startOptions.SetDisplayID(displayId);
     }
 

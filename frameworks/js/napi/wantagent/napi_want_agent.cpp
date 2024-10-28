@@ -119,7 +119,7 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
     TAG_LOGI(AAFwkTag::WANTAGENT, "called");
     TriggerReceiveDataWorker* dataWorkerData = static_cast<TriggerReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "worker is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null dataWorkerData");
         delete work;
         return;
     }
@@ -133,7 +133,7 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
     napi_value objValueFirst = nullptr;
     napi_create_object(dataWorkerData->env, &objValueFirst);
     if (objValueFirst == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to get objValueFirst");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null objValueFirst");
         delete dataWorkerData;
         dataWorkerData = nullptr;
         delete work;
@@ -142,7 +142,7 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
     napi_value objValueSecond = nullptr;
     napi_create_object(dataWorkerData->env, &objValueSecond);
     if (objValueSecond == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to get objValueSecond");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null objValueSecond");
         delete dataWorkerData;
         dataWorkerData = nullptr;
         delete work;
@@ -180,7 +180,7 @@ void TriggerCompleteCallBack::OnSendFinished(
     const AAFwk::Want &want, int resultCode, const std::string &resultData, const AAFwk::WantParams &resultExtras)
 {
     if (triggerCompleteInfo_.nativeRef == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "CallBack is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null callBack");
         return;
     }
 
@@ -189,18 +189,18 @@ void TriggerCompleteCallBack::OnSendFinished(
     napi_get_uv_event_loop(triggerCompleteInfo_.env, &loop);
 #endif  // NAPI_VERSION >= 2
     if (loop == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "loop instance is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null loop");
         return;
     }
 
     uv_work_t* work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "uv_work_t instance is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null work");
         return;
     }
     TriggerReceiveDataWorker* dataWorker = new (std::nothrow) TriggerReceiveDataWorker();
     if (dataWorker == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "dataWorker is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null dataWorker");
         delete work;
         work = nullptr;
         return;
@@ -1053,7 +1053,7 @@ void JsWantAgent::UnwrapWantAgent(napi_env env, napi_value jsParam, void** resul
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "called");
     if (jsParam == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "jsParam is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null jsParam");
         return;
     }
 
@@ -1251,7 +1251,7 @@ void JsWantAgent::SetOnNapiGetWantAgentCallback(std::shared_ptr<WantAgentWantsPa
             }
 
             if (pWantAgent == nullptr) {
-                TAG_LOGE(AAFwkTag::WANTAGENT, "pWantAgent is nullptr");
+                TAG_LOGE(AAFwkTag::WANTAGENT, "null pWantAgent");
                 result = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
                 task.Reject(env, CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result)));
             } else {
@@ -1310,7 +1310,7 @@ napi_value JsWantAgent::OnNapiGetOperationType(napi_env env, napi_callback_info 
 napi_value WantAgentFlagsInit(napi_env env)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Invalid input parameters");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return nullptr;
     }
 
@@ -1344,7 +1344,7 @@ napi_value WantAgentFlagsInit(napi_env env)
 napi_value WantAgentOperationTypeInit(napi_env env)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Invalid input parameters");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return nullptr;
     }
 
@@ -1372,7 +1372,7 @@ napi_value WantAgentOperationTypeInit(napi_env env)
 napi_value JsWantAgentInit(napi_env env, napi_value exportObj)
 {
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env or exportObj null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env or exportObj");
         return nullptr;
     }
 
