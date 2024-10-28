@@ -1281,13 +1281,12 @@ void JsRuntime::PreloadMainAbility(const std::string& moduleName, const std::str
 
 void JsRuntime::PreloadModule(const std::string& moduleName, const std::string& srcPath,
     std::string& hapPath, bool isEsMode, bool useCommonTrunk)
-{   
+{
     std::string key(moduleName);
     key.append("::");
     key.append(srcPath);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadModule srcPath: %{public}s", srcPath.c_str());
     preloadList_[key] = LoadModule(moduleName, srcPath, hapPath, isEsMode, useCommonTrunk);
-
 }
 
 bool JsRuntime::PopPreloadObj(const std::string& key, std::shared_ptr<NativeReference>& obj)

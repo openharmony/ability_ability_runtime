@@ -2538,7 +2538,7 @@ void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
 
 void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
 {
-    isNeedPreloadModule_ = isNeedPreloadModule; 
+    isNeedPreloadModule_ = isNeedPreloadModule;
 }
 
 }  // namespace AppExecFwk
