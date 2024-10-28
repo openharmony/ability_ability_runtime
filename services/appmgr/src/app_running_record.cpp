@@ -2544,7 +2544,7 @@ bool AppRunningRecord::IsCaching()
 
 void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
 {
-    isNeedPreloadModule_ = isNeedPreloadModule; 
+    isNeedPreloadModule_ = isNeedPreloadModule;
 }
 
 void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)

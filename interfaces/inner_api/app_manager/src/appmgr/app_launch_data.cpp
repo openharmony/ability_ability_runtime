@@ -116,7 +116,7 @@ bool AppLaunchData::MarshallingExtend(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteString(isNeedPreloadModule_)) {
+    if (!parcel.WriteBool(isNeedPreloadModule_)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write instance key.");
         return false;
     }
