@@ -31,15 +31,33 @@ const std::string DOWNLOAD_PATH = "/storage/Users/currentUser/Download";
 const std::string DESKTOP_PATH = "/storage/Users/currentUser/Desktop";
 const std::string DOCUMENTS_PATH = "/storage/Users/currentUser/Documents";
 const std::string CURRENTUSER = "currentUser";
+const std::string BACKFLASH = "/";
 
 static bool CheckPermission(uint64_t tokenCaller, const std::string &permission)
 {
     return PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenCaller, permission);
 }
 
-static bool CheckFileManagerUriPermission(uint64_t providerTokenId, std::string &path)
+static bool CheckFileManagerUriPermission(uint64_t providerTokenId,
+                                          const std::string &filePath,
+                                          const std::string &bundleName)
 {
+    std::string path = filePath;
     if (path.find(DOWNLOAD_PATH) == 0) {
+        path = path.substr(DOWNLOAD_PATH.size());
+        if (path.find(BACKFLASH) == 0) {
+            path = path.substr(1);
+        }
+        std::string dirname = "";
+        if (path.find(BACKFLASH) != std::string::npos) {
+            size_t pos = path.find(BACKFLASH);
+            dirname = path.substr(0, pos);
+        } else {
+            dirname = path;
+        }
+        if (dirname == bundleName) {
+            return true;
+        }
         return CheckPermission(providerTokenId, PermissionConstants::PERMISSION_READ_WRITE_DOWNLOAD);
     }
     if (path.find(DESKTOP_PATH) == 0) {
@@ -62,10 +80,10 @@ PolicyInfo FilePermissionManager::GetPathPolicyInfoFromUri(Uri &uri, uint32_t fl
 }
 
 std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vector<Uri> &uriVec,
-    uint32_t callerTokenId, uint32_t flag, std::vector<PolicyInfo> &pathPolicies)
+    uint32_t callerTokenId, uint32_t flag, std::vector<PolicyInfo> &pathPolicies, const std::string &bundleName)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR,
-        "call, uri size:%{public}zu", uriVec.size());
+        "CheckUriPersistentPermission call, size of uri is %{public}zu", uriVec.size());
     std::vector<bool> resultCodes(uriVec.size(), false);
     pathPolicies.clear();
     if (CheckPermission(callerTokenId, PermissionConstants::PERMISSION_FILE_ACCESS_MANAGER)) {
@@ -82,7 +100,7 @@ std::vector<bool> FilePermissionManager::CheckUriPersistentPermission(std::vecto
         PolicyInfo policyInfo = GetPathPolicyInfoFromUri(uriVec[i], flag);
         pathPolicies.emplace_back(policyInfo);
         if (uriVec[i].GetAuthority() == FILE_MANAGER_AUTHORITY &&
-            CheckFileManagerUriPermission(callerTokenId, policyInfo.path)) {
+            CheckFileManagerUriPermission(callerTokenId, policyInfo.path, bundleName)) {
             resultCodes[i] = true;
             continue;
         }
