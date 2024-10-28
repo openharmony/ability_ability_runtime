@@ -29,7 +29,7 @@ ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenID)
     return ATokenTypeEnum::TOKEN_INVALID;
 }
 
-int AccessTokenKit::GetNativeTokenInfo(AccessTokenID tokenID, NativeTokenInfo& nativeTokenInfoRes)
+int AccessTokenKit::GetNativeTokenInfo(AccessTokenID tokenID, NativeTokenInfo &nativeTokenInfoRes)
 {
     if (MyFlag::tokenInfos.find(tokenID) != MyFlag::tokenInfos.end()) {
         nativeTokenInfoRes.processName = MyFlag::tokenInfos[tokenID].processName;
@@ -38,7 +38,7 @@ int AccessTokenKit::GetNativeTokenInfo(AccessTokenID tokenID, NativeTokenInfo& n
     return -1;
 }
 
-int AccessTokenKit::GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo& hapInfo)
+int AccessTokenKit::GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo &hapInfo)
 {
     if (MyFlag::tokenInfos.find(tokenID) != MyFlag::tokenInfos.end()) {
         hapInfo.bundleName = MyFlag::tokenInfos[tokenID].bundleName;

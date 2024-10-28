@@ -13,18 +13,19 @@
 * limitations under the License.
 */
 
-#ifndef ABILITY_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
-#define ABILITY_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
+#define OHOS_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
 
 #include <string>
 
 namespace OHOS {
 namespace AAFwk {
+
 struct PolicyInfo final {
     std::string path;
     uint64_t mode;
 };
 
-} // namespace AAFwk
-} // namespace OHOS
-#endif // ABILITY_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
+} // AAFwk
+} // OHOS
+#endif // OHOS_ABILITY_RUNTIME_UPMS_POLICY_INFO_H
