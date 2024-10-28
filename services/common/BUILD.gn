@@ -141,11 +141,8 @@ ohos_shared_library("app_util") {
     "hisysevent:libhisysevent",
     "init:libbegetutil",
     "json:nlohmann_json_static",
+    "window_manager:libwsutils",
   ]
-
-  if (ability_runtime_graphics) {
-    external_deps += [ "window_manager:libwsutils" ]
-  }
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
