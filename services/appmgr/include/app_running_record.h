@@ -1039,9 +1039,9 @@ private:
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
+    bool isNeedPreloadModule_ = false;
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
-    bool isNeedPreloadModule_ = false;
 };
 
 }  // namespace AppExecFwk
