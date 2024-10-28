@@ -82,9 +82,6 @@ bool ExtensionPermissionsUtil::CheckSAPermissionMore(const AppExecFwk::Extension
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::REMOTE_LOCATION) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_REMOTE_LOCATION_EXTENSION");
-    } else if (extensionType == AppExecFwk::ExtensionAbilityType::DRIVER) {
-        checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
-            "ohos.permission.CONNECT_DRIVER_EXTENSION");
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::PUSH) {
         checkRet = PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_PUSH_EXTENSION");
