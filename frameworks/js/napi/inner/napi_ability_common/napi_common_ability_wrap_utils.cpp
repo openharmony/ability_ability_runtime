@@ -300,7 +300,7 @@ void GetFilesDirExecuteCallback(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
+        TAG_LOGE(AAFwkTag::JSNAPI, "error ability type");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -399,7 +399,7 @@ void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type wrong");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -483,7 +483,7 @@ void GetExternalCacheDirExecuteCallback(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type wrong");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;

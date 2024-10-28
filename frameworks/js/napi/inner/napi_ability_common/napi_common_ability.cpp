@@ -759,7 +759,7 @@ void GetContextAsyncExecuteCB(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type wrong");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
         asyncCallbackInfo->errCode = NAPI_ERR_ABILITY_TYPE_INVALID;
         return;
     }
@@ -878,7 +878,7 @@ napi_value GetContextWrap(napi_env env, napi_callback_info, AsyncCallbackInfo *a
 
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ability type wrong");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
         asyncCallbackInfo->errCode = NAPI_ERR_ABILITY_TYPE_INVALID;
         return nullptr;
     }
@@ -1089,7 +1089,7 @@ napi_value AcquireDataAbilityHelperWrap(napi_env env, napi_callback_info info, D
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, args[uriIndex], &valuetype));
     if (valuetype != napi_string) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "argument type wrong");
+        TAG_LOGE(AAFwkTag::JSNAPI, "argument type error");
         return nullptr;
     }
     napi_value result = nullptr;

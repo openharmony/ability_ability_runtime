@@ -130,7 +130,7 @@ private:
 
         sptr<IRemoteObject> remoteObj = want.GetRemoteObject(RequestConstants::REQUEST_CALLBACK_KEY);
         if (!remoteObj) {
-            TAG_LOGE(AAFwkTag::DIALOG, "wrap Param requestCallback failed");
+            TAG_LOGE(AAFwkTag::DIALOG, "wrap requestCallback failed");
             ThrowInvalidParamError(env, "Wrap Param requestCallback failed, must be a RequestCallback.");
             return CreateJsUndefined(env);
         }
