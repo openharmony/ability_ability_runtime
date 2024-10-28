@@ -149,7 +149,6 @@ AAFwk::UserStatus AssertFaultTaskThread::HandleAssertCallback(const std::string 
             TAG_LOGE(AAFwkTag::APPKIT, "Invalid client object");
             break;
         }
-
         std::unique_lock<std::mutex> lockAssertResult(assertResultMutex_);
         AAFwk::WantParams wantParams;
         wantParams.SetParam(ASSERT_FAULT_DETAIL, AAFwk::String::Box(exprStr));
@@ -158,7 +157,6 @@ AAFwk::UserStatus AssertFaultTaskThread::HandleAssertCallback(const std::string 
             TAG_LOGE(AAFwkTag::APPKIT, "Request assert fault dialog failed");
             break;
         }
-
         assertResultCV_.wait(lockAssertResult);
         assertResult = assertFaultCallback->GetAssertResult();
     } while (false);

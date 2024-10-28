@@ -30,7 +30,7 @@ ohos_unittest("ability_bundle_event_callback_test") {
   sources = [
     "${ability_runtime_path}/services/abilitymgr/src/ability_auto_startup_data_manager.cpp",
     "${ability_runtime_path}/services/abilitymgr/src/ability_auto_startup_service.cpp",
-    "${ability_runtime_path}/services/abilitymgr/src/ability_event_util.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/utils/ability_event_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_bundle_event_callback.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "ability_bundle_event_callback_test.cpp",

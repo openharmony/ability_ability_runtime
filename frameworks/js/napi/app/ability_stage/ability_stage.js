@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
+
 class AbilityStage {
   constructor() { }
   onCreate() { }
   onDestroy() { }
   onAcceptWant(want) {
-    console.log('onAcceptWant, want:' + want.abilityName);
+    hilog.sLogI(domainID, TAG, 'onAcceptWant, want:' + want.abilityName);
   }
   onNewProcessRequest(want) {
-    console.log('onNewProcessRequest, want:' + want.abilityName);
+    hilog.sLogI(domainID, TAG, 'onNewProcessRequest, want:' + want.abilityName);
   }
   onConfigurationUpdated(config) { }
   onConfigurationUpdate(newConfig) { }

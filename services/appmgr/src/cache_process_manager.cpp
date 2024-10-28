@@ -29,11 +29,12 @@
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
 const std::string RESOURCE_WARM_START_PROCESS_ENABLE = "persist.resourceschedule.enable_warm_start_process";
+const std::string MAX_ALLOWED_CACHE_NUM = "const.resourceschedule.max_cached_process_nums";
 const std::string PROCESS_CACHE_API_CHECK_CONFIG = "persist.sys.abilityms.processCacheApiCheck";
 const std::string PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG = "persist.sys.abilityms.processCacheSetSupportCheck";
 constexpr int32_t API12 = 12;
 constexpr int32_t API_VERSION_MOD = 100;
-constexpr int32_t CACHE_PROCESS_TIMEOUT_TIME_MS = 1500; // 1500ms
+constexpr int32_t DEFAULT_ALLOWED_CACHE_NUM = 64;
 constexpr const char *EVENT_KEY_VERSION_NAME = "VERSION_NAME";
 constexpr const char *EVENT_KEY_VERSION_CODE = "VERSION_CODE";
 constexpr const char *EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
@@ -49,7 +50,12 @@ CacheProcessManager::CacheProcessManager()
     shouldCheckApi = OHOS::system::GetBoolParameter(PROCESS_CACHE_API_CHECK_CONFIG, true);
     shouldCheckSupport = OHOS::system::GetBoolParameter(PROCESS_CACHE_SET_SUPPORT_CHECK_CONFIG, true);
     warmStartProcesEnable_ = OHOS::system::GetBoolParameter(RESOURCE_WARM_START_PROCESS_ENABLE, false);
-    TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum %{public}d", maxProcCacheNum_);
+    allowedCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_ALLOWED_CACHE_NUM, DEFAULT_ALLOWED_CACHE_NUM);
+    if (maxProcCacheNum_ > 0) {
+        allowedCacheNum_ = maxProcCacheNum_;
+    }
+    TAG_LOGW(AAFwkTag::APPMGR,
+        "maxProcCacheNum_ %{public}d, allowedCacheNum_ %{public}d", maxProcCacheNum_, allowedCacheNum_);
 }
 
 CacheProcessManager::~CacheProcessManager()
@@ -65,6 +71,7 @@ void CacheProcessManager::SetAppMgr(const std::weak_ptr<AppMgrServiceInner> &app
 void CacheProcessManager::RefreshCacheNum()
 {
     maxProcCacheNum_ = OHOS::system::GetIntParameter<int>(MAX_PROC_CACHE_NUM, 0);
+    allowedCacheNum_ = maxProcCacheNum_;
     TAG_LOGW(AAFwkTag::APPMGR, "maxProcCacheNum %{public}d", maxProcCacheNum_);
 }
 
@@ -124,11 +131,9 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
             appRecord->GetName().c_str());
         return true;
     }
-    if (warmStartProcesEnable_ && appRecord->GetPriorityObject()) {
-        AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PROCESS_CACHE_BEGIN,
-            appRecord->GetPriorityObject()->GetPid(), appRecord->GetUid(), CACHE_PROCESS_TIMEOUT_TIME_MS);
+    if (!warmStartProcesEnable_) {
+        appRecord->ScheduleCacheProcess();
     }
-    appRecord->ScheduleCacheProcess();
     appRecord->SetProcessCaching(false);
     auto appInfo = appRecord->GetApplicationInfo();
     HiSysEventWrite(HiSysEvent::Domain::AAFWK, "CACHE_START_APP", HiSysEvent::EventType::BEHAVIOR,
@@ -138,6 +143,9 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
         DelayedSingleton<CacheProcessManager>::GetInstance()->CheckAndNotifyCachedState(appRecord);
     };
     std::string taskName = "DELAY_CACHED_STATE_NOTIFY";
+    if (appRecord->GetPriorityObject()) {
+        taskName += std::to_string(appRecord->GetPriorityObject()->GetPid());
+    }
     auto res = appRecord->CancelTask(taskName);
     if (res) {
         TAG_LOGD(AAFwkTag::APPMGR, "Early delay task canceled.");
@@ -251,10 +259,6 @@ bool CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRec
         TAG_LOGE(AAFwkTag::APPMGR, "null appMgr");
         return true;
     }
-    if (appRecord->GetEnableProcessCache()) {
-        appRecord->SetEnableProcessCache(false);
-    }
-    appRecord->SetProcessCaching(false);
     appMgrSptr->OnAppCacheStateChanged(appRecord, ApplicationState::APP_STATE_READY);
     TAG_LOGI(AAFwkTag::APPMGR, "app none cached state is notified: %{public}s, uid: %{public}d, %{public}s",
         appRecord->GetBundleName().c_str(), appRecord->GetUid(), PrintCacheQueue().c_str());
@@ -382,7 +386,7 @@ bool CacheProcessManager::IsAppShouldCache(const std::shared_ptr<AppRunningRecor
     if (!QueryEnableProcessCache()) {
         return false;
     }
-    if (IsCachedProcess(appRecord)) {
+    if (IsCachedProcess(appRecord) && !appRecord->GetProcessCacheBlocked()) {
         return true;
     }
     if (!IsAppSupportProcessCache(appRecord)) {
@@ -437,7 +441,7 @@ void CacheProcessManager::ShrinkAndKillCache()
     std::vector<std::shared_ptr<AppRunningRecord>> cleanList;
     {
         std::lock_guard<ffrt::recursive_mutex> queueLock(cacheQueueMtx);
-        while (GetCurrentCachedProcNum() > maxProcCacheNum_ && !warmStartProcesEnable_) {
+        while (GetCurrentCachedProcNum() > allowedCacheNum_) {
             const auto& tmpAppRecord = cachedAppRecordQueue_.front();
             cachedAppRecordQueue_.pop_front();
             RemoveFromApplicationSet(tmpAppRecord);

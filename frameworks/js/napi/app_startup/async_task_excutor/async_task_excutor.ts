@@ -16,12 +16,9 @@
 async function concurrentFunc(startup, asyncCallback, context, startupName): void {
   'use concurrent';
   console.log('concurrentFunc start.');
-  let startupResult;
-  await startup.init(context).then((result: Object) => {
-    startupResult = result;
-    let taskPool = requireNapi('taskpool');
-    taskPool.Task.sendData(asyncCallback, startupName, startupResult);
-  });
+  let startupResult = await startup.init(context);
+  let taskPool = requireNapi('taskpool');
+  taskPool.Task.sendData(asyncCallback, startupName, startupResult);
   console.log('concurrentFunc end.');
 }
 

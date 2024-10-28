@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
+
 class InsightIntentContext {
   constructor(obj) {
     this.__context_impl__ = obj;
   }
 
   startAbility(want, callback) {
-    console.log('startAbility');
+    hilog.sLogI(domainID, TAG, 'startAbility');
     return this.__context_impl__.startAbility(want, callback);
   }
 }

@@ -1421,8 +1421,9 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
     }
 
     auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
-    CHECK_POINTER(missionListWrap);
-    missionListWrap->SetMissionAbilityState(missionId_, currentState_);
+    if (missionListWrap != nullptr) {
+        missionListWrap->SetMissionAbilityState(missionId_, currentState_);
+    }
 }
 #endif // SUPPORT_SCREEN
 bool AbilityRecord::GetAbilityForegroundingFlag() const

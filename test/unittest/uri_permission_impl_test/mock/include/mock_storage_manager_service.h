@@ -263,7 +263,7 @@ public:
     {
         return E_OK;
     }
-    
+
     virtual int32_t CreateRecoverKey(uint32_t userId,
                                      uint32_t userType,
                                      const std::vector<uint8_t> &token,

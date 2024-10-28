@@ -403,8 +403,9 @@ private:
     bool CheckProperties(const std::shared_ptr<AbilityRecord> &abilityRecord, const AbilityRequest &abilityRequest,
         AppExecFwk::LaunchMode launchMode) const;
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest) const;
-    int CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord,
+    void PrepareCloseUIAbility(std::shared_ptr<AbilityRecord> abilityRecord,
         int resultCode, const Want *resultWant, bool isClearSession);
+    int CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord);
     int32_t BackToCallerAbilityWithResultLocked(sptr<SessionInfo> currentSessionInfo,
         std::shared_ptr<AbilityRecord> callerAbilityRecord);
 

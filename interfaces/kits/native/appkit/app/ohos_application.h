@@ -84,7 +84,7 @@ public:
      *
      * @param config Indicates the new Configuration object.
      */
-    virtual void OnFontUpdated(Configuration config);
+    virtual void OnUpdateConfigurationForAll(Configuration config);
 
     /**
      *
@@ -94,7 +94,7 @@ public:
      *
      * @param level Indicates the memory trim level, which shows the current memory usage status.
      */
-    virtual void OnMemoryLevel(int level);
+    virtual void OnMemoryLevel(int32_t level);
 
     /**
      *
@@ -172,7 +172,7 @@ public:
      *
      * @param runtime
      */
-    const std::unique_ptr<AbilityRuntime::Runtime>& GetRuntime();
+    const std::unique_ptr<AbilityRuntime::Runtime>& GetRuntime() const;
 
     /*
      *
@@ -217,7 +217,7 @@ public:
 
     void AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName);
-        
+
     void AutoStartupDone(const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage,
         const AppExecFwk::HapModuleInfo &hapModuleInfo);
 

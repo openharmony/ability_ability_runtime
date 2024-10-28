@@ -303,7 +303,8 @@ void UriUtils::CheckUriPermissionForExtension(Want &want, uint32_t tokenId)
         TAG_LOGW(AAFwkTag::ABILITYMGR, "No file uri neet grant.");
         return;
     }
-    auto callerTokenId = tokenId > 0 ? tokenId : want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
+    auto callerTokenId = tokenId > 0 ?
+            tokenId : static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
     // check uri permission
     auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
         uriVec, flag, callerTokenId));

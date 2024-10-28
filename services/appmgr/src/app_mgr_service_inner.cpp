@@ -297,6 +297,60 @@ bool IsCjApplication(const BundleInfo &bundleInfo)
     }
     return false;
 }
+
+std::string GetEventName(int32_t eventId)
+{
+    switch (eventId) {
+        case AMSEventHandler::TERMINATE_ABILITY_TIMEOUT_MSG:
+        case AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG:
+        case AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG:
+        case AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG:
+        case AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG:
+        case AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG:
+            return AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT;
+        default:
+            return AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT;
+    }
+}
+
+std::pair<int, std::string> GetEventTypeAndMsg(int32_t eventId)
+{
+    std::pair<int, std::string> result{AppExecFwk::AppfreezeManager::TypeAttribute::NORMAL_TIMEOUT, ""};
+    switch (eventId) {
+        case AMSEventHandler::TERMINATE_ABILITY_TIMEOUT_MSG:
+        case AMSEventHandler::TERMINATE_ABILITY_HALF_TIMEOUT_MSG:
+            result.second = EVENT_MESSAGE_TERMINATE_ABILITY_TIMEOUT;
+            break;
+        case AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG:
+        case AMSEventHandler::TERMINATE_APPLICATION_HALF_TIMEOUT_MSG:
+            result.second = EVENT_MESSAGE_TERMINATE_APPLICATION_TIMEOUT;
+            break;
+        case AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG:
+        case AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG:
+            result.second = EVENT_MESSAGE_ADD_ABILITY_STAGE_INFO_TIMEOUT;
+            result.first = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
+            break;
+        case AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG:
+        case AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG:
+            result.second = EVENT_MESSAGE_START_PROCESS_SPECIFIED_ABILITY_TIMEOUT;
+            result.first = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
+            break;
+        case AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG:
+        case AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG:
+            result.second = EVENT_MESSAGE_START_SPECIFIED_ABILITY_TIMEOUT;
+            result.first = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
+            break;
+        case AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG:
+        case AMSEventHandler::START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG:
+            result.second = EVENT_MESSAGE_START_SPECIFIED_PROCESS_TIMEOUT;
+            result.first = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
+            break;
+        default:
+            result.second = EVENT_MESSAGE_DEFAULT;
+            break;
+    }
+    return result;
+}
 }  // namespace
 
 using OHOS::AppExecFwk::Constants::PERMISSION_GRANTED;
@@ -1024,7 +1078,7 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
         return;
     }
     TAG_LOGI(AAFwkTag::APPMGR, "attach pid:%{public}d, bundle:%{public}s", pid, eventInfo.bundleName.c_str());
-    sptr<AppDeathRecipient> appDeathRecipient = new (std::nothrow) AppDeathRecipient();
+    sptr<AppDeathRecipient> appDeathRecipient = sptr<AppDeathRecipient>::MakeSptr();
     CHECK_POINTER_AND_RETURN_LOG(appDeathRecipient, "Failed to create death recipient.");
     appDeathRecipient->SetTaskHandler(taskHandler_);
     appDeathRecipient->SetAppMgrServiceInner(shared_from_this());
@@ -1318,8 +1372,8 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
         EVENT_KEY_PID, std::to_string(eventInfo.pid),
         EVENT_KEY_PROCESS_NAME, eventInfo.processName,
         EVENT_KEY_MESSAGE, "Kill Reason:app exit");
-    TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d, send [FRAMEWORK,PROCESS_KILL], pid:"
-        "%{public}d, processName:%{public}s", result, eventInfo.pid, eventInfo.processName.c_str());
+    TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send [FRAMEWORK,PROCESS_KILL], pid=%{public}d,"
+        " processName=%{public}s, msg=Kill Reason:app exit", result, eventInfo.pid, eventInfo.processName.c_str());
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 
@@ -2361,7 +2415,7 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
     int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PID, std::to_string(eventInfo.pid),
         EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, killReason);
-    TAG_LOGI(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
+    TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
         "%{public}d, processName=%{public}s, msg=%{public}s", result, pid, eventInfo.processName.c_str(),
         killReason.c_str());
     return ret;
@@ -3737,32 +3791,40 @@ void AppMgrServiceInner::HandleTimeOut(const AAFwk::EventWrap &event)
         TAG_LOGD(AAFwkTag::APPMGR, "HandleTimeOut, Hook_mode: no handle time out");
         return;
     }
-
+    auto appRecord = AppEventUtil::GetInstance().RemoveEvent(event.GetEventId(), event.GetParam());
     switch (event.GetEventId()) {
         case AMSEventHandler::TERMINATE_ABILITY_TIMEOUT_MSG:
             appRunningManager_->HandleTerminateTimeOut(event.GetParam());
             break;
         case AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG:
-            SendHiSysEvent(event.GetEventId(), event.GetParam());
-            HandleTerminateApplicationTimeOut(event.GetParam());
+            SendHiSysEvent(event.GetEventId(), appRecord);
+            HandleTerminateApplicationTimeOut(appRecord);
             break;
         case AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG:
-            SendHiSysEvent(event.GetEventId(), event.GetParam());
-            HandleStartSpecifiedProcessTimeout(event.GetParam());
+            SendHiSysEvent(event.GetEventId(), appRecord);
+            HandleStartSpecifiedProcessTimeout(appRecord);
             break;
         case AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG:
         case AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG:
-            SendHiSysEvent(event.GetEventId(), event.GetParam());
-            HandleAddAbilityStageTimeOut(event.GetParam());
+            SendHiSysEvent(event.GetEventId(), appRecord);
+            HandleAddAbilityStageTimeOut(appRecord);
             break;
         case AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG:
-            SendHiSysEvent(event.GetEventId(), event.GetParam());
-            HandleStartSpecifiedAbilityTimeOut(event.GetParam());
+            SendHiSysEvent(event.GetEventId(), appRecord);
+            HandleStartSpecifiedAbilityTimeOut(appRecord);
+            break;
+        case AMSEventHandler::TERMINATE_APPLICATION_HALF_TIMEOUT_MSG:
+        case AMSEventHandler::START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG:
+        case AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG:
+        case AMSEventHandler::ADD_ABILITY_STAGE_INFO_HALF_TIMEOUT_MSG:
+        case AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG:
+            SendHiSysEvent(event.GetEventId(), appRecord);
             break;
         default:
             break;
     }
 }
+
 void AppMgrServiceInner::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -3784,14 +3846,9 @@ void AppMgrServiceInner::PrepareTerminate(const sptr<IRemoteObject> &token, bool
     appRunningManager_->PrepareTerminate(token, clearMissionFlag);
 }
 
-void AppMgrServiceInner::HandleTerminateApplicationTimeOut(const int64_t eventId)
+void AppMgrServiceInner::HandleTerminateApplicationTimeOut(std::shared_ptr<AppRunningRecord> appRecord)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
-        return;
-    }
-    auto appRecord = appRunningManager_->GetAppRunningRecord(eventId);
     TerminateApplication(appRecord);
 }
 
@@ -3842,14 +3899,9 @@ void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRe
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 
-void AppMgrServiceInner::HandleAddAbilityStageTimeOut(const int64_t eventId)
+void AppMgrServiceInner::HandleAddAbilityStageTimeOut(std::shared_ptr<AppRunningRecord> appRecord)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
-        return;
-    }
-    auto appRecord = appRunningManager_->GetAppRunningRecord(eventId);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return;
@@ -4447,8 +4499,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
         appRecord->SetProcessAndExtensionType(abilityInfoPtr);
         appRecord->SetTaskHandler(taskHandler_);
         appRecord->SetEventHandler(eventHandler_);
-        appRecord->SendEventForSpecifiedAbility(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG,
-            AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT);
+        appRecord->SendEventForSpecifiedAbility();
         uint32_t startFlags = AppspawnUtil::BuildStartFlags(want, abilityInfo);
         StartProcess(appInfo->name, processName, startFlags, appRecord, appInfo->uid, bundleInfo, appInfo->bundleName,
             appIndex, appExistFlag);
@@ -4503,15 +4554,9 @@ void AppMgrServiceInner::ScheduleAcceptWantDone(
     appRecord->ResetSpecifiedRequestId();
 }
 
-void AppMgrServiceInner::HandleStartSpecifiedAbilityTimeOut(const int64_t eventId)
+void AppMgrServiceInner::HandleStartSpecifiedAbilityTimeOut(std::shared_ptr<AppRunningRecord> appRecord)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "startSpecifiedAbility timeOut");
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
-        return;
-    }
-
-    auto appRecord = appRunningManager_->GetAppRunningRecord(eventId);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return;
@@ -4545,15 +4590,9 @@ void AppMgrServiceInner::ScheduleNewProcessRequestDone(
     appRecord->ResetNewProcessRequestId();
 }
 
-void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(const int64_t eventId)
+void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppRunningRecord> appRecord)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called start specified process time out!");
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
-        return;
-    }
-
-    auto appRecord = appRunningManager_->GetAppRunningRecord(eventId);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return;
@@ -4783,15 +4822,9 @@ void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunnin
     taskHandler_->SubmitTask(timeoutTask, "DelayKillProcess", AMSEventHandler::KILL_PROCESS_TIMEOUT);
 }
 
-void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_t eventId)
+void AppMgrServiceInner::SendHiSysEvent(int32_t innerEventId, std::shared_ptr<AppRunningRecord> appRecord)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called AppMgrServiceInner SendHiSysEvent!");
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
-        return;
-    }
-
-    auto appRecord = appRunningManager_->GetAppRunningRecord(eventId);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return;
@@ -4805,47 +4838,20 @@ void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_
         return;
     }
 
-    std::string eventName = AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT;
+    std::string eventName = GetEventName(innerEventId);
     int32_t pid = appRecord->GetPriorityObject()->GetPid();
     int32_t uid = appRecord->GetUid();
     std::string packageName = appRecord->GetBundleName();
     std::string processName = appRecord->GetProcessName();
-    std::string msg = AppExecFwk::AppFreezeType::APP_LIFECYCLE_TIMEOUT;
-    msg += ",";
-    int typeId = AppExecFwk::AppfreezeManager::TypeAttribute::NORMAL_TIMEOUT;
-    switch (innerEventId) {
-        case AMSEventHandler::TERMINATE_ABILITY_TIMEOUT_MSG:
-            msg += EVENT_MESSAGE_TERMINATE_ABILITY_TIMEOUT;
-            break;
-        case AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG:
-            msg += EVENT_MESSAGE_TERMINATE_APPLICATION_TIMEOUT;
-            break;
-        case AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG:
-            msg += EVENT_MESSAGE_ADD_ABILITY_STAGE_INFO_TIMEOUT;
-            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
-            break;
-        case AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG:
-            msg += EVENT_MESSAGE_START_PROCESS_SPECIFIED_ABILITY_TIMEOUT;
-            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
-            break;
-        case AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG:
-            msg += EVENT_MESSAGE_START_SPECIFIED_ABILITY_TIMEOUT;
-            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
-            break;
-        case AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG:
-            msg += EVENT_MESSAGE_START_SPECIFIED_PROCESS_TIMEOUT;
-            typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
-            break;
-        default:
-            msg += EVENT_MESSAGE_DEFAULT;
-            break;
-    }
+    std::string msg = eventName + ",";
+    auto eventTypeAndMsg = GetEventTypeAndMsg(innerEventId);
+    msg += eventTypeAndMsg.second;
 
     TAG_LOGW(AAFwkTag::APPMGR, "lifecycle_timeout, eventName: %{public}s, uid: %{public}d, pid: %{public}d, \
         packageName: %{public}s, processName: %{public}s, msg: %{public}s",
         eventName.c_str(), uid, pid, packageName.c_str(), processName.c_str(), msg.c_str());
     AppfreezeManager::ParamInfo info = {
-        .typeId = typeId,
+        .typeId = eventTypeAndMsg.first,
         .pid = pid,
         .eventName = eventName,
         .bundleName = packageName,
@@ -5917,7 +5923,7 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
         if (isNeedExit || (faultData.forceExit && !faultData.waitSaveState)) {
             TAG_LOGI(AAFwkTag::APPMGR, "faultData: %{public}s,pid: %{public}d will exit because %{public}s",
                 bundleName.c_str(), pid, innerService->FaultTypeToString(faultData.faultType).c_str());
-            innerService->KillProcessByPid(pid, "KillFaultApp");
+            innerService->KillProcessByPid(pid, faultData.errorObject.name);
             return;
         }
     };

@@ -20,7 +20,9 @@ ohos_unittest("os_account_manager_wrapper_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+
     "${ability_runtime_innerkits_path}/deps_wrapper/include",
   ]
 
