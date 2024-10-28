@@ -32,6 +32,7 @@ config("module_private_config") {
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_test_path}/mock/frameworks_kits_test/DemoAbility",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "//third_party/jsoncpp/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",

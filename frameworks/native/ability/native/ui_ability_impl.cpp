@@ -21,7 +21,6 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "js_ui_ability.h"
 #include "ohos_application.h"
 #include "process_options.h"
 #ifdef SUPPORT_SCREEN
@@ -176,6 +175,12 @@ void UIAbilityImpl::HandleAbilityTransaction(
     if ((lifecycleState_ == targetState.state) && !targetState.isNewWant) {
         if (ability_ != nullptr && targetState.state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
             ability_->RequestFocus(want);
+            AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
+                token_, targetState.state, GetRestoreData());
+        }
+        if (ability_ != nullptr && targetState.state == AAFwk::ABILITY_STATE_BACKGROUND_NEW) {
+            TAG_LOGW(AAFwkTag::UIABILITY, "OnBackground is called when current state is already background");
+            Background();
             AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
                 token_, targetState.state, GetRestoreData());
         }
@@ -396,23 +401,7 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
             return;
         }
 
-        auto abilityContext = impl->ability_->GetAbilityContext();
-        if (abilityContext == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
-            return;
-        }
         impl->ability_->OnAfterFocusedCommon(focuseMode);
-        auto applicationContext = abilityContext->GetApplicationContext();
-        if (applicationContext == nullptr || applicationContext->IsAbilityLifecycleCallbackEmpty()) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null applicationContext or lifecycleCallback");
-            return;
-        }
-        auto &jsAbility = static_cast<JsUIAbility &>(*(impl->ability_));
-        if (focuseMode) {
-            applicationContext->DispatchWindowStageFocus(jsAbility.GetJsAbility(), jsAbility.GetJsWindowStage());
-        } else {
-            applicationContext->DispatchWindowStageUnfocus(jsAbility.GetJsAbility(), jsAbility.GetJsWindowStage());
-        }
     };
 
     if (handler_) {

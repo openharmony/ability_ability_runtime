@@ -14,6 +14,10 @@
  */
 
 let UIExtensionContext = requireNapi('application.UIExtensionContext');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 export class PhotoEditorExtensionContext extends UIExtensionContext {
     constructor(obj) {
@@ -21,12 +25,12 @@ export class PhotoEditorExtensionContext extends UIExtensionContext {
     }
 
     saveEditedContentWithUri(uri, asyncCallback) {
-        console.log('saveEditedContent with uri: ' + uri);
+        hilog.sLogI(domainID, TAG, 'saveEditedContent with uri: ' + uri);
         return this.__context_impl__.saveEditedContentWithUri(uri, asyncCallback);
     }
 
     saveEditedContentWithImage(image, option, asyncCallback) {
-        console.log('saveEditedContent with image pixmap.');
+        hilog.sLogI(domainID, TAG, 'saveEditedContent with image pixmap.');
         return this.__context_impl__.saveEditedContentWithImage(image, option, asyncCallback);
     }
 }

@@ -1343,7 +1343,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
 #ifdef CJ_FRONTEND
         if (!entryHapModuleInfo.abilityInfos.empty()) {
-            isCJApp = AbilityRuntime::CJRuntime::IsCJAbility(entryHapModuleInfo.abilityInfos.front().srcEntrance);
+            auto srcEntrancenName = entryHapModuleInfo.abilityInfos.front().srcEntrance;
+            isCJApp = AbilityRuntime::CJRuntime::IsCJAbility(srcEntrancenName);
+            AbilityRuntime::CJRuntime::SetPackageName(srcEntrancenName);
         }
 #endif
         moduelJson = entryHapModuleInfo.isModuleJson;
@@ -1584,7 +1586,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
                     HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName,
                     "MSG", KILL_REASON);
-                TAG_LOGI(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
+                TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
                     " pid=%{public}d, processName=%{public}s, msg=%{public}s", result, pid, processName.c_str(),
                     KILL_REASON);
 
@@ -1825,13 +1827,17 @@ void MainThread::LoadNativeLibrary(const BundleInfo &bundleInfo, std::string &na
         TAG_LOGW(AAFwkTag::APPKIT, "No native library");
         return;
     }
-
+    char resolvedPath[PATH_MAX] = {0};
     void *handleAbilityLib = nullptr;
     for (auto fileEntry : nativeFileEntries_) {
-        if (fileEntry.empty()) {
+        if (fileEntry.empty() || fileEntry.size() >= PATH_MAX) {
             continue;
         }
-        handleAbilityLib = dlopen(fileEntry.c_str(), RTLD_NOW | RTLD_GLOBAL);
+        if (realpath(fileEntry.c_str(), resolvedPath) == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get realpath, errno = %{public}d", errno);
+            continue;
+        }
+        handleAbilityLib = dlopen(resolvedPath, RTLD_NOW | RTLD_GLOBAL);
         if (handleAbilityLib == nullptr) {
             if (fileEntry.find("libformrender.z.so") == std::string::npos) {
                 TAG_LOGE(AAFwkTag::APPKIT, "fail to dlopen %{public}s, [%{public}s]",

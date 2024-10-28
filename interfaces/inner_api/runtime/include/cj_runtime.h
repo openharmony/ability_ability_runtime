@@ -36,6 +36,7 @@ public:
     static void SetAppLibPath(const AppLibPathMap& appLibPaths);
     static bool IsCJAbility(const std::string& info);
     static void SetSanitizerVersion(SanitizerKind kind);
+    static void SetPackageName(std::string srcEntryName);
     ~CJRuntime() override = default;
 
     Language GetLanguage() const override
@@ -78,6 +79,7 @@ private:
     std::string bundleName_;
     uint32_t instanceId_ = 0;
     static AppLibPathVec appLibPaths_;
+    static std::string packageName_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

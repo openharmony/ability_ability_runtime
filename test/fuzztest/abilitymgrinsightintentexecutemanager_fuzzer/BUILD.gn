@@ -29,6 +29,7 @@ ohos_fuzztest("AbilityMgrInsightIntentExecuteManagerFuzzTest") {
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
   cflags = [
@@ -40,7 +41,7 @@ ohos_fuzztest("AbilityMgrInsightIntentExecuteManagerFuzzTest") {
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_execute_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_profile.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/ability_event_util.cpp",
     "abilitymgrinsightintentexecutemanager_fuzzer.cpp",
   ]
 

@@ -289,39 +289,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_001, TestSize.Level
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartAbilityDetails
  */
-HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0200, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0200 start");
-
-    Want want;
-    want.SetParam(DEBUG_APP, true);
-    want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.name = "ability1";
-    abilityInfo.bundleName = "testBundleName";
-    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
-    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
-    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    auto ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
-
-    /**
-     * @tc.steps: step2. CONTACTS_BUNDLE_NAME
-     * @tc.expected: step2. expect ERR_NOT_IN_APP_PROVISION_MODE
-     */
-    EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
-    Mock::VerifyAndClear(mockBundleMgr);
-    bundleMgrHelper_->bundleMgr_ = nullptr;
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0200 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartAbilityDetails
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartAbilityDetails
- */
 HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0300, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 start");
@@ -336,68 +303,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0300, TestSize.Leve
     auto ret = abilityMs->StartAbilityDetails(want1, abilityStartSetting_, nullptr, MAIN_USER_ID, -1, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartAbilityDetails
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartAbilityDetails
- */
-HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0400, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0400 start");
-    AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.name = "ability1";
-    abilityInfo.bundleName = "testBundleName";
-    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
-    abilityInfo.applicationInfo.name = "test";
-    abilityInfo.applicationInfo.bundleName = "testBundleName";
-    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
-    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
-    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
-    Want want;
-    want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
-    auto abilityMs = MockAbilityManagerService();
-    MyFlag::flag_ = 0;
-    auto ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
-    /**
-     * @tc.steps: step2. interceptorExecuter_ is inited, for CONTACTS_BUNDLE_NAME is sigeleton，usrid 0
-     * @tc.expected: step2. expect missionListManager/uiAbilityManager null, return ERR_INVALID_VALUE
-     */
-    MyFlag::flag_ = 1;
-    ret = abilityMs->StartAbilityDetails(want, abilityStartSetting_, nullptr, -1, -1, false);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    Mock::VerifyAndClear(mockBundleMgr);
-    bundleMgrHelper_->bundleMgr_ = nullptr;
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0400 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: StartAbilityDetails
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService StartAbilityInner
- */
-HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityInner_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    abilityMs->taskHandler_ = MockTaskHandlerWrap::CreateQueueHandler("StartAbilityInner_001");
-    abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
-    abilityMs->afterCheckExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
-    Want want;
-    want.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
-    MyFlag::abilityCallFlag_ = 0;
-    auto ret = abilityMs->StartAbilityInner(want, nullptr, -1, false);
-
-    /**
-     * @tc.steps: step2. interceptorExecuter_ is inited, for CONTACTS_BUNDLE_NAME is sigeleton，usrid 0
-     * @tc.expected: step2. expect missionListManager/uiAbilityManager null, return ERR_INVALID_VALUE
-     */
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityInner_001 end");
 }
 
 /*

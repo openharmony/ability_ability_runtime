@@ -210,7 +210,7 @@ int32_t CJAbilityObject::OnContinue(AAFwk::WantParams& wantParams) const
 {
     if (g_cjAbilityFuncs == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
-        return ContinuationManager::OnContinueResult::REJECT;
+        return ContinuationManager::OnContinueResult::ON_CONTINUE_ERR;
     }
     return 0;
 }

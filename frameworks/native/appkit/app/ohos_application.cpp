@@ -189,7 +189,7 @@ void OHOSApplication::SetApplicationContext(
             TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr.");
             return;
         }
-        applicationSptr->OnFontUpdated(config);
+        applicationSptr->OnUpdateConfigurationForAll(config);
     });
 }
 
@@ -264,8 +264,6 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
 #endif
 
     abilityRuntimeContext_->DispatchConfigurationUpdated(*configuration_);
-    abilityRuntimeContext_->SetMcc(configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
-    abilityRuntimeContext_->SetMnc(configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
     abilityRuntimeContext_->SetConfiguration(configuration_);
 }
 
@@ -275,7 +273,7 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
  *
  * @param config Indicates the new Configuration object.
  */
-void OHOSApplication::OnFontUpdated(Configuration config)
+void OHOSApplication::OnUpdateConfigurationForAll(Configuration config)
 {
 #ifdef SUPPORT_GRAPHICS
     // Notify Window
@@ -292,7 +290,7 @@ void OHOSApplication::OnFontUpdated(Configuration config)
  *
  * @param level Indicates the memory trim level, which shows the current memory usage status.
  */
-void OHOSApplication::OnMemoryLevel(int level)
+void OHOSApplication::OnMemoryLevel(int32_t level)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (abilityRuntimeContext_ == nullptr) {
@@ -441,16 +439,27 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
     if (!IsMainProcess(abilityInfo->bundleName, abilityInfo->applicationInfo.process)) {
         return nullptr;
     }
-    std::string moduleName = abilityInfo->moduleName;
     auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
     std::weak_ptr<OHOSApplication> weak = application;
 
-    auto autoStartupCallback = [weak, abilityStage, abilityRecord, moduleName, callback]() {
+    auto autoStartupCallback = [weak, abilityStage, abilityRecord, callback]() {
         auto ohosApplication = weak.lock();
         if (ohosApplication == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null ohosApplication");
             return;
         }
+        if (abilityRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
+            return;
+        }
+
+        auto abilityInfo = abilityRecord->GetAbilityInfo();
+        if (abilityInfo == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
+            return;
+        }
+
+        std::string moduleName = abilityInfo->moduleName;
         ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
         if (callback == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null callback");
@@ -644,7 +653,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::GetAppContext() const
     return abilityRuntimeContext_;
 }
 
-const std::unique_ptr<AbilityRuntime::Runtime>& OHOSApplication::GetRuntime()
+const std::unique_ptr<AbilityRuntime::Runtime>& OHOSApplication::GetRuntime() const
 {
     return runtime_;
 }
