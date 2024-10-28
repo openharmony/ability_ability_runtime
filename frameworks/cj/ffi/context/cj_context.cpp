@@ -254,7 +254,7 @@ int64_t FfiContextCreateModuleContext(int64_t id, int32_t type, char* moduleName
     auto moduleContext = nativeContext->CreateModuleContext(std::string(moduleName));
     if (moduleContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        return -1;
+        return -ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
     auto cjContext = FFIData::Create<CJContext>(moduleContext);
     if (cjContext == nullptr) {
