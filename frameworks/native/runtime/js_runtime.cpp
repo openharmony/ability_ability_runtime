@@ -1280,7 +1280,7 @@ void JsRuntime::PreloadMainAbility(const std::string& moduleName, const std::str
 }
 
 void JsRuntime::PreloadModule(const std::string& moduleName, const std::string& srcPath,
-    std::string& hapPath, bool isEsMode, bool useCommonTrunk)
+    const std::string& hapPath, bool isEsMode, bool useCommonTrunk)
 {
     std::string key(moduleName);
     key.append("::");
