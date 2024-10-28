@@ -30,14 +30,14 @@ using namespace OHOS::AbilityRuntime;
 
 class CJContext : public FFI::FFIData {
 public:
-    explicit CJContext(std::weak_ptr<AbilityRuntime::Context> &&context)
-        : context_(std::move(context)) {};
+    explicit CJContext(std::shared_ptr<AbilityRuntime::Context> context)
+        : context_(context) {};
     std::shared_ptr<AbilityRuntime::Context> GetContext()
     {
-        return context_.lock();
+        return context_;
     }
 private:
-    std::weak_ptr<AbilityRuntime::Context> context_;
+    std::shared_ptr<AbilityRuntime::Context> context_;
 };
 
 extern "C" {
