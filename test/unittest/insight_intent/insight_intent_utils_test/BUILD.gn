@@ -22,10 +22,13 @@ ohos_unittest("insight_intent_utils_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "../../../cfi_blocklist.txt"
   }
 
   include_dirs = [
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",
   ]
@@ -34,7 +37,7 @@ ohos_unittest("insight_intent_utils_test") {
     "${ability_runtime_path}/frameworks/native/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
     "${ability_runtime_path}/interfaces/inner_api/deps_wrapper/src/os_account_manager_wrapper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_profile.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/ability_event_util.cpp",
     "insight_intent_utils_test.cpp",
   ]
 

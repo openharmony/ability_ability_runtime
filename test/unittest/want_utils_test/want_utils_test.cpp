@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "app_mgr_util.h"
 #include "want_utils.h"
 #include "hilog_tag_wrapper.h"
 

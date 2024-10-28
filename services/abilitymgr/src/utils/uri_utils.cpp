@@ -15,6 +15,7 @@
 
 #include "uri_utils.h"
 
+#include "ability_util.h"
 #include "ability_config.h"
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
@@ -32,7 +33,7 @@ namespace {
 const std::string PARAMS_URI = "ability.verify.uri";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 const int32_t MAX_URI_COUNT = 500;
-constexpr int32_t API14 = 14;
+constexpr int32_t API13 = 13;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr uint32_t TOKEN_ID_BIT_SIZE = 32;
 }
@@ -120,19 +121,27 @@ void UriUtils::FilterUriWithPermissionDms(Want &want, uint32_t tokenId)
 int32_t UriUtils::CheckNonImplicitShareFileUri(const Want &want, int32_t userId, uint32_t specifyTokenId)
 {
     auto element = want.GetElement();
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckNonImplicitShareFileUri, %{public}s-%{public}s",
+        element.GetBundleName().c_str(), element.GetAbilityName().c_str());
     if (element.GetBundleName().empty() || element.GetAbilityName().empty()) {
         return ERR_OK;
     }
-    auto flagReadWrite = Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION;
-    if ((want.GetFlags() & flagReadWrite) == 0) {
+    if (!IsGrantUriPermissionFlag(want)) {
         return ERR_OK;
     }
     bool isFileUri = (!want.GetUriString().empty() && want.GetUri().GetScheme() == "file");
     if (!isFileUri && want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM).empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not file uri");
         return ERR_OK;
     }
     // SA and system app support
     auto callerTokenId = specifyTokenId > 0 ? specifyTokenId : IPCSkeleton::GetCallingTokenID();
+    return CheckNonImplicitShareFileUriInner(callerTokenId, element.GetBundleName(), userId);
+}
+
+int32_t UriUtils::CheckNonImplicitShareFileUriInner(uint32_t callerTokenId, const std::string &targetBundleName,
+    int32_t userId)
+{
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "SA call");
@@ -148,8 +157,8 @@ int32_t UriUtils::CheckNonImplicitShareFileUri(const Want &want, int32_t userId,
         // check api version
         TAG_LOGD(AAFwkTag::ABILITYMGR, "CallerBundleName:%{public}s, API:%{public}d",
             hapInfo.bundleName.c_str(), hapInfo.apiVersion);
-        if ((hapInfo.apiVersion % API_VERSION_MOD) < API14) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "api version lower than 14");
+        if ((hapInfo.apiVersion % API_VERSION_MOD) < API13) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "api version lower than 13");
             return ERR_OK;
         }
         // check system app
@@ -159,8 +168,29 @@ int32_t UriUtils::CheckNonImplicitShareFileUri(const Want &want, int32_t userId,
             return ERR_OK;
         }
     }
-    TAG_LOGE(AAFwkTag::URIPERMMGR, "Not allowed to share file uri non-implicitly");
+    // target is system app
+    if (IsSystemApplication(targetBundleName, userId)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "target is system app");
+        return ERR_OK;
+    }
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "Not allowed to share file uri non-implicitly");
     return CHECK_PERMISSION_FAILED;
+}
+
+bool UriUtils::IsSystemApplication(const std::string &bundleName, int32_t userId)
+{
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    if (!bundleMgrHelper) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "GetBundleManagerHelper failed");
+        return false;
+    }
+    AppExecFwk::ApplicationInfo appInfo;
+    if (!IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, userId, appInfo))) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "GetApplicationInfo failed");
+        return false;
+    }
+    return appInfo.isSystemApp;
 }
 
 std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string> &uriVec,
@@ -273,7 +303,8 @@ void UriUtils::CheckUriPermissionForExtension(Want &want, uint32_t tokenId)
         TAG_LOGW(AAFwkTag::ABILITYMGR, "No file uri neet grant.");
         return;
     }
-    auto callerTokenId = tokenId > 0 ? tokenId : want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
+    auto callerTokenId = tokenId > 0 ?
+            tokenId : static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
     // check uri permission
     auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
         uriVec, flag, callerTokenId));

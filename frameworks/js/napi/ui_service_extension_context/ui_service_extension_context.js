@@ -14,6 +14,10 @@
  */
 
 let ExtensionContext = requireNapi('application.ExtensionContext');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 class UIServiceExtensionContext extends ExtensionContext {
   constructor(obj) {
@@ -21,27 +25,27 @@ class UIServiceExtensionContext extends ExtensionContext {
   }
 
   startAbility(want, options) {
-    console.log('startAbility');
+    hilog.sLogI(domainID, TAG, 'startAbility');
     return this.__context_impl__.startAbility(want, options);
   }
 
   terminateSelf() {
-    console.log('terminateSelf');
+    hilog.sLogI(domainID, TAG, 'terminateSelf');
     return this.__context_impl__.terminateSelf();
   }
 
   startAbilityByType(type, wantParam, abilityStartCallback) {
-    console.log('startAbilityByType');
+    hilog.sLogI(domainID, TAG, 'startAbilityByType');
     return this.__context_impl__.startAbilityByType(type, wantParam, abilityStartCallback);
   }
 
   connectServiceExtensionAbility(want, options) {
-    console.log('connectServiceExtensionAbility');
+    hilog.sLogI(domainID, TAG, 'connectServiceExtensionAbility');
     return this.__context_impl__.connectServiceExtensionAbility(want, options);
   }
 
   disconnectServiceExtensionAbility(connection, callback) {
-      console.log('disconnectServiceExtensionAbility');
+      hilog.sLogI(domainID, TAG, 'disconnectServiceExtensionAbility');
       return this.__context_impl__.disconnectServiceExtensionAbility(connection, callback);
   }
 }

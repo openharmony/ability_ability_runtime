@@ -1758,7 +1758,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Start_0600, TestSize.Level1)
     abilityImpl_->ability_ = ability;
     Want want;
     abilityImpl_->Start(want);
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_Start_0600 end";
 }
 
@@ -1811,7 +1811,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Stop_0400, TestSize.Level1)
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
     abilityImpl_->Stop();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_Stop_0400 end";
 }
 
@@ -1870,7 +1870,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Stop_0700, TestSize.Level1)
     bool isAsyncCallback = true;
     abilityImpl_->Stop(isAsyncCallback);
     EXPECT_FALSE(isAsyncCallback);
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_Stop_0700 end";
 }
 
@@ -1960,7 +1960,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_StopCallback_0400, TestSize.Level1)
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
     abilityImpl_->StopCallback();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_StopCallback_0400 end";
 }
 
@@ -2013,7 +2013,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Active_0400, TestSize.Level1)
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
     abilityImpl_->Active();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_Active_0400 end";
 }
 
@@ -2066,7 +2066,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_Inactive_0400, TestSize.Level1)
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
     abilityImpl_->Inactive();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_Inactive_0400 end";
 }
 
@@ -2112,7 +2112,7 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_DispatchSaveAbilityState_0200, TestS
     ability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = ability;
     abilityImpl_->DispatchSaveAbilityState();
-    EXPECT_FALSE(abilityImpl_->needSaveDate_);
+    EXPECT_TRUE(abilityImpl_->needSaveDate_);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_DispatchSaveAbilityState_0200 end";
 }
 

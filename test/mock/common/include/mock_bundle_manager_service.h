@@ -25,7 +25,9 @@
 #include "mock_overlay_manager.h"
 
 namespace OHOS {
+namespace {
 constexpr int32_t BASE_USER_RANGE = 200000;
+}
 class MockBundleManagerService : public IRemoteStub<AppExecFwk::IBundleMgr> {
 public:
     MockBundleManagerService() {};

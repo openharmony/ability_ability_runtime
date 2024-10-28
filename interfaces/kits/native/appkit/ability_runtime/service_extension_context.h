@@ -169,6 +169,8 @@ public:
     using SelfType = ServiceExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
 
+    ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
+
 protected:
     bool IsContext(size_t contextTypeId) override
     {

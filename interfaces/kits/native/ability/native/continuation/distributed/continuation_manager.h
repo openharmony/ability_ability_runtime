@@ -77,7 +77,8 @@ public:
     enum OnContinueResult {
         AGREE = 0,
         REJECT = 1,
-        MISMATCH = 2
+        MISMATCH = 2,
+        ON_CONTINUE_ERR = 10,
     };
 private:
     enum ProgressState { INITIAL, WAITING_SCHEDULE, IN_PROGRESS };

@@ -14,18 +14,22 @@
  */
 
 let ExtensionAbility = requireNapi('app.ability.ExtensionAbility');
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
 
 class UIExtensionAbility extends ExtensionAbility {
   onCreate(launchParam, want) {
-    console.log('onCreate');
+    hilog.sLogI(domainID, TAG, 'onCreate');
   }
 
   onRequest(want, startId) {
-    console.log('onRequest, want:' + want.abilityName + ', startId:' + startId);
+    hilog.sLogI(domainID, TAG, 'onRequest, want:' + want.abilityName + ', startId:' + startId);
   }
 
   onDestroy() {
-    console.log('onDestroy');
+    hilog.sLogI(domainID, TAG, 'onDestroy');
   }
 }
 

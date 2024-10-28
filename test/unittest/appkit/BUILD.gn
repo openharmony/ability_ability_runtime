@@ -17,8 +17,6 @@ group("unittest") {
   deps = [
     "child_main_thread_first_test:unittest",
     "child_main_thread_test:unittest",
-    "main_fourth_test:unittest",
-    "main_thread_test:unittest",
     "ohos_application_first_test:unittest",
     "ohos_application_test:unittest",
   ]

@@ -28,6 +28,7 @@ config("upms_config") {
 }
 
 libupms_sources = [
+  "src/batch_uri.cpp",
   "src/file_permission_manager.cpp",
   "src/media_permission_manager.cpp",
   "src/tokenid_permission.cpp",

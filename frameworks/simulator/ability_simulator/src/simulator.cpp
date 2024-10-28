@@ -27,6 +27,7 @@
 #include "bundle_container.h"
 #include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
 #include "commonlibrary/ets_utils/js_sys_module/console/console.h"
+#include "declarative_module_preloader.h"
 #include "hilog_tag_wrapper.h"
 #include "js_ability_context.h"
 #include "js_ability_stage_context.h"
@@ -55,6 +56,7 @@ constexpr size_t DEFAULT_GC_THREAD_NUM = 7;
 constexpr size_t DEFAULT_LONG_PAUSE_TIME = 40;
 
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
+constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
 const std::string PACKAGE_NAME = "packageName";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
@@ -125,6 +127,7 @@ private:
     void LoadJsMock(const std::string &fileName);
     void ReportJsError(napi_value obj);
     std::string GetNativeStrFromJsTaggedObj(napi_value obj, const char* key);
+    void CreateStageContext();
 
     panda::ecmascript::EcmaVM *CreateJSVM();
     Options options_;
@@ -133,6 +136,7 @@ private:
     DebuggerTask debuggerTask_;
     napi_env nativeEngine_ = nullptr;
     TerminateCallback terminateCallback_;
+    bool isOhmUrl_ = false;
 
     int64_t currentId_ = 0;
     std::unordered_map<int64_t, std::shared_ptr<NativeReference>> abilities_;
@@ -243,7 +247,13 @@ void CallObjectMethod(napi_env env, napi_value obj, const char *name, napi_value
 
 napi_value SimulatorImpl::LoadScript(const std::string &srcPath)
 {
-    panda::Local<panda::ObjectRef> objRef = panda::JSNApi::GetExportObject(vm_, srcPath, "default");
+    panda::Local<panda::ObjectRef> objRef;
+    if (isOhmUrl_) {
+        objRef = panda::JSNApi::GetExportObjectFromOhmUrl(vm_, srcPath, "default");
+    } else {
+        objRef = panda::JSNApi::GetExportObject(vm_, srcPath, "default");
+    }
+
     if (objRef->IsNull()) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "Get export object failed");
         return nullptr;
@@ -312,7 +322,7 @@ bool SimulatorImpl::ParseAbilityInfo(const std::string &abilitySrcPath, const st
         abilityInfo_ = AppExecFwk::BundleContainer::GetInstance().GetAbilityInfo(
             options_.moduleName, abilityNameFromPath);
     }
-    
+
     if (abilityInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "ability info parse failed");
         return false;
@@ -332,14 +342,7 @@ int64_t SimulatorImpl::StartAbility(
         return -1;
     }
 
-    if (stageContext_ == nullptr) {
-        stageContext_ = std::make_shared<AbilityStageContext>();
-        stageContext_->SetOptions(options_);
-        stageContext_->SetConfiguration(options_.configuration);
-        stageContext_->SetApplicationInfo(appInfo_);
-        stageContext_->SetHapModuleInfo(moduleInfo_);
-    }
-
+    CreateStageContext();
     std::ifstream stream(options_.modulePath, std::ios::ate | std::ios::binary);
     if (!stream.is_open()) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "open:%{public}s failed", options_.modulePath.c_str());
@@ -358,13 +361,24 @@ int64_t SimulatorImpl::StartAbility(
         return -1;
     }
 
-    abilityPath_ = BUNDLE_INSTALL_PATH + options_.moduleName + "/" + abilitySrcPath;
-    if (!reinterpret_cast<NativeEngine*>(nativeEngine_)->RunScriptBuffer(abilityPath_, buf, len, false)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "run script:%{public}s failed", abilityPath_.c_str());
-        return -1;
+    isOhmUrl_ = panda::JSNApi::IsOhmUrl(abilitySrcPath);
+    napi_value instanceValue = nullptr;
+    if (isOhmUrl_) {
+        std::string srcFilename = "";
+        srcFilename = BUNDLE_INSTALL_PATH + options_.moduleName + MERGE_ABC_PATH;
+        if (!panda::JSNApi::ExecuteSecureWithOhmUrl(vm_, buf, len, srcFilename, abilitySrcPath)) {
+            return -1;
+        }
+        instanceValue = LoadScript(abilitySrcPath);
+    } else {
+        abilityPath_ = BUNDLE_INSTALL_PATH + options_.moduleName + "/" + abilitySrcPath;
+        if (!reinterpret_cast<NativeEngine*>(nativeEngine_)->RunScriptBuffer(abilityPath_, buf, len, false)) {
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "run script:%{public}s failed", abilityPath_.c_str());
+            return -1;
+        }
+        instanceValue = LoadScript(abilityPath_);
     }
 
-    napi_value instanceValue = LoadScript(abilityPath_);
     if (instanceValue == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "create object instance failed");
         return -1;
@@ -715,6 +729,7 @@ bool SimulatorImpl::OnInit()
         self->terminateCallback_(self->currentId_);
     };
     nativeEngine->RegisterNapiUncaughtExceptionHandler(uncaughtTask);
+    Ace::DeclarativeModulePreloader::Preload(*nativeEngine);
 
     napi_value globalObj;
     napi_get_global(env, &globalObj);
@@ -984,6 +999,17 @@ void SimulatorImpl::ReportJsError(napi_value obj)
     }
     summary += "Stacktrace:\n" + errorStack;
     TAG_LOGE(AAFwkTag::ABILITY_SIM, "summary:\n%{public}s", summary.c_str());
+}
+
+void SimulatorImpl::CreateStageContext()
+{
+    if (stageContext_ == nullptr) {
+        stageContext_ = std::make_shared<AbilityStageContext>();
+        stageContext_->SetOptions(options_);
+        stageContext_->SetConfiguration(options_.configuration);
+        stageContext_->SetApplicationInfo(appInfo_);
+        stageContext_->SetHapModuleInfo(moduleInfo_);
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
+
 class EnvironmentCallback {
   constructor() {}
 
   onConfigurationUpdated(config) {
-    console.log('onConfigurationUpdated');
+    hilog.sLogI(domainID, TAG, 'onConfigurationUpdated');
   }
 
   onMemoryLevel(level) {
-    console.log('onMemoryLevel');
+    hilog.sLogI(domainID, TAG, 'onMemoryLevel');
   }
 }
 
