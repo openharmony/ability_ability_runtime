@@ -1576,6 +1576,7 @@ void AppMgrServiceInner::SendProcessExitEventTask(
     eventInfo.pid = pid;
     eventInfo.processName = appRecord->GetProcessName();
     eventInfo.extensionType = static_cast<int32_t>(appRecord->GetExtensionType());
+    eventInfo.exitReason = appRecord->GetExitReason();
 
     if (exitResult) {
         eventInfo.exitResult = EXIT_SUCESS;

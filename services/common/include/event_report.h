@@ -55,6 +55,7 @@ struct EventInfo {
     int64_t duration = 0;
     int32_t reason = -1;
     int32_t subReason = -1;
+    int32_t exitReason = -1;
 };
 
 enum class EventName {
