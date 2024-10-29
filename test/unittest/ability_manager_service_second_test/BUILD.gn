@@ -78,5 +78,5 @@ ohos_unittest("ability_manager_service_second_test") {
 
 group("unittest") {
   testonly = true
-  deps = []
+  deps = [ ":ability_manager_service_second_test" ]
 }

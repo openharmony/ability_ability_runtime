@@ -790,7 +790,7 @@ public:
     }
 
     virtual sptr<IWantSender> GetWantSender(
-        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) = 0;
+        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid = -1) = 0;
 
     virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) = 0;
 
@@ -1705,6 +1705,19 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t TerminateMission(int32_t missionId)
+    {
+        return 0;
+    }
+
+    /**
+     * update associate config list by rss.
+     *
+     * @param configs The rss config info.
+     * @param exportConfigs The rss export config info.
+     * @param flag UPDATE_CONFIG_FLAG_COVER is cover config, UPDATE_CONFIG_FLAG_APPEND is append config.
+     */
+    virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag)
     {
         return 0;
     }

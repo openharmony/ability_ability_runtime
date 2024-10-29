@@ -43,6 +43,23 @@ const std::string HTTP_SCHEME_NAME = "http";
 const std::string HTTPS_SCHEME_NAME = "https";
 const std::string APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 
+void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
+{
+    auto instance_ = DelayedSingleton<AbilityManagerService>::GetInstance();
+    if (instance_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "instance null.");
+        return;
+    }
+    auto taskHandler = instance_->GetTaskHandler();
+    if (taskHandler == nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "task handler null.");
+        return;
+    }
+    taskHandler->SubmitTask([eventName, type, eventInfo]() {
+        EventReport::SendAbilityEvent(eventName, type, eventInfo);
+    });
+}
+
 bool ImplicitStartProcessor::IsExtensionInWhiteList(AppExecFwk::ExtensionAbilityType type)
 {
     switch (type) {
@@ -202,6 +219,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         ret = abilityMgr->StartAbility(request.want, request.callerToken);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
+        int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
+            static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
+        AddIdentity(tokenId, identity);
         return ret;
     }
 
@@ -433,7 +453,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<AppExecFwk::AbilityInfo> implicitAbilityInfos;
     std::vector<AppExecFwk::ExtensionAbilityInfo> implicitExtensionInfos;
     std::vector<std::string> infoNames;
-    if (!AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
+    if (!AppUtils::GetInstance().IsSelectorDialogDefaultPossion() && isMoreHapList) {
         IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->ImplicitQueryInfos(implicitwant, abilityInfoFlag, userId,
             withDefault, implicitAbilityInfos, implicitExtensionInfos));
         if (implicitAbilityInfos.size() != 0 && typeName != TYPE_ONLY_MATCH_WILDCARD) {
@@ -447,10 +467,18 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     if (abilityInfos.size() == 1) {
         auto skillUri =  abilityInfos.front().skillUri;
         SetTargetLinkInfo(skillUri, request.want);
+        if (abilityInfos.front().linkType == AppExecFwk::LinkType::APP_LINK) {
+            EventInfo eventInfo;
+            eventInfo.bundleName = abilityInfos.front().bundleName;
+            eventInfo.callerBundleName = request.want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+            eventInfo.uri = request.want.GetUriString();
+            SendAbilityEvent(EventName::START_ABILITY_BY_APP_LINKING, HiSysEventType::BEHAVIOR, eventInfo);
+        }
     }
 
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "for (const auto &info : abilityInfos)");
+        bool isExistDefaultApp = IsExistDefaultApp(userId, typeName);
         for (const auto &info : abilityInfos) {
             AddInfoParam param = {
                 .info = info,
@@ -459,7 +487,8 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
                 .isMoreHapList = isMoreHapList,
                 .withDefault = withDefault,
                 .typeName = typeName,
-                .infoNames = infoNames
+                .infoNames = infoNames,
+                .isExistDefaultApp = isExistDefaultApp
             };
             AddAbilityInfoToDialogInfos(param, dialogAppInfos);
         }
@@ -669,7 +698,7 @@ int ImplicitStartProcessor::CallStartAbilityInner(int32_t userId,
     eventInfo.abilityName = want.GetElement().GetAbilityName();
 
     if (callType == AbilityCallType::INVALID_TYPE) {
-        EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+        SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s, bundle:%{public}s", eventInfo.abilityName.c_str(),
@@ -679,7 +708,7 @@ int ImplicitStartProcessor::CallStartAbilityInner(int32_t userId,
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         if (callType == AbilityCallType::INVALID_TYPE) {
-            EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+            SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         }
     }
     return ret;
@@ -713,12 +742,6 @@ bool ImplicitStartProcessor::FilterAbilityList(const Want &want, std::vector<App
 {
     ErmsCallerInfo callerInfo;
     GetEcologicalCallerInfo(want, callerInfo, userId);
-    int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->
-        EvaluateResolveInfos(want, callerInfo, 0, abilityInfos, extensionInfos));
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to evaluate resolve infos from erms.");
-        return false;
-    }
     return true;
 }
 
@@ -785,12 +808,25 @@ void ImplicitStartProcessor::AddIdentity(int32_t tokenId, std::string identity)
     identityList_.emplace_back(IdentityNode(tokenId, identity));
 }
 
-void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId)
+void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId, bool flag)
 {
     std::lock_guard guard(identityListLock_);
     for (auto it = identityList_.begin(); it != identityList_.end(); it++) {
         if (it->tokenId == tokenId) {
             IPCSkeleton::SetCallingIdentity(it->identity);
+            if (flag) {
+                identityList_.erase(it);
+            }
+            return;
+        }
+    }
+}
+
+void ImplicitStartProcessor::RemoveIdentity(int32_t tokenId)
+{
+    std::lock_guard guard(identityListLock_);
+    for (auto it = identityList_.begin(); it != identityList_.end(); it++) {
+        if (it->tokenId == tokenId) {
             identityList_.erase(it);
             return;
         }
@@ -804,7 +840,7 @@ void ImplicitStartProcessor::AddAbilityInfoToDialogInfos(const AddInfoParam &par
         return;
     }
     if (!AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
-        bool isDefaultFlag = param.withDefault && IsExistDefaultApp(param.userId, param.typeName);
+        bool isDefaultFlag = param.withDefault && param.isExistDefaultApp;
         if (!param.isMoreHapList && !isDefaultFlag &&
             std::find(param.infoNames.begin(), param.infoNames.end(),
             (param.info.bundleName + "#" + param.info.moduleName + "#" + param.info.name)) != param.infoNames.end()) {

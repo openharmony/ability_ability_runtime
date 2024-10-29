@@ -23,8 +23,8 @@
 #include "ui_extension_utils.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
-#include "cache_process_manager.h"
 #include "window_visibility_info.h"
+#include "cache_process_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -517,11 +517,11 @@ void AppRunningRecord::AddAbilityStage()
     }
 }
 
-void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
+bool AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
 {
     if (!eventHandler_) {
         TAG_LOGE(AAFwkTag::APPMGR, "eventHandler_ null");
-        return;
+        return false;
     }
 
     HapModuleInfo hapModuleInfo;
@@ -534,10 +534,12 @@ void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
         }
         if (appLifeCycleDeal_ == nullptr) {
             TAG_LOGW(AAFwkTag::APPMGR, "appLifeCycleDeal_ null");
-            return;
+            return false;
         }
         appLifeCycleDeal_->AddAbilityStage(hapModuleInfo);
+        return true;
     }
+    return false;
 }
 
 void AppRunningRecord::AddAbilityStageBySpecifiedProcess(const std::string &bundleName)
@@ -2012,7 +2014,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
         if (!windowIds_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         }
-        if (windowIds_.empty() && IsAbilitytiesBackground()) {
+        if (windowIds_.empty() && IsAbilitytiesBackground() && foregroundingAbilityTokens_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
         }
     }
@@ -2343,6 +2345,18 @@ bool AppRunningRecord::SetSupportedProcessCache(bool isSupport)
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
     procCacheSupportState_ = isSupport ? SupportProcessCacheState::SUPPORT : SupportProcessCacheState::NOT_SUPPORT;
     return true;
+}
+
+bool AppRunningRecord::SetEnableProcessCache(bool enable)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    enableProcessCache_ = enable;
+    return true;
+}
+
+bool AppRunningRecord::GetEnableProcessCache()
+{
+    return enableProcessCache_;
 }
 
 SupportProcessCacheState AppRunningRecord::GetSupportProcessCacheState()

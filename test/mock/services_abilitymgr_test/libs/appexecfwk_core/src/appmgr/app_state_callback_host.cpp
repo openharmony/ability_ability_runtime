@@ -49,6 +49,11 @@ void AppStateCallbackHost::NotifyStartResidentProcess(std::vector<AppExecFwk::Bu
     TAG_LOGD(AAFwkTag::TEST, "NotifyStartResidentProcess called");
 }
 
+void AppStateCallbackHost::NotifyAppPreCache(int32_t pid, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::TEST, "NotifyAppPreCache called");
+}
+
 int32_t AppStateCallbackHost::HandleOnAppStateChanged(MessageParcel& data, MessageParcel& reply)
 {
     return NO_ERROR;
@@ -60,6 +65,11 @@ int32_t AppStateCallbackHost::HandleOnAbilityRequestDone(MessageParcel& data, Me
 }
 
 int32_t AppStateCallbackHost::HandleNotifyStartResidentProcess(MessageParcel &data, MessageParcel &reply)
+{
+    return NO_ERROR;
+}
+
+int32_t AppStateCallbackHost::HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply)
 {
     return NO_ERROR;
 }

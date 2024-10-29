@@ -24,6 +24,7 @@ config("module_private_config") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
@@ -93,7 +94,6 @@ ohos_unittest("application_test") {
   include_dirs = [
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/common/include",
-    "${resource_management_path}/frameworks/resmgr/include",
   ]
 
   sources = [
@@ -523,7 +523,6 @@ ohos_unittest("bms_context_impl_test") {
   branch_protector_ret = "pac_ret"
   include_dirs = [
     "${ability_runtime_services_path}/common/include",
-    "${resource_management_path}/frameworks/resmgr/include",
     "${ability_runtime_test_path}/mock/common/include",
   ]
 

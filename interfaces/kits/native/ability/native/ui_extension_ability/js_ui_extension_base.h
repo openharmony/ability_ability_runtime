@@ -95,6 +95,11 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnStop() override;
+    void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) override;
+    /**
+     * @brief The callback of OnStop.
+     */
+    void OnStopCallBack() override;
 
     /**
      * @brief Called when the system configuration is updated.
@@ -153,7 +158,10 @@ public:
 
     void BindContext() override;
 protected:
-    napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0);
+    napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
+        bool withResult = false);
+    bool CheckPromise(napi_value result);
+    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
     void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
     void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);

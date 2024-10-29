@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,20 +20,20 @@ extern const char _binary_service_extension_ability_js_end[];
 extern const char _binary_service_extension_ability_abc_start[];
 extern const char _binary_service_extension_ability_abc_end[];
 
-#ifdef ENABLE_ERRCODE
+#ifndef ENABLE_ERRCODE
 static napi_module _module = {
     .nm_version = 0,
-    .nm_filename = "app/ability/libserviceextensionability.so/service_extension_ability.js",
-    .nm_modname = "app.ability.ServiceExtensionAbility",
+    .nm_filename = "application/libserviceextensionability_napi.so/service_extension_ability.js",
+    .nm_modname = "application.ServiceExtensionAbility",
 };
 extern "C" __attribute__((constructor))
-void NAPI_app_ability_ServiceExtensionAbility_AutoRegister()
+void NAPI_application_ServiceExtensionAbility_AutoRegister()
 {
     napi_module_register(&_module);
 }
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_app_ability_ServiceExtensionAbility_GetJSCode(const char **buf, int *bufLen)
+void NAPI_application_ServiceExtensionAbility_GetJSCode(const char **buf, int *bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_service_extension_ability_js_start;
@@ -45,7 +45,7 @@ void NAPI_app_ability_ServiceExtensionAbility_GetJSCode(const char **buf, int *b
 }
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_app_ability_ServiceExtensionAbility_GetABCCode(const char **buf, int *buflen)
+void NAPI_application_ServiceExtensionAbility_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_service_extension_ability_abc_start;

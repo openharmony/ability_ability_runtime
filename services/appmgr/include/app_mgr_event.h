@@ -57,9 +57,6 @@ private:
 
     static void UpdateStartupType(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &abilityType,
         int32_t &extensionType);
-
-    static void UpdateCallerInfo(AAFwk::EventInfo &eventInfo, std::shared_ptr<AppRunningRecord> callerAppRecord,
-        std::shared_ptr<AppRunningRecord> appRecord);
 };
 }
 }

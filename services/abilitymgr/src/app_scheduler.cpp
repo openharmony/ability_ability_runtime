@@ -160,7 +160,7 @@ void AppScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, con
 
 void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Kill process by ability token.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process by ability token.");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->KillProcessByAbilityToken(token);
 }
@@ -237,6 +237,13 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     callback->OnAppRemoteDied(abilityTokens);
 }
 
+void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->NotifyAppPreCache(pid, userId);
+}
+
 int AppScheduler::KillApplication(const std::string &bundleName)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
@@ -277,11 +284,12 @@ int AppScheduler::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
     return ERR_OK;
 }
 
-int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t uid)
+int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t uid,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int ret = (int)appMgrClient_->KillApplicationByUid(bundleName, uid);
+    int ret = (int)appMgrClient_->KillApplicationByUid(bundleName, uid, reason);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to kill application by uid.");
         return INNER_ERR;
@@ -634,6 +642,7 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     }
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
 }
+
 bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     if (!appMgrClient_) {
@@ -642,7 +651,6 @@ bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
     }
     return appMgrClient_->IsProcessContainsOnlyUIAbility(pid);
 }
-
 bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
 {
     if (!appMgrClient_) {
@@ -650,6 +658,15 @@ bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
         return false;
     }
     return appMgrClient_->IsProcessAttached(token);
+}
+
+void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return;
+    }
+    appMgrClient_->SetSupportedProcessCache(pid, isSupport);
 }
 } // namespace AAFwk
 }  // namespace OHOS

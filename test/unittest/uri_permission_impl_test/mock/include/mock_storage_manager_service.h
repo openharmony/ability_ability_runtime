@@ -60,7 +60,7 @@ public:
     {
         return E_OK;
     }
-    
+
     virtual int32_t GetFreeSizeOfVolume(std::string volumeUuid, int64_t &freeSize) override
     {
         return E_OK;
@@ -71,7 +71,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetBundleStats(std::string pkgName, BundleStats &bundleStats, int32_t appIndex) override
+    virtual int32_t GetBundleStats(std::string pkgName, BundleStats &bundleStats, int32_t) override
     {
         return E_OK;
     }

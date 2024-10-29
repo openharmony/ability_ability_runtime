@@ -56,7 +56,7 @@ public:
         }
     };
 
-    void SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery = false);
+    void SignRestartAppFlag(int32_t uid, bool isAppRecovery = false);
 
     /**
      * StartUIAbility with request.
@@ -157,6 +157,8 @@ public:
 
     int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
         sptr<SessionInfo> &sessionInfo);
+
+    int32_t NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest);
 
     /**
      * @brief handle time out event
@@ -355,7 +357,7 @@ public:
     void NotifySCBToHandleAtomicServiceException(sptr<SessionInfo> sessionInfo, int32_t errorCode,
         const std::string& errorReason);
 
-    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool forceKill);
 
     void EnableListForSCBRecovery();
 

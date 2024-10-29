@@ -44,6 +44,10 @@ public:
 
     virtual void OnStop() = 0;
 
+    virtual void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) = 0;
+
+    virtual void OnStopCallBack() = 0;
+
     virtual void OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo) = 0;
 
     virtual void OnBackground() = 0;
