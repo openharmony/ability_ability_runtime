@@ -118,7 +118,10 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
         return;
     }
 
-    amsHandler_->SubmitTask(loadAbilityFunc);
+    amsHandler_->SubmitTask(loadAbilityFunc, AAFwk::TaskAttribute{
+            .taskName_ = TASK_LOAD_ABILITY,
+            .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE,
+        });
 }
 
 void AmsMgrScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state)
@@ -300,7 +303,7 @@ void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
     auto task = [amsMgrServiceInner = amsMgrServiceInner_, token]() {
         amsMgrServiceInner->HandleAbilityAttachTimeOut(token);
     };
-    amsHandler_->SubmitTask(task);
+    amsHandler_->SubmitTask(task, "AbilityAttachTimeOut");
 }
 
 void AmsMgrScheduler::PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag)
@@ -315,7 +318,10 @@ void AmsMgrScheduler::PrepareTerminate(const sptr<IRemoteObject> &token, bool cl
         return;
     }
     auto task = [=]() { amsMgrServiceInner_->PrepareTerminate(token, clearMissionFlag); };
-    amsHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+    amsHandler_->SubmitTask(task, {
+        .taskName_ = "PrepareTerminate",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
@@ -421,7 +427,10 @@ void AmsMgrScheduler::StartSpecifiedAbility(const AAFwk::Want &want, const AppEx
         return;
     }
     auto task = [=]() { amsMgrServiceInner_->StartSpecifiedAbility(want, abilityInfo, requestId); };
-    amsHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+    amsHandler_->SubmitTask(task, {
+        .taskName_ = "StartSpecifiedAbility",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 void AmsMgrScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
@@ -437,7 +446,10 @@ void AmsMgrScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppEx
         return;
     }
     auto task = [=]() { amsMgrServiceInner_->StartSpecifiedProcess(want, abilityInfo, requestId); };
-    amsHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+    amsHandler_->SubmitTask(task, {
+        .taskName_ = "StartSpecifiedProcess",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 void AmsMgrScheduler::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response)
@@ -450,7 +462,7 @@ void AmsMgrScheduler::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpe
         return;
     }
     auto task = [=]() { amsMgrServiceInner_->RegisterStartSpecifiedAbilityResponse(response); };
-    amsHandler_->SubmitTask(task);
+    amsHandler_->SubmitTask(task, "RegisterStartSpecifiedAbilityResponse");
 }
 
 int AmsMgrScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug)

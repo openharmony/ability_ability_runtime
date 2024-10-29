@@ -50,7 +50,7 @@ void WindowPidVisibilityChangedListener::NotifyWindowPidVisibilityChanged(
         }
         serviceInner->HandleWindowPidVisibilityChanged(windowPidVisibilityInfo);
     };
-    taskHandler_->SubmitTask(task);
+    taskHandler_->SubmitTask(task, "NotifyWindowPidVisibilityChanged");
 }
 #endif // SUPPORT_SCREEN
 } // namespace AppExecFwk
