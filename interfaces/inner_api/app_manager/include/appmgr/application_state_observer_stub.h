@@ -38,7 +38,7 @@ public:
     /**
      * Application foreground state changed callback.
      *
-     * @param appStateData Application Process data.
+     * @param appStateData Application state data.
      */
     virtual void OnForegroundApplicationChanged(const AppStateData &appStateData) override;
 
