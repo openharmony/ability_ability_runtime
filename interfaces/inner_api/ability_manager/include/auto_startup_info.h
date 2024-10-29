@@ -44,7 +44,7 @@ public:
 };
 
 struct AutoStartupStatus {
-    int32_t code;
+    int32_t code = 0;
     bool isAutoStartup = false;
     bool isEdmForce = false;
 };

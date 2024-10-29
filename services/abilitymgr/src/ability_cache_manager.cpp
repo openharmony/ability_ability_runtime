@@ -46,11 +46,7 @@ void AbilityCacheManager::RemoveAbilityRecInDevList(std::shared_ptr<AbilityRecor
     auto it = devRecLru_.begin();
     uint32_t accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
     while (it != devRecLru_.end()) {
-        if (!*it) {
-            it++;
-            continue;
-        }
-        if ((*it)->GetRecordId() == abilityRecord->GetRecordId()) {
+        if ((*it) && (*it)->GetRecordId() == abilityRecord->GetRecordId()) {
             devRecLru_.erase(it);
             devLruCnt_--;
             return;
@@ -74,11 +70,7 @@ void AbilityCacheManager::RemoveAbilityRecInProcList(std::shared_ptr<AbilityReco
     auto it = findProcInfo->second.recList.begin();
 
     while (it != findProcInfo->second.recList.end()) {
-        if (!*it) {
-            it++;
-            continue;
-        }
-        if ((*it)->GetRecordId() == abilityRecord->GetRecordId()) {
+        if ((*it) && (*it)->GetRecordId() == abilityRecord->GetRecordId()) {
             findProcInfo->second.recList.erase(it);
             findProcInfo->second.cnt--;
             if (findProcInfo->second.cnt == 0) {
@@ -214,12 +206,7 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::FindRecordByToken(const sptr
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = devRecLru_.begin();
     while (it != devRecLru_.end()) {
-        if (!*it) {
-            it++;
-            continue;
-        }
-        sptr<IRemoteObject> srcToken = (*it)->GetToken();
-        if (srcToken == token) {
+        if ((*it) && (*it)->GetToken() == token) {
             std::shared_ptr<AbilityRecord> &abilityRecord = *it;
             TAG_LOGD(AAFwkTag::ABILITYMGR,
                 "Find the ability by token from lru, service:%{public}s, extension type %{public}d",
