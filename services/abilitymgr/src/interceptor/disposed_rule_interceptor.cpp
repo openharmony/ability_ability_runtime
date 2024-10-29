@@ -15,7 +15,7 @@
 
 #include "interceptor/disposed_rule_interceptor.h"
 
-#include "ability_record.h"
+#include "ability_manager_service.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
@@ -250,13 +250,29 @@ ErrCode DisposedRuleInterceptor::CreateModalUIExtension(const Want &want, const 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (abilityRecord == nullptr) {
+    if (abilityRecord == nullptr || ShouldModalSystemUIExtension(abilityRecord, callerToken)) {
         auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
         (const_cast<Want &>(want)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
         return IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want)) ? ERR_OK : INNER_ERR;
     } else {
         return abilityRecord->CreateModalUIExtension(want);
     }
+}
+
+bool DisposedRuleInterceptor::ShouldModalSystemUIExtension(std::shared_ptr<AAFwk::AbilityRecord> abilityRecord,
+    sptr<IRemoteObject> callerToken)
+{
+    CHECK_POINTER_AND_RETURN(abilityRecord, true);
+    if (abilityRecord->GetAbilityInfo().type != AppExecFwk::AbilityType::PAGE) {
+        return true;
+    }
+    sptr<IRemoteObject> topToken = nullptr;
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->GetTopAbility(topToken));
+    if (ret != ERR_OK) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "GetTopAbility fail:%{public}d", ret);
+        return true;
+    }
+    return topToken != callerToken;
 }
 
 void DisposedRuleInterceptor::SetInterceptInfo(const Want &want, AppExecFwk::DisposedRule &disposedRule)
