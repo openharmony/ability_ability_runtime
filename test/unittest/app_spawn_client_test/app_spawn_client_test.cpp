@@ -18,6 +18,7 @@
 #define private public
 #include "app_spawn_client.h"
 #undef private
+#include "app_spawn_client.cpp"
 
 using namespace testing;
 using namespace testing::ext;
@@ -82,5 +83,887 @@ HWTEST_F(AppSpawnClientTest, SendAppSpawnUninstallDebugHapMsg_001, TestSize.Leve
     auto ret = appSpawnClient->SendAppSpawnUninstallDebugHapMsg(userId);
     ASSERT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: AppSpawnClient_002
+ * @tc.desc: new AppSpawnClient object
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_002 start");
+    const char* serviceName = "cjappspawn";
+    auto asc = std::make_shared<AppSpawnClient>(serviceName);
+    auto ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_002 end");
+}
+
+/**
+ * @tc.name: AppSpawnClient_003
+ * @tc.desc: new AppSpawnClient object
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_003, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_003 start");
+    const char* serviceName = "nwebRestart";
+    auto asc = std::make_shared<AppSpawnClient>(serviceName);
+    auto ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_003 end");
+}
+
+/**
+ * @tc.name: AppSpawnClient_004
+ * @tc.desc: new AppSpawnClient object
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_004, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_004 start");
+    const char* serviceName = "nativespawn";
+    auto asc = std::make_shared<AppSpawnClient>(serviceName);
+    auto ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_004 end");
+}
+
+/**
+ * @tc.name: AppSpawnClient_005
+ * @tc.desc: new AppSpawnClient object
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, AppSpawnClient_005, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_005 start");
+    const char* serviceName = "nwebspawn";
+    auto asc = std::make_shared<AppSpawnClient>(serviceName);
+    auto ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppSpawnClient_005 end");
+}
+
+/**
+ * @tc.name: OpenConnection_001
+ * @tc.desc: appspawn OpenConnection
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, OpenConnection_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 start");
+    auto asc = std::make_shared<AppSpawnClient>(true);
+    auto ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 end");
+}
+
+/**
+ * @tc.name: OpenConnection_002
+ * @tc.desc: appspawn OpenConnection
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, OpenConnection_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 start");
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    auto ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 end");
+}
+
+/**
+ * @tc.name: CloseConnection_001
+ * @tc.desc: appspawn CloseConnection
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, CloseConnection_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 start");
+    auto asc = std::make_shared<AppSpawnClient>(true);
+    auto ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 end");
+}
+
+/**
+ * @tc.name: CloseConnection_002
+ * @tc.desc: appspawn CloseConnection
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, CloseConnection_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 start");
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    auto ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "OpenConnection_001 end");
+}
+
+/**
+ * @tc.name: SetDacInfo_001
+ * @tc.desc: appspawn SetDacInfo
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetDacInfo_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetDacInfo_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetDacInfo(startMsg, reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "SetDacInfo_001 end");
+}
+
+/**
+ * @tc.name: SetMountPermission_001
+ * @tc.desc: appspawn SetMountPermission
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetMountPermission_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetMountPermission_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetMountPermission(startMsg, reqHandle);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "SetMountPermission_001 end");
+}
+
+/**
+ * @tc.name: SetStartFlags_001
+ * @tc.desc: appspawn SetStartFlags
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetStartFlags_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetStartFlags_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetStartFlags(startMsg, reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "SetStartFlags_001 end");
+}
+
+
+/**
+ * @tc.name: AppspawnSetExtMsgMore_001
+ * @tc.desc: appspawn AppspawnSetExtMsgMore
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, AppspawnSetExtMsgMore_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppspawnSetExtMsgMore_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->AppspawnSetExtMsgMore(startMsg, reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AppspawnSetExtMsgMore_001 end");
+}
+
+
+/**
+ * @tc.name: AppspawnCreateDefaultMsg_001
+ * @tc.desc: appspawn AppspawnCreateDefaultMsg
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, AppspawnCreateDefaultMsg_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppspawnCreateDefaultMsg_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string apl("test_apl");
+    startMsg.apl = apl;
+    std::string ownerId("test_owner_id");
+    startMsg.ownerId = ownerId;
+    std::string bundleName("test_bundle_name");
+    startMsg.bundleName = bundleName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->AppspawnCreateDefaultMsg(startMsg, reqHandle);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AppspawnCreateDefaultMsg_001 end");
+}
+
+
+/**
+ * @tc.name: VerifyMsg_001
+ * @tc.desc: appspawn VerifyMsg
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, VerifyMsg_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    bool result = false;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, true);
+
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_001 end");
+}
+
+/**
+ * @tc.name: VerifyMsg_002
+ * @tc.desc: appspawn VerifyMsg
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, VerifyMsg_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_002 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = -1;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    bool result = false;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_002 end");
+}
+
+/**
+ * @tc.name: VerifyMsg_003
+ * @tc.desc: appspawn VerifyMsg
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, VerifyMsg_003, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_003 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = -1;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    bool result = false;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_003 end");
+}
+
+/**
+ * @tc.name: VerifyMsg_004
+ * @tc.desc: appspawn VerifyMsg
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, VerifyMsg_004, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_004 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003, -1};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    bool result = false;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_004 end");
+}
+
+/**
+ * @tc.name: VerifyMsg_005
+ * @tc.desc: appspawn VerifyMsg
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, VerifyMsg_005, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_005 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002};
+    std::string procName("");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    bool result = false;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_005 end");
+}
+
+/**
+ * @tc.name: SetChildProcessTypeStartFlag_001
+ * @tc.desc: appspawn SetChildProcessTypeStartFlag
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetChildProcessTypeStartFlag_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetChildProcessTypeStartFlag_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    int32_t childProcessType = 1;
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetChildProcessTypeStartFlag(reqHandle, childProcessType);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "SetChildProcessTypeStartFlag_001 end");
+}
+
+/**
+ * @tc.name: SetChildProcessTypeStartFlag_002
+ * @tc.desc: appspawn SetChildProcessTypeStartFlag
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetChildProcessTypeStartFlag_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetChildProcessTypeStartFlag_002 start");
+    AppSpawnStartMsg startMsg = {0};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    int32_t childProcessType = -1;
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetChildProcessTypeStartFlag(reqHandle, childProcessType);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "SetChildProcessTypeStartFlag_002 end");
+}
+
+/**
+ * @tc.name: SetExtMsgFds_001
+ * @tc.desc: appspawn SetExtMsgFds
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetExtMsgFds_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetExtMsgFds_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    startMsg.fds.emplace("test_fd1", 100);
+    startMsg.fds.emplace("test_fd2", 101);
+    startMsg.fds.emplace("test_fd3", 102);
+    
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetExtMsgFds(reqHandle, startMsg.fds);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "SetExtMsgFds_001 end");
+}
+
+/**
+ * @tc.name: SetExtMsgFds_002
+ * @tc.desc: appspawn SetExtMsgFds
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetExtMsgFds_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetExtMsgFds_002 start");
+    AppSpawnStartMsg startMsg = {0};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    startMsg.fds.emplace("test_fd1", 100);
+    startMsg.fds.emplace("test_fd2", 101);
+    startMsg.fds.emplace("test_fd3", -1); 
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetExtMsgFds(reqHandle, startMsg.fds);
+    EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "SetExtMsgFds_002 end");
+}
+
+/**
+ * @tc.name: SetIsolationModeFlag_001
+ * @tc.desc: appspawn SetIsolationModeFlag
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetIsolationModeFlag_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetIsolationModeFlag_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    startMsg.isolationMode = true;
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetIsolationModeFlag(startMsg, reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "SetIsolationModeFlag_001 end");
+}
+
+/**
+ * @tc.name: SetIsolationModeFlag_002
+ * @tc.desc: appspawn SetIsolationModeFlag
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, SetIsolationModeFlag_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetIsolationModeFlag_002 start");
+    AppSpawnStartMsg startMsg = {0};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    startMsg.isolationMode = false;
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = asc->SetIsolationModeFlag(startMsg, reqHandle);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "SetIsolationModeFlag_002 end");
+}
+
+
+/**
+ * @tc.name: StartProcess_001
+ * @tc.desc: appspawn StartProcess
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, StartProcess_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartProcess_001 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    int32_t ret = 0;
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    pid_t pid = 0;
+    ret = asc->StartProcess(startMsg, pid);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartProcess_001 end");
+}
+
+/**
+ * @tc.name: StartProcess_002
+ * @tc.desc: appspawn StartProcess
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppSpawnClientTest, StartProcess_002, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartProcess_002 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002, 1003, -1};
+    std::string procName("test_proc_name");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    std::string permission2("permission_for_test_2");
+    std::string permission3("permission_for_test_3");
+    startMsg.permissions.insert(permission1);
+    startMsg.permissions.insert(permission2);
+    startMsg.permissions.insert(permission3);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    std::string provisionType("test_provisionType");
+    startMsg.provisionType = provisionType;
+    std::string processType("test_processType");
+    startMsg.processType = processType;
+    startMsg.maxChildProcess = 1;
+    std::string extensionSandboxPath("test_extensionSandboxPath");
+    startMsg.extensionSandboxPath = extensionSandboxPath;
+
+    int32_t ret = 0;
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    pid_t pid = 0;
+    ret = asc->StartProcess(startMsg, pid);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartProcess_002 end");
+}
+
+/**
+ * @tc.name: DumpJITPermissionListToJson_001
+ * @tc.desc: appspawn client DumpJITPermissionListToJson_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_001, TestSize.Level0)
+{
+    JITPermissionsList jitPermissionsList = {
+        "ohos.permission.jit1",
+        "ohos.permission.jit2"
+    };
+    std::string expectJITPermission1 = "ohos.permission.jit1";
+    std::string expectJITPermission2 = "ohos.permission.jit2";
+    std::string jsonJITPermissions = DumpJITPermissionListToJson(jitPermissionsList);
+
+    size_t pos = jsonJITPermissions.find(expectJITPermission1);
+    ASSERT_NE(pos, std::string::npos);
+    pos = jsonJITPermissions.find(expectJITPermission2);
+    ASSERT_NE(pos, std::string::npos);
+    pos = jsonJITPermissions.find(expectJITPermission2);
+    ASSERT_NE(pos, std::string::npos);
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS
