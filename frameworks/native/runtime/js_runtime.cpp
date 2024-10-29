@@ -97,6 +97,7 @@ const std::string TARGET_OHM = "targetohm";
 const std::string SINCE_VERSION = "sinceVersion";
 
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
+const std::string MERGE_SOURCE_MAP_PATH = "ets/sourceMaps.map";
 static auto PermissionCheckFunc = []() {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
 
@@ -732,8 +733,12 @@ bool JsRuntime::Initialize(const Options& options)
     }
 
     if (!options.preload) {
+        std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
+        bool newCreate = false;
+        std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
+        bool hasFile = extractor->HasEntry(MERGE_SOURCE_MAP_PATH);
         auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.bundleName, isModular,
-                                                                      options.isDebugVersion);
+                                                                      hasFile);
         InitSourceMap(operatorObj);
 
         if (options.isUnique) {
