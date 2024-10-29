@@ -89,12 +89,24 @@ public:
     void OnStopCallback() override;
 
     /**
+     * @brief The sync callback of OnContinue.
+     */
+    int32_t OnContinueSyncCB(napi_value result, WantParams &wantParams, napi_value jsWantParams);
+
+    /**
+     * @brief The async callback of OnContinue.
+     */
+    int32_t OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+        const AppExecFwk::AbilityInfo &abilityInfo) override;
+
+    /**
      * @brief Prepare user data of local Ability.
      * @param wantParams Indicates the user data to be saved.
      * @return If the ability is willing to continue and data saved successfully, it returns 0;
      * otherwise, it returns errcode.
      */
-    int32_t OnContinue(WantParams &wantParams) override;
+    int32_t OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
+        const AppExecFwk::AbilityInfo &abilityInfo) override;
 
     /**
      * @brief Update configuration
@@ -154,6 +166,8 @@ public:
      * @param info dump ability info
      */
     void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
+
+    void OnAfterFocusedCommon(bool isFocused) override;
 
     /**
      * @brief Get JsAbility
@@ -302,7 +316,7 @@ private:
         bool withResult = false, bool showMethodNotFoundLog = true);
     bool CheckPromise(napi_value result);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
-    bool CallPromise(napi_value result, int32_t &onContinueRes);
+    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
@@ -316,6 +330,8 @@ private:
     void CreateJSContext(napi_env env, napi_value &contextObj, int32_t screenMode);
     bool CheckSatisfyTargetAPIVersion(int32_t targetAPIVersion);
     bool BackPressDefaultValue();
+    void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
+        const std::string &moduleName, const std::string &srcPath);
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;

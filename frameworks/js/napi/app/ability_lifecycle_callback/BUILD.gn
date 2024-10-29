@@ -43,7 +43,7 @@ ohos_shared_library("abilitylifecyclecallback") {
   ]
 
   external_deps = [ "napi:ace_napi" ]
-  
+
   relative_install_dir = "module/app/ability"
   subsystem_name = "ability"
   part_name = "ability_runtime"

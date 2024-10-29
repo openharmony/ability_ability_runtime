@@ -359,8 +359,9 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
     std::string bundleName = data.ReadString();
     bool clearPageStack = data.ReadBool();
 
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, clearPageStack = %{public}d",
-        bundleName.c_str(), clearPageStack);
+    TAG_LOGW(AAFwkTag::APPMGR,
+        "KillApplication,callingPid=%{public}d,bundleName=%{public}s,clearPageStack=%{public}d",
+        IPCSkeleton::GetCallingPid(), bundleName.c_str(), clearPageStack);
 
     int32_t result = KillApplication(bundleName, clearPageStack);
     reply.WriteInt32(result);
@@ -399,7 +400,9 @@ ErrCode AmsMgrStub::HandleKillApplicationByUid(MessageParcel &data, MessageParce
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
     int uid = data.ReadInt32();
-    int32_t result = KillApplicationByUid(bundleName, uid);
+    std::string reason = data.ReadString();
+    TAG_LOGW(AAFwkTag::APPMGR, "KillApplicationByUid,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    int32_t result = KillApplicationByUid(bundleName, uid, reason);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -407,8 +410,10 @@ ErrCode AmsMgrStub::HandleKillApplicationByUid(MessageParcel &data, MessageParce
 ErrCode AmsMgrStub::HandleKillApplicationSelf(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
+    TAG_LOGW(AAFwkTag::APPMGR, "KillApplicationSelf,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
     bool clearPageStack = data.ReadBool();
-    int32_t result = KillApplicationSelf(clearPageStack);
+    std::string reason = data.ReadString();
+    int32_t result = KillApplicationSelf(clearPageStack, reason);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "result write failed.");
         return ERR_INVALID_VALUE;

@@ -266,23 +266,26 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
     faultNotifyData.faultType = FaultDataType::APP_FREEZE;
     faultNotifyData.eventId = faultData.eventId;
     std::string binderInfo;
+    std::string binderPidsStr;
     std::set<int> pids = GetBinderPeerPids(binderInfo, pid);
-    if (pids.empty()) {
-        binderInfo += "PeerBinder pids is empty\n";
-    }
     for (auto& pidTemp : pids) {
         TAG_LOGI(AAFwkTag::APPDFR, "pidTemp pids:%{public}d", pidTemp);
         if (pidTemp != pid) {
             std::string content = "PeerBinder catcher stacktrace for pid : " + std::to_string(pidTemp) + "\n";
             content += CatcherStacktrace(pidTemp);
             binderInfo += content;
+            binderPidsStr += " " + std::to_string(pidTemp);
         }
+    }
+
+    if (pids.empty()) {
+        binderInfo +="PeerBinder pids is empty\n";
     }
 
     std::string fileName = faultData.errorObject.name + "_" +
         AbilityRuntime::TimeUtil::FormatTime("%Y%m%d%H%M%S") + "_" + std::to_string(appInfo.pid) + "_binder";
     std::string fullStackPath = WriteToFile(fileName, binderInfo);
-    binderInfo = fullStackPath;
+    binderInfo = fullStackPath + "," + binderPidsStr;
 
     ret = NotifyANR(faultNotifyData, appInfo, binderInfo, memoryContent);
     return ret;

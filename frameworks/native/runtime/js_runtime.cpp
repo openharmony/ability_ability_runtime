@@ -1268,6 +1268,37 @@ void JsRuntime::PreloadSystemModule(const std::string& moduleName)
     napi_call_function(env, globalObj, refValue, 1, args, nullptr);
 }
 
+void JsRuntime::PreloadMainAbility(const std::string& moduleName, const std::string& srcPath,
+    const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance)
+{
+    HandleScope handleScope(*this);
+    std::string key(moduleName);
+    key.append("::");
+    key.append(srcPath);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadMainAbility srcPath: %{public}s", srcPath.c_str());
+    preloadList_[key] = LoadModule(moduleName, srcPath, hapPath, isEsMode, false, srcEntrance);
+}
+
+void JsRuntime::PreloadModule(const std::string& moduleName, const std::string& srcPath,
+    const std::string& hapPath, bool isEsMode, bool useCommonTrunk)
+{
+    std::string key(moduleName);
+    key.append("::");
+    key.append(srcPath);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadModule srcPath: %{public}s", srcPath.c_str());
+    preloadList_[key] = LoadModule(moduleName, srcPath, hapPath, isEsMode, useCommonTrunk);
+}
+
+bool JsRuntime::PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj)
+{
+    if (preloadList_.find(key) == preloadList_.end()) {
+        return false;
+    }
+    obj = std::move(preloadList_[key]);
+    preloadList_.erase(key);
+    return true;
+}
+
 NativeEngine& JsRuntime::GetNativeEngine() const
 {
     return *GetNativeEnginePointer();

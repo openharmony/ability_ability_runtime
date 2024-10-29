@@ -56,7 +56,7 @@ public:
         }
     };
 
-    void SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery = false);
+    void SignRestartAppFlag(int32_t uid, bool isAppRecovery = false);
 
     /**
      * StartUIAbility with request.
@@ -367,7 +367,7 @@ public:
     void NotifySCBToHandleAtomicServiceException(sptr<SessionInfo> sessionInfo, int32_t errorCode,
         const std::string& errorReason);
 
-    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool forceKill);
+    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     void EnableListForSCBRecovery();
 
@@ -403,8 +403,9 @@ private:
     bool CheckProperties(const std::shared_ptr<AbilityRecord> &abilityRecord, const AbilityRequest &abilityRequest,
         AppExecFwk::LaunchMode launchMode) const;
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest) const;
-    int CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord,
+    void PrepareCloseUIAbility(std::shared_ptr<AbilityRecord> abilityRecord,
         int resultCode, const Want *resultWant, bool isClearSession);
+    int CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord);
     int32_t BackToCallerAbilityWithResultLocked(sptr<SessionInfo> currentSessionInfo,
         std::shared_ptr<AbilityRecord> callerAbilityRecord);
 

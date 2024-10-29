@@ -22,6 +22,7 @@ ohos_unittest("AmsMgrProxyTest") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/appmgr/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",

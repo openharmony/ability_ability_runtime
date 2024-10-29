@@ -543,6 +543,26 @@ int AbilityConnectManager::UnloadUIExtensionAbility(const std::shared_ptr<AAFwk:
     return ERR_OK;
 }
 
+void AbilityConnectManager::ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
+    const std::shared_ptr<AbilityRecord> abilityRecord, sptr<IRemoteObject> callerToken)
+{
+    if (taskHandler_ == nullptr || abilityRecord == nullptr || abilityRecord->GetPid() <= 0) {
+        return;
+    }
+
+    std::string reason = ResSchedUtil::GetInstance().GetThawReasonByAbilityType(abilityInfo);
+    const int32_t uid = abilityInfo.applicationInfo.uid;
+    const std::string bundleName = abilityInfo.applicationInfo.bundleName;
+    const int32_t pid = abilityRecord->GetPid();
+    auto callerAbility = Token::GetAbilityRecordByToken(callerToken);
+    const int32_t callerPid = (callerAbility != nullptr) ? callerAbility->GetPid() : IPCSkeleton::GetCallingPid();
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}d_%{public}s_%{public}d reason=%{public}s callerPid=%{public}d", uid,
+        bundleName.c_str(), pid, reason.c_str(), callerPid);
+    taskHandler_->SubmitTask([uid, bundleName, reason, pid, callerPid]() {
+        ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, reason, pid, callerPid);
+    });
+}
+
 int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityRequest,
     const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, sptr<SessionInfo> sessionInfo,
     sptr<UIExtensionAbilityConnectInfo> connectInfo)
@@ -563,6 +583,9 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     ret = GetOrCreateTargetServiceRecord(abilityRequest, connectInfo, targetService, isLoadedAbility);
     if (ret != ERR_OK) {
         return ret;
+    }
+    if (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION) {
+        ReportEventToRSS(abilityRequest.abilityInfo, targetService, callerToken);
     }
     // 2. get target connectRecordList, and check whether this callback has been connected.
     ConnectListType connectRecordList;
@@ -812,6 +835,7 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
 void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "state: %{public}d", state);
+    std::lock_guard guard(serialMutex_);
     AppAbilityState abilityState = DelayedSingleton<AppScheduler>::GetInstance()->ConvertToAppAbilityState(state);
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
         auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
@@ -827,7 +851,6 @@ void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
         std::string element = abilityRecord->GetURI();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability is %{public}s, start to foreground.", element.c_str());
         abilityRecord->GrantUriPermissionForUIExtension();
-        std::lock_guard guard(serialMutex_);
         abilityRecord->ForegroundUIExtensionAbility();
     }
 }
@@ -3092,18 +3115,18 @@ int32_t AbilityConnectManager::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
     return uiExtensionAbilityRecordMgr_->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
 }
 
-void AbilityConnectManager::SignRestartAppFlag(const std::string &bundleName)
+void AbilityConnectManager::SignRestartAppFlag(int32_t uid)
 {
     {
         std::lock_guard lock(serviceMapMutex_);
         for (auto &[key, abilityRecord] : serviceMap_) {
-            if (abilityRecord == nullptr || abilityRecord->GetApplicationInfo().bundleName != bundleName) {
+            if (abilityRecord == nullptr || abilityRecord->GetUid() != uid) {
                 continue;
             }
             abilityRecord->SetRestartAppFlag(true);
         }
     }
-    AbilityCacheManager::GetInstance().SignRestartAppFlag(bundleName);
+    AbilityCacheManager::GetInstance().SignRestartAppFlag(uid);
 }
 
 bool AbilityConnectManager::AddToServiceMap(const std::string &key, std::shared_ptr<AbilityRecord> abilityRecord)

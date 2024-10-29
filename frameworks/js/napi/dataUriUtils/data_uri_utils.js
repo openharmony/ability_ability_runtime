@@ -12,11 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
+
 const URI_SPLIT = '/';
 
 let dataUriUtils = {
   getId: (uri) => {
-    console.debug('DataUriUtils getId called.');
+    hilog.sLogD(domainID, TAG, 'DataUriUtils getId called.');
     if (typeof uri !== 'string') {
       return -1;
     }
@@ -31,7 +37,7 @@ let dataUriUtils = {
     return Number(ret);
   },
   updateId: (uri, id) => {
-    console.debug('DataUriUtils updateId called.');
+    hilog.sLogD(domainID, TAG, 'DataUriUtils updateId called.');
     if (typeof uri !== 'string' || typeof id !== 'number') {
       return uri;
     }
@@ -42,7 +48,7 @@ let dataUriUtils = {
     return ret + URI_SPLIT + id;
   },
   deleteId: (uri) => {
-    console.debug('DataUriUtils deleteId called.');
+    hilog.sLogD(domainID, TAG, 'DataUriUtils deleteId called.');
     if (typeof uri !== 'string') {
       return uri;
     }
@@ -57,7 +63,7 @@ let dataUriUtils = {
     return uri.substring(0, index);
   },
   attachId: (uri, id) => {
-    console.debug('DataUriUtils attachId called.');
+    hilog.sLogD(domainID, TAG, 'DataUriUtils attachId called.');
     if (typeof uri !== 'string' || typeof id !== 'number') {
       return uri;
     }

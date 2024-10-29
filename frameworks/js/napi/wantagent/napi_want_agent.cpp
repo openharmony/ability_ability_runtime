@@ -160,7 +160,7 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t* work, int status) {
     napi_set_named_property(dataWorkerData->env, objValueSecond, "want",
         CreateJsWant(dataWorkerData->env, dataWorkerData->want));
     napi_set_named_property(dataWorkerData->env, objValueSecond, "finalCode",
-        CreateJsValue(dataWorkerData->env, dataWorkerData->resultCode));
+        CreateJsValue(dataWorkerData->env, GetJsErrorCodeByNativeError(dataWorkerData->resultCode)));
     napi_set_named_property(dataWorkerData->env, objValueSecond, "finalData",
         CreateJsValue(dataWorkerData->env, dataWorkerData->resultData));
     napi_set_named_property(dataWorkerData->env, objValueSecond, "extraInfo",

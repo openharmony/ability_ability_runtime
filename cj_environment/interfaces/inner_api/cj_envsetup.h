@@ -51,6 +51,7 @@ struct CJEnvMethods {
     bool (*startDebugger)() = nullptr;
     void (*registerCJUncaughtExceptionHandler)(const CJUncaughtExceptionInfo& uncaughtExceptionInfo) = nullptr;
     void (*setSanitizerKindRuntimeVersion)(SanitizerKind kind) = nullptr;
+    bool (*checkLoadCJLibrary)() = nullptr;
 };
 
 class CJEnv {

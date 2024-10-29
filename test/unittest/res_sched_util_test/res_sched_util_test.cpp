@@ -95,5 +95,33 @@ HWTEST_F(ResSchedUtilTest, ResSchedUtilTest_0300, TestSize.Level0)
     int64_t ret = AAFwk::ResSchedUtil::GetInstance().convertType(resSchedType);
     EXPECT_EQ(resSchedType, ret);
 }
+
+/**
+ * @tc.number: GetThawReasonByAbilityType
+ * @tc.desc: Test GetThawReasonByAbilityType
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedUtilTest, GetThawReasonByAbilityType, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetThawReasonByAbilityType called.");
+    AbilityInfo abilityInfo;
+    std::string reason = AAFwk::ResSchedUtil::GetInstance().GetThawReasonByAbilityType(abilityInfo);
+    EXPECT_EQ(reason, "THAW_BY_START_NOT_PAGE_ABILITY");
+
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    reason = AAFwk::ResSchedUtil::GetInstance().GetThawReasonByAbilityType(abilityInfo);
+    EXPECT_EQ(reason, "THAW_BY_START_PAGE_ABILITY");
+
+    abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    reason = AAFwk::ResSchedUtil::GetInstance().GetThawReasonByAbilityType(abilityInfo);
+    EXPECT_EQ(reason, "THAW_BY_START_SERVICE_EXTENSION");
+
+    abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI;
+    reason = AAFwk::ResSchedUtil::GetInstance().GetThawReasonByAbilityType(abilityInfo);
+    EXPECT_EQ(reason, "THAW_BY_START_UI_EXTENSION");
+}
+
 }  // namespace AbilityRuntime
 }  // namespace OHOS

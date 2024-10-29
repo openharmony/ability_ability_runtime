@@ -30,6 +30,7 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
+constexpr int32_t API_VERSION_MOD = 100;
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
 constexpr const char* NET_WORK_ID_MARK = "?networkid=";
 }
@@ -171,6 +172,23 @@ bool UPMSUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
     return isSystemApp;
 }
 
+bool UPMSUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
+{
+    auto bundleMgrHelper = ConnectManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "The bundleMgrHelper is nullptr.");
+        return false;
+    }
+    AppExecFwk::ApplicationInfo appInfo;
+    if (!IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, GetCurrentAccountId(), appInfo))) {
+        TAG_LOGI(AAFwkTag::URIPERMMGR, "Get application info failed.");
+        return false;
+    }
+    targetApiVersion = (appInfo.apiTargetVersion % API_VERSION_MOD);
+    return true;
+}
+
 bool UPMSUtils::CheckIsSystemAppByTokenId(uint32_t tokenId)
 {
     std::string bundleName;
@@ -195,7 +213,7 @@ bool UPMSUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int
     return true;
 }
 
-bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
+bool UPMSUtils::GetAlterableBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
 {
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
@@ -206,6 +224,22 @@ bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName
             return false;
         }
         return GetDirByBundleNameAndAppIndex(hapInfo.bundleName, hapInfo.instIndex, bundleName);
+    }
+    return false;
+}
+
+bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
+{
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        Security::AccessToken::HapTokenInfo hapInfo;
+        auto ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(tokenId, hapInfo);
+        if (ret != Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "GetHapTokenInfo failed, ret:%{public}d", ret);
+            return false;
+        }
+        bundleName = hapInfo.bundleName;
+        return true;
     }
     return false;
 }
@@ -261,6 +295,16 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
     }
     tokenId = bundleInfo.applicationInfo.accessTokenId;
     return ERR_OK;
+}
+
+bool UPMSUtils::CheckUriTypeIsValid(Uri &uri)
+{
+    auto &&scheme = uri.GetScheme();
+    if (scheme != "file" && scheme != "content") {
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "Type of uri is invalid, Scheme is %{public}s", scheme.c_str());
+        return false;
+    }
+    return true;
 }
 
 bool UPMSUtils::IsDocsCloudUri(Uri &uri)

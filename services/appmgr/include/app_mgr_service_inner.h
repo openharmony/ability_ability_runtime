@@ -299,9 +299,11 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
+    virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid");
 
     /**
      * KillApplicationSelf, this allows app to terminate itself.
@@ -309,7 +311,8 @@ public:
      * @param clearPageStack, the flag indicates if ClearPageStack lifecycle should be scheduled.
      * @return ERR_OK for success call, others for failure.
      */
-    virtual int32_t KillApplicationSelf(const bool clearPageStack = false);
+    virtual int32_t KillApplicationSelf(const bool clearPageStack = false,
+        const std::string& reason = "KillApplicationSelf");
 
     /**
      * KillApplicationByUserId, kill the application by user ID.
@@ -317,11 +320,12 @@ public:
      * @param bundleName, bundle name in Application record.
      * @param appCloneIndex the app clone id.
      * @param userId, user ID.
+     * @param  reason, caller function name.
      *
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(const std::string &bundleName, int32_t appCloneIndex, int userId,
-        const bool clearPageStack = false);
+        const bool clearPageStack = false, const std::string& reason = "KillApplicationByUserId");
 
     /**
      * ClearUpApplicationData, clear the application data.
@@ -1231,9 +1235,11 @@ public:
     int32_t UpdateRenderState(pid_t renderPid, int32_t state);
 
     /**
-     * Mark processes of a bundleName as the app is going to be restarted.
+     * Mark processes of the uid as the app is going to be restarted.
      */
-    int32_t SignRestartAppFlag(const std::string &bundleName);
+    int32_t SignRestartAppFlag(int32_t uid);
+
+    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) const;
 
     /**
      * Set application assertion pause state.
@@ -1466,7 +1472,7 @@ private:
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
                       bool isPreload = false, const std::string &moduleName = "", const std::string &abilityName = "",
-                      bool strictMode = false, int32_t maxChildProcess = 0, sptr<IRemoteObject> token = nullptr,
+                      bool strictMode = false, sptr<IRemoteObject> token = nullptr,
                       std::shared_ptr<AAFwk::Want> want = nullptr,
                       ExtensionAbilityType ExtensionAbilityType = ExtensionAbilityType::UNSPECIFIED);
 
@@ -1476,11 +1482,12 @@ private:
      * @param bundleName, bundle name in Application record.
      * @param appCloneIndex the app clone id.
      * @param userId, user ID.
+     * @param  reason, caller function name.
      *
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearPageStack = false);
+        const bool clearPageStack = false, const std::string& reason = "KillApplicationByUserIdLocked");
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1520,9 +1527,9 @@ private:
     // Test add the bundle manager instance.
     void SetBundleManagerHelper(const std::shared_ptr<BundleMgrHelper> &bundleMgrHelper);
 
-    void HandleTerminateApplicationTimeOut(const int64_t eventId);
+    void HandleTerminateApplicationTimeOut(std::shared_ptr<AppRunningRecord> appRecord);
 
-    void HandleAddAbilityStageTimeOut(const int64_t eventId);
+    void HandleAddAbilityStageTimeOut(std::shared_ptr<AppRunningRecord> appRecord);
 
     void ClipStringContent(const std::regex &re, const std::string &source, std::string &afterCutStr);
 
@@ -1537,9 +1544,9 @@ private:
     int StartEmptyProcess(const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &info,
         const std::string &processName, const int userId);
 
-    void HandleStartSpecifiedAbilityTimeOut(const int64_t eventId);
+    void HandleStartSpecifiedAbilityTimeOut(std::shared_ptr<AppRunningRecord> appRecord);
 
-    void HandleStartSpecifiedProcessTimeout(const int64_t eventId);
+    void HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppRunningRecord> appRecord);
 
     void InitGlobalConfiguration();
 
@@ -1612,7 +1619,8 @@ private:
 
     void KillAttachedChildProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
 
-    void PresetMaxChildProcess(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &maxChildProcess);
+    void PresetMaxChildProcess(std::shared_ptr<AppRunningRecord> appRecord,
+        int32_t &maxChildProcess);
 
     void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
@@ -1627,11 +1635,13 @@ private:
      * @param appCloneIndex the app clone id.
      * @param userId, userId.
      * @param isBySelf, clear data by application self.
+     * @param reason, caller function.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t ClearUpApplicationDataByUserId(const std::string &bundleName,
-        int32_t callerUid, pid_t callerPid, int32_t appCloneIndex, int32_t userId, bool isBySelf = false);
+        int32_t callerUid, pid_t callerPid, int32_t appCloneIndex, int32_t userId, bool isBySelf = false,
+        const std::string& reason = "ClearUpApplicationDataByUserId");
 
     bool CheckGetRunningInfoPermission() const;
 
@@ -1639,9 +1649,10 @@ private:
      * kill all processes of a bundleName
      * @param bundleName bundleName of which to be killed
      * @param clearPageStack should schedule clearPage lifecycle
+     * @param reason caller function name
      */
-    int32_t KillApplicationByBundleName(
-        const std::string &bundleName, const bool clearPageStack = false);
+    int32_t KillApplicationByBundleName(const std::string &bundleName, const bool clearPageStack = false,
+        const std::string& reason = "KillApplicationByBundleName");
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
@@ -1716,7 +1727,7 @@ private:
      */
     bool NotifyMemMgrPriorityChanged(const std::shared_ptr<AppRunningRecord> appRecord);
 
-    void HandlePreloadApplication(const PreloadRequest &request);
+    void HandlePreloadApplication(const PreloadRequest &request, AppExecFwk::PreloadMode preloadMode);
 
     std::string GetSpecifiedProcessFlag(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want);
 
@@ -1778,7 +1789,7 @@ private:
     void NotifyAppStatusByCallerUid(const std::string &bundleName, const int32_t tokenId, const int32_t userId,
         const int32_t callerUid, const std::string &eventData);
     void UpdateAllProviderConfig(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void SendHiSysEvent(const int32_t innerEventId, const int64_t eventId);
+    void SendHiSysEvent(int32_t innerEventId, std::shared_ptr<AppRunningRecord> appRecord);
     int FinishUserTestLocked(
         const std::string &msg, const int64_t &resultCode, const std::shared_ptr<AppRunningRecord> &appRecord);
     int32_t GetCurrentAccountId() const;
@@ -1813,6 +1824,8 @@ private:
         RunningMultiAppInfo &info);
     int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId);
+    int32_t KillProcessByPidInner(const pid_t pid, const std::string& reason,
+        const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;

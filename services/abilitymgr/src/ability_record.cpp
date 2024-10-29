@@ -207,6 +207,10 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
 
 AbilityRecord::~AbilityRecord()
 {
+    if (token_) {
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(token_->AsObject());
+    }
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
     if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
         auto object = scheduler_->AsObject();
         if (object != nullptr) {
@@ -1417,8 +1421,9 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
     }
 
     auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
-    CHECK_POINTER(missionListWrap);
-    missionListWrap->SetMissionAbilityState(missionId_, currentState_);
+    if (missionListWrap != nullptr) {
+        missionListWrap->SetMissionAbilityState(missionId_, currentState_);
+    }
 }
 #endif // SUPPORT_SCREEN
 bool AbilityRecord::GetAbilityForegroundingFlag() const
@@ -1471,11 +1476,8 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         if (schedulerObject == nullptr || !schedulerObject->AddDeathRecipient(schedulerDeathRecipient_)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "AddDeathRecipient failed");
         }
-        if (IsSceneBoard()) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "Sceneboard DeathRecipient Added");
-        }
         pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
-        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid());
+        AfterLoaded();
         // add collaborator mission bind pid
         NotifyMissionBindPid();
 #ifdef WITH_DLP
@@ -1495,6 +1497,15 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         }
         scheduler_ = scheduler;
         pid_ = 0;
+    }
+}
+
+void AbilityRecord::AfterLoaded()
+{
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
+    ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid());
+    if (IsSceneBoard()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Sceneboard Added");
     }
 }
 
@@ -1794,6 +1805,8 @@ void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
     CHECK_POINTER(scheduler_);
     auto result = GetResult();
     CHECK_POINTER(result);
+    UriUtils::GetInstance().CheckUriPermissionForUIExtension(result->resultWant_,
+        abilityInfo_.extensionAbilityType, tokeId);
     GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId);
     scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
     // reset result to avoid send result next time
@@ -2555,7 +2568,6 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 #endif // WITH_DLP
     NotifyRemoveShellProcess(CollaboratorType::RESERVE_TYPE);
     NotifyRemoveShellProcess(CollaboratorType::OTHERS_TYPE);
-    FreezeUtil::GetInstance().DeleteLifecycleEvent(object);
 }
 
 void AbilityRecord::OnProcessDied()
@@ -3288,8 +3300,7 @@ void AbilityRecord::GrantUriPermissionInner(Want &want, std::vector<std::string>
     }
     uint32_t flag = want.GetFlags();
     std::vector<Uri> permissionUris;
-    if (abilityInfo_.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE &&
-        abilityInfo_.extensionAbilityType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+    if (!UriUtils::GetInstance().IsPermissionPreCheckedType(abilityInfo_.extensionAbilityType)) {
         auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
             uriVec, flag, callerTokenId));
         permissionUris = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);

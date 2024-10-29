@@ -97,7 +97,8 @@ public:
      * @return If the ability is willing to continue and data saved successfully, it returns 0;
      * otherwise, it returns errcode.
      */
-    int32_t OnContinue(WantParams &wantParams) override;
+    int32_t OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
+        const AppExecFwk::AbilityInfo &abilityInfo) override;
 
     /**
      * @brief Update configuration

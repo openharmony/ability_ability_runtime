@@ -30,9 +30,7 @@
 #include "mock_app_scheduler.h"
 #include "mock_ability_token.h"
 #include "mock_app_spawn_client.h"
-#include "mock_bundle_installer_service.h"
 #include "mock_bundle_manager_service.h"
-#include "mock_system_ability_manager.h"
 #include "param.h"
 
 using namespace testing::ext;
@@ -43,11 +41,6 @@ using ::testing::DoAll;
 
 namespace OHOS {
 namespace AppExecFwk {
-namespace {
-constexpr int32_t BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
-sptr<MockBundleInstallerService> mockBundleInstaller = new (std::nothrow) MockBundleInstallerService();
-sptr<MockBundleManagerService> mockBundleMgr = new (std::nothrow) MockBundleManagerService();
-} // namespace
 #define CHECK_POINTER_IS_NULLPTR(object) \
     do {                                 \
         if (object == nullptr) {         \
@@ -61,10 +54,8 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    void MockBundleInstallerAndSA();
-    void MockBundleInstaller();
-    sptr<ISystemAbilityManager> iSystemAbilityMgr_ = nullptr;
-    sptr<AppExecFwk::MockSystemAbilityManager> mockSystemAbility_ = nullptr;
+    std::shared_ptr<BundleMgrHelper> bundleMgrHelper_{ nullptr };
+    sptr<MockBundleManagerService> mockBundleMgr = nullptr;
 
 protected:
     static const std::string GetTestAppName()
@@ -101,37 +92,12 @@ void AmsServiceLoadAbilityProcessTest::SetUp()
     service_.reset(new (std::nothrow) AppMgrServiceInner());
     service_->Init();
     mock_token_ = new (std::nothrow) MockAbilityToken();
-    mockSystemAbility_ = new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
-    iSystemAbilityMgr_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
+    bundleMgrHelper_ = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    mockBundleMgr = sptr<MockBundleManagerService>::MakeSptr();
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
 }
 
-void AmsServiceLoadAbilityProcessTest::TearDown()
-{
-    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = iSystemAbilityMgr_;
-}
-
-void AmsServiceLoadAbilityProcessTest::MockBundleInstallerAndSA()
-{
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
-        if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
-            return bms->AsObject();
-        } else {
-            return saMgr->GetSystemAbility(systemAbilityId);
-        }
-    };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-    EXPECT_CALL(*mockSystemAbility_, CheckSystemAbility(testing::_))
-        .WillOnce(testing::Invoke(mockGetSystemAbility))
-        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
-}
-
-void AmsServiceLoadAbilityProcessTest::MockBundleInstaller()
-{
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-}
+void AmsServiceLoadAbilityProcessTest::TearDown() {}
 
 std::shared_ptr<AppRunningRecord> AmsServiceLoadAbilityProcessTest::StartLoadAbility(const sptr<IRemoteObject>& token,
     const sptr<IRemoteObject>& preToken, const std::shared_ptr<AbilityInfo>& abilityInfo,
@@ -166,8 +132,7 @@ std::shared_ptr<AppRunningRecord> AmsServiceLoadAbilityProcessTest::StartLoadAbi
 HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AmsServiceLoadAbilityProcessTest LoadAbility_001 start");
-    MockBundleInstallerAndSA();
-    EXPECT_CALL(*mockBundleMgr, GetHapModuleInfo(testing::_, testing::_, testing::_))
+    EXPECT_CALL(*mockBundleMgr, GetBundleInfoV9(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(true))
         .WillRepeatedly(testing::Return(true));
     auto abilityInfo = std::make_shared<AbilityInfo>();
@@ -1230,9 +1195,9 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, StartProcess001, TestSize.Level1)
 
     auto record1 = service_->appRunningManager_->CheckAppRunningRecordIsExist(
         appInfo->name, GetTestAppName(), appInfo->uid, bundleInfo);
-    EXPECT_EQ(record1->GetPriorityObject()->GetPid(), PID);
     EXPECT_NE(record1, nullptr);
     CHECK_POINTER_IS_NULLPTR(record1);
+    EXPECT_EQ(record1->GetPriorityObject()->GetPid(), PID);
     EXPECT_EQ(record1->GetState(), ApplicationState::APP_STATE_CREATE);
     const auto& abilityMap = record1->GetAbilities();
     EXPECT_EQ(abilityMap.size(), (uint32_t)1);

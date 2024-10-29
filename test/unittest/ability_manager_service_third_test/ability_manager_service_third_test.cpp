@@ -1096,7 +1096,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckRestartAppWant_001, TestSize.Level
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
     AAFwk::Want want;
-    int32_t res = abilityMs->CheckRestartAppWant(want);
+    int32_t res = abilityMs->CheckRestartAppWant(want, 0);
     EXPECT_EQ(res, AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY);
 }
 
@@ -2011,7 +2011,11 @@ HWTEST_F(AbilityManagerServiceThirdTest, RequestModalUIExtension_001, TestSize.L
     auto abilityMs = std::make_shared<AbilityManagerService>();
     Want want;
     auto result = abilityMs->RequestModalUIExtension(want);
-    EXPECT_EQ(result, INNER_ERR);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, INNER_ERR);
+    } else {
+        EXPECT_EQ(result, ERR_OK);
+    }
 }
 
 /*
@@ -2024,7 +2028,11 @@ HWTEST_F(AbilityManagerServiceThirdTest, RequestModalUIExtensionInner_001, TestS
     auto abilityMs = std::make_shared<AbilityManagerService>();
     Want want;
     auto result = abilityMs->RequestModalUIExtensionInner(want);
-    EXPECT_EQ(result, INNER_ERR);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, INNER_ERR);
+    } else {
+        EXPECT_EQ(result, ERR_OK);
+    }
 }
 
 /*
@@ -2468,7 +2476,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SignRestartAppFlag_001, TestSize.Level1
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    abilityMs_->SignRestartAppFlag(USER_ID_U100, "com.ix.hiservcie");
+    abilityMs_->SignRestartAppFlag(USER_ID_U100, 1);
 }
 
 /*

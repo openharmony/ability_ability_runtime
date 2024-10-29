@@ -41,6 +41,7 @@ public:
     std::string GetMnc();
     void SetMnc(std::string mnc);
     void SetThemeId(std::string themeId);
+    void SetThemeIcon(std::string themeIcon);
 
     void UpdateResConfig(const AppExecFwk::Configuration &configuration,
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
@@ -55,6 +56,7 @@ private:
     std::string mnc_;
     std::string colorModeIsSetByApp_;
     std::string themeId_;
+    std::string themeIcon_;
 
     void UpdateResConfig(std::unique_ptr<Global::Resource::ResConfig> &resConfig);
 };

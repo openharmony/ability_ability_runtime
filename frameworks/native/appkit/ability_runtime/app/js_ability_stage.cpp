@@ -51,41 +51,6 @@ constexpr const char* CONFIG_ENTRY = "configEntry";
 constexpr const char *TASKPOOL = "taskPool";
 constexpr const char *TASKPOOL_LOWER = "taskpool";
 
-napi_value AttachAbilityStageContext(napi_env env, void *value, void *)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "AttachAbilityStageContext");
-    if (env == nullptr || value == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid parameter, env or value is nullptr");
-        return nullptr;
-    }
-    auto ptr = reinterpret_cast<std::weak_ptr<AbilityContext> *>(value)->lock();
-    if (ptr == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid context");
-        return nullptr;
-    }
-    napi_value object = CreateJsAbilityStageContext(env, ptr);
-    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.AbilityStageContext", &object, 1);
-    if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid systemModule");
-        return nullptr;
-    }
-    auto contextObj = systemModule->GetNapiValue();
-    if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGW(AAFwkTag::APPKIT, "LoadSystemModuleByEngine or ConvertNativeValueTo failed");
-        return nullptr;
-    }
-    napi_coerce_to_native_binding_object(
-        env, contextObj, DetachCallbackFunc, AttachAbilityStageContext, value, nullptr);
-    auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(ptr);
-    napi_wrap(env, contextObj, workContext,
-        [](napi_env, void *data, void *) {
-            TAG_LOGD(AAFwkTag::APPKIT, "Finalizer context is called");
-            delete static_cast<std::weak_ptr<AbilityRuntime::Context> *>(data);
-        },
-        nullptr, nullptr);
-    return contextObj;
-}
-
 bool JsAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
     for (auto &md: hapModuleInfo.metadata) {
@@ -121,9 +86,17 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
             srcPath.append(hapModuleInfo.srcPath);
             srcPath.append("/AbilityStage.abc");
         }
-        auto moduleObj = jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
-            hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
-        return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
+        std::string key(moduleName);
+        key.append("::");
+        key.append(srcPath);
+        std::unique_ptr<NativeReference> moduleObj = nullptr;
+        if (jsRuntime.PopPreloadObj(key, moduleObj)) {
+            return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
+        } else {
+            auto moduleObj = jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
+                hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
+            return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
+        }
     }
 
     std::unique_ptr<NativeReference> moduleObj;

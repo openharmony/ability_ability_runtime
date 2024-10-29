@@ -42,7 +42,7 @@ WantHandle FFICJWantCreateWithWantInfo(CJWantParams params)
     want->SetUri(params.uri);
     want->SetAction(params.action);
     want->SetType(params.wantType);
-    want->SetParams(OHOS::AAFwk::WantParamWrapper::ParseWantParams(params.parameters));
+    want->SetParams(OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(params.parameters));
 
     return want;
 }

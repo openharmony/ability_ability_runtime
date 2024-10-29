@@ -754,19 +754,19 @@ int32_t JsAbility::OnContinue(WantParams &wantParams)
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "AbilityStage object");
-        return AppExecFwk::ContinuationManager::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManager::OnContinueResult::ON_CONTINUE_ERR;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
         TAG_LOGE(AAFwkTag::ABILITY, "Ability object");
-        return AppExecFwk::ContinuationManager::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManager::OnContinueResult::ON_CONTINUE_ERR;
     }
 
     napi_value methodOnCreate = nullptr;
     napi_get_named_property(env, obj, "onContinue", &methodOnCreate);
     if (methodOnCreate == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "get 'onContinue'");
-        return AppExecFwk::ContinuationManager::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManager::OnContinueResult::ON_CONTINUE_ERR;
     }
 
     napi_value jsWantParams = OHOS::AppExecFwk::WrapWantParams(env, wantParams);
@@ -778,7 +778,7 @@ int32_t JsAbility::OnContinue(WantParams &wantParams)
     int32_t numberResult = 0;
     if (!ConvertFromJsValue(env, result, numberResult)) {
         TAG_LOGE(AAFwkTag::ABILITY, "'onContinue' not implemented");
-        return AppExecFwk::ContinuationManager::OnContinueResult::REJECT;
+        return AppExecFwk::ContinuationManager::OnContinueResult::ON_CONTINUE_ERR;
     }
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
