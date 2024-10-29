@@ -495,6 +495,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetJITEnabled(jitEnabled_);
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
+    launchData.SetIsNeedPreloadModule(isNeedPreloadModule_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
@@ -2534,5 +2535,11 @@ void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
         AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(prioObject->GetPid(), msg);
     }
 }
+
+void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
+{
+    isNeedPreloadModule_ = isNeedPreloadModule;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
