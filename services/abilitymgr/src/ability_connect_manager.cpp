@@ -2094,9 +2094,6 @@ void AbilityConnectManager::HandleAbilityDiedTask(
         abilityRecord->RemoveConnectRecordFromList(connectRecord);
         RemoveConnectionRecordFromMap(connectRecord);
     }
-    if (abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
-        ClearPreloadUIExtensionRecord(abilityRecord);
-    }
     if (IsUIExtensionAbility(abilityRecord)) {
         HandleUIExtensionDied(abilityRecord);
     }
@@ -2950,6 +2947,9 @@ void AbilityConnectManager::RemoveUIExtensionAbilityRecord(const std::shared_ptr
 {
     CHECK_POINTER(abilityRecord);
     CHECK_POINTER(uiExtensionAbilityRecordMgr_);
+    if (abilityRecord->GetWant().GetBoolParam(IS_PRELOAD_UIEXTENSION_ABILITY, false)) {
+        ClearPreloadUIExtensionRecord(abilityRecord);
+    }
     uiExtensionAbilityRecordMgr_->RemoveExtensionRecord(abilityRecord->GetUIExtensionAbilityId());
 }
 
