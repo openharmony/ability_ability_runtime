@@ -85,6 +85,7 @@
             "node",
             "os_account",
             "power_manager",
+            "qos_manager",
             "relational_store",
             "resource_management",
             "resource_schedule_service",
