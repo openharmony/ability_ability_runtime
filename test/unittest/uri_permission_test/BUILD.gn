@@ -47,11 +47,17 @@ ohos_unittest("uri_permission_test") {
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "relational_store:native_rdb",
     "storage_service:storage_manager_sa_proxy",
   ]
+
+  if (ability_runtime_feature_sandboxmanager) {
+    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
+  }
 }
 
 group("unittest") {
