@@ -1405,7 +1405,6 @@ void ContextImpl::ChangeToLocalPath(const std::string& bundleName, const std::st
         TAG_LOGE(AAFwkTag::APPKIT, "ChangeToLocalPath error localPath:%{public}s bundleName:%{public}s",
             localPath.c_str(), bundleName.c_str());
     }
-    }
     if (isExist) {
         localPath = std::regex_replace(localPath, pattern, std::string(LOCAL_CODE_PATH));
     } else {
