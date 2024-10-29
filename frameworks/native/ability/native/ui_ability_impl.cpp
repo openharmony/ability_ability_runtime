@@ -214,15 +214,15 @@ void UIAbilityImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleStat
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityManagerClient::AbilityTransitionDone; the transaction start.";
-    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         lifecycleState_ = AAFwk::ABILITY_STATE_FOREGROUND_NEW;
+        std::string entry = "AbilityManagerClient::AbilityTransitionDone; the transaction start.";
+        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, state, GetRestoreData());
     if (ret == ERR_OK && state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+        FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
     }
 }
 
@@ -432,8 +432,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-        "; UIAbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle.";
+    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     bool needNotifyAMS = false;
@@ -450,8 +449,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 
     if (needNotifyAMS) {
         TAG_LOGI(AAFwkTag::UIABILITY, "notify ability manager service");
-        entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-            "; AbilityManagerClient::AbilityTransitionDone; the transaction start.";
+        entry = "AbilityManagerClient::AbilityTransitionDone; the transaction start.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         owner->lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
         AppExecFwk::PacMap restoreData;
@@ -459,6 +457,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
             token_, AAFwk::AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW, restoreData);
         if (ret == ERR_OK) {
             FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+            FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
         }
     }
 }
@@ -468,8 +467,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:call");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-        "; UIAbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
+    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
     AppExecFwk::PacMap restoreData;
@@ -477,6 +475,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
         token_, AAFwk::AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);
     if (ret == ERR_OK) {
         FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+        FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
     }
 }
 
@@ -503,6 +502,9 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterUnfocused()
 void UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 {
     TAG_LOGE(AAFwkTag::UIABILITY, "scb call, ForegroundFailed");
+    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
+    std::string entry = "ERROR UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed; GoForeground failed.";
+    FreezeUtil::GetInstance().AppendLifecycleEvent(flow, entry);
     AppExecFwk::PacMap restoreData;
     switch (type) {
         case static_cast<int32_t>(OHOS::Rosen::WMError::WM_ERROR_INVALID_OPERATION): {

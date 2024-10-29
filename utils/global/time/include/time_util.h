@@ -28,6 +28,7 @@ constexpr int64_t NANOSECONDS = 1000000000;
 constexpr int64_t MICROSECONDS = 1000000;
 constexpr int64_t SEC_TO_MILLISEC = 1000;
 constexpr int64_t MAX_TIME_BUFF = 64; // 64 : for example 2021-05-27-01-01-01
+constexpr int32_t DECIMAL_BASE = 10;
 
 [[maybe_unused]] static int64_t SystemTimeMillisecond()
 {
@@ -48,6 +49,25 @@ constexpr int64_t MAX_TIME_BUFF = 64; // 64 : for example 2021-05-27-01-01-01
     char buffer[MAX_TIME_BUFF] = {0};
     std::strftime(buffer, sizeof(buffer), format.c_str(), &t);
     return std::string(buffer);
+}
+
+[[maybe_unused]] static std::string DefaultCurrentTimeStr()
+{
+    auto now = std::chrono::system_clock::now();
+    auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    auto timestamp = millis.count();
+    std::time_t tt = static_cast<std::time_t>(timestamp / SEC_TO_MILLISEC);
+    std::tm t{};
+    localtime_r(&tt, &t);
+    char buffer[MAX_TIME_BUFF] = {0};
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &t);
+    auto remainder = timestamp % SEC_TO_MILLISEC;
+    std::string milliStr("000");
+    for (int i = 2; i >= 0 && remainder > 0; i--) {
+        milliStr[i] = '0' + remainder % DECIMAL_BASE;
+        remainder /= DECIMAL_BASE;
+    }
+    return std::string(buffer) + "." + milliStr;
 }
 }  // namespace TimeUtil
 }  // namespace OHOS::AbilityRuntime

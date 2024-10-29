@@ -5110,8 +5110,7 @@ int AbilityManagerService::AttachAbilityThread(
         return dataAbilityManager->AttachAbilityThread(scheduler, token);
     } else {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) + "; AbilityManagerService::AttachAbilityThread;" +
-            " the end of load lifecycle.";
+        std::string entry = "AbilityManagerService::AttachAbilityThread; the end of load lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         int32_t ownerMissionUserId = abilityRecord->GetOwnerMissionUserId();
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -5711,14 +5710,12 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
 
     if (targetState == AbilityState::BACKGROUND) {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::BACKGROUND };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) +
-            "; AbilityManagerService::AbilityTransitionDone; the end of background lifecycle.";
+        std::string entry = "AbilityManagerService::AbilityTransitionDone; the end of background lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     } else if (targetState != AbilityState::INITIAL) {
         FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::FOREGROUND };
-        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) +
-            "; AbilityManagerService::AbilityTransitionDone; the end of foreground lifecycle.";
-        entry += " the end of foreground lifecycle.";
+        std::string entry = "AbilityManagerService::AbilityTransitionDone; the end of foreground lifecycle."
+            " the end of foreground lifecycle.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
 
@@ -6192,6 +6189,10 @@ int AbilityManagerService::StopServiceAbility(const Want &want, int32_t userId, 
 void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
+    if (abilityRecord->GetToken()) {
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(abilityRecord->GetToken()->AsObject());
+    }
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         if (abilityRecord->GetAbilityInfo().type == AbilityType::PAGE) {
             auto uiAbilityManager = GetUIAbilityManagerByUserId(abilityRecord->GetOwnerMissionUserId());

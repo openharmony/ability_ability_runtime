@@ -21,9 +21,11 @@ namespace OHOS {
 namespace AAFwk {
 class AbilitySchedulerStubMock : public AbilitySchedulerStub {
 public:
-    void ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
+    bool ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
         sptr<SessionInfo> sessionInfo = nullptr) override
-    {}
+    {
+        return true;
+    }
 
     void ScheduleShareData(const int32_t &uniqueId) override
     {}
