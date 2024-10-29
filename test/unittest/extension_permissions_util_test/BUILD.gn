@@ -28,7 +28,9 @@ ohos_unittest("extension_permissions_util_test") {
   include_dirs = [
     "mock/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+
     "${ability_runtime_services_path}/common/include",
   ]
 

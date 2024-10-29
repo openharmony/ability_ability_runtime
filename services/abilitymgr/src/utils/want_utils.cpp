@@ -17,6 +17,7 @@
 
 #include "ability_util.h"
 #include "in_process_call_wrapper.h"
+#include "utils/app_mgr_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -79,6 +80,24 @@ bool WantUtils::IsAtomicServiceUrl(const Want& want)
         TAG_LOGI(AAFwkTag::ABILITYMGR, "not atomic service short url");
     }
     return isAtomicServiceShortUrl;
+}
+
+int32_t WantUtils::GetAppIndex(const Want& want)
+{
+    int32_t appIndex = want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    if (appIndex == -1) {
+        auto appMgr = AppMgrUtil::GetAppMgr();
+        if (appMgr == nullptr) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
+            return appIndex;
+        }
+        auto callingPid = IPCSkeleton::GetCallingPid();
+        auto ret = IN_PROCESS_CALL(appMgr->GetAppIndexByPid(callingPid, appIndex));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr GetAppIndexByPid error");
+        }
+    }
+    return appIndex;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

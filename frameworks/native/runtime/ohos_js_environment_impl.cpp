@@ -16,11 +16,11 @@
 #include "ohos_js_environment_impl.h"
 
 #include "console.h"
-#include "timer.h"
 #include "hilog_tag_wrapper.h"
 #include "js_utils.h"
 #include "js_worker.h"
 #include "ohos_loop_handler.h"
+#include "sys_timer.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

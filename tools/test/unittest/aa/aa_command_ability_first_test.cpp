@@ -1113,7 +1113,7 @@ HWTEST_F(AaCommandFirstTest, RunAsAppDebugDebugCommand_0400, Function | MediumTe
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
     AbilityManagerShellCommand cmd(argc, argv);
-    EXPECT_EQ(cmd.RunAsAppDebugDebugCommand(), OHOS::ERR_OK);
+    EXPECT_EQ(cmd.RunAsAppDebugDebugCommand(), OHOS::AAFwk::ERR_NOT_DEBUG_APP);
 }
 
 /**

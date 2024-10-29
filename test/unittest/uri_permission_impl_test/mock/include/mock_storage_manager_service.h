@@ -62,7 +62,7 @@ public:
     }
 
     virtual int32_t NotifyMtpMounted(const std::string &id, const std::string &path,
-    const std::string &desc) override
+    const std::string &desc, const std::string &uuid) override
     {
         return E_OK;
     }
@@ -263,7 +263,7 @@ public:
     {
         return E_OK;
     }
-    
+
     virtual int32_t CreateRecoverKey(uint32_t userId,
                                      uint32_t userType,
                                      const std::vector<uint8_t> &token,

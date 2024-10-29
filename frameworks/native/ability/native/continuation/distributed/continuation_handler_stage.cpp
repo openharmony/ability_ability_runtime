@@ -37,7 +37,7 @@ ContinuationHandlerStage::ContinuationHandlerStage(
 bool ContinuationHandlerStage::HandleStartContinuationWithStack(
     const sptr<IRemoteObject> &token, const std::string &deviceId, uint32_t versionCode)
 {
-    TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");
+    TAG_LOGI(AAFwkTag::CONTINUATION, "Begin");
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION, "Token is null");
         return false;
@@ -52,7 +52,7 @@ bool ContinuationHandlerStage::HandleStartContinuationWithStack(
     std::shared_ptr<ContinuationManagerStage> continuationManagerTmp = nullptr;
     continuationManagerTmp = continuationManager_.lock();
     if (continuationManagerTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationManagerTmp is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "continuationManagerTmp is nullptr");
         return false;
     }
 
@@ -61,13 +61,22 @@ bool ContinuationHandlerStage::HandleStartContinuationWithStack(
     want.SetParam(VERSION_CODE_KEY, static_cast<int32_t>(versionCode));
     want.SetParam("targetDevice", deviceId);
     WantParams wantParams = want.GetParams();
-    int32_t status = continuationManagerTmp->OnContinue(wantParams);
+
+    bool isAsyncOnContinue = false;
+    AbilityInfo abilityInfo;
+    abilityInfo.deviceId = deviceId;
+    abilityInfo.bundleName = abilityInfo_->bundleName;
+    abilityInfo.name = abilityInfo_->name;
+    abilityInfo.moduleName = abilityInfo_->moduleName;
+    int32_t status = continuationManagerTmp->OnContinue(wantParams, isAsyncOnContinue, abilityInfo);
     if (status != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
             "OnContinue failed, BundleName = %{public}s, ClassName= %{public}s, status: %{public}d",
             abilityInfo_->bundleName.c_str(), abilityInfo_->name.c_str(), status);
     }
-
+    if (isAsyncOnContinue) {
+        return true;
+    }
     want.SetParams(wantParams);
     want.AddFlags(want.FLAG_ABILITY_CONTINUATION);
     want.SetElementName(deviceId, abilityInfo_->bundleName, abilityInfo_->name, abilityInfo_->moduleName);

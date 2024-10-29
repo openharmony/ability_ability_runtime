@@ -91,7 +91,7 @@ const std::string TEST_JSON_STR_ARRAY = "{"
 "}";
 
 constexpr int32_t BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
-sptr<MockBundleManagerService> mockBundleMgr = new (std::nothrow) MockBundleManagerService();
+auto mockBundleMgr = sptr<MockBundleManagerService>::MakeSptr();
 }
 class InsightIntentUtilsTest : public testing::Test {
 public:
@@ -114,7 +114,7 @@ void InsightIntentUtilsTest::TearDownTestCase(void)
 
 void InsightIntentUtilsTest::SetUp()
 {
-    mockSystemAbility_ = new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
+    mockSystemAbility_ = sptr<MockSystemAbilityManager>::MakeSptr();
     iSystemAbilityMgr_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
     MockBundleInstallerAndSA();
@@ -136,6 +136,7 @@ void InsightIntentUtilsTest::MockBundleInstallerAndSA()
 void InsightIntentUtilsTest::TearDown()
 {
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = iSystemAbilityMgr_;
+    testing::Mock::AllowLeak(mockSystemAbility_);
 }
 
 /**
@@ -235,6 +236,8 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0400, TestSize.Level1)
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, static_cast<ExecuteMode>(INT_MAX),
         TEST_SRC_ENTRY);
     EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0400 end.");
 }
 } // namespace AAFwk

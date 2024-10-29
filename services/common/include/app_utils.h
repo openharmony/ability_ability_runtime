@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_APP_UTILS_H
 #define OHOS_ABILITY_RUNTIME_APP_UTILS_H
 
+#include <mutex>
 #include <string>
 
 #include "nocopyable.h"
@@ -298,12 +299,14 @@ private:
     volatile DeviceConfiguration<bool> isSupportMultiInstance_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
+    std::mutex residentProcessInExtremeMemoryMutex_;
     DeviceConfiguration<std::vector<std::string>>
         allowStartNativeProcessApps_ = {false, {}};
     volatile DeviceConfiguration<int32_t> limitMaximumExtensionsPerProc_ = {false, DEFAULT_MAX_EXT_PER_PROC};
     volatile DeviceConfiguration<int32_t> limitMaximumExtensionsPerDevice_ = {false, DEFAULT_MAX_EXT_PER_DEV};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         startAbilityWithoutCallerToken_ = {false, {}};
+    std::mutex startAbilityWithoutCallerTokenMutex_;
     DeviceConfiguration<std::string> brokerDelegateBundleName_ = {false, ""};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> collaboratorBrokerReserveUid_ = {false, DEFAULT_INVALID_VALUE};

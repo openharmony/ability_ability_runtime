@@ -13,32 +13,37 @@
  * limitations under the License.
  */
 
+let hilog = requireNapi('hilog');
+
+let domainID = 0xD001320;
+let TAG = 'JSENV';
+
 class InsightIntentExecutor {
   constructor() {}
 
   onExecuteInUIAbilityForegroundMode(name, param, pageLoader) {
-    console.log(`onExecuteInUIAbilityForegroundMode ${name}`);
+    hilog.sLogI(domainID, TAG, `onExecuteInUIAbilityForegroundMode ${name}`);
     return {
       'code': 0
     };
   }
 
   onExecuteInUIAbilityBackgroundMode(name, param) {
-    console.log(`onExecuteInUIAbilityForegroundMode ${name}`);
+    hilog.sLogI(domainID, TAG, `onExecuteInUIAbilityForegroundMode ${name}`);
     return {
       'code': 0
     };
   }
 
   onExecuteInUIExtensionAbility(name, param, pageLoader) {
-    console.log(`onExecuteInUIExtensionAbility ${name}`);
+    hilog.sLogI(domainID, TAG, `onExecuteInUIExtensionAbility ${name}`);
     return {
       'code': 0
     };
   }
 
   onExecuteInServiceExtensionAbility(name, param) {
-    console.log(`onExecuteInServiceExtensionAbility ${name}`);
+    hilog.sLogI(domainID, TAG, `onExecuteInServiceExtensionAbility ${name}`);
     return {
       'code': 0
     };

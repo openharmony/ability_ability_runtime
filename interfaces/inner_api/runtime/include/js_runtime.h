@@ -97,6 +97,11 @@ public:
 
     void PreloadSystemModule(const std::string& moduleName) override;
 
+    void PreloadMainAbility(const std::string& moduleName, const std::string& srcPath,
+        const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) override;
+    void PreloadModule(const std::string& moduleName, const std::string& srcPath,
+        const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
+    bool PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj);
     void StartDebugMode(const DebugOption debugOption) override;
     void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);
     void StopDebugMode();
@@ -161,6 +166,7 @@ private:
     int32_t apiTargetVersion_ = 0;
     std::map<std::string, std::string> pkgContextInfoJsonStringMap_;
     std::map<std::string, std::string> packageNameList_;
+    std::map<std::string, std::unique_ptr<NativeReference>> preloadList_;
 
     static std::atomic<bool> hasInstance;
 

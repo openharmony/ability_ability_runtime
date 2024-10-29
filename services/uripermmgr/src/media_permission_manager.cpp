@@ -90,7 +90,7 @@ std::vector<bool> MediaPermissionManager::CheckUriPermission(const std::vector<U
         results, flag));
     TAG_LOGI(AAFwkTag::URIPERMMGR, "CheckPhotoUriPermission finished.");
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Check photo uri permission failed, ret is %{pubic}d", ret);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Check photo uri permission failed, ret is %{public}d", ret);
         results = std::vector<bool>(uriStrVec.size(), false);
         return results;
     }

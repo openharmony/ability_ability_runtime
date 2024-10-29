@@ -74,6 +74,7 @@ ohos_source_set("appmgr_test_source") {
   }
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
 
@@ -113,7 +114,6 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/ability_connect_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_debug_deal.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_event_handler.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_event_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_collaborator_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
@@ -152,7 +152,6 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/free_install_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_execute_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent_profile.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/ability_interceptor_executer.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/ability_jump_interceptor.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/control_interceptor.cpp",
@@ -172,7 +171,6 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/sender_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_handler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_handler/start_ability_sandbox_savefile.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sub_managers_helper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/task_data_persistence_mgr.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension_record.cpp",
@@ -180,6 +178,9 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/uri_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_controller.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_event_handler.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/ability_event_util.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/insight_intent_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_receiver_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_receiver_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_sender_info.cpp",
@@ -325,6 +326,7 @@ group("unittest") {
       "ability_cache_manager_test:unittest",
       "ability_connect_callback_proxy_test:unittest",
       "ability_connect_callback_stub_test:unittest",
+      "ability_connect_manager_first_test:unittest",
       "ability_connect_manager_test:unittest",
       "ability_connection_test:unittest",
       "ability_debug_deal_test:unittest",
@@ -357,6 +359,7 @@ group("unittest") {
       "ability_manager_service_seventh_test:unittest",
       "ability_manager_service_sixth_test:unittest",
       "ability_manager_service_third_test:unittest",
+      "ability_manager_stub_second_test:unittest",
       "ability_manager_stub_test:unittest",
       "ability_permission_util_test:unittest",
       "ability_record_dump_test:unittest",
@@ -532,6 +535,7 @@ group("unittest") {
       "js_uiservice_uiext_connection_test:unittest",
       "lifecycle_deal_test:unittest",
       "lifecycle_test:unittest",
+      "main_element_utils_test:unittest",
       "mission_data_storage_test:unittest",
       "mission_info_mgr_test:unittest",
       "mission_listener_proxy_test:unittest",
@@ -595,7 +599,6 @@ group("unittest") {
       "unlock_screen_test:unittest",
       "update_caller_info_util_test:unittest",
       "uri_perm_mgr_test:unittest",
-      "uri_permission_impl_test:unittest",
       "uri_permission_manager_test:unittest",
       "uri_permission_test:unittest",
       "uri_permission_utils_test:unittest",
@@ -617,12 +620,18 @@ group("unittest") {
       "window_visibility_changed_listener_test:unittest",
     ]
 
+    if (ability_runtime_feature_sandboxmanager) {
+      deps += [ "uri_permission_impl_test:unittest" ]
+    }
+
     if (ability_runtime_graphics) {
       deps += [
         "call_container_test:unittest",
         "mission_info_test:unittest",
         "mission_list_dump_test:unittest",
         "mission_list_manager_dump_test:unittest",
+        "mission_list_manager_first_test:unittest",
+        "mission_list_manager_second_test:unittest",
         "mission_list_manager_test:unittest",
         "mission_list_manager_ut_test:unittest",
         "mission_list_test:unittest",

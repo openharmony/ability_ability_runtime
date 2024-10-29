@@ -640,11 +640,11 @@ public:
 
     /**
      * @brief mark a process which is going restart.
-     * @param bundleName the bundleName of the process.
+     * @param uid the uid of the process.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t SignRestartAppFlag(const std::string &bundleName) override;
+    int32_t SignRestartAppFlag(int32_t uid) override;
 
     /**
      * Get appRunningUniqueId by pid.
@@ -739,6 +739,8 @@ public:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName,
         std::vector<int32_t> &pidList) override;
+
+    virtual int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) override;
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);

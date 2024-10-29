@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//commonlibrary/memory_utils/purgeable_mem_config.gni")
 import("//build/ohos.gni")
 import("//build/templates/abc/ohos_abc.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
@@ -87,6 +88,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/recovery",
     "${ability_runtime_path}/utils/global/time/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_napi_path}/inner/napi_common",
     "${ability_runtime_utils_path}/global/constant",
@@ -201,7 +203,6 @@ ohos_shared_library("appkit_native") {
     "napi:ace_napi",
     "preferences:native_preferences",
     "resource_management:global_resmgr",
-    "runtime_core:libarkbase_static",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
@@ -231,9 +232,6 @@ ohos_shared_library("appkit_native") {
     defines += [ "NWEB" ]
   }
 
-
-  memory_utils_purgeable_ashmem_enable = true
-  
   if (memory_utils_purgeable_ashmem_enable && defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_memmgr_override)) {
     defines += [ "IMAGE_PURGEABLE_PIXELMAP" ]

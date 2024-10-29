@@ -16,8 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_URI_PERMISSION_EVENT_H
 #define OHOS_ABILITY_RUNTIME_URI_PERMISSION_EVENT_H
 
-#include "event_report.h"
 #include "bundle_mgr_helper.h"
+#include "event_report.h"
+#include "uri.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -34,8 +35,11 @@ public:
     static bool CheckIsSystemAppByTokenId(uint32_t tokenId);
     static bool GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName);
     static bool GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName);
+    static bool GetAlterableBundleNameByTokenId(uint32_t tokenId, std::string &bundleName);
     static int32_t GetAppIdByBundleName(const std::string &bundleName, std::string &appId);
     static int32_t GetTokenIdByBundleName(const std::string &bundleName, int32_t appIndex, uint32_t &tokenId);
+    static bool CheckUriTypeIsValid(Uri &uri);
+    static bool GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion);
     static bool IsDocsCloudUri(Uri &uri);
 
 private:

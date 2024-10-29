@@ -267,7 +267,7 @@ int32_t DistributedClient::RegisterMissionListener(const std::u16string& devId,
 }
 
 int32_t DistributedClient::RegisterOnListener(const std::string& type,
-    const sptr<IRemoteObject>& obj)
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -281,11 +281,12 @@ int32_t DistributedClient::RegisterOnListener(const std::string& type,
     }
     PARCEL_WRITE_HELPER(data, String, type);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj);
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, REGISTER_ON_LISTENER, data, reply);
 }
 
 int32_t DistributedClient::RegisterOffListener(const std::string& type,
-    const sptr<IRemoteObject>& obj)
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -300,6 +301,7 @@ int32_t DistributedClient::RegisterOffListener(const std::string& type,
     }
     PARCEL_WRITE_HELPER(data, String, type);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj);
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, REGISTER_OFF_LISTENER, data, reply);
 }
 

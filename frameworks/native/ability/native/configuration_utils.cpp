@@ -70,6 +70,7 @@ void ConfigurationUtils::GetGlobalConfig(const Configuration &configuration,
     resourceConfig.SetMcc(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     resourceConfig.SetMnc(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
     resourceConfig.SetThemeId(configuration.GetItem(AAFwk::GlobalConfigurationKey::THEME_ID));
+    resourceConfig.SetThemeIcon(configuration.GetItem(AAFwk::GlobalConfigurationKey::THEME_ICON));
 }
 
 #ifdef SUPPORT_GRAPHICS

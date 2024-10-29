@@ -31,6 +31,7 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/abilitymgr/include/interceptor",
     "${ability_runtime_utils_path}/server/startup/include",
@@ -45,7 +46,7 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/start_other_app_interceptor.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "startotherappinterceptor_fuzzer.cpp",
   ]
@@ -56,6 +57,7 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/appmgr:libappms",

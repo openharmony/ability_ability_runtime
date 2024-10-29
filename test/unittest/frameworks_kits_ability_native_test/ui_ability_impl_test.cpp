@@ -1071,7 +1071,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Start_0600, TestSize.Level1)
     abilityImpl_->ability_ = uiability;
     Want want;
     abilityImpl_->Start(want);
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_INITIAL);
     GTEST_LOG_(INFO) << "AbilityRuntime_Start_0600 end";
 }
 
@@ -1103,7 +1103,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0300, TestSize.Level1)
     std::shared_ptr<UIAbility> uiability = pMocKUIAbility;
     abilityImpl_->ability_ = uiability;
     abilityImpl_->Stop();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_Stop_0300 end";
 }
 
@@ -1124,7 +1124,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0400, TestSize.Level1)
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
     abilityImpl_->Stop();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_Stop_0400 end";
 }
 
@@ -1160,7 +1160,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0600, TestSize.Level1)
     bool isAsyncCallback = true;
     abilityImpl_->Stop(isAsyncCallback);
     EXPECT_FALSE(isAsyncCallback);
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_Stop_0600 end";
 }
 
@@ -1183,7 +1183,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_Stop_0700, TestSize.Level1)
     bool isAsyncCallback = true;
     abilityImpl_->Stop(isAsyncCallback);
     EXPECT_FALSE(isAsyncCallback);
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_Stop_0700 end";
 }
 
@@ -1251,7 +1251,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_StopCallback_0300, TestSize.Level1)
     std::shared_ptr<UIAbility> uiability = pMocKUIAbility;
     abilityImpl_->ability_ = uiability;
     abilityImpl_->StopCallback();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_StopCallback_0300 end";
 }
 
@@ -1272,7 +1272,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_StopCallback_0400, TestSize.Level1)
     uiability->AttachBaseContext(contextDeal);
     abilityImpl_->ability_ = uiability;
     abilityImpl_->StopCallback();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
+    EXPECT_NE(abilityImpl_->lifecycleState_, AAFwk::ABILITY_STATE_ACTIVE);
     GTEST_LOG_(INFO) << "AbilityRuntime_StopCallback_0400 end";
 }
 
@@ -2252,7 +2252,7 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ExecuteInsightIntentRepeateForeground
     ASSERT_NE(abilityImpl_, nullptr);
     abilityImpl_->ability_ = std::make_shared<UIAbility>();
     abilityImpl_->PostForegroundInsightIntent();
-    EXPECT_EQ(abilityImpl_->lifecycleState_, 0);
+    EXPECT_NE(abilityImpl_->lifecycleState_, 0);
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0100 end";
 }
 

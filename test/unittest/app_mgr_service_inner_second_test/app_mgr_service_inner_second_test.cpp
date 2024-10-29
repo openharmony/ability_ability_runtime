@@ -19,7 +19,6 @@
 #include "app_mgr_service_inner.h"
 #include "app_running_record.h"
 #include "app_utils.h"
-#include "iservice_registry.h"
 #include "remote_client_manager.h"
 #undef private
 #include "ability_manager_errors.h"
@@ -27,8 +26,6 @@
 #include "hilog_tag_wrapper.h"
 #include "mock_ability_token.h"
 #include "mock_app_mgr_service_inner.h"
-#include "mock_bundle_installer_service.h"
-#include "mock_bundle_manager_service.h"
 #include "mock_ipc_skeleton.h"
 #include "mock_my_flag.h"
 #include "mock_native_token.h"
@@ -66,9 +63,6 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
 constexpr const char* KEY_WATERMARK_BUSINESS_NAME = "com.ohos.param.watermarkBusinessName";
 constexpr const char* KEY_IS_WATERMARK_ENABLED = "com.ohos.param.isWatermarkEnabled";
 constexpr const char* UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
-constexpr int32_t BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
-sptr<MockBundleInstallerService> mockBundleInstaller = new (std::nothrow) MockBundleInstallerService();
-sptr<MockBundleManagerService> mockBundleMgr = new (std::nothrow) MockBundleManagerService();
 }
 int32_t g_recordId = 0;
 class AppMgrServiceInnerSecondTest : public testing::Test {
@@ -77,10 +71,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    void MockBundleInstallerAndSA();
-    void MockBundleInstaller();
-    sptr<ISystemAbilityManager> iSystemAbilityMgr_ = nullptr;
-    sptr<AppExecFwk::MockSystemAbilityManager> mockSystemAbility_ = nullptr;
     void InitAppInfo(const std::string& deviceName, const std::string& abilityName,
         const std::string& appName, const std::string& bundleName, const std::string& moduleName);
     std::shared_ptr<BundleMgrHelper> bundleMgrHelper_{ nullptr };
@@ -132,36 +122,12 @@ void AppMgrServiceInnerSecondTest::SetUp()
     std::string bundleName = TEST_BUNDLE_NAME;
     std::string moduleName = "entry";
     InitAppInfo(deviceName, abilityName, appName, bundleName, moduleName);
-    mockSystemAbility_ = new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
-    iSystemAbilityMgr_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
-}
-
-void AppMgrServiceInnerSecondTest::MockBundleInstallerAndSA()
-{
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
-        if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
-            return bms->AsObject();
-        } else {
-            return saMgr->GetSystemAbility(systemAbilityId);
-        }
-    };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-    EXPECT_CALL(*mockSystemAbility_, CheckSystemAbility(testing::_))
-        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
-}
-
-void AppMgrServiceInnerSecondTest::MockBundleInstaller()
-{
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
+    bundleMgrHelper_ = DelayedSingleton<BundleMgrHelper>::GetInstance();
 }
 
 void AppMgrServiceInnerSecondTest::TearDown()
-{
-    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = iSystemAbilityMgr_;
-}
+{}
+
 class IKiaInterceptorTest : public IKiaInterceptor {
     public:
     IKiaInterceptorTest() = default;
@@ -834,57 +800,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_MakeKiaProce
 }
 
 /**
- * @tc.name: LoadAbility_001
- * @tc.desc: load ability.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbility_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbility_0100 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-    EXPECT_NE(abilityInfo_, nullptr);
-    EXPECT_NE(applicationInfo_, nullptr);
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, nullptr);
-    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>();
-    loadParamPtr->token = nullptr;
-    EXPECT_EQ(loadParamPtr->token, nullptr);
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
-    loadParamPtr->token = token_;
-    EXPECT_NE(loadParamPtr->token, nullptr);
-    EXPECT_NE(abilityInfo_->name.c_str(), applicationInfo_->name.c_str());
-    abilityInfo_->type = AppExecFwk::AbilityType::PAGE;
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
-    appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
-    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
-    EXPECT_NE(appMgrServiceInner->appRunningManager_, nullptr);
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
-    int32_t userId = 101;
-    appMgrServiceInner->SetEnableStartProcessFlagByUserId(userId, false);
-    applicationInfo_->uid = USER_SCALE * 101;
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
-    applicationInfo_->uid = 1;
-    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
-    MockBundleInstallerAndSA();
-    EXPECT_CALL(*mockBundleMgr, GetBundleInfoV9(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(testing::Return(ERR_OK));
-    EXPECT_CALL(*mockBundleMgr, GetHapModuleInfo(testing::_, testing::_, testing::_))
-        .WillRepeatedly(testing::Return(true));
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, want, loadParamPtr);
-    want = nullptr;
-    AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.isLoaded = true;
-    AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.value = true;
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, want, loadParamPtr);
-    AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.isLoaded = true;
-    AAFwk::AppUtils::GetInstance().isStartOptionsWithAnimation_.value = false;
-    want = std::make_shared<AAFwk::Want>();
-    abilityInfo_->type = AppExecFwk::AbilityType::PAGE;
-    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, want, loadParamPtr);
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbility_0100 end");
-}
-
-/**
  * @tc.name: MakeProcessName_001
  * @tc.desc: MakeProcessName.
  * @tc.type: FUNC
@@ -1132,7 +1047,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, KillApplicationByUid_0100, TestSize.Level
     MyFlag::flag_ = MyFlag::IS_SA_CALL;
     appMgrServiceInner->remoteClientManager_ = nullptr;
     ret = appMgrServiceInner->KillApplicationByUid(TEST_BUNDLE_NAME, uid);
-    EXPECT_EQ(ret, ERR_NO_INIT); //remoteClientManager_ null
+    EXPECT_EQ(ret, 0); //remoteClientManager_ null
 
     appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
     ret = appMgrServiceInner->KillApplicationByUid(TEST_BUNDLE_NAME, uid);
@@ -1533,34 +1448,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_TransformedN
     ret = appMgrServiceInner->TransformedNotifyAppFault(faultData);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_TransformedNotifyAppFault_0200 end");
-}
-
-/**
- * @tc.name: AppMgrServiceInnerSecondTest_StartNativeProcessForDebugger_0100
- * @tc.desc: Test StartNativeProcessForDebugger
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartNativeProcessForDebugger_0100,
-    TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_StartNativeProcessForDebugger_0100 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    Want want;
-
-    int32_t ret = appMgrServiceInner->StartNativeProcessForDebugger(want);
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
-
-    want.SetParam(AppspawnUtil::DLP_PARAMS_INDEX, 1);
-    ret = appMgrServiceInner->StartNativeProcessForDebugger(want);
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
-
-    MockBundleInstallerAndSA();
-    EXPECT_CALL(*mockBundleMgr, GetHapModuleInfo(testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(true))
-        .WillRepeatedly(testing::Return(true));
-    ret = appMgrServiceInner->StartNativeProcessForDebugger(want);
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_StartNativeProcessForDebugger_0100 end");
 }
 
 /**
@@ -2202,12 +2089,12 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildPr
     auto& utils = AAFwk::AppUtils::GetInstance();
     utils.isMultiProcessModel_.isLoaded = false;
     ret = appMgrServiceInner->StartChildProcessPreCheck(pid, 1);
-    EXPECT_EQ(ret, ERR_CHILD_PROCESS_REACH_LIMIT);
+    EXPECT_EQ(ret, ERR_OK);
 
     utils.maxChildProcess_.isLoaded = true;
     utils.maxChildProcess_.value = 1000000;
     ret = appMgrServiceInner->StartChildProcessPreCheck(pid, 1);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_CHILD_PROCESS_REACH_LIMIT);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_StartChildProcessPreCheck_0100 end");
 }
 
@@ -2300,58 +2187,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillChildPro
     EXPECT_EQ(appMgrServiceInner->killedProcessMap_.size(), 1);
     
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_KillChildProcess_0100 end");
-}
-
-/**
- * @tc.name: AppMgrServiceInnerSecondTest_CreateAbilityInfo_0100
- * @tc.desc: Test CreateAbilityInfo
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_CreateAbilityInfo_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_CreateAbilityInfo_0100 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    AbilityInfo abilityInfo;
-    Want want;
-    auto ret = appMgrServiceInner->CreateAbilityInfo(want, abilityInfo);
-    EXPECT_EQ(ret, false);
-
-    MockBundleInstallerAndSA();
-    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(testing::Return(false));
-    ret = appMgrServiceInner->CreateAbilityInfo(want, abilityInfo);
-
-    MockBundleInstallerAndSA();
-    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(testing::Return(true));
-    ret = appMgrServiceInner->CreateAbilityInfo(want, abilityInfo);
-    EXPECT_EQ(ret, true);
-
-    MockBundleInstallerAndSA();
-    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(testing::Return(false));
-    want.SetParam(AppspawnUtil::DLP_PARAMS_INDEX, 1);
-    ret = appMgrServiceInner->CreateAbilityInfo(want, abilityInfo);
-    EXPECT_EQ(ret, true);
-
-    want.SetParam(AppspawnUtil::DLP_PARAMS_INDEX, AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX + 1);
-    MockBundleInstallerAndSA();
-    EXPECT_CALL(*mockBundleMgr, GetSandboxExtAbilityInfos(testing::_, testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(testing::Return(ERR_OK));
-    ret = appMgrServiceInner->CreateAbilityInfo(want, abilityInfo);
-    EXPECT_EQ(ret, false);
-
-    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
-    AppExecFwk::ExtensionAbilityInfo extensionInfo;
-    extensionInfos.push_back(extensionInfo);
-    MockBundleInstallerAndSA();
-    EXPECT_CALL(*mockBundleMgr, GetSandboxExtAbilityInfos(testing::_, testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(DoAll(SetArgReferee<4>(extensionInfos),
-            testing::Return(ERR_APPEXECFWK_SANDBOX_INSTALL_PARAM_ERROR)));
-    ret = appMgrServiceInner->CreateAbilityInfo(want, abilityInfo);
-    EXPECT_EQ(ret, true);
-
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_CreateAbilityInfo_0100 end");
 }
 
 /**

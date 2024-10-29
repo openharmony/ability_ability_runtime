@@ -53,6 +53,7 @@ ohos_fuzztest("MissionListManagerThirdFuzzTest") {
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:connection_obs_manager",

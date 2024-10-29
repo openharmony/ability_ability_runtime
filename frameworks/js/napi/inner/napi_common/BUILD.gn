@@ -62,7 +62,7 @@ ohos_shared_library("napi_common") {
     "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "libuv:uv",
-    "napi:ace_napi",    
+    "napi:ace_napi",
   ]
 
   public_external_deps = [
