@@ -19,7 +19,6 @@
 #include "ability_manager_client.h"
 #include "ability_state.h"
 #include "exit_reason.h"
-#include "ability_util.h"
 
 int RecordAppExitReason(int exitReason, const char *exitMsg)
 {
@@ -33,6 +32,8 @@ int RecordAppExitReason(int exitReason, const char *exitMsg)
     OHOS::AAFwk::ExitReason exitReasonData = { reason, exitMsgStr };
 
     auto instance = OHOS::AAFwk::AbilityManagerClient::GetInstance();
-    CHECK_POINTER_AND_RETURN(instance, -1);
+    if (!instance) {
+        return -1;
+    }
     return instance->RecordAppExitReason(exitReasonData);
 }
