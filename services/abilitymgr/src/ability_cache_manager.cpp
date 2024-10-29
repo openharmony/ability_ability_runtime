@@ -206,15 +206,19 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::FindRecordByToken(const sptr
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = devRecLru_.begin();
     while (it != devRecLru_.end()) {
-        if ((*it) && (*it)->GetToken() == token) {
-            std::shared_ptr<AbilityRecord> &abilityRecord = *it;
-            TAG_LOGD(AAFwkTag::ABILITYMGR,
-                "Find the ability by token from lru, service:%{public}s, extension type %{public}d",
-                abilityRecord->GetURI().c_str(), abilityRecord->GetAbilityInfo().extensionAbilityType);
-            return abilityRecord;
-        } else {
-            it++;
+        if (*it) {
+            sptr<IRemoteObject> srcToken = (*it)->GetToken();
+            if (srcToken == token) {
+                std::shared_ptr<AbilityRecord> &abilityRecord = *it;
+                if (abilityRecord) {
+                    TAG_LOGD(AAFwkTag::ABILITYMGR,
+                    "Find the ability by token from lru, service:%{public}s, extension type %{public}d",
+                    abilityRecord->GetURI().c_str(), abilityRecord->GetAbilityInfo().extensionAbilityType);
+                }
+                return abilityRecord;
+            }
         }
+        it++;
     }
     return nullptr;
 }
