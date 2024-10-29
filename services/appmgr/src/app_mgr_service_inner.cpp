@@ -379,7 +379,9 @@ void AppMgrServiceInner::Init()
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
     DelayedSingleton<RenderStateObserverManager>::GetInstance()->Init();
     dfxTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("dfx_freeze_task_queue");
+    dfxTaskHandler_->SetPrintTaskLog(true);
     otherTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("other_app_mgr_task_queue");
+    otherTaskHandler_->SetPrintTaskLog(true);
     willKillPidsNum_ = 0;
     delayKillTaskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("delay_kill_task_queue");
     if (securityModeManager_) {
@@ -737,7 +739,7 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
         }
     };
     if (taskHandler_) {
-        taskHandler_->SubmitTask(reportLoadTask);
+        taskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
     }
 
     appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
@@ -927,7 +929,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
         otherTaskHandler_->SubmitTask([appRecord, abilityInfo, pThis = shared_from_this()]() {
             pThis->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_SET_COLD_START, false, false);
             pThis->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD);
-            }, FIRST_FRAME_NOTIFY_TASK_DELAY);
+            }, "AppStateChangedNotify", FIRST_FRAME_NOTIFY_TASK_DELAY);
     }
     uint32_t startFlags = (want == nullptr) ? 0 : AppspawnUtil::BuildStartFlags(*want, *abilityInfo);
     int32_t bundleIndex = 0;
@@ -3342,7 +3344,10 @@ int32_t AppMgrServiceInner::CreateStartMsg(const std::string &processName, uint3
 
     AAFwk::AutoSyncTaskHandle autoSync(otherTaskHandler_->SubmitTask([&]() {
         AddMountPermission(bundleInfo.applicationInfo.accessTokenId, startMsg.permissions);
-    }));
+        }, AAFwk::TaskAttribute{
+            .taskName_ = "AddMountPermission",
+            .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+        }));
 
     HspList hspList;
     auto ret = bundleMgrHelper->GetBaseSharedBundleInfos(bundleInfo.name, hspList,
@@ -7880,7 +7885,7 @@ void AppMgrServiceInner::SubmitCacheLoadAbilityTask()
         [taskHandler](LoadAbilityTaskFunc loadAbilityFunc) {
             auto LoadAbilityhandler = taskHandler.lock();
             if (LoadAbilityhandler != nullptr && loadAbilityFunc) {
-                LoadAbilityhandler->SubmitTask(loadAbilityFunc);
+                LoadAbilityhandler->SubmitTask(loadAbilityFunc, "loadAbilityFunc");
             }
         });
     loadAbilityTaskFuncList_.clear();
