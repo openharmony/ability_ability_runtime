@@ -494,8 +494,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     if (abilityInfo->type == AbilityType::PAGE) {
         AbilityRuntime::FreezeUtil::LifecycleFlow flow = {loadParam->token,
             AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
-        auto entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-            "; AppMgrServiceInner::LoadAbility; the load lifecycle.";
+        std::string entry = "AppMgrServiceInner::LoadAbility; the load lifecycle.";
         AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     }
 
@@ -909,6 +908,7 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid:%{public}d", pid);
         return;
     }
+    AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(pid, "ServiceInner::AttachApplication");
     auto appRecord = GetAppRunningRecordByPid(pid);
     CHECK_POINTER_AND_RETURN_LOG(appRecord, "no such appRecord");
     auto applicationInfo = appRecord->GetApplicationInfo();
@@ -975,10 +975,8 @@ void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord>
 
 void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is null");
-        return;
-    }
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord null");
+    appRecord->AddAppLifecycleEvent("ServiceInner::LaunchApplication");
     auto applicationInfo = appRecord->GetApplicationInfo();
     std::string bundleName = "";
     if (!applicationInfo) {
@@ -1046,6 +1044,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         TAG_LOGE(AAFwkTag::APPMGR, "get app record failed");
         return;
     }
+    appRecord->AddAppLifecycleEvent("ServiceInner::AppForegrounded");
     // Prevent forged requests from changing the app's state.
     if (appRecord->GetApplicationScheduleState() != ApplicationScheduleState::SCHEDULE_FOREGROUNDING) {
         TAG_LOGE(AAFwkTag::APPMGR, "app is not scheduling to foreground.");
@@ -1093,6 +1092,7 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         return;
     }
     // Prevent forged requests from changing the app's state.
+    appRecord->AddAppLifecycleEvent("ServiceInner::ForeForegrounded");
     if (appRecord->GetApplicationScheduleState() != ApplicationScheduleState::SCHEDULE_BACKGROUNDING) {
         TAG_LOGE(AAFwkTag::APPMGR, "app is not scheduling to background.");
         return;
@@ -1109,13 +1109,14 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         TAG_LOGW(AAFwkTag::APPMGR, "app name(%{public}s), app state(%{public}d)!",
             appRecord->GetName().c_str(), static_cast<ApplicationState>(appRecord->GetState()));
     }
-    if (appRecord->GetApplicationPendingState() == ApplicationPendingState::FOREGROUNDING) {
+    auto pendingState = appRecord->GetApplicationPendingState();
+    TAG_LOGI(AAFwkTag::APPMGR, "app backgrounded: %{public}s, pState: %{public}d", appRecord->GetBundleName().c_str(),
+        pendingState);
+    if (pendingState == ApplicationPendingState::FOREGROUNDING) {
         appRecord->ScheduleForegroundRunning();
-    } else if (appRecord->GetApplicationPendingState() == ApplicationPendingState::BACKGROUNDING) {
+    } else if (pendingState == ApplicationPendingState::BACKGROUNDING) {
         appRecord->SetApplicationPendingState(ApplicationPendingState::READY);
     }
-
-    TAG_LOGI(AAFwkTag::APPMGR, "ApplicationBackgrounded, bundle: %{public}s", appRecord->GetBundleName().c_str());
     auto eventInfo = BuildEventInfo(appRecord);
     AAFwk::EventReport::SendAppBackgroundEvent(AAFwk::EventName::APP_BACKGROUND, eventInfo);
 }
@@ -2247,6 +2248,8 @@ void AppMgrServiceInner::UpdateAbilityState(const sptr<IRemoteObject> &token, co
         return;
     }
 
+    AbilityRuntime::FreezeUtil::LifecycleFlow flow{token, AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND};
+    AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow, "ServiceInner::UpdateAbilityState");
     auto appRecord = GetAppRunningRecordByAbilityToken(token);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "app is not exist!");

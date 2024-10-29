@@ -55,7 +55,7 @@ public:
     void CommandAbilityWindow(const Want &want, const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
     void SaveAbilityState();
     void RestoreAbilityState(const PacMap &inState);
-    void ForegroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
+    bool ForegroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
         sptr<SessionInfo> sessionInfo = nullptr);
     void BackgroundNew(const Want &want, LifeCycleStateInfo &stateInfo,
         sptr<SessionInfo> sessionInfo = nullptr);

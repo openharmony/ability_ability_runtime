@@ -52,7 +52,7 @@ public:
      * @param targetState, The lifecycle state to be transformed
      * @param sessionInfo, The session info
      */
-    virtual void ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &targetState,
+    virtual bool ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &targetState,
         sptr<SessionInfo> sessionInfo = nullptr) = 0;
 
     /*
