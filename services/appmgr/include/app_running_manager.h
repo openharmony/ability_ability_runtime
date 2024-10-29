@@ -309,7 +309,7 @@ public:
      */
     int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
 
-    int32_t SignRestartAppFlag(const std::string &bundleName);
+    int32_t SignRestartAppFlag(int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -352,6 +352,9 @@ public:
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void NotifyAppPreCache(const std::shared_ptr<AppRunningRecord>& appRecord,
+        const std::shared_ptr<AppMgrServiceInner>& appMgrServiceInner);
 
 private:
     std::mutex runningRecordMapMutex_;

@@ -81,7 +81,7 @@ void AbilityResultListeners::RemoveListener(const uint64_t &uiExtensionComponent
 
 void AbilityResultListeners::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
-    for (auto item : listeners_) {
+    for (auto &item : listeners_) {
         if (item.second && item.second->IsMatch(requestCode)) {
             item.second->OnAbilityResult(requestCode, resultCode, resultData);
             return;

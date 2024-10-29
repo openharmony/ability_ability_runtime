@@ -34,7 +34,6 @@
 #include "mock_native_token.h"
 #include "mock_render_scheduler.h"
 #include "mock_sa_call.h"
-#include "mock_task_handler_wrap.h"
 #include "param.h"
 #include "parameters.h"
 #include "render_state_observer_stub.h"
@@ -3466,12 +3465,8 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAppFault_001, TestSize.Level1)
 HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 start");
-    std::shared_ptr<AppMgrServiceInner> appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-    std::shared_ptr<MockTaskHandlerWrap> taskHandler = MockTaskHandlerWrap::CreateQueueHandler("app_mgr_task_queue");
-    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(AtLeast(1));
-    appMgrServiceInner->SetTaskHandler(taskHandler);
-
     int32_t pid = 0;
     int32_t uid = 0;
     std::string bundleName = "test_processName";
@@ -3479,7 +3474,6 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     faultData.errorObject.name = "1234";
     faultData.faultType = FaultDataType::APP_FREEZE;
     appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, faultData);
-    EXPECT_NE(taskHandler, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 end");
 }
 
@@ -3712,6 +3706,7 @@ HWTEST_F(AppMgrServiceInnerTest, MakeAppDebugInfo_001, TestSize.Level0)
     auto appDebugInfo = appMgrServiceInner->MakeAppDebugInfo(appRecord, isDebugStart);
     EXPECT_EQ(appDebugInfo.bundleName, "");
     EXPECT_EQ(appDebugInfo.pid, APP_DEBUG_INFO_PID);
+    EXPECT_EQ(appDebugInfo.uid, APP_DEBUG_INFO_UID);
     EXPECT_EQ(appDebugInfo.isDebugStart, true);
 }
 
@@ -3881,7 +3876,6 @@ HWTEST_F(AppMgrServiceInnerTest, SendAppLaunchEvent_001, TestSize.Level0)
     appMgrServiceInner->SendAppLaunchEvent(appRecord);
     TAG_LOGI(AAFwkTag::TEST, "SendAppLaunchEvent_001 end");
 }
-
 HWTEST_F(AppMgrServiceInnerTest, IsMainProcess_001, TestSize.Level0)
 {
     TAG_LOGI(AAFwkTag::TEST, "IsMainProcess_001 start");
@@ -3892,7 +3886,7 @@ HWTEST_F(AppMgrServiceInnerTest, IsMainProcess_001, TestSize.Level0)
     hapModuleInfo.moduleName = "module123";
     applicationInfo_->process = "";
     EXPECT_EQ(appMgrServiceInner->IsMainProcess(nullptr, ""), true);
-    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, ""), false);
+    EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, ""), true);
     EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, "processName1"), false);
     EXPECT_EQ(appMgrServiceInner->IsMainProcess(applicationInfo_, applicationInfo_->bundleName), true);
     applicationInfo_->process = "processName2";

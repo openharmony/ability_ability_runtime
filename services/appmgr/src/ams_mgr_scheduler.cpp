@@ -281,15 +281,14 @@ void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const 
     amsHandler_->SubmitTask(attachPidToParentFunc, TASK_ATTACH_PID_TO_PARENT);
 }
 
-int32_t AmsMgrScheduler::KillProcessWithAccount(
-    const std::string &bundleName, const int accountId)
+int32_t AmsMgrScheduler::KillProcessWithAccount(const std::string &bundleName, const int accountId)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d",
-        bundleName.c_str(), accountId);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d", bundleName.c_str(), accountId);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId);
+    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId,
+        "KillProcessWithAccount");
 }
 
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
@@ -335,8 +334,7 @@ int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundl
 
 int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s",
-        bundleName.c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s", bundleName.c_str());
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
@@ -366,21 +364,22 @@ int32_t AmsMgrScheduler::KillProcessesByAccessTokenId(const uint32_t accessToken
     return amsMgrServiceInner_->KillProcessesByAccessTokenId(accessTokenId);
 }
 
-int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid)
+int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid);
+    return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid, reason);
 }
 
-int32_t AmsMgrScheduler::KillApplicationSelf()
+int32_t AmsMgrScheduler::KillApplicationSelf(const std::string& reason)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationSelf();
+    return amsMgrServiceInner_->KillApplicationSelf(reason);
 }
 
 bool AmsMgrScheduler::IsReady() const

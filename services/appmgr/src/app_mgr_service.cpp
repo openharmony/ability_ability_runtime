@@ -956,7 +956,7 @@ int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_
 
 void AppMgrService::AttachRenderProcess(const sptr<IRemoteObject> &scheduler)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AttachRenderProcess failed, not ready.");
         return;
@@ -1444,7 +1444,7 @@ int32_t AppMgrService::UpdateRenderState(pid_t renderPid, int32_t state)
     return appMgrServiceInner_->UpdateRenderState(renderPid, state);
 }
 
-int32_t AppMgrService::SignRestartAppFlag(const std::string &bundleName)
+int32_t AppMgrService::SignRestartAppFlag(int32_t uid)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
@@ -1456,7 +1456,7 @@ int32_t AppMgrService::SignRestartAppFlag(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::APPMGR, "VerificationAllToken failed.");
         return ERR_PERMISSION_DENIED;
     }
-    return appMgrServiceInner_->SignRestartAppFlag(bundleName);
+    return appMgrServiceInner_->SignRestartAppFlag(uid);
 }
 
 int32_t AppMgrService::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId)
@@ -1514,6 +1514,20 @@ int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
     return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
 }
 
+int32_t AppMgrService::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not foundation");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->SetSupportedProcessCache(pid, isSupport);
+}
+
 void AppMgrService::SetAppAssertionPauseState(bool flag)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
@@ -1548,7 +1562,7 @@ int32_t AppMgrService::CheckCallingIsUserTestMode(const pid_t pid, bool &isUserT
 
 int32_t AppMgrService::NotifyProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     if (!appMgrServiceInner_) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_VALUE;
@@ -1558,7 +1572,7 @@ int32_t AppMgrService::NotifyProcessDependedOnWeb()
 
 void AppMgrService::KillProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyKillProcessDependedOnWebPermission()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller have not permission.");
         return;
@@ -1571,7 +1585,7 @@ void AppMgrService::KillProcessDependedOnWeb()
 
 void AppMgrService::RestartResidentProcessDependedOnWeb()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not foundation.");
         return;
@@ -1580,6 +1594,21 @@ void AppMgrService::RestartResidentProcessDependedOnWeb()
         return;
     }
     appMgrServiceInner_->RestartResidentProcessDependedOnWeb();
+}
+
+int32_t AppMgrService::GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+{
+    bool isCallingPermission =
+        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
+    if (!isCallingPermission) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return appMgrServiceInner_->GetAppIndexByPid(pid, appIndex);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -86,6 +86,14 @@ public:
         }
     }
 
+    void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) override
+    {
+        Extension::OnStop();
+        if (impl_ != nullptr) {
+            impl_->OnStop(callbackInfo, isAsyncCallback);
+        }
+    }
+
     void OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo) override
     {
         Extension::OnForeground(want, sessionInfo);

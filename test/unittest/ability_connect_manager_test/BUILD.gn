@@ -32,13 +32,11 @@ ohos_unittest("ability_connect_manager_test") {
     "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_test_path}/mock/mock_sa_call",
-    "${ability_runtime_test_path}/mock/task_handler_wrap_mock/include",
   ]
 
   sources = [
     # add mock file
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
-    "${ability_runtime_test_path}/mock/task_handler_wrap_mock/src/mock_task_handler_wrap.cpp",
     "ability_connect_manager_test.cpp",
   ]
 

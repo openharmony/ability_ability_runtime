@@ -26,6 +26,7 @@
 #include "ability_lifecycle_executor.h"
 #include "ability_lifecycle_interface.h"
 #include "ability_transaction_callback_info.h"
+#include "appexecfwk_errors.h"
 #include "configuration.h"
 #include "context.h"
 #include "continuation_handler.h"
@@ -33,13 +34,11 @@
 #include "dummy_notification_request.h"
 #include "free_install_observer_interface.h"
 #include "iability_callback.h"
-#include "want_agent.h"
-#include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
-
-#include "appexecfwk_errors.h"
 #include "iremote_object.h"
 #include "pac_map.h"
 #include "want.h"
+#include "want_agent.h"
+#include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
 
 #ifdef SUPPORT_GRAPHICS
 #include "ability_window.h"

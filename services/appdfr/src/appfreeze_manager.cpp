@@ -34,6 +34,7 @@
 
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
+#include "time_util.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -53,6 +54,7 @@ constexpr int FREEZEMAP_SIZE_MAX = 20;
 constexpr int FREEZE_TIME_LIMIT = 60000;
 static constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nano second
 static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias second
+constexpr uint64_t SEC_TO_MILLISEC = 1000;
 const std::string LOG_FILE_PATH = "data/log/eventlog";
 }
 std::shared_ptr<AppfreezeManager> AppfreezeManager::instance_ = nullptr;
@@ -171,6 +173,10 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
         fullStackPath = WriteToFile(fileName, catcherStack);
         faultNotifyData.errorObject.stack = fullStackPath;
     } else {
+        auto start = GetMilliseconds();
+        std::string timeStamp = "\nTimestamp:" + AbilityRuntime::TimeUtil::FormatTime("%Y-%m-%d %H:%M:%S") +
+            ":" + std::to_string(start % SEC_TO_MILLISEC);
+        faultNotifyData.errorObject.message += timeStamp;
         catchJsonStack += CatchJsonStacktrace(appInfo.pid, faultData.errorObject.name);
         fullStackPath = WriteToFile(fileName, catchJsonStack);
         faultNotifyData.errorObject.stack = fullStackPath;
@@ -420,14 +426,12 @@ void AppfreezeManager::DeleteStack(int pid)
     }
 }
 
-void AppfreezeManager::FindStackByPid(std::string& ret, int pid, const std::string& msg) const
+void AppfreezeManager::FindStackByPid(std::string& ret, int pid) const
 {
     std::lock_guard<ffrt::mutex> lock(catchStackMutex_);
     auto it = catchStackMap_.find(pid);
     if (it != catchStackMap_.end()) {
         ret = it->second;
-    } else {
-        ret = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg;
     }
 }
 
@@ -438,9 +442,12 @@ std::string AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& fa
     std::string ret;
     std::string msg;
     size_t defaultMaxFaultNum = 256;
-    if (!dumplog.DumpCatch(pid, 0, msg, defaultMaxFaultNum, true)) {
+    if (dumplog.DumpCatchProcess(pid, msg, defaultMaxFaultNum, true) == -1) {
         TAG_LOGI(AAFwkTag::APPDFR, "appfreeze catch stack failed");
-        FindStackByPid(ret, pid, msg);
+        ret = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg;
+        if (faultType == AppFreezeType::APP_INPUT_BLOCK) {
+            FindStackByPid(ret, pid);
+        }
     } else {
         ret = msg;
         if (faultType == AppFreezeType::THREAD_BLOCK_3S) {
@@ -457,7 +464,7 @@ std::string AppfreezeManager::CatcherStacktrace(int pid) const
     HiviewDFX::DfxDumpCatcher dumplog;
     std::string ret;
     std::string msg;
-    if (!dumplog.DumpCatch(pid, 0, msg)) {
+    if (dumplog.DumpCatchProcess(pid, msg) == -1) {
         ret = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + msg;
     } else {
         ret = msg;
@@ -567,7 +574,7 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(int32_t pid)
         }
         return true;
     } else {
-        if (diff < FREEZE_TIME_LIMIT) {
+        if (currentTime > FREEZE_TIME_LIMIT && diff < FREEZE_TIME_LIMIT) {
             return true;
         }
         SetFreezeState(pid, AppFreezeState::APPFREEZE_STATE_FREEZE);

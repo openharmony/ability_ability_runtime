@@ -66,28 +66,14 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid context");
         return nullptr;
     }
-    auto screenModePtr = reinterpret_cast<std::weak_ptr<int32_t> *>(extValue)->lock();
-    if (screenModePtr == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid screenModePtr");
+    napi_value object = JsUIExtensionContext::CreateJsUIExtensionContext(env, ptr);
+    auto contextRef = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
+        &object, 1);
+    if (contextRef == nullptr) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "Failed to load module");
         return nullptr;
     }
-    napi_value contextObj = nullptr;
-    if (*screenModePtr == AAFwk::IDLE_SCREEN_MODE) {
-        auto uiExtObject = JsUIExtensionContext::CreateJsUIExtensionContext(env, ptr);
-        CHECK_POINTER_AND_RETURN(uiExtObject, nullptr);
-        auto contextRef = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
-            &uiExtObject, 1);
-        CHECK_POINTER_AND_RETURN(contextRef, nullptr);
-        contextObj = contextRef->GetNapiValue();
-    } else {
-        auto emUIObject = JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(env,
-            nullptr, ptr, *screenModePtr);
-        CHECK_POINTER_AND_RETURN(emUIObject, nullptr);
-        auto contextRef = JsRuntime::LoadSystemModuleByEngine(env, "application.EmbeddableUIAbilityContext",
-            &emUIObject, 1);
-        CHECK_POINTER_AND_RETURN(contextRef, nullptr);
-        contextObj = contextRef->GetNapiValue();
-    }
+    auto contextObj = contextRef->GetNapiValue();
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "load context error");
         return nullptr;
@@ -351,6 +337,7 @@ bool JsUIExtension::CheckPromise(napi_value result)
     return true;
 }
 
+namespace {
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
     void *data = nullptr;
@@ -364,6 +351,7 @@ napi_value PromiseCallback(napi_env env, napi_callback_info info)
     AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
     data = nullptr;
     return nullptr;
+}
 }
 
 bool JsUIExtension::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo)
@@ -429,8 +417,7 @@ void JsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::S
         sessionInfo->persistentId, winCmd);
     Extension::OnCommandWindow(want, sessionInfo, winCmd);
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want) && winCmd == AAFwk::WIN_CMD_FOREGROUND) {
-        bool finish = ForegroundWindowWithInsightIntent(want, sessionInfo, false);
-        if (finish) {
+        if (ForegroundWindowWithInsightIntent(want, sessionInfo, false)) {
             return;
         }
     }
@@ -694,9 +681,13 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
 sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
     const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
-    sptr<Rosen::WindowOption> option = new (std::nothrow) Rosen::WindowOption();
     if (context == nullptr || context->GetAbilityInfo() == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
+        return nullptr;
+    }
+    auto option = sptr<Rosen::WindowOption>::MakeSptr();
+    if (option == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
         return nullptr;
     }
     option->SetWindowName(context->GetBundleName() + context->GetAbilityInfo()->name);
