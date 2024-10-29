@@ -88,7 +88,7 @@ void AppStateCallbackProxy::NotifyConfigurationChange(const AppExecFwk::Configur
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
         return;
@@ -112,7 +112,7 @@ void AppStateCallbackProxy::NotifyStartResidentProcess(std::vector<AppExecFwk::B
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
@@ -141,7 +141,7 @@ void AppStateCallbackProxy::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
