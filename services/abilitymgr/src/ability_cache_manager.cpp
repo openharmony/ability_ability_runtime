@@ -210,11 +210,9 @@ std::shared_ptr<AbilityRecord> AbilityCacheManager::FindRecordByToken(const sptr
             sptr<IRemoteObject> srcToken = (*it)->GetToken();
             if (srcToken == token) {
                 std::shared_ptr<AbilityRecord> &abilityRecord = *it;
-                if (abilityRecord) {
-                    TAG_LOGD(AAFwkTag::ABILITYMGR,
+                TAG_LOGD(AAFwkTag::ABILITYMGR,
                     "Find the ability by token from lru, service:%{public}s, extension type %{public}d",
                     abilityRecord->GetURI().c_str(), abilityRecord->GetAbilityInfo().extensionAbilityType);
-                }
                 return abilityRecord;
             }
         }
