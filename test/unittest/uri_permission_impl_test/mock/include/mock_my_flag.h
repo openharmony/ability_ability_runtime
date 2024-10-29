@@ -50,8 +50,28 @@ public:
     enum FLAG {
         IS_SA_CALL = 1,
         IS_SHELL_CALL,
-        IS_SA_AND_SHELL_CALL,
+        IS_SA_AND_SHELL_CALL
     };
+
+    static void Init()
+    {
+        flag_ = 0;
+        permissionFileAccessManager_ = false;
+        permissionWriteImageVideo_ = false;
+        permissionReadImageVideo_ = false;
+        permissionAllMedia_ = false;
+        permissionWriteAudio_ = false;
+        permissionReadAudio_ = false;
+        permissionProxyAuthorization_ = false;
+        permissionAll_ = false;
+        permissionPrivileged_ = false;
+        permissionReadWriteDownload_ = false;
+        permissionReadWriteDesktop_ = false;
+        permissionReadWriteDocuments_ = false;
+        IsSystempAppCall_ = false;
+        tokenInfos = {};
+    }
+
     static int flag_;
     static bool permissionFileAccessManager_;
     static bool permissionWriteImageVideo_;
@@ -62,6 +82,10 @@ public:
     static bool permissionProxyAuthorization_;
     static bool permissionAll_;
     static bool permissionPrivileged_;
+    static bool permissionReadWriteDownload_;
+    static bool permissionReadWriteDesktop_;
+    static bool permissionReadWriteDocuments_;
+    static bool IsSystempAppCall_;
 
     static TokenInfoMap tokenInfos;
 };
