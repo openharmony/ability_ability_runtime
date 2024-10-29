@@ -1584,15 +1584,47 @@ int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack, const
         TAG_LOGI(AAFwkTag::APPMGR, "remote process exited successs");
         return ERR_OK;
     }
+    int32_t result = ERR_OK;
     for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        auto result = KillProcessByPid(*iter, reason);
-        if (result < 0) {
+        auto singleRet = KillProcessByPid(*iter, reason);
+        if (singleRet < 0) {
             TAG_LOGE(AAFwkTag::APPMGR, "killApplication fail for bundleName:%{public}s pid:%{public}d",
                 bundleName.c_str(), *iter);
-            return result;
+            result = singleRet;
         }
     }
-    return ERR_OK;
+    return result;
+}
+
+int32_t AppMgrServiceInner::KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
+    const std::string& reason)
+{
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_NO_INIT;
+    }
+
+    int64_t startTime = SystemTimeMillisecond();
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    TAG_LOGI(AAFwkTag::APPMGR, "callingTokenId value: %{public}d", callingTokenId);
+    std::list<pid_t> pids;
+    if (!appRunningManager_->ProcessExitByTokenIdAndInstance(callingTokenId, instanceKey, pids, clearPageStack)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "not exist");
+        return ERR_OK;
+    }
+    if (WaitForRemoteProcessExit(pids, startTime)) {
+        TAG_LOGI(AAFwkTag::APPMGR, "remote process exited success");
+        return ERR_OK;
+    }
+    int32_t result = ERR_OK;
+    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
+        auto singleRet = KillProcessByPid(*iter, reason);
+        if (singleRet < 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Failed to kill pid:%{public}d", *iter);
+            result = singleRet;
+        }
+    }
+    return result;
 }
 
 int32_t AppMgrServiceInner::KillApplicationByBundleName(
@@ -7506,25 +7538,14 @@ int32_t AppMgrServiceInner::UpdateRenderState(pid_t renderPid, int32_t state)
         renderRecord, state);
 }
 
-int32_t AppMgrServiceInner::SignRestartAppFlag(int32_t uid)
+int32_t AppMgrServiceInner::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call.");
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return ERR_NO_INIT;
     }
-    return appRunningManager_->SignRestartAppFlag(uid);
-}
-
-int32_t AppMgrServiceInner::GetAppIndexByPid(pid_t pid, int32_t &appIndex) const
-{
-    auto appRecord = GetAppRunningRecordByPid(pid);
-    if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord, pid:%{public}d", pid);
-        return ERR_INVALID_VALUE;
-    }
-    appIndex = appRecord->GetAppIndex();
-    return ERR_OK;
+    return appRunningManager_->SignRestartAppFlag(uid, instanceKey);
 }
 
 int32_t AppMgrServiceInner::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId)

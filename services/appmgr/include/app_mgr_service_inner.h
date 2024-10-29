@@ -314,6 +314,8 @@ public:
     virtual int32_t KillApplicationSelf(const bool clearPageStack = false,
         const std::string& reason = "KillApplicationSelf");
 
+    int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack, const std::string& reason);
+
     /**
      * KillApplicationByUserId, kill the application by user ID.
      *
@@ -1237,9 +1239,7 @@ public:
     /**
      * Mark processes of the uid as the app is going to be restarted.
      */
-    int32_t SignRestartAppFlag(int32_t uid);
-
-    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) const;
+    int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
 
     /**
      * Set application assertion pause state.

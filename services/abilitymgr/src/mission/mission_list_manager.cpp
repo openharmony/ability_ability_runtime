@@ -4272,20 +4272,20 @@ void MissionListManager::SendKeyEvent(const AbilityRequest &abilityRequest)
     EventReport::SendKeyEvent(EventName::START_PRIVATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
-void MissionListManager::SignRestartAppFlag(int32_t uid)
+void MissionListManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     std::lock_guard guard(managerLock_);
     for (const auto& missionList : currentMissionLists_) {
         if (!missionList) {
             continue;
         }
-        missionList->SignRestartAppFlag(uid);
+        missionList->SignRestartAppFlag(uid, instanceKey);
     }
     if (defaultStandardList_) {
-        defaultStandardList_->SignRestartAppFlag(uid);
+        defaultStandardList_->SignRestartAppFlag(uid, instanceKey);
     }
     if (defaultSingleList_) {
-        defaultSingleList_->SignRestartAppFlag(uid);
+        defaultSingleList_->SignRestartAppFlag(uid, instanceKey);
     }
 }
 

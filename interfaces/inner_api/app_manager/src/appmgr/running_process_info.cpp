@@ -61,6 +61,10 @@ bool RunningProcessInfo::ReadFromParcel(Parcel &parcel)
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, extensionType);
     extensionType_ = static_cast<ExtensionAbilityType>(extensionType);
     appCloneIndex = parcel.ReadInt32();
+    instanceKey = Str16ToStr8(parcel.ReadString16());
+    int32_t appModeType;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, appModeType);
+    appMode = static_cast<AppExecFwk::MultiAppModeType>(appModeType);
     return true;
 }
 
@@ -95,6 +99,8 @@ bool RunningProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(processType_));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(extensionType_));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, appCloneIndex);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(instanceKey));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(appMode));
     return true;
 }
 }  // namespace AppExecFwk
