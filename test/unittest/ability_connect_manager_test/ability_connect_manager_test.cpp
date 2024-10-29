@@ -3246,7 +3246,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_SignRestartAppFlag_001, Test
     abilityRecord2->abilityInfo_.bundleName = "errTestBundleName";
     connectManager->serviceMap_.emplace("second", abilityRecord2);
     int32_t uid = 100;
-    connectManager->SignRestartAppFlag(uid);
+    connectManager->SignRestartAppFlag(uid, "");
 }
 
 /*

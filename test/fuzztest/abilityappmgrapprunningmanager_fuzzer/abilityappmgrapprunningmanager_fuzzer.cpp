@@ -132,7 +132,7 @@ void DoSomethingInterestingWithMyAPIaddb(const char* data, size_t size)
     manager->OnChildProcessRemoteDied(remote);
     manager->GetAllAppRunningRecordCountByBundleName(jsonStr);
     auto uid = static_cast<int32_t>(GetU32Data(data));
-    manager->SignRestartAppFlag(uid);
+    manager->SignRestartAppFlag(uid, jsonStr);
     manager->GetAppRunningUniqueIdByPid(pidApps, jsonStr);
     std::vector<pid_t> hostPids;
     manager->GetAllUIExtensionRootHostPid(pidApps, hostPids);

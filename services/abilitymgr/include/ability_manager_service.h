@@ -2255,8 +2255,9 @@ private:
 
     void WaitBootAnimationStart();
 
-    int32_t SignRestartAppFlag(int32_t userId, int32_t uid, bool isAppRecovery = false);
-    int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex);
+    int32_t SignRestartAppFlag(int32_t userId, int32_t uid, const std::string &instanceKey,
+        AppExecFwk::MultiAppModeType type, bool isAppRecovery = false);
+    int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
         bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
