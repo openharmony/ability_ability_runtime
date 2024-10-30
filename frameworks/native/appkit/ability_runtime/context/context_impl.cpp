@@ -1386,13 +1386,20 @@ void ContextImpl::OnOverlayChanged(const EventFwk::CommonEventData &data,
     }
 }
 
-void ContextImpl::ChangeToLocalPath(const std::string& bundleName, const std::string &sourceDir, std::string &localPath)
+void ContextImpl::ChangeToLocalPath(const std::string& bundleName, const std::string& sourceDir, std::string &localPath)
 {
     std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleName);
     if (sourceDir.empty()) {
         return;
     }
-    if (std::regex_search(localPath, std::regex(bundleName))) {
+    bool isExist = false;
+    try {
+        isExist = std::regex_search(localPath, std::regex(bundleName));
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ChangeToLocalPath error localPath:%{public}s bundleName:%{public}s",
+            localPath.c_str(), bundleName.c_str());
+    }
+    if (isExist) {
         localPath = std::regex_replace(localPath, pattern, std::string(LOCAL_CODE_PATH));
     } else {
         localPath = std::regex_replace(localPath, std::regex(ABS_CODE_PATH), LOCAL_BUNDLES);
