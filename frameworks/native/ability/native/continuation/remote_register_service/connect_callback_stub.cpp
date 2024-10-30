@@ -48,7 +48,7 @@ int ConnectCallbackStub::OnRemoteRequest(
 {
     std::u16string token = data.ReadInterfaceToken();
     if (token.compare(IConnectCallback::GetDescriptor()) != 0) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Descriptor is wrong");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "Descriptor wrong");
         return OHOS::ERR_INVALID_REPLY;
     }
     switch (code) {

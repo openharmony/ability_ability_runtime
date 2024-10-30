@@ -1089,7 +1089,7 @@ std::vector<std::shared_ptr<DataAbilityResult>> Ability::ExecuteBatch(
     for (size_t i = 0; i < len; i++) {
         std::shared_ptr<DataAbilityOperation> operation = operations[i];
         if (operation == nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITY, "null operation, create DataAbilityResult");
+            TAG_LOGD(AAFwkTag::ABILITY, "null operation");
             results.push_back(std::make_shared<DataAbilityResult>(0));
             continue;
         }

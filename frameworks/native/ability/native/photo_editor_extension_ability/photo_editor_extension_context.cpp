@@ -58,7 +58,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::SaveEditedContent(const std::s
     std::ofstream panelFile;
     panelFile.open(panelPhysicalPath, std::ios::binary);
     if (!panelFile.is_open()) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Can not open panel file, reason: %{public}s", strerror(errno));
+        TAG_LOGE(AAFwkTag::UI_EXT, "not open panel file, reason: %{public}s", strerror(errno));
         panelFile.close();
         return PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR;
     }
@@ -86,7 +86,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::SaveEditedContent(const std::s
     }
 
     if (packedSize > static_cast<int64_t>(MAX_IMAGE_SIZE)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Image is too big, bigger than 50M");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Image is bigger than 50M");
         panelFile.close();
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_TOO_BIG_ERROR;
     }
@@ -114,14 +114,14 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
 
     char imagePath[PATH_MAX] = {0};
     if (realpath(imageUri.c_str(), imagePath) == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Realpath error, errno is %{public}d.", errno);
+        TAG_LOGE(AAFwkTag::UI_EXT, "Realpath error: %{public}d.", errno);
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_INPUT_ERROR;
     }
 
     std::ifstream sourceFile;
     sourceFile.open(imagePath, std::ios::binary);
     if (!sourceFile.is_open()) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Can not open source file");
+        TAG_LOGE(AAFwkTag::UI_EXT, "not open source file");
         sourceFile.close();
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_INPUT_ERROR;
     }
@@ -129,7 +129,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
     sourceFile.seekg(0, sourceFile.end);
     std::streampos imageSize = sourceFile.tellg();
     if (static_cast<uint64_t>(imageSize) > MAX_IMAGE_SIZE) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Image is too big, bigger than 50M");
+        TAG_LOGE(AAFwkTag::UI_EXT, "Image is bigger than 50M");
         sourceFile.close();
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_TOO_BIG_ERROR;
     }
@@ -138,7 +138,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
     std::ofstream panelFile;
     panelFile.open(panelPhysicalPath, std::ios::binary);
     if (!panelFile.is_open()) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Can not open panel file");
+        TAG_LOGE(AAFwkTag::UI_EXT, "not open panel file");
         sourceFile.close();
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_INPUT_ERROR;
     }

@@ -46,7 +46,7 @@ int DialogRequestCallbackStub::SendResultInner(MessageParcel &data, MessageParce
     auto resultCode = data.ReadInt32();
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "want null");
+        TAG_LOGE(AAFwkTag::DIALOG, "null want");
         return ERR_INVALID_VALUE;
     }
 

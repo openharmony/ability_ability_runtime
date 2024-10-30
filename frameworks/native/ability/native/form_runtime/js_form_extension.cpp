@@ -42,7 +42,7 @@ napi_value AttachFormExtensionContext(napi_env env, void* value, void*)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "call");
     if (value == nullptr) {
-        TAG_LOGW(AAFwkTag::FORM_EXT, "null value ");
+        TAG_LOGW(AAFwkTag::FORM_EXT, "null value");
         return nullptr;
     }
     auto ptr = reinterpret_cast<std::weak_ptr<FormExtensionContext>*>(value)->lock();
@@ -172,14 +172,14 @@ OHOS::AppExecFwk::FormProviderInfo JsFormExtension::OnCreate(const OHOS::AAFwk::
 
     OHOS::AppExecFwk::FormProviderInfo formProviderInfo;
     if (!CheckTypeForNapiValue(env, nativeResult, napi_object)) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "nativeResult null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null nativeResult");
         return formProviderInfo;
     }
 
     napi_value nativeDataValue = nullptr;
     napi_get_named_property(env, nativeResult, "data", &nativeDataValue);
     if (nativeDataValue == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "nativeResult null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null nativeResult");
         return formProviderInfo;
     }
     std::string formDataStr;
@@ -312,7 +312,7 @@ napi_value JsFormExtension::CallObjectMethod(const char* name, const char *bakNa
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "CallObjectMethod(%{public}s)", name);
     if (!jsObj_) {
-        TAG_LOGW(AAFwkTag::FORM_EXT, "jsObj null");
+        TAG_LOGW(AAFwkTag::FORM_EXT, "null jsObj");
         return nullptr;
     }
 
@@ -335,7 +335,7 @@ napi_value JsFormExtension::CallObjectMethod(const char* name, const char *bakNa
         method = nullptr;
         napi_get_named_property(env, obj, bakName, &method);
         if (!CheckTypeForNapiValue(env, method, napi_function)) {
-            TAG_LOGE(AAFwkTag::FORM_EXT, "Failed to get '%{public}s' from FormExtension object", bakName);
+            TAG_LOGE(AAFwkTag::FORM_EXT, "get '%{public}s' failed", bakName);
             return nullptr;
         }
     }
@@ -397,7 +397,7 @@ FormState JsFormExtension::OnAcquireFormState(const Want &want)
     napi_value argv[] = { napiWant };
     napi_value nativeResult = CallObjectMethod("onAcquireFormState", nullptr, argv, 1);
     if (nativeResult == nullptr) {
-        TAG_LOGI(AAFwkTag::FORM_EXT, "onAcquireFormState not found");
+        TAG_LOGI(AAFwkTag::FORM_EXT, "not found onAcquireFormState");
         return FormState::DEFAULT;
     }
 
@@ -429,7 +429,7 @@ bool JsFormExtension::OnShare(int64_t formId, AAFwk::WantParams &wantParams)
     napi_value argv[] = { CreateJsValue(env, formIdStr) };
     napi_value nativeResult = CallObjectMethod("onShareForm", "onShare", argv, 1);
     if (nativeResult == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "nativeResult null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null nativeResult");
         return false;
     }
 
@@ -460,7 +460,7 @@ bool JsFormExtension::OnAcquireData(int64_t formId, AAFwk::WantParams &wantParam
     napi_value argv[] = { CreateJsValue(env, formIdStr) };
     napi_value nativeResult = CallObjectMethod("onAcquireFormData", "OnAcquireData", argv, 1);
     if (nativeResult == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "nativeResult null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null nativeResult");
         return false;
     }
 
@@ -480,7 +480,7 @@ bool JsFormExtension::ConvertFromDataProxies(napi_env env, napi_value jsValue,
     std::vector<FormDataProxy> &formDataProxies)
 {
     if (jsValue == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "jsValue null");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null jsValue");
         return false;
     }
 
@@ -491,7 +491,7 @@ bool JsFormExtension::ConvertFromDataProxies(napi_env env, napi_value jsValue,
         napi_value element = nullptr;
         napi_get_element(env, jsValue, i, &element);
         if (!ConvertFormDataProxy(env, element, formDataProxy)) {
-            TAG_LOGE(AAFwkTag::FORM_EXT, "GetElement from array [%{public}u] error", i);
+            TAG_LOGE(AAFwkTag::FORM_EXT, "GetElement [%{public}u] error", i);
             continue;
         }
         formDataProxies.push_back(formDataProxy);

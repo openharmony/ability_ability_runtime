@@ -36,7 +36,7 @@ void ReverseContinuationSchedulerPrimary::NotifyReplicaTerminated()
 
     if (mainHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "mainHandler_ is nullptr");
+            "null mainHandler_");
         return;
     }
 
@@ -62,7 +62,7 @@ bool ReverseContinuationSchedulerPrimary::ContinuationBack(const AAFwk::Want &wa
 
     if (mainHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "mainHandler_ is nullptr");
+            "null mainHandler_");
         return false;
     }
 
@@ -81,7 +81,7 @@ void ReverseContinuationSchedulerPrimary::HandlerNotifyReplicaTerminated()
     continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "continuationHandler is nullptr");
+            "null continuationHandler");
         return;
     }
     continuationHandler->NotifyReplicaTerminated();
@@ -93,7 +93,7 @@ void ReverseContinuationSchedulerPrimary::HandlerContinuationBack(const AAFwk::W
     continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "continuationHandler is nullptr");
+            "null continuationHandler");
         return;
     }
     continuationHandler->ContinuationBack(want);

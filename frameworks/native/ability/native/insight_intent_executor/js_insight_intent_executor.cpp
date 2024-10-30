@@ -118,7 +118,7 @@ bool JsInsightIntentExecutor::HandleExecuteIntent(
     state_ = State::EXECUTING;
 
     if (callback == nullptr || callback->IsEmpty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "callback is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "null callback");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
     callback_ = std::move(callback);

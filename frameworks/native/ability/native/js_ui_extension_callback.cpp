@@ -85,7 +85,7 @@ void JsUIExtensionCallback::SetJsCallbackObject(napi_value jsCallbackObject)
     napi_create_reference(env_, jsCallbackObject, 1, &ref);
     jsCallbackObject_ = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref));
     if (jsCallbackObject_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "jsCallbackObject_ is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsCallbackObject_");
     }
 }
 
@@ -93,7 +93,7 @@ void JsUIExtensionCallback::OnError(int32_t number)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "call");
     if (env_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "env_ null");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env_");
         return;
     }
     // js callback should run in js thread
@@ -109,7 +109,7 @@ void JsUIExtensionCallback::OnError(int32_t number)
     NapiAsyncTask::Schedule("JsUIExtensionCallback::OnError:",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
     if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "uiContent_ null");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiContent_");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
@@ -119,7 +119,7 @@ void JsUIExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want &want
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "call");
     if (env_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "env_ null");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env_");
         return;
     }
     // js callback should run in js thread
@@ -135,7 +135,7 @@ void JsUIExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want &want
     NapiAsyncTask::Schedule("JsUIExtensionCallback::OnResult:",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
     if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "uiContent_ null");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiContent_");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);

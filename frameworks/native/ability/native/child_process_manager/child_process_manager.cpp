@@ -92,7 +92,7 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessBySelfFork(co
     if (pid == 0) {
         const char *processName = g_debugOption.processName.c_str();
         if (prctl(PR_SET_NAME, processName) < 0) {
-            TAG_LOGW(AAFwkTag::PROCESSMGR, "Set process name failed with %{public}d", errno);
+            TAG_LOGW(AAFwkTag::PROCESSMGR, "Set process name failed %{public}d", errno);
         }
         HandleChildProcessBySelfFork(srcEntry, bundleInfo);
     }
@@ -296,7 +296,7 @@ bool ChildProcessManager::LoadNativeLib(const std::string &moduleName,
 {
     auto childProcess = NativeChildIpcProcess::Create();
     if (childProcess == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Failed create NativeChildIpcProcess");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "create NativeChildIpcProcess failed");
         return false;
     }
     
@@ -318,11 +318,11 @@ bool ChildProcessManager::LoadNativeLib(const std::string &moduleName,
 bool ChildProcessManager::LoadNativeLibWithArgs(const std::string &moduleName, const std::string &srcEntry,
     const std::string &entryFunc, std::shared_ptr<AppExecFwk::ChildProcessArgs> args)
 {
-    TAG_LOGI(AAFwkTag::PROCESSMGR, "moduleName:%{public}s, srcEntry:%{public}s, entryFunc:%{public}s.",
+    TAG_LOGI(AAFwkTag::PROCESSMGR, "moduleName:%{public}s, srcEntry:%{public}s, entryFunc:%{public}s",
         moduleName.c_str(), srcEntry.c_str(), entryFunc.c_str());
     auto childProcess = NativeArgsChildProcess::Create();
     if (childProcess == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Failed create NativeArgsChildProcess.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "create NativeArgsChildProcess failed");
         return false;
     }
 
@@ -331,7 +331,7 @@ bool ChildProcessManager::LoadNativeLibWithArgs(const std::string &moduleName, c
     processStartInfo->srcEntry = srcEntry;
     processStartInfo->entryFunc = entryFunc;
     if (!childProcess->Init(processStartInfo)) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "NativeArgsChildProcess init failed.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "nativeArgsChildProcess init failed");
         return false;
     }
 
@@ -415,7 +415,7 @@ bool ChildProcessManager::GetHapModuleInfo(const AppExecFwk::BundleInfo &bundleI
     AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     if (bundleInfo.hapModuleInfos.empty()) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "hapModuleInfos empty!");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "hapModuleInfos empty");
         return false;
     }
     TAG_LOGD(AAFwkTag::PROCESSMGR, "hapModueInfos size: %{public}zu", bundleInfo.hapModuleInfos.size());
@@ -474,7 +474,7 @@ void ChildProcessManager::SetAppSpawnForkDebugOption(Runtime::DebugOption &debug
     std::shared_ptr<AppExecFwk::ChildProcessInfo> processInfo)
 {
     if (!processInfo) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "SetAppSpawnDebugOption failed, processInfo is nullptr.");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null processInfo");
         return;
     }
     debugOption.processName = processInfo->processName;

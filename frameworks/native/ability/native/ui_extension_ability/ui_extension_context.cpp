@@ -31,7 +31,7 @@ ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want) const
     TAG_LOGD(AAFwkTag::UI_EXT, "begin, ability:%{public}s", want.GetElement().GetAbilityName().c_str());
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "StartAbility is failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "StartAbility failed %{public}d", err);
     }
     return err;
 }
@@ -42,7 +42,7 @@ ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want, int requestCod
     TAG_LOGD(AAFwkTag::UI_EXT, "begin, requestCode:%{public}d", requestCode);
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "StartAbility is failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "StartAbility failed %{public}d", err);
     }
     return err;
 }
@@ -54,7 +54,7 @@ ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want, const AAFwk::S
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_,
         ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "StartAbility is failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "StartAbility failed %{public}d", err);
     }
     return err;
 }
@@ -66,7 +66,7 @@ ErrCode UIExtensionContext::StartUIServiceExtension(const AAFwk::Want& want, int
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
         want, token_, accountId, AppExecFwk::ExtensionAbilityType::UI_SERVICE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "StartUIServiceExtension is failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "StartUIServiceExtension failed %{public}d", err);
     }
     return err;
 }
@@ -76,7 +76,7 @@ ErrCode UIExtensionContext::TerminateSelf()
     TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, nullptr);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "TerminateSelf is failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "TerminateSelf failed %{public}d", err);
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelf end");
     return err;
@@ -111,7 +111,7 @@ ErrCode UIExtensionContext::DisconnectAbility(
     ErrCode ret =
         ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "DisconnectAbility error, ret=%{public}d", ret);
+        TAG_LOGE(AAFwkTag::UI_EXT, "DisconnectAbility error: %{public}d", ret);
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return ret;
@@ -177,7 +177,7 @@ ErrCode UIExtensionContext::StartAbilityForResultAsCaller(const AAFwk::Want &wan
     }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityForResultAsCaller(want, token_, requestCode);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "The result = %{public}d", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "ret = %{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "End");
@@ -195,7 +195,7 @@ ErrCode UIExtensionContext::StartAbilityForResultAsCaller(
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityForResultAsCaller(
         want, startOptions, token_, requestCode);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "The result = %{public}d", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "ret = %{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "End");
@@ -230,7 +230,7 @@ AppExecFwk::AbilityType UIExtensionContext::GetAbilityInfoType() const
 {
     std::shared_ptr<AppExecFwk::AbilityInfo> info = GetAbilityInfo();
     if (info == nullptr) {
-        TAG_LOGW(AAFwkTag::UI_EXT, "GetAbilityInfoType info is nullptr");
+        TAG_LOGW(AAFwkTag::UI_EXT, "null info");
         return AppExecFwk::AbilityType::UNKNOWN;
     }
 

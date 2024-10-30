@@ -316,7 +316,7 @@ napi_value JsAutoFillExtensionUtil::WrapUpdateRequest(const AAFwk::WantParams &w
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     if (jsObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Failed to create Object");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "create Object failed");
         return nullptr;
     }
 

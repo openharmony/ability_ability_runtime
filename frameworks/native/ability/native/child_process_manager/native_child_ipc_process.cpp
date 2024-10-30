@@ -37,7 +37,7 @@ bool NativeChildIpcProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &i
 {
     TAG_LOGD(AAFwkTag::PROCESSMGR, "init");
     if (info == nullptr || info->ipcObj == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "info or ipc callback is null");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null info or ipc callback");
         return false;
     }
 

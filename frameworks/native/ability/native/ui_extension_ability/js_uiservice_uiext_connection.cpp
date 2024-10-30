@@ -244,12 +244,12 @@ bool JSUIServiceUIExtConnection::IsJsCallbackObjectEquals(napi_env env,
     }
     auto object = callback->GetNapiValue();
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Failed to get object.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null object");
         return false;
     }
     bool result = false;
     if (napi_strict_equals(env, object, value, &result) != napi_ok) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Object does not match value.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "not match Object and value");
         return false;
     }
     return result;

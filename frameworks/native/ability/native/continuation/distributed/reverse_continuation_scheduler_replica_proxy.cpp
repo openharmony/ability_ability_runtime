@@ -42,13 +42,13 @@ void ReverseContinuationSchedulerReplicaProxy::PassPrimary(const sptr<IRemoteObj
     }
     if (primary) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(primary)) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write flag and primary");
+            TAG_LOGE(AAFwkTag::CONTINUATION, "write flag and primary failed");
             return;
         }
     } else {
         TAG_LOGD(AAFwkTag::CONTINUATION, "primary is nullptr");
         if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write flag");
+            TAG_LOGE(AAFwkTag::CONTINUATION, "write flag failed");
             return;
         }
     }
@@ -114,7 +114,7 @@ int32_t ReverseContinuationSchedulerReplicaProxy::SendTransactCmd(uint32_t code,
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Remote is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return ERR_NULL_OBJECT;
     }
 

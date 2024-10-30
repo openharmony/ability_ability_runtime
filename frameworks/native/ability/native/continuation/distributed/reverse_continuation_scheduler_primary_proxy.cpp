@@ -40,7 +40,7 @@ void ReverseContinuationSchedulerPrimaryProxy::NotifyReplicaTerminated()
     sptr<IRemoteObject> remoteObject = Remote();
     if (remoteObject == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "Remote is nullptr");
+            "null Remote");
         return;
     }
     if (!remoteObject->SendRequest(
@@ -69,13 +69,13 @@ bool ReverseContinuationSchedulerPrimaryProxy::ContinuationBack(const AAFwk::Wan
     }
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "failed to write want");
+            "write want failed");
         return false;
     }
     sptr<IRemoteObject> remoteObject = Remote();
     if (remoteObject == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "Remote is nullptr");
+            "null remote");
         return false;
     }
     if (!remoteObject->SendRequest(IReverseContinuationSchedulerPrimary::CONTINUATION_BACK, data, reply, option)) {

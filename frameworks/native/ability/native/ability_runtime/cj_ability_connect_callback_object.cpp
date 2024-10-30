@@ -50,7 +50,7 @@ void CJAbilityConnectCallback::OnAbilityConnectDone(
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called, resultCode:%{public}d", resultCode);
     if (g_cjAbilityConnectCallbackFuncs == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "cangjie functions for CJAbilityConnectCallbacks are not registered");
+        TAG_LOGE(AAFwkTag::CONTEXT, "not registered");
         return;
     }
 
@@ -58,7 +58,7 @@ void CJAbilityConnectCallback::OnAbilityConnectDone(
     // The cj side is responsible for the release.
     auto cjRemoteObj = FFI::FFIData::Create<AppExecFwk::CJRemoteObject>(remoteObject);
     if (cjRemoteObj == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "remote object is empty.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjRemoteObj");
         return;
     }
     g_cjAbilityConnectCallbackFuncs->onConnect(callbackId_, elementNameHandle, cjRemoteObj->GetID(), resultCode);

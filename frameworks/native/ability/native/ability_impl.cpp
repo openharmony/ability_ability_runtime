@@ -103,7 +103,7 @@ void AbilityImpl::Stop()
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "nullability_");
+        TAG_LOGE(AAFwkTag::ABILITY, "null ability_");
         return;
     }
 

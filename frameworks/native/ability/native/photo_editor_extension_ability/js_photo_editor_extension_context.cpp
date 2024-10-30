@@ -54,7 +54,7 @@ napi_value JsPhotoEditorExtensionContext::CreateJsPhotoEditorExtensionContext(
     std::unique_ptr<JsPhotoEditorExtensionContext> jsContext = std::make_unique<JsPhotoEditorExtensionContext>(context);
     napi_status status = napi_wrap(env, objValue, jsContext.release(), Finalizer, nullptr, nullptr);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to do napi wrap");
+        TAG_LOGE(AAFwkTag::UI_EXT, "do napi wrap failed");
     }
 
     const char *moduleName = "JsPhotoEditorExtensionContext";
@@ -101,7 +101,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
         TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithUri begin");
         auto context = weak.lock();
         if (!context) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "Context is released");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null context");
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)));
             return;
         }
@@ -110,7 +110,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
         PhotoEditorErrorCode errCode = context->SaveEditedContent(uri, newWant);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(errCode), newWant);
         if (abilityResult == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null abilityResult");
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)));
             return;
         }
@@ -144,7 +144,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
 
     auto context = context_.lock();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Context is released");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         ThrowError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR), ERR_MSG_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }
@@ -154,7 +154,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
         TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage begin");
         auto context = weak.lock();
         if (!context) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "Context is released");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null context");
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)));
             return;
         }
@@ -163,7 +163,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
         PhotoEditorErrorCode errCode = context->SaveEditedContent(image, packOption, newWant);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, static_cast<int>(errCode), newWant);
         if (abilityResult == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "Wrap abilityResult failed");
+            TAG_LOGE(AAFwkTag::UI_EXT, "null abilityResult");
             task.Reject(env, CreateJsError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR)));
             return;
         }
@@ -184,7 +184,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env 
 bool JsPhotoEditorExtensionContext::UnwrapPackOption(napi_env env, napi_value jsOption, Media::PackOption &packOption)
 {
     if (!AppExecFwk::IsTypeForNapiValue(env, jsOption, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Packing option error, not object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "not object");
         ThrowError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR), ERR_MSG_PARAMS_ERROR);
         return false;
     }

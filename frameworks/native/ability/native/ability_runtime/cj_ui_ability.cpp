@@ -262,7 +262,7 @@ void CJUIAbility::OnStopCallback()
 
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(AbilityContext::token_);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "the service connection is disconnected");
+        TAG_LOGE(AAFwkTag::UIABILITY, "service connection disconnected");
     }
     ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -339,7 +339,7 @@ void CJUIAbility::OnSceneRestored()
     if (!cjWindowStage_) {
         cjWindowStage_ = CreateCJWindowStage(scene_);
         if (!cjWindowStage_) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "failed to create CJWindowStage object");
+            TAG_LOGE(AAFwkTag::UIABILITY, "create CJWindowStage failed");
             return;
         }
     }
@@ -966,7 +966,7 @@ std::shared_ptr<CJAbilityObject> CJUIAbility::GetCJAbility()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (cjAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbility object");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
     }
     return cjAbilityObj_;
 }

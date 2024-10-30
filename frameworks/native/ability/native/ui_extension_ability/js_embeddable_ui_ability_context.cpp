@@ -38,7 +38,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 #define CHECK_POINTER_RETURN(env, object)            \
     if (!(object)) {                                 \
-        TAG_LOGE(AAFwkTag::UI_EXT, "Context is nullptr");           \
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");           \
         return CreateJsUndefined(env);               \
     }
 
@@ -224,7 +224,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartAbility(napi_env env, NapiCallba
 napi_value JsEmbeddableUIAbilityContext::OnOpenLink(napi_env env, NapiCallbackInfo& info)
 {
     if (screenMode_ == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
-        TAG_LOGI(AAFwkTag::UI_EXT, "Start openlink in embedded screen mode.");
+        TAG_LOGI(AAFwkTag::UI_EXT, "Start openlink in embedded screen mode");
         CHECK_POINTER_RETURN(env, jsUIExtensionContext_);
         return jsUIExtensionContext_->OnOpenLink(env, info);
     }

@@ -46,7 +46,7 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
     auto contextRef =
         JsRuntime::LoadSystemModuleByEngine(env, "application.PhotoEditorExtensionContext", &object, ARGC_ONE);
     if (contextRef == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to load module");
+        TAG_LOGE(AAFwkTag::UI_EXT, "load module failed");
         return nullptr;
     }
     auto contextObj = contextRef->GetNapiValue();
@@ -61,7 +61,7 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
             if (data == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "Finalizer for weak_ptr is nullptr");
+                TAG_LOGE(AAFwkTag::UI_EXT, "null weak_ptr finalizer");
                 return;
             }
             delete static_cast<std::weak_ptr<PhotoEditorExtensionContext> *>(data);
@@ -78,18 +78,18 @@ void JsPhotoEditorExtensionImpl::BindContext()
 {
     HandleScope handleScope(jsRuntime_);
     if (jsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "jsobj_ is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsobj_");
         return;
     }
 
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value obj = jsObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "obj is not object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "not object");
         return;
     }
     if (context_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Context is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null Context");
         return;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "BindContext CreateJsPhotoEditorExtensionContext");
@@ -102,12 +102,12 @@ void JsPhotoEditorExtensionImpl::BindContext()
     shellContextRef_ =
         JsRuntime::LoadSystemModuleByEngine(env, "application.PhotoEditorExtensionContext", &contextObj, ARGC_ONE);
     if (shellContextRef_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get loadSystemModuleByEngine");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get loadSystemModuleByEngine failed");
         return;
     }
     contextObj = shellContextRef_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get context native object");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get context native object failed");
         return;
     }
 
@@ -120,7 +120,7 @@ void JsPhotoEditorExtensionImpl::BindContext()
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
             if (data == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "Finalizer for weak_ptr is nullptr");
+                TAG_LOGE(AAFwkTag::UI_EXT, "null weak_ptr finalizer");
                 return;
             }
             delete static_cast<std::weak_ptr<PhotoEditorExtensionContext> *>(data);
@@ -146,13 +146,13 @@ void JsPhotoEditorExtensionImpl::OnStartContentEditing(const AAFwk::Want &want,
 
     std::string imageUri = want.GetStringParam("ability.params.stream");
     if (imageUri.empty()) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "OnStartContentEditing failed, imageUri is empty");
+        TAG_LOGE(AAFwkTag::UI_EXT, "empty imageUri");
         return;
     }
 
     TAG_LOGD(AAFwkTag::UI_EXT, "JsPhotoEditorExtension imageUri: (%{public}s), begin", imageUri.c_str());
     if (context_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "PhotoEditorExtension context is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         return;
     }
     context_->SetWant(std::make_shared<AAFwk::Want>(want));
@@ -160,12 +160,12 @@ void JsPhotoEditorExtensionImpl::OnStartContentEditing(const AAFwk::Want &want,
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Env is nullptr");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
         return;
     }
     napi_value jsWant = AppExecFwk::WrapWant(env, want);
     if (jsWant == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get want");
+        TAG_LOGE(AAFwkTag::UI_EXT, "get want failed");
         return;
     }
     napi_value jsImageUri;

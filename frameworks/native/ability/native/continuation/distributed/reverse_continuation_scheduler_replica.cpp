@@ -34,7 +34,7 @@ void ReverseContinuationSchedulerReplica::PassPrimary(const sptr<IRemoteObject> 
     };
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "mainHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null mainHandler_");
         return;
     }
 
@@ -53,7 +53,7 @@ bool ReverseContinuationSchedulerReplica::ReverseContinuation()
 
     if (mainHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "mainHandler_ is nullptr");
+            "null mainHandler_");
         return false;
     }
 
@@ -73,7 +73,7 @@ void ReverseContinuationSchedulerReplica::NotifyReverseResult(int reverseResult)
 
     if (mainHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "mainHandler_ is nullptr");
+            "null mainHandler_");
         return;
     }
 
@@ -90,7 +90,7 @@ void ReverseContinuationSchedulerReplica::HandlerPassPrimary(const sptr<IRemoteO
     replicaHandlerTmp = replicaHandler_.lock();
     if (replicaHandlerTmp == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "replicaHandlerTmp is nullptr");
+            "null replicaHandlerTmp");
         return;
     }
     replicaHandlerTmp->PassPrimary(primary);
@@ -103,7 +103,7 @@ bool ReverseContinuationSchedulerReplica::HandlerReverseContinuation()
     replicaHandlerTmp = replicaHandler_.lock();
     if (replicaHandlerTmp == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "replicaHandlerTmp is nullptr");
+            "null replicaHandlerTmp");
         return false;
     }
     return replicaHandlerTmp->ReverseContinuation();
@@ -116,7 +116,7 @@ void ReverseContinuationSchedulerReplica::HandlerNotifyReverseResult(int reverse
     replicaHandlerTmp = replicaHandler_.lock();
     if (replicaHandlerTmp == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "replicaHandlerTmp is nullptr");
+            "null replicaHandlerTmp");
         return;
     }
     replicaHandlerTmp->NotifyReverseResult(reverseResult);

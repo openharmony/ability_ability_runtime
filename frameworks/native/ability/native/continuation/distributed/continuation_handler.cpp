@@ -37,11 +37,11 @@ bool ContinuationHandler::HandleStartContinuationWithStack(const sptr<IRemoteObj
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "called");
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "token is null.");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null token");
         return false;
     }
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "abilityInfo is null.");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null abilityInfo");
         return false;
     }
 
@@ -50,7 +50,7 @@ bool ContinuationHandler::HandleStartContinuationWithStack(const sptr<IRemoteObj
     std::shared_ptr<ContinuationManager> continuationManagerTmp = nullptr;
     continuationManagerTmp = continuationManager_.lock();
     if (continuationManagerTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "continuationManagerTmp is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationManagerTmp");
         return false;
     }
 
@@ -84,11 +84,11 @@ bool ContinuationHandler::HandleStartContinuation(const sptr<IRemoteObject> &tok
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "called");
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "token is null.");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null token");
         return false;
     }
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "abilityInfo is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null abilityInfo");
         return false;
     }
 
@@ -97,7 +97,7 @@ bool ContinuationHandler::HandleStartContinuation(const sptr<IRemoteObject> &tok
     std::shared_ptr<ContinuationManager> continuationManagerTmp = nullptr;
     continuationManagerTmp = continuationManager_.lock();
     if (continuationManagerTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "continuationManagerTmp is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationManagerTmp");
         return false;
     }
 
@@ -135,7 +135,7 @@ void ContinuationHandler::HandleReceiveRemoteScheduler(const sptr<IRemoteObject>
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "begin");
     if (remoteReplica == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "scheduler is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null scheduler");
         return;
     }
 
@@ -167,7 +167,7 @@ void ContinuationHandler::HandleCompleteContinuation(int result)
     continuationManagerTmp = continuationManager_.lock();
     if (continuationManagerTmp == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "continuationManagerTmp is nullptr");
+            "null continuationManagerTmp");
         return;
     }
 
@@ -202,7 +202,7 @@ void ContinuationHandler::OnReplicaDied(const wptr<IRemoteObject> &remote)
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "begin");
     if (remoteReplicaProxy_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "remoteReplicaProxy_ is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteReplicaProxy_");
         return;
     }
 
@@ -238,7 +238,7 @@ void ContinuationHandler::NotifyReplicaTerminated()
     continuationManagerTmp = continuationManager_.lock();
     if (continuationManagerTmp == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "continuationManagerTmp is nullptr");
+            "mull continuationManagerTmp");
         return;
     }
     continuationManagerTmp->NotifyRemoteTerminated();
@@ -282,14 +282,14 @@ bool ContinuationHandler::ReverseContinuation()
     }
 
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "abilityInfo is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null abilityInfo");
         return false;
     }
 
     std::shared_ptr<ContinuationManager> continuationManagerTmp = nullptr;
     continuationManagerTmp = continuationManager_.lock();
     if (continuationManagerTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "continuationManagerTmp is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationManagerTmp");
         return false;
     }
 
@@ -324,7 +324,7 @@ void ContinuationHandler::NotifyReverseResult(int reverseResult)
         std::shared_ptr<Ability> ability = nullptr;
         ability = ability_.lock();
         if (ability == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTINUATION, "ability is nullptr");
+            TAG_LOGE(AAFwkTag::CONTINUATION, "null ability");
             return;
         }
         ability->TerminateAbility();
@@ -337,7 +337,7 @@ bool ContinuationHandler::ContinuationBack(const Want &want)
     std::shared_ptr<ContinuationManager> continuationManagerTmp = nullptr;
     continuationManagerTmp = continuationManager_.lock();
     if (continuationManagerTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "continuationManagerTmp is nullptr");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationManagerTmp");
         return false;
     }
 

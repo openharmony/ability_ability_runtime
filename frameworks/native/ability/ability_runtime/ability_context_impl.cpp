@@ -281,7 +281,7 @@ ErrCode AbilityContextImpl::StartUIServiceExtensionAbility(const AAFwk::Want& wa
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
         want, token_, accountId, AppExecFwk::ExtensionAbilityType::UI_SERVICE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "failed, ret: %{public}d", err);
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed %{public}d", err);
     }
     return err;
 }
@@ -326,7 +326,7 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
         TAG_LOGI(AAFwkTag::CONTEXT, "scb call, TerminateAbilityWithResult");
         ErrCode ret = static_cast<int32_t>(ifaceSessionToken->TerminateSession(info));
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "scb call, TerminateAbilityWithResult err: %{public}d", ret);
+            TAG_LOGE(AAFwkTag::CONTEXT, "err:%{public}d", ret);
         }
         return ret;
     } else {
@@ -406,7 +406,7 @@ ErrCode AbilityContextImpl::ConnectAbility(const AAFwk::Want& want, const sptr<A
         abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode ret = ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "failed, ret:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed %{public}d", ret);
     }
     return ret;
 }
@@ -418,7 +418,7 @@ ErrCode AbilityContextImpl::ConnectAbilityWithAccount(const AAFwk::Want& want, i
     ErrCode ret =
         ConnectionManager::GetInstance().ConnectAbilityWithAccount(token_, want, accountId, connectCallback);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "failed, ret:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed %{public}d", ret);
     }
     return ret;
 }
@@ -431,7 +431,7 @@ ErrCode AbilityContextImpl::ConnectUIServiceExtensionAbility(const AAFwk::Want& 
         "called, name:%{public}s", abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str());
     ErrCode ret = ConnectionManager::GetInstance().ConnectUIServiceExtensionAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "failed, ret:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed %{public}d", ret);
     }
     return ret;
 }
@@ -445,7 +445,7 @@ void AbilityContextImpl::DisconnectAbility(const AAFwk::Want& want,
     ErrCode ret =
         ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "error, ret=%{public}d", ret);
+        TAG_LOGE(AAFwkTag::CONTEXT, "error %{public}d", ret);
     }
 }
 
@@ -590,14 +590,14 @@ ErrCode AbilityContextImpl::TerminateSelf()
         auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
         ErrCode ret = static_cast<int32_t>(ifaceSessionToken->TerminateSession(info));
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "scb call, TerminateSelf err: %{public}d", ret);
+            TAG_LOGE(AAFwkTag::CONTEXT, "err:%{public}d", ret);
         }
         return ret;
     } else {
         AAFwk::Want resultWant;
         ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, &resultWant);
         if (err != ERR_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "terminateSelf failed %{public}d", err);
+            TAG_LOGE(AAFwkTag::CONTEXT, "failed:%{public}d", err);
         }
         return err;
     }
@@ -848,7 +848,7 @@ void AbilityContextImpl::RegisterAbilityLifecycleObserver(
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null abilityCallback, register failed");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null abilityCallback");
         return;
     }
     abilityCallback->RegisterAbilityLifecycleObserver(observer);
@@ -860,7 +860,7 @@ void AbilityContextImpl::UnregisterAbilityLifecycleObserver(
     TAG_LOGD(AAFwkTag::CONTEXT, "call");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null abilityCallback, unregister failed");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null abilityCallback");
         return;
     }
     abilityCallback->UnregisterAbilityLifecycleObserver(observer);
@@ -1088,7 +1088,7 @@ std::shared_ptr<AAFwk::Want> AbilityContextImpl::GetWant()
 {
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "abilityCallback is nullptr.");
+        TAG_LOGW(AAFwkTag::CONTEXT, "null abilityCallback");
         return nullptr;
     }
     return abilityCallback->GetWant();

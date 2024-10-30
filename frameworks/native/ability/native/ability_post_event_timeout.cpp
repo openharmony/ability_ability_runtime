@@ -49,7 +49,7 @@ void AbilityPostEventTimeout::TimingBegin(int64_t delaytime)
     auto task = [weak = weak_from_this()]() {
         auto timeoutTask = weak.lock();
         if (timeoutTask == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "timeout nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null timeout");
             return;
         }
         timeoutTask->TimeOutProc();
