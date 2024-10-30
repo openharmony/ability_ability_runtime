@@ -376,19 +376,19 @@ sptr<IRemoteObject> JsServiceExtension::OnConnect(const AAFwk::Want &want,
     bool callResult = false;
     do {
         if (!CheckTypeForNapiValue(env, result, napi_object)) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "CallPromise, error to convert native value to NativeObject");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "convert native value to NativeObject error");
             break;
         }
         napi_value then = nullptr;
         napi_get_named_property(env, result, "then", &then);
         if (then == nullptr) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "CallPromise, error to get property then");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "null then");
             break;
         }
         bool isCallable = false;
         napi_is_callable(env, then, &isCallable);
         if (!isCallable) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "CallPromise, property then not callable");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "not callable property then");
             break;
         }
         napi_value promiseCallback = nullptr;
@@ -400,7 +400,7 @@ sptr<IRemoteObject> JsServiceExtension::OnConnect(const AAFwk::Want &want,
     } while (false);
 
     if (!callResult) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "error to call promise");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "call promise error");
         isAsyncCallback = false;
     } else {
         isAsyncCallback = true;
@@ -433,7 +433,7 @@ void JsServiceExtension::OnDisconnect(const AAFwk::Want &want,
     }
     bool callResult = CallPromise(result, callbackInfo);
     if (!callResult) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "error to call promise");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "call promise error");
         isAsyncCallback = false;
     } else {
         isAsyncCallback = true;
@@ -690,14 +690,14 @@ napi_value JsServiceExtension::CallOnDisconnect(const AAFwk::Want &want, bool wi
 bool JsServiceExtension::CheckPromise(napi_value result)
 {
     if (result == nullptr) {
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "null result, no need to call promise");
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "null result");
         return false;
     }
     napi_env env = jsRuntime_.GetNapiEnv();
     bool isPromise = false;
     napi_is_promise(env, result, &isPromise);
     if (!isPromise) {
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "result not promise, no need to call promise");
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "result not promise");
         return false;
     }
     return true;
@@ -707,19 +707,19 @@ bool JsServiceExtension::CallPromise(napi_value result, AppExecFwk::AbilityTrans
 {
     napi_env env = jsRuntime_.GetNapiEnv();
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Error to convert native value to NativeObject");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "convert native value to NativeObject error");
         return false;
     }
     napi_value then = nullptr;
     napi_get_named_property(env, result, "then", &then);
     if (then == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Error to get property: then");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null then");
         return false;
     }
     bool isCallable = false;
     napi_is_callable(env, then, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Property then is not callable");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "not callable property then");
         return false;
     }
     HandleScope handleScope(jsRuntime_);

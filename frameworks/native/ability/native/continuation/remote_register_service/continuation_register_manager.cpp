@@ -44,7 +44,7 @@ void ContinuationRegisterManager::Register(const std::string &bundleName, const 
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->Register(bundleName, parameter, deviceCallback, requestCallback);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationRegisterManagerProxy");
     }
 }
 
@@ -60,7 +60,7 @@ void ContinuationRegisterManager::Unregister(int token, const std::shared_ptr<Re
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->Unregister(token, requestCallback);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationRegisterManagerProxy");
     }
 }
 
@@ -79,7 +79,7 @@ void ContinuationRegisterManager::UpdateConnectStatus(
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->UpdateConnectStatus(token, deviceId, status, requestCallback);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationRegisterManagerProxy");
     }
 }
 
@@ -97,7 +97,7 @@ void ContinuationRegisterManager::ShowDeviceList(
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->ShowDeviceList(token, parameter, requestCallback);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationRegisterManagerProxy");
     }
 }
 
@@ -110,7 +110,7 @@ void ContinuationRegisterManager::Disconnect(void)
     if (continuationRegisterManagerProxy_ != nullptr) {
         continuationRegisterManagerProxy_->Disconnect();
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationRegisterManagerProxy is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationRegisterManagerProxy");
     }
 }
 }  // namespace AppExecFwk

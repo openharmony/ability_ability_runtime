@@ -34,7 +34,7 @@ ContinuationRequestRegister::ContinuationRequestRegister(const std::string &bund
 void ContinuationRequestRegister::Execute(void)
 {
     if (continuatinConnector_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "continuatinConnector is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuatinConnector");
         return;
     }
 
@@ -42,7 +42,7 @@ void ContinuationRequestRegister::Execute(void)
     if (requestCallback_ != nullptr) {
         requestCallback_->OnResult(ret);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "requestCallback is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null requestCallback");
     }
 }
 
@@ -54,7 +54,7 @@ ContinuationRequestUnRegister::ContinuationRequestUnRegister(int token)
 void ContinuationRequestUnRegister::Execute(void)
 {
     if (continuatinConnector_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "continuatinConnector is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuatinConnector");
         return;
     }
 
@@ -62,7 +62,7 @@ void ContinuationRequestUnRegister::Execute(void)
     if (requestCallback_ != nullptr) {
         requestCallback_->OnResult(ret ? 0 : -1);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "requestCallback is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null requestCallback");
     }
 }
 
@@ -77,7 +77,7 @@ ContinuationRequestUpdateConnectStatus::ContinuationRequestUpdateConnectStatus(
 void ContinuationRequestUpdateConnectStatus::Execute(void)
 {
     if (continuatinConnector_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "continuatinConnector is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuatinConnector");
         return;
     }
 
@@ -85,7 +85,7 @@ void ContinuationRequestUpdateConnectStatus::Execute(void)
     if (requestCallback_ != nullptr) {
         requestCallback_->OnResult(ret ? 0 : -1);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "requestCallback is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null requestCallback");
     }
 }
 
@@ -98,7 +98,7 @@ ContinuationRequestShowDeviceList::ContinuationRequestShowDeviceList(int token, 
 void ContinuationRequestShowDeviceList::Execute(void)
 {
     if (continuatinConnector_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "continuatinConnector is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuatinConnector");
         return;
     }
 
@@ -106,7 +106,7 @@ void ContinuationRequestShowDeviceList::Execute(void)
     if (requestCallback_ != nullptr) {
         requestCallback_->OnResult(ret ? 0 : -1);
     } else {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "requestCallback is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null requestCallback");
     }
 }
 
@@ -138,7 +138,7 @@ void ContinuationRegisterManagerProxy::Register(const std::string &bundleName, c
     const std::shared_ptr<RequestCallback> &requestCallback)
 {
     if (context_.lock() == nullptr || applicationContext_.lock() == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "context or applicationContext is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null context or applicationContext");
         return;
     }
 
@@ -168,7 +168,7 @@ void ContinuationRegisterManagerProxy::Register(const std::string &bundleName, c
 void ContinuationRegisterManagerProxy::Unregister(int token, const std::shared_ptr<RequestCallback> &requestCallback)
 {
     if (applicationContext_.lock() == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Context is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null context");
         return;
     }
 
@@ -201,7 +201,7 @@ void ContinuationRegisterManagerProxy::UpdateConnectStatus(
     int token, const std::string &deviceId, int status, const std::shared_ptr<RequestCallback> &requestCallback)
 {
     if (applicationContext_.lock() == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Context is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null context");
         return;
     }
 
@@ -233,7 +233,7 @@ void ContinuationRegisterManagerProxy::ShowDeviceList(
     int token, const ExtraParams &parameter, const std::shared_ptr<RequestCallback> &requestCallback)
 {
     if (applicationContext_.lock() == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Context is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null context");
         return;
     }
 
@@ -265,7 +265,7 @@ void ContinuationRegisterManagerProxy::SendRequest(
     const std::weak_ptr<Context> &context, const std::shared_ptr<ContinuationRequest> &request)
 {
     if (request == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "request is null");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null request");
         return;
     }
 

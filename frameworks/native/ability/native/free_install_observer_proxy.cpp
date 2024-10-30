@@ -45,13 +45,13 @@ void FreeInstallObserverProxy::OnInstallFinished(const std::string &bundleName, 
 
     if (!data.WriteString(bundleName) || !data.WriteString(abilityName) || !data.WriteString(startTime) ||
         !data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "params is wrong");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "params wrong");
         return;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "Remote is NULL");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "null remote");
         return;
     }
     int32_t ret = remote->SendRequest(
@@ -75,13 +75,13 @@ void FreeInstallObserverProxy::OnInstallFinishedByUrl(const std::string &startTi
 
     if (!data.WriteString(startTime) || !data.WriteString(url) ||
         !data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "params is wrong");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "params wrong");
         return;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "Remote is NULL");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "null remote");
         return;
     }
     int32_t ret = remote->SendRequest(

@@ -204,7 +204,7 @@ void StartAbilityByCallComplete(napi_env env, NapiAsyncTask& task, std::weak_ptr
         return;
     }
     if (calldata->err != 0) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "callComplete err is %{public}d", calldata->err);
+        TAG_LOGE(AAFwkTag::CONTEXT, "err: %{public}d", calldata->err);
         task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
         TAG_LOGD(AAFwkTag::CONTEXT, "clear failed call of startup is called");
         auto context = abilityContext.lock();
@@ -466,7 +466,7 @@ napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info
         &observer = freeInstallObserver_, innerErrCode]() {
         auto context = weak.lock();
         if (!context) {
-            TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
@@ -523,7 +523,7 @@ napi_value JsAbilityContext::OnStartUIServiceExtension(napi_env env, NapiCallbac
         [weak = context_, want, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
                 *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
@@ -556,14 +556,14 @@ bool JsAbilityContext::UnwrapConnectUIServiceExtensionParam(napi_env env, NapiCa
     }
     bool unwrapResult = OHOS::AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want);
     if (!unwrapResult) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed, UnwrapWant failed");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "UnwrapWant failed");
         ThrowInvalidParamError(env, "parse want error");
         return false;
     }
     TAG_LOGI(AAFwkTag::UISERVC_EXT, "callee:%{public}s.%{public}s", want.GetBundle().c_str(),
         want.GetElement().GetAbilityName().c_str());
     if (!CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed, callback type incorrect");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "callback type incorrect");
         ThrowInvalidParamError(env, "Incorrect parameter types");
         return false;
     }
@@ -584,7 +584,7 @@ bool JsAbilityContext::CheckConnectAlreadyExist(napi_env env,
     std::unique_ptr<NapiAsyncTask> uasyncTask = CreateAsyncTaskWithLastParam(env, nullptr, nullptr, nullptr, &result);
     napi_value proxy = connection->GetProxyObject();
     if (proxy == nullptr) {
-        TAG_LOGW(AAFwkTag::UISERVC_EXT, "can't got proxy object, wait for duplicated connect finish");
+        TAG_LOGW(AAFwkTag::UISERVC_EXT, "not got proxy object, wait duplicate connect");
         connection->AddDuplicatedPendingTask(uasyncTask);
     } else {
         TAG_LOGD(AAFwkTag::UISERVC_EXT, "resolve, got proxy object");
@@ -648,7 +648,7 @@ void JsAbilityContext::DoConnectUIServiceExtension(napi_env env,
     int64_t connectId = connection->GetConnectionId();
     auto context = weakContext.lock();
     if (!context) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "connect ability failed, context is released.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null connect");
         uasyncTaskShared->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
         UIServiceConnection::RemoveUIServiceAbilityConnection(connectId);
         return;
@@ -673,7 +673,7 @@ napi_value JsAbilityContext::OnDisconnectUIServiceExtension(napi_env env, NapiCa
     AAFwk::JsUIServiceProxy* proxy = nullptr;
     napi_status status = napi_unwrap(env, info.argv[INDEX_ZERO], reinterpret_cast<void**>(&proxy));
     if (status != napi_ok || proxy == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "napi_unwrap err or proxy == nullptr");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "napi_unwrap err or null proxy");
         ThrowInvalidParamError(env, "Parameter verification failed");
         return CreateJsUndefined(env);
     }
@@ -687,12 +687,12 @@ napi_value JsAbilityContext::OnDisconnectUIServiceExtension(napi_env env, NapiCa
     NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, connection, innerErrCode]() {
         auto context = weak.lock();
         if (!context) {
-            TAG_LOGW(AAFwkTag::UISERVC_EXT, "onDisconnectUIServiceExtension context is released");
+            TAG_LOGW(AAFwkTag::UISERVC_EXT, "null context");
             *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
         if (!connection) {
-            TAG_LOGW(AAFwkTag::UISERVC_EXT, "onDisconnectUIServiceExtension connection nullptr");
+            TAG_LOGW(AAFwkTag::UISERVC_EXT, "null connection");
             *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
             return;
         }
@@ -755,7 +755,7 @@ bool JsAbilityContext::CreateOpenLinkTask(const napi_env &env, const napi_value 
     requestCode = GenerateRequestCode();
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+        TAG_LOGW(AAFwkTag::CONTEXT, "null context");
         return false;
     }
     context->InsertResultCallbackTask(requestCode, std::move(task));
@@ -766,7 +766,7 @@ void JsAbilityContext::RemoveOpenLinkTask(int requestCode)
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+        TAG_LOGW(AAFwkTag::CONTEXT, "null context");
         return;
     }
     context->RemoveResultCallbackTask(requestCode);
@@ -838,7 +838,7 @@ napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& wa
     NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrCode, requestCode]() {
         auto context = weak.lock();
         if (!context) {
-            TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
             *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
@@ -903,7 +903,7 @@ napi_value JsAbilityContext::OnStartAbilityAsCaller(napi_env env, NapiCallbackIn
     NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc, innerErrCode]() {
         auto context = weak.lock();
         if (!context) {
-            TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
             *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
@@ -971,7 +971,7 @@ napi_value JsAbilityContext::OnStartAbilityWithAccount(napi_env env, NapiCallbac
             &observer = freeInstallObserver_]() {
         auto context = weak.lock();
         if (!context) {
-            TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
             *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
@@ -1164,7 +1164,7 @@ napi_value JsAbilityContext::OnStartAbilityForResult(napi_env env, NapiCallbackI
     };
     auto context = context_.lock();
     if (context == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+        TAG_LOGW(AAFwkTag::CONTEXT, "null context");
         asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
     } else {
         want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
@@ -1250,7 +1250,7 @@ napi_value JsAbilityContext::OnStartAbilityForResultWithAccount(napi_env env, Na
     };
     auto context = context_.lock();
     if (context == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+        TAG_LOGW(AAFwkTag::CONTEXT, "null context");
         asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
     } else {
         auto requestCode = GenerateRequestCode();
@@ -1281,7 +1281,7 @@ napi_value JsAbilityContext::OnStartExtensionAbility(napi_env env, NapiCallbackI
         [weak = context_, want, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
                 *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
@@ -2462,7 +2462,7 @@ napi_value JsAbilityContext::OnSetMissionLabel(napi_env env, NapiCallbackInfo& i
         [weak = context_, label](napi_env env, NapiAsyncTask& task, int32_t status) {
             auto context = weak.lock();
             if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "context is released");
+                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                 return;
             }
@@ -2501,7 +2501,7 @@ napi_value JsAbilityContext::OnSetMissionIcon(napi_env env, NapiCallbackInfo& in
         [weak = context_, icon, innerErrCode]() {
             auto context = weak.lock();
             if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "context is released when set mission icon");
+                TAG_LOGW(AAFwkTag::CONTEXT, "null context when set mission icon");
                 *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
@@ -2556,7 +2556,7 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
         [weak = context_, type, wantParam, callback, innerErrCode]() mutable {
             auto context = weak.lock();
             if (!context) {
-                TAG_LOGW(AAFwkTag::CONTEXT, "complete, context is released");
+                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
                 *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
@@ -2699,7 +2699,7 @@ napi_value JsAbilityContext::OnOpenAtomicService(napi_env env, NapiCallbackInfo&
 
     std::string appId;
     if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], appId)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "fail to parse appId");
+        TAG_LOGE(AAFwkTag::CONTEXT, "parse appId faild");
         ThrowInvalidParamError(env, "Parse param appId failed, appId must be string.");
         return CreateJsUndefined(env);
     }
@@ -2743,7 +2743,7 @@ napi_value JsAbilityContext::OpenAtomicServiceInner(napi_env env, NapiCallbackIn
         std::string abilityName = element.GetAbilityName();
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
-            TAG_LOGW(AAFwkTag::CONTEXT, "wrap abilityResult failed");
+            TAG_LOGW(AAFwkTag::CONTEXT, "null abilityResult");
             isInner = true;
             resultCode = ERR_INVALID_VALUE;
         }

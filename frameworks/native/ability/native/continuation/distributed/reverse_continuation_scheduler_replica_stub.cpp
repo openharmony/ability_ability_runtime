@@ -48,7 +48,7 @@ int ReverseContinuationSchedulerReplicaStub::OnRemoteRequest(
 {
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (remoteDescriptor != ReverseContinuationSchedulerReplicaStub::GetDescriptor()) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "token is invalid");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "invalid token");
         return ERR_INVALID_STATE;
     }
     switch (code) {

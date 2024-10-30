@@ -192,7 +192,7 @@ void JsFreeInstallObserver::CallCallback(napi_ref callback, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "callback is nullptr.");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "null callback");
         return;
     }
     napi_value value;
@@ -211,7 +211,7 @@ void JsFreeInstallObserver::CallCallback(napi_ref callback, napi_value abilityRe
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "callback is nullptr");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "null callback");
         return;
     }
     napi_value argv[] = {
@@ -226,7 +226,7 @@ void JsFreeInstallObserver::CallCallback(napi_ref callback, napi_value abilityRe
 void JsFreeInstallObserver::CallPromise(napi_deferred deferred, int32_t resultCode)
 {
     if (deferred == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "deferred is nullptr");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "null deferred");
         return;
     }
     if (resultCode == ERR_OK) {
@@ -241,7 +241,7 @@ void JsFreeInstallObserver::CallPromise(napi_deferred deferred, int32_t resultCo
 void JsFreeInstallObserver::CallPromise(napi_deferred deferred, napi_value abilityResult)
 {
     if (deferred == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "deferred is nullptr");
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "null deferred");
         return;
     }
     napi_resolve_deferred(env_, deferred, abilityResult);
@@ -256,7 +256,7 @@ void JsFreeInstallObserver::AddJsObserverObject(const std::string &bundleName, c
         for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end(); ++it) {
             if (it->bundleName == bundleName && it->abilityName == abilityName &&
                 it->startTime == startTime) {
-                TAG_LOGW(AAFwkTag::FREE_INSTALL, "The jsObject has been added");
+                TAG_LOGW(AAFwkTag::FREE_INSTALL, "add jsObject");
                 return;
             }
         }
@@ -278,7 +278,7 @@ void JsFreeInstallObserver::AddJsObserverObject(const std::string &startTime, co
         std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
         for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end(); ++it) {
             if (it->startTime == startTime && it->url == url) {
-                TAG_LOGW(AAFwkTag::FREE_INSTALL, "The jsObject has been added");
+                TAG_LOGW(AAFwkTag::FREE_INSTALL, "add jsObject");
                 return;
             }
         }

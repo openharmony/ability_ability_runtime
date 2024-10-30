@@ -66,7 +66,7 @@ int ReverseContinuationSchedulerPrimaryStub::ContinuationBackInner(MessageParcel
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION,
-            "want is nullptr");
+            "null want");
         return -1;
     }
 

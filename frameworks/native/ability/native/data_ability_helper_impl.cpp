@@ -842,7 +842,7 @@ bool DataAbilityHelperImpl::CheckUri(const std::shared_ptr<Uri> &uri)
     }
 
     if (uri->GetScheme() != SchemeOhos) {
-        TAG_LOGE(AAFwkTag::DATA_ABILITY, "invalid param, uri not dataability, Scheme: %{private}s",
+        TAG_LOGE(AAFwkTag::DATA_ABILITY, "uri not dataability, Scheme: %{private}s",
             uri->GetScheme().c_str());
         return false;
     }

@@ -36,7 +36,7 @@ int RemoteRegisterServiceProxy::Register(const std::string &bundleName, const sp
     if (!data.WriteInterfaceToken(IRemoteRegisterService::GetDescriptor()) || !data.WriteString(bundleName) ||
         !data.WriteRemoteObject(token) || !data.WriteInt32(1) || !extras.Marshalling(data) ||
         !data.WriteRemoteObject(callback->AsObject())) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write transfer data");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write transfer data failed");
         return IPC_INVOKER_WRITE_TRANS_ERR;
     }
 
@@ -60,7 +60,7 @@ bool RemoteRegisterServiceProxy::Unregister(int registerToken)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(IRemoteRegisterService::GetDescriptor()) || !data.WriteInt32(registerToken)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write transfer data");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write transfer data failed");
         return false;
     }
 
@@ -87,7 +87,7 @@ bool RemoteRegisterServiceProxy::UpdateConnectStatus(int registerToken, const st
     MessageParcel data;
     if (!data.WriteInterfaceToken(IRemoteRegisterService::GetDescriptor()) || !data.WriteInt32(registerToken) ||
         !data.WriteString(deviceId) || !data.WriteInt32(status)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write transfer data");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write transfer data failed");
         return false;
     }
 
@@ -113,7 +113,7 @@ bool RemoteRegisterServiceProxy::ShowDeviceList(int registerToken, const ExtraPa
     MessageParcel data;
     if (!data.WriteInterfaceToken(IRemoteRegisterService::GetDescriptor()) || !data.WriteInt32(registerToken) ||
         !data.WriteInt32(1) || !extras.Marshalling(data)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed to write transfer data");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write transfer data failed");
         return false;
     }
 
@@ -133,7 +133,7 @@ int32_t RemoteRegisterServiceProxy::SendTransactCmd(uint32_t code, MessageParcel
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Remote is nullptr.");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return ERR_NULL_OBJECT;
     }
 

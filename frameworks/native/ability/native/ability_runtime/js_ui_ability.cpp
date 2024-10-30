@@ -110,7 +110,7 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *extValue)
     std::shared_ptr<NativeReference> systemModule = nullptr;
     auto screenModePtr = reinterpret_cast<std::weak_ptr<int32_t> *>(extValue)->lock();
     if (screenModePtr == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "nul screenModePtr");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null screenModePtr");
         return nullptr;
     }
     if (*screenModePtr == AAFwk::IDLE_SCREEN_MODE) {
@@ -369,7 +369,7 @@ int32_t JsUIAbility::OnShare(WantParams &wantParam)
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     if (jsAbilityObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null ability object");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj_");
         return ERR_INVALID_VALUE;
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
@@ -1026,7 +1026,7 @@ void JsUIAbility::ExecuteInsightIntentBackground(const Want &want,
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (executeParam == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "invalid executeParam");
+        TAG_LOGW(AAFwkTag::UIABILITY, "null executeParam");
         InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
         return;
     }
@@ -1154,7 +1154,7 @@ int32_t JsUIAbility::OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
         abilityInfo.moduleName);
     int result = AAFwk::AbilityManagerClient::GetInstance()->StartContinuation(want, token_, status);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "StartContinuation failed, result: %{public}d", result);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "StartContinuation failed: %{public}d", result);
     }
     TAG_LOGI(AAFwkTag::UIABILITY, "end");
     return result;
@@ -1189,7 +1189,7 @@ int32_t JsUIAbility::OnSaveState(int32_t reason, WantParams &wantParams)
     }
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "failed to get ability object");
+        TAG_LOGE(AAFwkTag::UIABILITY, "get ability object faild");
         return -1;
     }
 
@@ -1201,7 +1201,7 @@ int32_t JsUIAbility::OnSaveState(int32_t reason, WantParams &wantParams)
     napi_value methodOnSaveState = nullptr;
     napi_get_named_property(env, obj, "onSaveState", &methodOnSaveState);
     if (methodOnSaveState == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "failed to get 'onSaveState' fun");
+        TAG_LOGE(AAFwkTag::UIABILITY, "get 'onSaveState' fun failed");
         return -1;
     }
 
@@ -1466,19 +1466,19 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
 {
     auto env = jsRuntime_.GetNapiEnv();
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "convert native value to NativeObject failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "convert failed");
         return false;
     }
     napi_value then = nullptr;
     napi_get_named_property(env, result, "then", &then);
     if (then == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get property: then failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null then");
         return false;
     }
     bool isCallable = false;
     napi_is_callable(env, then, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "property then is not callable");
+        TAG_LOGE(AAFwkTag::UIABILITY, "not callable");
         return false;
     }
     HandleScope handleScope(jsRuntime_);
@@ -1496,7 +1496,7 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     auto env = jsRuntime_.GetNapiEnv();
     if (!CheckTypeForNapiValue(env, result, napi_object)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "convert native value to NativeObject error");
+        TAG_LOGE(AAFwkTag::UIABILITY, "convert error");
         return false;
     }
     napi_value then = nullptr;
@@ -1508,7 +1508,7 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
     bool isCallable = false;
     napi_is_callable(env, then, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "property then is not callable");
+        TAG_LOGE(AAFwkTag::UIABILITY, "not callable");
         return false;
     }
     HandleScope handleScope(jsRuntime_);

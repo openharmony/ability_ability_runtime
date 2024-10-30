@@ -32,12 +32,12 @@ int64_t FFIAbilityGetAbilityContext(AbilityHandle abilityHandle)
     auto ability = static_cast<CJUIAbility*>(abilityHandle);
     auto context = ability->GetAbilityContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null abilityContext");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null Context");
         return ERR_INVALID_INSTANCE_CODE;
     }
     auto cjContext = FFI::FFIData::Create<CJAbilityContext>(context);
     if (cjContext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "GetAbilityContext failed, abilityContext is null");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
         return ERR_INVALID_INSTANCE_CODE;
     }
     return cjContext->GetID();
@@ -47,7 +47,7 @@ void FFIAbilityContextGetFilesDir(int64_t id, void(*accept)(const char*))
 {
     auto cjContext = FFI::FFIData::GetData<CJAbilityContext>(id);
     if (cjContext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null cj abilityContext");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null cjContext");
         return;
     }
     auto context = cjContext->GetAbilityContext();

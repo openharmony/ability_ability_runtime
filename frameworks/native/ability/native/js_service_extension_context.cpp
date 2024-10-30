@@ -367,7 +367,7 @@ private:
                 return;
             }
             if (freeInstallObserver == nullptr) {
-                TAG_LOGE(AAFwkTag::SERVICE_EXT, "freeInstallObserver_ is nullptr");
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "null freeInstallObserver_");
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
                 return;
             }
@@ -578,7 +578,7 @@ private:
             constexpr int callerTimeOut = 10; // 10s
             std::unique_lock<std::mutex> lock(calldata->mutexlock);
             if (calldata->remoteCallee != nullptr) {
-                TAG_LOGI(AAFwkTag::SERVICE_EXT, "callee isn`t null");
+                TAG_LOGI(AAFwkTag::SERVICE_EXT, "callee not null");
                 return;
             }
 
@@ -891,7 +891,7 @@ private:
     void FindConnection(AAFwk::Want& want, sptr<JSServiceExtensionConnection>& connection, int64_t& connectId,
         int32_t &accountId) const
     {
-        TAG_LOGI(AAFwkTag::SERVICE_EXT, "Disconnect ability begin, connection:%{public}d",
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "Disconnect ability:%{public}d",
             static_cast<int32_t>(connectId));
         std::lock_guard guard(g_connectsMutex);
         auto item = std::find_if(g_connects.begin(),
@@ -1287,7 +1287,7 @@ private:
         sptr<JSServiceExtensionConnection> connection, int64_t connectId, std::shared_ptr<int> innerErrorCode)
     {
         return [weak = context_, want, connection, connectId, innerErrorCode]() {
-            TAG_LOGI(AAFwkTag::SERVICE_EXT, "Connect ability execute begin, connectId: %{public}d.",
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "Connect ability: %{public}d",
                 static_cast<int32_t>(connectId));
 
             auto context = weak.lock();
@@ -1444,7 +1444,7 @@ void JSServiceExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::
     }
     napi_value obj = jsConnectionObject_->GetNapiValue();
     if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "error to get object");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "get object error");
         return;
     }
     napi_value methodOnConnect = nullptr;
@@ -1491,7 +1491,7 @@ void JSServiceExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFw
     }
     napi_value obj = jsConnectionObject_->GetNapiValue();
     if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "error to get object");
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "get object error");
         return;
     }
 
