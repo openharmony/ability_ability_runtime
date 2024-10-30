@@ -50,6 +50,12 @@ constexpr int32_t GetLoadTimeOutBase()
 {
     return TIMEOUT_UNIT_TIME * LOAD_TIMEOUT_MULTIPLE;
 }
+
+constexpr int32_t GetLoadTimeOutInactive()
+{
+    return TIMEOUT_UNIT_TIME * (LOAD_TIMEOUT_MULTIPLE + INACTIVE_TIMEOUT_MULTIPLE);
+}
+
 }  // namespace GlobalConstant
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_GLOBAL_CONSTANT_H

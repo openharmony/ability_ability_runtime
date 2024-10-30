@@ -1585,6 +1585,12 @@ int AbilityConnectManager::DispatchInactive(const std::shared_ptr<AbilityRecord>
     }
     eventHandler_->RemoveEvent(AbilityManagerService::INACTIVE_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
 
+    if (abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END,
+            abilityRecord->GetPid(), abilityRecord->GetUid(), abilityRecord->GetAbilityRecordId());
+    }
+
     // complete inactive
     abilityRecord->SetAbilityState(AbilityState::INACTIVE);
     if (abilityRecord->IsCreateByConnect()) {

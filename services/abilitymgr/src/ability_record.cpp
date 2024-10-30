@@ -498,7 +498,7 @@ void AbilityRecord::PostForegroundTimeoutTask()
     std::string methodName = "ForegroundAbility";
     g_addLifecycleEventTask(token_, FreezeUtil::TimeoutState::FOREGROUND, methodName);
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
-        foregroundTimeout);
+        foregroundTimeout, GetAbilityRecordId());
 }
 
 void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
@@ -520,7 +520,7 @@ void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
                 static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
             SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
-                timeout);
+                timeout, GetAbilityRecordId());
             break;
         }
         default: {
@@ -1421,6 +1421,9 @@ void AbilityRecord::SetAbilityState(AbilityState state)
     if (state == AbilityState::FOREGROUND || state == AbilityState::ACTIVE || state == AbilityState::BACKGROUND) {
         SetRestarting(false);
     }
+    if (state == AbilityState::FOREGROUND) {
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_END, GetPid(), GetUid(), GetAbilityRecordId());
+    }
 }
 
 void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
@@ -1477,8 +1480,11 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
 
 void AbilityRecord::AfterLoaded()
 {
-    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
-    ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid());
+    if (GetAbilityInfo().extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
+        FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid(), GetAbilityRecordId());
+    }
+
     if (IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Sceneboard Added");
     }
