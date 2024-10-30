@@ -583,18 +583,18 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
     PerfProfile::GetInstance().Reset();
     appRecord->UpdateAbilityState(token, AbilityState::ABILITY_STATE_CREATE);
 
-    auto reportLoadTask = [appRecord, loadParam]() {
+    auto reportLoadTask = [appRecord, abilityRecordId = loadParam->abilityRecordId]() {
         auto priorityObj = appRecord->GetPriorityObject();
         if (priorityObj) {
             auto timeOut = AbilityRuntime::GlobalConstant::GetLoadTimeOutBase() *
                 AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
             if (appRecord->GetExtensionType() == ExtensionAbilityType::SERVICE) {
-                timeOut = AbilityRuntime::GlobalConstant::GetLoadTimeOutInactive() *
+                timeOut = AbilityRuntime::GlobalConstant::GetLoadAndInactiveTimeout() *
                     AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
             }
 
             AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::LOAD_BEGIN,
-                priorityObj->GetPid(), appRecord->GetUid(), timeOut, static_cast<int64_t>(loadParam->abilityRecordId));
+                priorityObj->GetPid(), appRecord->GetUid(), timeOut, static_cast<int64_t>(abilityRecordId));
         }
     };
     if (taskHandler_) {
