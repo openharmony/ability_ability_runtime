@@ -1480,8 +1480,8 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
 
 void AbilityRecord::AfterLoaded()
 {
+    FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
     if (GetAbilityInfo().extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
-        FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid(), GetAbilityRecordId());
     }
 
