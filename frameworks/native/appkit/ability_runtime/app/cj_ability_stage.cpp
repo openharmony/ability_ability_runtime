@@ -46,6 +46,10 @@ CJ_EXPORT CConfiguration FFICJGetConfiguration(int64_t id)
 CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilityStageHandle)
 {
     auto ability = static_cast<CJAbilityStage*>(abilityStageHandle);
+    if (ability == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetAbilityStageContext failed, abilityStage is nullptr.");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
     auto context = ability->GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "GetAbilityStageContext failed, abilityContext is nullptr.");
