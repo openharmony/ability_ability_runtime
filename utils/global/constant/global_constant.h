@@ -55,7 +55,7 @@ constexpr int32_t GetLoadTimeOutBase()
     return TIMEOUT_UNIT_TIME * LOAD_TIMEOUT_MULTIPLE;
 }
 
-constexpr int32_t GetLoadTimeOutInactive()
+constexpr int32_t GetLoadAndInactiveTimeout()
 {
     return TIMEOUT_UNIT_TIME * (LOAD_TIMEOUT_MULTIPLE + INACTIVE_TIMEOUT_MULTIPLE);
 }
