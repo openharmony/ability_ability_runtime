@@ -22,7 +22,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 
 struct CConfiguration {
-    char* language;
+    const char* language;
     int32_t colorMode;
     int32_t direction;
     int32_t screenDensity;
@@ -30,8 +30,8 @@ struct CConfiguration {
     bool hasPointerDevice;
     double fontSizeScale;
     double fontWeightScale;
-    char* mcc;
-    char* mnc;
+    const char* mcc;
+    const char* mnc;
 };
 
 }

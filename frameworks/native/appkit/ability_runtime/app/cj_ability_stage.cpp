@@ -14,7 +14,6 @@
  */
 
 #include "cj_ability_stage.h"
-#include "cj_ability_stage_context.h"
 #include "cj_runtime.h"
 #include "context_impl.h"
 #include "hilog_tag_wrapper.h"
@@ -22,61 +21,26 @@
 
 using namespace OHOS::AbilityRuntime;
 
-namespace {
-char* CreateCStringFromString(const std::string& source)
-{
-    if (source.size() == 0) {
-        return nullptr;
-    }
-    size_t length = source.size() + 1;
-    auto res = static_cast<char*>(malloc(length));
-    if (res == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "fail to mallc string.");
-        return nullptr;
-    }
-    if (strcpy_s(res, length, source.c_str()) != 0) {
-        free(res);
-        TAG_LOGE(AAFwkTag::APPKIT, "fail to strcpy source.");
-        return nullptr;
-    }
-    return res;
-}
-}
-
-extern "C" {
-CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id)
+CJ_EXPORT RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id)
 {
     auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
     if (abilityStageContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Get abilityStageContext failed. ");
-        return nullptr;
+        return RetHapModuleInfo();
     }
 
-    auto hapInfo = abilityStageContext->GetHapModuleInfo();
-    if (hapInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "CurrentHapMoudleInfo is nullptr.");
-        return nullptr;
+    return abilityStageContext->GetHapModuleInfo();
+}
+
+CJ_EXPORT CConfiguration FFICJGetConfiguration(int64_t id)
+{
+    auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
+    if (abilityStageContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get abilityStageContext failed. ");
+        return CConfiguration();
     }
 
-    CurrentHapModuleInfo* buffer = static_cast<CurrentHapModuleInfo*>(malloc(sizeof(CurrentHapModuleInfo)));
- 
-    if (buffer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Create CurrentHapMoudleInfo failed, CurrentHapMoudleInfo is nullptr.");
-        return nullptr;
-    }
-
-    buffer->name = CreateCStringFromString(hapInfo->name);
-    buffer->icon = CreateCStringFromString(hapInfo->iconPath);
-    buffer->iconId = hapInfo->iconId;
-    buffer->label = CreateCStringFromString(hapInfo->label);
-    buffer->labelId = hapInfo->labelId;
-    buffer->description = CreateCStringFromString(hapInfo->description);
-    buffer->descriptionId = hapInfo->descriptionId;
-    buffer->mainElementName = CreateCStringFromString(hapInfo->mainElementName);
-    buffer->installationFree = hapInfo->installationFree;
-    buffer->hashValue = CreateCStringFromString(hapInfo->hashValue);
-
-    return buffer;
+    return abilityStageContext->GetConfiguration();
 }
 
 CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilityStageHandle)
@@ -93,7 +57,6 @@ CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilitySta
         return ERR_INVALID_INSTANCE_CODE;
     }
     return cjStageContext->GetID();
-}
 }
 
 std::shared_ptr<CJAbilityStage> CJAbilityStage::Create(
@@ -152,6 +115,16 @@ std::string CJAbilityStage::OnAcceptWant(const AAFwk::Want& want)
     return cjAbilityStageObject_->OnAcceptWant(want);
 }
 
+std::string CJAbilityStage::OnNewProcessRequest(const AAFwk::Want& want)
+{
+    AbilityStage::OnNewProcessRequest(want);
+    if (!cjAbilityStageObject_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CJAbilityStage is not loaded.");
+        return "";
+    }
+    return cjAbilityStageObject_->OnNewProcessRequest(want);
+}
+
 void CJAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
     AbilityStage::OnConfigurationUpdated(configuration);
@@ -176,4 +149,14 @@ void CJAbilityStage::OnMemoryLevel(int level)
         return;
     }
     cjAbilityStageObject_->OnMemoryLevel(level);
+}
+
+void CJAbilityStage::OnDestroy() const
+{
+    AbilityStage::OnDestroy();
+    if (!cjAbilityStageObject_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CJAbilityStage is not loaded.");
+        return;
+    }
+    cjAbilityStageObject_->OnDestroy();
 }
