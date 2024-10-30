@@ -171,6 +171,7 @@ ohos_shared_library("res_sched_util") {
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "hilog:libhilog",
+    "samgr:samgr_proxy",
   ]
 
   if (resource_schedule_service_enable) {
