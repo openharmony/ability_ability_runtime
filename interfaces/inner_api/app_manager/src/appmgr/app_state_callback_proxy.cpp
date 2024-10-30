@@ -170,7 +170,7 @@ void AppStateCallbackProxy::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;

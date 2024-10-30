@@ -1089,8 +1089,6 @@ bool OHOSApplication::isUpdateFontSize(Configuration &config, AbilityRuntime::Se
     TAG_LOGW(AAFwkTag::APPKIT, "high level");
     configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     ApplicationConfigurationManager::GetInstance().SetfontSetLevel(level);
-    config.AddItem(AAFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE,
-        level == AbilityRuntime::SetLevel::Application ? "1" : "0");
     return true;
 }
 
@@ -1111,6 +1109,8 @@ bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRunti
         return false;
     }
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(level);
+    config.AddItem(AAFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE,
+        level == AbilityRuntime::SetLevel::Application ? "1" : "0");
     return true;
 }
 
