@@ -17,6 +17,7 @@
 
 #include "ability_delegator_registry.h"
 #include "application_context.h"
+#include "running_process_info.h"
 #include "cj_utils_ffi.h"
 #include "cj_lambda.h"
 #include "hilog_tag_wrapper.h"
@@ -558,6 +559,76 @@ void CJApplicationContext::OnOffApplicationStateChange(int32_t callbackId, int32
     }
 }
 
+void CJApplicationContext::OnSetFont(std::string font)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
+        return;
+    }
+    context->SetFont(font);
+}
+
+void CJApplicationContext::OnSetLanguage(std::string language)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
+        return;
+    }
+    context->SetLanguage(language);
+}
+
+void CJApplicationContext::OnSetColorMode(int32_t colorMode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
+        return;
+    }
+    context->SetColorMode(colorMode);
+}
+
+std::shared_ptr<AppExecFwk::RunningProcessInfo> CJApplicationContext::OnGetRunningProcessInformation(
+    int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        return nullptr;
+    }
+    auto processInfo = std::make_shared<AppExecFwk::RunningProcessInfo>();
+    *errCode = context->GetProcessRunningInformation(*processInfo);
+    return processInfo;
+}
+
+void CJApplicationContext::OnKillProcessBySelf(bool clearPageStack, int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        return;
+    }
+    context->KillProcessBySelf(clearPageStack);
+}
+
+int32_t CJApplicationContext::OnGetCurrentAppCloneIndex(int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        return -1;
+    }
+    if (context->GetCurrentAppMode() != static_cast<int32_t>(AppExecFwk::MultiAppModeType::APP_CLONE)) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NOT_APP_CLONE;
+        return -1;
+    }
+    return context->GetCurrentAppCloneIndex();
+}
+
 extern "C" {
 int64_t FFIGetArea(int64_t id)
 {
@@ -643,6 +714,123 @@ void FfiCJApplicationContextOnOff(int64_t id, const char* type, int32_t callback
     TAG_LOGE(AAFwkTag::CONTEXT, "off function type not match");
     *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     return;
+}
+
+void FfiCJApplicationContextSetFont(int64_t id, const char* font, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    auto fontString = std::string(font);
+    context->OnSetFont(fontString);
+}
+
+void FfiCJApplicationContextSetLanguage(int64_t id, const char* language, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    auto languageString = std::string(language);
+    context->OnSetLanguage(languageString);
+}
+
+void FfiCJApplicationContextSetColorMode(int64_t id, int32_t colorMode, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    context->OnSetColorMode(colorMode);
+}
+
+CjAppProcessState ConvertToJsAppProcessState(
+    const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused)
+{
+    CjAppProcessState processState;
+    switch (appProcessState) {
+        case AppExecFwk::AppProcessState::APP_STATE_CREATE:
+        case AppExecFwk::AppProcessState::APP_STATE_READY:
+            processState = STATE_CREATE;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_FOREGROUND:
+            processState = isFocused ? STATE_ACTIVE : STATE_FOREGROUND;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_BACKGROUND:
+            processState = STATE_BACKGROUND;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_TERMINATED:
+        case AppExecFwk::AppProcessState::APP_STATE_END:
+            processState = STATE_DESTROY;
+            break;
+        default:
+            TAG_LOGE(AAFwkTag::CONTEXT, "Process state is invalid.");
+            processState = STATE_DESTROY;
+            break;
+    }
+    return processState;
+}
+
+CArrProcessInformation FfiCJApplicationContextGetRunningProcessInformation(int64_t id, int32_t *errCode)
+{
+    CArrProcessInformation cArrProcessInformation = { .head = nullptr, .size = 0 };
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return cArrProcessInformation;
+    }
+    auto processInfo = context->OnGetRunningProcessInformation(errCode);
+    if (*errCode != ERR_OK) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        return cArrProcessInformation;
+    }
+    
+    CProcessInformation* head = static_cast<CProcessInformation*>(malloc(sizeof(CProcessInformation)));
+    if (head == nullptr) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        return cArrProcessInformation;
+    }
+    head->processName = CreateCStringFromString(processInfo->processName_);
+    head->pid = processInfo->pid_;
+    head->uid = processInfo->uid_;
+    head->bundleNames.head = VectorToCArrString(processInfo->bundleNames);
+    head->bundleNames.size = (processInfo->bundleNames).size();
+    head->state = ConvertToJsAppProcessState(processInfo->state_, processInfo->isFocused);
+    head->bundleType = processInfo->bundleType;
+    head->appCloneIndex = processInfo->appCloneIndex;
+    cArrProcessInformation.size = 1;
+    cArrProcessInformation.head = head;
+    return cArrProcessInformation;
+}
+
+void FfiCJApplicationContextKillAllProcesses(int64_t id, bool clearPageStack, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    context->OnKillProcessBySelf(clearPageStack, errCode);
+}
+
+int32_t FfiCJApplicationContextGetCurrentAppCloneIndex(int64_t id, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return -1;
+    }
+    return context->OnGetCurrentAppCloneIndex(errCode);
 }
 }
 }
