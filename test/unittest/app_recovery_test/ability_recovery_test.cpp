@@ -243,6 +243,12 @@ HWTEST_F(AbilityRecoveryUnitTest, ScheduleSaveAbilityState_002, TestSize.Level1)
     abilityRecovery_->EnableAbilityRecovery(true, RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
     EXPECT_FALSE(abilityRecovery_->ScheduleSaveAbilityState(StateReason::LIFECYCLE));
+    abilityRecovery_->missionId_ = 1;
+    EXPECT_FALSE(!abilityRecovery_->isEnable_);
+    EXPECT_TRUE(abilityRecovery_->missionId_ > 0);
+    abilityRecovery_->saveOccasion_ = 0x0010;
+    EXPECT_TRUE((abilityRecovery_->saveOccasion_ & SaveOccasionFlag::SAVE_WHEN_ERROR) == 0);
+    EXPECT_FALSE(abilityRecovery_->ScheduleSaveAbilityState(StateReason::APP_FREEZE));
 }
 
 /**

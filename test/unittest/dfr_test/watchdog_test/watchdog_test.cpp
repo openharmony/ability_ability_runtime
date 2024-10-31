@@ -495,5 +495,26 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_009, TestSize.Level1)
     watchdog_->SetBundleInfo("test", "1.1.0");
     watchdog_->SetBgWorkingThreadStatus(false);
 }
+
+/**
+ * @tc.number: WatchdogTest_ReportEvent_010
+ * @tc.desc: Verify that function ReportEvent.
+ */
+HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_010, TestSize.Level1)
+{
+    watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count() - TEST_INTERVAL_TIME;
+    watchdog_->isInBackground_ = false;
+    watchdog_->backgroundReportCount_ = 0;
+    watchdog_->isBgWorkingThread_ = false;
+    watchdog_->needReport_ = false;
+    watchdog_->ReportEvent();
+    watchdog_->needReport_ = true;
+    watchdog_->isSixSecondEvent_ = true;
+    watchdog_->ReportEvent();
+    watchdog_->isSixSecondEvent_ = false;
+    watchdog_->ReportEvent();
+    EXPECT_TRUE(watchdog_->backgroundReportCount_ > 0 && watchdog_->backgroundReportCount_.load() < 5);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
