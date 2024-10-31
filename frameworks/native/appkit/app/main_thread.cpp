@@ -190,6 +190,8 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
         libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
         TAG_LOGD(AAFwkTag::APPKIT, "lib path = %{private}s", libPath.c_str());
         appLibPaths["default"].emplace_back(libPath);
+    } else {
+        TAG_LOGI(AAFwkTag::APPKIT, "nativeLibraryPath is empty");
     }
 
     for (auto &hapInfo : bundleInfo.hapModuleInfos) {
