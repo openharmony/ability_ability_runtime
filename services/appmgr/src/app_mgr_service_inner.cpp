@@ -6792,7 +6792,8 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
     }
 
     auto userId = GetUserIdByUid(appRecord->GetUid());
-    if (appRecord->IsKeepAliveApp() && (userId == 0 || userId == currentUserId_)) {
+    if (appRecord->IsKeepAliveApp() && (userId == 0 || userId == currentUserId_) &&
+        appRecord->GetBundleName() != SCENE_BOARD_BUNDLE_NAME) {
         if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
             TAG_LOGI(AAFwkTag::APPMGR, "is killed for upgrade web");
             return;
