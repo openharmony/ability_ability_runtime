@@ -222,7 +222,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityN
     appRecord->SetMainProcess(true);
 
     appMgrServiceInner->LoadAbilityNoAppRecord(appRecord, true, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
-        TEST_FLAG, bundleInfo, hapModuleInfo, want_, false, false, token_);
+        TEST_FLAG, bundleInfo, hapModuleInfo, want_, false, false, AppExecFwk::PreloadMode::PRESS_DOWN, token_);
     EXPECT_EQ(appRecord->GetSpecifiedProcessFlag(), TEST_FLAG);
     EXPECT_FALSE(appRecord->IsEmptyKeepAliveApp());
     EXPECT_FALSE(appRecord->IsMainProcess());
@@ -251,7 +251,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityN
     appRecord->SetEmptyKeepAliveAppState(true);
 
     appMgrServiceInner->LoadAbilityNoAppRecord(appRecord, true, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
-        "", bundleInfo, hapModuleInfo, want_, false, false, token_);
+        "", bundleInfo, hapModuleInfo, want_, false, false, AppExecFwk::PreloadMode::PRESS_DOWN, token_);
     EXPECT_EQ(appRecord->GetSpecifiedProcessFlag(), "");
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0200 end");
 }
