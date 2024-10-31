@@ -5113,8 +5113,30 @@ int AppMgrServiceInner::GetRenderProcessTerminationStatus(pid_t renderPid, int &
     TAG_LOGD(AAFwkTag::APPMGR, "Get render process termination status success, renderPid:%{public}d, status:%{public}d",
         renderPid, status);
     hostRecord->RemoveRenderPid(renderPid);
-
+    RemoveRenderRecordNoAttach(hostRecord, renderPid);
     return 0;
+}
+
+void AppMgrServiceInner::RemoveRenderRecordNoAttach(const std::shared_ptr<AppRunningRecord> &hostRecord,
+    int32_t renderPid)
+{
+    if (!hostRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "hostRecord null");
+        return;
+    }
+    auto renderRecord = hostRecord->GetRenderRecordByPid(renderPid);
+    if (!renderRecord) {
+        TAG_LOGD(AAFwkTag::APPMGR, "renderRecord null");
+        return;
+    }
+    if (renderRecord->GetScheduler() == nullptr) {
+        hostRecord->RemoveRenderRecord(renderRecord);
+        {
+            std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
+            renderUidSet_.erase(renderRecord->GetUid());
+        }
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
+    }
 }
 
 void AppMgrServiceInner::OnRenderRemoteDied(const wptr<IRemoteObject> &remote)
