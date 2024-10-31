@@ -171,7 +171,8 @@ bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
 #endif
 }
 
-void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid, int64_t timeDuration, int64_t abilityRecordId)
+void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
+    int64_t timeDuration, int64_t abilityRecordId)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_KEY_PERF_SCENE;
