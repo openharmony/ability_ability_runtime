@@ -4649,7 +4649,8 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "configuration_->CompareDifferent");
         configuration_->CompareDifferent(changeKeyV, config);
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "changeKeyV size: %{public}zu", changeKeyV.size());
+    TAG_LOGI(AAFwkTag::APPMGR, "changeKeyV size: %{public}zu Config: %{public}s",
+        changeKeyV.size(), config.GetName().c_str());
     if (config.GetItem(AAFwk::GlobalConfigurationKey::THEME).empty() && changeKeyV.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "changeKeyV empty");
         return ERR_INVALID_VALUE;
@@ -4789,6 +4790,7 @@ void AppMgrServiceInner::InitGlobalConfiguration()
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE, deviceType);
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, "1.0");
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, "1.0");
+    TAG_LOGI(AAFwkTag::APPMGR, "InitGlobalConfiguration Config: %{public}s", configuration_->GetName().c_str());
 }
 
 std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration()
