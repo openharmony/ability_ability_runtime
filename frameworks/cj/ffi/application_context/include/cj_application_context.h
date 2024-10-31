@@ -25,7 +25,10 @@
 #include "cj_ability_lifecycle_callback.h"
 #include "cj_application_state_change_callback.h"
 #include "cj_common_ffi.h"
+#include "cj_want_ffi.h"
 #include "ffi_remote_data.h"
+#include "want.h"
+#include "want_params.h"
 #include "running_process_info.h"
 
 namespace OHOS {
@@ -81,6 +84,7 @@ public:
     std::shared_ptr<AppExecFwk::RunningProcessInfo> OnGetRunningProcessInformation(int32_t *errCode);
     void OnKillProcessBySelf(bool clearPageStack, int32_t *errCode);
     int32_t OnGetCurrentAppCloneIndex(int32_t *errCode);
+    void OnRestartApp(AAFwk::Want want, int32_t *errCode);
 
     int32_t OnOnEnvironment(void (*cfgCallback)(AbilityRuntime::CConfiguration),
         void (*memCallback)(int32_t), bool isSync, int32_t *errCode);
@@ -128,6 +132,7 @@ CJ_EXPORT void FfiCJApplicationContextSetColorMode(int64_t id, int32_t colorMode
 CJ_EXPORT CArrProcessInformation FfiCJApplicationContextGetRunningProcessInformation(int64_t id, int32_t *errCode);
 CJ_EXPORT void FfiCJApplicationContextKillAllProcesses(int64_t id, bool clearPageStack, int32_t *errCode);
 CJ_EXPORT int32_t FfiCJApplicationContextGetCurrentAppCloneIndex(int64_t id, int32_t *errCode);
+CJ_EXPORT void FfiCJApplicationContextRestartApp(int64_t id, WantHandle want, int32_t *errCode);
 };
 }
 }
