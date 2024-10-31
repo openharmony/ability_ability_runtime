@@ -37,14 +37,14 @@ void JsApplicationStateChangeCallback::CallJsMethodInnerCommon(
 
         auto obj = callback->GetNapiValue();
         if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
             continue;
         }
 
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName.data(), &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get %{public}s from object", methodName.data());
+            TAG_LOGE(AAFwkTag::APPKIT, "get %{public}s from object failed", methodName.data());
             continue;
         }
         napi_call_function(env_, obj, method, 0, nullptr, nullptr);
@@ -83,7 +83,7 @@ void JsApplicationStateChangeCallback::NotifyApplicationBackground()
 void JsApplicationStateChangeCallback::Register(napi_value jsCallback)
 {
     if (env_ == nullptr || jsCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "env or jsCallback is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or jsCallback");
         return;
     }
     napi_ref ref = nullptr;
@@ -94,7 +94,7 @@ void JsApplicationStateChangeCallback::Register(napi_value jsCallback)
 bool JsApplicationStateChangeCallback::UnRegister(napi_value jsCallback)
 {
     if (jsCallback == nullptr) {
-        TAG_LOGI(AAFwkTag::APPKIT, "jsCallback is nullptr, delete all callback");
+        TAG_LOGI(AAFwkTag::APPKIT, "null jsCallback, delete all callback");
         callbacks_.clear();
         return true;
     }
@@ -107,7 +107,7 @@ bool JsApplicationStateChangeCallback::UnRegister(napi_value jsCallback)
 
         napi_value value = callback->GetNapiValue();
         if (value == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
             continue;
         }
 

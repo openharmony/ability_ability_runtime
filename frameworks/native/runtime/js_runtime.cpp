@@ -161,7 +161,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode is false.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode false");
         return;
     }
     CHECK_POINTER(jsEnv_);
@@ -305,7 +305,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode is false.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode false");
         return;
     }
     CHECK_POINTER(jsEnv_);
@@ -411,7 +411,7 @@ std::shared_ptr<AbilityBase::FileMapper> JsRuntime::GetSafeData(const std::strin
     std::vector<std::string> fileNames;
     extractor->GetSpecifiedTypeFiles(fileNames, ".abc");
     if (fileNames.empty()) {
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "There's no abc file in hap or hqf: %{private}s", path.c_str());
+        TAG_LOGI(AAFwkTag::JSRUNTIME, "no abc file in hap or hqf: %{private}s", path.c_str());
         return nullptr;
     }
     std::string fileName = fileNames.front();
@@ -556,7 +556,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
     napi_create_reference(env, propertyValue, 1, &tmpRef);
     methodRequireNapiRef_.reset(reinterpret_cast<NativeReference*>(tmpRef));
     if (!methodRequireNapiRef_) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to create reference for global.requireNapi");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "create reference for global.requireNapi failed");
         return nullptr;
     }
 
@@ -569,7 +569,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
     napi_value instanceValue = nullptr;
     napi_new_instance(env, classValue, argc, argv, &instanceValue);
     if (instanceValue == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to create object instance");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null instanceValue");
         return nullptr;
     }
 
@@ -686,7 +686,7 @@ bool JsRuntime::Initialize(const Options& options)
             napi_create_reference(env, propertyValue, 1, &tmpRef);
             methodRequireNapiRef_.reset(reinterpret_cast<NativeReference*>(tmpRef));
             if (!methodRequireNapiRef_) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to create reference for global.requireNapi");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "create reference for global.requireNapi failed");
                 return false;
             }
             TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadAce start");
@@ -924,21 +924,21 @@ napi_value JsRuntime::LoadJsBundle(const std::string& path, const std::string& h
     napi_set_named_property(env, globalObj, "exports", exports);
 
     if (!RunScript(path, hapPath, useCommonChunk)) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to run script: %{private}s", path.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "run script: %{private}s failed", path.c_str());
         return nullptr;
     }
 
     napi_value exportsObj = nullptr;
     napi_get_named_property(env, globalObj, "exports", &exportsObj);
     if (exportsObj == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to get exports objcect: %{private}s", path.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null exportObj");
         return nullptr;
     }
 
     napi_value exportObj = nullptr;
     napi_get_named_property(env, exportsObj, "default", &exportObj);
     if (exportObj == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to get default objcect: %{private}s", path.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null exportObj");
         return nullptr;
     }
 
@@ -949,7 +949,7 @@ napi_value JsRuntime::LoadJsModule(const std::string& path, const std::string& h
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!RunScript(path, hapPath, false, srcEntrance)) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to run script: %{private}s", path.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "run script: %{private}s failed", path.c_str());
         return nullptr;
     }
 
@@ -1008,7 +1008,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& module
             fileName = std::regex_replace(fileName, pattern, "");
         } else {
             if (!MakeFilePath(codePath_, modulePath, fileName)) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to make module file path: %{private}s", modulePath.c_str());
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "make module file path: %{private}s failed", modulePath.c_str());
                 return std::unique_ptr<NativeReference>();
             }
         }
@@ -1026,7 +1026,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& module
     napi_value instanceValue = nullptr;
     napi_new_instance(env, classValue, 0, nullptr, &instanceValue);
     if (instanceValue == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to create object instance");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null instanceValue");
         return std::unique_ptr<NativeReference>();
     }
 
@@ -1055,7 +1055,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModule(
     napi_value instanceValue = nullptr;
     napi_new_instance(env, classValue, argc, argv, &instanceValue);
     if (instanceValue == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to create object instance");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null instanceValue");
         return std::unique_ptr<NativeReference>();
     }
 
@@ -1108,7 +1108,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
             std::unique_ptr<uint8_t[]> data;
             size_t dataLen = 0;
             if (!extractor->ExtractToBufByName(modulePath, data, dataLen)) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "Get File  Buffer abc file failed");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "get abc file failed");
                 return false;
             }
             std::vector<uint8_t> buffer;
@@ -1126,7 +1126,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
     std::string path = srcPath;
     if (!isBundle_) {
         if (moduleName_.empty()) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName is hole");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName empty");
             return false;
         }
         path = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
@@ -1145,13 +1145,13 @@ bool JsRuntime::RunSandboxScript(const std::string& path, const std::string& hap
         fileName = std::regex_replace(fileName, pattern, "");
     } else {
         if (!MakeFilePath(codePath_, path, fileName)) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to make module file path: %{private}s", path.c_str());
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "make module file path: %{private}s failed", path.c_str());
             return false;
         }
     }
 
     if (!RunScript(fileName, hapPath)) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to run script: %{public}s", fileName.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "run script: %{public}s failed", fileName.c_str());
         return false;
     }
     return true;
@@ -1339,7 +1339,7 @@ void JsRuntime::UpdateModuleNameAndAssetPath(const std::string& moduleName)
 
     auto vm = GetEcmaVm();
     if (!vm || moduleName.empty()) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "vm is nullptr or moduleName is empty");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null vm or moduleName");
         return;
     }
 

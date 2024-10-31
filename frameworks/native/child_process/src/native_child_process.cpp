@@ -61,7 +61,7 @@ void OnNativeChildProcessStartedWapper(int errCode, OHIPCRemoteProxy *ipcProxy)
         g_Callback(CvtChildProcessManagerErrCode(static_cast<ChildProcessManagerErrorCode>(errCode)), ipcProxy);
         g_Callback = nullptr;
     } else {
-        TAG_LOGW(AAFwkTag::PROCESSMGR, "Remote call twice?");
+        TAG_LOGW(AAFwkTag::PROCESSMGR, "remote call twice");
     }
 
     g_CallbackStub.clear();

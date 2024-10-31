@@ -785,7 +785,7 @@ ErrCode UIAbility::SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (!abilityInfo_ || abilityInfo_->type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "abilityInfo_ is nullptr or not page type");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo_ or not page type");
         return ERR_INVALID_VALUE;
     }
 

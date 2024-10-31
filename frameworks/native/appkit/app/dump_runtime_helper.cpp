@@ -36,18 +36,18 @@ DumpRuntimeHelper::DumpRuntimeHelper(const std::shared_ptr<OHOSApplication> &app
 void DumpRuntimeHelper::SetAppFreezeFilterCallback()
 {
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "OHOSApplication is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null OHOSApplication");
         return;
     }
     auto& runtime = application_->GetRuntime();
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Runtime is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Runtime");
         return;
     }
     auto appfreezeFilterCallback = [] (const int32_t pid) -> bool {
         auto client = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
         if (client == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "client is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null client");
             return false;
         }
         return client->SetAppFreezeFilter(pid);
@@ -85,7 +85,7 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
 void DumpRuntimeHelper::GetCheckList(const std::unique_ptr<AbilityRuntime::Runtime> &runtime, std::string &checkList)
 {
     if (runtime->GetLanguage() != AbilityRuntime::Runtime::Language::JS) {
-        TAG_LOGE(AAFwkTag::APPKIT, "current language is not js");
+        TAG_LOGE(AAFwkTag::APPKIT, "current language not js");
         return;
     }
     AbilityRuntime::JsRuntime &jsruntime = static_cast<AbilityRuntime::JsRuntime&>(*runtime);

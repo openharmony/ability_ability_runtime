@@ -231,7 +231,7 @@ void ConnectServerManager::SetProfilerCallBack()
         dlsym(handlerConnectServerSo_, "SetProfilerCallback"));
     if (setProfilerCallback == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME,
-                 "ConnectServerManager::AddInstance failed to find symbol 'setProfilerCallback'");
+                 "ConnectServerManager::AddInstance find symbol 'setProfilerCallback' failed");
         return;
     }
     setProfilerCallback([this](bool status) {
@@ -424,7 +424,7 @@ bool ConnectServerManager::SetRecordCallback(const std::function<void(void)> &st
     }
     auto setRecordCallback = reinterpret_cast<SetRecordCallBack>(dlsym(handlerConnectServerSo_, "SetRecordCallback"));
     if (setRecordCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to find SetRecordCallback");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "find SetRecordCallback failed");
         return false;
     }
     setRecordCallback(startRecordFunc, stopRecordFunc);
@@ -439,7 +439,7 @@ void ConnectServerManager::SetRecordResults(const std::string &jsonArrayStr)
     }
     auto sendLayoutMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
     if (sendLayoutMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to find sendLayoutMessage");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "find sendLayoutMessage failed");
         return;
     }
     sendLayoutMessage(jsonArrayStr);

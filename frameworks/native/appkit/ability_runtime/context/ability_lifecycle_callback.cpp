@@ -51,14 +51,14 @@ void JsAbilityLifecycleCallback::CallJsMethodInnerCommon(const std::string &meth
 
         auto obj = callback.second->GetNapiValue();
         if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
             return;
         }
 
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName.data(), &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get %{public}s from object",
+            TAG_LOGE(AAFwkTag::APPKIT, "get %{public}s from object failed",
                 methodName.data());
             return;
         }
@@ -78,7 +78,7 @@ void JsAbilityLifecycleCallback::CallJsMethod(
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = %{public}s", methodName.c_str());
     if (!ability) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
     HandleScope handleScope(env_);
@@ -91,7 +91,7 @@ void JsAbilityLifecycleCallback::CallWindowStageJsMethod(const std::string &meth
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = %{public}s", methodName.c_str());
     if (!ability || !windowStage) {
-        TAG_LOGE(AAFwkTag::APPKIT, "ability or windowStage is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
     HandleScope handleScope(env_);
@@ -203,14 +203,14 @@ bool JsAbilityLifecycleCallback::UnRegister(int32_t callbackId, bool isSync)
     if (isSync) {
         auto it = callbacksSync_.find(callbackId);
         if (it == callbacksSync_.end()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacksSync_", callbackId);
+            TAG_LOGE(AAFwkTag::APPKIT, "%{public}d not in callbacksSync_", callbackId);
             return false;
         }
         return callbacksSync_.erase(callbackId) == 1;
     }
     auto it = callbacks_.find(callbackId);
     if (it == callbacks_.end()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d is not in callbacks_", callbackId);
+        TAG_LOGE(AAFwkTag::APPKIT, "%{public}d not in callbacks_", callbackId);
         return false;
     }
     return callbacks_.erase(callbackId) == 1;

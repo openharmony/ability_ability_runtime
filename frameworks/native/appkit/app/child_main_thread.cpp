@@ -59,7 +59,7 @@ void ChildMainThread::Start(const std::map<std::string, int32_t> &fds)
     thread->SetFds(fds);
     std::shared_ptr<EventRunner> runner = EventRunner::GetMainEventRunner();
     if (runner == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runner is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runner");
         return;
     }
     if (!thread->Init(runner, processInfo)) {
@@ -91,12 +91,12 @@ int32_t ChildMainThread::GetChildProcessInfo(ChildProcessInfo &info)
 
     auto object = sysMgr->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to get app manager service");
+        TAG_LOGE(AAFwkTag::APPKIT, "get app manager service failed");
         return ERR_INVALID_VALUE;
     }
     auto appMgr = iface_cast<IAppMgr>(object);
     if (appMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to iface_cast object to appMgr");
+        TAG_LOGE(AAFwkTag::APPKIT, "iface_cast object to appMgr failed");
         return ERR_INVALID_VALUE;
     }
     return appMgr->GetChildProcessInfoForSelf(info);
@@ -105,7 +105,7 @@ int32_t ChildMainThread::GetChildProcessInfo(ChildProcessInfo &info)
 void ChildMainThread::SetFds(const std::map<std::string, int32_t> &fds)
 {
     if (processArgs_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processArgs_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null processArgs_");
         return;
     }
     processArgs_->fds = fds;
@@ -115,7 +115,7 @@ bool ChildMainThread::Init(const std::shared_ptr<EventRunner> &runner, const Chi
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (runner == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runner is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runner");
         return false;
     }
     processInfo_ = std::make_shared<ChildProcessInfo>(processInfo);
@@ -123,7 +123,7 @@ bool ChildMainThread::Init(const std::shared_ptr<EventRunner> &runner, const Chi
     mainHandler_ = std::make_shared<EventHandler>(runner);
     BundleInfo bundleInfo;
     if (!ChildProcessManager::GetInstance().GetBundleInfo(bundleInfo)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetBundleInfo failed!.");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetBundleInfo failed");
         return false;
     }
     bundleInfo_ = std::make_shared<BundleInfo>(bundleInfo);
@@ -136,7 +136,7 @@ bool ChildMainThread::Attach()
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto sysMrgClient = DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
     if (sysMrgClient == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get SysMrgClient");
+        TAG_LOGE(AAFwkTag::APPKIT, "get SysMrgClient failed");
         return false;
     }
     auto object = sysMrgClient->GetSystemAbility(APP_MGR_SERVICE_ID);
@@ -146,7 +146,7 @@ bool ChildMainThread::Attach()
     }
     appMgr_ = iface_cast<IAppMgr>(object);
     if (appMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to iface_cast object to appMgr_");
+        TAG_LOGE(AAFwkTag::APPKIT, "iface_cast object to appMgr_ failed");
         return false;
     }
     appMgr_->AttachChildProcess(this);
@@ -157,11 +157,11 @@ bool ChildMainThread::ScheduleLoadChild()
 {
     TAG_LOGI(AAFwkTag::APPKIT, "ScheduleLoadChild called.");
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler_");
         return false;
     }
     if (processInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo");
         return false;
     }
     auto childProcessType = processInfo_->childProcessType;
@@ -169,7 +169,7 @@ bool ChildMainThread::ScheduleLoadChild()
     auto task = [weak, childProcessType]() {
         auto childMainThread = weak.promote();
         if (childMainThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "childMainThread is nullptr, ScheduleLoadChild failed.");
+            TAG_LOGE(AAFwkTag::APPKIT, "null childMainThread, ScheduleLoadChild failed.");
             return;
         }
         if (childProcessType == CHILD_PROCESS_TYPE_ARK) {
@@ -191,7 +191,7 @@ void ChildMainThread::HandleLoadJs()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (processInfo_ == nullptr || bundleInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processInfo or bundleInfo_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo or bundleInfo_");
         return;
     }
     ChildProcessManager &childProcessManager = ChildProcessManager::GetInstance();
@@ -204,7 +204,7 @@ void ChildMainThread::HandleLoadJs()
 
     runtime_ = childProcessManager.CreateRuntime(bundleInfoCopy, hapModuleInfo, true, processInfo_->jitEnabled);
     if (!runtime_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create child process runtime");
+        TAG_LOGE(AAFwkTag::APPKIT, "create child process runtime failed");
         return;
     }
     AbilityRuntime::Runtime::DebugOption debugOption;
@@ -223,29 +223,29 @@ void ChildMainThread::HandleLoadArkTs()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!processInfo_ || !bundleInfo_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processInfo or bundleInfo_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo or bundleInfo_");
         return;
     }
     if (!processArgs_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processArgs_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null processArgs_");
         return;
     }
     auto &srcEntry = processInfo_->srcEntry;
     ChildProcessManager &childProcessManager = ChildProcessManager::GetInstance();
     std::string moduleName = childProcessManager.GetModuleNameFromSrcEntry(srcEntry);
     if (moduleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Can't find module name from srcEntry, srcEntry is %{private}s", srcEntry.c_str());
+        TAG_LOGE(AAFwkTag::APPKIT, "not find module name from srcEntry, srcEntry: %{private}s", srcEntry.c_str());
         return;
     }
     HapModuleInfo hapModuleInfo;
     if (!childProcessManager.GetHapModuleInfo(*bundleInfo_, moduleName, hapModuleInfo)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed, can't find module:%{public}s", moduleName.c_str());
+        TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed, not find module:%{public}s", moduleName.c_str());
         return;
     }
 
     runtime_ = childProcessManager.CreateRuntime(*bundleInfo_, hapModuleInfo, true, processInfo_->jitEnabled);
     if (!runtime_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create child process runtime");
+        TAG_LOGE(AAFwkTag::APPKIT, "create child process runtime failed");
         return;
     }
     AbilityRuntime::Runtime::DebugOption debugOption;
@@ -262,11 +262,11 @@ void ChildMainThread::HandleLoadNative()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "HandleLoadNative called.");
     if (!processInfo_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processInfo_ is null.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo_");
         return;
     }
     if (!processArgs_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processArgs_ is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null processArgs_");
         return;
     }
     ChildProcessManager &childProcessMgr = ChildProcessManager::GetInstance();
@@ -301,7 +301,7 @@ void ChildMainThread::InitNativeLib(const BundleInfo &bundleInfo)
 void ChildMainThread::ExitProcessSafely()
 {
     if (appMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is null, use exit(0) instead");
+        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_, use exit(0) instead");
         exit(0);
         return;
     }
@@ -312,14 +312,14 @@ bool ChildMainThread::ScheduleExitProcessSafely()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "ScheduleExitProcessSafely");
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler_");
         return false;
     }
     wptr<ChildMainThread> weak = this;
     auto task = [weak]() {
         auto childMainThread = weak.promote();
         if (childMainThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "childMainThread is nullptr, ScheduleExitProcessSafely failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "null childMainThread, ScheduleExitProcessSafely failed");
             return;
         }
         childMainThread->HandleExitProcessSafely();
@@ -349,19 +349,19 @@ bool ChildMainThread::ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProce
 {
     TAG_LOGD(AAFwkTag::APPKIT, "ScheduleRunNativeProc");
     if (mainProcessCb == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Main process callback is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Main process callback");
         return false;
     }
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler_");
         return false;
     }
 
     auto task = [weak = wptr<ChildMainThread>(this), callback = sptr<IRemoteObject>(mainProcessCb)]() {
         auto childMainThread = weak.promote();
         if (childMainThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "childMainThread is nullptr, ScheduleRunNativeProc failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "null childMainThread, ScheduleRunNativeProc failed");
             return;
         }
         childMainThread->HandleRunNativeProc(callback);
@@ -377,7 +377,7 @@ void ChildMainThread::HandleRunNativeProc(const sptr<IRemoteObject> &mainProcess
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!processInfo_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processInfo is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo");
         return;
     }
 
@@ -412,7 +412,7 @@ void ChildMainThread::UpdateNativeChildLibModuleName(const AppLibPathMap &appLib
         }
     }
 
-    TAG_LOGE(AAFwkTag::APPKIT, "Can not find native lib(%{private}s) in any app module",
+    TAG_LOGE(AAFwkTag::APPKIT, "not find native lib(%{private}s) in any app module",
         processInfo_->srcEntry.c_str());
 }
 

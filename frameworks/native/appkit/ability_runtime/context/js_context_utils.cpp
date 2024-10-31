@@ -122,7 +122,7 @@ napi_value JsBaseContext::OnSwitchArea(napi_env env, NapiCallbackInfo& info)
 
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
 
@@ -160,7 +160,7 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -193,7 +193,7 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
     }
 
     if (!moduleContext) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to create module context");
+        TAG_LOGE(AAFwkTag::APPKIT, "create module context failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -211,7 +211,7 @@ napi_value JsBaseContext::CreateJsModuleContext(napi_env env, const std::shared_
     }
     napi_value object = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -236,7 +236,7 @@ napi_value JsBaseContext::OnCreateSystemHspModuleResourceManager(napi_env env, N
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -279,7 +279,7 @@ napi_value JsBaseContext::OnCreateModuleResourceManager(napi_env env, NapiCallba
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "applicationContext is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -320,7 +320,7 @@ napi_value JsBaseContext::OnGetArea(napi_env env, NapiCallbackInfo& info)
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     int area = context->GetArea();
@@ -336,7 +336,7 @@ napi_value JsBaseContext::OnGetCacheDir(napi_env env, NapiCallbackInfo& info)
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetCacheDir();
@@ -352,7 +352,7 @@ napi_value JsBaseContext::OnGetTempDir(napi_env env, NapiCallbackInfo& info)
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetTempDir();
@@ -368,7 +368,7 @@ napi_value JsBaseContext::OnGetResourceDir(napi_env env, NapiCallbackInfo& info)
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetResourceDir();
@@ -384,7 +384,7 @@ napi_value JsBaseContext::OnGetFilesDir(napi_env env, NapiCallbackInfo& info)
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetFilesDir();
@@ -400,7 +400,7 @@ napi_value JsBaseContext::OnGetDistributedFilesDir(napi_env env, NapiCallbackInf
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetDistributedFilesDir();
@@ -416,7 +416,7 @@ napi_value JsBaseContext::OnGetDatabaseDir(napi_env env, NapiCallbackInfo& info)
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetDatabaseDir();
@@ -432,7 +432,7 @@ napi_value JsBaseContext::OnGetPreferencesDir(napi_env env, NapiCallbackInfo& in
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetPreferencesDir();
@@ -493,7 +493,7 @@ napi_value JsBaseContext::OnGetBundleCodeDir(napi_env env, NapiCallbackInfo& inf
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetBundleCodeDir();
@@ -509,7 +509,7 @@ napi_value JsBaseContext::OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetCloudFileDir();
@@ -519,7 +519,7 @@ napi_value JsBaseContext::OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info
 napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& info)
 {
     if (!CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "This application is not system-app, can not use system-api");
+        TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
     }
@@ -532,7 +532,7 @@ napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& 
 
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -546,7 +546,7 @@ napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& 
 
     auto bundleContext = context->CreateBundleContext(bundleName);
     if (!bundleContext) {
-        TAG_LOGE(AAFwkTag::APPKIT, "bundleContext is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleContext");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -564,7 +564,7 @@ napi_value JsBaseContext::CreateJsBundleContext(napi_env env, const std::shared_
     }
     napi_value object = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -583,14 +583,14 @@ napi_value JsBaseContext::OnGetApplicationContext(napi_env env, NapiCallbackInfo
 {
     auto context = context_.lock();
     if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "null context");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "applicationContext is nullptr");
+        TAG_LOGW(AAFwkTag::APPKIT, "null applicationContext");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -618,7 +618,7 @@ napi_value JsBaseContext::CreateJSApplicationContext(napi_env env,
     }
     napi_value object = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -671,7 +671,7 @@ napi_value AttachBaseContext(napi_env env, void* value, void* hint)
 
     napi_value contextObj = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return nullptr;
     }
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachBaseContext, value, nullptr);
@@ -705,7 +705,7 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
     }
     auto contextObj = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get object");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return nullptr;
     }
     napi_coerce_to_native_binding_object(
@@ -774,7 +774,7 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
         if (jsResourceManager != nullptr) {
             napi_set_named_property(env, object, "resourceManager", jsResourceManager);
         } else {
-            TAG_LOGE(AAFwkTag::APPKIT, "jsResourceManager is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null jsResourceManager");
         }
     }
 

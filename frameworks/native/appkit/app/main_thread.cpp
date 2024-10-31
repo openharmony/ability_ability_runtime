@@ -325,26 +325,26 @@ bool MainThread::ConnectToAppMgr()
     TAG_LOGD(AAFwkTag::APPKIT, "%{public}s start.", __func__);
     auto object = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to get app manager service");
+        TAG_LOGE(AAFwkTag::APPKIT, "get app manager service failed");
         return false;
     }
     deathRecipient_ = new (std::nothrow) AppMgrDeathRecipient();
     if (deathRecipient_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to new AppMgrDeathRecipient");
+        TAG_LOGE(AAFwkTag::APPKIT, "new AppMgrDeathRecipient failed");
         return false;
     }
 
     if (!object->AddDeathRecipient(deathRecipient_)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to AddDeathRecipient");
+        TAG_LOGE(AAFwkTag::APPKIT, "AddDeathRecipient failed");
         return false;
     }
 
     appMgr_ = iface_cast<IAppMgr>(object);
     if (appMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to iface_cast object to appMgr_");
+        TAG_LOGE(AAFwkTag::APPKIT, "iface_cast object to appMgr_ failed");
         return false;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "attach to appMGR.");
+    TAG_LOGI(AAFwkTag::APPKIT, "attach to appMGR");
     appMgr_->AttachApplication(this);
     TAG_LOGD(AAFwkTag::APPKIT, "end");
     return true;
@@ -367,7 +367,7 @@ void MainThread::Attach()
     isDeveloperMode_ = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgrHelper is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
         return;
     }
     bundleMgrHelper->PreConnect();
@@ -419,7 +419,7 @@ bool MainThread::ScheduleForegroundApplication()
     auto task = [weak]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr.");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleForegroundApplication();
@@ -429,7 +429,7 @@ bool MainThread::ScheduleForegroundApplication()
     }
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Watch dog");
     } else {
         tmpWatchdog->SetBackgroundStatus(false);
     }
@@ -449,7 +449,7 @@ void MainThread::ScheduleBackgroundApplication()
     auto task = [weak]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleBackgroundApplication();
@@ -460,7 +460,7 @@ void MainThread::ScheduleBackgroundApplication()
 
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Watch dog");
         return;
     }
     tmpWatchdog->SetBackgroundStatus(true);
@@ -480,7 +480,7 @@ void MainThread::ScheduleTerminateApplication(bool isLastProcess)
     auto task = [weak, isLastProcess]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleTerminateApplication(isLastProcess);
@@ -503,7 +503,7 @@ void MainThread::ScheduleShrinkMemory(const int level)
     auto task = [weak, level]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleShrinkMemory(level);
@@ -526,7 +526,7 @@ void MainThread::ScheduleMemoryLevel(const int level)
     auto task = [weak, level]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleMemoryLevel(level);
@@ -573,7 +573,7 @@ void MainThread::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
     auto task = [weak, info]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleJsHeapMemory(info);
@@ -594,7 +594,7 @@ void MainThread::ScheduleProcessSecurityExit()
     auto task = [weak]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleProcessSecurityExit();
@@ -614,7 +614,7 @@ void MainThread::ScheduleClearPageStack()
 {
     TAG_LOGI(AAFwkTag::APPKIT, "ScheduleClearPageStack called");
     if (applicationInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "applicationInfo_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo_");
         return;
     }
 
@@ -646,7 +646,7 @@ void MainThread::ScheduleLaunchApplication(const AppLaunchData &data, const Conf
     auto task = [weak, data, config]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleInitAssertFaultTask(data.GetDebugApp(), data.GetApplicationInfo().debug);
@@ -671,7 +671,7 @@ void MainThread::ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &a
     auto task = [weak, appInfo]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleUpdateApplicationInfoInstalled(appInfo);
@@ -688,7 +688,7 @@ void MainThread::ScheduleAbilityStage(const HapModuleInfo &abilityStage)
     auto task = [weak, abilityStage]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleAbilityStage(abilityStage);
@@ -729,7 +729,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
     auto task = [weak, abilityRecord]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleLaunchAbility(abilityRecord);
@@ -755,7 +755,7 @@ void MainThread::ScheduleCleanAbility(const sptr<IRemoteObject> &token, bool isC
     auto task = [weak, token, isCacheProcess]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleCleanAbility(token, isCacheProcess);
@@ -792,7 +792,7 @@ void MainThread::ScheduleConfigurationUpdated(const Configuration &config)
     auto task = [weak, config]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleConfigurationUpdated(config);
@@ -805,12 +805,12 @@ void MainThread::ScheduleConfigurationUpdated(const Configuration &config)
 bool MainThread::CheckLaunchApplicationParam(const AppLaunchData &appLaunchData) const
 {
     if (appLaunchData.GetApplicationInfo().name.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "applicationName is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationName empty");
         return false;
     }
 
     if (appLaunchData.GetProcessInfo().GetProcessName().empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "processName is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "processName empty");
         return false;
     }
     return true;
@@ -827,7 +827,7 @@ bool MainThread::CheckLaunchApplicationParam(const AppLaunchData &appLaunchData)
 bool MainThread::CheckAbilityItem(const std::shared_ptr<AbilityLocalRecord> &record) const
 {
     if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "record is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null record");
         return false;
     }
 
@@ -835,12 +835,12 @@ bool MainThread::CheckAbilityItem(const std::shared_ptr<AbilityLocalRecord> &rec
     sptr<IRemoteObject> token = record->GetToken();
 
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityInfo is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
         return false;
     }
 
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return false;
     }
     return true;
@@ -855,7 +855,7 @@ void MainThread::HandleTerminateApplicationLocal()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (applicationImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "error!");
+        TAG_LOGE(AAFwkTag::APPKIT, "error");
         return;
     }
     applicationImpl_->PerformTerminateStrong();
@@ -907,11 +907,11 @@ void MainThread::HandleProcessSecurityExit()
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "HandleProcessSecurityExit");
     if (abilityRecordMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecordMgr_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecordMgr_");
         return;
     }
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
     std::vector<sptr<IRemoteObject>> tokens = abilityRecordMgr_->GetAllTokens();
@@ -1108,7 +1108,7 @@ void MainThread::SubscribeOverlayChange(const std::string &bundleName, const std
         TAG_LOGD(AAFwkTag::APPKIT, "On overlay changed");
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "abilityThread is nullptr, SetRunnerStarted failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityThread");
             return;
         }
         appThread->OnOverlayChanged(data, resourceManager, bundleName, moduleName, loadPath);
@@ -1123,14 +1123,14 @@ void MainThread::OnOverlayChanged(const EventFwk::CommonEventData &data,
     const std::string &moduleName, const std::string &loadPath)
 {
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
         return;
     }
     wptr<MainThread> weak = this;
     auto task = [weak, data, resourceManager, bundleName, moduleName, loadPath]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "abilityThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityThread");
             return;
         }
         appThread->HandleOnOverlayChanged(data, resourceManager, bundleName, moduleName, loadPath);
@@ -1154,7 +1154,7 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
     bool isEnable = data.GetWant().GetBoolParam(Constants::OVERLAY_STATE, false);
     // 1.get overlay hapPath
     if (resourceManager == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "resourceManager is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
         return;
     }
     std::vector<OverlayModuleInfo> overlayModuleInfos;
@@ -1165,7 +1165,7 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
 
     // 2.add/remove overlay hapPath
     if (loadPath.empty() || overlayModuleInfos.empty()) {
-        TAG_LOGW(AAFwkTag::APPKIT, "There is not any hapPath in overlayModuleInfo");
+        TAG_LOGW(AAFwkTag::APPKIT, "not any hapPath in overlayModuleInfo");
     } else {
         if (isEnable) {
             std::vector<std::string> overlayPaths = GetAddOverlayPaths(overlayModuleInfos);
@@ -1231,7 +1231,7 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
         (std::string summary, const CJErrorObject errorObj) {
             auto appThread = weak_this.promote();
             if (appThread == nullptr) {
-                TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+                TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
                 return;
             }
             time_t timet;
@@ -1306,7 +1306,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
     auto bundleMgrHelper = contextDeal->GetBundleManager();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgrHelper is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
         return;
     }
 
@@ -1318,7 +1318,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
     BundleInfo bundleInfo;
     if (!GetBundleForLaunchApplication(bundleMgrHelper, bundleName, appLaunchData.GetAppIndex(), bundleInfo)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get bundle info");
+        TAG_LOGE(AAFwkTag::APPKIT, "get bundle info failed");
         return;
     }
 
@@ -1493,7 +1493,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to create runtime");
+            TAG_LOGE(AAFwkTag::APPKIT, "create runtime failed");
             return;
         }
 
@@ -1502,7 +1502,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             auto cb = [weak]() {
                 auto appThread = weak.promote();
                 if (appThread == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+                    TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
                     return false;
                 }
                 return appThread->NotifyDeviceDisConnect();
@@ -1560,7 +1560,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 pid, processName] (std::string summary, const JsEnv::ErrorObject errorObj) {
                 auto appThread = weak.promote();
                 if (appThread == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+                    TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
                     return;
                 }
                 time_t timet;
@@ -1615,7 +1615,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         auto callback = [weak](const AAFwk::ExitReason &exitReason) {
             auto appThread = weak.promote();
             if (appThread == nullptr) {
-                TAG_LOGE(AAFwkTag::APPKIT, "Main thread is nullptr");
+                TAG_LOGE(AAFwkTag::APPKIT, "null Main thread");
             }
             AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
             appThread->ScheduleProcessSecurityExit();
@@ -1645,12 +1645,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             IdleTimeCallback callback = [wpApplication](int32_t idleTime) {
                 auto app = wpApplication.lock();
                 if (app == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "app is nullptr");
+                    TAG_LOGE(AAFwkTag::APPKIT, "null app");
                     return;
                 }
                 auto &runtime = app->GetRuntime();
                 if (runtime == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "runtime is nullptr");
+                    TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
                     return;
                 }
                 auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
@@ -1672,7 +1672,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
         if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to prepare ability delegator");
+            TAG_LOGE(AAFwkTag::APPKIT, "prepare ability delegator failed");
             return;
         }
     }
@@ -1741,7 +1741,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     if (pAppEvnIml) {
         pAppEvnIml->SetAppInfo(*applicationInfo_.get());
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "pAppEvnIml is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null pAppEvnIml");
     }
 
 #if defined(NWEB)
@@ -1752,7 +1752,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         auto app = weakApp.lock();
         auto appmgr = weakMgr.promote();
         if (app == nullptr || appmgr == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "app or appmgr is null");
+            TAG_LOGE(AAFwkTag::APPKIT, "null app or appmgr");
             return;
         }
 
@@ -1860,7 +1860,7 @@ void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::st
 
     if (loadSoFromDir) {
         if (nativeLibraryPath.empty()) {
-            TAG_LOGW(AAFwkTag::APPKIT, "Native library path is empty");
+            TAG_LOGW(AAFwkTag::APPKIT, "native library path empty");
             return;
         }
 
@@ -1901,14 +1901,14 @@ void MainThread::LoadNativeLibrary(const BundleInfo &bundleInfo, std::string &na
         handleAbilityLib = dlopen(resolvedPath, RTLD_NOW | RTLD_GLOBAL);
         if (handleAbilityLib == nullptr) {
             if (fileEntry.find("libformrender.z.so") == std::string::npos) {
-                TAG_LOGE(AAFwkTag::APPKIT, "fail to dlopen %{public}s, [%{public}s]",
+                TAG_LOGE(AAFwkTag::APPKIT, "dlopen %{public}s, [%{public}s] failed",
                     fileEntry.c_str(), dlerror());
                 exit(-1);
             } else {
                 TAG_LOGD(AAFwkTag::APPKIT, "Load libformrender.z.so from native lib path.");
                 handleAbilityLib = dlopen(FORM_RENDER_LIB_PATH, RTLD_NOW | RTLD_GLOBAL);
                 if (handleAbilityLib == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, "fail to dlopen %{public}s, [%{public}s]",
+                    TAG_LOGE(AAFwkTag::APPKIT, " dlopen %{public}s, [%{public}s] failed",
                         FORM_RENDER_LIB_PATH, dlerror());
                     exit(-1);
                 }
@@ -1960,7 +1960,7 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo &app
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!application_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
     application_->UpdateApplicationInfoInstalled(appInfo);
@@ -1970,7 +1970,7 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!application_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
 
@@ -1978,11 +1978,11 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
     auto callback = [weak]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         if (!appThread->appMgr_ || !appThread->applicationImpl_) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
             return;
         }
         appThread->appMgr_->AddAbilityStageDone(appThread->applicationImpl_->GetRecordId());
@@ -1994,7 +1994,7 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
     }
 
     if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_ or applicationImpl_");
         return;
     }
 
@@ -2024,7 +2024,7 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine)
             if (app != nullptr) {
                 return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str()).Create(app->GetRuntime());
             }
-            TAG_LOGE(AAFwkTag::APPKIT, "failed.");
+            TAG_LOGE(AAFwkTag::APPKIT, "failed");
             return nullptr;
         });
     }
@@ -2060,18 +2060,18 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
             options.apiTargetVersion = applicationInfo_->apiTargetVersion;
         }
         if (entryHapModuleInfo.abilityInfos.empty()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to abilityInfos");
+            TAG_LOGE(AAFwkTag::APPKIT, "abilityInfos failed");
             return false;
         }
         bool isFaJsModel = entryHapModuleInfo.abilityInfos.front().srcLanguage == "js" ? true : false;
         static auto runtime = AbilityRuntime::Runtime::Create(options);
         auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
         if (testRunner == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to Create testRunner");
+            TAG_LOGE(AAFwkTag::APPKIT, "null testRunner");
             return false;
         }
         if (!testRunner->Initialize()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to Initialize testRunner");
+            TAG_LOGE(AAFwkTag::APPKIT, "Initialize testRunner failed");
             return false;
         }
         auto delegator = std::make_shared<AbilityDelegator>(
@@ -2098,7 +2098,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     if (abilityRecord->GetWant() != nullptr) {
         traceName += abilityRecord->GetWant()->GetElement().GetBundleName();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "Want is nullptr, cant not get abilityName");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Want, not get abilityName");
     }
     HITRACE_METER_NAME(HITRACE_TAG_APP, traceName);
     CHECK_POINTER_LOG(applicationImpl_, "applicationImpl_ is null");
@@ -2119,7 +2119,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     }
 
     if (!CheckAbilityItem(abilityRecord)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "record is invalid");
+        TAG_LOGE(AAFwkTag::APPKIT, "record invalid");
         return;
     }
 
@@ -2128,13 +2128,13 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     auto callback = [weak, abilityRecord](const std::shared_ptr<AbilityRuntime::Context> &stageContext) {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "abilityThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityThread");
             return;
         }
         appThread->SetProcessExtensionType(abilityRecord);
         auto application = appThread->GetApplication();
         if (application == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null application");
             return;
         }
         auto& runtime = application->GetRuntime();
@@ -2187,7 +2187,7 @@ void MainThread::HandleCleanAbilityLocal(const sptr<IRemoteObject> &token)
     }
 
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return;
     }
 
@@ -2224,7 +2224,7 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (applicationInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "applicationInfo is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo");
         return;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "Handle clean ability start, app is %{public}s.", applicationInfo_->name.c_str());
@@ -2274,7 +2274,7 @@ void MainThread::HandleForegroundApplication()
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleForegroundApplication");
     TAG_LOGI(AAFwkTag::APPKIT, "called");
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "handleForegroundApplication error!");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_ or appMgr_");
         return;
     }
 
@@ -2369,7 +2369,7 @@ void MainThread::HandleShrinkMemory(const int level)
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
 
     if (applicationImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationImpl_");
         return;
     }
 
@@ -2389,7 +2389,7 @@ void MainThread::HandleMemoryLevel(int level)
     TAG_LOGD(AAFwkTag::APPKIT, "start");
 
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
 
@@ -2407,7 +2407,7 @@ void MainThread::HandleConfigurationUpdated(const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (applicationImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationImpl_");
         return;
     }
 
@@ -2446,7 +2446,7 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
     auto task = [weak]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "abilityThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityThread");
             return;
         }
         appThread->SetRunnerStarted(true);
@@ -2464,10 +2464,10 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
 void MainThread::HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, void *context)
 {
     if (signal != MUSL_SIGNAL_JSHEAP) {
-        TAG_LOGE(AAFwkTag::APPKIT, "signal is %{public}d", signal);
+        TAG_LOGE(AAFwkTag::APPKIT, "signal: %{public}d", signal);
         return;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "sival_int is %{public}d", siginfo->si_value.sival_int);
+    TAG_LOGI(AAFwkTag::APPKIT, "sival_int: %{public}d", siginfo->si_value.sival_int);
     if (static_cast<SignalType>(siginfo->si_value.sival_int) != SignalType::SIGNAL_FORCE_FULLGC) {
         HandleDumpHeapPrepare();
     }
@@ -2517,17 +2517,17 @@ void MainThread::HandleDumpHeapPrepare()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "start");
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
         return;
     }
     auto app = applicationForDump_.lock();
     if (app == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "app is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null app");
         return;
     }
     auto &runtime = app->GetRuntime();
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
     runtime->GetHeapPrepare();
@@ -2537,17 +2537,17 @@ void MainThread::HandleDumpHeap(bool isPrivate)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "start");
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
         return;
     }
     auto app = applicationForDump_.lock();
     if (app == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "app is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null app");
         return;
     }
     auto &runtime = app->GetRuntime();
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
     auto taskFork = [&runtime, &isPrivate] {
@@ -2572,7 +2572,7 @@ void MainThread::HandleDumpHeap(bool isPrivate)
                 break;
             }
             if (p == pid) {
-                TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap dump process exited status is %{public}d", status);
+                TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap dump process exited status: %{public}d", status);
                 break;
             }
             if (time(nullptr) > startTime + TIME_OUT) {
@@ -2592,14 +2592,14 @@ void MainThread::DestroyHeapProfiler()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
         return;
     }
 
     auto task = [] {
         auto app = applicationForDump_.lock();
         if (app == nullptr || app->GetRuntime() == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "runtime is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;
         }
         app->GetRuntime()->DestroyHeapProfiler();
@@ -2611,14 +2611,14 @@ void MainThread::ForceFullGC()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Force fullGC");
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
         return;
     }
 
     auto task = [] {
         auto app = applicationForDump_.lock();
         if (app == nullptr || app->GetRuntime() == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "runtime is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;
         }
         app->GetRuntime()->ForceFullGC();
@@ -2633,7 +2633,7 @@ void MainThread::Start()
 
     std::shared_ptr<EventRunner> runner = EventRunner::GetMainEventRunner();
     if (runner == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runner is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runner");
         return;
     }
     sptr<MainThread> thread = sptr<MainThread>(new (std::nothrow) MainThread());
@@ -2704,7 +2704,7 @@ bool MainThread::IsApplicationReady() const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "start");
     if (application_ == nullptr || applicationImpl_ == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "application_=null or applicationImpl_=null");
+        TAG_LOGW(AAFwkTag::APPKIT, "null application_ or applicationImpl_");
         return false;
     }
 
@@ -2752,13 +2752,13 @@ void MainThread::LoadAbilityLibrary(const std::vector<std::string> &libraryPaths
             continue;
         }
         if (realpath(fileEntry.c_str(), resolvedPath) == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get realpath, errno = %{public}d", errno);
+            TAG_LOGE(AAFwkTag::APPKIT, "get realpath failed, errno = %{public}d", errno);
             continue;
         }
 
         handleAbilityLib = dlopen(resolvedPath, RTLD_NOW | RTLD_GLOBAL);
         if (handleAbilityLib == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Fail to dlopen %{public}s, [%{public}s]",
+            TAG_LOGE(AAFwkTag::APPKIT, "dlopen %{public}s, [%{public}s] failed",
                 resolvedPath, dlerror());
             exit(-1);
         }
@@ -2774,7 +2774,7 @@ void MainThread::LoadAceAbilityLibrary()
     const char *path = Ace::AceForwardCompatibility::GetAceLibName();
     AceAbilityLib = dlopen(path, RTLD_NOW | RTLD_LOCAL);
     if (AceAbilityLib == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Fail to dlopen %{public}s, [%{public}s]", path, dlerror());
+        TAG_LOGE(AAFwkTag::APPKIT, "dlopen %{public}s, [%{public}s] failed", path, dlerror());
     } else {
         TAG_LOGD(AAFwkTag::APPKIT, "Success to dlopen %{public}s", path);
         handleAbilityLib_.emplace_back(AceAbilityLib);
@@ -2789,7 +2789,7 @@ void MainThread::LoadAppLibrary()
     TAG_LOGI(AAFwkTag::APPKIT, "calling dlopen. appPath=%{public}s", appPath.c_str());
     handleAppLib_ = dlopen(appPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (handleAppLib_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Fail to dlopen %{public}s, [%{public}s]", appPath.c_str(), dlerror());
+        TAG_LOGE(AAFwkTag::APPKIT, "dlopen %{public}s, [%{public}s] failed", appPath.c_str(), dlerror());
         exit(-1);
     }
 #endif  // APPLICATION_LIBRARY_LOADER
@@ -2815,13 +2815,13 @@ void MainThread::LoadAppDetailAbilityLibrary(std::string &nativeLibraryPath)
             continue;
         }
         if (realpath(fileEntry.c_str(), resolvedPath) == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Failed to get realpath, errno = %{public}d", errno);
+            TAG_LOGE(AAFwkTag::APPKIT, "get realpath failed, errno: %{public}d", errno);
             continue;
         }
 
         handleAbilityLib = dlopen(resolvedPath, RTLD_NOW | RTLD_GLOBAL);
         if (handleAbilityLib == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Fail to dlopen %{public}s, [%{public}s]",
+            TAG_LOGE(AAFwkTag::APPKIT, "dlopen %{public}s, [%{public}s] failed",
                 resolvedPath, dlerror());
             exit(-1);
         }
@@ -2878,7 +2878,7 @@ bool MainThread::CheckFileType(const std::string &fileName, const std::string &e
         extensionName.c_str());
 
     if (fileName.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "the file name is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "file name empty");
         return false;
     }
 
@@ -2896,7 +2896,7 @@ void MainThread::HandleScheduleAcceptWant(const AAFwk::Want &want, const std::st
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!application_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
 
@@ -2904,7 +2904,7 @@ void MainThread::HandleScheduleAcceptWant(const AAFwk::Want &want, const std::st
     application_->ScheduleAcceptWant(want, moduleName, specifiedFlag);
 
     if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
         return;
     }
 
@@ -2918,7 +2918,7 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
     auto task = [weak, want, moduleName]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "abilityThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityThread");
             return;
         }
         appThread->HandleScheduleAcceptWant(want, moduleName);
@@ -2932,7 +2932,7 @@ void MainThread::HandleScheduleNewProcessRequest(const AAFwk::Want &want, const 
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!application_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
 
@@ -2940,7 +2940,7 @@ void MainThread::HandleScheduleNewProcessRequest(const AAFwk::Want &want, const 
     application_->ScheduleNewProcessRequest(want, moduleName, specifiedProcessFlag);
 
     if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
         return;
     }
 
@@ -2954,7 +2954,7 @@ void MainThread::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::s
     auto task = [weak, want, moduleName]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "abilityThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityThread");
             return;
         }
         appThread->HandleScheduleNewProcessRequest(want, moduleName);
@@ -2968,7 +2968,7 @@ void MainThread::CheckMainThreadIsAlive()
 {
     auto tmpWatchdog = watchdog_;
     if (tmpWatchdog == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Watch dog");
         return;
     }
 
@@ -2987,7 +2987,7 @@ int32_t MainThread::ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
     auto task = [weak, bundleName, callback, recordId]() {
         auto appThread = weak.promote();
         if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "ScheduleNotifyLoadRepairPatch, parameter is nullptr.");
+            TAG_LOGE(AAFwkTag::APPKIT, "ScheduleNotifyLoadRepairPatch, null parameter");
             return;
         }
 
@@ -3021,7 +3021,7 @@ int32_t MainThread::ScheduleNotifyHotReloadPage(const sptr<IQuickFixCallback> &c
     auto task = [weak, callback, recordId]() {
         auto appThread = weak.promote();
         if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "parameter is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
             return;
         }
         auto ret = appThread->application_->NotifyHotReloadPage();
@@ -3041,7 +3041,7 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgrHelper is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
         return false;
     }
 
@@ -3082,7 +3082,7 @@ int32_t MainThread::ScheduleNotifyUnLoadRepairPatch(const std::string &bundleNam
     auto task = [weak, bundleName, callback, recordId]() {
         auto appThread = weak.promote();
         if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, " parameter is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null parameter");
             return;
         }
 
@@ -3110,7 +3110,7 @@ int32_t MainThread::ScheduleNotifyUnLoadRepairPatch(const std::string &bundleNam
 int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
 {
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
         return ERR_INVALID_VALUE;
     }
 
@@ -3122,7 +3122,7 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
     auto task = [weak, faultData] {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr, NotifyAppFault failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread, NotifyAppFault failed");
             return;
         }
         appThread->NotifyAppFault(faultData);
@@ -3146,15 +3146,15 @@ void MainThread::NotifyAppFault(const FaultData &faultData)
 void MainThread::SetProcessExtensionType(const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
 {
     if (!extensionConfigMgr_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "extensionConfigMgr_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null extensionConfigMgr_");
         return;
     }
     if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
         return;
     }
     if (!abilityRecord->GetAbilityInfo()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityInfo is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
         return;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "type = %{public}d",
@@ -3166,7 +3166,7 @@ void MainThread::SetProcessExtensionType(const std::shared_ptr<AbilityLocalRecor
 void MainThread::AddExtensionBlockItem(const std::string &extensionName, int32_t type)
 {
     if (!extensionConfigMgr_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "extensionConfigMgr_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null extensionConfigMgr_");
         return;
     }
     extensionConfigMgr_->AddBlockListItem(extensionName, type);
@@ -3175,7 +3175,7 @@ void MainThread::AddExtensionBlockItem(const std::string &extensionName, int32_t
 void MainThread::UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
     if (!extensionConfigMgr_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "extensionConfigMgr_ is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null extensionConfigMgr_");
         return;
     }
     extensionConfigMgr_->UpdateRuntimeModuleChecker(runtime);
@@ -3186,13 +3186,13 @@ int MainThread::GetOverlayModuleInfos(const std::string &bundleName, const std::
 {
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "The bundleMgrHelper is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
         return ERR_INVALID_VALUE;
     }
 
     auto overlayMgrProxy = bundleMgrHelper->GetOverlayManagerProxy();
     if (overlayMgrProxy == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "The overlayMgrProxy is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null overlayMgrProxy");
         return ERR_INVALID_VALUE;
     }
 
@@ -3250,7 +3250,7 @@ int32_t MainThread::ScheduleChangeAppGcState(int32_t state)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called, state is %{public}d", state);
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null mainHandler");
         return ERR_INVALID_VALUE;
     }
 
@@ -3258,7 +3258,7 @@ int32_t MainThread::ScheduleChangeAppGcState(int32_t state)
     auto task = [weak, state] {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr, ChangeAppGcState failed.");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->ChangeAppGcState(state);
@@ -3276,12 +3276,12 @@ int32_t MainThread::ChangeAppGcState(int32_t state)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return ERR_INVALID_VALUE;
     }
     auto &runtime = application_->GetRuntime();
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return ERR_INVALID_VALUE;
     }
     if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::CJ) {
@@ -3308,7 +3308,7 @@ bool MainThread::NotifyDeviceDisConnect()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (appMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr");
         return false;
     }
     bool isLastProcess = appMgr_->IsFinalAppProcess();
@@ -3321,7 +3321,7 @@ void MainThread::AssertFaultPauseMainThreadDetection()
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     SetAppDebug(AbilityRuntime::AppFreezeState::AppFreezeFlag::ASSERT_DEBUG_MODE, true);
     if (appMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr");
         return;
     }
     appMgr_->SetAppAssertionPauseState(true);
@@ -3332,7 +3332,7 @@ void MainThread::AssertFaultResumeMainThreadDetection()
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     SetAppDebug(AbilityRuntime::AppFreezeState::AppFreezeFlag::ASSERT_DEBUG_MODE, false);
     if (appMgr_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr");
         return;
     }
     appMgr_->SetAppAssertionPauseState(false);
@@ -3341,7 +3341,7 @@ void MainThread::AssertFaultResumeMainThreadDetection()
 void MainThread::HandleInitAssertFaultTask(bool isDebugModule, bool isDebugApp)
 {
     if (!isDeveloperMode_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Developer Mode is false");
+        TAG_LOGE(AAFwkTag::APPKIT, "Developer Mode false");
         return;
     }
     if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
@@ -3354,7 +3354,7 @@ void MainThread::HandleInitAssertFaultTask(bool isDebugModule, bool isDebugApp)
     }
     auto assertThread = DelayedSingleton<AbilityRuntime::AssertFaultTaskThread>::GetInstance();
     if (assertThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get assert thread instance is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null assert thread");
         return;
     }
     assertThread->InitAssertFaultTask(this, isDebugModule);
@@ -3366,7 +3366,7 @@ void MainThread::SetAppDebug(uint32_t modeFlag, bool isDebug)
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto state = DelayedSingleton<AbilityRuntime::AppFreezeState>::GetInstance();
     if (state == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get app freeze state instance is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null state");
         return;
     }
 
@@ -3384,7 +3384,7 @@ void MainThread::HandleCancelAssertFaultTask()
 {
     auto assertThread = assertThread_.lock();
     if (assertThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get assert thread instance is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null assert thread");
         return;
     }
     assertThread->Stop();
@@ -3429,13 +3429,13 @@ void MainThread::ScheduleCacheProcess()
     auto task = [weak]() {
         auto appThread = weak.promote();
         if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
             return;
         }
         appThread->HandleCacheProcess();
     };
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "handler nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null handler");
         return;
     }
     if (!mainHandler_->PostTask(task, "MainThread:ScheduleCacheProcess")) {
