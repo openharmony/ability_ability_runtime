@@ -426,12 +426,13 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
         return ret;
     }
 
-    auto task = [inner = shared_from_this(), request, preloadMode] () {
+    request.preloadMode = preloadMode;
+    auto task = [inner = shared_from_this(), request] () {
         if (!inner) {
             TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication appMgrServiceInner is nullptr.");
             return;
         }
-        inner->HandlePreloadApplication(request, preloadMode);
+        inner->HandlePreloadApplication(request);
     };
     if (!taskHandler_) {
         TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication taskHandler_ is nullptr.");
@@ -443,7 +444,7 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     return ERR_OK;
 }
 
-void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request, AppExecFwk::PreloadMode preloadMode)
+void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto abilityInfo = request.abilityInfo;
@@ -485,9 +486,9 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request,
     appRecord = CreateAppRunningRecord(nullptr, nullptr, appInfo, abilityInfo, processName, bundleInfo,
         hapModuleInfo, want, NO_ABILITY_RECORD_ID);
     appRecord->SetPreloadState(PreloadState::PRELOADING);
-    appRecord->SetNeedPreloadModule(preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
+    appRecord->SetNeedPreloadModule(request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
     LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
-        hapModuleInfo, want, appExistFlag, true);
+        hapModuleInfo, want, appExistFlag, true, request.preloadMode);
 }
 
 void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
