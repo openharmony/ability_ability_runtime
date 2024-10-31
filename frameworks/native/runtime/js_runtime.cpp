@@ -26,7 +26,6 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-#include "file_ex.h"
 #include "accesstoken_kit.h"
 #include "config_policy_utils.h"
 #include "constants.h"
