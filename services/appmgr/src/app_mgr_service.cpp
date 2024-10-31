@@ -1478,7 +1478,7 @@ int32_t AppMgrService::UpdateRenderState(pid_t renderPid, int32_t state)
     return appMgrServiceInner_->UpdateRenderState(renderPid, state);
 }
 
-int32_t AppMgrService::SignRestartAppFlag(int32_t uid)
+int32_t AppMgrService::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
@@ -1490,7 +1490,7 @@ int32_t AppMgrService::SignRestartAppFlag(int32_t uid)
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
-    return appMgrServiceInner_->SignRestartAppFlag(uid);
+    return appMgrServiceInner_->SignRestartAppFlag(uid, instanceKey);
 }
 
 int32_t AppMgrService::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId)
@@ -1671,19 +1671,14 @@ int32_t AppMgrService::CheckIsKiaProcess(pid_t pid, bool &isKia)
     return appMgrServiceInner_->CheckIsKiaProcess(pid, isKia);
 }
 
-int32_t AppMgrService::GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+int32_t AppMgrService::KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
+    const std::string& reason)
 {
-    bool isCallingPermission =
-        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
-    if (!isCallingPermission) {
-        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
-        return ERR_PERMISSION_DENIED;
-    }
     if (!appMgrServiceInner_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
         return ERR_INVALID_VALUE;
     }
-    return appMgrServiceInner_->GetAppIndexByPid(pid, appIndex);
+    return appMgrServiceInner_->KillAppSelfWithInstanceKey(instanceKey, clearPageStack, reason);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

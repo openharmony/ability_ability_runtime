@@ -52,11 +52,11 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     std::shared_ptr<RestartAppManager> restartAppManager = std::make_shared<RestartAppManager>();
     std::string stringParam(data, size);
     int32_t uid = static_cast<int32_t>(GetU32Data(data));
+    RestartAppKeyType key(stringParam, uid);
     time_t currentTime = static_cast<time_t>(GetU32Data(data));
-    restartAppManager-> GetInstance();
-    restartAppManager-> IsRestartAppFrequent(uid, currentTime);
-    restartAppManager-> AddRestartAppHistory(uid, currentTime);
-    restartAppManager-> IsForegroundToRestartApp();
+    restartAppManager->GetInstance();
+    restartAppManager->IsRestartAppFrequent(key, currentTime);
+    restartAppManager->AddRestartAppHistory(key, currentTime);
     return true;
 }
 } // namespace OHOS

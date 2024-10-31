@@ -11257,55 +11257,50 @@ int32_t AbilityManagerService::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
 int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRecovery)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "RestartApp, isAppRecovery: %{public}d", isAppRecovery);
-    auto appIndex = WantUtils::GetAppIndex(want);
-    int result = CheckRestartAppWant(want, appIndex);
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t userId = callerUid / BASE_USER_RANGE;
+    auto result = CheckRestartAppWant(want, processInfo.appCloneIndex, userId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "checkRestartAppWant error");
         return result;
     }
-
-    int32_t callerUid = IPCSkeleton::GetCallingUid();
-    int64_t now = time(nullptr);
-    if (!isAppRecovery && RestartAppManager::GetInstance().IsRestartAppFrequent(callerUid, now)) {
-        return AAFwk::ERR_RESTART_APP_FREQUENT;
-    }
-
-    bool isForegroundToRestartApp = RestartAppManager::GetInstance().IsForegroundToRestartApp();
-    if (!isForegroundToRestartApp) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "restartApp, isForegroundToRestartApp failed");
+    if (!processInfo.isFocused && !processInfo.isAbilityForegrounding) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "restartApp, is not foreground");
         return AAFwk::NOT_TOP_ABILITY;
     }
 
-    int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-    result = SignRestartAppFlag(userId, callerUid, isAppRecovery);
+    RestartAppKeyType key(processInfo.instanceKey, callerUid);
+    int64_t now = time(nullptr);
+    if (!isAppRecovery && RestartAppManager::GetInstance().IsRestartAppFrequent(key, now)) {
+        return AAFwk::ERR_RESTART_APP_FREQUENT;
+    }
+
+    result = SignRestartAppFlag(userId, callerUid, processInfo.instanceKey, processInfo.appMode, isAppRecovery);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error");
         return result;
     }
-    result = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf(false, "RestartApp");
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "killApplicationSelf error");
-        return result;
-    }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "restartApp, without checkCallAbilityPermission.");
-    (const_cast<Want &>(want)).SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
-    result = StartAbilityWrap(want, nullptr,
-        DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, isForegroundToRestartApp);
+    (const_cast<Want &>(want)).SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, processInfo.appCloneIndex);
+    (const_cast<Want &>(want)).SetParam(AAFwk::Want::APP_INSTANCE_KEY, processInfo.instanceKey);
+    (const_cast<Want &>(want)).RemoveParam(Want::CREATE_APP_INSTANCE_KEY);
+    result = StartAbilityWrap(want, nullptr, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, true);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility error");
         return result;
     }
     if (!isAppRecovery) {
-        RestartAppManager::GetInstance().AddRestartAppHistory(callerUid, now);
+        RestartAppManager::GetInstance().AddRestartAppHistory(key, now);
     }
     return result;
 }
 
-int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex)
+int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId)
 {
     std::string bundleName = want.GetElement().GetBundleName();
-    auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
     if (!CheckCallingTokenId(bundleName, userId, appIndex)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no itself called, no allowed");
         return AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY;
@@ -11325,34 +11320,40 @@ int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want, int3
     return ERR_OK;
 }
 
-int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, int32_t uid, bool isAppRecovery)
+int32_t AbilityManagerService::SignRestartAppFlag(int32_t userId, int32_t uid, const std::string &instanceKey,
+    AppExecFwk::MultiAppModeType type, bool isAppRecovery)
 {
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
         return ERR_INVALID_VALUE;
     }
-    auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(uid));
+    auto ret = IN_PROCESS_CALL(appMgr->SignRestartAppFlag(uid, instanceKey));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgr signRestartAppFlag error");
         return ret;
     }
 
     auto connectManager = GetConnectManagerByUserId(userId);
-    connectManager->SignRestartAppFlag(uid);
+    connectManager->SignRestartAppFlag(uid, instanceKey);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        uiAbilityManager->SignRestartAppFlag(uid, isAppRecovery);
-        return ERR_OK;
+        uiAbilityManager->SignRestartAppFlag(uid, instanceKey, isAppRecovery);
+    } else {
+        auto missionListManager = GetMissionListManagerByUserId(userId);
+        if (missionListManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListManager null userId:%{public}d", userId);
+            return ERR_INVALID_VALUE;
+        }
+        missionListManager->SignRestartAppFlag(uid, instanceKey);
     }
-    auto missionListManager = GetMissionListManagerByUserId(userId);
-    if (missionListManager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "missionListManager null userId:%{public}d", userId);
-        return ERR_INVALID_VALUE;
+
+    if (type == AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
+        return appMgr->KillAppSelfWithInstanceKey(instanceKey, false, "RestartInstance");
+    } else {
+        return DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplicationSelf(false, "RestartApp");
     }
-    missionListManager->SignRestartAppFlag(uid);
-    return ERR_OK;
 }
 
 bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToken, const std::string &appId)

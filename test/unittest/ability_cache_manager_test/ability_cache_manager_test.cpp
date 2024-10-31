@@ -624,7 +624,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerSignRestartAppFlag_001, Tes
     int recId = abilityRecord_->GetRecordId();
     std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
     EXPECT_EQ(rec, nullptr);
-    OHOS::AAFwk::AbilityCacheManager::GetInstance().SignRestartAppFlag(applicationInfo.uid);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().SignRestartAppFlag(applicationInfo.uid, "");
     AbilityRequest abilityRequest;
     abilityRequest.abilityInfo = abilityInfo;
     abilityRequest.appInfo = applicationInfo;
