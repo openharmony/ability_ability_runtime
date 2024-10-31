@@ -642,7 +642,7 @@ private:
         return true;
     }
 
-    bool CheckStartAbilityWithAccountInputParam(
+    bool CheckConnectAbilityWithAccountInputParam(
         napi_env env, NapiCallbackInfo& info,
         AAFwk::Want& want, int32_t& accountId, sptr<JSServiceExtensionConnection>& connection) const
     {
@@ -752,7 +752,7 @@ private:
         AAFwk::Want want;
         int32_t accountId = 0;
         sptr<JSServiceExtensionConnection> connection = new JSServiceExtensionConnection(env);
-        if (!CheckStartAbilityWithAccountInputParam(env, info, want, accountId, connection)) {
+        if (!CheckConnectAbilityWithAccountInputParam(env, info, want, accountId, connection)) {
             return CreateJsUndefined(env);
         }
         int64_t connectId = connection->GetConnectionId();
@@ -814,26 +814,18 @@ private:
         return true;
     }
 
-    bool CheckAbilityParam(napi_env env, NapiCallbackInfo& info, int64_t& connectId)
-    {
-        if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return false;
-        }
-        if (!AppExecFwk::UnwrapInt64FromJS2(env, info.argv[INDEX_ZERO], connectId)) {
-            ThrowInvalidParamError(env, "Parse param connection failed, must be a number.");
-            return false;
-        }
-        return true;
-    }
-
     napi_value OnDisconnectAbility(napi_env env, NapiCallbackInfo& info)
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
+        if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
         int64_t connectId = -1;
-        if (!CheckAbilityParam(env, info, connectId)) {
+        if (!AppExecFwk::UnwrapInt64FromJS2(env, info.argv[INDEX_ZERO], connectId)) {
+            ThrowInvalidParamError(env, "Parse param connection failed, must be a number.");
             return CreateJsUndefined(env);
         }
         AAFwk::Want want;
@@ -901,7 +893,7 @@ private:
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "called");
-         if (info.argc < ARGC_ONE) {
+        if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
