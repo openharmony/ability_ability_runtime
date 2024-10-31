@@ -3115,18 +3115,19 @@ int32_t AbilityConnectManager::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
     return uiExtensionAbilityRecordMgr_->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
 }
 
-void AbilityConnectManager::SignRestartAppFlag(int32_t uid)
+void AbilityConnectManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     {
         std::lock_guard lock(serviceMapMutex_);
         for (auto &[key, abilityRecord] : serviceMap_) {
-            if (abilityRecord == nullptr || abilityRecord->GetUid() != uid) {
+            if (abilityRecord == nullptr || abilityRecord->GetUid() != uid ||
+                abilityRecord->GetInstanceKey() != instanceKey) {
                 continue;
             }
             abilityRecord->SetRestartAppFlag(true);
         }
     }
-    AbilityCacheManager::GetInstance().SignRestartAppFlag(uid);
+    AbilityCacheManager::GetInstance().SignRestartAppFlag(uid, instanceKey);
 }
 
 bool AbilityConnectManager::AddToServiceMap(const std::string &key, std::shared_ptr<AbilityRecord> abilityRecord)
