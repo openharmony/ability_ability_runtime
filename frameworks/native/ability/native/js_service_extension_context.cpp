@@ -897,27 +897,18 @@ private:
         return;
     }
 
-    bool CheckAbilityParam(napi_env env, NapiCallbackInfo& info, AAFwk::Want& want)
-    {
-        if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return false;
-        }
-        if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
-            ThrowInvalidParamError(env, "Parse param want failed, must be a Want.");
-            return false;
-        }
-        return true;
-    }
-
     napi_value OnStartExtensionAbility(napi_env env, NapiCallbackInfo& info)
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "called");
-        // unwrap want
+         if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
         AAFwk::Want want;
-        if (!CheckAbilityParam(env, info, want)) {
+        if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
+            ThrowInvalidParamError(env, "Parse param want failed, must be a Want.");
             return CreateJsUndefined(env);
         }
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
@@ -1033,9 +1024,14 @@ private:
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "called");
-        // unwrap want
+        if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
         AAFwk::Want want;
-        if (!CheckAbilityParam(env, info, want)) {
+        if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
+            ThrowInvalidParamError(env, "Parse param want failed, must be a Want.");
             return CreateJsUndefined(env);
         }
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
