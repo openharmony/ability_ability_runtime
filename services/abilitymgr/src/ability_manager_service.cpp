@@ -2184,6 +2184,14 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
 
+    if (sessionInfo->callerToken) {
+        auto callerAbility = Token::GetAbilityRecordByToken(sessionInfo->callerToken);
+        if (callerAbility == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbility not exist");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
     auto currentUserId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
     if (sessionInfo->userId == DEFAULT_INVAL_VALUE) {
         sessionInfo->userId = currentUserId;
