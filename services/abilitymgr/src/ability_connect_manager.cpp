@@ -1030,7 +1030,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     }
     CompleteStartServiceReq(abilityRecord->GetURI());
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_END, abilityRecord->GetPid(),
-        abilityRecord->GetUid());
+        abilityRecord->GetUid(), abilityRecord->GetAbilityRecordId());
     return ERR_OK;
 }
 
@@ -1506,7 +1506,7 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
         taskName = std::string("ConnectTimeout_") + std::to_string(connectRecordId);
         delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * CONNECT_TIMEOUT_MULTIPLE;
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord->GetPid(),
-            abilityRecord->GetUid(), delayTime);
+            abilityRecord->GetUid(), delayTime, abilityRecord->GetAbilityRecordId());
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "messageId error");
         return;
@@ -1667,6 +1667,11 @@ int AbilityConnectManager::DispatchInactive(const std::shared_ptr<AbilityRecord>
         return ERR_INVALID_VALUE;
     }
     eventHandler_->RemoveEvent(AbilityManagerService::INACTIVE_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+
+    if (abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END,
+            abilityRecord->GetPid(), abilityRecord->GetUid(), abilityRecord->GetAbilityRecordId());
+    }
 
     // complete inactive
     abilityRecord->SetAbilityState(AbilityState::INACTIVE);
