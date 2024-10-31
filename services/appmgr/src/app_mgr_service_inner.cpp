@@ -3656,7 +3656,7 @@ bool AppMgrServiceInner::SendCreateAtomicServiceProcessEvent(const std::shared_p
 }
 
 bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload,
-     AppExecFwk::PreloadMode preloadMode)
+    AppExecFwk::PreloadMode preloadMode)
 {
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
@@ -3666,7 +3666,7 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
     auto callerPid = appRecord->GetCallerPid() == -1 ? IPCSkeleton::GetCallingPid() : appRecord->GetCallerPid();
     auto callerAppRecord = GetAppRunningRecordByPid(callerPid);
     eventInfo.isPreload = isPreload;
-    eventInfo.preloadInfo = static_cast<int32_t> preloadMode;
+    eventInfo.preloadMode = static_cast<int32_t>(preloadMode);
     AppMgrEventUtil::SendProcessStartEvent(callerAppRecord, appRecord, eventInfo);
     SendReStartProcessEvent(eventInfo, appRecord->GetUid());
     return true;
