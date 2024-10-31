@@ -47,7 +47,8 @@ public:
         const int32_t callerPid = -1);
     void GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPids);
     bool CheckShouldForceKillProcess(int32_t pid);
-    void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid, int64_t timeDuration = 0, int64_t abilityRecordId = -1);
+    void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
+        int64_t timeDuration = 0, int64_t abilityRecordId = -1);
 private:
     ResSchedUtil() = default;
     ~ResSchedUtil() = default;
