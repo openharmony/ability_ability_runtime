@@ -1625,6 +1625,8 @@ private:
     void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
+    void RemoveRenderRecordNoAttach(const std::shared_ptr<AppRunningRecord> &hostRecord, int32_t renderPid);
+
 private:
     /**
      * ClearUpApplicationData, clear the application data.
