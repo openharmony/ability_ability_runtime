@@ -45,8 +45,6 @@ private:
     ErrCode StartNonBlockRule(const Want &want, AppExecFwk::DisposedRule &disposedRule);
     sptr<AppExecFwk::IAppMgr> GetAppMgr();
     ErrCode CreateModalUIExtension(const Want &want, const sptr<IRemoteObject> &callerToken);
-    bool ShouldModalSystemUIExtension(std::shared_ptr<AAFwk::AbilityRecord> abilityRecord,
-        sptr<IRemoteObject> callerToken);
     void SetInterceptInfo(const Want &want, AppExecFwk::DisposedRule &disposedRule);
 private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
