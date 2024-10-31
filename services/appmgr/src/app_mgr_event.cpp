@@ -97,6 +97,10 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "abilities failed");
     }
+#define START_UP_ABILITY_TYPE_PREMAKE 100
+    if (eventInfo.isPreload) {
+        eventInfo.abilityType = START_UP_ABILITY_TYPE_PREMAKE + eventInfo.preloadMode;
+    }
     if (!callerAppRecord) {
         Security::AccessToken::NativeTokenInfo nativeTokenInfo = {};
         auto token = appRecord->GetCallerTokenId() == -1 ?
