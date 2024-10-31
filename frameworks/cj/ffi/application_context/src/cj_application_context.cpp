@@ -16,6 +16,7 @@
 #include "cj_application_context.h"
 
 #include "ability_delegator_registry.h"
+#include "ability_manager_errors.h"
 #include "application_context.h"
 #include "running_process_info.h"
 #include "cj_utils_ffi.h"
@@ -629,6 +630,31 @@ int32_t CJApplicationContext::OnGetCurrentAppCloneIndex(int32_t *errCode)
     return context->GetCurrentAppCloneIndex();
 }
 
+void CJApplicationContext::OnRestartApp(AAFwk::Want want, int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        return;
+    }
+    auto code = context->RestartApp(want);
+    if (code == ERR_OK) {
+        return;
+    }
+    if (code == ERR_INVALID_VALUE) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    } else if (code == AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY) {
+        *errCode = ERR_ABILITY_RUNTIME_RESTART_APP_INCORRECT_ABILITY;
+    } else if (code == AAFwk::ERR_RESTART_APP_FREQUENT) {
+        *errCode = ERR_ABILITY_RUNTIME_RESTART_APP_FREQUENT;
+    } else if (code == AAFwk::NOT_TOP_ABILITY) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NOT_TOP_ABILITY;
+    } else {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+    }
+}
+
 extern "C" {
 int64_t FFIGetArea(int64_t id)
 {
@@ -831,6 +857,23 @@ int32_t FfiCJApplicationContextGetCurrentAppCloneIndex(int64_t id, int32_t *errC
         return -1;
     }
     return context->OnGetCurrentAppCloneIndex(errCode);
+}
+
+void FfiCJApplicationContextRestartApp(int64_t id, WantHandle want, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    auto actualWant = reinterpret_cast<AAFwk::Want*>(want);
+    if (actualWant == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null want");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    return context->OnRestartApp(*actualWant, errCode);
 }
 }
 }
