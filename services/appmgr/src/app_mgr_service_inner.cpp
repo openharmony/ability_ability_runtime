@@ -476,12 +476,13 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
         return ret;
     }
 
-    auto task = [inner = shared_from_this(), request, preloadMode] () {
+    request.preloadMode = preloadMode;
+    auto task = [inner = shared_from_this(), request] () {
         if (!inner) {
             TAG_LOGE(AAFwkTag::APPMGR, "null appMgrServiceInner");
             return;
         }
-        inner->HandlePreloadApplication(request, preloadMode);
+        inner->HandlePreloadApplication(request);
     };
     if (!taskHandler_) {
         TAG_LOGE(AAFwkTag::APPMGR, "null taskHandler_");
@@ -493,7 +494,7 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     return ERR_OK;
 }
 
-void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request, AppExecFwk::PreloadMode preloadMode)
+void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto abilityInfo = request.abilityInfo;
@@ -536,9 +537,9 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request,
     appRecord = CreateAppRunningRecord(loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, want);
     if (appRecord != nullptr) {
         appRecord->SetPreloadState(PreloadState::PRELOADING);
-        appRecord->SetNeedPreloadModule(preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
+        appRecord->SetNeedPreloadModule(request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
         LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
-            hapModuleInfo, want, appExistFlag, true);
+            hapModuleInfo, want, appExistFlag, true, request.preloadMode);
     }
 }
 
@@ -680,7 +681,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         appRecord = CreateAppRunningRecord(loadParam, appInfo, abilityInfo,
             processName, bundleInfo, hapModuleInfo, want, isKia);
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
-            specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false, loadParam->token);
+            specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
+            AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token);
         if (ProcessKia(isKia, appRecord, watermarkBusinessName, isWatermarkEnabled) != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "ProcessKia failed");
             return;
@@ -912,7 +914,8 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     bool isShellCall, std::shared_ptr<ApplicationInfo> appInfo,
     std::shared_ptr<AbilityInfo> abilityInfo, const std::string &processName,
     const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo, const HapModuleInfo &hapModuleInfo,
-    std::shared_ptr<AAFwk::Want> want, bool appExistFlag, bool isPreload, sptr<IRemoteObject> token)
+    std::shared_ptr<AAFwk::Want> want, bool appExistFlag, bool isPreload, AppExecFwk::PreloadMode preloadMode,
+    sptr<IRemoteObject> token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "processName:%{public}s, isPreload:%{public}d",
@@ -944,8 +947,8 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     bool strictMode = (want == nullptr) ? false : want->GetBoolParam(STRICT_MODE, false);
     appRecord->SetStrictMode(strictMode);
     StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord,
-        appInfo->uid, bundleInfo, appInfo->bundleName, bundleIndex, appExistFlag, isPreload, abilityInfo->moduleName,
-        abilityInfo->name, strictMode, token, want, abilityInfo->extensionAbilityType);
+        appInfo->uid, bundleInfo, appInfo->bundleName, bundleIndex, appExistFlag, isPreload, preloadMode,
+        abilityInfo->moduleName, abilityInfo->name, strictMode, token, want, abilityInfo->extensionAbilityType);
     if (isShellCall) {
         std::string perfCmd = (want == nullptr) ? "" : want->GetStringParam(PERF_CMD);
         bool isSandboxApp = (want == nullptr) ? false : want->GetBoolParam(ENTER_SANDBOX, false);
@@ -3475,8 +3478,9 @@ void AppMgrServiceInner::QueryExtensionSandBox(const std::string &moduleName, co
 void AppMgrServiceInner::StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
     std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
     const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag, bool isPreload,
-    const std::string &moduleName, const std::string &abilityName, bool strictMode, sptr<IRemoteObject> token,
-    std::shared_ptr<AAFwk::Want> want, ExtensionAbilityType ExtensionAbilityType)
+    AppExecFwk::PreloadMode preloadMode, const std::string &moduleName, const std::string &abilityName,
+    bool strictMode, sptr<IRemoteObject> token, std::shared_ptr<AAFwk::Want> want,
+    ExtensionAbilityType ExtensionAbilityType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "bundleName: %{public}s, isPreload: %{public}d", bundleName.c_str(), isPreload);
@@ -3564,7 +3568,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         OnAppStarted(appRecord);
     }
     PerfProfile::GetInstance().SetAppForkEndTime(GetTickCount());
-    SendProcessStartEvent(appRecord);
+    SendProcessStartEvent(appRecord, isPreload, preloadMode);
     ProcessAppDebug(appRecord, appRecord->IsDebugApp());
 }
 
@@ -3651,7 +3655,8 @@ bool AppMgrServiceInner::SendCreateAtomicServiceProcessEvent(const std::shared_p
     return AppMgrEventUtil::SendCreateAtomicServiceProcessEvent(callerAppRecord, appRecord, moduleName, abilityName);
 }
 
-bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord)
+bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload,
+    AppExecFwk::PreloadMode preloadMode)
 {
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
@@ -3660,6 +3665,8 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
     AAFwk::EventInfo eventInfo;
     auto callerPid = appRecord->GetCallerPid() == -1 ? IPCSkeleton::GetCallingPid() : appRecord->GetCallerPid();
     auto callerAppRecord = GetAppRunningRecordByPid(callerPid);
+    eventInfo.isPreload = isPreload;
+    eventInfo.preloadMode = static_cast<int32_t>(preloadMode);
     AppMgrEventUtil::SendProcessStartEvent(callerAppRecord, appRecord, eventInfo);
     SendReStartProcessEvent(eventInfo, appRecord->GetUid());
     return true;
