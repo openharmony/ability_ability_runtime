@@ -1330,9 +1330,14 @@ bool JsRuntime::PopPreloadObj(const std::string& key, std::unique_ptr<NativeRefe
     if (preloadList_.find(key) == preloadList_.end()) {
         return false;
     }
-    obj = std::move(preloadList_[key]);
+    if (preloadList_[key] != nullptr) {
+        obj = std::move(preloadList_[key]);
+        preloadList_.erase(key);
+        return true;
+    }
+
     preloadList_.erase(key);
-    return true;
+    return false;
 }
 
 NativeEngine& JsRuntime::GetNativeEngine() const
