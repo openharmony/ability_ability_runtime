@@ -153,7 +153,7 @@ void OHOSApplication::SetRuntime(std::unique_ptr<AbilityRuntime::Runtime>&& runt
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
     runtime_ = std::move(runtime);
@@ -169,7 +169,7 @@ void OHOSApplication::SetApplicationContext(
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (abilityRuntimeContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "context is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "context empty");
         return;
     }
     abilityRuntimeContext_ = abilityRuntimeContext;
@@ -178,7 +178,7 @@ void OHOSApplication::SetApplicationContext(
     abilityRuntimeContext_->RegisterAppConfigUpdateObserver([applicationWptr](const Configuration &config) {
         std::shared_ptr<OHOSApplication> applicationSptr = applicationWptr.lock();
         if (applicationSptr == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr.");
+            TAG_LOGE(AAFwkTag::APPKIT, "null application");
             return;
         }
         applicationSptr->OnConfigurationUpdated(config, AbilityRuntime::SetLevel::Application);
@@ -186,7 +186,7 @@ void OHOSApplication::SetApplicationContext(
     abilityRuntimeContext_->RegisterAppFontObserver([applicationWptr](const Configuration &config) {
         std::shared_ptr<OHOSApplication> applicationSptr = applicationWptr.lock();
         if (applicationSptr == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr.");
+            TAG_LOGE(AAFwkTag::APPKIT, "null application");
             return;
         }
         applicationSptr->OnUpdateConfigurationForAll(config);
@@ -203,7 +203,7 @@ void OHOSApplication::SetAbilityRecordMgr(const std::shared_ptr<AbilityRecordMgr
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (abilityRecordMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecordMgr is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecordMgr");
         return;
     }
     abilityRecordMgr_ = abilityRecordMgr;
@@ -294,7 +294,7 @@ void OHOSApplication::OnMemoryLevel(int32_t level)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (abilityRuntimeContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRuntimeContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRuntimeContext_");
         return;
     }
     if (abilityRecordMgr_) {
@@ -358,12 +358,12 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
         return nullptr;
     }
     const std::shared_ptr<AbilityInfo> &abilityInfo = abilityRecord->GetAbilityInfo();
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
         return nullptr;
     }
     std::string moduleName = abilityInfo->moduleName;
@@ -376,7 +376,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         stageContext->SetConfiguration(GetConfiguration());
         std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo = stageContext->GetHapModuleInfo();
         if (hapModuleInfo == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfo");
             return nullptr;
         }
         if (runtime_) {
@@ -403,7 +403,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         if (autoStartupCallback != nullptr) {
             abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
             if (isAsyncCallback) {
-                TAG_LOGI(AAFwkTag::APPKIT, "waiting for startup");
+                TAG_LOGI(AAFwkTag::APPKIT, "wait startup");
                 return nullptr;
             }
         }
@@ -419,7 +419,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     }
     const sptr<IRemoteObject> &token = abilityRecord->GetToken();
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return nullptr;
     }
     abilityStage->AddAbility(token, abilityRecord);
@@ -508,7 +508,7 @@ void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> 
     const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName)
 {
     if (abilityStage == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityStage");
         return;
     }
 
@@ -522,7 +522,7 @@ void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> 
     abilityStages_[moduleName] = abilityStage;
     const sptr<IRemoteObject> &token = abilityRecord->GetToken();
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return;
     }
     abilityStage->AddAbility(token, abilityRecord);
@@ -533,7 +533,7 @@ void OHOSApplication::AutoStartupDone(
     const AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     if (abilityStage == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityStage");
         return;
     }
 
@@ -556,7 +556,7 @@ void OHOSApplication::UpdateApplicationInfoInstalled(const AppExecFwk::Applicati
     TAG_LOGD(AAFwkTag::APPKIT, "called");
 
     if (abilityRuntimeContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRuntimeContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRuntimeContext_");
         return;
     }
 
@@ -569,12 +569,12 @@ bool OHOSApplication::AddAbilityStage(
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (abilityRuntimeContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRuntimeContext_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRuntimeContext_");
         return false;
     }
 
     if (runtime_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "runtime_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime_");
         return false;
     }
 
@@ -589,7 +589,7 @@ bool OHOSApplication::AddAbilityStage(
     stageContext->SetConfiguration(GetConfiguration());
     auto moduleInfo = stageContext->GetHapModuleInfo();
     if (moduleInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "moduleInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null moduleInfo");
         return false;
     }
 
@@ -610,7 +610,7 @@ bool OHOSApplication::AddAbilityStage(
     if (autoStartupCallback != nullptr) {
         abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
         if (isAsyncCallback) {
-            TAG_LOGI(AAFwkTag::APPKIT, "waiting for startup");
+            TAG_LOGI(AAFwkTag::APPKIT, "wait startup");
             return false;
         }
     }
@@ -625,11 +625,11 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
     const std::shared_ptr<AbilityInfo> &abilityInfo, bool isCacheProcess)
 {
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
         return;
     }
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return;
     }
     std::string moduleName = abilityInfo->moduleName;
@@ -637,7 +637,7 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
     if (iterator != abilityStages_.end()) {
         auto abilityStage = iterator->second;
         if (abilityStage == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null abilityStage");
             return;
         }
         abilityStage->RemoveAbility(token);
@@ -689,12 +689,12 @@ void OHOSApplication::ScheduleNewProcessRequest(const AAFwk::Want &want, const s
 {
     TAG_LOGD(AAFwkTag::APPKIT, "call");
     if (abilityStages_.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityStages_ is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityStages_ empty");
         return;
     }
     auto iter = abilityStages_.find(moduleName);
     if (iter == abilityStages_.end()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "%{public}s is not in abilityStage", moduleName.c_str());
+        TAG_LOGE(AAFwkTag::APPKIT, "%{public}s not in abilityStage", moduleName.c_str());
         return;
     }
     auto abilityStage = iter->second;
@@ -750,7 +750,7 @@ void OHOSApplication::CleanAppTempData(bool isLastProcess)
         return;
     }
     if (abilityRuntimeContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Context is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Context");
         return;
     }
 
@@ -764,7 +764,7 @@ void OHOSApplication::CleanAppTempData(bool isLastProcess)
 void OHOSApplication::CleanUselessTempData()
 {
     if (abilityRuntimeContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Context is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Context");
         return;
     }
 
@@ -779,7 +779,7 @@ void OHOSApplication::UpdateAppContextResMgr(const Configuration &config)
 {
     auto context = GetAppContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Application context is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return;
     }
 
@@ -849,7 +849,7 @@ bool OHOSApplication::isUpdateFontSize(Configuration &config, AbilityRuntime::Se
 {
     std::string fontSize = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
     if (fontSize.empty()) {
-        TAG_LOGW(AAFwkTag::APPKIT, "fontSize is empty");
+        TAG_LOGW(AAFwkTag::APPKIT, "fontSize empty");
         return false;
     }
 
@@ -882,7 +882,7 @@ bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRunti
 
     std::string language = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     if (language.empty()) {
-        TAG_LOGW(AAFwkTag::APPKIT, "language is empty");
+        TAG_LOGW(AAFwkTag::APPKIT, "language empty");
         return false;
     }
     if (level < AbilityRuntime::ApplicationConfigurationManager::GetInstance().GetLanguageSetLevel()) {

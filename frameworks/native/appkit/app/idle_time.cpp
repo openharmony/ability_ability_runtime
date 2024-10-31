@@ -99,14 +99,14 @@ void IdleTime::PostTask()
     }
 
     if (eventHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "eventHandler_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null eventHandler_");
         return;
     }
     std::weak_ptr<IdleTime> weak(shared_from_this());
     auto task = [weak]() {
         auto idleTime = weak.lock();
         if (idleTime == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "idleTime is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null idleTime");
             return;
         }
         idleTime->EventTask();

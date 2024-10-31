@@ -41,7 +41,7 @@ void AbilityDelegator::AddAbilityMonitor(const std::shared_ptr<IAbilityMonitor> 
     std::unique_lock<std::mutex> lck(mutexMonitor_);
     auto pos = std::find(abilityMonitors_.begin(), abilityMonitors_.end(), monitor);
     if (pos != abilityMonitors_.end()) {
-        TAG_LOGW(AAFwkTag::DELEGATOR, "monitor has been added");
+        TAG_LOGW(AAFwkTag::DELEGATOR, "add monitor");
         return;
     }
 
@@ -57,7 +57,7 @@ void AbilityDelegator::AddAbilityStageMonitor(const std::shared_ptr<IAbilityStag
     std::unique_lock<std::mutex> lck(mutexStageMonitor_);
     auto pos = std::find(abilityStageMonitors_.begin(), abilityStageMonitors_.end(), monitor);
     if (pos != abilityStageMonitors_.end()) {
-        TAG_LOGW(AAFwkTag::DELEGATOR, "stage monitor added");
+        TAG_LOGW(AAFwkTag::DELEGATOR, "add stage monitor");
         return;
     }
     abilityStageMonitors_.emplace_back(monitor);
@@ -356,7 +356,7 @@ void AbilityDelegator::Print(const std::string &msg)
         TAG_LOGW(AAFwkTag::DELEGATOR, "too long message");
         realMsg.resize(DELEGATOR_PRINT_MAX_LENGTH);
     }
-    TAG_LOGI(AAFwkTag::DELEGATOR, "message to print : %{public}s", realMsg.data());
+    TAG_LOGI(AAFwkTag::DELEGATOR, "print message: %{public}s", realMsg.data());
 
     testObserver->TestStatus(realMsg, 0);
 }
@@ -639,7 +639,7 @@ void AbilityDelegator::RemoveAbilityProperty(const std::shared_ptr<ADelegatorAbi
         return;
     }
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "ability property { name : %{public}s, state : %{public}d }",
+    TAG_LOGI(AAFwkTag::DELEGATOR, "ability property: name : %{public}s, state : %{public}d",
         ability->name_.data(), ability->lifecycleState_);
 
     std::unique_lock<std::mutex> lck(mutexAbilityProperties_);

@@ -34,7 +34,7 @@ ApplicationImpl::ApplicationImpl() : curState_(APP_STATE_CREATE), recordId_(0)
 void ApplicationImpl::SetApplication(const std::shared_ptr<OHOSApplication> &application)
 {
     if (application == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return;
     }
     this->application_ = application;
@@ -50,7 +50,7 @@ bool ApplicationImpl::PerformAppReady()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return false;
     }
     application_->CleanUselessTempData();
@@ -59,7 +59,7 @@ bool ApplicationImpl::PerformAppReady()
         curState_ = APP_STATE_READY;
         return true;
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "curState is %{public}d", curState_);
+    TAG_LOGE(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
     return false;
 }
 
@@ -78,7 +78,7 @@ bool ApplicationImpl::PerformForeground()
         curState_ = APP_STATE_FOREGROUND;
         return true;
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "curState is %{public}d", curState_);
+    TAG_LOGE(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
     return false;
 }
 
@@ -96,7 +96,7 @@ bool ApplicationImpl::PerformBackground()
         curState_ = APP_STATE_BACKGROUND;
         return true;
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "curState is %{public}d", curState_);
+    TAG_LOGE(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
     return false;
 }
 
@@ -112,7 +112,7 @@ bool ApplicationImpl::PerformTerminate(bool isLastProcess)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Application instance is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return false;
     }
 
@@ -122,7 +122,7 @@ bool ApplicationImpl::PerformTerminate(bool isLastProcess)
         curState_ = APP_STATE_TERMINATED;
         return true;
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "curState is %{public}d", curState_);
+    TAG_LOGE(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
     return false;
 }
 
@@ -136,7 +136,7 @@ void ApplicationImpl::PerformTerminateStrong()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "invalid application_.");
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid application_");
         return;
     }
     application_->OnTerminate();

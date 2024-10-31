@@ -41,7 +41,7 @@ constexpr char ASSERT_FAULT_PROMPT[] = "\n\n(Press Retry to debug the applicatio
 AAFwk::UserStatus AssertFaultTaskThread::RequestAssertResult(const std::string &exprStr)
 {
     if (assertHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Assert handler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Assert handler");
         return ASSERT_FAULT_DEFAULT_VALUE;
     }
 
@@ -51,7 +51,7 @@ AAFwk::UserStatus AssertFaultTaskThread::RequestAssertResult(const std::string &
         TAG_LOGD(AAFwkTag::APPKIT, "called");
         auto assertFaultTask = weak.lock();
         if (assertFaultTask == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Assert fault task instance is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null Assert fault task");
             return;
         }
         assertResult = assertFaultTask->HandleAssertCallback(exprStr);
@@ -96,13 +96,13 @@ void AssertFaultTaskThread::InitAssertFaultTask(const wptr<AppExecFwk::MainThrea
 {
     auto runner = AppExecFwk::EventRunner::Create(ASSERT_FAULT_THREAD);
     if (runner == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Runner is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Runner");
         return;
     }
 
     auto assertHandler = std::make_shared<AppExecFwk::EventHandler>(runner);
     if (assertHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Handler is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Handler");
         runner->Stop();
         return;
     }
@@ -117,7 +117,7 @@ void AssertFaultTaskThread::InitAssertFaultTask(const wptr<AppExecFwk::MainThrea
 void AssertFaultTaskThread::Stop()
 {
     if (assertRunner_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Assert runner is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Assert runner");
         return;
     }
     assertRunner_->Stop();

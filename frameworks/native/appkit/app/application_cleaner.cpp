@@ -49,13 +49,13 @@ constexpr int64_t MAX_FILE_SIZE = 50 * 1024;
 void ApplicationCleaner::RenameTempData()
 {
     if (context_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Context is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "null Context");
         return;
     }
     std::vector<std::string> tempdir{};
     context_->GetAllTempDir(tempdir);
     if (tempdir.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get app temp path list is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "empty tempdir");
         return;
     }
     int64_t now =
@@ -66,7 +66,7 @@ void ApplicationCleaner::RenameTempData()
     for (const auto &path : tempdir) {
         auto newPath = path + MARK_SYMBOL + stream.str();
         if (rename(path.c_str(), newPath.c_str()) != 0) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Rename temp dir failed, msg is %{public}s", strerror(errno));
+            TAG_LOGE(AAFwkTag::APPKIT, "Rename temp dir failed, msg: %{public}s", strerror(errno));
         }
     }
 }
@@ -88,7 +88,7 @@ void ApplicationCleaner::ClearTempData()
         }
         std::vector<std::string> temps;
         if (sharedThis->GetObsoleteBundleTempPath(rootDir, temps) != RESULT_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Get bundle temp file list is false");
+            TAG_LOGE(AAFwkTag::APPKIT, "Get bundle temp file list false");
             return;
         }
 
@@ -132,7 +132,7 @@ int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
 
     auto instance = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance();
     if (instance == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get OsAccountManager instance");
+        TAG_LOGE(AAFwkTag::APPKIT, "get OsAccountManager instance failed");
         return RESULT_ERR;
     }
 
@@ -146,7 +146,7 @@ int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
     auto baseDir = context_->GetBaseDir();
     auto infos = context_->GetApplicationInfo();
     if (infos == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Input param is invalid");
+        TAG_LOGE(AAFwkTag::APPKIT, "Input param invalid");
         return RESULT_ERR;
     }
 
@@ -165,13 +165,13 @@ ErrCode ApplicationCleaner::GetObsoleteBundleTempPath(
     const std::vector<std::string> &rootPath, std::vector<std::string> &tempPath)
 {
     if (rootPath.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Input param is invalid");
+        TAG_LOGE(AAFwkTag::APPKIT, "invalid param");
         return RESULT_ERR;
     }
 
     for (const auto &dir : rootPath) {
         if (dir.empty()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Input param is invalid");
+            TAG_LOGE(AAFwkTag::APPKIT, "invalid param");
             continue;
         }
         std::vector<std::string> temp;
@@ -224,7 +224,7 @@ bool ApplicationCleaner::RemoveDir(const std::string &tempPath)
     }
     struct stat buf = {};
     if (stat(tempPath.c_str(), &buf) != 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to obtain file properties");
+        TAG_LOGE(AAFwkTag::APPKIT, "obtain file properties failed");
         return false;
     }
 

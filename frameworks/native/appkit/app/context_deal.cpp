@@ -56,7 +56,7 @@ std::shared_ptr<ApplicationInfo> ContextDeal::GetApplicationInfo() const
 void ContextDeal::SetApplicationInfo(const std::shared_ptr<ApplicationInfo> &info)
 {
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "info is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "null info");
         return;
     }
     applicationInfo_ = info;
@@ -70,7 +70,7 @@ std::shared_ptr<Context> ContextDeal::GetApplicationContext() const
 void ContextDeal::SetApplicationContext(const std::shared_ptr<Context> &context)
 {
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "context is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return;
     }
     appContext_ = context;
@@ -105,7 +105,7 @@ const std::shared_ptr<AbilityInfo> ContextDeal::GetAbilityInfo()
 void ContextDeal::SetAbilityInfo(const std::shared_ptr<AbilityInfo> &info)
 {
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "info is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "null info");
         return;
     }
     abilityInfo_ = info;
@@ -119,7 +119,7 @@ std::shared_ptr<Context> ContextDeal::GetContext()
 void ContextDeal::SetContext(const std::shared_ptr<Context> &context)
 {
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "context is empty.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return;
     }
     abilityContext_ = context;
@@ -129,7 +129,7 @@ std::shared_ptr<BundleMgrHelper> ContextDeal::GetBundleManager() const
 {
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get bundle manager service.");
+        TAG_LOGE(AAFwkTag::APPKIT, "get bundle manager service failed");
         return nullptr;
     }
     return bundleMgrHelper;
@@ -165,12 +165,12 @@ std::string ContextDeal::GetDataDir()
 std::string ContextDeal::GetDir(const std::string &name, int mode)
 {
     if (applicationInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "applicationInfo_ == nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo_");
         return "";
     }
     std::string dir = applicationInfo_->dataDir + CONTEXT_DEAL_FILE_SEPARATOR + name;
     if (!OHOS::FileExists(dir)) {
-        TAG_LOGI(AAFwkTag::APPKIT, "GetDir File is not exits");
+        TAG_LOGI(AAFwkTag::APPKIT, "GetDir File not exits");
         OHOS::ForceCreateDirectory(dir);
         OHOS::ChangeModeDirectory(dir, mode);
     }
@@ -210,7 +210,7 @@ sptr<AAFwk::IAbilityManager> ContextDeal::GetAbilityManager()
 {
     auto remoteObject = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get ability manager service.");
+        TAG_LOGE(AAFwkTag::APPKIT, "get ability manager service failed");
         return nullptr;
     }
     sptr<AAFwk::IAbilityManager> ams = iface_cast<AAFwk::IAbilityManager>(remoteObject);
@@ -221,7 +221,7 @@ std::string ContextDeal::GetAppType()
 {
     auto ptr = GetBundleManager();
     if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetAppType failed to get bundle manager service");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetAppType get bundle manager service failed");
         return "";
     }
     std::string retString = ptr->GetAppType(applicationInfo_->bundleName);
@@ -260,10 +260,10 @@ void ContextDeal::SetPattern(int patternId)
         }
         OHOS::Global::Resource::RState errval = resourceManager_->GetPatternById(patternId, pattern_);
         if (errval != OHOS::Global::Resource::RState::SUCCESS) {
-            TAG_LOGE(AAFwkTag::APPKIT, "SetPattern GetPatternById(patternId:%d) retval is %u", patternId, errval);
+            TAG_LOGE(AAFwkTag::APPKIT, "SetPattern GetPatternById(patternId:%d) retval: %u", patternId, errval);
         }
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetPattern resourceManager_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "SetPattern null resourceManager_");
     }
 }
 
@@ -273,7 +273,7 @@ std::shared_ptr<HapModuleInfo> ContextDeal::GetHapModuleInfo()
     if (hapModuleInfoLocal_ == nullptr) {
         HapModuleInfoRequestInit();
         if (hapModuleInfoLocal_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfoLocal_ is nullptr");
+            TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfoLocal_");
             return nullptr;
         }
     }
@@ -288,7 +288,7 @@ void ContextDeal::initResourceManager(const std::shared_ptr<Global::Resource::Re
 std::string ContextDeal::GetString(int resId)
 {
     if (resourceManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetString resourceManager_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetString null resourceManager_");
         return "";
     }
 
@@ -297,7 +297,7 @@ std::string ContextDeal::GetString(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return ret;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetString GetStringById(resId:%d) retval is %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetString GetStringById(resId:%d) retval: %u", resId, errval);
         return "";
     }
 }
@@ -305,7 +305,7 @@ std::string ContextDeal::GetString(int resId)
 std::vector<std::string> ContextDeal::GetStringArray(int resId)
 {
     if (resourceManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "resourceManager_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager_");
         return std::vector<std::string>();
     }
 
@@ -314,7 +314,7 @@ std::vector<std::string> ContextDeal::GetStringArray(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return retv;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetStringArrayById(resId:%d) retval is %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetStringArrayById(resId:%d) retval: %u", resId, errval);
         return std::vector<std::string>();
     }
 }
@@ -322,7 +322,7 @@ std::vector<std::string> ContextDeal::GetStringArray(int resId)
 std::vector<int> ContextDeal::GetIntArray(int resId)
 {
     if (resourceManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArray resourceManager_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArray null resourceManager_");
         return std::vector<int>();
     }
 
@@ -331,7 +331,7 @@ std::vector<int> ContextDeal::GetIntArray(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return retv;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArray GetIntArrayById(resId:%d) retval is %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArray GetIntArrayById(resId:%d) retval: %u", resId, errval);
         return std::vector<int>();
     }
 }
@@ -347,13 +347,13 @@ std::map<std::string, std::string> ContextDeal::GetTheme()
 void ContextDeal::SetTheme(int themeId)
 {
     if (resourceManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "resourceManager_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager_");
         return;
     }
 
     auto hapModInfo = GetHapModuleInfo();
     if (hapModInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "hapModInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null hapModInfo");
         return;
     }
 
@@ -362,7 +362,7 @@ void ContextDeal::SetTheme(int themeId)
     }
     OHOS::Global::Resource::RState errval = resourceManager_->GetThemeById(themeId, theme_);
     if (errval != OHOS::Global::Resource::RState::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetTheme GetThemeById(themeId:%d) retval is %u", themeId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "SetTheme GetThemeById(themeId:%d) retval: %u", themeId, errval);
     }
 }
 
@@ -371,7 +371,7 @@ std::map<std::string, std::string> ContextDeal::GetPattern()
     if (!pattern_.empty()) {
         return pattern_;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetPattern pattern_ is empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetPattern pattern_ empty");
         return std::map<std::string, std::string>();
     }
 }
@@ -379,7 +379,7 @@ std::map<std::string, std::string> ContextDeal::GetPattern()
 int ContextDeal::GetColor(int resId)
 {
     if (resourceManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetColor resourceManager_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetColor null resourceManager_");
         return INVALID_RESOURCE_VALUE;
     }
 
@@ -388,7 +388,7 @@ int ContextDeal::GetColor(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return ret;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetColor GetColorById(resId:%d) retval is %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetColor GetColorById(resId:%d) retval: %u", resId, errval);
         return INVALID_RESOURCE_VALUE;
     }
 }
@@ -399,7 +399,7 @@ int ContextDeal::GetThemeId()
     if (hapModInfo != nullptr) {
         return -1;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetThemeId hapModInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetThemeId null hapModInfo");
         return -1;
     }
 }
@@ -409,7 +409,7 @@ int ContextDeal::GetDisplayOrientation()
     if (abilityInfo_ != nullptr) {
         return static_cast<int>(abilityInfo_->orientation);
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityInfo_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo_");
         return static_cast<int>(DisplayOrientation::UNSPECIFIED);
     }
 }
@@ -426,7 +426,7 @@ void ContextDeal::SetColorMode(int mode)
 {
     auto hapModInfo = GetHapModuleInfo();
     if (hapModInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetColorMode hapModInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "SetColorMode null hapModInfo");
         return;
     }
 
@@ -443,7 +443,7 @@ int ContextDeal::GetColorMode()
 {
     auto hapModInfo = GetHapModuleInfo();
     if (hapModInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetColorMode hapModInfo is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "GetColorMode null hapModInfo");
         return -1;
     }
     return static_cast<int>(hapModInfo->colorMode);
@@ -454,18 +454,18 @@ bool ContextDeal::HapModuleInfoRequestInit()
 {
     auto ptr = GetBundleManager();
     if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get bundle manager service.");
+        TAG_LOGE(AAFwkTag::APPKIT, "get bundle manager service failed");
         return false;
     }
 
     if (abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "The abilityInfo_ is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo_");
         return false;
     }
 
     hapModuleInfoLocal_ = std::make_shared<HapModuleInfo>();
     if (!ptr->GetHapModuleInfo(*abilityInfo_.get(), *hapModuleInfoLocal_)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed, will retval false value.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed, will retval false value");
         return false;
     }
     return true;

@@ -69,7 +69,7 @@ bool CJTestRunner::Initialize()
         return false;
     }
     if (!cjTestRunnerObj_) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null cjTestRunnerObj_, initialize failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cjTestRunnerObj_");
         return false;
     }
     return true;
@@ -80,7 +80,7 @@ void CJTestRunner::Prepare()
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
     TestRunner::Prepare();
     if (!cjTestRunnerObj_) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null cjTestRunnerObj_, initialize failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cjTestRunnerObj_");
         return;
     }
     cjTestRunnerObj_->OnPrepare();
@@ -91,7 +91,7 @@ void CJTestRunner::Run()
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
     TestRunner::Run();
     if (!cjTestRunnerObj_) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null cjTestRunnerObj_, initialize failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null cjTestRunnerObj_");
         return;
     }
     cjTestRunnerObj_->OnRun();

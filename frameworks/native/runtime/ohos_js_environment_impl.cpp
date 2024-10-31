@@ -132,7 +132,7 @@ bool OHOSJsEnvironmentImpl::InitLoop(NativeEngine* engine, bool isStage)
     auto uvLoop = engine->GetUVLoop();
     auto fd = uvLoop != nullptr ? uv_backend_fd(uvLoop) : -1;
     if (fd < 0) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to get backend fd from uv loop");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "get fd failed");
         return false;
     }
     uv_run(uvLoop, UV_RUN_NOWAIT);

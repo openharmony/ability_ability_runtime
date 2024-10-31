@@ -98,7 +98,7 @@ std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath) cons
     if (realHapPath.empty() ||
         realHapPath.length() < suffix.length() ||
         realHapPath.compare(realHapPath.length() - suffix.length(), suffix.length(), suffix) != 0) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to obtain realHapPath");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "obtain realHapPath failed");
         return realHapPath;
     }
     return realHapPath;
@@ -121,7 +121,7 @@ std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath) co
     if (realHapPath.empty() ||
         realHapPath.length() < suffix.length() ||
         realHapPath.compare(realHapPath.length() - suffix.length(), suffix.length(), suffix) != 0) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to obtain realHapPath");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "obtain realHapPath failed");
         return realHapPath;
     }
     return realHapPath;

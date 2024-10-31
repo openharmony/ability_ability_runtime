@@ -83,7 +83,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
     napi_value globalObj = nullptr;
     napi_get_global(reinterpret_cast<napi_env>(nativeEngine), &globalObj);
     if (globalObj == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to get global object");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null globalObj");
         return;
     }
 
@@ -339,7 +339,7 @@ bool AssetHelper::ReadAmiData(const std::string& ami, uint8_t** buff, size_t* bu
 
     std::ifstream stream(path, std::ios::binary | std::ios::ate);
     if (!stream.is_open()) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Failed to open file %{private}s", ami.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "open file %{private}s failed", ami.c_str());
         return false;
     }
 
