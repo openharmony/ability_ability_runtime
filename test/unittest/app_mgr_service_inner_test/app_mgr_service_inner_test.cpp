@@ -3915,7 +3915,6 @@ HWTEST_F(AppMgrServiceInnerTest, IsApplicationRunning_002, TestSize.Level1)
     EXPECT_FALSE(isRunning);
 }
 
-
 /**
  * @tc.name: InitWindowVisibilityChangedListener_001
  * @tc.desc: init windowVisibilityChangedListener
@@ -4132,7 +4131,6 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterRenderStateObserver_0100, TestSize.Leve
     auto res = appMgrServiceInner->RegisterRenderStateObserver(observer);
     EXPECT_EQ(ERR_INVALID_VALUE, res);
 }
-
 
 /**
  * @tc.name: RegisterStateStateObserver_0200
