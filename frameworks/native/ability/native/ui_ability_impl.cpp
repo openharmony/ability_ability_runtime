@@ -630,7 +630,7 @@ bool UIAbilityImpl::AbilityTransaction(const AAFwk::Want &want, const AAFwk::Lif
 
 void UIAbilityImpl::HandleInitialState(bool &ret)
 {
-#ifdef SUPPORT_SCREEN
+#ifdef SUPPORT_GRAPHICS
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
         lifecycleState_ == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         Background();
