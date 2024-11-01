@@ -5892,6 +5892,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         return ERR_OK;
     }
     std::string bundleName = appRecord->GetBundleName();
+    std::string processName = appRecord->GetProcessName();
     if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
         TAG_LOGW(AAFwkTag::APPMGR,
             "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s",
@@ -5909,22 +5910,23 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         }
     }
 
-    auto notifyAppTask = [appRecord, pid, callerUid, bundleName, faultData, innerService = shared_from_this()]() {
+    auto notifyAppTask = [appRecord, pid, callerUid, bundleName, processName, faultData,
+        innerService = shared_from_this()]() {
         if (faultData.faultType == FaultDataType::APP_FREEZE) {
             AppfreezeManager::AppInfo info = {
                 .pid = pid,
                 .uid = callerUid,
                 .bundleName = bundleName,
-                .processName = bundleName,
+                .processName = processName,
             };
             AppExecFwk::AppfreezeManager::GetInstance()->AppfreezeHandleWithStack(faultData, info);
         }
 
         TAG_LOGW(AAFwkTag::APPMGR,
-            "name: %{public}s, faultType: %{public}d, uid: %{public}d, pid: %{public}d,"
-            "bundleName: %{public}s, faultData.forceExit:%{public}d, faultData.waitSaveState:%{public}d",
-            faultData.errorObject.name.c_str(), faultData.faultType,
-            callerUid, pid, bundleName.c_str(), faultData.forceExit, faultData.waitSaveState);
+            "name: %{public}s, faultType: %{public}d, uid: %{public}d, pid: %{public}d, bundleName: %{public}s,"
+            " processName: %{public}s, faultData.forceExit:%{public}d, faultData.waitSaveState:%{public}d",
+            faultData.errorObject.name.c_str(), faultData.faultType, callerUid, pid, bundleName.c_str(),
+            processName.c_str(), faultData.forceExit, faultData.waitSaveState);
     };
 
     if (!dfxTaskHandler_) {
