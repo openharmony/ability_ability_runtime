@@ -162,7 +162,7 @@ public:
      */
     void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
 
-    int NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest);
+    int NotifySCBToStartUIAbility(AbilityRequest &abilityRequest);
     void CancelSameAbilityTimeoutTask(const AppExecFwk::AbilityInfo &abilityInfo);
 
     int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
