@@ -2355,7 +2355,6 @@ void MissionListManager::HandleLoadTimeout(const std::shared_ptr<AbilityRecord> 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ability null");
         return;
     }
-    ability->SetLoadState(AbilityLoadState::FAILED);
     // root launcher load timeout, notify appMs force terminate the ability and restart immediately.
     if (ability->IsLauncherAbility() && ability->IsLauncherRoot()) {
         ability->SetRestarting(true);
@@ -3355,7 +3354,7 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     // new version started by call type
     auto ret = ResolveAbility(targetAbilityRecord, abilityRequest);
     bool isStartToForeground = targetAbilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false);
-    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ) {
+    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ || targetAbilityRecord->IsReady()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved.");
         if (isStartToForeground) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
@@ -3446,9 +3445,6 @@ int MissionListManager::ResolveAbility(
     if (targetAbility->IsReady()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "targetAbility is ready, directly scheduler call request.");
         targetAbility->CallRequest();
-        return ResolveResultType::OK_HAS_REMOTE_OBJ;
-    } else if (targetAbility->GetLoadState() == AbilityLoadState::LOADING) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "targetAbility is loading.");
         return ResolveResultType::OK_HAS_REMOTE_OBJ;
     }
 

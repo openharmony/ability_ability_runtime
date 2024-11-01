@@ -942,7 +942,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     // new version started by call type
     const auto& abilityInfo = abilityRequest.abilityInfo;
     auto ret = ResolveAbility(uiAbilityRecord, abilityRequest);
-    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ) {
+    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ || (persistentId != 0 && !uiAbilityRecord->IsReady())) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved.");
         if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
@@ -1095,9 +1095,6 @@ int UIAbilityLifecycleManager::ResolveAbility(
     if (targetAbility->IsReady()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "targetAbility is ready, directly scheduler call request.");
         targetAbility->CallRequest();
-        return ResolveResultType::OK_HAS_REMOTE_OBJ;
-    } else if (targetAbility->GetLoadState() == AbilityLoadState::LOADING) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "targetAbility is loading.");
         return ResolveResultType::OK_HAS_REMOTE_OBJ;
     }
 
@@ -1626,7 +1623,6 @@ void UIAbilityLifecycleManager::HandleLoadTimeout(const std::shared_ptr<AbilityR
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null ability record");
         return;
     }
-    abilityRecord->SetLoadState(AbilityLoadState::FAILED);
     NotifySCBToHandleException(abilityRecord,
         static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT), "handleLoadTimeout");
     DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
