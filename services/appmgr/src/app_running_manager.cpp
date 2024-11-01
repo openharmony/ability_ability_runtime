@@ -1646,7 +1646,10 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
-
+    if (appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT) {
+        TAG_LOGI(AAFwkTag::APPMGR, "support porcess cache should not force clean");
+        return false;
+    }
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(abilityToken);
     if (!abilityRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null abilityRecord");
@@ -1655,8 +1658,7 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
     abilityRecord->SetUserRequestCleaningStatus();
 
     bool canKill = appRecord->IsAllAbilityReadyToCleanedByUserRequest();
-    bool isProcessSupportCache = appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT;
-    if (!canKill || isProcessSupportCache ||appRecord->IsKeepAliveApp()) {
+    if (!canKill || appRecord->IsKeepAliveApp()) {
         return false;
     }
 
