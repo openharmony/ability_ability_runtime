@@ -1642,7 +1642,7 @@ HWTEST_F(AbilityBaseTest, AbilityContinuation_0500, TestSize.Level1)
 
     WantParams wantParams;
     auto state = ability->OnContinue(wantParams);
-    EXPECT_EQ(state, ContinuationManager::OnContinueResult::REJECT);
+    EXPECT_EQ(state, ContinuationManager::OnContinueResult::ON_CONTINUE_ERR);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }

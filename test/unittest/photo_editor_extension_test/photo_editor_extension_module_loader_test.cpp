@@ -49,9 +49,11 @@ void PhotoEditorExtensionModuleLoaderTest::TearDown(void)
 HWTEST_F(PhotoEditorExtensionModuleLoaderTest, PhotoEditorExtensionModuleLoader_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "PhotoEditorExtensionModuleLoader_0100 start";
+    std::unique_ptr<Runtime> runtime;
+    auto extension = PhotoEditorExtensionModuleLoader::GetInstance().Create(runtime);
     void *handle = dlopen("/system/lib/extensionability/libphoto_editor_extension_module.z.so", RTLD_LAZY);
     dlclose(handle);
-    EXPECT_TRUE(handle != nullptr);
+    EXPECT_TRUE(extension != nullptr);
     GTEST_LOG_(INFO) << "PhotoEditorExtensionModuleLoader_0100 end";
 }
 

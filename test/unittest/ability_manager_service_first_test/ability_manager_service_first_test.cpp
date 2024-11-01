@@ -2336,7 +2336,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0100, TestSize
 
     WindowOptionsUtils::UpdateWantToSetDisplayID(want, callerToken);
     auto displayId = want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
-    std::string expectDisplayId = "0";
+    std::string expectDisplayId = "";
     EXPECT_EQ(displayId, expectDisplayId);
 }
 
@@ -2353,7 +2353,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0200, TestSize
     
     WindowOptionsUtils::UpdateWantToSetDisplayID(want, callerToken);
     auto displayId = want.GetParams().GetStringParam(Want::PARAM_RESV_DISPLAY_ID);
-    std::string expectDisplayId = "0";
+    std::string expectDisplayId = "";
     EXPECT_EQ(displayId, expectDisplayId);
 }
 
@@ -2366,7 +2366,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateWantToSetDisplayID_0300, TestSize
 {
     WantParams params;
     Want setWant;
-    std::string testDisplayId = "1";
+    std::string testDisplayId = "";
     params.SetParam(Want::PARAM_RESV_DISPLAY_ID, AAFwk::String::Box(testDisplayId));
     setWant.SetParams(params);
 
@@ -2406,7 +2406,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, UpdateStartOptionsToSetDisplayID_0100, 
     startOptions.SetDisplayID(0);
     WindowOptionsUtils::UpdateStartOptionsToSetDisplayID(startOptions, token);
     int32_t expectDisplayId = 0;
-    EXPECT_NE(startOptions.GetDisplayID(), expectDisplayId);
+    EXPECT_EQ(startOptions.GetDisplayID(), expectDisplayId);
 }
 
 /**

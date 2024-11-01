@@ -2089,12 +2089,12 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildPr
     auto& utils = AAFwk::AppUtils::GetInstance();
     utils.isMultiProcessModel_.isLoaded = false;
     ret = appMgrServiceInner->StartChildProcessPreCheck(pid, 1);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_CHILD_PROCESS_REACH_LIMIT);
 
     utils.maxChildProcess_.isLoaded = true;
     utils.maxChildProcess_.value = 1000000;
     ret = appMgrServiceInner->StartChildProcessPreCheck(pid, 1);
-    EXPECT_EQ(ret, ERR_CHILD_PROCESS_REACH_LIMIT);
+    EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_StartChildProcessPreCheck_0100 end");
 }
 
