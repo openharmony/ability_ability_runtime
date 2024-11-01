@@ -476,26 +476,17 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     bool isDebugApp = want.GetBoolParam(DEBUG_APP, false);
-    bool isNativeDebugApp = want.GetBoolParam(NATIVE_DEBUG, false);
     bool hasWindowOptions = (want.HasParameter(Want::PARAM_RESV_WINDOW_LEFT) ||
         want.HasParameter(Want::PARAM_RESV_WINDOW_TOP) ||
         want.HasParameter(Want::PARAM_RESV_WINDOW_HEIGHT) ||
         want.HasParameter(Want::PARAM_RESV_WINDOW_WIDTH));
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "isDebugApp=%{public}d, hasWindowOptions=%{public}d, isNativeDebugApp=%{public}d",
-        static_cast<int>(isDebugApp), static_cast<int>(hasWindowOptions), static_cast<int>(isNativeDebugApp));
-    bool checkDeveloperModeFlag = (isDebugApp || hasWindowOptions || isNativeDebugApp);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "isDebugApp=%{public}d, hasWindowOptions=%{public}d",
+        static_cast<int>(isDebugApp), static_cast<int>(hasWindowOptions));
+    bool checkDeveloperModeFlag = (isDebugApp || hasWindowOptions);
     if (checkDeveloperModeFlag) {
         if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "not developer Mode");
             return ERR_NOT_DEVELOPER_MODE;
-        }
-        int32_t err = ERR_OK;
-        if (userId == DEFAULT_INVAL_VALUE) {
-            userId = GetValidUserId(userId);
-        }
-        if ((err = StartAbilityUtils::CheckAppProvisionMode(want, userId)) != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "checkAppProvisionMode returns errcode=%{public}d", err);
-            return err;
         }
     }
     if (!UnlockScreenManager::GetInstance().UnlockScreen()) {
@@ -7952,12 +7943,6 @@ int AbilityManagerService::StartUserTest(const Want &want, const sptr<IRemoteObj
         }
     }
 
-    bool isDebugApp = want.GetBoolParam(DEBUG_APP, false);
-    if (isDebugApp && bundleInfo.applicationInfo.appProvisionType != AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "release app not support debug");
-        return ERR_NOT_IN_APP_PROVISION_MODE;
-    }
-
     return DelayedSingleton<AppScheduler>::GetInstance()->StartUserTest(want, observer, bundleInfo, GetUserId());
 }
 
@@ -10384,13 +10369,6 @@ int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName)
         return CHECK_PERMISSION_FAILED;
     }
 
-    int32_t err = ERR_OK;
-    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    if ((err = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAppProvisionMode returns errcode=%{public}d", err);
-        return err;
-    }
-
     ConnectInitAbilityDebugDeal();
     return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->AttachAppDebug(bundleName));
 }
@@ -10407,13 +10385,6 @@ int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName)
         !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission verification failed.");
         return CHECK_PERMISSION_FAILED;
-    }
-
-    int32_t err = ERR_OK;
-    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    if ((err = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAppProvisionMode returns errcode=%{public}d", err);
-        return err;
     }
 
     return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->DetachAppDebug(bundleName));
