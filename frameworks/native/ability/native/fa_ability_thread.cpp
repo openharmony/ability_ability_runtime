@@ -1150,13 +1150,13 @@ void FAAbilityThread::InitExtensionFlag(const std::shared_ptr<AppExecFwk::Abilit
         return;
     }
     if (abilityInfo->type == AppExecFwk::AbilityType::EXTENSION) {
-        TAG_LOGD(AAFwkTag::FA, "true InitExtensionFlag");
+        TAG_LOGD(AAFwkTag::FA, "InitExtensionFlag is true");
         isExtension_ = true;
     } else {
         isExtension_ = false;
     }
     if (abilityInfo->type == AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGD(AAFwkTag::FA, "assigned true isUIAbility_");
+        TAG_LOGD(AAFwkTag::FA, "isUIAbility_ is assigned true");
         isUIAbility_ = true;
     }
 }
@@ -1191,7 +1191,7 @@ bool FAAbilityThread::HandleRegisterObserver(const Uri &uri, const sptr<AAFwk::I
 {
     auto obsMgrClient = DataObsMgrClient::GetInstance();
     if (obsMgrClient == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "null obsMgrClient");
+        TAG_LOGE(AAFwkTag::FA, "obsMgrClient is nullptr");
         return false;
     }
 
@@ -1368,7 +1368,7 @@ void FAAbilityThread::DumpAbilityInfoInner(const std::vector<std::string> &param
 {
     TAG_LOGD(AAFwkTag::FA, "begin");
     if (currentAbility_ == nullptr && currentExtension_ == nullptr) {
-        TAG_LOGD(AAFwkTag::FA, "null currentAbility and currentExtension_");
+        TAG_LOGD(AAFwkTag::FA, "currentAbility and currentExtension_ is nullptr");
         return;
     }
     if (currentAbility_ != nullptr) {
@@ -1429,12 +1429,12 @@ void FAAbilityThread::DumpOtherInfo(std::vector<std::string> &info)
     if (currentAbility_ != nullptr) {
         const auto ablityContext = currentAbility_->GetAbilityContext();
         if (ablityContext == nullptr) {
-            TAG_LOGD(AAFwkTag::FA, "null abilitycontext");
+            TAG_LOGD(AAFwkTag::FA, "abilitycontext is nullptr");
             return;
         }
         const auto localCallContainer = ablityContext->GetLocalCallContainer();
         if (localCallContainer == nullptr) {
-            TAG_LOGD(AAFwkTag::FA, "null localCallContainer");
+            TAG_LOGD(AAFwkTag::FA, "localCallContainer is nullptr");
             return;
         }
         localCallContainer->DumpCalls(info);
