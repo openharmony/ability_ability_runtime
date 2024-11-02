@@ -157,7 +157,12 @@ public:
      */
     void HandleShareData(int32_t uniqueId);
 
-    void HandleExecuteInsightIntentBackground(const AAFwk::Want &want, bool onlyExecuteIntent = false);
+    /**
+     * @param want Indicates the structure containing information about the ability.
+     * @param onlyExecuteIntent Indicates whether only the intent needs to be executed.
+     * @return return true if the lifecycle background successfully, otherwise return false.
+     */
+    bool HandleExecuteInsightIntentBackground(const AAFwk::Want &want, bool onlyExecuteIntent = false);
 
     void SetAbilityRecordId(int32_t abilityRecordId)
     {
