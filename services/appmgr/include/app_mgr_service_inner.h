@@ -1402,7 +1402,7 @@ private:
      */
     void RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord);
 
-    bool CheckLoadAbilityConditions(const sptr<IRemoteObject> &token,
+    bool CheckLoadAbilityConditions(std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
         const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo);
 
     /**
@@ -1781,6 +1781,8 @@ private:
      * @param appRecord indicates the process is going to die.
      */
     void NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord> appRecord);
+
+    void NotifyLoadAbilityFailed(sptr<IRemoteObject> token);
 private:
     /**
      * Notify application status.
