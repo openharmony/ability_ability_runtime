@@ -571,6 +571,7 @@ config("uiability_config") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/distributed",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/recovery/",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
@@ -1376,6 +1377,7 @@ config("ui_extension_public_config") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/insight_intent_executor",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${windowmanager_path}/interfaces/kits/napi/embeddable_window_stage",
     "${windowmanager_path}/interfaces/kits/napi/extension_window",
   ]
@@ -1386,13 +1388,13 @@ ohos_shared_library("ui_extension") {
   sources = [
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_embeddable_ui_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_base.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_content_session.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_uiservice_uiext_connection.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension_servicehost_stub_impl.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/js_ui_extension_base.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/js_ui_extension_content_session.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/js_ui_extension_context.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/js_uiservice_uiext_connection.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/ui_extension_context.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/ui_extension_servicehost_stub_impl.cpp",
   ]
 
   public_configs = [ ":ui_extension_public_config" ]
@@ -1479,7 +1481,7 @@ config("share_extension_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/share_extension_ability",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
@@ -1530,7 +1532,7 @@ config("action_extension_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/action_extension_ability",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
@@ -1676,7 +1678,7 @@ config("embedded_ui_extension_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/embedded_ui_extension_ability",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
@@ -1834,7 +1836,7 @@ config("auto_fill_extension_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/auto_fill_extension_ability",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
   ]
 }
 
@@ -1924,7 +1926,7 @@ config("photo_editor_extension_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
