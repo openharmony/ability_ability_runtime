@@ -85,6 +85,8 @@ public:
     void OnKillProcessBySelf(bool clearPageStack, int32_t *errCode);
     int32_t OnGetCurrentAppCloneIndex(int32_t *errCode);
     void OnRestartApp(AAFwk::Want want, int32_t *errCode);
+    void OnClearUpApplicationData(int32_t *errCode);
+    void OnSetSupportedProcessCacheSelf(bool isSupported, int32_t *errCode);
 
     int32_t OnOnEnvironment(void (*cfgCallback)(AbilityRuntime::CConfiguration),
         void (*memCallback)(int32_t), bool isSync, int32_t *errCode);
@@ -133,6 +135,8 @@ CJ_EXPORT CArrProcessInformation FfiCJApplicationContextGetRunningProcessInforma
 CJ_EXPORT void FfiCJApplicationContextKillAllProcesses(int64_t id, bool clearPageStack, int32_t *errCode);
 CJ_EXPORT int32_t FfiCJApplicationContextGetCurrentAppCloneIndex(int64_t id, int32_t *errCode);
 CJ_EXPORT void FfiCJApplicationContextRestartApp(int64_t id, WantHandle want, int32_t *errCode);
+CJ_EXPORT void FfiCJApplicationContextClearUpApplicationData(int64_t id, int32_t *errCode);
+CJ_EXPORT void FfiCJApplicationContextSetSupportedProcessCache(int64_t id, bool isSupported, int32_t *errCode);
 };
 }
 }
