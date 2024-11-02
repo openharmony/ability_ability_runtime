@@ -1421,10 +1421,6 @@ void AbilityRecord::SetAbilityState(AbilityState state)
     if (state == AbilityState::FOREGROUND || state == AbilityState::ACTIVE || state == AbilityState::BACKGROUND) {
         SetRestarting(false);
     }
-    if (state == AbilityState::FOREGROUND) {
-        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_END, GetPid(),
-            GetUid(), GetAbilityRecordId());
-    }
 }
 
 void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
@@ -1484,7 +1480,7 @@ void AbilityRecord::AfterLoaded()
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
     if (GetAbilityInfo().extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(),
-            GetUid(), GetAbilityRecordId());
+            GetUid(), 0, GetAbilityRecordId());
     }
 
     if (IsSceneBoard()) {
