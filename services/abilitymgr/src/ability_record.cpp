@@ -1445,7 +1445,7 @@ void AbilityRecord::SetAbilityState(AbilityState state)
     }
     if (state == AbilityState::FOREGROUND) {
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_END, GetPid(),
-            GetUid(), GetAbilityRecordId());
+            GetUid(), 0, GetAbilityRecordId());
     }
 }
 #endif // SUPPORT_SCREEN
@@ -1506,7 +1506,7 @@ void AbilityRecord::AfterLoaded()
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
     if (GetAbilityInfo().extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(),
-            GetUid(), GetAbilityRecordId());
+            GetUid(), 0, GetAbilityRecordId());
     }
 
     if (IsSceneBoard()) {
