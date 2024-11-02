@@ -655,6 +655,33 @@ void CJApplicationContext::OnRestartApp(AAFwk::Want want, int32_t *errCode)
     }
 }
 
+void CJApplicationContext::OnClearUpApplicationData(int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        return;
+    }
+    context->ClearUpApplicationData();
+}
+
+void CJApplicationContext::OnSetSupportedProcessCacheSelf(bool isSupported, int32_t *errCode)
+{
+    auto context = applicationContext_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        return;
+    }
+    int32_t code = context->SetSupportedProcessCacheSelf(isSupported);
+    if (code == AAFwk::ERR_CAPABILITY_NOT_SUPPORT) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NO_SUCH_SYSCAP;
+    } else if (code != ERR_OK) {
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+    }
+}
+
 extern "C" {
 int64_t FFIGetArea(int64_t id)
 {
@@ -874,6 +901,28 @@ void FfiCJApplicationContextRestartApp(int64_t id, WantHandle want, int32_t *err
         return;
     }
     return context->OnRestartApp(*actualWant, errCode);
+}
+
+void FfiCJApplicationContextClearUpApplicationData(int64_t id, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    return context->OnClearUpApplicationData(errCode);
+}
+
+void FfiCJApplicationContextSetSupportedProcessCache(int64_t id, bool isSupported, int32_t *errCode)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        return;
+    }
+    return context->OnSetSupportedProcessCacheSelf(isSupported, errCode);
 }
 }
 }
