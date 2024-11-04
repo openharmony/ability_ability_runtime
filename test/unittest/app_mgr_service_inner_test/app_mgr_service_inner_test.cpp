@@ -21,8 +21,10 @@
 #include "remote_client_manager.h"
 #undef private
 #include "ability_manager_errors.h"
+#include "accesstoken_kit.h"
 #include "app_scheduler.h"
 #include "appspawn_util.h"
+#include "app_spawn_client.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
@@ -4788,5 +4790,20 @@ HWTEST_F(AppMgrServiceInnerTest, CheckIsKiaProcess_001, TestSize.Level0)
 
     TAG_LOGI(AAFwkTag::TEST, "CheckIsKiaProcess_001 end");
 }
+
+/**
+ * @tc.name: SetJITPermissions_001
+ * @tc.desc: set jit permissions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetJITPermissions_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetJITPermissions_001 start");
+    uint32_t accessTokenId = 0;
+    AppSpawnStartMsg startMsg = {0};
+    AppspawnUtil::SetJITPermissions(accessTokenId, startMsg.jitPermissionsList);
+    TAG_LOGI(AAFwkTag::TEST, "SetJITPermissions_001 end");
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS
