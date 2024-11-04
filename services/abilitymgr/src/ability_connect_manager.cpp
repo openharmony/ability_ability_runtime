@@ -1030,7 +1030,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     }
     CompleteStartServiceReq(abilityRecord->GetURI());
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_END, abilityRecord->GetPid(),
-        abilityRecord->GetUid(), abilityRecord->GetAbilityRecordId());
+        abilityRecord->GetUid(), 0, abilityRecord->GetAbilityRecordId());
     return ERR_OK;
 }
 
@@ -1670,7 +1670,7 @@ int AbilityConnectManager::DispatchInactive(const std::shared_ptr<AbilityRecord>
 
     if (abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END,
-            abilityRecord->GetPid(), abilityRecord->GetUid(), abilityRecord->GetAbilityRecordId());
+            abilityRecord->GetPid(), abilityRecord->GetUid(), 0, abilityRecord->GetAbilityRecordId());
     }
 
     // complete inactive
