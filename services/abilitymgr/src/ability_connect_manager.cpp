@@ -27,6 +27,7 @@
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
 #include "multi_instance_utils.h"
+#include "param.h"
 #include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
@@ -1433,9 +1434,14 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     }
 
     UpdateUIExtensionInfo(abilityRecord);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = abilityRecord->GetRecordId();
+    loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    loadParam.token = token;
+    loadParam.preToken = perToken;
+    loadParam.instanceKey = abilityRecord->GetInstanceKey();
     DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token, perToken, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(),
-        abilityRecord->GetWant(), abilityRecord->GetRecordId(), abilityRecord->GetInstanceKey());
+        loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
     abilityRecord->SetLoadState(AbilityLoadState::LOADING);
 }
 
