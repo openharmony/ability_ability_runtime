@@ -2634,155 +2634,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetAbilityVisibilityState_001, TestSiz
 
 /*
  * Feature: AbilityRecord
- * Function: LoadAbility
- * SubFunction: LoadAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord LoadAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_LoadAbility_005, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    abilityRecord->abilityInfo_.type = AbilityType::UNKNOWN;
-    abilityRecord->abilityInfo_.applicationInfo.name = "app";
-    abilityRecord->isLauncherRoot_ = true;
-    abilityRecord->isRestarting_ = true;
-    abilityRecord->isLauncherAbility_ = true;
-    abilityRecord->restartCount_ = 0;
-    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
-    abilityRecord->abilityInfo_.applicationInfo.tsanEnabled = true;
-    int res = abilityRecord->LoadAbility();
-    EXPECT_NE(abilityRecord_, nullptr);
-    EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::UNKNOWN);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: AbilityRecord_LoadUIAbility_001
- * @tc.desc: Test LoadUIAbility
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_LoadUIAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->abilityInfo_.applicationInfo.name = "app";
-    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
-    abilityRecord->abilityInfo_.applicationInfo.tsanEnabled = true;
-    abilityRecord->LoadUIAbility();
-    EXPECT_NE(abilityRecord_, nullptr);
-    EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ForegroundAbility
- * SubFunction: ForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_005, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    uint32_t sceneFlag = 0;
-    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_HIDE);
-    abilityRecord->ForegroundAbility(sceneFlag);
-    EXPECT_NE(abilityRecord_, nullptr);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ForegroundUIExtensionAbility
- * SubFunction: ForegroundUIExtensionAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundUIExtensionAbility
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    uint32_t sceneFlag = 0;
-    abilityRecord->abilityInfo_.type = AbilityType::DATA;
-    abilityRecord->abilityInfo_.applicationInfo.name = "app";
-    abilityRecord->isAttachDebug_ = false;
-    abilityRecord->isAssertDebug_ = false;
-    abilityRecord->ForegroundUIExtensionAbility(sceneFlag);
-    EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
-    EXPECT_NE(abilityRecord_, nullptr);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ForegroundAbility
- * SubFunction: ForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundAbility
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_002, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    uint32_t sceneFlag = 0;
-    bool isNewWant = true;
-    abilityRecord->SetIsNewWant(isNewWant);
-    abilityRecord->ForegroundUIExtensionAbility(sceneFlag);
-    EXPECT_NE(abilityRecord_, nullptr);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: PostUIExtensionAbilityTimeoutTask
- * SubFunction: PostUIExtensionAbilityTimeoutTask
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord PostUIExtensionAbilityTimeoutTask
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_PostUIExtensionAbilityTimeoutTask_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    ASSERT_NE(abilityRecord, nullptr);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::LOAD_TIMEOUT_MSG);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
-    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: PrepareTerminateAbility
- * SubFunction: PrepareTerminateAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord PrepareTerminateAbility
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_PrepareTerminateAbility_001, TestSize.Level1)
-{
-    abilityRecord_->lifecycleDeal_ = nullptr;
-    abilityRecord_->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    bool result = abilityRecord_->lifecycleDeal_->PrepareTerminateAbility();
-    EXPECT_EQ(result, false);
-    EXPECT_NE(abilityRecord_, nullptr);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: PrepareTerminateAbility
- * SubFunction: PrepareTerminateAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord PrepareTerminateAbility
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_PrepareTerminateAbility_002, TestSize.Level1)
-{
-    abilityRecord_->lifecycleDeal_ = nullptr;
-    abilityRecord_->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
-    bool result = abilityRecord_->lifecycleDeal_->PrepareTerminateAbility();
-    EXPECT_EQ(result, false);
-    EXPECT_NE(abilityRecord_, nullptr);
-}
-
-/*
- * Feature: AbilityRecord
  * Function: Activate
  * SubFunction: Activate
  * FunctionPoints: NA
@@ -3059,6 +2910,155 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetRestartCount_001, TestSize.Level1)
     abilityRecord->SetRestartCount(restartCount);
     int32_t result = abilityRecord->GetRestartCount();
     EXPECT_EQ(result, restartCount);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: LoadAbility
+ * SubFunction: LoadAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord LoadAbility
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_LoadAbility_005, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.type = AbilityType::UNKNOWN;
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
+    abilityRecord->isLauncherRoot_ = true;
+    abilityRecord->isRestarting_ = true;
+    abilityRecord->isLauncherAbility_ = true;
+    abilityRecord->restartCount_ = 0;
+    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.tsanEnabled = true;
+    int res = abilityRecord->LoadAbility();
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::UNKNOWN);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AbilityRecord_LoadUIAbility_001
+ * @tc.desc: Test LoadUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_LoadUIAbility_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->abilityInfo_.type = AbilityType::DATA;
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
+    abilityRecord->abilityInfo_.applicationInfo.asanEnabled = true;
+    abilityRecord->abilityInfo_.applicationInfo.tsanEnabled = true;
+    abilityRecord->LoadUIAbility();
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_005, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    uint32_t sceneFlag = 0;
+    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_HIDE);
+    abilityRecord->ForegroundAbility(sceneFlag);
+    EXPECT_NE(abilityRecord_, nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    uint32_t sceneFlag = 0;
+    abilityRecord->abilityInfo_.type = AbilityType::DATA;
+    abilityRecord->abilityInfo_.applicationInfo.name = "app";
+    abilityRecord->isAttachDebug_ = false;
+    abilityRecord->isAssertDebug_ = false;
+    abilityRecord->ForegroundUIExtensionAbility(sceneFlag);
+    EXPECT_EQ(abilityRecord->abilityInfo_.type, AbilityType::DATA);
+    EXPECT_NE(abilityRecord_, nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    uint32_t sceneFlag = 0;
+    bool isNewWant = true;
+    abilityRecord->SetIsNewWant(isNewWant);
+    abilityRecord->ForegroundUIExtensionAbility(sceneFlag);
+    EXPECT_NE(abilityRecord_, nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PostUIExtensionAbilityTimeoutTask
+ * SubFunction: PostUIExtensionAbilityTimeoutTask
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PostUIExtensionAbilityTimeoutTask
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_PostUIExtensionAbilityTimeoutTask_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    ASSERT_NE(abilityRecord, nullptr);
+    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::LOAD_TIMEOUT_MSG);
+    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::FOREGROUND_TIMEOUT_MSG);
+    abilityRecord->PostUIExtensionAbilityTimeoutTask(AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PrepareTerminateAbility
+ * SubFunction: PrepareTerminateAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PrepareTerminateAbility
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_PrepareTerminateAbility_001, TestSize.Level1)
+{
+    abilityRecord_->lifecycleDeal_ = nullptr;
+    abilityRecord_->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
+    bool result = abilityRecord_->lifecycleDeal_->PrepareTerminateAbility();
+    EXPECT_EQ(result, false);
+    EXPECT_NE(abilityRecord_, nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: PrepareTerminateAbility
+ * SubFunction: PrepareTerminateAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord PrepareTerminateAbility
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_PrepareTerminateAbility_002, TestSize.Level1)
+{
+    abilityRecord_->lifecycleDeal_ = nullptr;
+    abilityRecord_->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
+    bool result = abilityRecord_->lifecycleDeal_->PrepareTerminateAbility();
+    EXPECT_EQ(result, false);
+    EXPECT_NE(abilityRecord_, nullptr);
 }
 
 /*
