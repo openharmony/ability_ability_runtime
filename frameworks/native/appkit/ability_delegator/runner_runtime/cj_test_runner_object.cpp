@@ -53,8 +53,7 @@ std::shared_ptr<CJTestRunnerObject> CJTestRunnerObject::LoadModule(const std::st
     }
     auto id = g_cjTestRunnerFuncs->cjTestRunnerCreate(name.c_str());
     if (id == 0) {
-        TAG_LOGE(AAFwkTag::DELEGATOR,
-            "invoke failed, not registered ability: %{public}s", name.c_str());
+        TAG_LOGE(AAFwkTag::DELEGATOR, "not registered: %{public}s", name.c_str());
         return nullptr;
     }
     return std::make_shared<CJTestRunnerObject>(id);

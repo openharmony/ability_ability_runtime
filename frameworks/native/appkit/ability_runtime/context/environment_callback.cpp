@@ -48,8 +48,7 @@ void JsEnvironmentCallback::CallConfigurationUpdatedInner(const std::string &met
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName.data(), &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get %{public}s from object failed",
-                methodName.data());
+            TAG_LOGE(AAFwkTag::APPKIT, "null method %{public}s", methodName.data());
             return;
         }
 
@@ -96,7 +95,7 @@ void JsEnvironmentCallback::CallMemoryLevelInner(const std::string &methodName, 
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName.data(), &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get %{public}s from object failed", methodName.data());
+            TAG_LOGE(AAFwkTag::APPKIT, "null method %{public}s", methodName.data());
             return;
         }
 

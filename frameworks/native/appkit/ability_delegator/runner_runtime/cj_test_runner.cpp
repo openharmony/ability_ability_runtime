@@ -46,7 +46,7 @@ std::unique_ptr<TestRunner> CJTestRunner::Create(const std::unique_ptr<Runtime> 
 
     auto pTestRunner = new (std::nothrow) CJTestRunner(*cjRuntime, args, bundleInfo);
     if (!pTestRunner) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "create testrunner failed");
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null testRunner");
         return nullptr;
     }
 

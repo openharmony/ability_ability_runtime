@@ -142,8 +142,7 @@ void Watchdog::Timer()
     }
     if (!needReport_) {
         watchdogReportCount_++;
-        TAG_LOGE(AAFwkTag::APPDFR, "timeout, wait to recover, wait count: %{public}d",
-            watchdogReportCount_.load());
+        TAG_LOGE(AAFwkTag::APPDFR, "wait count: %{public}d", watchdogReportCount_.load());
         if (watchdogReportCount_.load() >= WATCHDOG_REPORT_COUNT_MAX) {
 #ifndef APP_NO_RESPONSE_DIALOG
             AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandleOverReportCount(true);
@@ -186,15 +185,13 @@ void Watchdog::ReportEvent()
         system_clock::now().time_since_epoch()).count();
     if ((now - lastWatchTime_) > (RESET_RATIO * CHECK_INTERVAL_TIME) ||
         (now - lastWatchTime_) < (CHECK_INTERVAL_TIME / RESET_RATIO)) {
-        TAG_LOGI(AAFwkTag::APPDFR,
-            "Thread may be blocked, not report time. currTime: %{public}llu, lastTime: %{public}llu",
+        TAG_LOGI(AAFwkTag::APPDFR, "currTime: %{public}llu, lastTime: %{public}llu",
             static_cast<unsigned long long>(now), static_cast<unsigned long long>(lastWatchTime_));
         return;
     }
 
     if (isInBackground_ && backgroundReportCount_.load() < BACKGROUND_REPORT_COUNT_MAX) {
-        TAG_LOGI(AAFwkTag::APPDFR, "In Background, thread may be blocked in, not report time"
-            "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 "",
+        TAG_LOGI(AAFwkTag::APPDFR, "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 "",
             static_cast<uint64_t>(now), static_cast<uint64_t>(lastWatchTime_));
         backgroundReportCount_++;
         return;

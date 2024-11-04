@@ -57,7 +57,7 @@ std::shared_ptr<ProcessInfo> ContextContainer::GetProcessInfo() const
 void ContextContainer::SetProcessInfo(const std::shared_ptr<ProcessInfo> &info)
 {
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "info empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "null info");
         return;
     }
     processInfo_ = info;
@@ -118,7 +118,7 @@ std::shared_ptr<BundleMgrHelper> ContextContainer::GetBundleManager() const
     if (baseContext_ != nullptr) {
         return baseContext_->GetBundleManager();
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "null lbaseContext_");
+        TAG_LOGE(AAFwkTag::APPKIT, "null baseContext_");
         return nullptr;
     }
 }
@@ -286,7 +286,7 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
     TAG_LOGD(AAFwkTag::APPKIT, "InitResourceManager begin, bundleName:%{public}s, codePath:%{public}s",
         bundleInfo.name.c_str(), bundleInfo.applicationInfo.codePath.c_str());
     if (deal == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null InitResourceManager deal");
+        TAG_LOGE(AAFwkTag::APPKIT, "null deal");
         return;
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -306,7 +306,7 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
             bundleInfo.name, moduleName, hapPath, overlayPaths, *resConfig, appType));
         if (resourceManager == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "create resourceManager failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
             return;
         }
         deal->initResourceManager(resourceManager);
@@ -316,7 +316,7 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
         bundleInfo.name, moduleName, hapPath, overlayPaths, *resConfig, appType));
     if (resourceManager == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "create resourceManager failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
         return;
     }
     LoadResources(bundleInfo, resourceManager, resConfig, deal);
@@ -346,7 +346,7 @@ void ContextContainer::LoadResources(BundleInfo &bundleInfo,
         loadPath = std::regex_replace(loadPath, pattern, AbilityBase::Constants::LOCAL_BUNDLES);
         TAG_LOGD(AAFwkTag::APPKIT, "loadPath: %{private}s", loadPath.c_str());
         if (!resourceManager->AddResource(loadPath.c_str())) {
-            TAG_LOGE(AAFwkTag::APPKIT, "ContextContainer::InitResourceManager AddResource failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
         }
     }
 
@@ -383,7 +383,7 @@ std::string ContextContainer::GetString(int resId)
         std::string ret = baseContext_->GetString(resId);
         return ret;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetString null baseContext_");
+        TAG_LOGE(AAFwkTag::APPKIT, "null baseContext_");
         return "";
     }
 }

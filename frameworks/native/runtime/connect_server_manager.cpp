@@ -230,8 +230,7 @@ void ConnectServerManager::SetProfilerCallBack()
     auto setProfilerCallback = reinterpret_cast<SetProfilerCallback>(
         dlsym(handlerConnectServerSo_, "SetProfilerCallback"));
     if (setProfilerCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME,
-                 "ConnectServerManager::AddInstance find symbol 'setProfilerCallback' failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null setProfilerCallback");
         return;
     }
     setProfilerCallback([this](bool status) {
@@ -266,8 +265,7 @@ bool ConnectServerManager::AddInstance(int32_t tid, int32_t instanceId, const st
         std::lock_guard<std::mutex> lock(mutex_);
         auto result = instanceMap_.try_emplace(instanceId, std::make_pair(instanceName, tid));
         if (!result.second) {
-            TAG_LOGW(
-                AAFwkTag::JSRUNTIME, "Instance %{public}d added", instanceId);
+            TAG_LOGW(AAFwkTag::JSRUNTIME, "instance %{public}d added", instanceId);
             return false;
         }
     }
@@ -424,7 +422,7 @@ bool ConnectServerManager::SetRecordCallback(const std::function<void(void)> &st
     }
     auto setRecordCallback = reinterpret_cast<SetRecordCallBack>(dlsym(handlerConnectServerSo_, "SetRecordCallback"));
     if (setRecordCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "find SetRecordCallback failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null setRecordCallback");
         return false;
     }
     setRecordCallback(startRecordFunc, stopRecordFunc);
@@ -439,7 +437,7 @@ void ConnectServerManager::SetRecordResults(const std::string &jsonArrayStr)
     }
     auto sendLayoutMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
     if (sendLayoutMessage == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "find sendLayoutMessage failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null sendLayoutMessage");
         return;
     }
     sendLayoutMessage(jsonArrayStr);

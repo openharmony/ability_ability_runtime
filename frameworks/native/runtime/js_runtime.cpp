@@ -161,7 +161,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode false");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
         return;
     }
     CHECK_POINTER(jsEnv_);
@@ -305,7 +305,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode false");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
         return;
     }
     CHECK_POINTER(jsEnv_);
@@ -324,7 +324,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
         [bundleName, isStartWithDebug, instanceId, weak, isDebugApp](int socketFd, std::string option) {
         TAG_LOGI(AAFwkTag::JSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
         if (weak == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null weak");
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
@@ -381,8 +381,7 @@ bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFull
         extractor.GetSpecifiedTypeFiles(fileNames, ".map");
     }
     if (fileNames.empty()) {
-        TAG_LOGW(
-            AAFwkTag::JSRUNTIME, "no .abc in hap/hqf %{private}s", filePath.c_str());
+        TAG_LOGW(AAFwkTag::JSRUNTIME, "no .abc in hap/hqf %{private}s", filePath.c_str());
         return true;
     }
 
@@ -404,7 +403,7 @@ std::shared_ptr<AbilityBase::FileMapper> JsRuntime::GetSafeData(const std::strin
     bool newCreate = false;
     auto extractor = ExtractorUtil::GetExtractor(path, newCreate, true);
     if (extractor == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get extractor failed. path: %{private}s", path.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null extractor path: %{private}s", path.c_str());
         return nullptr;
     }
 
@@ -419,7 +418,7 @@ std::shared_ptr<AbilityBase::FileMapper> JsRuntime::GetSafeData(const std::strin
 
     auto safeData = extractor->GetSafeData(fileName);
     if (safeData == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get safe data failed. path: %{private}s", path.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null safeData path: %{private}s", path.c_str());
         return nullptr;
     }
 
@@ -542,7 +541,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ModuleName %{public}s", moduleName.c_str());
     if (env == nullptr) {
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "invalid engine");
+        TAG_LOGI(AAFwkTag::JSRUNTIME, "null env");
         return nullptr;
     }
 
@@ -556,7 +555,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
     napi_create_reference(env, propertyValue, 1, &tmpRef);
     methodRequireNapiRef_.reset(reinterpret_cast<NativeReference*>(tmpRef));
     if (!methodRequireNapiRef_) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "create reference for global.requireNapi failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null methodRequireNapiRef_");
         return nullptr;
     }
 
@@ -686,7 +685,7 @@ bool JsRuntime::Initialize(const Options& options)
             napi_create_reference(env, propertyValue, 1, &tmpRef);
             methodRequireNapiRef_.reset(reinterpret_cast<NativeReference*>(tmpRef));
             if (!methodRequireNapiRef_) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "create reference for global.requireNapi failed");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "null methodRequireNapiRef_");
                 return false;
             }
             TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadAce start");
@@ -1084,7 +1083,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
     std::string loadPath = ExtractorUtil::GetLoadFilePath(hapPath);
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
     if (!extractor) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Get extractor failed. hapPath[%{private}s]", hapPath.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "hapPath[%{private}s]", hapPath.c_str());
         return false;
     }
     if (newCreate) {
@@ -1100,7 +1099,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
         if (!extractor->IsHapCompress(modulePath) && useSafeMempry) {
             auto safeData = extractor->GetSafeData(modulePath);
             if (!safeData) {
-                TAG_LOGE(AAFwkTag::JSRUNTIME, "Get safeData abc file failed");
+                TAG_LOGE(AAFwkTag::JSRUNTIME, "null safeData");
                 return false;
             }
             return LoadScript(abcPath, safeData->GetDataPtr(), safeData->GetDataLen(), isBundle_, srcEntrance);
@@ -1513,7 +1512,7 @@ void JsRuntime::SetRequestAotCallback()
     auto callback = [](const std::string& bundleName, const std::string& moduleName, int32_t triggerMode) -> int32_t {
         auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (systemAbilityMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "get SaMgr failed");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null SaMgr");
             return ERR_INVALID_VALUE;
         }
 
@@ -1525,7 +1524,7 @@ void JsRuntime::SetRequestAotCallback()
 
         auto bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObj);
         if (bundleMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "get bms failed");
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "null bms");
             return ERR_INVALID_VALUE;
         }
 

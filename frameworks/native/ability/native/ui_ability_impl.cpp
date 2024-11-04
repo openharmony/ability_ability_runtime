@@ -235,7 +235,7 @@ void UIAbilityImpl::ExecuteInsightIntentDone(uint64_t intentId, const InsightInt
     TAG_LOGI(AAFwkTag::UIABILITY, "intentId %{public}" PRIu64"", intentId);
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token_, intentId, result);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "notify execute done faild");
+        TAG_LOGE(AAFwkTag::UIABILITY, "notify execute done failed");
     }
 }
 #ifdef SUPPORT_SCREEN
@@ -658,7 +658,7 @@ void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "invalid  params");
+        TAG_LOGE(AAFwkTag::UIABILITY, "invalid params");
         HandleForegroundNewState(want, bflag);
         return;
     }
@@ -671,7 +671,7 @@ void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want
     auto intentCb = std::make_unique<InsightIntentExecutorAsyncCallback>();
     intentCb.reset(InsightIntentExecutorAsyncCallback::Create());
     if (intentCb == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "create async callback failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null intentCb");
         HandleForegroundNewState(want, bflag);
         return;
     }
@@ -739,7 +739,7 @@ void UIAbilityImpl::PostForegroundInsightIntent()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (ability_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "invalid params ");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
 
@@ -785,7 +785,7 @@ bool UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want
     auto intentCb = std::make_unique<InsightIntentExecutorAsyncCallback>();
     intentCb.reset(InsightIntentExecutorAsyncCallback::Create());
     if (intentCb == nullptr && !onlyExecuteIntent) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "create async callback failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null intentCb");
         Background();
         return true;
     }

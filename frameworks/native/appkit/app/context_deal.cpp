@@ -129,7 +129,7 @@ std::shared_ptr<BundleMgrHelper> ContextDeal::GetBundleManager() const
 {
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get bundle manager service failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
         return nullptr;
     }
     return bundleMgrHelper;
@@ -210,7 +210,7 @@ sptr<AAFwk::IAbilityManager> ContextDeal::GetAbilityManager()
 {
     auto remoteObject = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get ability manager service failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "null remoteObject");
         return nullptr;
     }
     sptr<AAFwk::IAbilityManager> ams = iface_cast<AAFwk::IAbilityManager>(remoteObject);
@@ -221,7 +221,7 @@ std::string ContextDeal::GetAppType()
 {
     auto ptr = GetBundleManager();
     if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetAppType get bundle manager service failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "null ptr");
         return "";
     }
     std::string retString = ptr->GetAppType(applicationInfo_->bundleName);
@@ -263,7 +263,7 @@ void ContextDeal::SetPattern(int patternId)
             TAG_LOGE(AAFwkTag::APPKIT, "SetPattern GetPatternById(patternId:%d) retval: %u", patternId, errval);
         }
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetPattern null resourceManager_");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager_");
     }
 }
 
@@ -288,7 +288,7 @@ void ContextDeal::initResourceManager(const std::shared_ptr<Global::Resource::Re
 std::string ContextDeal::GetString(int resId)
 {
     if (resourceManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetString null resourceManager_");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager_");
         return "";
     }
 
@@ -297,7 +297,7 @@ std::string ContextDeal::GetString(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return ret;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetString GetStringById(resId:%d) retval: %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetStringById(resId:%d) retval: %u", resId, errval);
         return "";
     }
 }
@@ -322,7 +322,7 @@ std::vector<std::string> ContextDeal::GetStringArray(int resId)
 std::vector<int> ContextDeal::GetIntArray(int resId)
 {
     if (resourceManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArray null resourceManager_");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager_");
         return std::vector<int>();
     }
 
@@ -331,7 +331,7 @@ std::vector<int> ContextDeal::GetIntArray(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return retv;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArray GetIntArrayById(resId:%d) retval: %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArrayById(resId:%d) retval: %u", resId, errval);
         return std::vector<int>();
     }
 }
@@ -362,7 +362,7 @@ void ContextDeal::SetTheme(int themeId)
     }
     OHOS::Global::Resource::RState errval = resourceManager_->GetThemeById(themeId, theme_);
     if (errval != OHOS::Global::Resource::RState::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetTheme GetThemeById(themeId:%d) retval: %u", themeId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetThemeById(themeId:%d) retval: %u", themeId, errval);
     }
 }
 
@@ -371,7 +371,7 @@ std::map<std::string, std::string> ContextDeal::GetPattern()
     if (!pattern_.empty()) {
         return pattern_;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetPattern pattern_ empty");
+        TAG_LOGE(AAFwkTag::APPKIT, "pattern_ empty");
         return std::map<std::string, std::string>();
     }
 }
@@ -379,7 +379,7 @@ std::map<std::string, std::string> ContextDeal::GetPattern()
 int ContextDeal::GetColor(int resId)
 {
     if (resourceManager_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetColor null resourceManager_");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager_");
         return INVALID_RESOURCE_VALUE;
     }
 
@@ -388,7 +388,7 @@ int ContextDeal::GetColor(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return ret;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetColor GetColorById(resId:%d) retval: %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetColorById(resId:%d) retval: %u", resId, errval);
         return INVALID_RESOURCE_VALUE;
     }
 }
@@ -399,7 +399,7 @@ int ContextDeal::GetThemeId()
     if (hapModInfo != nullptr) {
         return -1;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetThemeId null hapModInfo");
+        TAG_LOGE(AAFwkTag::APPKIT, "null hapModInfo");
         return -1;
     }
 }
@@ -426,7 +426,7 @@ void ContextDeal::SetColorMode(int mode)
 {
     auto hapModInfo = GetHapModuleInfo();
     if (hapModInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "SetColorMode null hapModInfo");
+        TAG_LOGE(AAFwkTag::APPKIT, "null hapModInfo");
         return;
     }
 
@@ -443,7 +443,7 @@ int ContextDeal::GetColorMode()
 {
     auto hapModInfo = GetHapModuleInfo();
     if (hapModInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetColorMode null hapModInfo");
+        TAG_LOGE(AAFwkTag::APPKIT, "null hapModInfo");
         return -1;
     }
     return static_cast<int>(hapModInfo->colorMode);
@@ -454,7 +454,7 @@ bool ContextDeal::HapModuleInfoRequestInit()
 {
     auto ptr = GetBundleManager();
     if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get bundle manager service failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "null ptr");
         return false;
     }
 
@@ -465,7 +465,7 @@ bool ContextDeal::HapModuleInfoRequestInit()
 
     hapModuleInfoLocal_ = std::make_shared<HapModuleInfo>();
     if (!ptr->GetHapModuleInfo(*abilityInfo_.get(), *hapModuleInfoLocal_)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed, will retval false value");
+        TAG_LOGE(AAFwkTag::APPKIT, "will retval false");
         return false;
     }
     return true;

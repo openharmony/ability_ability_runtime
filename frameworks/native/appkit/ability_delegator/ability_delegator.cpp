@@ -297,7 +297,7 @@ bool AbilityDelegator::DoAbilityForeground(const sptr<IRemoteObject> &token)
 
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->DelegatorDoAbilityForeground(token);
     if (ret) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "call DelegatorDoAbilityForeground failed, reson: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "ret: %{public}d", ret);
         return false;
     }
 
@@ -315,7 +315,7 @@ bool AbilityDelegator::DoAbilityBackground(const sptr<IRemoteObject> &token)
 
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->DelegatorDoAbilityBackground(token);
     if (ret) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "call doAbilityBackground failed, reson: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "ret: %{public}d", ret);
         return false;
     }
 
@@ -639,7 +639,7 @@ void AbilityDelegator::RemoveAbilityProperty(const std::shared_ptr<ADelegatorAbi
         return;
     }
 
-    TAG_LOGI(AAFwkTag::DELEGATOR, "ability property: name : %{public}s, state : %{public}d",
+    TAG_LOGI(AAFwkTag::DELEGATOR, "ability property { name : %{public}s, state : %{public}d }",
         ability->name_.data(), ability->lifecycleState_);
 
     std::unique_lock<std::mutex> lck(mutexAbilityProperties_);

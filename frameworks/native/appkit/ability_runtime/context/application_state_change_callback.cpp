@@ -44,7 +44,7 @@ void JsApplicationStateChangeCallback::CallJsMethodInnerCommon(
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName.data(), &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get %{public}s from object failed", methodName.data());
+            TAG_LOGE(AAFwkTag::APPKIT, "null method %{public}s", methodName.data());
             continue;
         }
         napi_call_function(env_, obj, method, 0, nullptr, nullptr);
@@ -94,7 +94,7 @@ void JsApplicationStateChangeCallback::Register(napi_value jsCallback)
 bool JsApplicationStateChangeCallback::UnRegister(napi_value jsCallback)
 {
     if (jsCallback == nullptr) {
-        TAG_LOGI(AAFwkTag::APPKIT, "null jsCallback, delete all callback");
+        TAG_LOGI(AAFwkTag::APPKIT, "null jsCallback");
         callbacks_.clear();
         return true;
     }
@@ -107,7 +107,7 @@ bool JsApplicationStateChangeCallback::UnRegister(napi_value jsCallback)
 
         napi_value value = callback->GetNapiValue();
         if (value == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "null value");
             continue;
         }
 

@@ -48,7 +48,7 @@ void IdleTime::InitVSyncReceiver()
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         receiver_ = rsClient.CreateVSyncReceiver("ABILITY", eventHandler_);
         if (receiver_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Create VSync receiver failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "null receiver");
             return;
         }
         receiver_->Init();
@@ -59,7 +59,7 @@ void IdleTime::InitVSyncReceiver()
 void IdleTime::EventTask()
 {
     if (receiver_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "no VSyncReceiver");
+        TAG_LOGE(AAFwkTag::APPKIT, "null receiver");
         return;
     }
 

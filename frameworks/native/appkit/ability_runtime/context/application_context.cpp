@@ -575,7 +575,7 @@ std::string ApplicationContext::GetResourceDir()
 void ApplicationContext::GetAllTempDir(std::vector<std::string> &tempPaths)
 {
     if (contextImpl_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null contextimpl");
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
         return;
     }
     contextImpl_->GetAllTempDir(tempPaths);
@@ -873,7 +873,7 @@ void ApplicationContext::SetCurrentInstanceKey(const std::string& instanceKey)
 void ApplicationContext::ProcessSecurityExit(const AAFwk::ExitReason &exitReason)
 {
     if (appProcessExitCallback_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "callback invalid");
+        TAG_LOGE(AAFwkTag::APPKIT, "null callback");
         return;
     }
 
