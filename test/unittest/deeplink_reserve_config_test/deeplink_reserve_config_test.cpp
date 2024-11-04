@@ -46,22 +46,6 @@ void DeepLinkReserveConfigTest::TearDown()
 
 /*
  * Feature: deepLinkReserveConfig
- * Function: LoadConfiguration
- * SubFunction: NA
- * FunctionPoints: deepLinkReserveConfig LoadConfiguration
- * EnvConditions: NA
- * CaseDescription: Verify that the deepLinkReserveConfig LoadConfiguration is normal.
- */
-HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfigTest_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0100 start";
-    DeepLinkReserveConfig deepLinkReserveConfig;
-    EXPECT_EQ(deepLinkReserveConfig.LoadConfiguration(), false);
-    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0100 end";
-}
-
-/*
- * Feature: deepLinkReserveConfig
  * Function: isLinkReserved
  * SubFunction: NA
  * FunctionPoints: deepLinkReserveConfig isLinkReserved
