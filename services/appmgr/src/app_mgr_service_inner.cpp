@@ -1619,16 +1619,12 @@ void AppMgrServiceInner::SendProcessExitEventTask(
     if (exitResult) {
         eventInfo.exitResult = EXIT_SUCESS;
         AAFwk::EventReport::SendProcessExitEvent(AAFwk::EventName::PROCESS_EXIT, eventInfo);
-        TAG_LOGI(AAFwkTag::APPMGR, "time: %{public}" PRId64 ", exitResult: %{public}d, pid: %{public}d",
-            eventInfo.time, eventInfo.exitResult, eventInfo.pid);
         return;
     }
 
     if (--count <= 0) {
         eventInfo.exitResult = EXIT_FAILED;
         AAFwk::EventReport::SendProcessExitEvent(AAFwk::EventName::PROCESS_EXIT, eventInfo);
-        TAG_LOGI(AAFwkTag::APPMGR, "time: %{public}" PRId64 ", exitResult: %{public}d, pid: %{public}d",
-            eventInfo.time, eventInfo.exitResult, eventInfo.pid);
         return;
     }
 
