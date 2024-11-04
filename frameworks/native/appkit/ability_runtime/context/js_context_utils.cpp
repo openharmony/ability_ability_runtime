@@ -184,7 +184,7 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
             return CreateJsUndefined(env);
         }
         if (!CheckCallerIsSystemApp()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "This application is not system-app, can not use system-api");
+            TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
             AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
             return CreateJsUndefined(env);
         }
@@ -193,7 +193,7 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
     }
 
     if (!moduleContext) {
-        TAG_LOGE(AAFwkTag::APPKIT, "create module context failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "null moduleContext");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -205,7 +205,7 @@ napi_value JsBaseContext::CreateJsModuleContext(napi_env env, const std::shared_
     napi_value value = CreateJsBaseContext(env, moduleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid systemModule");
+        TAG_LOGW(AAFwkTag::APPKIT, "null systemModule");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -257,12 +257,12 @@ napi_value JsBaseContext::OnCreateSystemHspModuleResourceManager(napi_env env, N
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager = nullptr;
     int32_t retCode = context->CreateSystemHspModuleResourceManager(bundleName, moduleName, resourceManager);
     if (resourceManager == nullptr && retCode == ERR_ABILITY_RUNTIME_EXTERNAL_NOT_SYSTEM_HSP) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create resourceManager");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_NOT_SYSTEM_HSP);
         return CreateJsUndefined(env);
     }
     if (resourceManager == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create resourceManager");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -297,13 +297,13 @@ napi_value JsBaseContext::OnCreateModuleResourceManager(napi_env env, NapiCallba
         return CreateJsUndefined(env);
     }
     if (!CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "This application is not system-app, can not use system-api");
+        TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
     }
     auto resourceManager = context->CreateModuleResourceManager(bundleName, moduleName);
     if (resourceManager == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create resourceManager");
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -558,7 +558,7 @@ napi_value JsBaseContext::CreateJsBundleContext(napi_env env, const std::shared_
     napi_value value = CreateJsBaseContext(env, bundleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "OnCreateBundleContext, invalid systemModule");
+        TAG_LOGW(AAFwkTag::APPKIT, "null systemModule");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -612,7 +612,7 @@ napi_value JsBaseContext::CreateJSApplicationContext(napi_env env,
     napi_value value = JsApplicationContextUtils::CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "OnGetApplicationContext, invalid systemModule");
+        TAG_LOGW(AAFwkTag::APPKIT, "null systemModule");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -659,13 +659,13 @@ napi_value AttachBaseContext(napi_env env, void* value, void* hint)
     }
     auto ptr = reinterpret_cast<std::weak_ptr<Context>*>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid context");
+        TAG_LOGW(AAFwkTag::APPKIT, "null ptr");
         return nullptr;
     }
     napi_value object = CreateJsBaseContext(env, ptr, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &object, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "AttachBaseContext, invalid systemModule");
+        TAG_LOGW(AAFwkTag::APPKIT, "null systemModule");
         return nullptr;
     }
 
@@ -694,13 +694,13 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
     }
     auto ptr = reinterpret_cast<std::weak_ptr<ApplicationContext>*>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid context");
+        TAG_LOGW(AAFwkTag::APPKIT, "null ptr");
         return nullptr;
     }
     napi_value object = JsApplicationContextUtils::CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &object, 1);
     if (systemModule == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid systemModule");
+        TAG_LOGW(AAFwkTag::APPKIT, "null systemModule");
         return nullptr;
     }
     auto contextObj = systemModule->GetNapiValue();
@@ -750,11 +750,11 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "invalid object");
+        TAG_LOGW(AAFwkTag::APPKIT, "null object");
         return nullptr;
     }
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "context object");
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return nullptr;
     }
     auto jsContext = std::make_unique<JsBaseContext>(context);

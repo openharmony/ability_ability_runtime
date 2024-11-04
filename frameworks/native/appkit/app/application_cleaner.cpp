@@ -49,7 +49,7 @@ constexpr int64_t MAX_FILE_SIZE = 50 * 1024;
 void ApplicationCleaner::RenameTempData()
 {
     if (context_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null Context");
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return;
     }
     std::vector<std::string> tempdir{};
@@ -66,7 +66,7 @@ void ApplicationCleaner::RenameTempData()
     for (const auto &path : tempdir) {
         auto newPath = path + MARK_SYMBOL + stream.str();
         if (rename(path.c_str(), newPath.c_str()) != 0) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Rename temp dir failed, msg: %{public}s", strerror(errno));
+            TAG_LOGE(AAFwkTag::APPKIT, "msg: %{public}s", strerror(errno));
         }
     }
 }
@@ -88,13 +88,13 @@ void ApplicationCleaner::ClearTempData()
         }
         std::vector<std::string> temps;
         if (sharedThis->GetObsoleteBundleTempPath(rootDir, temps) != RESULT_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Get bundle temp file list false");
+            TAG_LOGE(AAFwkTag::APPKIT, "get bundle temp file list false");
             return;
         }
 
         for (const auto &temp : temps) {
             if (sharedThis->RemoveDir(temp) == false) {
-                TAG_LOGE(AAFwkTag::APPKIT, "Clean bundle data dir failed, path: %{private}s", temp.c_str());
+                TAG_LOGE(AAFwkTag::APPKIT, "path: %{private}s", temp.c_str());
             }
         }
     };
@@ -126,13 +126,13 @@ bool ApplicationCleaner::CheckFileSize(const std::vector<std::string> &bundlePat
 int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
 {
     if (context_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Invalid context pointer");
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return RESULT_ERR;
     }
 
     auto instance = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance();
     if (instance == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get OsAccountManager instance failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "null instance");
         return RESULT_ERR;
     }
 
@@ -146,7 +146,7 @@ int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
     auto baseDir = context_->GetBaseDir();
     auto infos = context_->GetApplicationInfo();
     if (infos == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Input param invalid");
+        TAG_LOGE(AAFwkTag::APPKIT, "null infos");
         return RESULT_ERR;
     }
 
@@ -165,13 +165,13 @@ ErrCode ApplicationCleaner::GetObsoleteBundleTempPath(
     const std::vector<std::string> &rootPath, std::vector<std::string> &tempPath)
 {
     if (rootPath.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "invalid param");
+        TAG_LOGE(AAFwkTag::APPKIT, "empty rootPath");
         return RESULT_ERR;
     }
 
     for (const auto &dir : rootPath) {
         if (dir.empty()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "invalid param");
+            TAG_LOGE(AAFwkTag::APPKIT, "empty dir");
             continue;
         }
         std::vector<std::string> temp;
@@ -185,14 +185,14 @@ void ApplicationCleaner::TraverseObsoleteTempDirectory(
     const std::string &currentPath, std::vector<std::string> &tempDirs)
 {
     if (currentPath.empty() || (currentPath.size() > PATH_MAX_SIZE)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Traverse temp directory current path invaild");
+        TAG_LOGE(AAFwkTag::APPKIT, "traverse temp directory current path invalid");
         return;
     }
 
     std::string filePath = currentPath;
     DIR *dir = opendir(filePath.c_str());
     if (dir == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Open dir error. %{public}s", currentPath.c_str());
+        TAG_LOGE(AAFwkTag::APPKIT, "null dir %{public}s", currentPath.c_str());
         return;
     }
     if (filePath.back() != FILE_SEPARATOR_CHAR) {

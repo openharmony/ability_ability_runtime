@@ -31,7 +31,7 @@ int32_t AssertFaultCallback::OnRemoteRequest(
     std::u16string descriptor = AssertFaultCallback::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Local descriptor not equal remote");
+        TAG_LOGE(AAFwkTag::APPKIT, "local descriptor not remote");
         return ERR_INVALID_STATE;
     }
 
@@ -51,7 +51,7 @@ void AssertFaultCallback::NotifyDebugAssertResult(AAFwk::UserStatus status)
     status_ = status;
     auto assertThread = assertFaultThread_.lock();
     if (assertThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null assert thread");
+        TAG_LOGE(AAFwkTag::APPKIT, "null assertThread");
         return;
     }
     assertThread->NotifyReleaseLongWaiting();

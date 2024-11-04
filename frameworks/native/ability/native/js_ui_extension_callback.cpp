@@ -161,14 +161,14 @@ void JsUIExtensionCallback::CallJsResult(int32_t resultCode, const AAFwk::Want &
     }
     napi_value obj = jsCallbackObject_->GetNapiValue();
     if (obj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "get js object failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null obj");
         return;
     }
     napi_value method = nullptr;
     napi_get_named_property(env_, obj, "onResult", &method);
     if (method == nullptr || AppExecFwk::IsTypeForNapiValue(env_, method, napi_undefined)
         || AppExecFwk::IsTypeForNapiValue(env_, method, napi_null)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "get onResult method from object failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null method");
         return;
     }
 
@@ -212,14 +212,14 @@ void JsUIExtensionCallback::CallJsError(int32_t number)
     }
     napi_value obj = jsCallbackObject_->GetNapiValue();
     if (obj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "get js object failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null obj");
         return;
     }
     napi_value method = nullptr;
     napi_get_named_property(env_, obj, "onError", &method);
     if (method == nullptr || AppExecFwk::IsTypeForNapiValue(env_, method, napi_undefined)
         || AppExecFwk::IsTypeForNapiValue(env_, method, napi_null)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "get onError method from object failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null method");
         return;
     }
 

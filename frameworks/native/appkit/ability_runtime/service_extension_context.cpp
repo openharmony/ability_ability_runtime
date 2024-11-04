@@ -33,7 +33,7 @@ ErrCode ServiceExtensionContext::StartAbility(const AAFwk::Want &want) const
     TAG_LOGD(AAFwkTag::APPKIT, "ability:%{public}s", want.GetElement().GetAbilityName().c_str());
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StartAbility failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -45,7 +45,7 @@ ErrCode ServiceExtensionContext::StartAbility(const AAFwk::Want &want, const AAF
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_,
         ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StartAbility failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -58,7 +58,7 @@ ErrCode ServiceExtensionContext::StartAbilityAsCaller(const AAFwk::Want &want) c
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->
     StartAbilityAsCaller(want, token_, nullptr, ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StartAbilityAsCaller failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -72,7 +72,7 @@ ErrCode ServiceExtensionContext::StartAbilityAsCaller(const AAFwk::Want &want,
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityAsCaller(want, startOptions, token_, nullptr,
         ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StartAbilityAsCaller failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -138,7 +138,7 @@ ErrCode ServiceExtensionContext::StartAbilityWithAccount(const AAFwk::Want &want
         want, token_, ILLEGAL_REQUEST_CODE, accountId);
     TAG_LOGD(AAFwkTag::APPKIT, "ret=%{public}d", err);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StartAbilityWithAccount failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -152,7 +152,7 @@ ErrCode ServiceExtensionContext::StartAbilityWithAccount(
         ILLEGAL_REQUEST_CODE, accountId);
     TAG_LOGD(AAFwkTag::APPKIT, "End calling StartAbilityWithAccount. ret=%{public}d", err);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StartAbilityWithAccount failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -163,7 +163,7 @@ ErrCode ServiceExtensionContext::StartServiceExtensionAbility(const AAFwk::Want 
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
         want, token_, accountId, AppExecFwk::ExtensionAbilityType::SERVICE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StartServiceExtensionAbility failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -174,7 +174,7 @@ ErrCode ServiceExtensionContext::StartUIServiceExtensionAbility(const AAFwk::Wan
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
         want, token_, accountId, AppExecFwk::ExtensionAbilityType::UI_SERVICE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StartServiceExtensionAbility failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -185,7 +185,7 @@ ErrCode ServiceExtensionContext::StopServiceExtensionAbility(const AAFwk::Want& 
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StopExtensionAbility(
         want, token_, accountId, AppExecFwk::ExtensionAbilityType::SERVICE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "StopServiceExtensionAbility failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -208,7 +208,7 @@ ErrCode ServiceExtensionContext::DisconnectAbility(const AAFwk::Want &want,
     ErrCode ret =
         ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "DisconnectAbility error, ret=%{public}d", ret);
+        TAG_LOGE(AAFwkTag::APPKIT, "ret=%{public}d", ret);
     }
     return ret;
 }
@@ -218,7 +218,7 @@ ErrCode ServiceExtensionContext::TerminateAbility()
     TAG_LOGI(AAFwkTag::APPKIT, "begin");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, nullptr);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "TerminateAbility failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -228,7 +228,7 @@ ErrCode ServiceExtensionContext::RequestModalUIExtension(const Want &want)
     TAG_LOGI(AAFwkTag::APPKIT, "begin");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->RequestModalUIExtension(want);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "RequestModalUIExtension failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -248,7 +248,7 @@ ErrCode ServiceExtensionContext::AddFreeInstallObserver(const sptr<AbilityRuntim
 {
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(token_, observer);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "AddFreeInstallObserver error, ret: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::APPKIT, "ret: %{public}d", ret);
     }
     return ret;
 }
@@ -259,7 +259,7 @@ ErrCode ServiceExtensionContext::PreStartMission(const std::string& bundleName, 
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->PreStartMission(
         bundleName, moduleName, abilityName, startTime);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "PreStartMission failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }

@@ -76,12 +76,12 @@ void ResourceConfigHelper::UpdateResConfig(
     const AppExecFwk::Configuration &configuration, std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
 {
     if (resourceManager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "invalid Resource manager");
+        TAG_LOGE(AAFwkTag::ABILITY, "null resourceManager");
         return;
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (resConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "create resConfig failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "null resConfig");
         return;
     }
     resourceManager->GetResConfig(*resConfig);

@@ -53,7 +53,7 @@ int32_t JsStartupTaskExecutor::RunOnTaskPool(
     auto env = jsRuntime.GetNapiEnv();
 
     if (startup == nullptr || context == nullptr || asyncTaskExcutor == nullptr || asyncTaskCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "args null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null args");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     napi_value asyncTaskExcutorValue = asyncTaskExcutor->GetNapiValue();
@@ -64,7 +64,7 @@ int32_t JsStartupTaskExecutor::RunOnTaskPool(
     napi_value asyncPushTask = nullptr;
     napi_get_named_property(env, asyncTaskExcutorValue, "asyncPushTask", &asyncPushTask);
     if (asyncPushTask == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "AsyncPushTask null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null asyncPushTask");
         return ERR_STARTUP_FAILED_TO_EXECUTE_STARTUP;
     }
     bool isCallable = false;

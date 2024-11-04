@@ -78,7 +78,7 @@ void UIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null localRecord");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null record");
         return;
     }
     application_ = application;
@@ -770,7 +770,7 @@ ErrCode UIAbility::SetMissionLabel(const std::string &label)
     }
     auto window = scene_->GetMainWindow();
     if (window == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get window scene failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null window");
         return ERR_INVALID_VALUE;
     }
 
@@ -1216,7 +1216,7 @@ bool UIAbility::CheckRecoveryEnabled()
 bool UIAbility::CheckDefaultRecoveryEnabled()
 {
     if (abilityContext_ == nullptr) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "context invalid");
+        TAG_LOGW(AAFwkTag::UIABILITY, "null context");
         return false;
     }
 

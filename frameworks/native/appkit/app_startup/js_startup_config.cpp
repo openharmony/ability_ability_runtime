@@ -29,7 +29,7 @@ JsStartupConfig::~JsStartupConfig() = default;
 int32_t JsStartupConfig::Init(std::unique_ptr<NativeReference> &configEntryJsRef)
 {
     if (configEntryJsRef == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "config entry null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null configEntry");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     HandleScope handleScope(env_);
@@ -42,7 +42,7 @@ int32_t JsStartupConfig::Init(std::unique_ptr<NativeReference> &configEntryJsRef
     napi_value onConfig = nullptr;
     napi_get_named_property(env_, configEntry, "onConfig", &onConfig);
     if (onConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "onConfig invalid");
+        TAG_LOGE(AAFwkTag::STARTUP, "null onConfig");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     bool isCallable = false;
@@ -54,7 +54,7 @@ int32_t JsStartupConfig::Init(std::unique_ptr<NativeReference> &configEntryJsRef
     napi_value config = nullptr;
     napi_call_function(env_, configEntry, onConfig, 0, nullptr, &config);
     if (config == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "config null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null config");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
@@ -66,7 +66,7 @@ int32_t JsStartupConfig::Init(std::unique_ptr<NativeReference> &configEntryJsRef
 int32_t JsStartupConfig::Init(napi_value config)
 {
     if (config == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "config null");
+        TAG_LOGE(AAFwkTag::STARTUP, "null config");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
@@ -121,7 +121,7 @@ void JsStartupConfig::InitListener(napi_env env, napi_value config)
     OnCompletedCallbackFunc onCompletedCallback =
         [env, listenerRefSp](const std::shared_ptr<StartupTaskResult> &result) {
             if (env == nullptr || listenerRefSp == nullptr) {
-                TAG_LOGE(AAFwkTag::STARTUP, "env or listenerRefSp null");
+                TAG_LOGE(AAFwkTag::STARTUP, "null env or listenerRefSp");
                 return;
             }
             HandleScope handleScope(env);

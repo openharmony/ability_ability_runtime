@@ -95,7 +95,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
     // load jsfwk
     if (g_jsFramework && !arkNativeEngine->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "load jsframework failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "load jsFramework failed");
     }
 
     if (g_debugMode) {
@@ -294,7 +294,7 @@ bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* bu
 
     std::unique_ptr<FileMapper> fileMapper = std::make_unique<FileMapper>();
     if (fileMapper == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create file mapper failed");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null fileMapper");
         close(fd);
         return false;
     }
@@ -327,7 +327,7 @@ bool AssetHelper::ReadAmiData(const std::string& ami, uint8_t** buff, size_t* bu
             return true;
         } else {
             // If api version less than 12 and get secure mem failed, try get normal mem.
-            TAG_LOGW(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s", ami.c_str());
+            TAG_LOGW(AAFwkTag::JSRUNTIME, "file %{private}s", ami.c_str());
         }
     }
 
@@ -429,7 +429,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
             if (apiTargetVersion >= API12) {
                 useSecureMem = true;
                 if (safeData == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s", filePath.c_str());
+                    TAG_LOGE(AAFwkTag::JSRUNTIME, "null safeData file %{private}s", filePath.c_str());
                     return false;
                 }
                 *buff = safeData->GetDataPtr();
@@ -442,7 +442,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
                 return true;
             } else {
                 // If api version less than 12 and get secure mem failed, try get normal mem.
-                TAG_LOGW(AAFwkTag::JSRUNTIME, "Get secure mem failed, file %{private}s", filePath.c_str());
+                TAG_LOGW(AAFwkTag::JSRUNTIME, "file %{private}s", filePath.c_str());
             }
         }
         if (!extractor->ExtractToBufByName(realfilePath, dataPtr, fileLen)) {
@@ -452,7 +452,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
     }
 
     if (!workerInfo_->isDebugVersion && fileLen > ASSET_FILE_MAX_SIZE) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "ReadFilePathData failed, file is too large");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "file too large");
         return false;
     }
 
@@ -520,7 +520,7 @@ void AssetHelper::GetAmi(std::string& ami, const std::string& filePath)
 bool AssetHelper::GetIsStageModel()
 {
     bool stageModule = workerInfo_->isStageModel.GetBool();
-    TAG_LOGI(AAFwkTag::JSRUNTIME, "stagemodule: %{public}d", stageModule);
+    TAG_LOGI(AAFwkTag::JSRUNTIME, "stageModule: %{public}d", stageModule);
     return stageModule;
 }
 

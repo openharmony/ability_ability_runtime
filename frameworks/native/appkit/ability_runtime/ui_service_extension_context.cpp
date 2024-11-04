@@ -40,7 +40,7 @@ ErrCode UIServiceExtensionContext::StartAbility(const AAFwk::Want &want, const A
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_,
         ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "StartAbility failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed %{public}d", err);
     }
     return err;
 }
@@ -49,7 +49,7 @@ ErrCode UIServiceExtensionContext::TerminateSelf()
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, nullptr);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "TerminateAbility failed %{public}d", err);
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "failed %{public}d", err);
     }
     return err;
 }
@@ -110,7 +110,7 @@ ErrCode UIServiceExtensionContext::StartAbilityByType(const std::string &type,
 
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "CreateModalUIExtension failed");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "sessionId zero");
         return ERR_INVALID_VALUE;
     }
     uiExtensionCallbacks->SetUIContent(uiContent);
@@ -136,7 +136,7 @@ ErrCode UIServiceExtensionContext::DisConnectServiceExtensionAbility(const AAFwk
         ErrCode ret =
             ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::UISERVC_EXT, "DisconnectAbility error, ret=%{public}d", ret);
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "ret=%{public}d", ret);
         }
         TAG_LOGI(AAFwkTag::UISERVC_EXT, "end");
         return ret;

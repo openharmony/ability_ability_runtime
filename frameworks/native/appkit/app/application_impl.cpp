@@ -136,7 +136,7 @@ void ApplicationImpl::PerformTerminateStrong()
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (application_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "invalid application_");
+        TAG_LOGE(AAFwkTag::APPKIT, "null application");
         return;
     }
     application_->OnTerminate();
