@@ -75,6 +75,7 @@ class IStatusBarDelegate;
 }
 namespace Rosen {
 class FocusChangeInfo;
+class WindowVisibilityInfo;
 }
 
 namespace AAFwk {
@@ -87,6 +88,7 @@ constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 using OHOS::AppExecFwk::IAbilityController;
 struct StartAbilityInfo;
 class WindowFocusChangedListener;
+class WindowVisibilityChangedListener;
 
 /**
  * @class AbilityManagerService
@@ -1197,6 +1199,9 @@ public:
 
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
+    void HandleWindowVisibilityChanged(
+        const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
+
     virtual int GetDialogSessionInfo(const std::string &dialogSessionId,
         sptr<DialogSessionInfo> &dialogSessionInfo) override;
 
@@ -1921,6 +1926,9 @@ private:
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
     int StartAbilityPrechainInterceptor(StartAbilityParams &params);
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
+    void InitWindowVisibilityChangedListener();
+    void FreeWindowVisibilityChangedListener();
+    bool CheckProcessIsBackground(int32_t pid, AbilityState currentState);
 
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
@@ -2324,6 +2332,7 @@ private:
 
     bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
 
+    sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
@@ -2335,10 +2344,13 @@ private:
     std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;
+    std::unordered_set<int32_t> windowVisibleList_;
+
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;
     ffrt::mutex preStartSessionMapLock_;
+    ffrt::mutex windowVisibleListLock_;
 
     std::multimap<std::string, std::string> timeoutMap_;
     std::map<std::string, sptr<SessionInfo>> preStartSessionMap_;
