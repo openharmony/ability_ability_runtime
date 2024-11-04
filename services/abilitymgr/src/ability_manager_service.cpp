@@ -7518,6 +7518,7 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
 
 int AbilityManagerService::LogoutUser(int32_t userId)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "LogoutUser in service:%{public}d", userId);
     if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verification failed, not account process");
         return CHECK_PERMISSION_FAILED;
