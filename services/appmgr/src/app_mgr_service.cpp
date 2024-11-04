@@ -25,6 +25,7 @@
 #include "app_death_recipient.h"
 #include "app_mgr_constants.h"
 #include "datetime_ex.h"
+#include "fd_guard.h"
 #include "freeze_util.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
@@ -42,6 +43,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+using AAFwk::FdGuard;
 constexpr const char* OPTION_KEY_HELP = "-h";
 constexpr const char* OPTION_KEY_DUMP_IPC = "--ipc";
 constexpr const char* OPTION_KEY_DUMP_FFRT = "--ffrt";
@@ -952,13 +954,22 @@ int32_t AppMgrService::PreStartNWebSpawnProcess()
 int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_t ipcFd,
     int32_t sharedFd, int32_t crashFd, pid_t &renderPid, bool isGPU)
 {
+    FdGuard ipcFdGuard(ipcFd);
+    FdGuard sharedFdGuard(sharedFd);
+    FdGuard crashFdGuard(crashFd);
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "StartRenderProcess failed, AppMgrService not ready.");
         return ERR_INVALID_OPERATION;
     }
 
-    return appMgrServiceInner_->StartRenderProcess(IPCSkeleton::GetCallingPid(),
+    auto result = appMgrServiceInner_->StartRenderProcess(IPCSkeleton::GetCallingPid(),
         renderParam, ipcFd, sharedFd, crashFd, renderPid, isGPU);
+    if (result == ERR_OK) {
+        ipcFdGuard.Release();
+        sharedFdGuard.Release();
+        crashFdGuard.Release();
+    }
+    return result;
 }
 
 void AppMgrService::AttachRenderProcess(const sptr<IRemoteObject> &scheduler)
@@ -1348,11 +1359,22 @@ int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCl
 int32_t AppMgrService::StartChildProcess(pid_t &childPid, const ChildProcessRequest &request)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::vector<FdGuard> fds;
+    for (const auto &[name, fd] : request.args.fds) {
+        fds.emplace_back(fd);
+    }
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "StartChildProcess failed, AppMgrService not ready.");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->StartChildProcess(IPCSkeleton::GetCallingPid(), childPid, request);
+
+    auto result = appMgrServiceInner_->StartChildProcess(IPCSkeleton::GetCallingPid(), childPid, request);
+    if (result == ERR_OK) {
+        for (auto &fd : fds) {
+            fd.Release();
+        }
+    }
+    return result;
 }
 
 int32_t AppMgrService::GetChildProcessInfoForSelf(ChildProcessInfo &info)
