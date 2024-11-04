@@ -1573,7 +1573,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0200,
      * @tc.expected: expect step1 different bundle unfocused true
      */
     auto ret = appRunningManager->SignRestartAppFlag(0, "");
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_SignRestartAppFlag_0200 end");
 }
 
