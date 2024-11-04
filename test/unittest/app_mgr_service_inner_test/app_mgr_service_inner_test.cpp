@@ -432,7 +432,8 @@ HWTEST_F(AppMgrServiceInnerTest, CheckLoadAbilityConditions_001, TestSize.Level0
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
 
     appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, nullptr);
 
@@ -440,15 +441,15 @@ HWTEST_F(AppMgrServiceInnerTest, CheckLoadAbilityConditions_001, TestSize.Level0
 
     appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(token, nullptr, nullptr);
+    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, nullptr, nullptr);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(token, abilityInfo_, nullptr);
+    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, abilityInfo_, nullptr);
 
     appMgrServiceInner->CheckLoadAbilityConditions(nullptr, abilityInfo_, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(token, nullptr, applicationInfo_);
+    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, nullptr, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(token, abilityInfo_, applicationInfo_);
+    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, abilityInfo_, applicationInfo_);
 
     EXPECT_NE(appMgrServiceInner, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "CheckLoadAbilityConditions_001 end");
@@ -3915,7 +3916,6 @@ HWTEST_F(AppMgrServiceInnerTest, IsApplicationRunning_002, TestSize.Level1)
     EXPECT_FALSE(isRunning);
 }
 
-
 /**
  * @tc.name: InitWindowVisibilityChangedListener_001
  * @tc.desc: init windowVisibilityChangedListener
@@ -4132,7 +4132,6 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterRenderStateObserver_0100, TestSize.Leve
     auto res = appMgrServiceInner->RegisterRenderStateObserver(observer);
     EXPECT_EQ(ERR_INVALID_VALUE, res);
 }
-
 
 /**
  * @tc.name: RegisterStateStateObserver_0200

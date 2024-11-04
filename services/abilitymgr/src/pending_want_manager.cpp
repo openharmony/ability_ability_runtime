@@ -29,9 +29,11 @@ namespace AAFwk {
 using namespace OHOS::EventFwk;
 using namespace std::chrono;
 using namespace std::placeholders;
+constexpr const char* PENDING_WANT_MANAGER = "PendingWantManager";
 
 PendingWantManager::PendingWantManager()
 {
+    taskHandler_ = TaskHandlerWrap::CreateQueueHandler(PENDING_WANT_MANAGER);
 }
 
 PendingWantManager::~PendingWantManager()
@@ -604,16 +606,15 @@ int32_t PendingWantManager::GetWantSenderInfo(const sptr<IWantSender> &target, s
 
 void PendingWantManager::ClearPendingWantRecord(const std::string &bundleName, int32_t uid)
 {
-    auto abilityManagerService = DelayedSingleton<AbilityManagerService>::GetInstance();
-    CHECK_POINTER(abilityManagerService);
-    auto handler = abilityManagerService->GetTaskHandler();
-    CHECK_POINTER(handler);
+    CHECK_POINTER(taskHandler_);
+    TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
     auto task = [bundleName, uid, self = shared_from_this()]() { self->ClearPendingWantRecordTask(bundleName, uid); };
-    handler->SubmitTask(task);
+    taskHandler_->SubmitTask(task);
 }
 
 void PendingWantManager::ClearPendingWantRecordTask(const std::string &bundleName, int32_t uid)
 {
+    TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
     if (!QueryRecordByBundle(bundleName)) {
         return;
     }
