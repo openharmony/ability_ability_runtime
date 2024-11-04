@@ -612,8 +612,9 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         TAG_LOGE(AAFwkTag::APPMGR, "null loadParam");
         return;
     }
-    if (!CheckLoadAbilityConditions(loadParam->token, abilityInfo, appInfo)) {
+    if (!CheckLoadAbilityConditions(loadParam, abilityInfo, appInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "checkLoadAbilityConditions fail");
+        NotifyLoadAbilityFailed(loadParam->token);
         return;
     }
     if (abilityInfo->type == AbilityType::PAGE) {
@@ -664,6 +665,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey);
     if (appRecord && appRecord->IsCaching()) {
+        TAG_LOGD(AAFwkTag::APPMGR, "process %{public}s is caching start ability set to blocked", processName.c_str());
         appRecord->SetProcessCacheBlocked(true);
         appRecord = nullptr;
     }
@@ -809,10 +811,10 @@ void AppMgrServiceInner::RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunnin
     appRunningManager_->RemoveUIExtensionLauncherItemById(uiExtensionAbilityId);
 }
 
-bool AppMgrServiceInner::CheckLoadAbilityConditions(const sptr<IRemoteObject> &token,
+bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
     const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo)
 {
-    if (!token || !abilityInfo || !appInfo) {
+    if (!loadParam || !loadParam->token || !abilityInfo || !appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
         return false;
     }
@@ -823,6 +825,17 @@ bool AppMgrServiceInner::CheckLoadAbilityConditions(const sptr<IRemoteObject> &t
     if (abilityInfo->applicationName != appInfo->name) {
         TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo and appInfo have diff appName");
         return false;
+    }
+    if (loadParam->preToken) {
+        auto appRecord = GetAppRunningRecordByAbilityToken(loadParam->preToken);
+        if (appRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "preToken not exist");
+            return false;
+        }
+        if (appRecord->IsKilling()) {
+            TAG_LOGE(AAFwkTag::APPMGR, "app is killing");
+            return false;
+        }
     }
 
     return true;
@@ -1123,6 +1136,19 @@ void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord>
     }
     TAG_LOGI(AAFwkTag::APPMGR, "attach fail name: %{public}s %{public}zu", appRecord->GetProcessName().c_str(),
         abilityTokens.size());
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->OnAppRemoteDied(abilityTokens);
+        }
+    }
+}
+
+void AppMgrServiceInner::NotifyLoadAbilityFailed(sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN_LOG(token, "token null.");
+    std::vector<sptr<IRemoteObject>> abilityTokens;
+    abilityTokens.emplace_back(token);
     std::lock_guard lock(appStateCallbacksLock_);
     for (const auto &item : appStateCallbacks_) {
         if (item.callback != nullptr) {
@@ -5436,8 +5462,30 @@ int AppMgrServiceInner::GetRenderProcessTerminationStatus(pid_t renderPid, int &
     TAG_LOGD(AAFwkTag::APPMGR, "Get render process termination status success, renderPid:%{public}d, status:%{public}d",
         renderPid, status);
     hostRecord->RemoveRenderPid(renderPid);
-
+    RemoveRenderRecordNoAttach(hostRecord, renderPid);
     return 0;
+}
+
+void AppMgrServiceInner::RemoveRenderRecordNoAttach(const std::shared_ptr<AppRunningRecord> &hostRecord,
+    int32_t renderPid)
+{
+    if (!hostRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "hostRecord null");
+        return;
+    }
+    auto renderRecord = hostRecord->GetRenderRecordByPid(renderPid);
+    if (!renderRecord) {
+        TAG_LOGD(AAFwkTag::APPMGR, "renderRecord null");
+        return;
+    }
+    if (renderRecord->GetScheduler() == nullptr) {
+        hostRecord->RemoveRenderRecord(renderRecord);
+        {
+            std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
+            renderUidSet_.erase(renderRecord->GetUid());
+        }
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
+    }
 }
 
 void AppMgrServiceInner::OnRenderRemoteDied(const wptr<IRemoteObject> &remote)
@@ -6849,7 +6897,8 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
     }
 
     auto userId = GetUserIdByUid(appRecord->GetUid());
-    if (appRecord->IsKeepAliveApp() && (userId == 0 || userId == currentUserId_)) {
+    if (appRecord->IsKeepAliveApp() && (userId == 0 || userId == currentUserId_) &&
+        appRecord->GetBundleName() != SCENE_BOARD_BUNDLE_NAME) {
         if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
             TAG_LOGI(AAFwkTag::APPMGR, "is killed for upgrade web");
             return;

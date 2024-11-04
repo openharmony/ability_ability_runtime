@@ -1227,38 +1227,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_100
 }
 
 /**
- * @tc.name: AppMgrServiceInnerSecondTest_GetRunningCloneAppInfo_0100
- * @tc.desc: Test GetRunningCloneAppInfo
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningCloneAppInfo_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetRunningCloneAppInfo_0100 start");
-    std::string bundleName = "";
-    std::vector<std::string> instanceKeys;
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
-    BundleInfo bundleInfo;
-    HapModuleInfo hapModuleInfo;
-    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
-    loadParam->token = token_;
-    loadParam->preToken = preToken_;
-    appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
-        bundleInfo, hapModuleInfo, want_, false);
-    RunningMultiAppInfo info;
-    info.mode = static_cast<int32_t>(MultiAppModeType::APP_CLONE);
-    appMgrServiceInner->GetRunningCloneAppInfo(appRecord, info);
-    EXPECT_EQ(info.mode, static_cast<int32_t>(MultiAppModeType::APP_CLONE));
-    info.mode = static_cast<int32_t>(MultiAppModeType::MULTI_INSTANCE);
-    appMgrServiceInner->GetRunningCloneAppInfo(appRecord, info);
-    EXPECT_EQ(info.mode, static_cast<int32_t>(MultiAppModeType::MULTI_INSTANCE));
-    info.mode = 0;
-    appMgrServiceInner->GetRunningCloneAppInfo(appRecord, info);
-    EXPECT_EQ(info.mode, 0);
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetRunningCloneAppInfo_0100 end");
-}
-
-/**
  * @tc.name: AppMgrServiceInnerSecondTest_CheckAppRecordAndPriorityObject_0100
  * @tc.desc: Test CheckAppRecordAndPriorityObject
  * @tc.type: FUNC

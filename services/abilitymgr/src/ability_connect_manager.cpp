@@ -27,6 +27,7 @@
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
 #include "multi_instance_utils.h"
+#include "param.h"
 #include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
@@ -1030,7 +1031,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     }
     CompleteStartServiceReq(abilityRecord->GetURI());
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_END, abilityRecord->GetPid(),
-        abilityRecord->GetUid(), abilityRecord->GetAbilityRecordId());
+        abilityRecord->GetUid(), 0, abilityRecord->GetAbilityRecordId());
     return ERR_OK;
 }
 
@@ -1433,9 +1434,14 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     }
 
     UpdateUIExtensionInfo(abilityRecord);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = abilityRecord->GetRecordId();
+    loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    loadParam.token = token;
+    loadParam.preToken = perToken;
+    loadParam.instanceKey = abilityRecord->GetInstanceKey();
     DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token, perToken, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(),
-        abilityRecord->GetWant(), abilityRecord->GetRecordId(), abilityRecord->GetInstanceKey());
+        loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
     abilityRecord->SetLoadState(AbilityLoadState::LOADING);
 }
 
@@ -1670,7 +1676,7 @@ int AbilityConnectManager::DispatchInactive(const std::shared_ptr<AbilityRecord>
 
     if (abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END,
-            abilityRecord->GetPid(), abilityRecord->GetUid(), abilityRecord->GetAbilityRecordId());
+            abilityRecord->GetPid(), abilityRecord->GetUid(), 0, abilityRecord->GetAbilityRecordId());
     }
 
     // complete inactive
