@@ -1022,7 +1022,8 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType,
         bool checkSystemCaller = true,
         bool isImplicit = false,
-        bool isDlp = false);
+        bool isDlp = false,
+        bool isStartAsCaller = false);
 
     int RequestModalUIExtensionInner(Want want);
 
@@ -2018,7 +2019,8 @@ private:
         const sptr<IRemoteObject> &callerToken, int32_t userId);
     int32_t InitialAbilityRequest(AbilityRequest &request, const StartAbilityInfo &abilityInfo) const;
     int CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
-        int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType, bool isImplicit = false);
+        int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType, bool isImplicit = false,
+        bool isStartAsCaller = false);
 
     void SubscribeBackgroundTask();
 
