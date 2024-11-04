@@ -40,6 +40,9 @@ namespace OHOS {
 namespace AppExecFwk {
 class Configuration;
 }
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace AAFwk {
 /**
  * @enum AppAbilityState
@@ -139,16 +142,14 @@ public:
     /**
      * load ability with token, ability info and application info.
      *
-     * @param token, the token of ability.
-     * @param preToken, the token of ability's caller.
+     * @param loadParam, the loadParam of ability.
      * @param abilityInfo, ability info.
      * @param applicationInfo, application info.
      * @param want ability want
      * @return true on success ,false on failure.
      */
-    int LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-        const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-        const Want &want, int32_t abilityRecordId, const std::string &instanceKey);
+    int LoadAbility(const AbilityRuntime::LoadParam &loadParam, const AppExecFwk::AbilityInfo &abilityInfo,
+        const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want);
 
     /**
      * terminate ability with token.
