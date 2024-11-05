@@ -1126,7 +1126,7 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
 }
 
 void JsUIAbility::MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams,
-    napi_value &result, AppExecFwk::AbilityInfo &abilityInfo,
+    napi_value &result, const AppExecFwk::AbilityInfo &abilityInfo,
     AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &callbackInfo)
 {
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();

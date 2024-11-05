@@ -333,7 +333,7 @@ private:
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
     void MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams,
-        napi_value &result, AppExecFwk::AbilityInfo &abilityInfo,
+        napi_value &result, const AppExecFwk::AbilityInfo &abilityInfo,
         AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &callbackInfo);
 
     JsRuntime &jsRuntime_;
