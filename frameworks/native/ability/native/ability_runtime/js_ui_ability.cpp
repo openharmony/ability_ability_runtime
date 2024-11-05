@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,7 @@ JsUIAbility::JsUIAbility(JsRuntime &jsRuntime) : jsRuntime_(jsRuntime)
 
 JsUIAbility::~JsUIAbility()
 {
-    //maintenance log
+    // maintenance log
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     if (abilityContext_ != nullptr) {
         abilityContext_->Unbind();
@@ -909,7 +909,7 @@ void JsUIAbility::ContinuationRestore(const Want &want)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (!IsRestoredInContinuation()) {
-        TAG_LOGW(AAFwkTag::UIABILITY, "not in continuation");
+        TAG_LOGE(AAFwkTag::UIABILITY, "not in continuation");
         return;
     }
     if (scene_ == nullptr) {
