@@ -177,6 +177,9 @@ enum class AbilityErrorCode {
     // Not support to create a new instance.
     ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT = 16000080,
 
+    // Target application not found.
+    ERROR_CODE_GET_BUNFLE_INFO_FAILED = 16000081,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 
