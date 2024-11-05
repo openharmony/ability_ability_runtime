@@ -52,8 +52,9 @@ constexpr const char* ERROR_MSG_FREE_INSTALL_TIMEOUT = "Installation-free timed 
 constexpr const char* ERROR_MSG_FREE_INSTALL_OTHERS = "Installation-free is not allowed for other applications.";
 constexpr const char* ERROR_MSG_FREE_INSTALL_CROSS_DEVICE = "Cross-device installation-free is not supported.";
 constexpr const char* ERROR_MSG_INVALID_URI_FLAG = "Invalid URI flag.";
-constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Invalid URI type, only support file Uri.";
+constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Only support file URI.";
 constexpr const char* ERROR_MSG_GRANT_URI_PERMISSION = "A sandbox application cannot grant URI permission.";
+constexpr const char* ERROR_MSG_GET_BUNDLE_INFO_FAILED = "Get target application info failed.";
 constexpr const char* ERROR_MSG_OPERATION_NOT_SUPPORTED = "Operation not supported.";
 constexpr const char* ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND =
     "The number of child processes exceeds the upper limit.";
@@ -129,6 +130,7 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG, ERROR_MSG_INVALID_URI_FLAG },
     { AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE, ERROR_MSG_INVALID_URI_TYPE },
     { AbilityErrorCode::ERROR_CODE_GRANT_URI_PERMISSION, ERROR_MSG_GRANT_URI_PERMISSION },
+    { AbilityErrorCode::ERROR_CODE_GET_BUNFLE_INFO_FAILED, ERROR_MSG_GET_BUNDLE_INFO_FAILED},
     { AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED, ERROR_MSG_OPERATION_NOT_SUPPORTED },
     { AbilityErrorCode::ERROR_CODE_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND,
         ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND },
@@ -183,6 +185,7 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_CODE_INVALID_URI_FLAG, AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG},
     {ERR_CODE_INVALID_URI_TYPE, AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE},
     {ERR_CODE_GRANT_URI_PERMISSION, AbilityErrorCode::ERROR_CODE_GRANT_URI_PERMISSION},
+    {GET_BUNDLE_INFO_FAILED, AbilityErrorCode::ERROR_CODE_GET_BUNFLE_INFO_FAILED},
     {ERR_NOT_SELF_APPLICATION, AbilityErrorCode::ERROR_NOT_SELF_APPLICATION},
     // Installation-free error code transfer
     {HAP_PACKAGE_DOWNLOAD_TIMED_OUT, AbilityErrorCode::ERROR_CODE_NETWORK_ABNORMAL},
