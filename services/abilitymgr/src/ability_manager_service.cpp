@@ -500,7 +500,7 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
         CHECK_CALLER_IS_SYSTEM_APP;
     }
     if (hasWindowOptions && !AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "window options are not supported in the current product type.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "window options not supported");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
@@ -637,7 +637,6 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> token;
-
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
         Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusChangeInfo);
@@ -670,7 +669,6 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> token;
-
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
         Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusChangeInfo);
@@ -1162,8 +1160,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         TAG_LOGI(AAFwkTag::ABILITYMGR, "create clone selector dialog");
         return CreateCloneSelectorDialog(abilityRequest, GetUserId());
     }
-#endif // SUPPORT_SCREEN
-
+#endif
     if (!AbilityUtil::IsSystemDialogAbility(abilityInfo.bundleName, abilityInfo.name)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "PreLoadAppDataAbilities:%{public}s.", abilityInfo.bundleName.c_str());
         result = PreLoadAppDataAbilities(abilityInfo.bundleName, validUserId);
@@ -1524,8 +1521,8 @@ int AbilityManagerService::StartAbilityForResultAsCaller(
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_CALLER_IS_SYSTEM_APP;
-
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+
     AAFwk::Want newWant = want;
     auto connectManager = GetCurrentConnectManager();
     CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
@@ -1638,6 +1635,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         if (!isStartAsCaller) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
             UpdateCallerInfo(localWant, callerToken);
+        } else {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "start as caller, skip UpdateCallerInfo!");
         }
         return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode,
             callerToken, true, specifyTokenId);
@@ -1673,6 +1672,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         } else if (!isStartAsCaller) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
             UpdateCallerInfo(abilityRequest.want, callerToken);
+        } else {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "start as caller, skip UpdateCallerInfo!");
         }
         result = implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId,
             startOptions.GetWindowMode());
@@ -1698,6 +1699,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     if (!isStartAsCaller) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
         UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "start as caller, skip UpdateCallerInfo!");
     }
     auto abilityInfo = abilityRequest.abilityInfo;
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
@@ -1777,6 +1780,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         afterCheckExecuter_->DoProcess(afterCheckParam);
     bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
     newWant.RemoveParam("queryWantFromErms");
+#ifdef SUPPORT_SCREEN
     if (result != ERR_OK && isReplaceWantExist == false) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "DoProcess failed or replaceWant not exist");
         return result;
@@ -1789,6 +1793,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         TAG_LOGI(AAFwkTag::ABILITYMGR, "create clone selector dialog");
         return CreateCloneSelectorDialog(abilityRequest, GetUserId());
     }
+#endif
+
     auto backFlag = StartAbilityUtils::ermsSupportBackToCallerFlag;
     UpdateBackToCallerFlag(callerToken, abilityRequest.want, requestCode, backFlag);
     StartAbilityUtils::ermsSupportBackToCallerFlag = false;
