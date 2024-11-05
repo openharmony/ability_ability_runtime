@@ -96,7 +96,7 @@ public:
     /**
      * @brief The async callback of OnContinue.
      */
-    int32_t OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+    int32_t OnContinueAsyncCB(napi_ref jsWantParams, int32_t status,
         const AppExecFwk::AbilityInfo &abilityInfo) override;
 
     /**
