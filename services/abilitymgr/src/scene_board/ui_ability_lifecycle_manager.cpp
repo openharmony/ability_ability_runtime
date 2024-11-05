@@ -1288,7 +1288,7 @@ int UIAbilityLifecycleManager::CloseUIAbility(const std::shared_ptr<AbilityRecor
         if (abilityRecord->GetScheduler() == nullptr) {
             auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
             CHECK_POINTER_AND_RETURN_LOG(handler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
-            abilityRecord->RemoveLoadTimeoutTask();
+            handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
         }
         terminateAbilityList_.remove(abilityRecord);
         return abilityRecord->TerminateAbility();
