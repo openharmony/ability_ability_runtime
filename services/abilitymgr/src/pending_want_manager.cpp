@@ -116,7 +116,6 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
         }
         MakeWantSenderCanceledLocked(*ref);
         wantRecords_.erase(ref->GetKey());
-        EraseBundleRecord(wantSenderInfo.allWants, ref->GetKey());
     }
 
     if (!needCreate) {
@@ -130,7 +129,6 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
         rec->SetCallerUid(callingUid);
         pendingKey->SetCode(PendingRecordIdCreate());
         wantRecords_.insert(std::make_pair(pendingKey, rec));
-        InsertBundleRecord(wantSenderInfo.allWants, pendingKey);
         TAG_LOGD(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
         return rec;
     }
@@ -254,9 +252,6 @@ void PendingWantManager::CancelWantSenderLocked(PendingWantRecord &record, bool 
     MakeWantSenderCanceledLocked(record);
     if (cleanAbility) {
         wantRecords_.erase(record.GetKey());
-        if (record.GetKey() != nullptr) {
-            EraseBundleRecord(record.GetKey()->GetAllWantsInfos(), record.GetKey());
-        }
     }
 }
 
@@ -615,27 +610,21 @@ void PendingWantManager::ClearPendingWantRecord(const std::string &bundleName, i
 void PendingWantManager::ClearPendingWantRecordTask(const std::string &bundleName, int32_t uid)
 {
     TAG_LOGI(AAFwkTag::WANTAGENT, "begin");
-    if (!QueryRecordByBundle(bundleName)) {
-        return;
-    }
     std::lock_guard<ffrt::mutex> locker(mutex_);
-    if (!QueryRecordByBundle(bundleName)) {
-        return;
-    }
     auto iter = wantRecords_.begin();
     while (iter != wantRecords_.end()) {
         bool hasBundle = false;
         const auto &pendingRecord = iter->second;
         if ((pendingRecord != nullptr)) {
-            auto wantInfos = pendingRecord->GetKey()->GetAllWantsInfos();
-            for (const auto &wantInfo: wantInfos) {
-                if (wantInfo.want.GetBundle() == bundleName && uid == pendingRecord->GetUid()) {
+            std::vector<std::string> bundleNameVec;
+            pendingRecord->GetKey()->GetAllBundleNames(bundleNameVec);
+            for (const auto &bundleItem: bundleNameVec) {
+                if (bundleItem == bundleName && uid == pendingRecord->GetUid()) {
                     hasBundle = true;
                     break;
                 }
             }
             if (hasBundle) {
-                EraseBundleRecord(wantInfos, pendingRecord->GetKey());
                 iter = wantRecords_.erase(iter);
                 TAG_LOGI(AAFwkTag::WANTAGENT, "wantRecords_ size %{public}zu", wantRecords_.size());
             } else {
@@ -698,6 +687,7 @@ void PendingWantManager::Dump(std::vector<std::string> &info)
     std::string dumpInfo = "    PendingWantRecords:";
     info.push_back(dumpInfo);
 
+    std::lock_guard<ffrt::mutex> locker(mutex_);
     for (const auto &item : wantRecords_) {
         const auto &pendingKey = item.first;
         dumpInfo = "        PendWantRecord ID #" + std::to_string(pendingKey->GetCode()) +
@@ -730,6 +720,7 @@ void PendingWantManager::DumpByRecordId(std::vector<std::string> &info, const st
     std::string dumpInfo = "    PendingWantRecords:";
     info.push_back(dumpInfo);
 
+    std::lock_guard<ffrt::mutex> locker(mutex_);
     for (const auto &item : wantRecords_) {
         const auto &pendingKey = item.first;
         if (args == std::to_string(pendingKey->GetCode())) {
@@ -774,53 +765,6 @@ int32_t PendingWantManager::GetAllRunningInstanceKeysByBundleName(
     }
 
     return IN_PROCESS_CALL(appMgr->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec));
-}
-
-void PendingWantManager::EraseBundleRecord(
-    const std::vector<WantsInfo> &wantsInfos, std::shared_ptr<PendingWantKey> key)
-{
-    std::lock_guard<ffrt::mutex> locker(bundleRecordsMutex_);
-    for (const auto &wantInfo : wantsInfos) {
-        auto it = bundleRecords_.find(wantInfo.want.GetBundle());
-        if (it != bundleRecords_.end()) {
-            auto &recordVec = it->second;
-            recordVec.erase(std::remove_if(recordVec.begin(), recordVec.end(),
-                [key](std::shared_ptr<PendingWantKey> value) {
-                    return value == key;
-                }),
-                recordVec.end());
-            if (recordVec.empty()) {
-                bundleRecords_.erase(wantInfo.want.GetBundle());
-            }
-        }
-    }
-}
-
-void PendingWantManager::InsertBundleRecord(
-    const std::vector<WantsInfo> &wantsInfos, std::shared_ptr<PendingWantKey> key)
-{
-    std::lock_guard<ffrt::mutex> locker(bundleRecordsMutex_);
-    for (const auto &wantInfo : wantsInfos) {
-        auto it = bundleRecords_.find(wantInfo.want.GetBundle());
-        if (it != bundleRecords_.end()) {
-            auto &recordVec = it->second;
-            recordVec.emplace_back(key);
-        } else {
-            std::vector<std::shared_ptr<PendingWantKey>> pendingWantVector;
-            pendingWantVector.emplace_back(key);
-            bundleRecords_[wantInfo.want.GetBundle()] = pendingWantVector;
-        }
-    }
-}
-
-bool PendingWantManager::QueryRecordByBundle(const std::string &bundleName)
-{
-    std::lock_guard<ffrt::mutex> locker(bundleRecordsMutex_);
-    auto bundleIter = bundleRecords_.find(bundleName);
-    if (bundleIter != bundleRecords_.end()) {
-        return true;
-    }
-    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
