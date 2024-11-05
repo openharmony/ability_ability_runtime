@@ -71,9 +71,10 @@ protected:
 
 class MockedApplication : public AppSchedulerHost, public MockedSchedulerBase {
 public:
-    void ScheduleForegroundApplication() override
+    bool ScheduleForegroundApplication() override
     {
         scheduled_ |= FOREGROUND_SCHEDULED;
+        return true;
     }
     void ScheduleBackgroundApplication() override
     {

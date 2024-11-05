@@ -17,7 +17,6 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
-#include "hilog_tag_wrapper.h"
 #include "parameters.h"
 #include "uri_permission_manager_client.h"
 
@@ -26,7 +25,8 @@ namespace AAFwk {
 namespace {
 constexpr const char* KEY_TOKEN = "accessTokenId";
 constexpr const char* KEY_UID = "uid";
-constexpr const char* WEB_BUNDLE_NAME = "com.ohos.nweb";
+constexpr const char* OLD_WEB_BUNDLE_NAME = "com.ohos.nweb";
+constexpr const char* NEW_WEB_BUNDLE_NAME = "com.ohos.arkwebcore";
 constexpr const char* ARKWEB_CORE_PACKAGE_NAME = "persist.arkwebcore.package_name";
 
 }
@@ -62,12 +62,12 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
             TAG_LOGE(AAFwkTag::ABILITYMGR, "OnReceiveEvent failed, abilityAutoStartupService is nullptr");
             return;
         }
-        abilityAutoStartupService_->DeleteAutoStartupData(bundleName, uid);
+        abilityAutoStartupService_->DeleteAutoStartupData(bundleName, tokenId);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
         // install or uninstall module/bundle
         HandleUpdatedModuleInfo(bundleName, uid);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
-        if (bundleName == WEB_BUNDLE_NAME ||
+        if (bundleName == NEW_WEB_BUNDLE_NAME || bundleName == OLD_WEB_BUNDLE_NAME ||
             bundleName == system::GetParameter(ARKWEB_CORE_PACKAGE_NAME, "false")) {
             HandleRestartResidentProcessDependedOnWeb();
         }

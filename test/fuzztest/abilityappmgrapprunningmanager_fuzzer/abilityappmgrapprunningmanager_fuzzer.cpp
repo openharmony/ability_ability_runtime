@@ -75,10 +75,10 @@ void DoSomethingInterestingWithMyAPIadda(const char* data, size_t size)
     int64_t eventId = static_cast<int64_t>(GetU32Data(data));
     manager->HandleTerminateTimeOut(eventId);
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
-    manager->HandleAbilityAttachTimeOut(token);
+    std::shared_ptr<AppMgrServiceInner> appMgrServiceInner;
+    manager->HandleAbilityAttachTimeOut(token, appMgrServiceInner);
     manager->GetAppRunningRecord(eventId);
     bool clearMissionFlag = *data % ENABLE;
-    std::shared_ptr<AppMgrServiceInner> appMgrServiceInner;
     manager->TerminateAbility(token, clearMissionFlag, appMgrServiceInner);
     ApplicationInfo appInfos;
     manager->ProcessUpdateApplicationInfoInstalled(appInfos);
@@ -130,7 +130,8 @@ void DoSomethingInterestingWithMyAPIaddb(const char* data, size_t size)
     wptr<IRemoteObject> remote;
     manager->OnChildProcessRemoteDied(remote);
     manager->GetAllAppRunningRecordCountByBundleName(jsonStr);
-    manager->SignRestartAppFlag(jsonStr);
+    auto uid = static_cast<int32_t>(GetU32Data(data));
+    manager->SignRestartAppFlag(uid);
     manager->GetAppRunningUniqueIdByPid(pidApps, jsonStr);
     std::vector<pid_t> hostPids;
     manager->GetAllUIExtensionRootHostPid(pidApps, hostPids);

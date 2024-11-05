@@ -39,7 +39,7 @@ void AbilityManager::StartAbility(const Want &want, int requestCode = -1)
 
 int32_t AbilityManager::ClearUpApplicationData(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "%s, %d", __func__, __LINE__);
+    TAG_LOGI(AAFwkTag::APPKIT, "%s, %d", __func__, __LINE__);
     auto object = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(APP_MGR_SERVICE_ID);
     sptr<IAppMgr> appMgr_ = iface_cast<IAppMgr>(object);
     if (appMgr_ == nullptr) {

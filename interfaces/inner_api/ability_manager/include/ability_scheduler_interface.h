@@ -52,7 +52,7 @@ public:
      * @param targetState, The lifecycle state to be transformed
      * @param sessionInfo, The session info
      */
-    virtual void ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &targetState,
+    virtual bool ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &targetState,
         sptr<SessionInfo> sessionInfo = nullptr) = 0;
 
     /*
@@ -389,7 +389,7 @@ public:
         DUMP_ABILITY_RUNNER_INNER,
 
         SCHEDULE_CALL,
-        
+
         SCHEDULE_SHARE_DATA,
 
         // ipc id for scheduling service ability to prepare terminate (30)

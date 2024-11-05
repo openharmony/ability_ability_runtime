@@ -25,6 +25,7 @@
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "media_permission_manager.h"
 #include "parameter.h"
 #include "permission_constants.h"
 #include "permission_verification.h"
@@ -76,8 +77,6 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
                 return true;
             }
         }
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri permission not exists.");
-        return false;
     }
     return VerifySubDirUriPermission(uriStr, newFlag, tokenId);
 }
@@ -165,10 +164,6 @@ int32_t UriPermissionManagerStubImpl::GrantUriPermissionPrivileged(const std::ve
         targetBundleName.c_str(), appIndex, uriVec.size());
 
     uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
-    auto callerName = UPMSUtils::GetCallerNameByTokenId(callerTokenId);
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "callerTokenId: %{public}u, callerName is %{public}s",
-        callerTokenId, callerName.c_str());
-
     auto permissionName = PermissionConstants::PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED;
     if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(callerTokenId, permissionName)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "No permission to call");
@@ -215,7 +210,6 @@ int UriPermissionManagerStubImpl::GrantUriPermissionInner(const std::vector<Uri>
     if (UPMSUtils::IsFoundationCall()) {
         recordId = abilityId;
         appTokenId = initiatorTokenId;
-        auto callerName = UPMSUtils::GetCallerNameByTokenId(appTokenId);
     }
     if (uriVec.size() == 1) {
         return GrantSingleUriPermission(uriVec[0], flag, appTokenId, targetTokenId, recordId);
@@ -351,7 +345,9 @@ int UriPermissionManagerStubImpl::GrantSingleUriPermission(const Uri &uri, unsig
         return ERR_CODE_INVALID_URI_TYPE;
     }
     TokenIdPermission tokenIdPermission(callerTokenId);
-    if (!CheckUriPermission(uri, flag, tokenIdPermission)) {
+    std::vector<Uri> uriVec = { uri };
+    auto checkResult = CheckUriPermission(tokenIdPermission, uriVec, flag);
+    if (!checkResult[0]) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "No permission, uri is %{private}s, callerTokenId is %{public}u",
             uri.ToString().c_str(), callerTokenId);
         UPMSUtils::SendShareUnPrivilegeUriEvent(callerTokenId, targetTokenId);
@@ -405,24 +401,22 @@ int UriPermissionManagerStubImpl::GrantBatchUriPermission(const std::vector<Uri>
         callerTokenId, targetTokenId, flag, abilityId);
     TokenIdPermission tokenIdPermission(callerTokenId);
     std::vector<std::string> uriStrVec = {};
-    bool checkUriPermissionFailedFlag = false;
-    for (const auto &uri : uriVec) {
-        if (!CheckUriTypeIsValid(uri)) {
-            TAG_LOGW(AAFwkTag::URIPERMMGR, "Check uri type failed, uri is %{private}s", uri.ToString().c_str());
+    auto checkResult = CheckUriPermission(tokenIdPermission, uriVec, flag);
+    int32_t noPermissionUriCount = 0;
+    for (size_t i = 0; i < checkResult.size(); i++) {
+        auto uriStr = uriVec[i].ToString();
+        if (!checkResult[i]) {
+            TAG_LOGW(AAFwkTag::URIPERMMGR, "No permission, uri:%{private}s", uriStr.c_str());
+            noPermissionUriCount++;
             continue;
         }
-        if (!CheckUriPermission(uri, flag, tokenIdPermission)) {
-            TAG_LOGW(AAFwkTag::URIPERMMGR, "No permission, uri is %{private}s.", uri.ToString().c_str());
-            checkUriPermissionFailedFlag = true;
-            continue;
-        }
-        uriStrVec.emplace_back(uri.ToString());
+        uriStrVec.emplace_back(uriStr);
     }
-    if (checkUriPermissionFailedFlag) {
+    if (noPermissionUriCount > 0) {
         UPMSUtils::SendShareUnPrivilegeUriEvent(callerTokenId, targetTokenId);
     }
     if (uriStrVec.empty()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Valid uri list is empty.");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "all uri invalid or no permission");
         return INNER_ERR;
     }
     return GrantBatchUriPermissionImpl(uriStrVec, flag, callerTokenId, targetTokenId, abilityId);
@@ -542,15 +536,15 @@ int UriPermissionManagerStubImpl::RevokeAllUriPermissions(uint32_t tokenId)
         TAG_LOGE(AAFwkTag::URIPERMMGR, "No permission to revoke all uri permission.");
         return CHECK_PERMISSION_FAILED;
     }
+    std::string callerAuthority = "";
+    UPMSUtils::GetAlterableBundleNameByTokenId(tokenId, callerAuthority);
     std::map<uint32_t, std::vector<std::string>> uriLists;
     {
         std::lock_guard<std::mutex> guard(mutex_);
         for (auto iter = uriMap_.begin(); iter != uriMap_.end();) {
-            uint32_t authorityTokenId = 0;
-            auto authority = Uri(iter->first).GetAuthority();
+            auto uriAuthority = Uri(iter->first).GetAuthority();
             // uri belong to target tokenId.
-            auto ret = UPMSUtils::GetTokenIdByBundleName(authority, 0, authorityTokenId);
-            if (ret == ERR_OK && authorityTokenId == tokenId) {
+            if (callerAuthority == uriAuthority) {
                 for (const auto &record : iter->second) {
                     uriLists[record.targetTokenId].emplace_back(iter->first);
                 }
@@ -605,11 +599,12 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
 
     auto uriStr = uri.ToString();
     auto uriInner = uri;
-    uint32_t authorityTokenId = 0;
-    UPMSUtils::GetTokenIdByBundleName(uriInner.GetAuthority(), 0, authorityTokenId);
+    auto uriAuthority = uriInner.GetAuthority();
     // uri belong to caller or caller is target.
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
-    bool isRevokeSelfUri = (callerTokenId == targetTokenId || callerTokenId == authorityTokenId);
+    std::string callerAuthority = "";
+    UPMSUtils::GetAlterableBundleNameByTokenId(callerTokenId, callerAuthority);
+    bool isRevokeSelfUri = (callerTokenId == targetTokenId || callerAuthority == uriAuthority);
     std::vector<std::string> uriList;
     {
         std::lock_guard<std::mutex> guard(mutex_);
@@ -648,35 +643,27 @@ int32_t UriPermissionManagerStubImpl::DeleteShareFile(uint32_t targetTokenId, co
     return ret;
 }
 
-std::vector<bool> UriPermissionManagerStubImpl::CheckUriAuthorization(const std::vector<std::string> &uriVec,
+std::vector<bool> UriPermissionManagerStubImpl::CheckUriAuthorization(const std::vector<std::string> &uriStrVec,
     uint32_t flag, uint32_t tokenId)
 {
-    TAG_LOGI(AAFwkTag::URIPERMMGR,
-        "tokenId is %{public}u, tokenName is %{public}s, flag is %{public}u, size of uris is %{public}zu",
-        tokenId, UPMSUtils::GetCallerNameByTokenId(tokenId).c_str(), flag, uriVec.size());
-    std::vector<bool> result(uriVec.size(), false);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "tokenId:%{public}u, flag:%{public}u, size of uris:%{public}zu",
+        tokenId, flag, uriStrVec.size());
     if (!UPMSUtils::IsSAOrSystemAppCall()) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA or SystemApp");
+        std::vector<bool> result(uriStrVec.size(), false);
         return result;
     }
     if ((flag & FLAG_READ_WRITE_URI) == 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Flag is invalid.");
+        std::vector<bool> result(uriStrVec.size(), false);
         return result;
     }
-
-    TokenIdPermission tokenIdPermission(tokenId);
-    for (size_t i = 0; i < uriVec.size(); i++) {
-        Uri uri(uriVec[i]);
-        if (!CheckUriTypeIsValid(uri)) {
-            TAG_LOGW(AAFwkTag::URIPERMMGR, "uri is invalid, uri is %{private}s.", uriVec[i].c_str());
-            continue;
-        }
-        result[i] = CheckUriPermission(uri, flag, tokenIdPermission);
-        if (!result[i]) {
-            TAG_LOGW(AAFwkTag::URIPERMMGR, "Check uri permission failed, uri is %{private}s.", uriVec[i].c_str());
-        }
+    std::vector<Uri> uriVec;
+    for (auto &uriStr: uriStrVec) {
+        uriVec.emplace_back(uriStr);
     }
-    return result;
+    TokenIdPermission tokenIdPermission(tokenId);
+    return CheckUriPermission(tokenIdPermission, uriVec, flag);
 }
 
 template<typename T>
@@ -811,83 +798,69 @@ void UriPermissionManagerStubImpl::HandleUriPermission(
     }
 }
 
-bool UriPermissionManagerStubImpl::CheckUriPermission(Uri uri, uint32_t flag, TokenIdPermission &tokenIdPermission)
+std::vector<bool> UriPermissionManagerStubImpl::CheckUriPermission(TokenIdPermission &tokenIdPermission,
+    const std::vector<Uri> &uriVec, uint32_t flag)
 {
-    auto &&authority = uri.GetAuthority();
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "Authority of uri is %{public}s", authority.c_str());
-    if (uri.GetScheme() == "content") {
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "uri is content type.");
-        return UPMSUtils::IsFoundationCall();
-    }
-    if (authority == "docs") {
-        return AccessDocsUriPermission(tokenIdPermission, uri, flag);
-    }
-    if (authority == "media") {
-        return AccessMediaUriPermission(tokenIdPermission, uri, flag);
-    }
-    uint32_t authorityTokenId = 0;
-    if (UPMSUtils::GetTokenIdByBundleName(authority, 0, authorityTokenId) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "Get tokenId of %{public}s failed.", authority.c_str());
-        return false;
-    }
-    if (tokenIdPermission.GetTokenId() == authorityTokenId) {
-        return true;
-    }
-    return CheckProxyUriPermission(tokenIdPermission, uri, flag);
-}
-
-bool UriPermissionManagerStubImpl::AccessMediaUriPermission(TokenIdPermission &tokenIdPermission,
-    const Uri &uri, uint32_t flag)
-{
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "Call AccessMediaUriPermission.");
-    bool isWriteFlag = (flag & Want::FLAG_AUTH_WRITE_URI_PERMISSION) != 0;
-    auto innerUri = uri;
-    auto path = innerUri.GetPath();
-    if (path.rfind("/Photo/", 0) == 0) {
-        if (tokenIdPermission.VerifyWriteImageVideoPermission()) {
-            return true;
-        }
-        if (!isWriteFlag && tokenIdPermission.VerifyReadImageVideoPermission()) {
-            return true;
-        }
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "Do not have IMAGEVIDEO Permission.");
-        return CheckProxyUriPermission(tokenIdPermission, uri, flag);
-    }
-    if (path.rfind("/Audio/", 0) == 0) {
-        if (tokenIdPermission.VerifyWriteAudioPermission()) {
-            return true;
-        }
-        if (!isWriteFlag && tokenIdPermission.VerifyReadAudioPermission()) {
-            return true;
-        }
-        TAG_LOGI(AAFwkTag::URIPERMMGR, "Do not have AUDIO Permission.");
-        return CheckProxyUriPermission(tokenIdPermission, uri, flag);
-    }
-    TAG_LOGE(AAFwkTag::URIPERMMGR, "Media uri is invalid, path is %{public}s", path.c_str());
-    return false;
-}
-
-bool UriPermissionManagerStubImpl::AccessDocsUriPermission(TokenIdPermission &tokenIdPermission,
-    const Uri &uri, uint32_t flag)
-{
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "Call AccessDocsUriPermission.");
-    if (tokenIdPermission.VerifyFileAccessManagerPermission()) {
-        return true;
-    }
-    TAG_LOGW(AAFwkTag::URIPERMMGR, "Do not have FILE_ACCESS_MANAGER Permission.");
-    return CheckProxyUriPermission(tokenIdPermission, uri, flag);
-}
-
-int32_t UriPermissionManagerStubImpl::CheckProxyUriPermission(TokenIdPermission &tokenIdPermission,
-    const Uri &uri, uint32_t flag)
-{
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "Call CheckProxyUriPermission.");
     auto tokenId = tokenIdPermission.GetTokenId();
-    if (tokenIdPermission.VerifyProxyAuthorizationUriPermission() && VerifyUriPermission(uri, flag, tokenId)) {
-        return true;
+    std::vector<bool> result(uriVec.size(), false);
+    std::vector<Uri> mediaUris;
+    std::vector<int32_t> mediaUriIndexs;
+    bool isFoundationCall = UPMSUtils::IsFoundationCall();
+    std::string callerAlterableBundleName;
+    UPMSUtils::GetAlterableBundleNameByTokenId(tokenId, callerAlterableBundleName);
+    for (size_t i = 0; i < uriVec.size(); i++) {
+        auto uri = uriVec[i];
+        auto &&scheme = uri.GetScheme();
+        if (scheme != "content" && scheme != "file") {
+            TAG_LOGW(AAFwkTag::URIPERMMGR, "invalid uri:%{private}s", uri.ToString().c_str());
+            result[i] = false;
+            continue;
+        }
+        if (scheme == "content") {
+            result[i] = isFoundationCall;
+            continue;
+        }
+        auto &&authority = uri.GetAuthority();
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "UriAuth:%{public}s", authority.c_str());
+        if (authority == "docs" && tokenIdPermission.VerifyFileAccessManagerPermission()) {
+            result[i] = true;
+            continue;
+        }
+        if (authority == "media") {
+            mediaUris.emplace_back(uri);
+            mediaUriIndexs.emplace_back(i);
+            continue;
+        }
+        result[i] = (authority == callerAlterableBundleName);
     }
-    TAG_LOGW(AAFwkTag::URIPERMMGR, "Check proxy uri permission failed.");
-    return false;
+    if (!mediaUris.empty()) {
+        auto mediaUriResult = MediaPermissionManager::GetInstance().CheckUriPermission(mediaUris, tokenId, flag);
+        for (size_t i = 0; i < mediaUriResult.size(); i++) {
+            result[mediaUriIndexs[i]] = mediaUriResult[i];
+        }
+    }
+    CheckProxyUriPermission(tokenIdPermission, uriVec, flag, result);
+    return result;
+}
+
+void UriPermissionManagerStubImpl::CheckProxyUriPermission(TokenIdPermission &tokenIdPermission,
+    const std::vector<Uri> &uriVec, uint32_t flag, std::vector<bool> &result)
+{
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "Call");
+    if (uriVec.size() != result.size()) {
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "param size not equal");
+        return;
+    }
+    auto tokenId = tokenIdPermission.GetTokenId();
+    if (!tokenIdPermission.VerifyProxyAuthorizationUriPermission()) {
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "no proxy permission");
+        return;
+    }
+    for (size_t i = 0; i < uriVec.size(); i++) {
+        if (!result[i]) {
+            result[i] = VerifyUriPermission(uriVec[i], flag, tokenId);
+        }
+    }
 }
 
 bool UriPermissionManagerStubImpl::CheckUriTypeIsValid(Uri uri)

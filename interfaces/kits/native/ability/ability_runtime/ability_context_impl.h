@@ -237,6 +237,8 @@ public:
 
     void RemoveResultCallbackTask(int requestCode) override;
 
+    std::shared_ptr<AAFwk::Want> GetWant() override;
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Set mission label of this ability.

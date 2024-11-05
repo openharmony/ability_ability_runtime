@@ -305,8 +305,6 @@ enum class AbilityManagerInterfaceCode {
 
     GET_PROCESS_RUNNING_INFO = 1026,
 
-    CLEAR_UP_APPLICATION_DATA = 1027,
-
     START_ABILITY_FOR_OPTIONS = 1028,
 
     // ipc id for call ability
@@ -544,6 +542,12 @@ enum class AbilityManagerInterfaceCode {
     REQUEST_ASSERT_FAULT_DIALOG = 6116,
     // ipc id for notify the operation status of the user
     NOTIFY_DEBUG_ASSERT_RESULT = 6117,
+
+    // ipc id for terminate mission
+    TERMINATE_MISSION = 6118,
+
+    // update associate config list
+    UPDATE_ASSOCIATE_CONFIG_LIST = 6120,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

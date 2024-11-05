@@ -84,6 +84,7 @@ void NewAbilityImpl::AbilityTransactionCallback(const AbilityLifeCycleState &sta
     if (ret == ERR_OK && state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
         FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+        FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
     }
 }
 

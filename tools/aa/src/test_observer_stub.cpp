@@ -20,18 +20,18 @@ namespace OHOS {
 namespace AAFwk {
 TestObserverStub::TestObserverStub()
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "test observer stub instance is created");
+    TAG_LOGI(AAFwkTag::AA_TOOL, "created");
 }
 
 TestObserverStub::~TestObserverStub()
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "test observer stub instance is destroyed");
+    TAG_LOGI(AAFwkTag::AA_TOOL, "destroyed");
 }
 
 int TestObserverStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "local descriptor is not equal to remote");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "invalid descriptor");
         return ERR_TRANSACTION_FAILED;
     }
     switch (code) {
@@ -52,13 +52,13 @@ int TestObserverStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             int64_t timeoutSecs = data.ReadInt64();
             ShellCommandResult result = ExecuteShellCommand(cmd, timeoutSecs);
             if (!reply.WriteParcelable(&result)) {
-                TAG_LOGE(AAFwkTag::AA_TOOL, "Failed to write reply ShellCommandResult!");
+                TAG_LOGE(AAFwkTag::AA_TOOL, "write ShellCommandResult failed");
                 return ERR_INVALID_VALUE;
             }
             break;
         }
         default:
-            TAG_LOGW(AAFwkTag::AA_TOOL, "event receive stub receives unknown code, code = %{public}u", code);
+            TAG_LOGW(AAFwkTag::AA_TOOL, "event receive stub receives unknown code: %{public}u", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 

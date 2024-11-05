@@ -21,8 +21,8 @@
 #include <native_engine/native_value.h>
 
 #include "ability_connect_callback.h"
-#include "ability_context.h"
 #include "event_handler.h"
+#include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
 #include "js_ability_context.h"
 #include "js_free_install_observer.h"
 #include "js_runtime.h"
@@ -43,6 +43,7 @@ public:
     static napi_value DisconnectAbility(napi_env env, napi_callback_info info);
     static napi_value TerminateSelf(napi_env env, napi_callback_info info);
     static napi_value TerminateSelfWithResult(napi_env env, napi_callback_info info);
+    static napi_value BackToCallerAbilityWithResult(napi_env env, napi_callback_info info);
     static napi_value CreateJsEmbeddableUIAbilityContext(napi_env env, std::shared_ptr<AbilityContext> uiAbiContext,
         std::shared_ptr<UIExtensionContext> uiExtContext, int32_t screenMode);
     static napi_value StartAbilityAsCaller(napi_env env, napi_callback_info info);
@@ -79,6 +80,7 @@ private:
     napi_value OnDisconnectAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnTerminateSelf(napi_env env, NapiCallbackInfo& info);
     napi_value OnTerminateSelfWithResult(napi_env env, NapiCallbackInfo& info);
+    napi_value OnBackToCallerAbilityWithResult(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAbilityAsCaller(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAbilityWithAccount(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAbilityByCall(napi_env env, NapiCallbackInfo& info);

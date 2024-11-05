@@ -22,11 +22,12 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 
+#include "app_mem_info.h"
 #include "app_mgr_interface.h"
 #include "app_service_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "app_mem_info.h"
+#include "param.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -84,11 +85,11 @@ private:
         auto me = shared_from_this();
         deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new AppMgrDeathRecipient(me));
         if (deathRecipient_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s :Failed to create AppMgrDeathRecipient!", __func__);
+            TAG_LOGE(AAFwkTag::APPMGR, "create AppMgrDeathRecipient failed");
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
         if ((remote_->IsProxyObject()) && (!remote_->AddDeathRecipient(deathRecipient_))) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s :Add death recipient to AppMgrService failed.", __func__);
+            TAG_LOGE(AAFwkTag::APPMGR, "AddDeathRecipient to AppMs failed");
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
         }
 
@@ -128,9 +129,8 @@ AppMgrClient::AppMgrClient()
 AppMgrClient::~AppMgrClient()
 {}
 
-AppMgrResultCode AppMgrClient::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-    const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo, const AAFwk::Want &want,
-    int32_t abilityRecordId)
+AppMgrResultCode AppMgrClient::LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
+    const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
@@ -140,7 +140,8 @@ AppMgrResultCode AppMgrClient::LoadAbility(sptr<IRemoteObject> token, sptr<IRemo
             std::shared_ptr<AbilityInfo> abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
             std::shared_ptr<ApplicationInfo> appInfoPtr = std::make_shared<ApplicationInfo>(appInfo);
             std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>(want);
-            amsService->LoadAbility(token, preToken, abilityInfoPtr, appInfoPtr, wantPtr, abilityRecordId);
+            auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+            amsService->LoadAbility(abilityInfoPtr, appInfoPtr, wantPtr, loadParamPtr);
             return AppMgrResultCode::RESULT_OK;
         }
     }
@@ -332,13 +333,14 @@ AppMgrResultCode AppMgrClient::KillProcessesByAccessTokenId(const uint32_t acces
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleName, const int uid)
+AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleName, const int uid,
+    const std::string& reason)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->KillApplicationByUid(bundleName, uid);
+            int32_t result = amsService->KillApplicationByUid(bundleName, uid, reason);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }
@@ -348,13 +350,13 @@ AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleNam
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillApplicationSelf()
+AppMgrResultCode AppMgrClient::KillApplicationSelf(const std::string& reason)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->KillApplicationSelf();
+            int32_t result = amsService->KillApplicationSelf(reason);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }
@@ -364,11 +366,12 @@ AppMgrResultCode AppMgrClient::KillApplicationSelf()
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
+AppMgrResultCode AppMgrClient::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex,
+    int32_t userId)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        int32_t result = service->ClearUpApplicationData(bundleName, userId);
+        int32_t result = service->ClearUpApplicationData(bundleName, appCloneIndex, userId);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }
@@ -518,6 +521,18 @@ AppMgrResultCode AppMgrClient::ConnectAppMgrService()
         return mgrHolder_->ConnectAppMgrService();
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+}
+
+bool AppMgrClient::IsProcessContainsOnlyUIAbility(const pid_t pid)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            return amsService->IsProcessContainsOnlyUIAbility(pid);
+        }
+    }
+    return false;
 }
 
 void AppMgrClient::SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr)
@@ -1230,6 +1245,17 @@ int32_t AppMgrClient::SetSupportedProcessCacheSelf(bool isSupport)
     return service->SetSupportedProcessCacheSelf(isSupport);
 }
 
+int32_t AppMgrClient::SetSupportedProcessCache(int32_t pid, bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->SetSupportedProcessCache(pid, isSupport);
+}
+
 void AppMgrClient::SaveBrowserChannel(sptr<IRemoteObject> browser)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1298,6 +1324,22 @@ AppMgrResultCode AppMgrClient::BlockProcessCacheByPids(const std::vector<int32_t
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+bool AppMgrClient::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return false;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr.");
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    return amsService->IsKilledForUpgradeWeb(bundleName);
+}
+
 bool AppMgrClient::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1314,20 +1356,17 @@ bool AppMgrClient::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     return amsService->CleanAbilityByUserRequest(token);
 }
 
-bool AppMgrClient::IsKilledForUpgradeWeb(const std::string &bundleName)
+bool AppMgrClient::IsProcessAttached(sptr<IRemoteObject> token) const
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
         return false;
     }
     sptr<IAmsMgr> amsService = service->GetAmsMgr();
     if (amsService == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr.");
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
-    return amsService->IsKilledForUpgradeWeb(bundleName);
+    return amsService->IsProcessAttached(token);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

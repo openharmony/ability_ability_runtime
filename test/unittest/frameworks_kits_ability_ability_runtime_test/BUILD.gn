@@ -163,7 +163,6 @@ ohos_unittest("dialog_callback_test") {
   sources = [
     "${ability_runtime_path}/frameworks/native/ability/ability_runtime/dialog_request_callback_impl.cpp",
     "${ability_runtime_path}/frameworks/native/ability/ability_runtime/dialog_ui_extension_callback.cpp",
-    "dialog_request_callback_impl_test.cpp",
     "dialog_ui_extension_callback_test.cpp",
   ]
 

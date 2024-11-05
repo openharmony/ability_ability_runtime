@@ -15,20 +15,10 @@
 
 #include "ability_manager_proxy.h"
 
-#include "errors.h"
-#include "string_ex.h"
-
-#include "hilog_tag_wrapper.h"
-#include "ability_connect_callback_proxy.h"
-#include "ability_connect_callback_stub.h"
-#include "ability_manager_errors.h"
 #include "ability_scheduler_stub.h"
 #include "ability_util.h"
-#include "appexecfwk_errors.h"
-#include "configuration.h"
-#include "hilog_tag_wrapper.h"
+#include "freeze_util.h"
 #include "hitrace_meter.h"
-#include "session_info.h"
 #include "status_bar_delegate_interface.h"
 
 namespace OHOS {
@@ -46,6 +36,7 @@ namespace {
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr int32_t MAX_AUTO_STARTUP_COUNT = 100;
+constexpr int32_t MAX_UPDATE_CONFIG_SIZE = 100;
 bool AbilityManagerProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(AbilityManagerProxy::GetDescriptor())) {
@@ -803,7 +794,7 @@ int AbilityManagerProxy::StartUIExtensionAbility(const sptr<SessionInfo> &extens
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart)
+int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -821,6 +812,10 @@ int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool
             TAG_LOGE(AAFwkTag::ABILITYMGR, "flag write failed.");
             return INNER_ERR;
         }
+    }
+    if (!data.WriteUint32(sceneFlag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneFlag write failed.");
+        return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::START_UI_ABILITY_BY_SCB, data, reply, option);
     if (error != NO_ERROR) {
@@ -1283,6 +1278,7 @@ int AbilityManagerProxy::AttachAbilityThread(const sptr<IAbilityScheduler> &sche
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    AbilityRuntime::FreezeUtil::LifecycleFlow flow = {token, AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
     if (scheduler == nullptr) {
         return ERR_INVALID_VALUE;
     }
@@ -1297,6 +1293,8 @@ int AbilityManagerProxy::AttachAbilityThread(const sptr<IAbilityScheduler> &sche
     error = SendRequest(AbilityManagerInterfaceCode::ATTACH_ABILITY_THREAD, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            std::string("ERROR AttachAbilityThread failed IPC error") + std::to_string(error));
         return error;
     }
     return reply.ReadInt32();
@@ -1309,6 +1307,7 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
     MessageParcel reply;
     MessageOption option;
 
+    AbilityRuntime::FreezeUtil::LifecycleFlow flow = {token, AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND};
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
@@ -1318,12 +1317,16 @@ int AbilityManagerProxy::AbilityTransitionDone(const sptr<IRemoteObject> &token,
     }
     if (!data.WriteParcelable(&saveData)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "saveData write failed.");
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            "write saveData failed");
         return INNER_ERR;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::ABILITY_TRANSITION_DONE, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+            std::string("ERROR AbilityTransitionDone failed IPC error") + std::to_string(error));
         return error;
     }
     return reply.ReadInt32();
@@ -1584,7 +1587,7 @@ int AbilityManagerProxy::MinimizeUIExtensionAbility(const sptr<SessionInfo> &ext
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser)
+int AbilityManagerProxy::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser, uint32_t sceneFlag)
 {
     int error;
     MessageParcel data;
@@ -1607,6 +1610,10 @@ int AbilityManagerProxy::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &session
     }
     if (!data.WriteBool(fromUser)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fromUser write failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteUint32(sceneFlag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneFlag write failed.");
         return INNER_ERR;
     }
 
@@ -1843,31 +1850,6 @@ int AbilityManagerProxy::ForceTimeoutForTest(const std::string &abilityName, con
 }
 #endif
 
-int AbilityManagerProxy::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
-    }
-    if (!data.WriteString16(Str8ToStr16(bundleName))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName write failed.");
-        return ERR_INVALID_VALUE;
-    }
-    if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId write failed.");
-        return ERR_INVALID_VALUE;
-    }
-    int error = SendRequest(AbilityManagerInterfaceCode::CLEAR_UP_APPLICATION_DATA, data, reply, option);
-    if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
-        return error;
-    }
-    return reply.ReadInt32();
-}
-
 int AbilityManagerProxy::UninstallApp(const std::string &bundleName, int32_t uid)
 {
     return UninstallApp(bundleName, uid, 0);
@@ -1925,7 +1907,7 @@ int32_t AbilityManagerProxy::UpgradeApp(const std::string &bundleName, const int
 }
 
 sptr<IWantSender> AbilityManagerProxy::GetWantSender(
-    const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken)
+    const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1948,6 +1930,12 @@ sptr<IWantSender> AbilityManagerProxy::GetWantSender(
             return nullptr;
         }
     }
+
+    if (!data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uid write fail");
+        return nullptr;
+    }
+    
     auto error = SendRequest(AbilityManagerInterfaceCode::GET_PENDING_WANT_SENDER, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
@@ -5486,6 +5474,106 @@ ErrCode AbilityManagerProxy::OpenLink(const Want& want, sptr<IRemoteObject> call
         return error;
     }
     return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::TerminateMission(int32_t missionId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteInt32(missionId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appCloneIndex write failed.");
+        return INNER_ERR;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::TERMINATE_MISSION,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+    const std::list<std::string>& exportConfigs, int32_t flag)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return IPC_PROXY_ERR;
+    }
+
+    if (!UpdateAssociateConfigInner(configs, data)) {
+        return INNER_ERR;
+    }
+
+    int32_t size = static_cast<int32_t>(exportConfigs.size());
+    if (size > MAX_UPDATE_CONFIG_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "export configs size too large");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(size)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write export configs size fail");
+        return INNER_ERR;
+    }
+    for (const auto& config : exportConfigs) {
+        if (!data.WriteString(config)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write export config item fail");
+            return INNER_ERR;
+        }
+    }
+    if (!data.WriteInt32(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag fail");
+        return INNER_ERR;
+    }
+    auto error = SendRequest(AbilityManagerInterfaceCode::UPDATE_ASSOCIATE_CONFIG_LIST, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+bool AbilityManagerProxy::UpdateAssociateConfigInner(const std::map<std::string, std::list<std::string>>& configs,
+    MessageParcel& data)
+{
+    int32_t size = static_cast<int32_t>(configs.size());
+    if (size > MAX_UPDATE_CONFIG_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "configs size too large");
+        return false;
+    }
+    if (!data.WriteInt32(size)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write configs size fail");
+        return false;
+    }
+    for (const auto& config : configs) {
+        if (!data.WriteString(config.first)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write config key fail");
+            return false;
+        }
+        size = static_cast<int32_t>(config.second.size());
+        if (size > MAX_UPDATE_CONFIG_SIZE) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "config size too large");
+            return false;
+        }
+        if (!data.WriteInt32(size)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write config item size fail");
+            return false;
+        }
+        for (const auto& item : config.second) {
+            if (!data.WriteString(item)) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "write config item fail");
+                return false;
+            }
+        }
+    }
+    return true;
 }
 } // namespace AAFwk
 } // namespace OHOS

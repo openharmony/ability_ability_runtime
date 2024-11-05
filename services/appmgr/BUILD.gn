@@ -135,6 +135,7 @@ ohos_shared_library("libappms") {
     "resource_schedule_service:ressched_client",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libwsutils",
   ]
   public_external_deps = [ "kv_store:distributeddata_mgr" ]
 
@@ -153,8 +154,11 @@ ohos_shared_library("libappms") {
     external_deps += [
       "i18n:intl_util",
       "window_manager:libwm",
-      "window_manager:libwsutils",
     ]
+  }
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
   if (background_task_mgr_continuous_task_enable) {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]

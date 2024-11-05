@@ -69,7 +69,7 @@ void JSAppStateObserver::OnAbilityStateChanged(const AbilityStateData &abilitySt
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has cancelled storage");
+        TAG_LOGE(AAFwkTag::APPMGR, "appmgr may has cancelled storage");
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
@@ -103,7 +103,7 @@ void JSAppStateObserver::OnExtensionStateChanged(const AbilityStateData &ability
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has destroyed");
+        TAG_LOGE(AAFwkTag::APPMGR, "appmgr may destroyed");
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
@@ -111,7 +111,7 @@ void JSAppStateObserver::OnExtensionStateChanged(const AbilityStateData &ability
         HandleScope handleScope(env);
         sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
         if (!jsObserverSptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr");
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
             return;
         }
         jsObserverSptr->HandleOnExtensionStateChanged(abilityStateData);
@@ -137,7 +137,7 @@ void JSAppStateObserver::OnProcessCreated(const ProcessData &processData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has cancelled storage");
+        TAG_LOGE(AAFwkTag::APPMGR, "appmgr may has cancelled storage");
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
@@ -171,7 +171,7 @@ void JSAppStateObserver::OnProcessStateChanged(const ProcessData &processData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has destroyed");
+        TAG_LOGE(AAFwkTag::APPMGR, "appmgr may has destroyed");
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
@@ -205,7 +205,7 @@ void JSAppStateObserver::OnProcessDied(const ProcessData &processData)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has destroyed");
+        TAG_LOGE(AAFwkTag::APPMGR, "appmgr may destroyed");
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
@@ -213,7 +213,7 @@ void JSAppStateObserver::OnProcessDied(const ProcessData &processData)
         HandleScope handleScope(env);
         sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
         if (!jsObserverSptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
             return;
         }
         jsObserverSptr->HandleOnProcessDied(processData);
@@ -240,7 +240,7 @@ void JSAppStateObserver::OnAppStarted(const AppStateData &appStateData)
     TAG_LOGD(AAFwkTag::APPMGR, "bundleName:%{public}s, uid:%{public}d, state:%{public}d",
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has destroyed");
+        TAG_LOGE(AAFwkTag::APPMGR, "appmgr may destroyed");
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
@@ -248,7 +248,7 @@ void JSAppStateObserver::OnAppStarted(const AppStateData &appStateData)
         HandleScope handleScope(env);
         sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
         if (!jsObserverSptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
             return;
         }
         jsObserverSptr->HandleOnAppStarted(appStateData);
@@ -280,7 +280,7 @@ void JSAppStateObserver::OnAppStopped(const AppStateData &appStateData)
     TAG_LOGD(AAFwkTag::APPMGR, "bundleName:%{public}s, uid:%{public}d, state:%{public}d",
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     if (!valid_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "the app manager may has destroyed");
+        TAG_LOGE(AAFwkTag::APPMGR, "appmgr may destroyed");
         return;
     }
     wptr<JSAppStateObserver> jsObserver = this;
@@ -288,7 +288,7 @@ void JSAppStateObserver::OnAppStopped(const AppStateData &appStateData)
         HandleScope handleScope(env);
         sptr<JSAppStateObserver> jsObserverSptr = jsObserver.promote();
         if (!jsObserverSptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr nullptr.");
+            TAG_LOGW(AAFwkTag::APPMGR, "jsObserverSptr null");
             return;
         }
         jsObserverSptr->HandleOnAppStopped(appStateData);
@@ -327,7 +327,7 @@ void JSAppStateObserver::CallJsFunction(
     napi_value method = nullptr;
     napi_get_named_property(env_, value, methodName, &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to get from object");
+        TAG_LOGE(AAFwkTag::APPMGR, "get method failed");
         return;
     }
     napi_value callResult = nullptr;

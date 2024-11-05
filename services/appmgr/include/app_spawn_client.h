@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@ using DataGroupInfoList = std::vector<DataGroupInfo>;
 const int32_t MAX_FLAG_INDEX = 32;
 const int32_t MAX_PROC_NAME_LEN = 256;
 const int32_t START_FLAG_BASE = 1;
+const int32_t MAX_COST_TIME = 500;
 struct AppSpawnStartMsg {
     int32_t uid;
     int32_t gid;
@@ -95,6 +96,7 @@ struct StartFlags {
     static const int GWP_ENABLED_NORMAL = 11;
     static const int TSANENABLED = 12;
     static const int EXTENSION_CONTROLLED = 13;
+    static const int HWASANENABLED = 21;
     static const int TEMP_JIT_ALLOW = 28;
 };
 

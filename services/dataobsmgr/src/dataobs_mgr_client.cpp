@@ -142,7 +142,7 @@ ErrCode DataObsMgrClient::NotifyChange(const Uri &uri)
  *
  * @return Returns SUCCESS on success, others on failure.
  */
-std::pair<Status, sptr<IDataObsMgr>> DataObsMgrClient::GetObsMgr()
+__attribute__ ((no_sanitize("cfi"))) std::pair<Status, sptr<IDataObsMgr>> DataObsMgrClient::GetObsMgr()
 {
     std::lock_guard<std::mutex> lock(mutex_);
 

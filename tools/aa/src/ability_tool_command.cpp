@@ -108,7 +108,7 @@ AbilityToolCommand::AbilityToolCommand(int argc, char* argv[]) : ShellCommand(ar
 
     aaShellCmd_ = std::make_shared<AbilityManagerShellCommand>(argc, argv);
     if (aaShellCmd_.get() == nullptr) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "Get aa command failed.");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "Get aa command failed");
     }
 }
 
@@ -128,7 +128,7 @@ ErrCode AbilityToolCommand::CreateCommandMap()
 ErrCode AbilityToolCommand::CreateMessageMap()
 {
     if (aaShellCmd_.get() == nullptr) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "aa shell command is nullptr.");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "null aaShellCmd_");
         return OHOS::ERR_INVALID_VALUE;
     }
     return aaShellCmd_.get()->CreateMessageMap();
@@ -158,7 +158,7 @@ ErrCode AbilityToolCommand::RunAsStartAbility()
 
     result = AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, nullptr);
     if (result != OHOS::ERR_OK) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_START_ABILITY_NG.c_str(), result);
+        TAG_LOGE(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_START_ABILITY_NG.c_str(), result);
         if (result != START_ABILITY_WAITING) {
             resultReceiver_ = STRING_START_ABILITY_NG + "\n";
         }
@@ -183,7 +183,7 @@ ErrCode AbilityToolCommand::RunAsStopService()
 
     result = AbilityManagerClient::GetInstance()->StopServiceAbility(want);
     if (result != OHOS::ERR_OK) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_STOP_SERVICE_ABILITY_NG.c_str(), result);
+        TAG_LOGE(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_STOP_SERVICE_ABILITY_NG.c_str(), result);
         resultReceiver_ = STRING_STOP_SERVICE_ABILITY_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
         return result;
@@ -204,7 +204,7 @@ ErrCode AbilityToolCommand::RunAsForceStop()
     std::string bundleName = argList_[0];
     ErrCode result = AbilityManagerClient::GetInstance()->KillProcess(bundleName);
     if (result != OHOS::ERR_OK) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "%{public}s result = %{public}d", STRING_FORCE_STOP_NG.c_str(), result);
+        TAG_LOGE(AAFwkTag::AA_TOOL, "%{public}s result: %{public}d", STRING_FORCE_STOP_NG.c_str(), result);
         resultReceiver_ = STRING_FORCE_STOP_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
         return result;
@@ -226,12 +226,12 @@ ErrCode AbilityToolCommand::RunAsTestCommand()
     }
 
     if (aaShellCmd_.get() == nullptr) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "aa shell command is nullptr.");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "null aaShellCmd_");
         return OHOS::ERR_INVALID_VALUE;
     }
 
     if (!aaShellCmd_.get()->IsTestCommandIntegrity(params)) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "test command lack of essential args.");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "invalid params");
         resultReceiver_ = ABILITY_TOOL_HELP_LACK_OPTIONS + "\n";
         resultReceiver_.append(ABILITY_TOOL_HELP_MSG_TEST);
         return OHOS::ERR_INVALID_VALUE;
@@ -311,7 +311,7 @@ ErrCode AbilityToolCommand::ParseStartAbilityArgsFromCmd(Want& want, StartOption
 
     // Parameter check
     if (abilityName.size() == 0 || bundleName.size() == 0) {
-        TAG_LOGD(AAFwkTag::AA_TOOL, "'ability_tool %{public}s' without enough options.", cmd_.c_str());
+        TAG_LOGD(AAFwkTag::AA_TOOL, "'ability_tool %{public}s' without enough options", cmd_.c_str());
         if (abilityName.size() == 0) {
             resultReceiver_.append(ABILITY_TOOL_HELP_MSG_NO_ABILITY_NAME_OPTION + "\n");
         }
@@ -394,7 +394,7 @@ ErrCode AbilityToolCommand::ParseStopServiceArgsFromCmd(Want& want)
     }
 
     if (abilityName.size() == 0 || bundleName.size() == 0) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "'ability_tool %{public}s' without enough options.", cmd_.c_str());
+        TAG_LOGI(AAFwkTag::AA_TOOL, "'ability_tool %{public}s' without enough options", cmd_.c_str());
         if (abilityName.size() == 0) {
             resultReceiver_.append(ABILITY_TOOL_HELP_MSG_NO_ABILITY_NAME_OPTION + "\n");
         }

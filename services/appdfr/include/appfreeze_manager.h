@@ -75,7 +75,7 @@ public:
     static void DestroyInstance();
     int AppfreezeHandle(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int AppfreezeHandleWithStack(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
-    int LifecycleTimeoutHandle(const ParamInfo& info, std::unique_ptr<FreezeUtil::LifecycleFlow> flow = nullptr);
+    int LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::LifecycleFlow flow = FreezeUtil::LifecycleFlow());
     std::string WriteToFile(const std::string& fileName, std::string& content);
     bool IsHandleAppfreeze(const std::string& bundleName);
     bool IsProcessDebug(int32_t pid, std::string processName);
@@ -93,16 +93,18 @@ private:
     std::map<int, std::set<int>> BinderParser(std::ifstream& fin, std::string& stack) const;
     void ParseBinderPids(const std::map<int, std::set<int>>& binderInfo, std::set<int>& pids, int pid, int layer) const;
     std::set<int> GetBinderPeerPids(std::string& stack, int pid) const;
-    void FindStackByPid(std::string& ret, int pid, const std::string& msg) const;
+    void FindStackByPid(std::string& ret, int pid) const;
     std::string CatchJsonStacktrace(int pid, const std::string& faultType) const;
     std::string CatcherStacktrace(int pid) const;
-    int AcquireStack(const FaultData& faultData, const AppInfo& appInfo);
-    int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo, const std::string& binderInfo);
+    int AcquireStack(const FaultData& faultData, const AppInfo& appInfo, const std::string& memoryContent);
+    int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
+        const std::string& binderInfo, const std::string& memoryContent);
     int64_t GetFreezeCurrentTime();
     void SetFreezeState(int32_t pid, int state);
     int GetFreezeState(int32_t pid);
     int64_t GetFreezeTime(int32_t pid);
     void ClearOldInfo();
+    void CollectFreezeSysMemory(std::string& memoryContent);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;

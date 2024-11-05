@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FUZZTEST_OHOS_ABILITY_RUNTIME_ABILITYSTUBCLEARUPAPPLICATIONDATA_FUZZER_H
-#define FUZZTEST_OHOS_ABILITY_RUNTIME_ABILITYSTUBCLEARUPAPPLICATIONDATA_FUZZER_H
+#include "permission_verification.h"
 
-#define FUZZ_PROJECT_NAME "abilitystubclearupapplicationdata_fuzzer"
-
-#endif // FUZZTEST_OHOS_ABILITY_RUNTIME_ABILITYSTUBCLEARUPAPPLICATIONDATA_FUZZER_H
+namespace OHOS {
+namespace AAFwk {
+bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName) const
+{
+    return MyFlag::hasPerm_;
+}
+bool PermissionVerification::IsSACall() const
+{
+    return (MyFlag::flag_ & MyFlag::FLAG::IS_SA_CALL);
+}
+}  // namespace AAFwk
+}  // namespace OHOS

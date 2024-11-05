@@ -298,7 +298,6 @@ ErrCode AbilityContextImpl::StopServiceExtensionAbility(const AAFwk::Want& want,
 
 ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, int resultCode)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "called");
     isTerminating_.store(true);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sessionToken = GetSessionToken();
@@ -309,9 +308,12 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
         info->want = want;
         info->resultCode = resultCode;
         auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
-        auto err = ifaceSessionToken->TerminateSession(info);
-        TAG_LOGI(AAFwkTag::CONTEXT, "scb, ret=%{public}d", err);
-        return static_cast<int32_t>(err);
+        TAG_LOGI(AAFwkTag::CONTEXT, "scb call, TerminateAbilityWithResult");
+        ErrCode ret = static_cast<int32_t>(ifaceSessionToken->TerminateSession(info));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "scb call, TerminateAbilityWithResult err: %{public}d", ret);
+        }
+        return ret;
     } else {
         ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, resultCode, &want);
         TAG_LOGI(AAFwkTag::CONTEXT, "ret=%{public}d", err);
@@ -544,14 +546,18 @@ ErrCode AbilityContextImpl::TerminateSelf()
     }
 
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
-        TAG_LOGI(AAFwkTag::CONTEXT, "terminateSelf SCB");
+        TAG_LOGI(AAFwkTag::CONTEXT, "scb call, TerminateSelf: %{public}s",
+            abilityInfo_ ? abilityInfo_->name.c_str() : "");
         AAFwk::Want resultWant;
         sptr<AAFwk::SessionInfo> info = new AAFwk::SessionInfo();
         info->want = resultWant;
         info->resultCode = -1;
         auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
-        auto err = ifaceSessionToken->TerminateSession(info);
-        return static_cast<int32_t>(err);
+        ErrCode ret = static_cast<int32_t>(ifaceSessionToken->TerminateSession(info));
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "scb call, TerminateSelf err: %{public}d", ret);
+        }
+        return ret;
     } else {
         AAFwk::Want resultWant;
         ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, &resultWant);
@@ -1011,6 +1017,16 @@ ErrCode AbilityContextImpl::OpenLink(const AAFwk::Want& want, int requestCode)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
     return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
+}
+
+std::shared_ptr<AAFwk::Want> AbilityContextImpl::GetWant()
+{
+    auto abilityCallback = abilityCallback_.lock();
+    if (abilityCallback == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "abilityCallback is nullptr.");
+        return nullptr;
+    }
+    return abilityCallback->GetWant();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

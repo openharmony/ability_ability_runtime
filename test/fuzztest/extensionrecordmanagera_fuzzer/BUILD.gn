@@ -66,6 +66,7 @@ ohos_fuzztest("ExtensionRecordManageraFuzzTest") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//third_party/jsoncpp:jsoncpp",
   ]
@@ -101,6 +102,10 @@ ohos_fuzztest("ExtensionRecordManageraFuzzTest") {
       "i18n:intl_util",
       "window_manager:libwm",
     ]
+  }
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
 }
 

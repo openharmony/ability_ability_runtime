@@ -24,7 +24,7 @@
 #include "js_ui_extension_callback.h"
 #include "locale_config.h"
 #include "mock_ui_content.h"
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "ohos_application.h"
 #include "process_options.h"
 #include "session_info.h"
@@ -75,14 +75,14 @@ HWTEST_F(JsUIExtensionCallbackTest, OnError_002, TestSize.Level1)
     GTEST_LOG_(INFO) << "OnError_002 start";
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
 
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     jsUIExtensionCallback_ = std::make_shared<JsUIExtensionCallback>(env);
     EXPECT_TRUE(jsUIExtensionCallback_ != nullptr);
     jsUIExtensionCallback_->OnError(0);
-    err = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    err = JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
     EXPECT_EQ(err, napi_status::napi_ok);
     GTEST_LOG_(INFO) << "OnError_002 end";
 }
@@ -123,7 +123,7 @@ HWTEST_F(JsUIExtensionCallbackTest, OnResult_002, TestSize.Level1)
     GTEST_LOG_(INFO) << "OnResult_002 start";
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
 
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
@@ -131,7 +131,7 @@ HWTEST_F(JsUIExtensionCallbackTest, OnResult_002, TestSize.Level1)
     EXPECT_TRUE(jsUIExtensionCallback_ != nullptr);
     AAFwk::Want want;
     jsUIExtensionCallback_->OnResult(0, want);
-    err = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    err = JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
     EXPECT_EQ(err, napi_status::napi_ok);
     GTEST_LOG_(INFO) << "OnResult_002 end";
 }
@@ -159,7 +159,7 @@ HWTEST_F(JsUIExtensionCallbackTest, CallJsResult_002, TestSize.Level1)
     GTEST_LOG_(INFO) << "CallJsResult_002 start";
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
 
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
@@ -167,7 +167,7 @@ HWTEST_F(JsUIExtensionCallbackTest, CallJsResult_002, TestSize.Level1)
     EXPECT_TRUE(jsUIExtensionCallback_ != nullptr);
     AAFwk::Want want;
     jsUIExtensionCallback_->CallJsResult(0, want);
-    err = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    err = JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
     EXPECT_EQ(err, napi_status::napi_ok);
     GTEST_LOG_(INFO) << "CallJsResult_002 end";
 }
@@ -208,14 +208,14 @@ HWTEST_F(JsUIExtensionCallbackTest, CallJsError_002, TestSize.Level1)
     GTEST_LOG_(INFO) << "CallJsError_002 start";
     OHOS::AbilityRuntime::Runtime::Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
+    auto err = JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
     EXPECT_EQ(err, napi_status::napi_ok);
 
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     jsUIExtensionCallback_ = std::make_shared<JsUIExtensionCallback>(env);
     EXPECT_TRUE(jsUIExtensionCallback_ != nullptr);
     jsUIExtensionCallback_->CallJsError(0);
-    err = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
+    err = JsRuntimeLite::GetInstance().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
     EXPECT_EQ(err, napi_status::napi_ok);
     GTEST_LOG_(INFO) << "CallJsError_002 end";
 }

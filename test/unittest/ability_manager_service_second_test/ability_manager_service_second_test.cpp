@@ -1673,20 +1673,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, KillProcess_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: ClearUpApplicationData
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService ClearUpApplicationData
- */
-HWTEST_F(AbilityManagerServiceSecondTest, ClearUpApplicationData_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ClearUpApplicationData_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->ClearUpApplicationData("test"), CLEAR_APPLICATION_DATA_FAIL);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ClearUpApplicationData_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: PreLoadAppDataAbilities
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService PreLoadAppDataAbilities
@@ -1776,7 +1762,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, ParseJsonFromBoot_001, TestSize.Level1
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     const std::string file = "/etc/efficiency_manager/prevent_startability_whitelist.json";
     nlohmann::json whiteListJsonObj;
-    abilityMs_->ParseJsonFromBoot(whiteListJsonObj, file, "white_list");
+    abilityMs_->ParseJsonFromBoot(file);
     EXPECT_TRUE(abilityMs_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ParseJsonFromBoot_001 end");
 }
@@ -1818,6 +1804,23 @@ HWTEST_F(AbilityManagerServiceSecondTest, ShouldPreventStartAbility_001, TestSiz
         abilityName, appName, bundleName, moduleName);
     EXPECT_FALSE(abilityMs_->ShouldPreventStartAbility(abilityRequest));
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ShouldPreventStartAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: UpdateKeepAliveEnableState_001
+ * Function: CheckProcessOptions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UpdateKeepAliveEnableState
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, UpdateKeepAliveEnableState_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UpdateKeepAliveEnableState_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto ret = abilityMs_->UpdateKeepAliveEnableState("bundle", "entry", "mainAbility", true, 0);
+    EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UpdateKeepAliveEnableState_001 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

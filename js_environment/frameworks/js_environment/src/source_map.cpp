@@ -269,6 +269,7 @@ void SourceMap::ExtractSourceMapData(const std::string& allmappings, std::shared
             return;
         }
         if (ans.empty()) {
+            TAG_LOGE(AAFwkTag::JSENV, "decode sourcemap fail, mapping: %{public}s", mapping.c_str());
             break;
         }
         if (ans.size() == 1) {

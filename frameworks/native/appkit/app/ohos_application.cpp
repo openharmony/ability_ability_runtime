@@ -23,7 +23,6 @@
 
 #include "ability.h"
 #include "ability_record_mgr.h"
-#include "ability_stage_context.h"
 #include "ability_thread.h"
 #include "app_loader.h"
 #include "application_context.h"
@@ -669,7 +668,11 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
     const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback)
 {
     const std::shared_ptr<AbilityInfo> &abilityInfo = abilityRecord->GetAbilityInfo();
-    if (!IsBackupExtension(abilityInfo)) {
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
+        return nullptr;
+    }
+    if (!IsMainProcess(abilityInfo->bundleName, abilityInfo->applicationInfo.process)) {
         return nullptr;
     }
     std::string moduleName = abilityInfo->moduleName;
@@ -688,6 +691,39 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
             return;
         }
         callback(abilityStage->GetContext());
+    };
+
+    return autoStartupCallback;
+}
+
+const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
+    const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage,
+    const AppExecFwk::HapModuleInfo &hapModuleInfo,
+    const std::function<void()>& callback)
+{
+    auto applicationInfo = abilityRuntimeContext_->GetApplicationInfo();
+    if (applicationInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo");
+        return nullptr;
+    }
+    if (!IsMainProcess(hapModuleInfo.bundleName, applicationInfo->process)) {
+        return nullptr;
+    }
+    auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
+    std::weak_ptr<OHOSApplication> weak = application;
+
+    auto autoStartupCallback = [weak, abilityStage, hapModuleInfo, callback]() {
+        auto ohosApplication = weak.lock();
+        if (ohosApplication == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null ohosApplication");
+            return;
+        }
+        ohosApplication->AutoStartupDone(abilityStage, hapModuleInfo);
+        if (callback == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null callback");
+            return;
+        }
+        callback();
     };
 
     return autoStartupCallback;
@@ -715,6 +751,22 @@ void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> 
     abilityStage->AddAbility(token, abilityRecord);
 }
 
+void OHOSApplication::AutoStartupDone(
+    const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage,
+    const AppExecFwk::HapModuleInfo &hapModuleInfo)
+{
+    if (abilityStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+        return;
+    }
+
+    Want want;
+    abilityStage->OnCreate(want);
+    abilityStages_[hapModuleInfo.moduleName] = abilityStage;
+    TAG_LOGI(AAFwkTag::APPKIT, "abilityStage insert and initialization");
+    return;
+}
+
 /**
  *
  * @brief update the application info after new module installed.
@@ -734,7 +786,9 @@ void OHOSApplication::UpdateApplicationInfoInstalled(const AppExecFwk::Applicati
     abilityRuntimeContext_->SetApplicationInfo(std::make_shared<AppExecFwk::ApplicationInfo>(appInfo));
 }
 
-bool OHOSApplication::AddAbilityStage(const AppExecFwk::HapModuleInfo &hapModuleInfo)
+bool OHOSApplication::AddAbilityStage(
+    const AppExecFwk::HapModuleInfo &hapModuleInfo,
+    const std::function<void()> &callback, bool &isAsyncCallback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (abilityRuntimeContext_ == nullptr) {
@@ -771,10 +825,18 @@ bool OHOSApplication::AddAbilityStage(const AppExecFwk::HapModuleInfo &hapModule
     auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
     std::weak_ptr<OHOSApplication> weak = application;
     abilityStage->Init(stageContext, weak);
+    auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, hapModuleInfo, callback);
+    if (autoStartupCallback != nullptr) {
+        abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
+        if (isAsyncCallback) {
+            TAG_LOGI(AAFwkTag::APPKIT, "waiting for startup");
+            return false;
+        }
+    }
     Want want;
     abilityStage->OnCreate(want);
     abilityStages_[hapModuleInfo.moduleName] = abilityStage;
-    TAG_LOGE(AAFwkTag::APPKIT, "abilityStage insert and initialization");
+    TAG_LOGI(AAFwkTag::APPKIT, "abilityStage insert and initialization");
     return true;
 }
 
@@ -798,15 +860,6 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
             abilityStage->OnDestroy();
             abilityStages_.erase(moduleName);
         }
-        DoCleanWorkAfterStageCleaned(*abilityInfo);
-    }
-}
-
-void OHOSApplication::DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "language: %{public}s", abilityInfo.srcLanguage.c_str());
-    if (runtime_) {
-        runtime_->DoCleanWorkAfterStageCleaned();
     }
 }
 
@@ -1015,22 +1068,25 @@ bool OHOSApplication::isUpdateFontSize(Configuration &config, AbilityRuntime::Se
         return false;
     }
 
-    auto preLevle = ApplicationConfigurationManager::GetInstance().GetFontSetLevel();
-    if (level < preLevle) {
+    auto preLevel = ApplicationConfigurationManager::GetInstance().GetFontSetLevel();
+    if (level < preLevel) {
+        TAG_LOGW(AAFwkTag::APPKIT, "low level");
         config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
         return false;
     }
 
-    std::string globalFontFollowSysteme = configuration_->GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
-    if (level == preLevle && !globalFontFollowSysteme.empty()) {
-        if (globalFontFollowSysteme.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
+    std::string globalFontFollowSystem = configuration_->GetItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    if (level == preLevel && !globalFontFollowSystem.empty()) {
+        TAG_LOGW(AAFwkTag::APPKIT, "same level");
+        if (globalFontFollowSystem.compare(ConfigurationInner::IS_APP_FONT_FOLLOW_SYSTEM) == 0) {
             return true;
         }
         config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
         return false;
     }
 
-    // level > preLevle
+    // level > preLevel
+    TAG_LOGW(AAFwkTag::APPKIT, "high level");
     configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     ApplicationConfigurationManager::GetInstance().SetfontSetLevel(level);
     return true;
@@ -1053,20 +1109,29 @@ bool OHOSApplication::IsUpdateLanguageNeeded(Configuration &config, AbilityRunti
         return false;
     }
     AbilityRuntime::ApplicationConfigurationManager::GetInstance().SetLanguageSetLevel(level);
+    config.AddItem(AAFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE,
+        level == AbilityRuntime::SetLevel::Application ? "1" : "0");
     return true;
 }
 
-bool OHOSApplication::IsBackupExtension(const std::shared_ptr<AbilityInfo> &abilityInfo)
+bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::string &process)
 {
-    if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
+    auto processInfo = GetProcessInfo();
+    if (processInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null processInfo");
         return false;
     }
-    if (abilityInfo->extensionAbilityType == ExtensionAbilityType::BACKUP) {
-        TAG_LOGD(AAFwkTag::APPKIT, "Is backup extension");
-        return false;
+    ProcessType processType = processInfo->GetProcessType();
+    if (processType == ProcessType::NORMAL) {
+        return true;
     }
-    return true;
+
+    std::string processName = processInfo->GetProcessName();
+    if (processName == bundleName || processName == process) {
+        return true;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "not main process");
+    return false;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

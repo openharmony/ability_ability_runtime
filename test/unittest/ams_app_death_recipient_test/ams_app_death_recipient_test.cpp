@@ -27,6 +27,7 @@
 #include "mock_bundle_installer_service.h"
 #include "mock_bundle_manager_service.h"
 #include "mock_system_ability_manager.h"
+#include "param.h"
 #include "singleton.h"
 
 using namespace testing::ext;
@@ -172,8 +173,10 @@ sptr<IRemoteObject> AppDeathRecipientTest::GetApp(int32_t pid, int size)
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(pid), Return(ERR_OK)));
     std::shared_ptr<MockAppSpawnClient> mockClientstr(mockClientPtr);
     appMgrServiceInner_->SetAppSpawnClient(mockClientstr);
-
-    appMgrServiceInner_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    appMgrServiceInner_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
 
     auto appRecord = GetAppRunningRecordByIndex(pid);
 

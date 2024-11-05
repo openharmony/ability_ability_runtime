@@ -15,27 +15,14 @@
 
 #include "app_scheduler.h"
 
-#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
-#include "ability_record.h"
 #include "ability_util.h"
-#include "appmgr/app_mgr_constants.h"
 #include "hitrace_meter.h"
-#include "hilog_tag_wrapper.h"
-#include "in_process_call_wrapper.h"
+#include "param.h"
+#include "utils/state_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
-const std::map<AppState, std::string> appStateToStrMap_ = {
-    std::map<AppState, std::string>::value_type(AppState::BEGIN, "BEGIN"),
-    std::map<AppState, std::string>::value_type(AppState::READY, "READY"),
-    std::map<AppState, std::string>::value_type(AppState::FOREGROUND, "FOREGROUND"),
-    std::map<AppState, std::string>::value_type(AppState::BACKGROUND, "BACKGROUND"),
-    std::map<AppState, std::string>::value_type(AppState::SUSPENDED, "SUSPENDED"),
-    std::map<AppState, std::string>::value_type(AppState::TERMINATED, "TERMINATED"),
-    std::map<AppState, std::string>::value_type(AppState::END, "END"),
-    std::map<AppState, std::string>::value_type(AppState::FOCUS, "FOCUS"),
-};
 AppScheduler::AppScheduler() : appMgrClient_(std::make_unique<AppExecFwk::AppMgrClient>())
 {}
 
@@ -88,8 +75,13 @@ int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> pre
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = abilityRecordId;
+    loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    loadParam.token = token;
+    loadParam.preToken = preToken;
     int ret = static_cast<int>(IN_PROCESS_CALL(
-        appMgrClient_->LoadAbility(token, preToken, abilityInfo, applicationInfo, want, abilityRecordId)));
+        appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AppScheduler fail to LoadAbility. ret %d", ret);
         return INNER_ERR;
@@ -168,7 +160,7 @@ void AppScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, con
 
 void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Kill process by ability token.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process by ability token.");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->KillProcessByAbilityToken(token);
 }
@@ -245,6 +237,13 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     callback->OnAppRemoteDied(abilityTokens);
 }
 
+void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->NotifyAppPreCache(pid, userId);
+}
+
 int AppScheduler::KillApplication(const std::string &bundleName)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
@@ -285,27 +284,17 @@ int AppScheduler::KillProcessesByAccessTokenId(const uint32_t accessTokenId)
     return ERR_OK;
 }
 
-int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t uid)
+int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t uid,
+    const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int ret = (int)appMgrClient_->KillApplicationByUid(bundleName, uid);
+    int ret = (int)appMgrClient_->KillApplicationByUid(bundleName, uid, reason);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to kill application by uid.");
         return INNER_ERR;
     }
 
-    return ERR_OK;
-}
-
-int AppScheduler::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
-{
-    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int ret = (int)appMgrClient_->ClearUpApplicationData(bundleName, userId);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to clear application data.");
-        return INNER_ERR;
-    }
     return ERR_OK;
 }
 
@@ -414,11 +403,7 @@ int AppScheduler::GetProcessRunningInfosByUserId(std::vector<AppExecFwk::Running
 
 std::string AppScheduler::ConvertAppState(const AppState &state)
 {
-    auto it = appStateToStrMap_.find(state);
-    if (it != appStateToStrMap_.end()) {
-        return it->second;
-    }
-    return "INVALIDSTATE";
+    return StateUtils::AppStateToStrMap(state);
 }
 
 int AppScheduler::StartUserTest(
@@ -638,6 +623,15 @@ void AppScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
     appMgrClient_->BlockProcessCacheByPids(pids);
 }
 
+bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
+}
+
 bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -649,13 +643,30 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
 }
 
-bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
+bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {
     if (!appMgrClient_) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
         return false;
     }
-    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
+    return appMgrClient_->IsProcessContainsOnlyUIAbility(pid);
+}
+bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsProcessAttached(token);
+}
+
+void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return;
+    }
+    appMgrClient_->SetSupportedProcessCache(pid, isSupport);
 }
 } // namespace AAFwk
 }  // namespace OHOS

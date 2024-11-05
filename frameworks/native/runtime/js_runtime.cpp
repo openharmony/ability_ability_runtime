@@ -26,7 +26,6 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-#include "file_ex.h"
 #include "accesstoken_kit.h"
 #include "config_policy_utils.h"
 #include "constants.h"
@@ -53,7 +52,7 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/native_create_env.h"
 #include "native_engine/native_engine.h"
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 #include "ohos_js_env_logger.h"
 #include "ohos_js_environment_impl.h"
 #include "parameters.h"
@@ -68,7 +67,6 @@
 #include "declarative_module_preloader.h"
 #endif
 
-
 using namespace OHOS::AbilityBase;
 using Extractor = OHOS::AbilityBase::Extractor;
 
@@ -79,7 +77,6 @@ constexpr size_t PARAM_TWO = 2;
 constexpr uint8_t SYSCAP_MAX_SIZE = 100;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 constexpr int32_t DEFAULT_INTER_VAL = 500;
-constexpr int32_t TRIGGER_GC_AFTER_CLEAR_STAGE_MS = 3000;
 constexpr int32_t API8 = 8;
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
@@ -97,15 +94,7 @@ const std::string NAMESPACE = "namespace";
 const std::string TARGET_OHM = "targetohm";
 const std::string SINCE_VERSION = "sinceVersion";
 
-const std::string PACKAGE_NAME = "packageName";
-const std::string BUNDLE_NAME = "bundleName";
-const std::string MODULE_NAME = "moduleName";
-const std::string VERSION = "version";
-const std::string ENTRY_PATH = "entryPath";
-const std::string IS_SO = "isSO";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
-const std::string DEPENDENCY_ALIAS = "dependencyAlias";
-
 static auto PermissionCheckFunc = []() {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
 
@@ -160,52 +149,9 @@ int32_t PrintVmLog(int32_t, int32_t, const char*, const char*, const char* messa
     TAG_LOGI(AAFwkTag::JSRUNTIME, "ArkLog: %{public}s", message);
     return 0;
 }
-
-napi_status CreateNapiEnv(napi_env *env)
-{
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "Called");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid arg");
-        return napi_status::napi_invalid_arg;
-    }
-    auto options = JsRuntime::GetChildOptions();
-    if (options == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null options");
-        return napi_status::napi_generic_failure;
-    }
-    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
-    auto errCode = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(*options, jsEnv);
-    if (errCode != napi_status::napi_ok) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "CreateJsEnv failed");
-        return errCode;
-    }
-    *env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
-        return napi_status::napi_generic_failure;
-    }
-    return NativeRuntimeImpl::GetNativeRuntimeImpl().Init(*options, *env);
-}
-
-napi_status DestroyNapiEnv(napi_env *env)
-{
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "Called");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid arg");
-        return napi_status::napi_invalid_arg;
-    }
-    auto errCode = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(*env);
-    if (errCode == napi_status::napi_ok) {
-        *env = nullptr;
-    }
-    return errCode;
-}
-
 } // namespace
 
 std::atomic<bool> JsRuntime::hasInstance(false);
-std::shared_ptr<Runtime::Options> JsRuntime::childOptions_ = nullptr;
-std::mutex childOptionsMutex_;
 JsRuntime::JsRuntime()
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
@@ -222,7 +168,7 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::unique_ptr<JsRuntime> instance;
-    SetChildOptions(options);
+    JsRuntimeLite::InitJsRuntimeLite(options);
     if (!options.preload && options.isStageModel) {
         auto preloadedInstance = Runtime::GetPreloaded();
 #ifdef SUPPORT_GRAPHICS
@@ -685,7 +631,11 @@ void JsRuntime::PostPreload(const Options& options)
     postOption.SetEnableProfile(profileEnabled);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ASMM JIT Verify PostFork, jitEnabled: %{public}d", options.jitEnabled);
     postOption.SetEnableJIT(options.jitEnabled);
-    panda::JSNApi::PostFork(vm, postOption);
+    postOption.SetAOTCompileStatusMap(options.aotCompileStatusMap);
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "panda::JSNApi::PostFork");
+        panda::JSNApi::PostFork(vm, postOption);
+    }
     reinterpret_cast<NativeEngine*>(env)->ReinitUVLoop();
     uv_loop_s* loop = nullptr;
     napi_get_uv_event_loop(env, &loop);
@@ -721,8 +671,6 @@ bool JsRuntime::Initialize(const Options& options)
             TAG_LOGE(AAFwkTag::JSRUNTIME, "Create jsEnv failed");
             return false;
         }
-        NativeCreateEnv::RegCreateNapiEnvCallback(CreateNapiEnv);
-        NativeCreateEnv::RegDestroyNapiEnvCallback(DestroyNapiEnv);
     }
     apiTargetVersion_ = options.apiTargetVersion;
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Initialize: %{public}d", apiTargetVersion_);
@@ -773,7 +721,7 @@ bool JsRuntime::Initialize(const Options& options)
             bundleName_ = options.bundleName;
             codePath_ = options.codePath;
             panda::JSNApi::SetSearchHapPathTracker(
-                vm, [options](const std::string moduleName, std::string &hapPath) -> bool {
+                vm, [options](const std::string moduleName, std::string& hapPath)-> bool {
                     if (options.hapModulePath.find(moduleName) == options.hapModulePath.end()) {
                         return false;
                     }
@@ -793,7 +741,8 @@ bool JsRuntime::Initialize(const Options& options)
             std::map<std::string, std::string> pkgAliasMap;
             pkgContextInfoJsonStringMap_ = options.pkgContextInfoJsonStringMap;
             packageNameList_ = options.packageNameList;
-            GetPkgContextInfoListMap(options.pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
+            JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(
+                options.pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
             panda::JSNApi::SetpkgContextInfoList(vm, pkgContextInfoMap);
             panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
             panda::JSNApi::SetPkgNameList(vm, options.packageNameList);
@@ -908,17 +857,6 @@ void JsRuntime::ReloadFormComponent()
     CHECK_POINTER(nativeEngine);
     // ArkTsCard update condition, need to reload new component
     OHOS::Ace::DeclarativeModulePreloader::ReloadCard(*nativeEngine, bundleName_, pkgContextInfoJsonStringMap_);
-}
-
-void JsRuntime::DoCleanWorkAfterStageCleaned()
-{
-    // Force gc. If the jsRuntime is destroyed, this task should not be executed.
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
-    RemoveTask("ability_destruct_gc");
-    auto gcTask = [this]() {
-        panda::JSNApi::TriggerGC(GetEcmaVm(), panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
-    };
-    PostTask(gcTask, "ability_destruct_gc", TRIGGER_GC_AFTER_CLEAR_STAGE_MS);
 }
 
 bool JsRuntime::InitLoop(bool isStage)
@@ -1263,7 +1201,7 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
     dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
     dumpOption.isVmMode = true;
     dumpOption.isPrivate = false;
-    dumpOption.captureNumericValue = false;
+    dumpOption.captureNumericValue = true;
     dumpOption.isFullGC = isFullGC;
     dumpOption.isSync = false;
     DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
@@ -1507,31 +1445,31 @@ void JsRuntime::InitWorkerModule(const Options& options)
 {
     CHECK_POINTER(jsEnv_);
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
-    workerInfo->codePath = options.codePath;
+    workerInfo->codePath = panda::panda_file::StringPacProtect(options.codePath);
     workerInfo->isDebugVersion = options.isDebugVersion;
     workerInfo->isBundle = options.isBundle;
     workerInfo->packagePathStr = options.packagePathStr;
     workerInfo->assetBasePathStr = options.assetBasePathStr;
-    workerInfo->hapPath = options.hapPath;
-    workerInfo->isStageModel = options.isStageModel;
+    workerInfo->hapPath = panda::panda_file::StringPacProtect(options.hapPath);
+    workerInfo->isStageModel = panda::panda_file::BoolPacProtect(options.isStageModel);
     workerInfo->moduleName = options.moduleName;
-    workerInfo->apiTargetVersion = options.apiTargetVersion;
+    workerInfo->apiTargetVersion = panda::panda_file::DataProtect(static_cast<uintptr_t>(options.apiTargetVersion));
     if (options.isJsFramework) {
         SetJsFramework();
     }
     jsEnv_->InitWorkerModule(workerInfo);
 }
 
-void JsRuntime::ReInitJsEnvImpl(const Options& options)
-{
-    CHECK_POINTER(jsEnv_);
-    jsEnv_->ReInitJsEnvImpl(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
-}
-
 void JsRuntime::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const
 {
     CHECK_POINTER(jsEnv_);
     jsEnv_->SetModuleLoadChecker(moduleCheckerDelegate);
+}
+
+void JsRuntime::ReInitJsEnvImpl(const Options& options)
+{
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->ReInitJsEnvImpl(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
 }
 
 void JsRuntime::SetRequestAotCallback()
@@ -1638,132 +1576,6 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
     return systemKitsMap;
 }
 
-void JsRuntime::GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
-    std::map<std::string, std::vector<std::vector<std::string>>> &pkgContextInfoMap,
-    std::map<std::string, std::string> &pkgAliasMap)
-{
-    for (auto it = contextInfoMap.begin(); it != contextInfoMap.end(); it++) {
-        std::vector<std::vector<std::string>> pkgContextInfoList;
-        std::string filePath = it->second;
-        bool newCreate = false;
-        std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(
-            ExtractorUtil::GetLoadFilePath(filePath), newCreate, false);
-        if (!extractor) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s load hapPath failed", it->first.c_str());
-            continue;
-        }
-        std::ostringstream outStream;
-        if (!extractor->ExtractByName("pkgContextInfo.json", outStream)) {
-            TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
-            continue;
-        }
-        auto jsonObject = nlohmann::json::parse(outStream.str(), nullptr, false);
-        if (jsonObject.is_discarded()) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());
-            continue;
-        }
-        for (nlohmann::json::iterator jsonIt = jsonObject.begin(); jsonIt != jsonObject.end(); jsonIt++) {
-            std::vector<std::string> items;
-            items.emplace_back(jsonIt.key());
-            nlohmann::json itemObject = jsonIt.value();
-            std::string pkgName = "";
-            items.emplace_back(PACKAGE_NAME);
-            if (itemObject[PACKAGE_NAME].is_null() || !itemObject[PACKAGE_NAME].is_string()) {
-                items.emplace_back(pkgName);
-            } else {
-                pkgName = itemObject[PACKAGE_NAME].get<std::string>();
-                items.emplace_back(pkgName);
-            }
-
-            items.emplace_back(BUNDLE_NAME);
-            if (itemObject[BUNDLE_NAME].is_null() || !itemObject[BUNDLE_NAME].is_string()) {
-                items.emplace_back("");
-            } else {
-                items.emplace_back(itemObject[BUNDLE_NAME].get<std::string>());
-            }
-
-            items.emplace_back(MODULE_NAME);
-            if (itemObject[MODULE_NAME].is_null() || !itemObject[MODULE_NAME].is_string()) {
-                items.emplace_back("");
-            } else {
-                items.emplace_back(itemObject[MODULE_NAME].get<std::string>());
-            }
-
-            items.emplace_back(VERSION);
-            if (itemObject[VERSION].is_null() || !itemObject[VERSION].is_string()) {
-                items.emplace_back("");
-            } else {
-                items.emplace_back(itemObject[VERSION].get<std::string>());
-            }
-
-            items.emplace_back(ENTRY_PATH);
-            if (itemObject[ENTRY_PATH].is_null() || !itemObject[ENTRY_PATH].is_string()) {
-                items.emplace_back("");
-            } else {
-                items.emplace_back(itemObject[ENTRY_PATH].get<std::string>());
-            }
-
-            items.emplace_back(IS_SO);
-            if (itemObject[IS_SO].is_null() || !itemObject[IS_SO].is_boolean()) {
-                items.emplace_back("false");
-            } else {
-                bool isSo = itemObject[IS_SO].get<bool>();
-                if (isSo) {
-                    items.emplace_back("true");
-                } else {
-                    items.emplace_back("false");
-                }
-            }
-            if (!itemObject[DEPENDENCY_ALIAS].is_null() && itemObject[DEPENDENCY_ALIAS].is_string()) {
-                std::string pkgAlias = itemObject[DEPENDENCY_ALIAS].get<std::string>();
-                if (!pkgAlias.empty()) {
-                    pkgAliasMap[pkgAlias] = pkgName;
-                }
-            }
-            pkgContextInfoList.emplace_back(items);
-        }
-        TAG_LOGI(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json success", it->first.c_str());
-        pkgContextInfoMap[it->first] = pkgContextInfoList;
-    }
-}
-
-void JsRuntime::SetChildOptions(const Options& options)
-{
-    std::lock_guard<std::mutex> lock(childOptionsMutex_);
-    if (childOptions_ == nullptr) {
-        childOptions_ = std::make_shared<Options>();
-    }
-    childOptions_->lang = options.lang;
-    childOptions_->bundleName = options.bundleName;
-    childOptions_->moduleName = options.moduleName;
-    childOptions_->codePath = options.codePath;
-    childOptions_->bundleCodeDir = options.bundleCodeDir;
-    childOptions_->hapPath = options.hapPath;
-    childOptions_->arkNativeFilePath = options.arkNativeFilePath;
-    childOptions_->hapModulePath = options.hapModulePath;
-    childOptions_->loadAce = options.loadAce;
-    childOptions_->preload = options.preload;
-    childOptions_->isBundle = options.isBundle;
-    childOptions_->isDebugVersion = options.isDebugVersion;
-    childOptions_->isJsFramework = options.isJsFramework;
-    childOptions_->isStageModel = options.isStageModel;
-    childOptions_->isTestFramework = options.isTestFramework;
-    childOptions_->uid = options.uid;
-    childOptions_->isUnique = options.isUnique;
-    childOptions_->moduleCheckerDelegate = options.moduleCheckerDelegate;
-    childOptions_->apiTargetVersion = options.apiTargetVersion;
-    childOptions_->packagePathStr = options.packagePathStr;
-    childOptions_->assetBasePathStr = options.assetBasePathStr;
-    childOptions_->jitEnabled = options.jitEnabled;
-}
-
-std::shared_ptr<Runtime::Options> JsRuntime::GetChildOptions()
-{
-    std::lock_guard<std::mutex> lock(childOptionsMutex_);
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
-    return childOptions_;
-}
-
 void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
 {
     auto iterator = pkgContextInfoJsonStringMap_.find(moduleName);
@@ -1773,7 +1585,8 @@ void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hap
         auto vm = GetEcmaVm();
         std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
         std::map<std::string, std::string> pkgAliasMap;
-        GetPkgContextInfoListMap(pkgContextInfoJsonStringMap_, pkgContextInfoMap, pkgAliasMap);
+        JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(
+            pkgContextInfoJsonStringMap_, pkgContextInfoMap, pkgAliasMap);
         panda::JSNApi::SetpkgContextInfoList(vm, pkgContextInfoMap);
         panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
         panda::JSNApi::SetPkgNameList(vm, packageNameList_);

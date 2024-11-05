@@ -29,6 +29,9 @@
 #include "running_process_info.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace AppExecFwk {
 class IAmsMgr : public IRemoteBroker {
 public:
@@ -43,9 +46,9 @@ public:
      * @param appInfo, the app information.
      * @return
      */
-    virtual void LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId) {};
+    virtual void LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const std::shared_ptr<ApplicationInfo> &appInfo,
+        const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam) {};
 
     /**
      * TerminateAbility, call TerminateAbility() through the proxy object, terminate the token ability.
@@ -170,16 +173,18 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  userId, userId.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplicationByUid(const std::string &bundleName, const int uid) = 0;
+    virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid") = 0;
 
     /**
      * Kill the application self.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillApplicationSelf()
+    virtual int KillApplicationSelf(const std::string& reason = "KillApplicationSelf")
     {
         return ERR_OK;
     }
@@ -348,6 +353,17 @@ public:
     virtual void BlockProcessCacheByPids(const std::vector<int32_t> &pids) {}
 
     /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
+    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName)
+    {
+        return true;
+    }
+
+    /**
      * Request to clean uiability from user.
      *
      * @param token the token of ability.
@@ -359,14 +375,17 @@ public:
     }
 
     /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
      */
-    virtual bool IsKilledForUpgradeWeb(const std::string &bundleName)
+    virtual bool IsProcessContainsOnlyUIAbility(const pid_t pid)
     {
-        return true;
+        return false;
+    }
+
+    virtual bool IsProcessAttached(sptr<IRemoteObject> token)
+    {
+        return false;
     }
 
     enum class Message {
@@ -416,9 +435,11 @@ public:
         ATTACHED_TO_STATUS_BAR,
         BLOCK_PROCESS_CACHE_BY_PIDS,
         IS_KILLED_FOR_UPGRADE_WEB,
+        IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION,
         FORCE_KILL_APPLICATION,
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
+        IS_PROCESS_ATTACHED,
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
     };
 };

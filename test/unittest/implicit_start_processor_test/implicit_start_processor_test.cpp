@@ -67,7 +67,7 @@ HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_001, TestSize.Level1)
     AbilityRequest request;
     int32_t userId = 0;
     bool res = processor->ImplicitStartAbility(request, userId,
-        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", true);
     EXPECT_TRUE(res);
 }
 
@@ -379,6 +379,7 @@ HWTEST_F(ImplicitStartProcessorTest, ProcessLinkType_001, TestSize.Level1)
     AbilityInfo abilityInfo2;
     abilityInfo2.linkType = AppExecFwk::LinkType::APP_LINK;
     abilityInfos.push_back(abilityInfo2);
+    EXPECT_TRUE(processor != nullptr);
 }
 
 /*
@@ -401,6 +402,7 @@ HWTEST_F(ImplicitStartProcessorTest, OnlyKeepReserveApp_001, TestSize.Level1)
     abilityInfos.push_back(abilityInfo);
     AbilityRequest abilityRequest;
     processor->OnlyKeepReserveApp(abilityInfos, extensionAbInfos, abilityRequest);
+    EXPECT_TRUE(processor != nullptr);
 }
 
 /*
@@ -414,7 +416,8 @@ HWTEST_F(ImplicitStartProcessorTest, OnlyKeepReserveApp_001, TestSize.Level1)
 HWTEST_F(ImplicitStartProcessorTest, GetDefaultAppProxy_001, TestSize.Level1)
 {
     auto processor = std::make_shared<ImplicitStartProcessor>();
-    processor->GetDefaultAppProxy();
+    auto result = processor->GetDefaultAppProxy();
+    EXPECT_EQ(result, nullptr);
 }
 
 /*
@@ -432,28 +435,8 @@ HWTEST_F(ImplicitStartProcessorTest, FilterAbilityList_001, TestSize.Level1)
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionAbInfos;
     int32_t  userId = 100;
-    processor->FilterAbilityList(want, abilityInfos, extensionAbInfos, userId);
-}
-
-/*
- * Feature: ImplicitStartProcessor
- * Function: GetEcologicalCallerInfo
- * SubFunction: NA
- * FunctionPoints:ImplicitStartProcessor GetEcologicalCallerInfo
- * EnvConditions: NA
- * CaseDescription: Verify GetEcologicalCallerInfo  etc.
- */
-HWTEST_F(ImplicitStartProcessorTest, GetEcologicalCallerInfo_001, TestSize.Level1)
-{
-    auto processor = std::make_shared<ImplicitStartProcessor>();
-    Want want;
-    ErmsCallerInfo callerInfo;
-    int32_t  userId = 100;
-    processor->GetEcologicalCallerInfo(want, callerInfo, userId);
-    want.SetBundle("haha");
-    processor->GetEcologicalCallerInfo(want, callerInfo, userId);
-    want.SetBundle("com.ix.hiservcie");
-    processor->GetEcologicalCallerInfo(want, callerInfo, userId);
+    auto result = processor->FilterAbilityList(want, abilityInfos, extensionAbInfos, userId);
+    EXPECT_EQ(result, true);
 }
 
 /*
@@ -470,7 +453,7 @@ HWTEST_F(ImplicitStartProcessorTest, AddIdentity_001, TestSize.Level1)
     int32_t  userId = 102;
     std::string  identity;
     processor->AddIdentity(userId, identity);
-    processor->ResetCallingIdentityAsCaller(userId);
+    processor->ResetCallingIdentityAsCaller(userId, true);
     AddInfoParam param;
     std::vector<DialogAppInfo> dialogAppInfos;
     param.isExtension = true;
@@ -478,20 +461,7 @@ HWTEST_F(ImplicitStartProcessorTest, AddIdentity_001, TestSize.Level1)
     processor->AddAbilityInfoToDialogInfos(param, dialogAppInfos);
     param.isExtension = false;
     processor->AddAbilityInfoToDialogInfos(param, dialogAppInfos);
-}
-
-/*
- * Feature: ImplicitStartProcessor
- * Function: IsExistDefaultApp
- * SubFunction: NA
- * FunctionPoints:ImplicitStartProcessor IsExistDefaultApp
- * EnvConditions: NA
- * CaseDescription: Verify IsExistDefaultApp  etc.
- */
-HWTEST_F(ImplicitStartProcessorTest, IsExistDefaultApp_001, TestSize.Level1)
-{
-    auto processor = std::make_shared<ImplicitStartProcessor>();
-    int32_t  userId = 100;
+    EXPECT_TRUE(processor != nullptr);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

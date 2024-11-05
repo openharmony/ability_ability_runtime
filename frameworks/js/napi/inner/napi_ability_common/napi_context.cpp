@@ -3307,7 +3307,7 @@ napi_value NapiJsContext::OnVerifyPermission(napi_env env, napi_callback_info in
         return CreateJsNull(env);
     }
     JsPermissionOptions options;
-    bool flagCall = UnwrapVerifyPermissionParams(env, info, options);
+    bool flagCall = UnwarpVerifyPermissionParams(env, info, options);
     auto execute = [obj = this, permission, options, value = errorVal] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);

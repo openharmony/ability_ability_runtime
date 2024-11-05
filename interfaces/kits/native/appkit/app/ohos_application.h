@@ -22,10 +22,11 @@
 #include <memory>
 
 #include "ability_lifecycle_callbacks.h"
-#include "foundation/ability/ability_runtime/interfaces/kits/native/appkit/ability_runtime/context/context.h"
 #include "ability_stage.h"
 #include "app_context.h"
+#include "context.h"
 #include "element_callback.h"
+#include "ability_stage_context.h"
 #include "application_configuration_manager.h"
 
 namespace OHOS {
@@ -178,7 +179,7 @@ public:
      */
     virtual void OnConfigurationUpdated(Configuration config,
         AbilityRuntime::SetLevel level = AbilityRuntime::SetLevel::System);
-    
+
     /**
      *
      * @brief Will be Called when the application font of the device changes.
@@ -249,7 +250,9 @@ public:
      * @param hapModuleInfo
      * @return Returns true on success, false on failure
      */
-    bool AddAbilityStage(const AppExecFwk::HapModuleInfo &hapModuleInfo);
+    bool AddAbilityStage(
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void()> &callback, bool &isAsyncCallback);
 
     /**
      * @brief remove the ability stage when all of the abilities in the hap have been removed
@@ -257,7 +260,7 @@ public:
      * @param abilityInfo
      */
     void CleanAbilityStage(const sptr<IRemoteObject> &token, const std::shared_ptr<AbilityInfo> &abilityInfo,
-        bool isCacheProcess = false);
+        bool isCacheProcess);
 
     /**
      * @brief return the application context
@@ -316,11 +319,13 @@ public:
 
     void AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName);
+        
+    void AutoStartupDone(const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo);
 
     void CleanEmptyAbilityStage();
 
 private:
-    void DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo);
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
     bool isUpdateFontSize(Configuration &config, AbilityRuntime::SetLevel level);
@@ -329,7 +334,11 @@ private:
         const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
         const std::shared_ptr<AbilityLocalRecord> abilityRecord,
         const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback);
-    bool IsBackupExtension(const std::shared_ptr<AbilityInfo> &abilityInfo);
+    const std::function<void()> CreateAutoStartupCallback(
+        const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void()>& callback);
+    bool IsMainProcess(const std::string &bundleName, const std::string &process);
 
 private:
     std::list<std::shared_ptr<AbilityLifecycleCallbacks>> abilityLifecycleCallbacks_;

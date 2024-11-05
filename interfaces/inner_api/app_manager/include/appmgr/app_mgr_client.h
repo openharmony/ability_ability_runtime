@@ -42,6 +42,9 @@
 #include "app_jsheap_mem_info.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace AppExecFwk {
 class AppServiceManager;
 class Configuration;
@@ -54,16 +57,14 @@ public:
     /**
      * Load ability.
      *
-     * @param token Ability identify.
-     * @param preToken Ability identify of caller.
      * @param abilityInfo Ability information.
      * @param appInfo Application information.
      * @param want Want.
+     * @param loadParam load ability param.
      * @return Returns RESULT_OK on success, others on failure.
      */
-    virtual AppMgrResultCode LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-        const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo, const AAFwk::Want &want,
-        int32_t abilityRecordId);
+    virtual AppMgrResultCode LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
+        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam);
 
     /**
      * Terminate ability.
@@ -187,27 +188,30 @@ public:
      *
      * @param  bundleName, bundle name in Application record.
      * @param  uid, uid.
+     * @param  reason, caller function name.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid);
+    virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid,
+        const std::string& reason = "KillApplicationByUid");
 
     /**
      * Kill the application self.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode KillApplicationSelf();
+    virtual AppMgrResultCode KillApplicationSelf(const std::string& reason = "KillApplicationSelf");
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
+     * @param appCloneIndex the app clone id.
      * @param userId, the user id.
      * @return
      */
-    virtual AppMgrResultCode ClearUpApplicationData(const std::string &bundleName,
-        const int32_t userId = -1);
+    virtual AppMgrResultCode ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId = -1);
 
     /**
      * ClearUpApplicationDataBySelf, call ClearUpApplicationDataBySelf() through proxy project,
@@ -774,6 +778,8 @@ public:
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport);
+
     void SaveBrowserChannel(sptr<IRemoteObject> browser);
 
     /**
@@ -804,6 +810,14 @@ public:
     virtual AppMgrResultCode BlockProcessCacheByPids(const std::vector<int32_t> &pids);
 
     /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
+    /**
      * Request to clean uiability from user.
      *
      * @param token the token of ability.
@@ -812,12 +826,12 @@ public:
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
     /**
-     * whether killed for upgrade web.
-     *
-     * @param bundleName the bundle name is killed for upgrade web.
-     * @return Returns true is killed for upgrade web, others return false.
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
      */
-    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
+
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

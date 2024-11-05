@@ -53,7 +53,9 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const std::string DEBUG_APP = "debugApp";
+#ifdef WITH_DLP
 const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
+#endif // WITH_DLP
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string URI_PERMISSION_TABLE_NAME = "uri_permission";
@@ -2317,6 +2319,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_RevokeUriPermission_001, TestSize.Leve
     abilityRecord->RevokeUriPermission();
 }
 
+#ifdef WITH_DLP
 /*
  * Feature: AbilityRecord
  * Function: HandleDlpClosed
@@ -2333,6 +2336,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_HandleDlpClosed_001, TestSize.Level1)
     abilityRecord->appIndex_ = 1;
     abilityRecord->HandleDlpClosed();
 }
+#endif // WITH_DLP
 
 /*
  * Feature: AbilityRecord
@@ -2911,7 +2915,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetRestartCount_001, TestSize.Level1)
     EXPECT_EQ(result, restartCount);
 }
 
-
 /*
  * Feature: AbilityRecord
  * Function: LoadAbility
@@ -2973,11 +2976,11 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_005, TestSize.Leve
 
 /*
  * Feature: AbilityRecord
- * Function: ForegroundUIExtensionAbility
- * SubFunction: ForegroundUIExtensionAbility
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ForegroundUIExtensionAbility
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
  */
 HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1)
 {
@@ -3075,7 +3078,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_001, TestSize.Level
     Want want;
     want.SetUri("file://com.example.test/test.txt");
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 1);
 }
 
@@ -3094,7 +3097,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_002, TestSize.Level
     std::vector<std::string> oriUriVec = { "file://com.example.test/test.txt" };
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 1);
 }
 
@@ -3114,7 +3117,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_003, TestSize.Level
     std::vector<std::string> oriUriVec = { "file://com.example.test/test.txt" };
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 2);
 }
 
@@ -3134,7 +3137,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_004, TestSize.Level
     std::vector<std::string> oriUriVec(500, "file://com.example.test/test.txt");
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 500);
 }
 
@@ -3153,7 +3156,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetUriListFromWant_005, TestSize.Level
     std::vector<std::string> oriUriVec(501, "file://com.example.test/test.txt");
     want.SetParam(AbilityConfig::PARAMS_STREAM, oriUriVec);
     std::vector<std::string> uriVec;
-    abilityRecord->GetUriListFromWant(want, uriVec);
+    UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     EXPECT_EQ(uriVec.size(), 500);
 }
 
@@ -3284,4 +3287,3 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetPermissionedUriList_006, TestSize.L
 }
 }  // namespace AAFwk
 }  // namespace OHOS
-

@@ -81,6 +81,10 @@ ohos_unittest("AmsWorkFlowTest") {
     "window_manager:libwm",
     "window_manager:libwsutils",
   ]
+
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 group("unittest") {

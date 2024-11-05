@@ -39,6 +39,7 @@ ohos_unittest("data_ability_manager_test") {
     "${ability_runtime_services_path}/abilitymgr/src/rdb/ability_resident_process_rdb.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/rdb/parser_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/rdb/rdb_data_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "data_ability_manager_test.cpp",  # add mock file
   ]
 
@@ -56,6 +57,7 @@ ohos_unittest("data_ability_manager_test") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:perm_verification",
@@ -90,6 +92,11 @@ ohos_unittest("data_ability_manager_test") {
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
+  }
+
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
 }
 

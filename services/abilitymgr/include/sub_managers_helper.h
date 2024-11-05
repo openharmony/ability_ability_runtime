@@ -49,6 +49,7 @@ public:
 
     std::shared_ptr<DataAbilityManager> GetCurrentDataAbilityManager();
     std::shared_ptr<DataAbilityManager> GetDataAbilityManager(const sptr<IAbilityScheduler> &scheduler);
+    std::unordered_map<int, std::shared_ptr<DataAbilityManager>> GetDataAbilityManagers();
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByUserId(int32_t userId);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByToken(const sptr<IRemoteObject> &token);
 

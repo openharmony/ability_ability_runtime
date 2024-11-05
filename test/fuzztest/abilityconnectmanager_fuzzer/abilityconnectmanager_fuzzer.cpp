@@ -126,7 +126,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityConnectManager->PostTimeOutTask(abilityRecord, uint32Param);
     abilityConnectManager->HandleStartTimeoutTask(abilityRecord);
     abilityConnectManager->HandleCommandTimeoutTask(abilityRecord);
-    abilityConnectManager->StartRootLauncher(abilityRecord);
     abilityConnectManager->HandleStopTimeoutTask(abilityRecord);
     AbilityConnectManager::ConnectListType connectlist;
     abilityConnectManager->HandleTerminateDisconnectTask(connectlist);

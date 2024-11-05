@@ -46,6 +46,7 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/start_other_app_interceptor.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "startotherappinterceptor_fuzzer.cpp",
   ]
 
@@ -55,6 +56,7 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/common:perm_verification",
@@ -82,6 +84,10 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
+
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 ###############################################################################

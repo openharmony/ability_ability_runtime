@@ -15,7 +15,7 @@
 
 #include "mock_lifecycle_observer.h"
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 namespace OHOS {
 namespace AppExecFwk {

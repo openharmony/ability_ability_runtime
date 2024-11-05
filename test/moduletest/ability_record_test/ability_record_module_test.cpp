@@ -21,6 +21,7 @@
 
 #include "abs_shared_result_set.h"
 #include "data_ability_predicates.h"
+#include "param.h"
 #include "values_bucket.h"
 
 #include "want.h"
@@ -272,7 +273,7 @@ HWTEST_F(AbilityRecordModuleTest, AbilityScheduler_001, TestSize.Level3)
         testResult = false;
         EXPECT_CALL(*mockAbilityScheduerStub, ScheduleAbilityTransaction(_, _, _))
             .Times(1)
-            .WillOnce(Invoke(mockActivateHandler));
+            .WillOnce(testing::DoAll(Invoke(mockActivateHandler), testing::Return(true)));
 
         abilityRecord->Activate();
         EXPECT_TRUE(testResult);
@@ -286,7 +287,7 @@ HWTEST_F(AbilityRecordModuleTest, AbilityScheduler_001, TestSize.Level3)
         };
         EXPECT_CALL(*mockAbilityScheduerStub, ScheduleAbilityTransaction(_, _, _))
             .Times(1)
-            .WillOnce(Invoke(mockInactivateHandler));
+            .WillOnce(testing::DoAll(Invoke(mockInactivateHandler), testing::Return(true)));
 
         abilityRecord->Inactivate();
         EXPECT_TRUE(testResult);

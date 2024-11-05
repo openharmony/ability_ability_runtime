@@ -39,7 +39,9 @@ constexpr int32_t DEFAULT_DMS_SESSION_ID = 0;
 constexpr char LAUNCHER_BUNDLE_NAME[] = "com.ohos.launcher";
 constexpr char LAUNCHER_ABILITY_NAME[] = "com.ohos.launcher.MainAbility";
 constexpr char SHOW_ON_LOCK_SCREEN[] = "ShowOnLockScreen";
+#ifdef WITH_DLP
 constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
+#endif // WITH_DLP
 constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 constexpr int32_t ERR_INVALID_VALUE = -1;
 }
@@ -159,8 +161,10 @@ void UIAbility::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessio
         return;
     }
 
+#ifdef WITH_DLP
     securityFlag_ = want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false);
     (const_cast<AAFwk::Want &>(want)).RemoveParam(DLP_PARAMS_SECURITY_FLAG);
+#endif // WITH_DLP
     SetWant(want);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s.", abilityInfo_->name.c_str());
 #ifdef SUPPORT_GRAPHICS
@@ -218,6 +222,9 @@ void UIAbility::OnStop()
         return;
     }
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_STOP);
+#ifdef SUPPORT_SCREEN
+    Rosen::DisplayManager::GetInstance().RemoveDisplayIdFromAms(token_);
+#endif
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
@@ -385,11 +392,13 @@ void UIAbility::OnRestoreAbilityState(const AppExecFwk::PacMap &inState)
 
 void UIAbility::SetWant(const AAFwk::Want &want)
 {
+    std::lock_guard<std::mutex> lock(wantMutexlock_);
     setWant_ = std::make_shared<AAFwk::Want>(want);
 }
 
 std::shared_ptr<AAFwk::Want> UIAbility::GetWant()
 {
+    std::lock_guard<std::mutex> lock(wantMutexlock_);
     return setWant_;
 }
 
@@ -525,6 +534,7 @@ sptr<IRemoteObject> UIAbility::CallRequest()
 
 bool UIAbility::IsUseNewStartUpRule()
 {
+    std::lock_guard<std::mutex> lock(wantMutexlock_);
     if (!isNewRuleFlagSetted_ && setWant_) {
         startUpNewRule_ = setWant_->GetBoolParam(COMPONENT_STARTUP_NEW_RULES, false);
         isNewRuleFlagSetted_ = true;
@@ -985,6 +995,9 @@ void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
         int32_t displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         TAG_LOGD(AAFwkTag::UIABILITY, "abilityName: %{public}s, displayId: %{public}d",
             abilityInfo_->name.c_str(), displayId);
+#ifdef SUPPORT_SCREEN
+        Rosen::DisplayManager::GetInstance().AddDisplayIdFromAms(displayId, token_);
+#endif
         auto option = GetWindowOption(want);
         InitWindow(displayId, option);
 

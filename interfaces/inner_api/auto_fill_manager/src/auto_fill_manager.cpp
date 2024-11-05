@@ -122,11 +122,9 @@ int32_t AutoFillManager::HandleRequestExecuteInner(Ace::UIContent *uiContent, co
     result.autoFillSessionId = callbackId;
     extensionCallback->SetInstanceId(uiContent->GetInstanceId());
     extensionCallback->SetSessionId(sessionId);
-    extensionCallback->SetViewData(request.viewData);
     extensionCallback->SetWindowType(autoFillWindowType);
     extensionCallback->SetExtensionType(isSmartAutoFill);
-    extensionCallback->SetAutoFillType(request.autoFillType);
-    extensionCallback->SetAutoFillRequestConfig(request.config);
+    extensionCallback->SetAutoFillRequest(request);
     TAG_LOGI(AAFwkTag::AUTOFILLMGR, "callbackId: %{public}u", callbackId);
     std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
     extensionCallbacks_.emplace(callbackId, extensionCallback);
@@ -277,9 +275,9 @@ void AutoFillManager::SetTimeOutEvent(uint32_t eventId)
 
 void AutoFillManager::RemoveEvent(uint32_t eventId)
 {
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "called");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     if (eventHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null eventHandler");
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null eventhandler");
         return;
     }
     eventHandler_->RemoveEvent(eventId);
@@ -298,7 +296,7 @@ void AutoFillManager::HandleTimeOut(uint32_t eventId)
 
 bool AutoFillManager::IsNeedToCreatePopupWindow(const AbilityBase::AutoFillType &autoFillType)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
     if (autoFillType == AbilityBase::AutoFillType::PASSWORD ||
         autoFillType == AbilityBase::AutoFillType::USER_NAME ||
         autoFillType == AbilityBase::AutoFillType::NEW_PASSWORD) {
@@ -343,6 +341,12 @@ bool AutoFillManager::IsPreviousRequestFinished(Ace::UIContent *uiContent)
         if (extensionCallback->GetWindowType() == AutoFill::AutoFillWindowType::MODAL_WINDOW &&
             extensionCallback->GetInstanceId() == uiContent->GetInstanceId()) {
             return false;
+        }
+        if (extensionCallback->GetWindowType() == AutoFill::AutoFillWindowType::POPUP_WINDOW &&
+            extensionCallback->GetInstanceId() == uiContent->GetInstanceId()) {
+            TAG_LOGI(AAFwkTag::AUTOFILLMGR, "autofill popup window exist!");
+            extensionCallback->CloseUIExtension();
+            return true;
         }
     }
     return true;

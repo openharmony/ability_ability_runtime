@@ -86,6 +86,11 @@ public:
     void UnregisterAbilityLifecycleObserver(const std::shared_ptr<ILifecycleObserver> &observer)
     {
     }
+
+    std::shared_ptr<AAFwk::Want> GetWant()
+    {
+        return nullptr;
+    }
 };
 
 class AbilityContextImplTest : public testing::Test {
@@ -1507,8 +1512,10 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_RequestDialog_0100, Functi
     int32_t missionId = -1;
     ErrCode ret = context_->GetMissionId(missionId);
     EXPECT_FALSE(ret == ERR_OK);
-    int32_t missionId2 = 1;
-    EXPECT_EQ(context_->GetMissionId(missionId2), ERR_OK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        int32_t missionId2 = 1;
+        EXPECT_EQ(context_->GetMissionId(missionId2), MISSION_NOT_FOUND);
+    }
     RuntimeTask task2 = [](const int32_t count, const Want& want, bool isInner)
     { ; };
     int requestCode = 22;

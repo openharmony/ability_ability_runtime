@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "native_runtime_impl.h"
+#include "js_runtime_lite.h"
 
 #include <regex>
 
@@ -27,6 +27,7 @@
 #include "ohos_js_environment_impl.h"
 #include "parameters.h"
 #include "system_ability_definition.h"
+#include "native_engine/native_create_env.h"
 
 using Extractor = OHOS::AbilityBase::Extractor;
 using ExtractorUtil = OHOS::AbilityBase::ExtractorUtil;
@@ -37,16 +38,23 @@ namespace {
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 constexpr size_t MAX_ENV_COUNT = 16;
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
+const std::string PACKAGE_NAME = "packageName";
+const std::string BUNDLE_NAME = "bundleName";
+const std::string MODULE_NAME = "moduleName";
+const std::string VERSION = "version";
+const std::string ENTRY_PATH = "entryPath";
+const std::string IS_SO = "isSO";
+const std::string DEPENDENCY_ALIAS = "dependencyAlias";
 int32_t PrintVmLog(int32_t, int32_t, const char*, const char*, const char* message)
 {
     TAG_LOGI(AAFwkTag::JSRUNTIME, "ArkLog: %{public}s", message);
     return 0;
 }
 }
-NativeRuntimeImpl::NativeRuntimeImpl()
+JsRuntimeLite::JsRuntimeLite()
 {}
 
-NativeRuntimeImpl::~NativeRuntimeImpl()
+JsRuntimeLite::~JsRuntimeLite()
 {
     std::lock_guard<std::mutex> lock(envMutex_);
     for (auto it : envMap_) {
@@ -57,13 +65,63 @@ NativeRuntimeImpl::~NativeRuntimeImpl()
     threadIds_.clear();
 }
 
-NativeRuntimeImpl& NativeRuntimeImpl::GetNativeRuntimeImpl()
+JsRuntimeLite& JsRuntimeLite::GetInstance()
 {
-    static NativeRuntimeImpl nativeRuntimeImpl;
-    return nativeRuntimeImpl;
+    static JsRuntimeLite jsRuntimeLite;
+    return jsRuntimeLite;
 }
 
-napi_status NativeRuntimeImpl::CreateJsEnv(const Options& options, std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
+napi_status CreateNapiEnv(napi_env *env)
+{
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "Called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid arg");
+        return napi_status::napi_invalid_arg;
+    }
+    auto options = JsRuntimeLite::GetInstance().GetChildOptions();
+    if (options == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null options");
+        return napi_status::napi_generic_failure;
+    }
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto errCode = JsRuntimeLite::GetInstance().CreateJsEnv(*options, jsEnv);
+    if (errCode != napi_status::napi_ok) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "CreateJsEnv failed");
+        return errCode;
+    }
+    *env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
+        return napi_status::napi_generic_failure;
+    }
+    return JsRuntimeLite::GetInstance().Init(*options, *env);
+}
+
+napi_status DestroyNapiEnv(napi_env *env)
+{
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "Called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid arg");
+        return napi_status::napi_invalid_arg;
+    }
+    auto errCode = JsRuntimeLite::GetInstance().RemoveJsEnv(*env);
+    if (errCode == napi_status::napi_ok) {
+        *env = nullptr;
+    }
+    return errCode;
+}
+
+void JsRuntimeLite::InitJsRuntimeLite(const Options& options)
+{
+    if (options.isUnique) {
+        return;
+    }
+    GetInstance().SetChildOptions(options);
+    NativeCreateEnv::RegCreateNapiEnvCallback(CreateNapiEnv);
+    NativeCreateEnv::RegDestroyNapiEnvCallback(DestroyNapiEnv);
+}
+
+napi_status JsRuntimeLite::CreateJsEnv(const Options& options, std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     panda::RuntimeOption pandaOption;
@@ -109,7 +167,7 @@ napi_status NativeRuntimeImpl::CreateJsEnv(const Options& options, std::shared_p
     return AddEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()), jsEnv);
 }
 
-napi_status NativeRuntimeImpl::Init(const Options& options, napi_env env)
+napi_status JsRuntimeLite::Init(const Options& options, napi_env env)
 {
     auto jsEnv = GetJsEnv(env);
     if (jsEnv == nullptr) {
@@ -139,6 +197,12 @@ napi_status NativeRuntimeImpl::Init(const Options& options, napi_env env)
                 hapPath = options.hapModulePath.find(moduleName)->second;
                 return true;
             });
+        std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
+        std::map<std::string, std::string> pkgAliasMap;
+        GetPkgContextInfoListMap(options.pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
+        panda::JSNApi::SetpkgContextInfoList(vm, pkgContextInfoMap);
+        panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
+        panda::JSNApi::SetPkgNameList(vm, options.packageNameList);
     }
 
     if (!preloaded_) {
@@ -163,7 +227,7 @@ napi_status NativeRuntimeImpl::Init(const Options& options, napi_env env)
     return napi_status::napi_ok;
 }
 
-napi_status NativeRuntimeImpl::AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnvironment> jsEnv)
+napi_status JsRuntimeLite::AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnvironment> jsEnv)
 {
     std::lock_guard<std::mutex> lock(envMutex_);
     pid_t threadId = gettid();
@@ -185,7 +249,7 @@ napi_status NativeRuntimeImpl::AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnv
     return napi_status::napi_generic_failure;
 }
 
-napi_status NativeRuntimeImpl::RemoveJsEnv(napi_env env)
+napi_status JsRuntimeLite::RemoveJsEnv(napi_env env)
 {
     std::lock_guard<std::mutex> lock(envMutex_);
     pid_t threadId = gettid();
@@ -201,7 +265,7 @@ napi_status NativeRuntimeImpl::RemoveJsEnv(napi_env env)
     return napi_status::napi_destroy_ark_runtime_env_not_exist;
 }
 
-panda::ecmascript::EcmaVM* NativeRuntimeImpl::GetEcmaVm(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv) const
+panda::ecmascript::EcmaVM* JsRuntimeLite::GetEcmaVm(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv) const
 {
     if (jsEnv == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
@@ -210,7 +274,7 @@ panda::ecmascript::EcmaVM* NativeRuntimeImpl::GetEcmaVm(const std::shared_ptr<Js
     return jsEnv->GetVM();
 }
 
-std::shared_ptr<JsEnv::JsEnvironment> NativeRuntimeImpl::GetJsEnv(napi_env env)
+std::shared_ptr<JsEnv::JsEnvironment> JsRuntimeLite::GetJsEnv(napi_env env)
 {
     std::lock_guard<std::mutex> lock(envMutex_);
     auto jsEnv = envMap_.find(env);
@@ -220,7 +284,7 @@ std::shared_ptr<JsEnv::JsEnvironment> NativeRuntimeImpl::GetJsEnv(napi_env env)
     return nullptr;
 }
 
-void NativeRuntimeImpl::LoadAotFile(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
+void JsRuntimeLite::LoadAotFile(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     auto vm = GetEcmaVm(jsEnv);
     if (!vm || options.hapPath.empty()) {
@@ -235,7 +299,7 @@ void NativeRuntimeImpl::LoadAotFile(const Options& options, const std::shared_pt
     }
 }
 
-void NativeRuntimeImpl::InitConsoleModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
+void JsRuntimeLite::InitConsoleModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
@@ -244,7 +308,7 @@ void NativeRuntimeImpl::InitConsoleModule(const std::shared_ptr<JsEnv::JsEnviron
     jsEnv->InitConsoleModule();
 }
 
-void NativeRuntimeImpl::InitTimerModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
+void JsRuntimeLite::InitTimerModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
@@ -253,7 +317,7 @@ void NativeRuntimeImpl::InitTimerModule(const std::shared_ptr<JsEnv::JsEnvironme
     jsEnv->InitTimerModule();
 }
 
-void NativeRuntimeImpl::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate>& moduleCheckerDelegate,
+void JsRuntimeLite::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate>& moduleCheckerDelegate,
     const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
@@ -263,7 +327,7 @@ void NativeRuntimeImpl::SetModuleLoadChecker(const std::shared_ptr<ModuleChecker
     jsEnv->SetModuleLoadChecker(moduleCheckerDelegate);
 }
 
-void NativeRuntimeImpl::SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
+void JsRuntimeLite::SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
@@ -297,7 +361,7 @@ void NativeRuntimeImpl::SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnv
     jsEnv->SetRequestAotCallback(callback);
 }
 
-bool NativeRuntimeImpl::InitLoop(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
+bool JsRuntimeLite::InitLoop(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
@@ -306,7 +370,7 @@ bool NativeRuntimeImpl::InitLoop(const std::shared_ptr<JsEnv::JsEnvironment>& js
     return jsEnv->InitLoop();
 }
 
-void NativeRuntimeImpl::InitWorkerModule(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
+void JsRuntimeLite::InitWorkerModule(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     if (jsEnv == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null jsEnv");
@@ -314,18 +378,140 @@ void NativeRuntimeImpl::InitWorkerModule(const Options& options, const std::shar
     }
 
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
-    workerInfo->codePath = options.codePath;
+    workerInfo->codePath = panda::panda_file::StringPacProtect(options.codePath);
     workerInfo->isDebugVersion = options.isDebugVersion;
     workerInfo->isBundle = options.isBundle;
     workerInfo->packagePathStr = options.packagePathStr;
     workerInfo->assetBasePathStr = options.assetBasePathStr;
-    workerInfo->hapPath = options.hapPath;
-    workerInfo->isStageModel = options.isStageModel;
+    workerInfo->hapPath = panda::panda_file::StringPacProtect(options.hapPath);
+    workerInfo->isStageModel = panda::panda_file::BoolPacProtect(options.isStageModel);
     workerInfo->moduleName = options.moduleName;
     if (options.isJsFramework) {
         SetJsFramework();
     }
     jsEnv->InitWorkerModule(workerInfo);
+}
+
+void JsRuntimeLite::SetChildOptions(const Options& options)
+{
+    std::lock_guard<std::mutex> lock(childOptionsMutex_);
+    if (childOptions_ == nullptr) {
+        childOptions_ = std::make_shared<Options>();
+    }
+    childOptions_->lang = options.lang;
+    childOptions_->bundleName = options.bundleName;
+    childOptions_->moduleName = options.moduleName;
+    childOptions_->codePath = options.codePath;
+    childOptions_->bundleCodeDir = options.bundleCodeDir;
+    childOptions_->hapPath = options.hapPath;
+    childOptions_->arkNativeFilePath = options.arkNativeFilePath;
+    childOptions_->hapModulePath = options.hapModulePath;
+    childOptions_->loadAce = options.loadAce;
+    childOptions_->preload = options.preload;
+    childOptions_->isBundle = options.isBundle;
+    childOptions_->isDebugVersion = options.isDebugVersion;
+    childOptions_->isJsFramework = options.isJsFramework;
+    childOptions_->isStageModel = options.isStageModel;
+    childOptions_->isTestFramework = options.isTestFramework;
+    childOptions_->uid = options.uid;
+    childOptions_->isUnique = options.isUnique;
+    childOptions_->moduleCheckerDelegate = options.moduleCheckerDelegate;
+    childOptions_->apiTargetVersion = options.apiTargetVersion;
+    childOptions_->packagePathStr = options.packagePathStr;
+    childOptions_->assetBasePathStr = options.assetBasePathStr;
+    childOptions_->jitEnabled = options.jitEnabled;
+    childOptions_->pkgContextInfoJsonStringMap = options.pkgContextInfoJsonStringMap;
+    childOptions_->packageNameList = options.packageNameList;
+}
+
+std::shared_ptr<Options> JsRuntimeLite::GetChildOptions()
+{
+    std::lock_guard<std::mutex> lock(childOptionsMutex_);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
+    return childOptions_;
+}
+
+void JsRuntimeLite::GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
+    std::map<std::string, std::vector<std::vector<std::string>>> &pkgContextInfoMap,
+    std::map<std::string, std::string> &pkgAliasMap)
+{
+    for (auto it = contextInfoMap.begin(); it != contextInfoMap.end(); it++) {
+        std::vector<std::vector<std::string>> pkgContextInfoList;
+        std::string filePath = it->second;
+        bool newCreate = false;
+        std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(
+            ExtractorUtil::GetLoadFilePath(filePath), newCreate, false);
+        if (!extractor) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s load hapPath failed", it->first.c_str());
+            continue;
+        }
+        std::unique_ptr<uint8_t[]> data;
+        size_t dataLen = 0;
+        if (!extractor->ExtractToBufByName("pkgContextInfo.json", data, dataLen)) {
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
+            continue;
+        }
+        auto jsonObject = nlohmann::json::parse(data.get(), data.get() + dataLen, nullptr, false);
+        if (jsonObject.is_discarded()) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());
+            continue;
+        }
+        ParsePkgContextInfoJson(jsonObject, pkgContextInfoList, pkgAliasMap);
+        TAG_LOGI(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json success", it->first.c_str());
+        pkgContextInfoMap[it->first] = pkgContextInfoList;
+    }
+}
+
+void JsRuntimeLite::ParsePkgContextInfoJson(nlohmann::json &jsonObject,
+    std::vector<std::vector<std::string>> &pkgContextInfoList, std::map<std::string, std::string> &pkgAliasMap)
+{
+    for (nlohmann::json::iterator jsonIt = jsonObject.begin(); jsonIt != jsonObject.end(); jsonIt++) {
+        std::vector<std::string> items;
+        items.emplace_back(jsonIt.key());
+        nlohmann::json itemObject = jsonIt.value();
+        std::string pkgName = "";
+        items.emplace_back(PACKAGE_NAME);
+        if (itemObject[PACKAGE_NAME].is_null() || !itemObject[PACKAGE_NAME].is_string()) {
+            items.emplace_back(pkgName);
+        } else {
+            pkgName = itemObject[PACKAGE_NAME].get<std::string>();
+            items.emplace_back(pkgName);
+        }
+
+        ParsePkgContextInfoJsonString(itemObject, BUNDLE_NAME, items);
+        ParsePkgContextInfoJsonString(itemObject, MODULE_NAME, items);
+        ParsePkgContextInfoJsonString(itemObject, VERSION, items);
+        ParsePkgContextInfoJsonString(itemObject, ENTRY_PATH, items);
+        items.emplace_back(IS_SO);
+        if (itemObject[IS_SO].is_null() || !itemObject[IS_SO].is_boolean()) {
+            items.emplace_back("false");
+        } else {
+            bool isSo = itemObject[IS_SO].get<bool>();
+            if (isSo) {
+                items.emplace_back("true");
+            } else {
+                items.emplace_back("false");
+            }
+        }
+        if (!itemObject[DEPENDENCY_ALIAS].is_null() && itemObject[DEPENDENCY_ALIAS].is_string()) {
+            std::string pkgAlias = itemObject[DEPENDENCY_ALIAS].get<std::string>();
+            if (!pkgAlias.empty()) {
+                pkgAliasMap[pkgAlias] = pkgName;
+            }
+        }
+        pkgContextInfoList.emplace_back(items);
+    }
+}
+
+void JsRuntimeLite::ParsePkgContextInfoJsonString(
+    const nlohmann::json &itemObject, const std::string &key, std::vector<std::string> &items)
+{
+    items.emplace_back(key);
+    if (itemObject[key].is_null() || !itemObject[key].is_string()) {
+        items.emplace_back("");
+    } else {
+        items.emplace_back(itemObject[key].get<std::string>());
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

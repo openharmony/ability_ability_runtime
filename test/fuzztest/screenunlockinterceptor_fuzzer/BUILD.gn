@@ -47,6 +47,7 @@ ohos_fuzztest("ScreenUnlockInterceptorFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/screen_unlock_interceptor.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "screenunlockinterceptor_fuzzer.cpp",
   ]
 
@@ -56,6 +57,7 @@ ohos_fuzztest("ScreenUnlockInterceptorFuzzTest") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/common:perm_verification",
@@ -85,6 +87,10 @@ ohos_fuzztest("ScreenUnlockInterceptorFuzzTest") {
     "samgr:samgr_proxy",
     "screenlock_mgr:screenlock_client",
   ]
+
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 ###############################################################################

@@ -69,18 +69,13 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
 {
     auto appThread = GetApplicationClient();
     if (appThread && ability) {
-        auto abilityInfo = ability->GetAbilityInfo();
-        if (abilityInfo == nullptr) {
-            TAG_LOGW(AAFwkTag::APPMGR, "abilityInfo null.");
-            return;
-        }
-        if (abilityInfo->type == AbilityType::PAGE) {
+        auto &abilityInfo = ability->GetAbilityInfo();
+        if (abilityInfo != nullptr && abilityInfo->type == AbilityType::PAGE) {
             FreezeUtil::LifecycleFlow flow = {ability->GetToken(), FreezeUtil::TimeoutState::LOAD};
-            auto entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
-                "; AppLifeCycleDeal::LaunchAbility; the LoadAbility lifecycle.";
+            std::string entry = "AppLifeCycleDeal::LaunchAbility; the LoadAbility lifecycle.";
             FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "Launch ability.");
+        TAG_LOGD(AAFwkTag::APPMGR, "Launch");
         appThread->ScheduleLaunchAbility(*abilityInfo, ability->GetToken(),
             ability->GetWant(), ability->GetAbilityRecordId());
     } else {
@@ -99,16 +94,16 @@ void AppLifeCycleDeal::ScheduleTerminate(bool isLastProcess)
     appThread->ScheduleTerminateApplication(isLastProcess);
 }
 
-void AppLifeCycleDeal::ScheduleForegroundRunning()
+bool AppLifeCycleDeal::ScheduleForegroundRunning()
 {
     auto appThread = GetApplicationClient();
     if (!appThread) {
         TAG_LOGE(AAFwkTag::APPMGR, "appThread is nullptr");
-        return;
+        return false;
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    appThread->ScheduleForegroundApplication();
+    return appThread->ScheduleForegroundApplication();
 }
 
 void AppLifeCycleDeal::ScheduleBackgroundRunning()

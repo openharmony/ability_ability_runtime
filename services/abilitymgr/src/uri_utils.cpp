@@ -16,8 +16,10 @@
 #include "uri_utils.h"
 
 #include "ability_config.h"
+#include "extension_ability_info.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
+#include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
 
 namespace OHOS {
@@ -172,5 +174,86 @@ std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string>
     return permissionedUris;
 }
 
+bool UriUtils::GetUriListFromWant(Want &want, std::vector<std::string> &uriVec)
+{
+    auto uriStr = want.GetUri().ToString();
+    uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+    if (uriVec.empty() && uriStr.empty()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "uriVec empty.");
+        return false;
+    }
+    // process param stream
+    auto paramStreamUriCount = uriVec.size();
+    if (uriStr.empty() && paramStreamUriCount > MAX_URI_COUNT) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "uri empty, paream stream counts: %{public}zu", paramStreamUriCount);
+        uriVec.resize(MAX_URI_COUNT);
+        want.RemoveParam(AbilityConfig::PARAMS_STREAM);
+        want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+    }
+    if (!uriStr.empty() && paramStreamUriCount > MAX_URI_COUNT - 1) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "paream stream counts: %{public}zu", paramStreamUriCount);
+        uriVec.resize(MAX_URI_COUNT - 1);
+        want.RemoveParam(AbilityConfig::PARAMS_STREAM);
+        want.SetParam(AbilityConfig::PARAMS_STREAM, uriVec);
+    }
+    // process uri
+    if (!uriStr.empty()) {
+        uriVec.insert(uriVec.begin(), uriStr);
+    }
+    return true;
+}
+
+bool UriUtils::IsGrantUriPermissionFlag(const Want &want)
+{
+    return ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) != 0);
+}
+
+void UriUtils::CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckUriPermissionForServiceExtension called.");
+    if (extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
+        return;
+    }
+    CheckUriPermissionForExtension(want, 0);
+    return;
+}
+
+void UriUtils::CheckUriPermissionForUIExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType,
+    uint32_t tokenId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckUriPermissionForUIExtension called.");
+    if (!UIExtensionUtils::IsUIExtension(extensionAbilityType)) {
+        return;
+    }
+    CheckUriPermissionForExtension(want, tokenId);
+    return;
+}
+
+void UriUtils::CheckUriPermissionForExtension(Want &want, uint32_t tokenId)
+{
+    uint32_t flag = want.GetFlags();
+    if (!IsGrantUriPermissionFlag(want)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "No grant uri flag: %{public}u.", flag);
+        return;
+    }
+    std::vector<std::string> uriVec;
+    if (!UriUtils::GetUriListFromWant(want, uriVec)) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "No file uri neet grant.");
+        return;
+    }
+    auto callerTokenId = tokenId > 0 ? tokenId : want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
+    // check uri permission
+    auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
+        uriVec, flag, callerTokenId));
+    // remove unpermissioned uri from want
+    UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
+    return;
+}
+
+bool UriUtils::IsPermissionPreCheckedType(AppExecFwk::ExtensionAbilityType extensionAbilityType)
+{
+    return extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
+        UIExtensionUtils::IsUIExtension(extensionAbilityType);
+}
 } // AAFwk
 } // OHOS

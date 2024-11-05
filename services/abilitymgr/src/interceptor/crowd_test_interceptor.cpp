@@ -16,8 +16,6 @@
 #include "interceptor/crowd_test_interceptor.h"
 
 #include "ability_util.h"
-#include "hilog_tag_wrapper.h"
-#include "in_process_call_wrapper.h"
 #include "start_ability_utils.h"
 
 namespace OHOS {
@@ -28,6 +26,7 @@ constexpr const char* ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTes
 ErrCode CrowdTestInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     if (StartAbilityUtils::skipCrowTest) {
+        StartAbilityUtils::skipCrowTest = false;
         return ERR_OK;
     }
     if (CheckCrowdtest(param.want, param.userId)) {

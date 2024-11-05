@@ -124,10 +124,12 @@ public:
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
+     * @param appCloneIndex the app clone id.
+     * @param userId the user id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t ClearUpApplicationData(const std::string &bundleName,
-        const int32_t userId = -1) override;
+    virtual int32_t ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId = -1) override;
 
     /**
      * ClearUpApplicationDataBySelf, call ClearUpApplicationDataBySelf() through proxy project,
@@ -519,7 +521,7 @@ public:
 
     int32_t UpdateRenderState(pid_t renderPid, int32_t state) override;
 
-    int32_t SignRestartAppFlag(const std::string &bundleName) override;
+    int32_t SignRestartAppFlag(int32_t uid) override;
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId) override;
 
@@ -532,6 +534,8 @@ public:
     void SetAppAssertionPauseState(bool flag) override;
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
+
+    int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) override;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
 
@@ -557,6 +561,8 @@ public:
     virtual void KillProcessDependedOnWeb() override;
 
     virtual void RestartResidentProcessDependedOnWeb() override;
+
+    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) override;
 private:
     /**
      * Init, Initialize application services.

@@ -99,8 +99,6 @@ public:
     {
         return;
     }
-
-    void DoCleanWorkAfterStageCleaned() override {}
 public:
     Language language;
 };

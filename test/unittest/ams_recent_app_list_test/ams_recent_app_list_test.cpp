@@ -30,6 +30,7 @@
 #include "mock_bundle_installer_service.h"
 #include "mock_bundle_manager_service.h"
 #include "mock_system_ability_manager.h"
+#include "param.h"
 
 using namespace testing::ext;
 using testing::_;
@@ -146,15 +147,16 @@ void AmsRecentAppListTest::StartProcessSuccess(const int32_t index) const
     pid_t pid = PID_MAX - index;
     auto abilityInfo = GetAbilityInfoByIndex(index);
     auto appInfo = GetApplicationByIndex(index);
-    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
     MockAppSpawnClient* mockClientPtr = new (std::nothrow) MockAppSpawnClient();
     EXPECT_TRUE(mockClientPtr);
 
     // mock start process success, and pid is right.
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(pid), Return(ERR_OK)));
     serviceInner_->SetAppSpawnClient(std::unique_ptr<MockAppSpawnClient>(mockClientPtr));
-
-    serviceInner_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = new (std::nothrow) MockAbilityToken();
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    serviceInner_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     return;
 }
 }  // namespace AppExecFwk

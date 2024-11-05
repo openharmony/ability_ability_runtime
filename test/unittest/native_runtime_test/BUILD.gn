@@ -17,11 +17,11 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/native_runtime"
 
-ohos_unittest("native_runtime_test") {
+ohos_unittest("js_runtime_lite_test") {
   module_out_path = module_output_path
   include_dirs = [ "${ability_runtime_innerkits_path}/runtime/include" ]
 
-  sources = [ "native_runtime_test.cpp" ]
+  sources = [ "js_runtime_lite_test.cpp" ]
 
   deps = [
     "${ability_runtime_innerkits_path}/runtime:runtime",
@@ -46,5 +46,5 @@ ohos_unittest("native_runtime_test") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":native_runtime_test" ]
+  deps = [ ":js_runtime_lite_test" ]
 }

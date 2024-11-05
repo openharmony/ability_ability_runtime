@@ -115,7 +115,7 @@ AbilityStateData *AbilityStateData::Unmarshalling(Parcel &parcel)
 {
     AbilityStateData *abilityStateData = new (std::nothrow) AbilityStateData();
     if (abilityStateData && !abilityStateData->ReadFromParcel(parcel)) {
-        TAG_LOGW(AAFwkTag::APPMGR, "AbilityStateData failed, because ReadFromParcel failed");
+        TAG_LOGW(AAFwkTag::APPMGR, "ReadFromParcel failed");
         delete abilityStateData;
         abilityStateData = nullptr;
     }

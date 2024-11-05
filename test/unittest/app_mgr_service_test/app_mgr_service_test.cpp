@@ -288,7 +288,7 @@ HWTEST_F(AppMgrServiceTest, ClearUpApplicationData_001, TestSize.Level0)
     std::string bundleName = "bundleName";
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
-    int32_t res = appMgrService->ClearUpApplicationData(bundleName);
+    int32_t res = appMgrService->ClearUpApplicationData(bundleName, 0);
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
@@ -1490,21 +1490,6 @@ HWTEST_F(AppMgrServiceTest, ExitChildProcessSafely_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnregisterAbilityForegroundStateObserver_0100
- * @tc.desc: Verify it when judgments is ready and observer is nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceTest, UnregisterAbilityForegroundStateObserver_0100, TestSize.Level1)
-{
-    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
-    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
-    appMgrService->taskHandler_ = taskHandler_;
-    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
-    int32_t res = appMgrService->UnregisterAbilityForegroundStateObserver(nullptr);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: IsApplicationRunning_001
  * @tc.desc: Determine that the application is running by returning a value.
  * @tc.type: FUNC
@@ -1538,6 +1523,21 @@ HWTEST_F(AppMgrServiceTest, RegisterAbilityForegroundStateObserver_0100, TestSiz
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     int32_t res = appMgrService->RegisterAbilityForegroundStateObserver(nullptr);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnregisterAbilityForegroundStateObserver_0100
+ * @tc.desc: Verify it when judgments is ready and observer is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, UnregisterAbilityForegroundStateObserver_0100, TestSize.Level1)
+{
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    int32_t res = appMgrService->UnregisterAbilityForegroundStateObserver(nullptr);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 

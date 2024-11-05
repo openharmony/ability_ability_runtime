@@ -41,6 +41,7 @@ ohos_fuzztest("FreezeUtilFuzzTest") {
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "freezeutil_fuzzer.cpp",
   ]
 
@@ -84,6 +85,10 @@ ohos_fuzztest("FreezeUtilFuzzTest") {
       "i18n:intl_util",
       "window_manager:libwm",
     ]
+  }
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
 }
 

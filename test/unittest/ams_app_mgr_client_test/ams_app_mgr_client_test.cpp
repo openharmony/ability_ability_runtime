@@ -27,6 +27,7 @@
 #include "mock_app_service_mgr.h"
 #include "mock_iapp_state_callback.h"
 #include "mock_native_token.h"
+#include "param.h"
 #include "running_process_info.h"
 
 using namespace testing::ext;
@@ -121,14 +122,16 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_001, TestSize.Level1)
     sptr<IAmsMgr> amsMgrScheduler(new MockAmsMgrScheduler());
 
     EXPECT_CALL(*(static_cast<MockAmsMgrScheduler*>(amsMgrScheduler.GetRefPtr())),
-        LoadAbility(_, _, _, _, _, _)).Times(1);
+        LoadAbility(_, _, _, _)).Times(1);
 
     EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
         GetAmsMgr())
         .Times(1)
         .WillOnce(Return(amsMgrScheduler));
-
-    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->LoadAbility(token_, preToken_, abilityInfo, appInfo, want, 0));
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token_;
+    loadParam.preToken = preToken_;
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->LoadAbility(abilityInfo, appInfo, want, loadParam));
     TAG_LOGI(AAFwkTag::TEST, "ams_app_mgr_client_test_001 end");
 }
 
@@ -146,9 +149,11 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_002, TestSize.Level1)
     AbilityInfo abilityInfo;
     ApplicationInfo appInfo;
     Want want;
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token_;
+    loadParam.preToken = preToken_;
     EXPECT_EQ(
-        AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED, client_->LoadAbility(token_, preToken_, abilityInfo,
-            appInfo, want, 0));
+        AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED, client_->LoadAbility(abilityInfo, appInfo, want, loadParam));
     TAG_LOGI(AAFwkTag::TEST, "ams_app_mgr_client_test_002 end");
 }
 
@@ -424,10 +429,10 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_014, TestSize.Level1)
     sptr<IRemoteObject> token;
     EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
     EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
-        ClearUpApplicationData(_, _))
+        ClearUpApplicationData(_, _, _))
         .Times(1)
         .WillOnce(Return(ERR_NO_MEMORY));
-    EXPECT_EQ(AppMgrResultCode::ERROR_SERVICE_NOT_READY, client_->ClearUpApplicationData("com.test"));
+    EXPECT_EQ(AppMgrResultCode::ERROR_SERVICE_NOT_READY, client_->ClearUpApplicationData("com.test", 0));
 }
 
 /*
@@ -444,10 +449,10 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_015, TestSize.Level1)
     EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
     sptr<IAppMgr> appMgr(new MockAppMgrService());
     EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
-        ClearUpApplicationData(_, _))
+        ClearUpApplicationData(_, _, _))
         .Times(1)
         .WillOnce(Return(ERR_OK));
-    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ClearUpApplicationData("com.test"));
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ClearUpApplicationData("com.test", 0));
 }
 
 /**

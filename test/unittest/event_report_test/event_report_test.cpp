@@ -70,6 +70,8 @@ HWTEST_F(EventReportTest, ConvertEventName_0100, TestSize.Level0)
     EXPECT_EQ(EventReport::ConvertEventName(EventName::STOP_SERVICE), "STOP_SERVICE");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::CONNECT_SERVICE), "CONNECT_SERVICE");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::DISCONNECT_SERVICE), "DISCONNECT_SERVICE");
+    EXPECT_EQ(EventReport::ConvertEventName(EventName::START_ABILITY_OTHER_EXTENSION),
+        "START_ABILITY_OTHER_EXTENSION");
     // app behavior event
     EXPECT_EQ(EventReport::ConvertEventName(EventName::APP_ATTACH), "APP_ATTACH");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::APP_LAUNCH), "APP_LAUNCH");

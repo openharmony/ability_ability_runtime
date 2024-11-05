@@ -28,11 +28,11 @@ RestartAppManager &RestartAppManager::GetInstance()
     return instance;
 }
 
-bool RestartAppManager::IsRestartAppFrequent(const RestartAppKeyType &key, time_t time)
+bool RestartAppManager::IsRestartAppFrequent(int32_t uid, time_t time)
 {
     std::lock_guard<ffrt::mutex> lock(restartAppMapLock_);
     constexpr int64_t MIN_RESTART_TIME = 10;
-    auto it = restartAppHistory_.find(key);
+    auto it = restartAppHistory_.find(uid);
     if ((it != restartAppHistory_.end()) && (it->second + MIN_RESTART_TIME > time)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Restart too frequently. Try again at least 10s later.");
         return true;
@@ -40,12 +40,11 @@ bool RestartAppManager::IsRestartAppFrequent(const RestartAppKeyType &key, time_
     return false;
 }
 
-void RestartAppManager::AddRestartAppHistory(const RestartAppKeyType &key, time_t time)
+void RestartAppManager::AddRestartAppHistory(int32_t uid, time_t time)
 {
     std::lock_guard<ffrt::mutex> lock(restartAppMapLock_);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Refresh history, bundleName=%{public}s, userId=%{public}d", key.bundleName.c_str(),
-        key.userId);
-    restartAppHistory_[key] = time;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Refresh history, uid=%{public}d", uid);
+    restartAppHistory_[uid] = time;
 }
 
 bool RestartAppManager::IsForegroundToRestartApp() const

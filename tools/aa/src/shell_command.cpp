@@ -68,17 +68,17 @@ std::string ShellCommand::ExecCommand()
     TAG_LOGD(AAFwkTag::AA_TOOL, "start");
     int result = CreateCommandMap();
     if (result != OHOS::ERR_OK) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "failed to create command map.\n");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "CreateCommandMap failed\n");
     }
 
     result = CreateMessageMap();
     if (result != OHOS::ERR_OK) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "failed to create message map.\n");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "CreateMessageMap failed\n");
     }
 
     result = OnCommand();
     if (result != OHOS::ERR_OK) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "failed to execute your command.\n");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "failed to execute your command\n");
 
         resultReceiver_ = "error: failed to execute your command.\n";
     }
@@ -113,7 +113,6 @@ std::string ShellCommand::GetUnknownOptionMsg(std::string& unknownOption) const
 
 std::string ShellCommand::GetMessageFromCode(const int32_t code) const
 {
-    TAG_LOGI(AAFwkTag::AA_TOOL, "[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     TAG_LOGI(AAFwkTag::AA_TOOL, "code = %{public}d", code);
 
     std::string result = "";
@@ -124,7 +123,7 @@ std::string ShellCommand::GetMessageFromCode(const int32_t code) const
         }
     }
 
-    TAG_LOGI(AAFwkTag::AA_TOOL, "result = %{public}s", result.c_str());
+    TAG_LOGI(AAFwkTag::AA_TOOL, "result: %{public}s", result.c_str());
 
     return result;
 }

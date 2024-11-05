@@ -28,6 +28,7 @@
 #include "mock_js_runtime.h"
 #include "mock_jsnapi.h"
 #include "hilog_tag_wrapper.h"
+#include "js_runtime_lite.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1110,26 +1111,6 @@ HWTEST_F(JsRuntimeTest, StartDebugger_0100, TestSize.Level0)
 }
 
 /**
- * @tc.name: DoCleanWorkAfterStageCleaned_0100
- * @tc.desc: JsRuntime test for DoCleanWorkAfterStageCleaned.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, DoCleanWorkAfterStageCleaned_0100, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "DoCleanWorkAfterStageCleaned_0100 start");
-
-    AbilityRuntime::Runtime::Options options;
-    options.preload = true;
-    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-
-    ASSERT_NE(jsRuntime, nullptr);
-
-    jsRuntime->DoCleanWorkAfterStageCleaned();
-    jsRuntime.reset();
-    TAG_LOGI(AAFwkTag::TEST, "DoCleanWorkAfterStageCleaned_0100 end");
-}
-
-/**
  * @tc.name: ReloadFormComponent_0100
  * @tc.desc: JsRuntime test for ReloadFormComponent.
  * @tc.type: FUNC
@@ -1276,8 +1257,8 @@ HWTEST_F(JsRuntimeTest, GetPkgContextInfoListMap_0100, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0100 start");
 
     std::map<std::string, std::string> modulePkgContentMap;
-    std::string pkgContentJsonString = R"({"library": {"packageName": "library", "bundleName": "com.xxx.xxxx",
-        "moduleName": "library", "version": "1.0.0", "entryPath": "", "isSO": false}})";
+    std::string pkgContentJsonString = R"({"library":{"packageName":"library","bundleName":"com.xxx.xxxx","moduleName":
+            "library","version":"1.0.0","entryPath":"","isSO":false}})";
     modulePkgContentMap["entry"] = pkgContentJsonString;
 
     AbilityRuntime::Runtime::Options options;
@@ -1285,7 +1266,7 @@ HWTEST_F(JsRuntimeTest, GetPkgContextInfoListMap_0100, TestSize.Level0)
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
     std::map<std::string, std::vector<std::vector<std::string>>> ret;
     std::map<std::string, std::string> pkgAliasMap;
-    jsRuntime->GetPkgContextInfoListMap(modulePkgContentMap, ret, pkgAliasMap);
+    JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(modulePkgContentMap, ret, pkgAliasMap);
     std::string expectString = "library:packageName:library:bundleName:";
     expectString += "com.xxx.xxxx:moduleName:library:version:1.0.0:entryPath::isSO:false:";
     auto it = ret.find("entry");
@@ -1310,12 +1291,12 @@ HWTEST_F(JsRuntimeTest, GetPkgContextInfoListMap_0200, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "GetPkgContextInfoListMap_0200 start");
 
     std::map<std::string, std::string> modulePkgContentMap;
-    std::string pkgContentJsonString = R"({"library": {"packageName": "library", "bundleName":
-        "com.xxx.xxxx", "moduleName": "library", "version": "1.0.0", "entryPath": "", "isSO": false}})";
+    std::string pkgContentJsonString = R"({"library":{"packageName":"library","bundleName":"com.xxx.xxxx","moduleName":
+            "library","version":"1.0.0","entryPath":"","isSO":false}})";
     modulePkgContentMap["entry"] = pkgContentJsonString;
 
-    std::string libraryString = R"({"library": {"packageName": "library","bundleName": "com.xxx.xxxx", "moduleName":
-        "library", "version": "1.0.0", "entryPath": "", "isSO": false}})";
+    std::string libraryString = R"({"library":{"packageName":"library","bundleName":"com.xxx.xxxx","moduleName":
+            "library","version":"1.0.0","entryPath":"","isSO":false}})";
     modulePkgContentMap["library"] = libraryString;
 
     AbilityRuntime::Runtime::Options options;
@@ -1323,7 +1304,7 @@ HWTEST_F(JsRuntimeTest, GetPkgContextInfoListMap_0200, TestSize.Level0)
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
     std::map<std::string, std::vector<std::vector<std::string>>> ret;
     std::map<std::string, std::string> pkgAliasMap;
-    jsRuntime->GetPkgContextInfoListMap(modulePkgContentMap, ret, pkgAliasMap);
+    JsRuntimeLite::GetInstance().GetPkgContextInfoListMap(modulePkgContentMap, ret, pkgAliasMap);
     std::string expectString = "library:packageName:library:bundleName:";
     expectString += "com.xxx.xxxx:moduleName:library:version:1.0.0:entryPath::isSO:false:";
     auto it = ret.find("entry");
@@ -1351,18 +1332,6 @@ HWTEST_F(JsRuntimeTest, CreateJsEnv_0100, TestSize.Level1)
     auto jsRuntime = std::make_unique<JsRuntime>();
     auto ret = jsRuntime->CreateJsEnv(options_);
     EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: GetChildOptions_0100
- * @tc.desc: JsRuntime test for GetChildOptions.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, GetChildOptions_0100, TestSize.Level1)
-{
-    auto jsRuntime = std::make_unique<JsRuntime>();
-    jsRuntime->GetChildOptions();
-    EXPECT_TRUE(jsRuntime != nullptr);
 }
 
 /**

@@ -29,6 +29,7 @@ class PreLoadUIExtStateObserver final : public AppExecFwk::ApplicationStateObser
 public:
     PreLoadUIExtStateObserver(std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord);
     void OnProcessDied(const AppExecFwk::ProcessData &processData) override;
+    void OnAppCacheStateChanged(const AppExecFwk::AppStateData &appStateData) override;
 
 private:
     std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord_ = std::weak_ptr<AbilityRuntime::ExtensionRecord>();
