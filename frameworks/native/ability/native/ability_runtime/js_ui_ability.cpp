@@ -1137,7 +1137,10 @@ void JsUIAbility::MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams
     napi_add_finalizer(env, result, jsWantParamsRef, [](napi_env env, void *context, void *) {
         TAG_LOGI(AAFwkTag::UIABILITY, "Release jsWantParamsRef");
         napi_ref contextRef = reinterpret_cast<napi_ref>(context);
-        napi_delete_reference(env, contextRef);
+        if(contextRef != nullptr){
+            napi_delete_reference(env, contextRef);
+            contextRef = nullptr;
+        }
     }, nullptr, nullptr);
 
     auto asyncCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
