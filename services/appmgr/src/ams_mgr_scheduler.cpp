@@ -51,8 +51,9 @@ constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility
 constexpr const char* TASK_SCENE_BOARD_ATTACH_TIMEOUT = "sceneBoardAttachTimeoutTask";
 constexpr const char* TASK_ATTACHED_TO_STATUS_BAR = "AttachedToStatusBar";
 constexpr const char* TASK_BLOCK_PROCESS_CACHE_BY_PIDS = "BlockProcessCacheByPids";
+constexpr const char* POWER_OFF_ABILITY = "BlockProcessCacheByPids";
 constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
-constexpr const char* TASK_LOAD_ABILITY = "LoadAbilityTask";
+constexpr int32_t LOAD_TASK_TIMEOUT = 30000; // ms
 };  // namespace
 
 AmsMgrScheduler::AmsMgrScheduler(
@@ -109,19 +110,20 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
         amsHandler_->SubmitTask(timeoutTask, TASK_SCENE_BOARD_ATTACH_TIMEOUT, SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME);
     }
 
+    AAFwk::TaskAttribute taskAttr{
+        .taskName_ = "LoadAbilityTask",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE,
+        .timeoutMillis_ = LOAD_TASK_TIMEOUT
+    };
+
     if (abilityInfo->bundleName == AAFwk::AppUtils::GetInstance().GetMigrateClientBundleName()) {
-        amsHandler_->SubmitTask(loadAbilityFunc, AAFwk::TaskAttribute{
-            .taskName_ = TASK_LOAD_ABILITY,
-            .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE,
-            .taskPriority_ = AAFwk::TaskQueuePriority::IMMEDIATE
-        });
-        return;
+        taskAttr.taskPriority_ = AAFwk::TaskQueuePriority::IMMEDIATE;
+    }
+    if (abilityInfo->bundleName == SCENE_BOARD_BUNDLE_NAME && abilityInfo->name == POWER_OFF_ABILITY) {
+        taskAttr.insertHead_ = true;
     }
 
-    amsHandler_->SubmitTask(loadAbilityFunc, AAFwk::TaskAttribute{
-            .taskName_ = TASK_LOAD_ABILITY,
-            .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE,
-        });
+    amsHandler_->SubmitTask(loadAbilityFunc, taskAttr);
 }
 
 void AmsMgrScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state)

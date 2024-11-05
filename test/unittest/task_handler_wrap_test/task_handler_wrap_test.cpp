@@ -21,7 +21,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AAFwk {
-constexpr int32_t LONG_TIME_TASK_TIME = 2 * 500000 + 100000;
+constexpr int32_t LONG_TIME_TASK_TIME = 2 * 500000 + 100000; // us
+constexpr int32_t SCHEDULE_TIMEOUT = 500; // ms
 class TaskHandlerWrapTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -107,7 +108,7 @@ HWTEST_F(TaskHandlerWrapTest, QueueTest_0040, TestSize.Level0)
 }
 
 /**
- * @tc.name: QueueTest_0040
+ * @tc.name: QueueTest_0050
  * @tc.desc: SubmitTask time task test
  * @tc.type: FUNC
  */
@@ -121,6 +122,45 @@ HWTEST_F(TaskHandlerWrapTest, QueueTest_0050, TestSize.Level0)
     EXPECT_TRUE(taskHandle);
     taskHandle.Sync();
     EXPECT_TRUE(input == 1);
+}
+
+/**
+ * @tc.name: QueueTest_0060
+ * @tc.desc: Insert task test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TaskHandlerWrapTest, QueueTest_0060, TestSize.Level0)
+{
+    queueHandler_->SetPrintTaskLog(true);
+    int input = 0;
+    auto task1 = [&input]() {
+        usleep(LONG_TIME_TASK_TIME);
+        input = 1;
+    };
+    auto handle1 = queueHandler_->SubmitTask(task1, "task1");
+
+    // this task will trigger scheduling timeout
+    auto handle2 = queueHandler_->SubmitTask([](){}, TaskAttribute{
+        .taskName_ = "task2",
+        .timeoutMillis_ = SCHEDULE_TIMEOUT
+    });
+
+    int result3 = 0;
+    int result4 = 0;
+    auto handle3 = queueHandler_->SubmitTask([&input, &result3]() {
+            result3 = ++input;
+        }, "task3");
+    auto handle4 = queueHandler_->SubmitTask([&input, &result4]() {
+            result4 = ++input;
+        }, TaskAttribute{
+            .taskName_ = "task4",
+            .insertHead_ = true
+        });
+    handle1.Sync();
+    handle2.Sync();
+    handle3.Sync();
+    handle4.Sync();
+    EXPECT_TRUE(result3 == result4 + 1);
 }
 
 /**
