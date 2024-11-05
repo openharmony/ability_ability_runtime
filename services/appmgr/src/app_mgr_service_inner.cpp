@@ -1463,10 +1463,6 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName, const
         return ERR_NO_INIT;
     }
 
-    if (CheckCallerIsAppGallery()) {
-        return KillApplicationByBundleName(bundleName, clearPageStack, "KillApplicationByAppGallery");
-    }
-
     auto result = VerifyKillProcessPermission(bundleName);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
@@ -1564,12 +1560,10 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
     }
 
     int32_t result = ERR_OK;
-    if (!CheckCallerIsAppGallery()) {
-        result = VerifyKillProcessPermission(bundleName);
-        if (result != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
-            return result;
-        }
+    result = VerifyKillProcessPermission(bundleName);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
+        return result;
     }
 
     int64_t startTime = SystemTimeMillisecond();
@@ -5076,40 +5070,6 @@ int32_t AppMgrServiceInner::VerifyKillProcessPermissionCommon() const
     return ERR_PERMISSION_DENIED;
 }
 
-bool AppMgrServiceInner::CheckCallerIsAppGallery()
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
-        return false;
-    }
-    auto callerPid = IPCSkeleton::GetCallingPid();
-    auto appRecord = appRunningManager_->GetAppRunningRecordByPid(callerPid);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "get app running record fail, callingPId: %{public}d", callerPid);
-        return false;
-    }
-    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
-    if (!bundleMgrHelper) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
-        return false;
-    }
-    auto callerBundleName = appRecord->GetBundleName();
-    if (callerBundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "callerBundleName empty");
-        return false;
-    }
-    std::string appGalleryBundleName;
-    if (!bundleMgrHelper->QueryAppGalleryBundleName(appGalleryBundleName)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "queryAppGalleryBundleName fail");
-        return false;
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "callerBundleName:%{public}s, appGalleryBundleName:%{public}s", callerBundleName.c_str(),
-        appGalleryBundleName.c_str());
-
-    return callerBundleName == appGalleryBundleName;
-}
-
 bool AppMgrServiceInner::VerifyAPL() const
 {
     if (!appRunningManager_) {
@@ -5135,6 +5095,8 @@ bool AppMgrServiceInner::VerifyAPL() const
         TAG_LOGE(AAFwkTag::APPMGR, "caller is not system_basic or system_core");
         return false;
     }
+    TAG_LOGE(AAFwkTag::APPMGR, "%{public}s without ohos.permission.KILL_APP_PROCESSES",
+        applicationInfo->name.c_str());
     return true;
 }
 
