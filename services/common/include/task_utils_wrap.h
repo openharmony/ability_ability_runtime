@@ -48,11 +48,8 @@ struct TaskAttribute {
     int64_t delayMillis_ = 0;
     TaskQoS taskQos_ = TaskQoS::DEFAULT;
     TaskQueuePriority taskPriority_ = TaskQueuePriority::LOW;
-
-    bool IsDefault() const
-    {
-        return delayMillis_ <= 0 && taskName_.empty() && taskQos_ == TaskQoS::DEFAULT;
-    }
+    int64_t timeoutMillis_ = 0;  // task should be started within timeout
+    bool insertHead_ = false;  // insert into the head of the queue
 };
 } // namespace AAFwk
 } // namespace OHOS
