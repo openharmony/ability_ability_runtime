@@ -45,6 +45,10 @@
 #endif
 #define ABILITY_LIBRARY_LOADER
 
+#if defined(NWEB)
+#include "nweb_preload.h"
+#endif
+
 class Runtime;
 namespace OHOS {
 namespace AppExecFwk {
@@ -666,6 +670,9 @@ private:
     std::string abilityLibraryType_ = ".so";
     static std::weak_ptr<OHOSApplication> applicationForDump_;
     bool isDeveloperMode_ = false;
+#if defined(NWEB)
+    std::shared_ptr<NWeb::NWebPreload> nwebPreloadImpl_ = nullptr;
+#endif
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**

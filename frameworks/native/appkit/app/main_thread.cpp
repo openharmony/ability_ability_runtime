@@ -968,6 +968,14 @@ bool MainThread::InitCreate(
         TAG_LOGE(AAFwkTag::APPKIT, "create contextDeal failed");
         return false;
     }
+
+#if defined(NWEB)
+    nwebPreloadImpl_ = std::make_shared<NWeb::NWebPreload>();
+    if (!nwebPreloadImpl_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "create nwebPreloadImpl failed");
+        return false;
+    }
+#endif
     AppExecFwk::AppfreezeInner::GetInstance()->SetApplicationInfo(applicationInfo_);
 
     application_->SetProcessInfo(processInfo_);
@@ -1769,6 +1777,16 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
         OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, app->GetAppContext()->GetBundleCodeDir());
     }).detach();
+
+    // nweb preload
+    if (mainHandler_ && appLaunchData.IsAllowedNWebPreload()) {
+        if (!nwebPreloadImpl_) {
+            TAG_LOGE(AAFwkTag::APPKIT, "nwebPreloadImpl is nullptr");
+            return;
+        }
+        mainHandler_->PostIdleTask(nwebPreloadImpl_->GetNWebPreloadTask(), "MainThread::NWEB_PRELOAD");
+        TAG_LOGI(AAFwkTag::APPKIT, "postIdleTask success");
+    }
 #endif
 }
 

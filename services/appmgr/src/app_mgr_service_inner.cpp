@@ -264,6 +264,8 @@ constexpr int32_t PROCESS_START_FAILED_SUB_REASON_UNKNOWN = 0;
 
 constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
+constexpr int32_t NWEB_PRELOAD_DELAY = 3000;
+
 int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
@@ -388,6 +390,9 @@ void AppMgrServiceInner::Init()
     if (securityModeManager_) {
         securityModeManager_->Init();
     }
+    otherTaskHandler_->SubmitTask([pThis = shared_from_this()]() {
+        pThis->nwebPreloadSet_ = AAFwk::ResSchedUtil::GetInstance().GetNWebPreloadSet();
+        }, NWEB_PRELOAD_DELAY);
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
@@ -1114,7 +1119,7 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
     appRecord->SetAppDeathRecipient(appDeathRecipient);
     appRecord->SetApplicationClient(appScheduler);
     if (appRecord->GetState() == ApplicationState::APP_STATE_CREATE) {
-        LaunchApplication(appRecord);
+        LaunchApplicationExt(appRecord);
     }
 
     // submit cached load ability task after scene board attach
@@ -1125,6 +1130,19 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_ATTACH, HiSysEventType::BEHAVIOR, eventInfo);
+}
+
+void AppMgrServiceInner::LaunchApplicationExt(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    auto isPreload = IsAllowedNWebPreload(appRecord->GetProcessName());
+    appRecord->SetNWebPreload(isPreload);
+    LaunchApplication(appRecord);
+}
+
+bool AppMgrServiceInner::IsAllowedNWebPreload(const std::string &processName)
+{
+    // nwebPreloadSet_ only be initialized in Init(), no lock required.
+    return nwebPreloadSet_.count(processName);
 }
 
 void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord> appRecord)
