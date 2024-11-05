@@ -593,25 +593,24 @@ private:
     napi_value OnOffForeground(napi_env env, size_t argc, napi_value *argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
-        if (argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
-        if (argc == ARGC_TWO && !AppExecFwk::IsTypeForNapiValue(env, argv[INDEX_ONE], napi_object)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Invalid param");
-            ThrowInvalidParamError(env, "Parse param observer failed, must be a AppForegroundStateObserver.");
-            return CreateJsUndefined(env);
-        }
         if (observerForeground_ == nullptr || appManager_ == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null observer or appManager");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
-
+        if (argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
         if (argc == ARGC_ONE) {
             observerForeground_->RemoveAllJsObserverObjects();
         } else if (argc == ARGC_TWO) {
+            if (!AppExecFwk::IsTypeForNapiValue(env, argv[INDEX_ONE], napi_object)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "Invalid param");
+                ThrowInvalidParamError(env, "Parse param observer failed, must be a AppForegroundStateObserver.");
+                return CreateJsUndefined(env);
+            }
             observerForeground_->RemoveJsObserverObject(argv[INDEX_ONE]);
         }
         if (observerForeground_->IsEmpty()) {
@@ -861,7 +860,7 @@ private:
         napi_value lastParam = (argc == ARGC_TWO && !hasClearPageStack) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [bundleName, clearPageStack, abilityManager = abilityManager_,
+        auto asyncTask = [bundleName, abilityManager = abilityManager_, clearPageStack,
             env, task = napiAsyncTask.get()]() {
             OnKillProcessesByBundleNameInner(bundleName, clearPageStack, abilityManager, env, task);
             delete task;
@@ -1010,7 +1009,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Params mismatch");
+            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }

@@ -431,7 +431,7 @@ void AppRecovery::DeleteInValidMissionFiles()
     }
     std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "bilityMgr client is not exist");
+        TAG_LOGE(AAFwkTag::RECOVERY, "abilityMgr client is not exist");
         return;
     }
     abilityMgr->IsValidMissionIds(missionIds, results);
