@@ -1022,13 +1022,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller invalid");
         return ERR_INVALID_CALLER;
     }
-    if (callerToken != nullptr) {
-        bool isAppKilling = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsAppKilling(callerToken));
-        if (isAppKilling) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller killing");
-            return ERR_INVALID_CALLER;
-        }
-    }
     {
 #ifdef WITH_DLP
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "CHECK_DLP");
@@ -2191,14 +2184,6 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
-
-    if (sessionInfo->callerToken) {
-        auto callerAbility = Token::GetAbilityRecordByToken(sessionInfo->callerToken);
-        if (callerAbility == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbility not exist");
-            return ERR_INVALID_VALUE;
-        }
-    }
 
     auto currentUserId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
     if (sessionInfo->userId == DEFAULT_INVAL_VALUE) {
