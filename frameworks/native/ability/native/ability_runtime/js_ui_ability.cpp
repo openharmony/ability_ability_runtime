@@ -1530,7 +1530,8 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
     return true;
 }
 
-bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
+bool JsUIAbility::CallPromise(napi_value result,
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
     AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *rejectCallbackInfo)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
