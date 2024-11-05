@@ -1110,13 +1110,14 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     if (!CheckPromise(result)) {
         return OnContinueSyncCB(result, wantParams, jsWantParams);
     }
-    auto *callbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Create();
-    if (callbackInfo == nullptr) {
+    auto *resolveCallbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Create();
+    auto *rejectCallbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Create();
+    if (promiseCallbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "create AbilityTransactionCallbackInfo failed");
         return OnContinueSyncCB(result, wantParams, jsWantParams);
     }
-    MakeOnContinueAsyncTask(env, jsWantParams, result, abilityInfo, callbackInfo);
-    if (!CallPromise(result, callbackInfo)) {
+    MakeOnContinueAsyncTask(jsWantParams, result, abilityInfo, resolveCallbackInfo, rejectCallbackInfo);
+    if (!CallPromise(result, resolveCallbackInfo, rejectCallbackInfo)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "call promise failed");
         return OnContinueSyncCB(result, wantParams, jsWantParams);
     }
@@ -1125,10 +1126,13 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     return onContinueRes;
 }
 
-void JsUIAbility::MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams,
+void JsUIAbility::MakeOnContinueAsyncTask(napi_value &jsWantParams,
     napi_value &result, const AppExecFwk::AbilityInfo &abilityInfo,
-    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &callbackInfo)
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &resolveCallbackInfo,
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &rejectCallbackInfo)
 {
+    HandleScope handleScope(jsRuntime_);
+    auto env = jsRuntime_.GetNapiEnv();
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
     napi_ref jsWantParamsRef;
     napi_create_reference(env, jsWantParams, 1, &jsWantParamsRef);
@@ -1143,7 +1147,7 @@ void JsUIAbility::MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams
         }
     }, nullptr, nullptr);
 
-    auto asyncCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
+    auto resolveCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
         auto ability = abilityWeakPtr.lock();
         if (ability == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
@@ -1152,7 +1156,19 @@ void JsUIAbility::MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams
         ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
     };
 
-    callbackInfo.Push(asyncCallback);
+    resolveCallbackInfo.Push(resolveCallback);
+
+    auto rejectCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
+        auto ability = abilityWeakPtr.lock();
+        if (ability == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
+            return;
+        }
+        status = AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
+        ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
+    };
+
+    rejectCallbackInfo.Push(rejectCallback);
 }
 
 int32_t JsUIAbility::OnContinueAsyncCB(napi_ref jsWantParamsRef, int32_t status,
@@ -1514,7 +1530,8 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
     return true;
 }
 
-bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo)
+bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *rejectCallbackInfo)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     auto env = jsRuntime_.GetNapiEnv();
@@ -1535,10 +1552,13 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
         return false;
     }
     HandleScope handleScope(jsRuntime_);
-    napi_value promiseCallback = nullptr;
+    napi_value resolveCallback = nullptr;
     napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, OnContinuePromiseCallback,
-        callbackInfo, &promiseCallback);
-    napi_value argv[2] = { promiseCallback, promiseCallback };
+        resolveCallbackInfo, &resolveCallback);
+    napi_value rejectCallback = nullptr;
+    napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, OnContinuePromiseCallback,
+        rejectCallbackInfo, &rejectCallback);
+    napi_value argv[2] = { resolveCallback, rejectCallback };
     napi_call_function(env, result, then, PROMISE_CALLBACK_PARAM_NUM, argv, nullptr);
     TAG_LOGI(AAFwkTag::UIABILITY, "end");
     return true;

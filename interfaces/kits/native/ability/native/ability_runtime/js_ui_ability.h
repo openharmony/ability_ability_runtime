@@ -316,7 +316,8 @@ private:
         bool withResult = false, bool showMethodNotFoundLog = true);
     bool CheckPromise(napi_value result);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
-    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo);
+    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *rejectCallbackInfo);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
@@ -332,9 +333,10 @@ private:
     bool BackPressDefaultValue();
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
-    void MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams,
+    void MakeOnContinueAsyncTask(napi_value &jsWantParams,
         napi_value &result, const AppExecFwk::AbilityInfo &abilityInfo,
-        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &callbackInfo);
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &resolveCallbackInfo,
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &rejectCallbackInfo);
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
