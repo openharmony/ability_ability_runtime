@@ -38,6 +38,16 @@ using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
 using InsightIntentExecutorAsyncCallback = AppExecFwk::InsightIntentExecutorAsyncCallback;
 
 class JsUIAbility : public UIAbility {
+
+public:
+    struct OnContinueData{
+        napi_value promise;
+        napi_value jsWantParams;
+        napi_ref jsWantParamsRef;
+        AppExecFwk::AbilityInfo abilityInfo;
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo;
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *rejectCallbackInfo;
+    };
 public:
     /**
      * @brief Create a JsUIAbility instance through the singleton pattern
@@ -334,10 +344,7 @@ private:
     bool BackPressDefaultValue();
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
-    void MakeOnContinueAsyncTask(napi_value &jsWantParams,
-        napi_value &result, const AppExecFwk::AbilityInfo &abilityInfo,
-        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
-        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *rejectCallbackInfo);
+    void MakeOnContinueAsyncTask(OnContinueData &onContinueData);
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
