@@ -434,8 +434,7 @@ HWTEST_F(AppMgrServiceInnerTest, CheckLoadAbilityConditions_001, TestSize.Level0
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
-    loadParam->token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
 
     appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, nullptr);
 
@@ -443,15 +442,15 @@ HWTEST_F(AppMgrServiceInnerTest, CheckLoadAbilityConditions_001, TestSize.Level0
 
     appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, nullptr, nullptr);
+    appMgrServiceInner->CheckLoadAbilityConditions(token, nullptr, nullptr);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, abilityInfo_, nullptr);
+    appMgrServiceInner->CheckLoadAbilityConditions(token, abilityInfo_, nullptr);
 
     appMgrServiceInner->CheckLoadAbilityConditions(nullptr, abilityInfo_, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, nullptr, applicationInfo_);
+    appMgrServiceInner->CheckLoadAbilityConditions(token, nullptr, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, abilityInfo_, applicationInfo_);
+    appMgrServiceInner->CheckLoadAbilityConditions(token, abilityInfo_, applicationInfo_);
 
     EXPECT_NE(appMgrServiceInner, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "CheckLoadAbilityConditions_001 end");

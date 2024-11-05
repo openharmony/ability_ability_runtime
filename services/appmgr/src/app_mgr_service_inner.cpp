@@ -612,9 +612,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         TAG_LOGE(AAFwkTag::APPMGR, "null loadParam");
         return;
     }
-    if (!CheckLoadAbilityConditions(loadParam, abilityInfo, appInfo)) {
+    if (!CheckLoadAbilityConditions(loadParam->token, abilityInfo, appInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "checkLoadAbilityConditions fail");
-        NotifyLoadAbilityFailed(loadParam->token);
         return;
     }
     if (abilityInfo->type == AbilityType::PAGE) {
@@ -811,10 +810,10 @@ void AppMgrServiceInner::RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunnin
     appRunningManager_->RemoveUIExtensionLauncherItemById(uiExtensionAbilityId);
 }
 
-bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
+bool AppMgrServiceInner::CheckLoadAbilityConditions(const sptr<IRemoteObject> &token,
     const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo)
 {
-    if (!loadParam || !loadParam->token || !abilityInfo || !appInfo) {
+    if (!token || !abilityInfo || !appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
         return false;
     }
@@ -825,17 +824,6 @@ bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AbilityRunti
     if (abilityInfo->applicationName != appInfo->name) {
         TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo and appInfo have diff appName");
         return false;
-    }
-    if (loadParam->preToken) {
-        auto appRecord = GetAppRunningRecordByAbilityToken(loadParam->preToken);
-        if (appRecord == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "preToken not exist");
-            return false;
-        }
-        if (appRecord->IsKilling()) {
-            TAG_LOGE(AAFwkTag::APPMGR, "app is killing");
-            return false;
-        }
     }
 
     return true;
@@ -1136,19 +1124,6 @@ void AppMgrServiceInner::NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord>
     }
     TAG_LOGI(AAFwkTag::APPMGR, "attach fail name: %{public}s %{public}zu", appRecord->GetProcessName().c_str(),
         abilityTokens.size());
-    std::lock_guard lock(appStateCallbacksLock_);
-    for (const auto &item : appStateCallbacks_) {
-        if (item.callback != nullptr) {
-            item.callback->OnAppRemoteDied(abilityTokens);
-        }
-    }
-}
-
-void AppMgrServiceInner::NotifyLoadAbilityFailed(sptr<IRemoteObject> token)
-{
-    CHECK_POINTER_AND_RETURN_LOG(token, "token null.");
-    std::vector<sptr<IRemoteObject>> abilityTokens;
-    abilityTokens.emplace_back(token);
     std::lock_guard lock(appStateCallbacksLock_);
     for (const auto &item : appStateCallbacks_) {
         if (item.callback != nullptr) {
