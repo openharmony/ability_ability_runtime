@@ -63,6 +63,7 @@ const int32_t BASE_DISPLAY_ID_NUM (10);
 #endif
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
+constexpr const int32_t PROMISE_CALLBACK_PARAM_NUM = 2;
 
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
@@ -81,10 +82,10 @@ napi_value OnContinuePromiseCallback(napi_env env, napi_callback_info info)
     size_t argc = 1;
     napi_value argv = {nullptr};
     NAPI_CALL_NO_THROW(napi_get_cb_info(env, info, &argc, &argv, nullptr, &data), nullptr);
-    int32_t onContinueRes = 0;
+    int32_t onContinueRes = AppExecFwk::ContinuationManagerStage::OnContinueResult::REJECT;
     if (!ConvertFromJsValue(env, argv, onContinueRes)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get value failed");
-        return nullptr;
+        onContinueRes = AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *>(data);
     callbackInfo->Call(onContinueRes);
@@ -212,15 +213,23 @@ void JsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
 }
 
+void JsUIAbility::UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
+    const std::string &moduleName, const std::string &srcPath)
+{
+    std::string key = moduleName + "::" + srcPath;
+    std::unique_ptr<NativeReference> moduleObj = nullptr;
+    jsAbilityObj_ = jsRuntime_.PopPreloadObj(key, moduleObj) ? std::move(moduleObj) : jsRuntime_.LoadModule(
+        moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
+        false, abilityInfo->srcEntrance);
+}
+
 void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "called");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-    jsAbilityObj_ = jsRuntime_.LoadModule(
-        moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE,
-        false, abilityInfo->srcEntrance);
+    UpdateAbilityObj(abilityInfo, moduleName, srcPath);
     if (jsAbilityObj_ == nullptr || abilityContext_ == nullptr || want == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null jsAbilityObj_ or abilityContext_ or want");
         return;
@@ -257,10 +266,11 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
         abilityRecovery_->SetJsAbility(reinterpret_cast<uintptr_t>(workContext));
     }
     napi_wrap(env, contextObj, workContext,
-        [](napi_env, void *data, void *) {
+        [](napi_env, void *data, void *hint) {
             TAG_LOGD(AAFwkTag::UIABILITY, "finalizer for weak_ptr ability context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
-        }, nullptr, nullptr);
+            delete static_cast<std::weak_ptr<int32_t> *>(hint);
+        }, workScreenMode, nullptr);
     TAG_LOGI(AAFwkTag::UIABILITY, "End");
 }
 
@@ -1106,18 +1116,29 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
         return OnContinueSyncCB(result, wantParams, jsWantParams);
     }
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
-    auto asyncCallback = [thisJsWantParams = jsWantParams, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
+    napi_ref jsWantParamsRef;
+    napi_create_reference(env, jsWantParams, 1, &jsWantParamsRef);
+    napi_add_finalizer(env, result, jsWantParamsRef, [](napi_env env, void *context, void *) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "Release jsWantParamsRef");
+        auto contextRef = reinterpret_cast<napi_ref>(context);
+        if (contextRef != nullptr) {
+            napi_delete_reference(env, contextRef);
+            contextRef = nullptr;
+        }
+    }, nullptr, nullptr);
+    auto asyncCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
         auto ability = abilityWeakPtr.lock();
         if (ability == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
             return;
         }
-        ability->OnContinueAsyncCB(thisJsWantParams, status, abilityInfo);
+        ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
     };
 
     callbackInfo->Push(asyncCallback);
     if (!CallPromise(result, callbackInfo)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "call promise failed");
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Destroy(callbackInfo);
         return OnContinueSyncCB(result, wantParams, jsWantParams);
     }
     isAsyncOnContinue = true;
@@ -1125,13 +1146,15 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     return onContinueRes;
 }
 
-int32_t JsUIAbility::OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+int32_t JsUIAbility::OnContinueAsyncCB(napi_ref jsWantParamsRef, int32_t status,
     const AppExecFwk::AbilityInfo &abilityInfo)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "call");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     WantParams wantParams;
+    napi_value jsWantParams;
+    napi_get_reference_value(env, jsWantParamsRef, &jsWantParams);
     OHOS::AppExecFwk::UnwrapWantParams(env, jsWantParams, wantParams);
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
@@ -1505,9 +1528,9 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
     HandleScope handleScope(jsRuntime_);
     napi_value promiseCallback = nullptr;
     napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, OnContinuePromiseCallback,
-        callbackInfo, &promiseCallback);
-    napi_value argv[1] = { promiseCallback };
-    napi_call_function(env, result, then, 1, argv, nullptr);
+        resolveCallbackInfo, &promiseCallback);
+    napi_value argv[2] = { promiseCallback, promiseCallback };
+    napi_call_function(env, result, then, PROMISE_CALLBACK_PARAM_NUM, argv, nullptr);
     TAG_LOGI(AAFwkTag::UIABILITY, "end");
     return true;
 }

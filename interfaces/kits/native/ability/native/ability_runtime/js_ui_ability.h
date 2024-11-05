@@ -96,7 +96,7 @@ public:
     /**
      * @brief The async callback of OnContinue.
      */
-    int32_t OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+    int32_t OnContinueAsyncCB(napi_ref jsWantParams, int32_t status,
         const AppExecFwk::AbilityInfo &abilityInfo) override;
 
     /**
@@ -330,6 +330,8 @@ private:
     void CreateJSContext(napi_env env, napi_value &contextObj, int32_t screenMode);
     bool CheckSatisfyTargetAPIVersion(int32_t targetAPIVersion);
     bool BackPressDefaultValue();
+    void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
+        const std::string &moduleName, const std::string &srcPath);
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
