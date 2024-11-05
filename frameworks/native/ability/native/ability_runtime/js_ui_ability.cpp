@@ -1128,8 +1128,8 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
 
 void JsUIAbility::MakeOnContinueAsyncTask(napi_value &jsWantParams,
     napi_value &result, const AppExecFwk::AbilityInfo &abilityInfo,
-    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &resolveCallbackInfo,
-    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &rejectCallbackInfo)
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *rejectCallbackInfo)
 {
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
@@ -1156,7 +1156,7 @@ void JsUIAbility::MakeOnContinueAsyncTask(napi_value &jsWantParams,
         ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
     };
 
-    resolveCallbackInfo.Push(resolveCallback);
+    resolveCallbackInfo->Push(resolveCallback);
 
     auto rejectCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
         auto ability = abilityWeakPtr.lock();
@@ -1168,7 +1168,7 @@ void JsUIAbility::MakeOnContinueAsyncTask(napi_value &jsWantParams,
         ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
     };
 
-    rejectCallbackInfo.Push(rejectCallback);
+    rejectCallbackInfo->Push(rejectCallback);
 }
 
 int32_t JsUIAbility::OnContinueAsyncCB(napi_ref jsWantParamsRef, int32_t status,

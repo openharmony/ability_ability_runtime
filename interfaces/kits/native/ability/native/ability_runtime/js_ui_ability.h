@@ -335,8 +335,8 @@ private:
         const std::string &moduleName, const std::string &srcPath);
     void MakeOnContinueAsyncTask(napi_value &jsWantParams,
         napi_value &result, const AppExecFwk::AbilityInfo &abilityInfo,
-        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &resolveCallbackInfo,
-        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &rejectCallbackInfo);
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *rejectCallbackInfo);
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
