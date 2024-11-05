@@ -3739,5 +3739,16 @@ void AbilityRecord::UpdateDmsCallerInfo(Want &want)
     want.SetParam(Want::PARAM_RESV_CALLER_APP_IDENTIFIER, want.GetStringParam(DMS_CALLER_APP_IDENTIFIER));
     want.RemoveParam(DMS_CALLER_APP_IDENTIFIER);
 }
+
+void SetDebugUIExtension(boolean isDebugUIExt)
+{
+    if (!isDebugUIExt) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Invalid to debug UIExtension");
+        return;
+    }
+    want_.SetParam(DEBUG_APP, true);
+    launchDebugInfo_.isDebugAppSet = true;
+    launchDebugInfo_.debugApp = true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
