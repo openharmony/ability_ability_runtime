@@ -316,7 +316,8 @@ private:
         bool withResult = false, bool showMethodNotFoundLog = true);
     bool CheckPromise(napi_value result);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
-    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
+    bool CallPromise(napi_value result,
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *resolveCallbackInfo,
         AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *rejectCallbackInfo);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
