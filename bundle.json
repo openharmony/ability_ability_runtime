@@ -433,7 +433,7 @@
           },
           {
             "header": {
-              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/ui_extension_ability",
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/ui_extension_base",
               "header_files": [
                 "ui_extension_context.h"
               ]
