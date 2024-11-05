@@ -63,6 +63,7 @@ const int32_t BASE_DISPLAY_ID_NUM (10);
 #endif
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
+constexpr const int32_t PROMISE_CALLBACK_PARAM_NUM = 2;
 
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
@@ -1114,11 +1115,25 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
         TAG_LOGE(AAFwkTag::UIABILITY, "create AbilityTransactionCallbackInfo failed");
         return OnContinueSyncCB(result, wantParams, jsWantParams);
     }
+    MakeOnContinueAsyncTask(env, jsWantParams, result, abilityInfo, callbackInfo);
+    if (!CallPromise(result, callbackInfo)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "call promise failed");
+        return OnContinueSyncCB(result, wantParams, jsWantParams);
+    }
+    isAsyncOnContinue = true;
+    TAG_LOGI(AAFwkTag::UIABILITY, "end");
+    return onContinueRes;
+}
+
+void JsUIAbility::MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams,
+    napi_value &result, AppExecFwk::AbilityInfo &abilityInfo,
+    AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &callbackInfo)
+{
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
     napi_ref jsWantParamsRef;
     napi_create_reference(env, jsWantParams, 1, &jsWantParamsRef);
 
-    // Release jsWantParamsRef at the same time as Primise object destruction
+    // Release jsWantParamsRef at the same time as Promise object destruction
     napi_add_finalizer(env, result, jsWantParamsRef, [](napi_env env, void *context, void *) {
         TAG_LOGI(AAFwkTag::UIABILITY, "Release jsWantParamsRef");
         napi_ref contextRef = reinterpret_cast<napi_ref>(context);
@@ -1134,14 +1149,7 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
         ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
     };
 
-    callbackInfo->Push(asyncCallback);
-    if (!CallPromise(result, callbackInfo)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "call promise failed");
-        return OnContinueSyncCB(result, wantParams, jsWantParams);
-    }
-    isAsyncOnContinue = true;
-    TAG_LOGI(AAFwkTag::UIABILITY, "end");
-    return onContinueRes;
+    callbackInfo.Push(asyncCallback);
 }
 
 int32_t JsUIAbility::OnContinueAsyncCB(napi_ref jsWantParamsRef, int32_t status,
@@ -1528,7 +1536,7 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
     napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, OnContinuePromiseCallback,
         callbackInfo, &promiseCallback);
     napi_value argv[2] = { promiseCallback, promiseCallback };
-    napi_call_function(env, result, then, 2, argv, nullptr);
+    napi_call_function(env, result, then, PROMISE_CALLBACK_PARAM_NUM, argv, nullptr);
     TAG_LOGI(AAFwkTag::UIABILITY, "end");
     return true;
 }

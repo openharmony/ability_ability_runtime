@@ -332,6 +332,9 @@ private:
     bool BackPressDefaultValue();
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
+    void MakeOnContinueAsyncTask(napi_env env, napi_value &jsWantParams,
+        napi_value &result, AppExecFwk::AbilityInfo &abilityInfo,
+        AppExecFwk::AbilityTransactionCallbackInfo<int32_t> &callbackInfo);
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
