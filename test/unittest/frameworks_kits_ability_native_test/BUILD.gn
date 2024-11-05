@@ -2394,15 +2394,12 @@ ohos_unittest("ability_connection_manager_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "faultloggerd:libdfx_dumpcatcher",
+    "hichecker:libhichecker",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
-
-  if (hichecker_enabled) {
-    external_deps += [ "hichecker:libhichecker" ]
-  }
 }
 
 ohos_unittest("abilityruntime_test") {
@@ -2850,7 +2847,6 @@ group("unittest") {
     ":ability_test",
     ":ability_thread_call_request_test",
     ":ability_thread_dataability_test",
-    ":ability_thread_test",
     ":ability_transaction_callback_info_test",
     ":ability_window_test",
     ":abilityruntime_test",
