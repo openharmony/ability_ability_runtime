@@ -3102,6 +3102,9 @@ AppProcessData AppMgrServiceInner::WrapAppProcessData(const std::shared_ptr<AppR
     processData.pid = appRecord->GetPriorityObject()->GetPid();
     processData.appState = state;
     processData.isFocused = appRecord->GetFocusFlag();
+    processData.appIndex = appRecord->GetAppIndex();
+    processData.instanceKey = appRecord->GetInstanceKey();
+    processData.bundleName = appRecord->GetBundleName();
     auto renderRecordMap = appRecord->GetRenderRecordMap();
     if (!renderRecordMap.empty()) {
         for (auto iter : renderRecordMap) {
