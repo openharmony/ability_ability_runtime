@@ -274,6 +274,7 @@ struct AbilityRequest {
     uint32_t specifyTokenId = 0;
     bool uriReservedFlag = false;
     std::string reservedBundleName;
+    bool isFromIcon = false;
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -581,6 +582,8 @@ public:
 #endif
 
     bool GrantUriPermissionForServiceExtension();
+
+    bool GrantUriPermissionForUIExtension();
 
     /**
      * check whether the ability is launcher.
@@ -973,6 +976,7 @@ public:
     void SetSessionInfo(sptr<SessionInfo> sessionInfo);
     void UpdateSessionInfo(sptr<IRemoteObject> sessionToken);
     void SetMinimizeReason(bool fromUser);
+    void SetSceneFlag(uint32_t sceneFlag);
     bool IsMinimizeFromUser() const;
     void SetClearMissionFlag(bool clearMissionFlag);
     bool IsClearMissionFlag();
@@ -1058,6 +1062,18 @@ public:
 
     void RemoveConnectWant();
 
+    void UpdateDmsCallerInfo(Want &want);
+
+    void SetSecurityFlag(bool securityFlag)
+    {
+        securityFlag_ = securityFlag;
+    }
+
+    bool GetSecurityFlag() const
+    {
+        return securityFlag_;
+    }
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
@@ -1089,8 +1105,10 @@ private:
 
     void RecordSaCallerInfo(const Want &want);
 
+#ifdef WITH_DLP
     void HandleDlpAttached();
     void HandleDlpClosed();
+#endif // WITH_DLP
     void NotifyRemoveShellProcess(int32_t type);
     void NotifyAnimationAbilityDied();
     inline void SetCallerAccessTokenId(uint32_t callerAccessTokenId)
@@ -1113,11 +1131,10 @@ private:
 
     void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
 
-    bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
-
     void PublishFileOpenEvent(const Want &want);
 
     void SetDebugAppByWaitingDebugFlag();
+    void AfterLoaded();
 
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
@@ -1281,6 +1298,7 @@ private:
     ffrt::mutex connectWantLock_;
     bool isLaunching_ = true;
     LaunchDebugInfo launchDebugInfo_;
+    bool securityFlag_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

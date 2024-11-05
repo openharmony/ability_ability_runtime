@@ -34,7 +34,10 @@ ohos_shared_library("startup_util") {
     "${ability_runtime_utils_path}/server/constant",
   ]
 
-  sources = [ "src/startup_util.cpp" ]
+  sources = [
+    "src/param.cpp",
+    "src/startup_util.cpp",
+  ]
 
   public_configs = [ ":startup_util_config" ]
 
@@ -49,6 +52,7 @@ ohos_shared_library("startup_util") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "ipc:ipc_single",
   ]
 
   innerapi_tags = [ "platformsdk" ]

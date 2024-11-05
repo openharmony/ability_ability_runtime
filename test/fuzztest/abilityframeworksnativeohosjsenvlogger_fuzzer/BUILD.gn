@@ -50,6 +50,7 @@ ohos_fuzztest("AbilityFrameworksNativeOhosJsEnvLoggerFuzzTest") {
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/app_scheduler.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "abilityframeworksnativeohosjsenvlogger_fuzzer.cpp",
   ]
 
@@ -80,6 +81,7 @@ ohos_fuzztest("AbilityFrameworksNativeOhosJsEnvLoggerFuzzTest") {
     "ability_runtime:ability_deps_wrapper",
     "ability_runtime:js_environment",
     "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
@@ -103,6 +105,10 @@ ohos_fuzztest("AbilityFrameworksNativeOhosJsEnvLoggerFuzzTest") {
       "i18n:intl_util",
       "window_manager:libwm",
     ]
+  }
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
 }
 

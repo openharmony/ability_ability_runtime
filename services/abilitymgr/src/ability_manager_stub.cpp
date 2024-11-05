@@ -15,20 +15,10 @@
 
 #include "ability_manager_stub.h"
 
-#include "errors.h"
-#include "string_ex.h"
-
-#include "ability_connect_callback_proxy.h"
-#include "ability_connect_callback_stub.h"
-#include "ability_manager_collaborator_proxy.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_radar.h"
-#include "ability_scheduler_proxy.h"
-#include "ability_scheduler_stub.h"
-#include "configuration.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "session_info.h"
 #include "status_bar_delegate_interface.h"
 
 namespace OHOS {
@@ -38,6 +28,7 @@ namespace {
 const std::u16string extensionDescriptor = u"ohos.aafwk.ExtensionManager";
 constexpr int32_t CYCLE_LIMIT = 1000;
 constexpr int32_t MAX_KILL_PROCESS_PID_COUNT = 100;
+constexpr int32_t MAX_UPDATE_CONFIG_SIZE = 100;
 } // namespace
 AbilityManagerStub::AbilityManagerStub()
 {}
@@ -325,9 +316,6 @@ int AbilityManagerStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel 
     if (interfaceCode == AbilityManagerInterfaceCode::IS_RAM_CONSTRAINED_DEVICE) {
         return IsRamConstrainedDeviceInner(data, reply);
     }
-    if (interfaceCode == AbilityManagerInterfaceCode::CLEAR_UP_APPLICATION_DATA) {
-        return ClearUpApplicationDataInner(data, reply);
-    }
     if (interfaceCode == AbilityManagerInterfaceCode::LOCK_MISSION_FOR_CLEANUP) {
         return LockMissionForCleanupInner(data, reply);
     }
@@ -510,9 +498,11 @@ int AbilityManagerStub::OnRemoteRequestInnerThirteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_CONNECTION_OBSERVER) {
         return UnregisterConnectionObserverInner(data, reply);
     }
+#ifdef WITH_DLP
     if (interfaceCode == AbilityManagerInterfaceCode::GET_DLP_CONNECTION_INFOS) {
         return GetDlpConnectionInfosInner(data, reply);
     }
+#endif // WITH_DLP
     if (interfaceCode == AbilityManagerInterfaceCode::MOVE_ABILITY_TO_BACKGROUND) {
         return MoveAbilityToBackgroundInner(data, reply);
     }
@@ -748,6 +738,12 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     }
     if (interfaceCode == AbilityManagerInterfaceCode::OPEN_LINK) {
         return OpenLinkInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::TERMINATE_MISSION) {
+        return TerminateMissionInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::UPDATE_ASSOCIATE_CONFIG_LIST) {
+        return UpdateAssociateConfigListInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -1023,7 +1019,8 @@ int AbilityManagerStub::MinimizeUIAbilityBySCBInner(MessageParcel &data, Message
         sessionInfo = data.ReadParcelable<SessionInfo>();
     }
     bool fromUser = data.ReadBool();
-    int32_t result = MinimizeUIAbilityBySCB(sessionInfo, fromUser);
+    uint32_t sceneFlag = data.ReadUint32();
+    int32_t result = MinimizeUIAbilityBySCB(sessionInfo, fromUser, sceneFlag);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1133,18 +1130,6 @@ int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &rep
     int result = KillProcess(bundleName);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove stack error");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::ClearUpApplicationDataInner(MessageParcel &data, MessageParcel &reply)
-{
-    std::string bundleName = Str16ToStr8(data.ReadString16());
-    int32_t userId = data.ReadInt32();
-    int result = ClearUpApplicationData(bundleName, userId);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ClearUpApplicationData error");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -1724,7 +1709,9 @@ int AbilityManagerStub::GetWantSenderInner(MessageParcel &data, MessageParcel &r
     if (data.ReadBool()) {
         callerToken = data.ReadRemoteObject();
     }
-    sptr<IWantSender> wantSender = GetWantSender(*wantSenderInfo, callerToken);
+
+    int32_t uid = data.ReadInt32();
+    sptr<IWantSender> wantSender = GetWantSender(*wantSenderInfo, callerToken, uid);
     if (!reply.WriteRemoteObject(((wantSender == nullptr) ? nullptr : wantSender->AsObject()))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to reply wantSender instance to client, for write parcel error");
         return ERR_INVALID_VALUE;
@@ -2248,8 +2235,9 @@ int AbilityManagerStub::StartUIAbilityBySCBInner(MessageParcel &data, MessagePar
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
     }
+    uint32_t sceneFlag = data.ReadUint32();
     bool isColdStart = false;
-    int32_t result = StartUIAbilityBySCB(sessionInfo, isColdStart);
+    int32_t result = StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
     reply.WriteBool(isColdStart);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -2645,11 +2633,13 @@ int AbilityManagerStub::UnregisterObserver(const sptr<AbilityRuntime::IConnectio
     return NO_ERROR;
 }
 
+#ifdef WITH_DLP
 int AbilityManagerStub::GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos)
 {
     // should implement in child
     return NO_ERROR;
 }
+#endif // WITH_DLP
 
 int AbilityManagerStub::GetConnectionData(std::vector<AbilityRuntime::ConnectionData> &infos)
 {
@@ -2892,6 +2882,7 @@ int AbilityManagerStub::UnregisterConnectionObserverInner(MessageParcel &data, M
     return UnregisterObserver(observer);
 }
 
+#ifdef WITH_DLP
 int AbilityManagerStub::GetDlpConnectionInfosInner(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<AbilityRuntime::DlpConnectionInfo> infos;
@@ -2915,6 +2906,7 @@ int AbilityManagerStub::GetDlpConnectionInfosInner(MessageParcel &data, MessageP
 
     return ERR_OK;
 }
+#endif // WITH_DLP
 
 int AbilityManagerStub::GetConnectionDataInner(MessageParcel &data, MessageParcel &reply)
 {
@@ -3981,6 +3973,56 @@ int32_t AbilityManagerStub::OpenLinkInner(MessageParcel &data, MessageParcel &re
     }
     reply.WriteInt32(result);
     return result;
+}
+
+int32_t AbilityManagerStub::TerminateMissionInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t missionId = data.ReadInt32();
+    int32_t result = TerminateMission(missionId);
+    if (result != NO_ERROR && result != ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "OpenLink failed.");
+    }
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t AbilityManagerStub::UpdateAssociateConfigListInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t size = data.ReadInt32();
+    if (size > MAX_UPDATE_CONFIG_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "config size error");
+        return ERR_INVALID_VALUE;
+    }
+    std::map<std::string, std::list<std::string>> configs;
+    for (int32_t i = 0; i < size; ++i) {
+        std::string key = data.ReadString();
+        int32_t itemSize = data.ReadInt32();
+        if (itemSize > MAX_UPDATE_CONFIG_SIZE) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "config size error");
+            return ERR_INVALID_VALUE;
+        }
+        configs.emplace(key, std::list<std::string>());
+        for (int32_t j = 0; j < itemSize; ++j) {
+            configs[key].push_back(data.ReadString());
+        }
+    }
+
+    std::list<std::string> exportConfigs;
+    size = data.ReadInt32();
+    if (size > MAX_UPDATE_CONFIG_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "config size error");
+        return ERR_INVALID_VALUE;
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        exportConfigs.push_back(data.ReadString());
+    }
+    int32_t flag = data.ReadInt32();
+    int32_t result = UpdateAssociateConfigList(configs, exportConfigs, flag);
+    if (result != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "update associate config fail");
+    }
+    reply.WriteInt32(result);
+    return NO_ERROR;
 }
 } // namespace AAFwk
 } // namespace OHOS

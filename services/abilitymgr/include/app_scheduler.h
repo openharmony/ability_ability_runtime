@@ -94,6 +94,8 @@ public:
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) {}
+
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 };
 
@@ -257,9 +259,11 @@ public:
      *
      * @param bundleName name of bundle.
      * @param uid uid of bundle.
+     * @param  reason, caller function name.
      * @return 0 if success.
      */
-    int KillApplicationByUid(const std::string &bundleName, int32_t uid);
+    int KillApplicationByUid(const std::string &bundleName, int32_t uid,
+        const std::string& reason = "KillApplicationByUid");
 
      /**
      * update the application info after new module installed.
@@ -269,13 +273,6 @@ public:
      * @return 0 if success.
      */
     int UpdateApplicationInfoInstalled(const std::string &bundleName, const int32_t uid);
-
-    /**
-     * clear the application data
-     *
-     * @param bundleName.
-     */
-    int ClearUpApplicationData(const std::string &bundleName, const int32_t userId = -1);
 
     void AttachTimeOut(const sptr<IRemoteObject> &token);
 
@@ -352,6 +349,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
+
+    /**
+     *  Set the process cache status by process ID.
+     *
+     * @param pid The process id.
+     * @param isSupport The process is support cache.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    void SetProcessCacheStatus(int32_t pid, bool isSupport);
 
     /**
      * Record process exit reason to appRunningRecord
@@ -461,6 +467,8 @@ public:
 
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
 
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
     /**
      * Request to clean uiability from user.
      *
@@ -469,7 +477,13 @@ public:
      */
     bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
-    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+    /**
+     * whether the abilities of process specified by pid type only UIAbility.
+     * @return Returns true is only UIAbility, otherwise return false
+     */
+    bool IsProcessContainsOnlyUIAbility(const pid_t pid);
+
+    bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
 protected:
     /**
@@ -501,6 +515,9 @@ protected:
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+
+    
+    virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
 private:
     std::mutex lock_;

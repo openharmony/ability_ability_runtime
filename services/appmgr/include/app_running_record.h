@@ -330,26 +330,6 @@ public:
      */
     void SetTrimMemoryLevel(int32_t level);
 
-    // Kill this process with a given reason
-    /**
-     * ForceKillApp, Kill this process with a given reason.
-     *
-     * @param reason, The reason to kill the process.
-     *
-     * @return
-     */
-    void ForceKillApp(const std::string &reason) const;
-
-    // Schedule to crash this app with a given description
-    /**
-     * ScheduleAppCrash, Schedule to crash this app with a given description.
-     *
-     * @param description, the given description.
-     *
-     * @return
-     */
-    void ScheduleAppCrash(const std::string &description) const;
-
     /**
      * LaunchApplication, Notify application to launch application.
      *
@@ -364,7 +344,12 @@ public:
      */
     void AddAbilityStage();
 
-    void AddAbilityStageBySpecifiedAbility(const std::string &bundleName);
+    /**
+     * AddAbilityStageBySpecifiedAbility, Notify application to ability stage.
+     *
+     * @return Return true if the ability stage need to be add, otherwise it returns false.
+     */
+    bool AddAbilityStageBySpecifiedAbility(const std::string &bundleName);
 
     void AddAbilityStageBySpecifiedProcess(const std::string &bundleName);
 
@@ -489,7 +474,7 @@ public:
      *
      * @return
      */
-    void TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce);
+    void TerminateAbility(const sptr<IRemoteObject> &token, const bool isForce, bool isTimeout = false);
 
     /**
      * AbilityTerminated, terminate the ability.
@@ -809,6 +794,9 @@ public:
     void SetAttachedToStatusBar(bool isAttached);
     bool IsAttachedToStatusBar();
 
+    bool SetEnableProcessCache(bool enable);
+    bool GetEnableProcessCache();
+
     void ScheduleCacheProcess();
 
     void SetBrowserHost(sptr<IRemoteObject> browser);
@@ -844,9 +832,9 @@ public:
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
      *
-     * @return
+     * @return bool operation status
      */
-    void ScheduleForegroundRunning();
+    bool ScheduleForegroundRunning();
 
     /**
      * ScheduleBackgroundRunning, Notify application to switch to background.
@@ -858,7 +846,9 @@ public:
     void SetUserRequestCleaning();
     bool IsUserRequestCleaning() const;
     bool IsAllAbilityReadyToCleanedByUserRequest();
+    bool IsProcessAttached() const;
 
+    void AddAppLifecycleEvent(const std::string &msg);
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1004,6 +994,7 @@ private:
     bool isErrorInfoEnhance_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
+    bool enableProcessCache_ = false;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     bool processCacheBlocked = false; // temporarily block process cache feature
     sptr<IRemoteObject> browserHost_;

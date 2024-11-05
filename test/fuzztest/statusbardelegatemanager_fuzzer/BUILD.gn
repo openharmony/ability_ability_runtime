@@ -44,6 +44,7 @@ ohos_fuzztest("StatusBarDelegateManagerFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/status_bar_delegate_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/state_utils.cpp",
     "statusbardelegatemanager_fuzzer.cpp",
   ]
 
@@ -87,6 +88,10 @@ ohos_fuzztest("StatusBarDelegateManagerFuzzTest") {
       "i18n:intl_util",
       "window_manager:libwm",
     ]
+  }
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
   }
 }
 

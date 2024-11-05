@@ -350,7 +350,7 @@ public:
      * @param isColdStart the session info of the ability is or not cold start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart);
+    ErrCode StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag = 0);
 
     /**
      * Stop extension ability with want, send want to ability manager service.
@@ -470,7 +470,7 @@ public:
      * @param fromUser, Whether form user.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode MinimizeUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool fromUser = false);
+    ErrCode MinimizeUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool fromUser = false, uint32_t sceneFlag = 0);
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -603,16 +603,6 @@ public:
      */
     ErrCode ForceTimeoutForTest(const std::string &abilityName, const std::string &state);
     #endif
-
-    /**
-     * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
-     * clear the application data.
-     *
-     * @param bundleName, bundle name in Application record.
-     * @param userId User ID.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode ClearUpApplicationData(const std::string &bundleName, const int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * ContinueMission, continue ability from mission center.
@@ -1409,7 +1399,7 @@ public:
      */
     int32_t RestartApp(const AAFwk::Want &want);
 
-    /*
+    /**
      * @brief Get host info of root caller.
      *
      * @param token The ability token.
@@ -1544,6 +1534,24 @@ public:
      * @return Returns ERR_OK on success, others on failure.
     */
     int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode);
+
+    /**
+     * Terminate process by bundleName.
+     *
+     * @param missionId, The mission id of the UIAbility need to be terminated.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode TerminateMission(int32_t missionId);
+
+    /**
+     * update associate config list by rss.
+     *
+     * @param configs The rss config info.
+     * @param exportConfigs The rss export config info.
+     * @param flag UPDATE_CONFIG_FLAG_COVER is cover config, UPDATE_CONFIG_FLAG_APPEND is append config.
+     */
+    ErrCode UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag);
 
 private:
     AbilityManagerClient();

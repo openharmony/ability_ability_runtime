@@ -119,6 +119,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnRun_Success_001, TestSi
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
     proxy->OnRun();
     proxy.reset();
+    EXPECT_EQ(nullptr, proxy);
 }
 
 /**
@@ -130,6 +131,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnRun_Failed_NoRegistrati
 {
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
     proxy->OnRun();
+    EXPECT_NE(nullptr, proxy);
 }
 
 /**
@@ -142,6 +144,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnPrepare_Success_001, Te
     RegisterCJTestRunnerFuncs(RegisterCangjieFuncs);
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
     proxy->OnPrepare();
+    EXPECT_NE(nullptr, proxy);
 }
 
 /**
@@ -153,6 +156,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestOnPrepare_Failed_NoRegist
 {
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
     proxy->OnPrepare();
+    EXPECT_NE(nullptr, proxy);
 }
 
 /**
@@ -165,6 +169,7 @@ HWTEST_F(CjTestRunnerObjectTest, CjTestRunnerObjectTestDestructor_Success_001, T
     RegisterCJTestRunnerFuncs(RegisterCangjieFuncs);
     auto proxy = CJTestRunnerObject::LoadModule("test_ability");
     proxy.reset();
+    EXPECT_EQ(nullptr, proxy);
 }
 } // namespace RunnerRuntime
 } // namespace OHOS

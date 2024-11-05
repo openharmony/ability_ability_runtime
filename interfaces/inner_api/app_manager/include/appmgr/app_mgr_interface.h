@@ -121,11 +121,12 @@ public:
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
+     * @param appCloneIndex the app clone id.
      * @param userId the user id.
-     * @return
+     * @return ErrCode
      */
-    virtual int32_t ClearUpApplicationData(const std::string &bundleName,
-        const int32_t userId = -1) = 0;
+    virtual int32_t ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId = -1) = 0;
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
@@ -646,7 +647,7 @@ public:
      */
     virtual int32_t UpdateRenderState(pid_t renderPid, int32_t state) = 0;
 
-    virtual int32_t SignRestartAppFlag(const std::string &bundleName)
+    virtual int32_t SignRestartAppFlag(int32_t uid)
     {
         return 0;
     }
@@ -696,7 +697,7 @@ public:
         return 0;
     }
 
-    virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
+    virtual int32_t SetSupportedProcessCache(int32_t pid, bool isSupport) = 0;
 
     /**
      * Set application assertion pause state.
@@ -704,6 +705,8 @@ public:
      * @param flag assertion pause state.
      */
     virtual void SetAppAssertionPauseState(bool flag) {}
+
+    virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) = 0;
 
@@ -750,6 +753,17 @@ public:
     virtual void RestartResidentProcessDependedOnWeb()
     {
         return;
+    }
+
+    /**
+     * Get appIndex of pid.
+     * @param pid The pid.
+     * @param appIndex appIndex of pid.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+    {
+        return 0;
     }
 };
 }  // namespace AppExecFwk

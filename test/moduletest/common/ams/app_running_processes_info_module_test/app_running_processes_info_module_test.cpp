@@ -214,7 +214,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_001, TestSize.Level
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -273,7 +276,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_002, TestSize.Level
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -334,7 +340,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_003, TestSize.Level
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -411,7 +420,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_004, TestSize.Level
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -472,7 +484,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_005, TestSize.Level
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();
@@ -531,7 +546,10 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_006, TestSize.Level
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();

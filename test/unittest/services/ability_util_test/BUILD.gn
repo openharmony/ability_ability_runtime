@@ -44,6 +44,11 @@ ohos_unittest("ability_util_test") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
   ]
+
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 group("unittest") {

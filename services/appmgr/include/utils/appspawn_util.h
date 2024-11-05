@@ -33,9 +33,11 @@ static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::COLD_START);
     }
 
+#ifdef WITH_DLP
     if (want.GetIntParam(DLP_PARAMS_INDEX, 0) != 0) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::DLP_MANAGER);
     }
+#endif // WITH_DLP
 
     if (applicationInfo.debug) {
         startFlags = startFlags | (START_FLAG_BASE << StartFlags::DEBUGGABLE);
@@ -61,6 +63,9 @@ static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &
     if (applicationInfo.multiAppMode.multiAppModeType == MultiAppModeType::APP_CLONE && applicationInfo.appIndex > 0 &&
         applicationInfo.appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         startFlags = startFlags | (START_FLAG_BASE << APP_FLAGS_CLONE_ENABLE);
+    }
+    if (applicationInfo.hwasanEnabled) {
+        startFlags = startFlags | (START_FLAG_BASE << StartFlags::HWASANENABLED);
     }
 
     return startFlags;

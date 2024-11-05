@@ -38,6 +38,7 @@
 #include "mock_iapp_state_callback.h"
 #include "mock_native_token.h"
 #include "mock_system_ability_manager.h"
+#include "param.h"
 #include "permission_verification.h"
 #include "refbase.h"
 #include "system_ability_definition.h"
@@ -178,8 +179,10 @@ std::shared_ptr<AppRunningRecord> AppRunningProcessesInfoTest::StartLoadAbility(
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
     service_->SetAppSpawnClient(mockClientPtr);
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(newPid), Return(ERR_OK)));
-
-    service_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    service_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
 
     BundleInfo bundleInfo;
     bundleInfo.appId = "com.ohos.test.helloworld_code123";
@@ -265,7 +268,10 @@ HWTEST_F(AppRunningProcessesInfoTest, UpdateAppRunningRecord_002, TestSize.Level
 
     EXPECT_CALL(*mockApplication, ScheduleForegroundApplication())
         .Times(1)
-        .WillOnce(InvokeWithoutArgs(mockApplication.GetRefPtr(), &MockApplication::Post));
+        .WillOnce([mockApplication]() {
+            mockApplication->Post();
+            return true;
+            });
     // application enter in foreground and check the result
     record->ScheduleForegroundRunning();
     mockApplication->Wait();

@@ -34,7 +34,7 @@ void AbilityConnection::OnAbilityConnectDone(
         element.GetBundleName().c_str(), element.GetAbilityName().c_str(), resultCode);
     mutex_.lock();
     if (abilityConnectCallbackList_.empty()) {
-        TAG_LOGD(AAFwkTag::CONNECTION, "empty abilityConnectCallbackList");
+        TAG_LOGW(AAFwkTag::CONNECTION, "empty callbackList");
         mutex_.unlock();
         return;
     }
@@ -90,9 +90,9 @@ void AbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& e
         (*item)->OnAbilityDisconnectDone(element, resultCode);
         item++;
     }
-    SetRemoteObject(nullptr);
     TAG_LOGD(AAFwkTag::CONNECTION, "bundleName:%{public}s, abilityName:%{public}s",
         element.GetBundleName().c_str(), element.GetAbilityName().c_str());
+    SetRemoteObject(nullptr);
 }
 
 void AbilityConnection::AddConnectCallback(const sptr<AbilityConnectCallback>& abilityConnectCallback)

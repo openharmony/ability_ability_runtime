@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
@@ -115,14 +115,9 @@ ohos_shared_library("ability_simulator_inner") {
       "json:nlohmann_json_static",
       "jsoncpp:jsoncpp_static",
       "napi:ace_napi",
+      "window_manager:previewer_window",
+      "window_manager:previewer_window_napi",
     ]
-
-    if (ability_runtime_graphics) {
-      external_deps += [
-        "window_manager:previewer_window",
-        "window_manager:previewer_window_napi",
-      ]
-    }
 
     if (is_mingw) {
       external_deps += [ "resource_management:win_resmgr" ]

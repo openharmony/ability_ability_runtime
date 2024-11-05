@@ -269,8 +269,6 @@ public:
 
     void PauseExtensions();
 
-    void StartRootLauncher(const std::shared_ptr<AbilityRecord> &abilityRecord);
-
     void OnTimeOut(uint32_t msgId, int64_t abilityRecordId, bool isHalf = false);
 
     /**
@@ -317,10 +315,13 @@ public:
 
     void CloseAssertDialog(const std::string &assertSessionId);
 
-    void SignRestartAppFlag(const std::string &bundleName);
+    void SignRestartAppFlag(int32_t uid);
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
     void UninstallApp(const std::string &bundleName);
+
+    int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
+        const std::string &mainElement, bool updateEnable);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t CONNECT_TIMEOUT_MSG = 1;

@@ -33,11 +33,11 @@ const int32_t UID_TRANSFORM_DIVISOR = 200000;
 ErrCode OsAccountManagerWrapper::QueryActiveOsAccountIds(std::vector<int32_t>& ids)
 {
 #ifndef OS_ACCOUNT_PART_ENABLED
-    TAG_LOGI(AAFwkTag::DEFAULT, "Without os account subsystem");
+    TAG_LOGD(AAFwkTag::DEFAULT, "Without os account subsystem");
     ids.emplace_back(DEFAULT_OS_ACCOUNT_ID);
     return ERR_OK;
 #else
-    TAG_LOGI(AAFwkTag::DEFAULT, "os account subsystem");
+    TAG_LOGD(AAFwkTag::DEFAULT, "os account subsystem");
     return AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
 #endif // OS_ACCOUNT_PART_ENABLED
 }
@@ -45,11 +45,11 @@ ErrCode OsAccountManagerWrapper::QueryActiveOsAccountIds(std::vector<int32_t>& i
 ErrCode OsAccountManagerWrapper::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
 {
 #ifndef OS_ACCOUNT_PART_ENABLED
-    TAG_LOGI(AAFwkTag::DEFAULT, "Without os account subsystem");
+    TAG_LOGD(AAFwkTag::DEFAULT, "Without os account subsystem");
     id = uid / UID_TRANSFORM_DIVISOR;
     return ERR_OK;
 #else
-    TAG_LOGI(AAFwkTag::DEFAULT, "os account subsystem");
+    TAG_LOGD(AAFwkTag::DEFAULT, "os account subsystem");
     return AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, id);
 #endif // OS_ACCOUNT_PART_ENABLED
 }
@@ -100,7 +100,7 @@ ErrCode OsAccountManagerWrapper::RemoveOsAccount(const int id)
     TAG_LOGD(AAFwkTag::DEFAULT, "Without os account subsystem");
     return ERR_OK;
 #else // OS_ACCOUNT_PART_ENABLED
-    TAG_LOGI(AAFwkTag::DEFAULT, "os account subsystem");
+    TAG_LOGD(AAFwkTag::DEFAULT, "os account subsystem");
     return AccountSA::OsAccountManager::RemoveOsAccount(id);
 #endif // OS_ACCOUNT_PART_ENABLED
 }

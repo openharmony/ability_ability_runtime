@@ -198,6 +198,7 @@ public:
     int32_t GetUIExtensionAbilityId() const;
     void SetUserRequestCleaningStatus();
     bool IsUserRequestCleaning() const;
+    bool IsSceneBoard() const;
 
 private:
     int32_t lastLaunchTime_ = 0;

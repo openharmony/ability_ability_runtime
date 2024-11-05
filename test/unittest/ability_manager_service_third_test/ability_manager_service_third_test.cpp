@@ -61,8 +61,8 @@ public:
 
     AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
         const std::string& appName, const std::string& bundleName, const std::string& moduleName);
-public:
 
+public:
     AbilityRequest abilityRequest_{};
     Want want_{};
 };
@@ -932,6 +932,24 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionIsFocused_001, TestSize
 
 /*
  * Feature: AbilityManagerService
+ * Function: NotifySaveAsResult
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService NotifySaveAsResult
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, NotifySaveAsResult_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest NotifySaveAsResult_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+
+    Want want;
+    auto result = abilityMs_->NotifySaveAsResult(want, 0, 0);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest NotifySaveAsResult_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: CheckCollaboratorType
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService CheckCollaboratorType
@@ -1165,7 +1183,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckRestartAppWant_001, TestSize.Level
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
     AAFwk::Want want;
-    int32_t res = abilityMs->CheckRestartAppWant(want);
+    int32_t res = abilityMs->CheckRestartAppWant(want, 0);
     EXPECT_EQ(res, AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY);
 }
 
@@ -1260,19 +1278,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, PreStartMission_001, TestSize.Level1)
 
     auto result = abilityMs_->PreStartMission("com.ix.hiservcie", "entry", "ServiceAbility", "2024-07-16 10:00:00");
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest PreStartMission_001 call result %{public}d", result);
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: HandleRestartResidentProcessDependedOnWeb
- * FunctionPoints: HandleRestartResidentProcessDependedOnWeb
- */
-HWTEST_F(AbilityManagerServiceThirdTest, HandleRestartResidentProcessDependedOnWeb_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
-
-    abilityMs_->HandleRestartResidentProcessDependedOnWeb();
 }
 
 /*
@@ -1396,7 +1401,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, ParseJsonFromBoot_001, TestSize.Level1)
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    abilityMs_->ParseJsonFromBoot(nullptr, "", "");
+    abilityMs_->ParseJsonFromBoot("");
 }
 
 /*
@@ -1469,7 +1474,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SignRestartAppFlag_001, TestSize.Level1
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
 
-    abilityMs_->SignRestartAppFlag(USER_ID_U100, "com.ix.hiservcie");
+    abilityMs_->SignRestartAppFlag(USER_ID_U100, 1);
 }
 
 /*

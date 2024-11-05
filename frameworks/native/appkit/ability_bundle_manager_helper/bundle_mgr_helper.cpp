@@ -33,6 +33,11 @@ BundleMgrHelper::~BundleMgrHelper()
     }
 }
 
+void BundleMgrHelper::PreConnect()
+{
+    Connect();
+}
+
 ErrCode BundleMgrHelper::GetNameForUid(const int32_t uid, std::string &name)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
@@ -194,6 +199,19 @@ ErrCode BundleMgrHelper::GetSandboxHapModuleInfo(const AbilityInfo &abilityInfo,
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetSandboxHapModuleInfo(abilityInfo, appIndex, userId, hapModuleInfo);
+}
+
+std::string BundleMgrHelper::GetAppIdByBundleName(const std::string &bundleName, const int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "GetAppIdByBundleName called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect.");
+        return "";
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetAppIdByBundleName(bundleName, userId);
 }
 
 sptr<IBundleMgr> BundleMgrHelper::Connect()
@@ -699,7 +717,7 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want &want, int32_t flags, int32_
     return ret;
 }
 
-bool BundleMgrHelper::CleanBundleDataFiles(const std::string &bundleName, const int32_t userId)
+bool BundleMgrHelper::CleanBundleDataFiles(const std::string &bundleName, int32_t userId, int32_t appCloneIndex)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
     auto bundleMgr = Connect();
@@ -709,7 +727,7 @@ bool BundleMgrHelper::CleanBundleDataFiles(const std::string &bundleName, const 
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->CleanBundleDataFiles(bundleName, userId);
+    return bundleMgr->CleanBundleDataFiles(bundleName, userId, appCloneIndex);
 }
 
 bool BundleMgrHelper::QueryDataGroupInfos(
@@ -770,7 +788,7 @@ bool BundleMgrHelper::QueryAppGalleryBundleName(std::string &bundleName)
     return bundleMgr->QueryAppGalleryBundleName(bundleName);
 }
 
-ErrCode BundleMgrHelper::GetUidByBundleName(const std::string &bundleName, const int32_t userId)
+ErrCode BundleMgrHelper::GetUidByBundleName(const std::string &bundleName, int32_t userId, int32_t appCloneIndex)
 {
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
     auto bundleMgr = Connect();
@@ -780,7 +798,7 @@ ErrCode BundleMgrHelper::GetUidByBundleName(const std::string &bundleName, const
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->GetUidByBundleName(bundleName, userId);
+    return bundleMgr->GetUidByBundleName(bundleName, userId, appCloneIndex);
 }
 
 ErrCode BundleMgrHelper::QueryExtensionAbilityInfosOnlyWithTypeName(const std::string &extensionTypeName,
@@ -883,10 +901,10 @@ ErrCode BundleMgrHelper::QueryCloneExtensionAbilityInfoWithAppIndex(const Elemen
 ErrCode BundleMgrHelper::GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes,
     int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "Called.");
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "Called");
     auto bundleMgr = Connect();
     if (bundleMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect.");
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 

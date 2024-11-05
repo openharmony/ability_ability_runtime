@@ -43,7 +43,11 @@ struct VerificationInfo {
 
     bool IsSACall() const;
 
+    bool IsSACallByTokenId(uint32_t callerTokenId) const;
+
     bool IsShellCall() const;
+
+    bool IsShellCallByTokenId(uint32_t callerTokenId) const;
 
     bool CheckSpecificSystemAbilityAccessPermission(const std::string &processName) const;
 
@@ -90,6 +94,8 @@ struct VerificationInfo {
     bool JudgeCallerIsAllowedToUseSystemAPI() const;
 
     bool IsSystemAppCall() const;
+
+    bool IsSystemAppCallByTokenId(uint32_t callerTokenId) const;
 
     bool VerifyPrepareTerminatePermission() const;
 

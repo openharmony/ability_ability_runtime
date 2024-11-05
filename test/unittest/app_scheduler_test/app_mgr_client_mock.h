@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include "app_mgr_client.h"
+#include "param.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -30,15 +31,16 @@ public:
     {}
     MOCK_METHOD0(ConnectAppMgrService, AppMgrResultCode());
     MOCK_METHOD1(RegisterAppStateCallback, AppMgrResultCode(const sptr<IAppStateCallback> &callback));
-    MOCK_METHOD6(LoadAbility, AppMgrResultCode(sptr<IRemoteObject>, sptr<IRemoteObject>,
-        const AbilityInfo&, const ApplicationInfo&, const AAFwk::Want&, int32_t));
+    MOCK_METHOD4(LoadAbility, AppMgrResultCode(const AbilityInfo&, const ApplicationInfo&,
+        const AAFwk::Want&, AbilityRuntime::LoadParam));
     MOCK_METHOD2(TerminateAbility, AppMgrResultCode(const sptr<IRemoteObject>&, bool));
     MOCK_METHOD2(UpdateExtensionState, AppMgrResultCode(const sptr<IRemoteObject> &token, const ExtensionState state));
     MOCK_METHOD2(UpdateApplicationInfoInstalled, AppMgrResultCode(const std::string &bundleName, const int uid));
     MOCK_METHOD0(UpdateApplicationInfoInstalledDone, AppMgrResultCode());
     MOCK_METHOD1(KillApplication, AppMgrResultCode(const std::string&));
-    MOCK_METHOD2(KillApplicationByUid, AppMgrResultCode(const std::string &bundleName, const int uid));
-    MOCK_METHOD2(ClearUpApplicationData, AppMgrResultCode(const std::string&, int32_t userId));
+    MOCK_METHOD3(KillApplicationByUid,
+        AppMgrResultCode(const std::string &bundleName, const int uid, const std::string&));
+    MOCK_METHOD3(ClearUpApplicationData, AppMgrResultCode(const std::string&, int32_t appCloneIndex, int32_t userId));
     MOCK_METHOD1(StartupResidentProcess, void(const std::vector<AppExecFwk::BundleInfo> &bundleInfos));
     MOCK_METHOD3(StartSpecifiedAbility, void(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t));
     MOCK_METHOD1(GetAllRunningProcesses, AppMgrResultCode(std::vector<RunningProcessInfo> &info));

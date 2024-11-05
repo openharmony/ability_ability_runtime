@@ -152,7 +152,7 @@ public:
     }
 
     virtual sptr<AAFwk::IWantSender> GetWantSender(
-        const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken) override
+        const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken, int32_t uid) override
     {
         return nullptr;
     }
@@ -210,10 +210,6 @@ public:
     }
 
     int GetWantSenderInfo(const sptr<IWantSender>& target, std::shared_ptr<WantSenderInfo>& info) override
-    {
-        return 0;
-    }
-    int ClearUpApplicationData(const std::string& bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }

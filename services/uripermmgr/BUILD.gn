@@ -28,7 +28,9 @@ config("upms_config") {
 }
 
 libupms_sources = [
+  "src/batch_uri.cpp",
   "src/file_permission_manager.cpp",
+  "src/media_permission_manager.cpp",
   "src/tokenid_permission.cpp",
   "src/uri_permission_manager_service.cpp",
   "src/uri_permission_manager_stub_impl.cpp",
@@ -77,14 +79,17 @@ ohos_shared_library("libupms") {
     "c_utils:utils",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
+    "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "graphic_2d:color_manager",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "image_framework:image_native",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "media_library:media_library_manager",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
@@ -93,11 +98,8 @@ ohos_shared_library("libupms") {
   ]
   if (ability_runtime_feature_sandboxmanager) {
     external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
-  if (ability_runtime_graphics) {
-    external_deps += [ "i18n:intl_util" ]
-  }
-
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -139,10 +141,14 @@ ohos_static_library("libupms_static") {
     "c_utils:utils",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
+    "data_share:datashare_consumer",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "media_library:media_library_manager",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
@@ -150,6 +156,7 @@ ohos_static_library("libupms_static") {
 
   if (ability_runtime_feature_sandboxmanager) {
     external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
 
   subsystem_name = "ability"

@@ -14,7 +14,9 @@
  */
 
 #include <gtest/gtest.h>
+#define private public
 #include "dialog_ui_extension_callback.h"
+#undef private
 #include "mock_ui_content.h"
 
 using namespace testing::ext;
@@ -63,6 +65,11 @@ public:
     void UnregisterAbilityLifecycleObserver(const std::shared_ptr<ILifecycleObserver> &observer)
     {
     }
+
+    std::shared_ptr<AAFwk::Want> GetWant()
+    {
+        return nullptr;
+    }
 };
 
 class DialogUIExtensionCallbackTest : public testing::Test {
@@ -93,6 +100,7 @@ HWTEST_F(DialogUIExtensionCallbackTest, OnRelease_0100, TestSize.Level1)
     dialogUIExtensionCallback_->SetUIContent(uicontent);
     dialogUIExtensionCallback_->SetSessionId(1);
     dialogUIExtensionCallback_->OnRelease();
+    EXPECT_EQ(dialogUIExtensionCallback_->sessionId_, 1);
     delete uicontent;
 }
 
@@ -111,21 +119,8 @@ HWTEST_F(DialogUIExtensionCallbackTest, OnError_0100, TestSize.Level1)
     dialogUIExtensionCallback_->SetUIContent(uicontent);
     dialogUIExtensionCallback_->SetSessionId(1);
     dialogUIExtensionCallback_->OnError();
+    EXPECT_EQ(dialogUIExtensionCallback_->sessionId_, 1);
     delete uicontent;
 }
-
-/**
- * @tc.name: DialogUIExtensionCallbackTest_OnDestroy_0100
- * @tc.desc: Test the state of OnDestroy
- * @tc.type: FUNC
- */
-HWTEST_F(DialogUIExtensionCallbackTest, OnDestroy_0100, TestSize.Level1)
-{
-    auto abilityCallback = std::make_shared<MyAbilityCallback>();
-    auto dialogUIExtensionCallback =
-    std::make_shared<DialogUIExtensionCallback>(std::weak_ptr<AppExecFwk::IAbilityCallback>(abilityCallback));
-    dialogUIExtensionCallback->OnDestroy();
-}
-
 } // namespace AAFwk
 } // namespace OHOS

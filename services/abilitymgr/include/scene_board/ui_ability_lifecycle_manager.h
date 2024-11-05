@@ -56,7 +56,7 @@ public:
         }
     };
 
-    void SignRestartAppFlag(const std::string &bundleName, bool isAppRecovery = false);
+    void SignRestartAppFlag(int32_t uid, bool isAppRecovery = false);
 
     /**
      * StartUIAbility with request.
@@ -66,7 +66,8 @@ public:
      * @param isColdStart the session info of the ability is or not cold start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, bool &isColdStart);
+    int StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag,
+        bool &isColdStart);
 
     /**
      * @brief execute after the ability schedule the lifecycle
@@ -119,7 +120,7 @@ public:
      * @param fromUser, Whether form user.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool fromUser = false);
+    int MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool fromUser, uint32_t sceneFlag);
 
     /**
      * GetUIAbilityRecordBySessionInfo.
@@ -156,6 +157,8 @@ public:
 
     int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
         sptr<SessionInfo> &sessionInfo);
+
+    int32_t NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest);
 
     /**
      * @brief handle time out event
@@ -333,6 +336,7 @@ public:
 
     int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
     bool IsCallerInStatusBar();
+
     int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
 
     int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
@@ -353,7 +357,9 @@ public:
     void NotifySCBToHandleAtomicServiceException(sptr<SessionInfo> sessionInfo, int32_t errorCode,
         const std::string& errorReason);
 
-    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool forceKill);
+
+    void EnableListForSCBRecovery();
 
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -429,6 +435,8 @@ private:
     void TerminateSession(std::shared_ptr<AbilityRecord> abilityRecord);
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
+    std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
+        bool &isColdStart);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -443,6 +451,8 @@ private:
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
+    bool isSCBRecovery_ = false;
+    std::unordered_set<int32_t> coldStartInSCBRecovery_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

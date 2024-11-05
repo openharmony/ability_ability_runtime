@@ -34,6 +34,7 @@
 #include "mock_native_token.h"
 #include "mock_render_scheduler.h"
 #include "mock_sa_call.h"
+#include "param.h"
 #include "parameters.h"
 #include "render_state_observer_stub.h"
 #include "window_manager.h"
@@ -399,18 +400,21 @@ HWTEST_F(AppMgrServiceInnerTest, LoadAbility_001, TestSize.Level0)
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->LoadAbility(token, nullptr, abilityInfo_, applicationInfo_, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    appMgrServiceInner->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
 
     auto appMgrServiceInner1 = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner1, nullptr);
 
     appMgrServiceInner1->remoteClientManager_->SetBundleManagerHelper(nullptr);
-    appMgrServiceInner1->LoadAbility(token, nullptr, abilityInfo_, applicationInfo_, nullptr, 0);
+    appMgrServiceInner1->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
 
     auto appMgrServiceInner2 = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner2, nullptr);
 
-    appMgrServiceInner2->LoadAbility(token, nullptr, abilityInfo_, applicationInfo_, nullptr, 0);
+    appMgrServiceInner2->LoadAbility(abilityInfo_, applicationInfo_, nullptr, loadParamPtr);
     TAG_LOGI(AAFwkTag::TEST, "LoadAbility_001 end");
 }
 
@@ -874,19 +878,19 @@ HWTEST_F(AppMgrServiceInnerTest, KillApplicationByUserId_001, TestSize.Level0)
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     std::string bundleName = "test_bundleName";
-    int result = appMgrServiceInner->KillApplicationByUserId(bundleName, 0);
+    int result = appMgrServiceInner->KillApplicationByUserId(bundleName, 0, 0);
     EXPECT_EQ(result, 0);
 
     appMgrServiceInner->remoteClientManager_->SetBundleManagerHelper(nullptr);
-    appMgrServiceInner->KillApplicationByUserId(bundleName, 0);
+    appMgrServiceInner->KillApplicationByUserId(bundleName, 0, 0);
     EXPECT_EQ(result, 0);
 
     appMgrServiceInner->remoteClientManager_ = nullptr;
-    appMgrServiceInner->KillApplicationByUserId(bundleName, 0);
+    appMgrServiceInner->KillApplicationByUserId(bundleName, 0, 0);
     EXPECT_EQ(result, 0);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->KillApplicationByUserId(bundleName, 0);
+    appMgrServiceInner->KillApplicationByUserId(bundleName, 0, 0);
     EXPECT_EQ(result, 0);
 
     TAG_LOGI(AAFwkTag::TEST, "KillApplicationByUserId_001 end");
@@ -905,19 +909,19 @@ HWTEST_F(AppMgrServiceInnerTest, KillApplicationByUserIdLocked_001, TestSize.Lev
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     std::string bundleName = "test_bundleName";
-    int result = appMgrServiceInner->KillApplicationByUserIdLocked(bundleName, 0);
+    int result = appMgrServiceInner->KillApplicationByUserIdLocked(bundleName, 0, 0);
     EXPECT_EQ(result, 0);
 
     appMgrServiceInner->remoteClientManager_->SetBundleManagerHelper(nullptr);
-    appMgrServiceInner->KillApplicationByUserIdLocked(bundleName, 0);
+    appMgrServiceInner->KillApplicationByUserIdLocked(bundleName, 0, 0);
     EXPECT_EQ(result, 0);
 
     appMgrServiceInner->remoteClientManager_ = nullptr;
-    appMgrServiceInner->KillApplicationByUserIdLocked(bundleName, 0);
+    appMgrServiceInner->KillApplicationByUserIdLocked(bundleName, 0, 0);
     EXPECT_EQ(result, 0);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->KillApplicationByUserIdLocked(bundleName, 0);
+    appMgrServiceInner->KillApplicationByUserIdLocked(bundleName, 0, 0);
     EXPECT_EQ(result, 0);
 
     TAG_LOGI(AAFwkTag::TEST, "KillApplicationByUserIdLocked_001 end");
@@ -936,7 +940,7 @@ HWTEST_F(AppMgrServiceInnerTest, ClearUpApplicationData_001, TestSize.Level0)
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     std::string bundleName = "test_bundleName";
-    appMgrServiceInner->ClearUpApplicationData(bundleName, 0, 0);
+    appMgrServiceInner->ClearUpApplicationData(bundleName, 0, 0, 0);
 
     TAG_LOGI(AAFwkTag::TEST, "ClearUpApplicationData_001 end");
 }
@@ -954,15 +958,15 @@ HWTEST_F(AppMgrServiceInnerTest, ClearUpApplicationDataByUserId_001, TestSize.Le
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     std::string bundleName = "test_bundleName";
-    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 0, 0, 0);
-    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 1, 0, 0);
-    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 1, 1, 0);
+    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 0, 0, 0, 0);
+    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 1, 0, 0, 0);
+    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 1, 1, 0, 0);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 1, 1, 0);
+    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 1, 1, 0, 0);
 
     appMgrServiceInner->remoteClientManager_->SetBundleManagerHelper(nullptr);
-    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 1, 1, 0);
+    appMgrServiceInner->ClearUpApplicationDataByUserId(bundleName, 1, 1, 0, 0);
 
     TAG_LOGI(AAFwkTag::TEST, "ClearUpApplicationDataByUserId_001 end");
 }
@@ -3078,6 +3082,7 @@ HWTEST_F(AppMgrServiceInnerTest, AttachRenderProcess_002, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "AttachRenderProcess_002 end");
 }
 
+#ifdef WITH_DLP
 /**
  * @tc.name: BuildStartFlags_001
  * @tc.desc: build start flags.
@@ -3100,6 +3105,7 @@ HWTEST_F(AppMgrServiceInnerTest, BuildStartFlags_001, TestSize.Level0)
 
     TAG_LOGI(AAFwkTag::TEST, "BuildStartFlags_001 end");
 }
+#endif // WITH_DLP
 
 /**
  * @tc.name: RegisterFocusListener_001
@@ -3461,7 +3467,6 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-
     int32_t pid = 0;
     int32_t uid = 0;
     std::string bundleName = "test_processName";

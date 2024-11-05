@@ -54,7 +54,7 @@ AbilityFirstFrameStateData *AbilityFirstFrameStateData::Unmarshalling(Parcel &pa
 {
     AbilityFirstFrameStateData *abilityFirstFrameStateData = new (std::nothrow) AbilityFirstFrameStateData();
     if (abilityFirstFrameStateData && !abilityFirstFrameStateData->ReadFromParcel(parcel)) {
-        TAG_LOGW(AAFwkTag::APPMGR, "abilityFirstFrameStateData failed, because ReadFromParcel failed");
+        TAG_LOGW(AAFwkTag::APPMGR, "ReadFromParcel failed");
         delete abilityFirstFrameStateData;
         abilityFirstFrameStateData = nullptr;
     }

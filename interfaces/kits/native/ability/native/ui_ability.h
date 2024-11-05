@@ -25,11 +25,10 @@
 #include "configuration.h"
 #include "context.h"
 #include "continuation_handler_stage.h"
-#include "fa_ability_context.h"
-#include "iability_callback.h"
+#include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
 #include "resource_config_helper.h"
+#include "iability_callback.h"
 #include "want.h"
-
 #ifdef SUPPORT_GRAPHICS
 #include "display_manager.h"
 #include "session_info.h"
@@ -102,7 +101,7 @@ public:
      * @brief Obtains the Want object that starts this ability.
      * @return Returns the Want object that starts this ability.
      */
-    std::shared_ptr<AAFwk::Want> GetWant();
+    std::shared_ptr<AAFwk::Want> GetWant() override;
 
     /**
      * @brief Init the UIability
@@ -601,6 +600,7 @@ private:
 
     std::string identityToken_;
     bool showOnLockScreen_ = false;
+    std::mutex wantMutexlock_;
 #endif
 };
 } // namespace AbilityRuntime

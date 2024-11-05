@@ -15,8 +15,6 @@
 
 #include "ability_cache_manager.h"
 
-#include <algorithm>
-
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -57,7 +55,6 @@ void AbilityCacheManager::RemoveAbilityRecInDevList(std::shared_ptr<AbilityRecor
 
 void AbilityCacheManager::RemoveAbilityRecInProcList(std::shared_ptr<AbilityRecord> abilityRecord)
 {
-    const Want want = abilityRecord->GetWant();
     uint32_t accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
     auto findProcInfo = procLruMap_.find(accessTokenId);
     if (findProcInfo == procLruMap_.end()) {
@@ -277,13 +274,13 @@ void AbilityCacheManager::RemoveLauncherDeathRecipient()
     }
 }
 
-void AbilityCacheManager::SignRestartAppFlag(const std::string &bundleName)
+void AbilityCacheManager::SignRestartAppFlag(int32_t uid)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = devRecLru_.begin();
     while (it != devRecLru_.end()) {
         auto abilityRecord = *it;
-        if (abilityRecord != nullptr && abilityRecord->GetApplicationInfo().bundleName == bundleName) {
+        if (abilityRecord != nullptr && abilityRecord->GetUid() == uid) {
             abilityRecord->SetRestartAppFlag(true);
         }
         it++;

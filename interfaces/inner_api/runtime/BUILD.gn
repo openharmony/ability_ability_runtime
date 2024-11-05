@@ -48,6 +48,8 @@ config("runtime_all_deps_config") {
 }
 
 ohos_shared_library("runtime") {
+  branch_protector_ret = "pac_ret"
+
   include_dirs = [
     "${ability_runtime_path}/services/abilitymgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
@@ -64,9 +66,9 @@ ohos_shared_library("runtime") {
     "${ability_runtime_native_path}/runtime/js_module_searcher.cpp",
     "${ability_runtime_native_path}/runtime/js_quickfix_callback.cpp",
     "${ability_runtime_native_path}/runtime/js_runtime.cpp",
+    "${ability_runtime_native_path}/runtime/js_runtime_lite.cpp",
     "${ability_runtime_native_path}/runtime/js_runtime_utils.cpp",
     "${ability_runtime_native_path}/runtime/js_worker.cpp",
-    "${ability_runtime_native_path}/runtime/native_runtime_impl.cpp",
     "${ability_runtime_native_path}/runtime/ohos_js_env_logger.cpp",
     "${ability_runtime_native_path}/runtime/ohos_js_environment_impl.cpp",
     "${ability_runtime_native_path}/runtime/ohos_loop_handler.cpp",
@@ -93,6 +95,7 @@ ohos_shared_library("runtime") {
     "ability_base:extractortool",
     "ability_base:extractresourcemanager",
     "ability_base:string_utils",
+    "ability_base:want",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -115,11 +118,6 @@ ohos_shared_library("runtime") {
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
     "zlib:shared_libz",
-  ]
-
-  public_external_deps = [
-    "ability_base:session_info",
-    "ability_base:want",
   ]
 
   defines = []

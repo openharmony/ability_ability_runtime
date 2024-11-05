@@ -313,6 +313,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleNotifyMemorySizeStateChanged(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE_SELF):
             return HandleSetSupportedProcessCacheSelf(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE):
+            return HandleSetSupportedProcessCache(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_BUNDLE_TYPE):
             return HandleGetRunningProcessesByBundleType(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF):
@@ -333,6 +335,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleRestartResidentProcessDependedOnWeb(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_CHILDREN_PROCESSES):
             return HandleGetAllChildrenProcesses(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_INDEX_BY_PID):
+            return HandleGetAppIndexByPid(data, reply);
     }
     return INVALID_FD;
 }
@@ -415,8 +419,9 @@ int32_t AppMgrStub::HandleClearUpApplicationData(MessageParcel &data, MessagePar
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
+    int32_t appCloneIndex = data.ReadInt32();
     int32_t userId = data.ReadInt32();
-    int32_t result = ClearUpApplicationData(bundleName, userId);
+    int32_t result = ClearUpApplicationData(bundleName, appCloneIndex, userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1083,7 +1088,7 @@ int32_t AppMgrStub::HandleGetRunningProcessInfoByPid(MessageParcel &data, Messag
     auto pid = static_cast<pid_t>(data.ReadInt32());
     auto result = GetRunningProcessInfoByPid(pid, processInfo);
     if (reply.WriteParcelable(&processInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "process info write failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "failed");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(result)) {
@@ -1420,8 +1425,8 @@ int32_t AppMgrStub::HandleUpdateRenderState(MessageParcel &data, MessageParcel &
 int32_t AppMgrStub::HandleSignRestartAppFlag(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::string bundleName = data.ReadString();
-    auto ret = SignRestartAppFlag(bundleName);
+    auto uid = data.ReadInt32();
+    auto ret = SignRestartAppFlag(uid);
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
@@ -1500,11 +1505,12 @@ int32_t AppMgrStub::HandleNotifyMemorySizeStateChanged(MessageParcel &data, Mess
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     bool isSupport = data.ReadBool();
-    auto ret = SetSupportedProcessCacheSelf(isSupport);
+    int32_t pid = data.ReadInt32();
+    auto ret = SetSupportedProcessCache(pid, isSupport);
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
@@ -1520,18 +1526,15 @@ int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, Message
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::string libName = data.ReadString();
-    int32_t childCount = data.ReadInt32();
-    sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    int32_t result = StartNativeChildProcess(libName, childCount, callback);
-    if (!reply.WriteInt32(result)) {
+    bool isSupport = data.ReadBool();
+    auto ret = SetSupportedProcessCacheSelf(isSupport);
+    if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
     }
-
     return NO_ERROR;
 }
 
@@ -1549,6 +1552,21 @@ int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, Messag
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
     }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    std::string libName = data.ReadString();
+    int32_t childCount = data.ReadInt32();
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    int32_t result = StartNativeChildProcess(libName, childCount, callback);
+    if (!reply.WriteInt32(result)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+
     return NO_ERROR;
 }
 
@@ -1575,6 +1593,23 @@ int32_t AppMgrStub::HandleRestartResidentProcessDependedOnWeb(MessageParcel &dat
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     RestartResidentProcessDependedOnWeb();
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAppIndexByPid(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    auto pid = data.ReadInt32();
+    int32_t appIndex = -1;
+    int32_t result = GetAppIndexByPid(pid, appIndex);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write GetAppIndexByPid result.");
+        return IPC_STUB_ERR;
+    }
+    if (!reply.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write appIndex.");
+        return IPC_STUB_ERR;
+    }
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

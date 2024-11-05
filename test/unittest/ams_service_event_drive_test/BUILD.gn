@@ -99,10 +99,12 @@ ohos_unittest("AmsServiceEventDriveTest") {
     "resource_schedule_service:ressched_client",
     "window_manager:libwm",
   ]
+
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 group("unittest") {
   testonly = true
-
-  deps = [ ":AmsServiceEventDriveTest" ]
 }

@@ -15,17 +15,10 @@
 
 #include "pending_want_manager.h"
 
-#include <atomic>
-#include <chrono>
-#include <thread>
-
 #include "ability_manager_service.h"
 #include "ability_util.h"
 #include "distributed_client.h"
-#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "in_process_call_wrapper.h"
-#include "permission_verification.h"
 #include "permission_constants.h"
 #include "session_manager_lite.h"
 #include "wm_common.h"
@@ -64,12 +57,12 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
     }
 
     WantSenderInfo info = wantSenderInfo;
-    
+
     if (!isSystemApp && !AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
         info.allWants.size() > 0) {
         info.allWants.back().want.RemoveParam("ohos.extra.param.key.appCloneIndex");
     }
-       
+
     return GetWantSenderLocked(callingUid, uid, wantSenderInfo.userId, info, callerToken, appIndex);
 }
 

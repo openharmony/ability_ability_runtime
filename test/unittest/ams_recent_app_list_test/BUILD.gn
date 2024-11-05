@@ -93,12 +93,15 @@ ohos_unittest("AmsRecentAppListTest") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "kv_store:distributeddata_mgr",
-    "memmgr:memmgrclient",
     "memory_utils:libmeminfo",
     "resource_schedule_service:ressched_client",
     "window_manager:libwm",
     "window_manager:libwsutils",
   ]
+
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 }
 
 group("unittest") {

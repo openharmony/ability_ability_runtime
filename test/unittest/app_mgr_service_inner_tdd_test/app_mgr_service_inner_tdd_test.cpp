@@ -740,5 +740,43 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level0)
     EXPECT_EQ(startMsg.dataGroupInfoList.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "QueryExtensionSandBox_004 end");
 }
+
+/**
+ * @tc.name: SetAppEnvInfo_001
+ * @tc.desc: The hwasanEnabled is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    info.applicationInfo.hwasanEnabled = true;
+    AppSpawnStartMsg startMsg;
+    appMgrServiceInner->SetAppEnvInfo(info, startMsg);
+    std::string hwasanEnabled = "hwasanEnabled";
+    EXPECT_EQ(startMsg.appEnv.find(hwasanEnabled)->second, "1");
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_001 end");
+}
+
+/**
+ * @tc.name: SetAppEnvInfo_002
+ * @tc.desc: The hwasanEnabled is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    info.applicationInfo.hwasanEnabled = false;
+    AppSpawnStartMsg startMsg;
+    appMgrServiceInner->SetAppEnvInfo(info, startMsg);
+    std::string hwasanEnabled = "hwasanEnabled";
+    EXPECT_EQ(startMsg.appEnv.find(hwasanEnabled)->second, "0");
+    TAG_LOGI(AAFwkTag::TEST, "SetAppEnvInfo_002 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

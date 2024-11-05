@@ -19,7 +19,6 @@
 
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "mission_info_mgr.h"
 #include "scene_board_judgement.h"
 #include "os_account_manager_wrapper.h"
 
@@ -186,6 +185,13 @@ std::shared_ptr<DataAbilityManager> SubManagersHelper::GetDataAbilityManager(con
 
     return nullptr;
 }
+
+std::unordered_map<int, std::shared_ptr<DataAbilityManager>> SubManagersHelper::GetDataAbilityManagers()
+{
+    std::lock_guard<ffrt::mutex> lock(managersMutex_);
+    return dataAbilityManagers_;
+}
+
 std::shared_ptr<DataAbilityManager> SubManagersHelper::GetDataAbilityManagerByUserId(int32_t userId)
 {
     std::lock_guard<ffrt::mutex> lock(managersMutex_);
@@ -415,7 +421,8 @@ void SubManagersHelper::UninstallAppInMissionListManagers(int32_t userId, const 
 
 bool SubManagersHelper::VerificationAllTokenForConnectManagers(const sptr<IRemoteObject> &token)
 {
-    for (auto& item: connectManagers_) {
+    auto connectManagers = GetConnectManagers();
+    for (auto& item: connectManagers) {
         if (item.second && item.second->GetExtensionByTokenFromServiceMap(token)) {
             return true;
         }
@@ -433,16 +440,17 @@ bool SubManagersHelper::VerificationAllToken(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "VerificationAllToken.");
-    std::lock_guard<ffrt::mutex> lock(managersMutex_);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        for (auto& item: uiAbilityManagers_) {
+        auto uiAbilityManagers = GetUIAbilityManagers();
+        for (auto& item: uiAbilityManagers) {
             if (item.second && item.second->IsContainsAbility(token)) {
                 return true;
             }
         }
     } else {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "VerificationAllToken::SearchMissionListManagers");
-        for (auto& item: missionListManagers_) {
+        auto missionListManagers = GetMissionListManagers();
+        for (auto& item: missionListManagers) {
             if (item.second && item.second->GetAbilityRecordByToken(token)) {
                 return true;
             }
@@ -453,7 +461,8 @@ bool SubManagersHelper::VerificationAllToken(const sptr<IRemoteObject> &token)
     }
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "VerificationAllToken::SearchDataAbilityManagers_");
-        for (auto& item: dataAbilityManagers_) {
+        auto dataAbilityManagers = GetDataAbilityManagers();
+        for (auto& item: dataAbilityManagers) {
             if (item.second && item.second->GetAbilityRecordByToken(token)) {
                 return true;
             }

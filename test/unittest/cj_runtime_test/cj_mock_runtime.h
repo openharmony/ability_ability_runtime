@@ -103,8 +103,6 @@ public:
     }
 
     void StartProfiler(const DebugOption debugOption) override {}
-
-    void DoCleanWorkAfterStageCleaned() override {}
 public:
     Language language;
 };

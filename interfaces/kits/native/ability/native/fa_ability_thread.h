@@ -71,7 +71,7 @@ public:
      * @param targetState Indicates the lifecycle state.
      * @param sessionInfo Indicates the session info.
      */
-    void ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &targetState,
+    bool ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &targetState,
         sptr<AAFwk::SessionInfo> sessionInfo = nullptr) override;
 
     /**
@@ -563,7 +563,7 @@ private:
     std::shared_ptr<AbilityContext> BuildAbilityContext(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
         const std::shared_ptr<AppExecFwk::OHOSApplication> &application, const sptr<IRemoteObject> &token,
         const std::shared_ptr<Context> &stageContext);
-    
+
     void AddLifecycleEvent(uint32_t state, std::string &methodName) const;
 
     std::shared_ptr<AppExecFwk::AbilityImpl> abilityImpl_;

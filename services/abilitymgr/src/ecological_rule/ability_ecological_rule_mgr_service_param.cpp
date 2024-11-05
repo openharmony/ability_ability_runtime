@@ -15,12 +15,6 @@
 
 #include "ecological_rule/ability_ecological_rule_mgr_service_param.h"
 
-#include <string>
-#include <vector>
-
-#include "iremote_broker.h"
-#include "iremote_object.h"
-
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -177,6 +171,11 @@ bool AbilityCallerInfo::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(static_cast<int32_t>(targetExtensionAbilityType))) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetExtensionAbilityType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write userId failed");
         return false;
     }
     return true;

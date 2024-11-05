@@ -28,7 +28,7 @@ AbilityControllerProxy::AbilityControllerProxy(
 bool AbilityControllerProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(AbilityControllerProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write interface token failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "write token failed");
         return false;
     }
     return true;
@@ -48,7 +48,7 @@ bool AbilityControllerProxy::AllowAbilityStart(const Want &want, const std::stri
         static_cast<uint32_t>(IAbilityController::Message::TRANSACT_ON_ALLOW_ABILITY_START),
         data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
         return true;
     }
     return reply.ReadBool();
@@ -67,7 +67,7 @@ bool AbilityControllerProxy::AllowAbilityBackground(const std::string &bundleNam
         static_cast<uint32_t>(IAbilityController::Message::TRANSACT_ON_ALLOW_ABILITY_BACKGROUND),
         data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
         return true;
     }
     return reply.ReadBool();
@@ -78,7 +78,7 @@ int32_t AbilityControllerProxy::SendTransactCmd(uint32_t code, MessageParcel &da
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Remote is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "null remote");
         return ERR_NULL_OBJECT;
     }
 

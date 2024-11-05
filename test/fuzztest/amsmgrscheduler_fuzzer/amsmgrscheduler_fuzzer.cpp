@@ -22,6 +22,7 @@
 #include "ams_mgr_scheduler.h"
 #undef private
 #include "ability_record.h"
+#include "param.h"
 #include "parcel.h"
 #include "securec.h"
 
@@ -73,7 +74,12 @@ std::shared_ptr<AmsMgrScheduler> DoSomethingInterestingWithMyAPI1(sptr<IRemoteOb
     std::shared_ptr<ApplicationInfo> appInfo;
     std::shared_ptr<AAFwk::Want> wantptr;
     int32_t abilityRecordId = static_cast<int32_t>(GetU32Data(data));
-    amsMgrScheduler->LoadAbility(token, preToken, abilityInfoptr, appInfo, wantptr, abilityRecordId);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = abilityRecordId;
+    loadParam.token = token;
+    loadParam.preToken = preToken;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    amsMgrScheduler->LoadAbility(abilityInfoptr, appInfo, wantptr, loadParamPtr);
     bool clearMissionFlag = *data % ENABLE;
     amsMgrScheduler->TerminateAbility(token, clearMissionFlag);
     return amsMgrScheduler;

@@ -101,6 +101,10 @@ HWTEST_F(DynamicLoaderOhosTest, DynamicLoaderOhosTestFindSymbol_0100, TestSize.L
  */
 HWTEST_F(DynamicLoaderOhosTest, DynamicLoaderOhosTestGetError_0100, TestSize.Level1)
 {
+    const char* symbol = "test_symbol";
+    unsigned int mode = RTLD_LAZY;
+
     // Test dlerror with an error message
-    DynamicLoadLibrary(nullptr, "test_library.so", RTLD_LAZY);
+    void* result = DynamicLoadLibrary(nullptr, symbol, mode);
+    EXPECT_EQ(result, dlopen(symbol, mode));
 }

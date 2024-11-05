@@ -468,20 +468,25 @@ void MissionList::GetActiveAbilityList(int32_t uid, std::vector<std::string> &ab
     }
 }
 
-void MissionList::SignRestartAppFlag(const std::string &bundleName)
+void MissionList::SignRestartAppFlag(int32_t uid)
 {
-    for (auto mission : missions_) {
+    for (auto it = missions_.begin(); it != missions_.end();) {
+        auto mission = *it;
         if (!mission) {
+            it++;
             continue;
         }
         auto abilityRecord = mission->GetAbilityRecord();
         if (!abilityRecord) {
+            it++;
             continue;
         }
-        if (abilityRecord->GetApplicationInfo().bundleName != bundleName) {
+        if (abilityRecord->GetUid() != uid) {
+            it++;
             continue;
         }
         abilityRecord->SetRestartAppFlag(true);
+        it = missions_.erase(it);
     }
 }
 }  // namespace AAFwk

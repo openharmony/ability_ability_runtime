@@ -22,12 +22,12 @@ namespace AAFwk {
 bool ShellCommandResult::Marshalling(Parcel& parcel) const
 {
     if (!parcel.WriteInt32(exitCode)) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "Failed to write exitCode");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "write exitCode failed");
         return false;
     }
 
     if (!parcel.WriteString(stdResult)) {
-        TAG_LOGE(AAFwkTag::AA_TOOL, "Failed to write stdResult");
+        TAG_LOGE(AAFwkTag::AA_TOOL, "write stdResult failed");
         return false;
     }
 

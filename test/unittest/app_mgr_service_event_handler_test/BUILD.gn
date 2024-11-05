@@ -97,6 +97,9 @@ ohos_unittest("AMSEventHandlerTest") {
     "window_manager:libwm",
     "window_manager:libwsutils",
   ]
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
 
   if (ability_runtime_feature_sandboxmanager) {
     external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]

@@ -72,14 +72,14 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string stack(data, size);
     freeze->GetBinderPeerPids(stack, pid);
     std::string ret(data, size);
-    std::string msg(data, size);
-    freeze->FindStackByPid(ret, pid, msg);
+    freeze->FindStackByPid(ret, pid);
     std::string faultType(data, size);
     freeze->CatchJsonStacktrace(pid, faultType);
     freeze->CatcherStacktrace(pid);
-    freeze->AcquireStack(faultData, appInfo);
+    std::string memoryContent(data, size);
+    freeze->AcquireStack(faultData, appInfo, memoryContent);
     std::string binderInfo(data, size);
-    freeze->NotifyANR(faultData, appInfo, binderInfo);
+    freeze->NotifyANR(faultData, appInfo, binderInfo, memoryContent);
     int state = static_cast<int>(GetU32Data(data));
     freeze->SetFreezeState(pid, state);
     freeze->GetFreezeState(pid);

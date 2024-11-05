@@ -25,12 +25,12 @@
 #include "js_extension_window.h"
 #include "js_runtime_utils.h"
 #include "js_ui_extension_context.h"
-#include "string_wrapper.h"
 #include "napi_common_start_options.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include "native_engine.h"
 #include "native_value.h"
+#include "string_wrapper.h"
 #include "tokenid_kit.h"
 #include "ui_content.h"
 #include "want.h"
@@ -81,7 +81,7 @@ void AbilityResultListeners::RemoveListener(const uint64_t &uiExtensionComponent
 
 void AbilityResultListeners::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
-    for (auto item:listeners_) {
+    for (auto &item : listeners_) {
         if (item.second && item.second->IsMatch(requestCode)) {
             item.second->OnAbilityResult(requestCode, resultCode, resultData);
             return;
@@ -827,7 +827,7 @@ napi_value JsUIExtensionContentSession::OnSetWindowPrivacyMode(napi_env env, Nap
 
 napi_value JsUIExtensionContentSession::OnStartAbilityByType(napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGE(AAFwkTag::UI_EXT, "called");
+    TAG_LOGI(AAFwkTag::UI_EXT, "called");
 
     std::string type;
     AAFwk::WantParams wantParam;

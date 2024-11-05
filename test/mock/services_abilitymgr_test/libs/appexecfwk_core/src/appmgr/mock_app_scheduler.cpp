@@ -145,10 +145,9 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAppRemoteDied()");
 }
 
-int AppScheduler::ClearUpApplicationData(const std::string& bundleName, const int32_t userId)
+void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
 {
-    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::ClearUpApplicationData()");
-    return ERR_OK;
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyAppPreCache()");
 }
 
 void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject>& token, const AppExecFwk::AbilityState state)

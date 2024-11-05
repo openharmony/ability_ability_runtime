@@ -32,6 +32,7 @@ constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 constexpr int RESET_RATIO = 2;
 
 constexpr int32_t BACKGROUND_REPORT_COUNT_MAX = 5;
+constexpr int32_t WATCHDOG_REPORT_COUNT_MAX = 5;
 #ifdef SUPPORT_ASAN
 constexpr uint32_t CHECK_INTERVAL_TIME = 45000;
 #else
@@ -46,7 +47,7 @@ Watchdog::Watchdog()
 Watchdog::~Watchdog()
 {
     if (!stopWatchdog_) {
-        TAG_LOGD(AAFwkTag::APPDFR, "Stop watchdog when deconstruct.");
+        TAG_LOGD(AAFwkTag::APPDFR, "Stop watchdog");
         OHOS::HiviewDFX::Watchdog::GetInstance().StopWatchdog();
     }
 }
@@ -67,10 +68,10 @@ void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
 
 void Watchdog::Stop()
 {
-    TAG_LOGD(AAFwkTag::APPDFR, "Watchdog is stop!");
+    TAG_LOGD(AAFwkTag::APPDFR, "called");
     std::unique_lock<std::mutex> lock(cvMutex_);
     if (stopWatchdog_) {
-        TAG_LOGD(AAFwkTag::APPDFR, "Watchdog has stoped.");
+        TAG_LOGD(AAFwkTag::APPDFR, "stoped");
         return;
     }
     stopWatchdog_.store(true);
@@ -107,6 +108,7 @@ void Watchdog::AllowReportEvent()
     needReport_.store(true);
     isSixSecondEvent_.store(false);
     backgroundReportCount_.store(0);
+    watchdogReportCount_.store(0);
 }
 
 bool Watchdog::IsReportEvent()
@@ -115,7 +117,7 @@ bool Watchdog::IsReportEvent()
         appMainThreadIsAlive_.store(false);
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPDFR, "AppMainThread is not alive");
+    TAG_LOGD(AAFwkTag::APPDFR, "AppMainThread not alive");
     return true;
 }
 
@@ -135,11 +137,23 @@ void Watchdog::Timer()
 {
     std::unique_lock<std::mutex> lock(cvMutex_);
     if (stopWatchdog_) {
-        TAG_LOGD(AAFwkTag::APPDFR, "Watchdog has stoped.");
+        TAG_LOGD(AAFwkTag::APPDFR, "stoped");
         return;
     }
     if (!needReport_) {
-        TAG_LOGE(AAFwkTag::APPDFR, "Watchdog timeout, wait for the handler to recover, and do not send event.");
+        watchdogReportCount_++;
+        TAG_LOGE(AAFwkTag::APPDFR, "timeout, wait to recover, wait count: %{public}d",
+            watchdogReportCount_.load());
+        if (watchdogReportCount_.load() >= WATCHDOG_REPORT_COUNT_MAX) {
+#ifndef APP_NO_RESPONSE_DIALOG
+            AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandleOverReportCount(true);
+#endif
+            watchdogReportCount_.store(0);
+        } else if (watchdogReportCount_.load() >= (WATCHDOG_REPORT_COUNT_MAX - 1)) {
+#ifndef APP_NO_RESPONSE_DIALOG
+            AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandleOverReportCount(false);
+#endif
+        }
         return;
     }
 
@@ -173,13 +187,13 @@ void Watchdog::ReportEvent()
     if ((now - lastWatchTime_) > (RESET_RATIO * CHECK_INTERVAL_TIME) ||
         (now - lastWatchTime_) < (CHECK_INTERVAL_TIME / RESET_RATIO)) {
         TAG_LOGI(AAFwkTag::APPDFR,
-            "Thread may be blocked, do not report this time. currTime: %{public}llu, lastTime: %{public}llu",
+            "Thread may be blocked, not report time. currTime: %{public}llu, lastTime: %{public}llu",
             static_cast<unsigned long long>(now), static_cast<unsigned long long>(lastWatchTime_));
         return;
     }
 
     if (isInBackground_ && backgroundReportCount_.load() < BACKGROUND_REPORT_COUNT_MAX) {
-        TAG_LOGI(AAFwkTag::APPDFR, "In Background, thread may be blocked in, do not report this time. "
+        TAG_LOGI(AAFwkTag::APPDFR, "In Background, thread may be blocked in, not report time"
             "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 "",
             static_cast<uint64_t>(now), static_cast<uint64_t>(lastWatchTime_));
         backgroundReportCount_++;

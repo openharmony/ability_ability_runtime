@@ -108,6 +108,7 @@ private:
     std::atomic_bool isInBackground_ = true;
     std::atomic_bool isBgWorkingThread_ = false;
     std::atomic_int backgroundReportCount_ = 0;
+    std::atomic_int watchdogReportCount_ = 0;
     std::mutex cvMutex_;
     std::condition_variable cvWatchdog_;
     static std::shared_ptr<EventHandler> appMainHandler_;

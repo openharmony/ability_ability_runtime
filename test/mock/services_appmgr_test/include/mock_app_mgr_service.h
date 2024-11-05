@@ -44,7 +44,7 @@ public:
     MOCK_METHOD1(KillApplication, int32_t(const std::string& appName));
     MOCK_METHOD3(ForceKillApplication, int32_t(const std::string& appName, const int userId, const int appIndex));
     MOCK_METHOD1(KillProcessesByAccessTokenId, int32_t(const uint32_t accessTokenId));
-    MOCK_METHOD2(KillApplicationByUid, int(const std::string&, const int uid));
+    MOCK_METHOD3(KillApplicationByUid, int(const std::string&, const int uid, const std::string&));
     MOCK_METHOD1(IsBackgroundRunningRestricted, int(const std::string& bundleName));
     MOCK_METHOD1(GetAllRunningProcesses, int(std::vector<RunningProcessInfo>& info));
     MOCK_METHOD2(GetRunningProcessesByBundleType, int(const BundleType bundleType,
@@ -55,7 +55,7 @@ public:
     MOCK_METHOD0(GetAmsMgr, sptr<IAmsMgr>());
     MOCK_METHOD1(GetAppFreezingTime, void(int& time));
     MOCK_METHOD1(SetAppFreezingTime, void(int time));
-    MOCK_METHOD2(ClearUpApplicationData, int32_t(const std::string& bundleName, int32_t userId));
+    MOCK_METHOD3(ClearUpApplicationData, int32_t(const std::string& bundleName, int32_t appCloneIndex, int32_t userId));
     MOCK_METHOD1(ClearUpApplicationDataBySelf, int32_t(int32_t userId));
     MOCK_METHOD1(StartupResidentProcess, void(const std::vector<AppExecFwk::BundleInfo>& bundleInfos));
     MOCK_METHOD1(AddAbilityStageDone, void(const int32_t recordId));
@@ -106,8 +106,10 @@ public:
 
     MOCK_METHOD0(IsFinalAppProcess, bool());
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupport));
+    MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
     MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback));
+
     virtual int StartUserTestProcess(
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId)
     {
@@ -172,7 +174,8 @@ public:
 
     virtual int32_t JudgeSandboxByPid(pid_t pid, bool &isSandbox)
     {
-        return 0;
+        isSandbox = isSandbox_;
+        return judgeSandboxByPidRet_;
     }
 
     void KillApplicationImpl(const std::string& data)
@@ -255,6 +258,10 @@ private:
     Semaphore sem_;
     std::string data_;
     sptr<IAppStateCallback> callback_;
+
+public:
+    uint32_t judgeSandboxByPidRet_ = 0;
+    bool isSandbox_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

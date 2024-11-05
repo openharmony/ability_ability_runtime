@@ -39,7 +39,7 @@ public:
      *
      * @return
      */
-    virtual void ScheduleForegroundApplication() = 0;
+    virtual bool ScheduleForegroundApplication() = 0;
 
     /**
      * ScheduleBackgroundApplication, call ScheduleBackgroundApplication() through proxy project,

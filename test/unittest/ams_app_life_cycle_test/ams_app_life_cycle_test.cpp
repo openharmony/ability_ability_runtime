@@ -28,6 +28,7 @@
 #include "mock_app_spawn_client.h"
 #include "mock_iapp_state_callback.h"
 #include "mock_bundle_manager.h"
+#include "param.h"
 
 using namespace testing::ext;
 using testing::_;
@@ -128,8 +129,11 @@ std::shared_ptr<AppRunningRecord> AmsAppLifeCycleTest::StartProcessAndLoadAbilit
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(newPid), Return(ERR_OK)));
 
     serviceInner_->SetAppSpawnClient(mockClientPtr);
-
-    serviceInner_->LoadAbility(token, preToken, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    loadParam.preToken = preToken;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    serviceInner_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     BundleInfo bundleInfo;
     bundleInfo.appId = "com.ohos.test.helloworld_code123";
     auto record = serviceInner_->appRunningManager_->CheckAppRunningRecordIsExist(
@@ -292,8 +296,10 @@ std::shared_ptr<AbilityRunningRecord> AmsAppLifeCycleTest::AddNewAbility(
     const std::shared_ptr<AppRunningRecord>& appRecord, const std::string& index) const
 {
     auto newAbilityInfo = GetAbilityInfoByIndex(index);
-    sptr<IRemoteObject> newToken = new (std::nothrow) MockAbilityToken();
-    serviceInner_->LoadAbility(newToken, nullptr, newAbilityInfo, GetApplication(), nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = new (std::nothrow) MockAbilityToken();
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    serviceInner_->LoadAbility(newAbilityInfo, GetApplication(), nullptr, loadParamPtr);
     auto newAbilityRecord = appRecord->GetAbilityRunningRecordByToken(newToken);
     EXPECT_NE(newAbilityRecord, nullptr);
     return newAbilityRecord;
@@ -306,8 +312,10 @@ std::shared_ptr<AbilityRunningRecord> AmsAppLifeCycleTest::AddNewAbility(
     newAbilityInfo->applicationInfo.uid = uid;
     auto app = GetApplication();
     app->uid = uid;
-    sptr<IRemoteObject> newToken = new (std::nothrow) MockAbilityToken();
-    serviceInner_->LoadAbility(newToken, nullptr, newAbilityInfo, app, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = new (std::nothrow) MockAbilityToken();
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    serviceInner_->LoadAbility(newAbilityInfo, app, nullptr, loadParamPtr);
     auto newAbilityRecord = appRecord->GetAbilityRunningRecordByToken(newToken);
     EXPECT_NE(newAbilityRecord, nullptr);
     return newAbilityRecord;
@@ -396,8 +404,10 @@ HWTEST_F(AmsAppLifeCycleTest, Schedule_001, TestSize.Level1)
     EXPECT_NE(abilityRecord, nullptr);
     AbilityState abilityState = abilityRecord->GetState();
     ApplicationState appState = appRecord->GetState();
-
-    serviceInner_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    serviceInner_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     EXPECT_EQ(abilityState, abilityRecord->GetState());
     EXPECT_EQ(appState, appRecord->GetState());
 }
@@ -1272,7 +1282,10 @@ HWTEST_F(AmsAppLifeCycleTest, Stop_001, TestSize.Level1)
     EXPECT_NE(abilityRecord, nullptr);
     AbilityState abilityState = abilityRecord->GetState();
     ApplicationState appState = appRecord->GetState();
-    serviceInner_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    serviceInner_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     EXPECT_EQ(abilityState, abilityRecord->GetState());
     EXPECT_EQ(appState, appRecord->GetState());
 
@@ -1330,7 +1343,10 @@ HWTEST_F(AmsAppLifeCycleTest, Stop_003, TestSize.Level1)
     EXPECT_NE(abilityRecord, nullptr);
     AbilityState abilityState = abilityRecord->GetState();
     ApplicationState appState = appRecord->GetState();
-    serviceInner_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = token;
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    serviceInner_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     EXPECT_EQ(abilityState, abilityRecord->GetState());
     EXPECT_EQ(appState, appRecord->GetState());
 
@@ -1374,14 +1390,15 @@ HWTEST_F(AmsAppLifeCycleTest, KillApplication_002, TestSize.Level1)
     const pid_t NEW_PID = 123;
     auto abilityInfo = GetAbilityInfoByIndex("0");
     auto appInfo = GetApplication();
-    sptr<IRemoteObject> token = GetMockToken();
 
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(NEW_PID), Return(ERR_OK)));
 
     serviceInner_->SetAppSpawnClient(mockClientPtr);
-
-    serviceInner_->LoadAbility(token, nullptr, abilityInfo, appInfo, nullptr, 0);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.token = GetMockToken();
+    auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
+    serviceInner_->LoadAbility(abilityInfo, appInfo, nullptr, loadParamPtr);
     BundleInfo bundleInfo;
     bundleInfo.appId = "com.ohos.test.helloworld_code123";
     auto appRecord = serviceInner_->appRunningManager_->CheckAppRunningRecordIsExist(
@@ -1670,20 +1687,20 @@ HWTEST_F(AmsAppLifeCycleTest, ClearUpApplicationData_001, TestSize.Level1)
 
     // pid < 0
     appRecord->SetUid(101);
-    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _)).Times(0);
-    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), appRecord->GetUid(), 0);
+    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _, _)).Times(0);
+    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), appRecord->GetUid(), 0, 0);
 
     // uid < 0
-    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _)).Times(0);
-    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), -1, NEW_PID);
+    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _, _)).Times(0);
+    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), -1, NEW_PID, 0);
 
-    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _)).Times(1).WillOnce(Return(101));
+    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _, _)).Times(1).WillOnce(Return(101));
 
     sptr<MockAppScheduler> mockAppScheduler = new MockAppScheduler();
     sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockAppScheduler.GetRefPtr());
     appRecord->SetApplicationClient(client);
 
-    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), appRecord->GetUid(), NEW_PID);
+    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), appRecord->GetUid(), NEW_PID, 0);
 }
 
 /*
@@ -1703,14 +1720,14 @@ HWTEST_F(AmsAppLifeCycleTest, ClearUpApplicationData_002, TestSize.Level1)
     auto appRecord = StartProcessAndLoadAbility(token, nullptr, abilityInfo, appInfo, NEW_PID);
     appRecord->SetUid(101);
 
-    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _)).Times(1).WillOnce(Return(101));
-    EXPECT_CALL(*mockBundleMgr, GetUidByBundleName(_, _)).Times(1);
+    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _, _)).Times(1).WillOnce(Return(101));
+    EXPECT_CALL(*mockBundleMgr, GetUidByBundleName(_, _, _)).Times(1);
 
     sptr<MockAppScheduler> mockAppScheduler = new MockAppScheduler();
     sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockAppScheduler.GetRefPtr());
     appRecord->SetApplicationClient(client);
 
-    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), appRecord->GetUid(), NEW_PID);
+    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), appRecord->GetUid(), NEW_PID, 0);
 }
 
 /*
@@ -1730,14 +1747,14 @@ HWTEST_F(AmsAppLifeCycleTest, ClearUpApplicationData_003, TestSize.Level1)
     auto appRecord = StartProcessAndLoadAbility(token, nullptr, abilityInfo, appInfo, NEW_PID);
     appRecord->SetUid(101);
 
-    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _)).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(*mockBundleMgr, GetUidByBundleName(_, _)).Times(0);
+    EXPECT_CALL(*mockBundleMgr, CleanBundleDataFiles(_, _, _)).Times(1).WillOnce(Return(0));
+    EXPECT_CALL(*mockBundleMgr, GetUidByBundleName(_, _, _)).Times(0);
 
     sptr<MockAppScheduler> mockAppScheduler = new MockAppScheduler();
     sptr<IAppScheduler> client = iface_cast<IAppScheduler>(mockAppScheduler.GetRefPtr());
     appRecord->SetApplicationClient(client);
 
-    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), appRecord->GetUid(), NEW_PID);
+    serviceInner_->ClearUpApplicationData(appRecord->GetBundleName(), appRecord->GetUid(), NEW_PID, 0);
 }
 
 /*

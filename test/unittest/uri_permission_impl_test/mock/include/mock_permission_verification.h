@@ -47,13 +47,17 @@ struct VerificationInfo {
  
     bool IsShellCall() const;
 
+    bool IsSystemAppCall() const;
+
     bool CheckSpecificSystemAbilityAccessPermission() const;
 
     bool VerifyRunningInfoPerm() const;
 
     bool VerifyControllerPerm() const;
 
+#ifdef WITH_DLP
     bool VerifyDlpPermission(Want &want) const;
+#endif // WITH_DLP
 
     int VerifyAccountPermission() const;
 

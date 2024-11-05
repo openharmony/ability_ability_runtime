@@ -88,7 +88,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_002, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     ret = appfreezeManager->AppfreezeHandleWithStack(faultData, appInfo);
     EXPECT_EQ(ret, 0);
-    ret = appfreezeManager->AcquireStack(faultData, appInfo);
+    ret = appfreezeManager->AcquireStack(faultData, appInfo, "test");
     EXPECT_EQ(ret, 0);
 
     faultData.errorObject.name = AppFreezeType::APP_INPUT_BLOCK;
@@ -96,7 +96,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_002, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     ret = appfreezeManager->AppfreezeHandleWithStack(faultData, appInfo);
     EXPECT_EQ(ret, 0);
-    ret = appfreezeManager->AcquireStack(faultData, appInfo);
+    ret = appfreezeManager->AcquireStack(faultData, appInfo, "test");
     EXPECT_EQ(ret, 0);
 }
 
@@ -115,7 +115,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_003, TestSize.Level1)
         .bundleName = "AppfreezeManagerTest_003",
         .processName = "AppfreezeManagerTest_003",
     };
-    int ret = appfreezeManager->NotifyANR(faultData, appInfo, "");
+    int ret = appfreezeManager->NotifyANR(faultData, appInfo, "", "");
     EXPECT_EQ(ret, 0);
 }
 
@@ -151,9 +151,9 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_004, TestSize.Level1)
         .bundleName = "",
         .msg = "Test",
     };
-    auto flow = std::make_unique<FreezeUtil::LifecycleFlow>();
-    flow->state = AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND;
-    ret = appfreezeManager->LifecycleTimeoutHandle(info3, std::move(flow));
+    FreezeUtil::LifecycleFlow flow;
+    flow.state = AbilityRuntime::FreezeUtil::TimeoutState::FOREGROUND;
+    ret = appfreezeManager->LifecycleTimeoutHandle(info3, flow);
     EXPECT_EQ(ret, 0);
 }
 

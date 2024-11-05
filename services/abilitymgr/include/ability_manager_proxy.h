@@ -301,7 +301,7 @@ public:
      * @param isColdStart the session info of the ability is or not cold start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart) override;
+    virtual int StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag = 0) override;
 
     /**
      * Stop extension ability with want, send want to ability manager service.
@@ -422,7 +422,8 @@ public:
      * @param fromUser, Whether form user.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser = false) override;
+    virtual int MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser = false,
+        uint32_t sceneFlag = 0) override;
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -594,16 +595,6 @@ public:
     #endif
 
     /**
-     * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
-     * clear the application data.
-     *
-     * @param bundleName, bundle name in Application record.
-     * @return
-     */
-    virtual int ClearUpApplicationData(const std::string &bundleName,
-        const int32_t userId = -1) override;
-
-    /**
      * Uninstall app
      *
      * @param bundleName bundle name of uninstalling app.
@@ -635,7 +626,7 @@ public:
         int32_t appIndex = 0) override;
 
     virtual sptr<IWantSender> GetWantSender(
-        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) override;
+        const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid = -1) override;
 
     virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) override;
 
@@ -1319,6 +1310,24 @@ public:
     virtual int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE) override;
 
+    /**
+     * Terminate the mission.
+     *
+     * @param missionId, The mission id of the UIAbility need to be terminated.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t TerminateMission(int32_t missionId) override;
+
+    /**
+     * update associate config list by rss.
+     *
+     * @param configs The rss config info.
+     * @param exportConfigs The rss export config info.
+     * @param flag UPDATE_CONFIG_FLAG_COVER is cover config, UPDATE_CONFIG_FLAG_APPEND is append config.
+     */
+    virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
+        const std::list<std::string>& exportConfigs, int32_t flag) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
@@ -1329,6 +1338,8 @@ private:
         MessageOption& option);
     int CheckUISessionParams(MessageParcel &data, const sptr<IRemoteObject> &callerToken,
         const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode);
+    bool UpdateAssociateConfigInner(const std::map<std::string, std::list<std::string>>& configs,
+        MessageParcel& data);
 
 private:
     static inline BrokerDelegator<AbilityManagerProxy> delegator_;

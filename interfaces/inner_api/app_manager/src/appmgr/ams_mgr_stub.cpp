@@ -26,6 +26,7 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
+#include "param.h"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -47,13 +48,13 @@ void AmsMgrStub::CreateMemberFuncMap() {}
 int AmsMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (code != static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID)) {
-        TAG_LOGI(AAFwkTag::APPMGR, "AmsMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code,
+        TAG_LOGI(AAFwkTag::APPMGR, "OnReceived, code: %{public}u, flags: %{public}d", code,
             option.GetFlags());
     }
     std::u16string descriptor = AmsMgrStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::APPMGR, "local descriptor is unequal to remote");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid descriptor");
         return ERR_INVALID_STATE;
     }
     return OnRemoteRequestInner(code, data, reply, option);
@@ -204,12 +205,16 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
     MessageParcel &reply, MessageOption &option)
 {
     switch (static_cast<uint32_t>(code)) {
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION):
+            return HandleIsProcessContainsOnlyUIAbility(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION):
             return HandleForceKillApplication(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::CLEAN_UIABILITY_BY_USER_REQUEST):
             return HandleCleanAbilityByUserRequest(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID):
             return HandleKillProcessesByAccessTokenId(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_ATTACHED):
+            return HandleIsProcessAttached(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -217,14 +222,6 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
 ErrCode AmsMgrStub::HandleLoadAbility(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    sptr<IRemoteObject> token = nullptr;
-    sptr<IRemoteObject> preToke = nullptr;
-    if (data.ReadBool()) {
-        token = data.ReadRemoteObject();
-    }
-    if (data.ReadBool()) {
-        preToke = data.ReadRemoteObject();
-    }
     std::shared_ptr<AbilityInfo> abilityInfo(data.ReadParcelable<AbilityInfo>());
     if (!abilityInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<AbilityInfo> failed");
@@ -242,9 +239,13 @@ ErrCode AmsMgrStub::HandleLoadAbility(MessageParcel &data, MessageParcel &reply)
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable want failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
-    int32_t abilityRecordId = data.ReadInt32();
+    std::shared_ptr<AbilityRuntime::LoadParam> loadParam(data.ReadParcelable<AbilityRuntime::LoadParam>());
+    if (!loadParam) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable loadParam failed");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
 
-    LoadAbility(token, preToke, abilityInfo, appInfo, want, abilityRecordId);
+    LoadAbility(abilityInfo, appInfo, want, loadParam);
     return NO_ERROR;
 }
 
@@ -325,7 +326,7 @@ ErrCode AmsMgrStub::HandleKillProcessesByPids(MessageParcel &data, MessageParcel
     HITRACE_METER(HITRACE_TAG_APP);
     auto size = data.ReadUint32();
     if (size == 0 || size > MAX_KILL_PROCESS_PID_COUNT) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid size");
         return ERR_INVALID_VALUE;
     }
     std::vector<int32_t> pids;
@@ -370,6 +371,10 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
 
+    TAG_LOGW(AAFwkTag::APPMGR,
+        "KillApplication,callingPid=%{public}d,bundleName=%{public}s",
+        IPCSkeleton::GetCallingPid(), bundleName.c_str());
+
     int32_t result = KillApplication(bundleName);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -407,7 +412,9 @@ ErrCode AmsMgrStub::HandleKillApplicationByUid(MessageParcel &data, MessageParce
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
     int uid = data.ReadInt32();
-    int32_t result = KillApplicationByUid(bundleName, uid);
+    std::string reason = data.ReadString();
+    TAG_LOGW(AAFwkTag::APPMGR, "KillApplicationByUid,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    int32_t result = KillApplicationByUid(bundleName, uid, reason);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -415,7 +422,9 @@ ErrCode AmsMgrStub::HandleKillApplicationByUid(MessageParcel &data, MessageParce
 ErrCode AmsMgrStub::HandleKillApplicationSelf(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    int32_t result = KillApplicationSelf();
+    TAG_LOGW(AAFwkTag::APPMGR, "KillApplicationSelf,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    std::string reason = data.ReadString();
+    int32_t result = KillApplicationSelf(reason);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "result write failed.");
         return ERR_INVALID_VALUE;
@@ -798,6 +807,23 @@ ErrCode AmsMgrStub::HandleBlockProcessCacheByPids(MessageParcel &data, MessagePa
     return NO_ERROR;
 }
 
+int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    auto bundleName = data.ReadString();
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto result = IsKilledForUpgradeWeb(bundleName);
+    if (!reply.WriteBool(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 ErrCode AmsMgrStub::HandleCleanAbilityByUserRequest(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
@@ -810,18 +836,25 @@ ErrCode AmsMgrStub::HandleCleanAbilityByUserRequest(MessageParcel &data, Message
     return NO_ERROR;
 }
 
-int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParcel &reply)
+int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    auto bundleName = data.ReadString();
-    if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
+    auto pid = data.ReadUint32();
+
+    auto result = IsProcessContainsOnlyUIAbility(pid);
+    if (!reply.WriteBool(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result in HandleIsProcessContainsOnlyUIAbility.");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
 
-    auto result = IsKilledForUpgradeWeb(bundleName);
-    if (!reply.WriteBool(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+int32_t AmsMgrStub::HandleIsProcessAttached(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto isAttached = IsProcessAttached(token);
+    if (!reply.WriteBool(isAttached)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

@@ -23,7 +23,7 @@
 #include "values_bucket.h"
 #include "ability_connect_callback_interface.h"
 #include "ability_manager_errors.h"
-#include "fa_ability_context.h"
+#include "ability_context.h"
 #include "ability_manager_interface.h"
 #include "ability_scheduler_interface.h"
 #include "iremote_object.h"
@@ -48,8 +48,11 @@ public:
 
 class MockAbilityThread : public IRemoteStub<AAFwk::IAbilityScheduler> {
 public:
-    virtual void ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
-        sptr<SessionInfo> sessionInfo = nullptr) {};
+    virtual bool ScheduleAbilityTransaction(const Want& want, const LifeCycleStateInfo& targetState,
+        sptr<SessionInfo> sessionInfo = nullptr)
+    {
+        return true;
+    }
     virtual void SendResult(int requestCode, int resultCode, const Want& resultWant) {};
     virtual void ScheduleConnectAbility(const Want& want) {};
     virtual void ScheduleDisconnectAbility(const Want& want) {};

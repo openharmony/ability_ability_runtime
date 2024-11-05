@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_CONSTANT_H
 #define OHOS_ABILITY_RUNTIME_INSIGHT_INTENT_CONSTANT_H
 
+#include "ability_manager_errors.h"
+
 namespace OHOS::AbilityRuntime {
     enum class InsightIntentExecuteMode {
         UIABILITY_FOREGROUND,
@@ -28,7 +30,8 @@ namespace OHOS::AbilityRuntime {
 
     enum InsightIntentInnerErr {
         INSIGHT_INTENT_ERR_OK,
-        INSIGHT_INTENT_INTERNAL_ERROR
+        INSIGHT_INTENT_INTERNAL_ERROR,
+        INSIGHT_INTENT_EXECUTE_REPLY_FAILED = AAFwk::ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED,
     };
 } // namespace OHOS::AbilityRuntime
 
