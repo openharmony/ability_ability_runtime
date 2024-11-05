@@ -736,7 +736,12 @@ bool JsRuntime::Initialize(const Options& options)
         std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
         bool newCreate = false;
         std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
-        bool hasFile = extractor->HasEntry(MERGE_SOURCE_MAP_PATH);
+        bool hasFile = false;
+        if (!extractor) {
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "Get extractor failed. hapPath[%{private}s]", loadPath.c_str());
+        } else {
+            hasFile = extractor->HasEntry(MERGE_SOURCE_MAP_PATH);
+        }
         auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.bundleName, isModular,
                                                                       hasFile);
         InitSourceMap(operatorObj);
