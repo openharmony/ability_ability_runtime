@@ -59,6 +59,20 @@ int32_t UIExtensionRecordFactory::CreateRecord(
     if (AAFwk::MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
         abilityRecord->SetInstanceKey(AAFwk::MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
     }
+    auto callerRecord = AAFWK::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    auto callerBundleName = callerRecord ? callerRecord->GetAbilityInfo().bundleName : "";
+    if (callerRecord) {
+        if (callerRecord->IsDebug() &&
+            callerRecord->GetApplicationInfo().appProvisionType ==
+                AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+            auto isSameApp = callerBundleName == abilityRequest.abilityInfo.bundleName;
+            auto isCallerUIAbility = callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
+            if (isSameApp && isCallerUIAbility) {
+                TAG_LOGD(AAFwkTag::ABILITYMGR, "Setting up debug UIExtension");
+                abilityRecord->SetDebugUIExtension(true);
+            }
+        }
+    }
     extensionRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
     extensionRecord->processMode_ = GetExtensionProcessMode(abilityRequest, extensionRecord->isHostSpecified_);
     return ERR_OK;
