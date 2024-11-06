@@ -1112,7 +1112,7 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     }
     auto *resolveCallbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Create();
     auto *rejectCallbackInfo = AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Create();
-    if (promiseCallbackInfo == nullptr) {
+    if (resolveCallbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "create AbilityTransactionCallbackInfo failed");
         return OnContinueSyncCB(result, wantParams, jsWantParams);
     }
@@ -1122,7 +1122,7 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     onContinueData.jsWantParams = jsWantParams;
     onContinueData.resolveCallbackInfo = resolveCallbackInfo;
     onContinueData.rejectCallbackInfo = rejectCallbackInfo;
-    MakeOnContinueAsyncTask(OnContinueData);
+    MakeOnContinueAsyncTask(onContinueData);
     if (!CallPromise(result, resolveCallbackInfo, rejectCallbackInfo)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "call promise failed");
         return OnContinueSyncCB(result, wantParams, jsWantParams);
@@ -1140,7 +1140,8 @@ void JsUIAbility::MakeOnContinueAsyncTask(OnContinueData &onContinueData)
     napi_create_reference(env, onContinueData.jsWantParams, 1, &onContinueData.jsWantParamsRef);
 
     // Release jsWantParamsRef at the same time as Promise object destruction
-    napi_add_finalizer(env, onContinueData.promise, &onContinueData, [](napi_env env, void *context, void *) {
+    napi_value promise = onContinueData.promise;
+    napi_add_finalizer(env, promise, &onContinueData, [](napi_env env, void *context, void *) {
         TAG_LOGI(AAFwkTag::UIABILITY, "Release jsWantParamsRef");
         auto contextRef = reinterpret_cast<OnContinueData *>(context);
         if (contextRef->jsWantParamsRef != nullptr) {
