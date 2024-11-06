@@ -1224,7 +1224,8 @@ void JsRuntime::ForceFullGC()
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
-    panda::JSNApi::TriggerGC(vm, panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    panda::JSNApi::TriggerGC(vm, panda::ecmascript::GCReason::TRIGGER_BY_ABILITY,
+        panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 
 void JsRuntime::AllowCrossThreadExecution()
