@@ -66,20 +66,14 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
     return true;
 }
 
-int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-    const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-    const Want &want, int32_t abilityRecordId)
+int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const AppExecFwk::AbilityInfo &abilityInfo,
+    const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
-    AbilityRuntime::LoadParam loadParam;
-    loadParam.abilityRecordId = abilityRecordId;
-    loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
-    loadParam.token = token;
-    loadParam.preToken = preToken;
     int ret = static_cast<int>(IN_PROCESS_CALL(
         appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {

@@ -38,6 +38,7 @@
 #include "system_ability_token_callback.h"
 #include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
+#include "param.h"
 #include "permission_constants.h"
 #include "process_options.h"
 #include "uri_utils.h"
@@ -301,7 +302,7 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, FreezeUtil::TimeoutState::LOAD, methodName);
 }
 
-int AbilityRecord::LoadAbility()
+int AbilityRecord::LoadAbility(bool isShellCall)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s.", abilityInfo_.name.c_str());
@@ -337,8 +338,17 @@ int AbilityRecord::LoadAbility()
 
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = recordId_;
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        loadParam.isShellCall = isShellCall;
+    } else {
+        loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    }
+    loadParam.token = token_;
+    loadParam.preToken = callerToken_;
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token_, callerToken_, abilityInfo_, applicationInfo_, want_, recordId_);
+        loadParam, abilityInfo_, applicationInfo_, want_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
 
     auto isAttachDebug = DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName);
@@ -455,7 +465,7 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag)
+void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag, bool isShellCall)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetElementName().GetURI();
@@ -483,7 +493,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
     } else {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        LoadAbility();
+        LoadAbility(isShellCall);
     }
 }
 

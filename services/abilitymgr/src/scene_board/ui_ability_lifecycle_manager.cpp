@@ -44,6 +44,7 @@ constexpr int DEFAULT_DMS_MISSION_ID = -1;
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 constexpr const char* DMS_PROCESS_NAME = "distributedsched";
 constexpr const char* DMS_PERSISTENT_ID = "ohos.dms.persistentId";
+constexpr const char* IS_SHELL_CALL = "isShellCall";
 #ifdef SUPPORT_ASAN
 constexpr int KILL_TIMEOUT_MULTIPLE = 45;
 #else
@@ -106,7 +107,8 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     if (!uiAbilityRecord->IsReady() || sessionInfo->isNewWant) {
         AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
     }
-    uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId, sceneFlag);
+    auto isShellCall = abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
+    uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId, sceneFlag, isShellCall);
     CheckSpecified(abilityRequest, uiAbilityRecord);
     SendKeyEvent(abilityRequest);
     return ERR_OK;
@@ -322,11 +324,12 @@ int UIAbilityLifecycleManager::AbilityTransactionDone(const sptr<IRemoteObject> 
     return DispatchState(abilityRecord, targetState);
 }
 
-int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest)
+int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &abilityRequest)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    abilityRequest.want.SetParam(IS_SHELL_CALL, AAFwk::PermissionVerification::GetInstance()->IsShellCall());
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    // start abilty with persistentId by dms
+    // start ability with persistentId by dms
     int32_t persistentId = abilityRequest.want.GetIntParam(DMS_PERSISTENT_ID, 0);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "NotifySCBToStartUIAbility, want with persistentId: %{public}d.", persistentId);
     if (persistentId != 0 &&
@@ -350,7 +353,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
     }
     auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
-        PreCreateProcessName(const_cast<AbilityRequest &>(abilityRequest));
+        PreCreateProcessName(abilityRequest);
         specifiedRequestMap_.emplace(specifiedRequestId_, abilityRequest);
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(
             abilityRequest.want, abilityRequest.abilityInfo, specifiedRequestId_);
