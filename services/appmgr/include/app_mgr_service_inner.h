@@ -1402,8 +1402,9 @@ private:
      */
     void RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord);
 
-    bool CheckLoadAbilityConditions(std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo);
+    bool CheckLoadAbilityConditions(std::shared_ptr<AAFwk::Want> want,
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam, const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const std::shared_ptr<ApplicationInfo> &appInfo);
 
     /**
      * query bundle info for the given bundleName

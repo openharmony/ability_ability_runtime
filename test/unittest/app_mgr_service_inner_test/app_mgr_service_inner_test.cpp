@@ -437,21 +437,21 @@ HWTEST_F(AppMgrServiceInnerTest, CheckLoadAbilityConditions_001, TestSize.Level0
     auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
     loadParam->token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
 
-    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, nullptr);
+    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, nullptr, nullptr);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, abilityInfo_, nullptr);
+    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, abilityInfo_, nullptr);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, applicationInfo_);
+    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, nullptr, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, nullptr, nullptr);
+    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, loadParam, nullptr, nullptr);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, abilityInfo_, nullptr);
+    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, loadParam, abilityInfo_, nullptr);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, abilityInfo_, applicationInfo_);
+    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, nullptr, abilityInfo_, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, nullptr, applicationInfo_);
+    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, loadParam, nullptr, applicationInfo_);
 
-    appMgrServiceInner->CheckLoadAbilityConditions(loadParam, abilityInfo_, applicationInfo_);
+    appMgrServiceInner->CheckLoadAbilityConditions(nullptr, loadParam, abilityInfo_, applicationInfo_);
 
     EXPECT_NE(appMgrServiceInner, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "CheckLoadAbilityConditions_001 end");

@@ -612,7 +612,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         TAG_LOGE(AAFwkTag::APPMGR, "null loadParam");
         return;
     }
-    if (!CheckLoadAbilityConditions(loadParam, abilityInfo, appInfo)) {
+    if (!CheckLoadAbilityConditions(want, loadParam, abilityInfo, appInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "checkLoadAbilityConditions fail");
         NotifyLoadAbilityFailed(loadParam->token);
         return;
@@ -811,8 +811,9 @@ void AppMgrServiceInner::RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunnin
     appRunningManager_->RemoveUIExtensionLauncherItemById(uiExtensionAbilityId);
 }
 
-bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
-    const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo)
+bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AAFwk::Want> want,
+    std::shared_ptr<AbilityRuntime::LoadParam> loadParam, const std::shared_ptr<AbilityInfo> &abilityInfo,
+    const std::shared_ptr<ApplicationInfo> &appInfo)
 {
     if (!loadParam || !loadParam->token || !abilityInfo || !appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
@@ -826,7 +827,12 @@ bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AbilityRunti
         TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo and appInfo have diff appName");
         return false;
     }
-    if (loadParam->preToken) {
+    bool needCheckCallerIsExist = false;
+    if (want) {
+        needCheckCallerIsExist = want->GetBoolParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST, false);
+        want->RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
+    }
+    if (needCheckCallerIsExist && loadParam->preToken) {
         auto appRecord = GetAppRunningRecordByAbilityToken(loadParam->preToken);
         if (appRecord == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "preToken not exist");
