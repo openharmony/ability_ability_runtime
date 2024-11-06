@@ -799,16 +799,6 @@ public:
     virtual void SetAppAssertionPauseState(bool flag) {}
 
     /**
-     * Start native child process, callde by ChildProcessManager.
-     * @param libName lib file name to be load in child process
-     * @param childProcessCount current started child process count
-     * @param callback callback for notify start result
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
-        const sptr<IRemoteObject> &callback) = 0;
-
-    /**
      * set browser channel for caller
      */
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) = 0;
@@ -823,6 +813,16 @@ public:
     {
         return 0;
     }
+
+    /**
+     * Start native child process, callde by ChildProcessManager.
+     * @param libName lib file name to be load in child process
+     * @param childProcessCount current started child process count
+     * @param callback callback for notify start result
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback) = 0;
 
     /**
      * Notify that the process depends on web by itself.
