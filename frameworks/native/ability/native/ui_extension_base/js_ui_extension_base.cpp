@@ -247,7 +247,6 @@ void JsUIExtensionBase::OnStop()
 #ifdef SUPPORT_GRAPHICS
     UnregisterDisplayInfoChangedListener();
 #endif // SUPPORT_GRAPHICS
-
     OnStopCallBack();
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }

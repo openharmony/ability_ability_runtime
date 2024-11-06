@@ -863,20 +863,20 @@ public:
     virtual AppMgrResultCode BlockProcessCacheByPids(const std::vector<int32_t> &pids);
 
     /**
-     * Request to clean uiability from user.
-     *
-     * @param token the token of ability.
-     * @return Returns true if clean success, others return false.
-     */
-    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
-
-    /**
      * whether killed for upgrade web.
      *
      * @param bundleName the bundle name is killed for upgrade web.
      * @return Returns true is killed for upgrade web, others return false.
      */
     bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
     /**
      * whether the abilities of process specified by pid type only UIAbility.
