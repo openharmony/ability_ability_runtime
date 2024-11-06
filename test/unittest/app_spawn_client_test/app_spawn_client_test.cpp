@@ -18,6 +18,7 @@
 #define private public
 #include "app_spawn_client.h"
 #undef private
+#include "app_spawn_client.cpp"
 
 using namespace testing;
 using namespace testing::ext;
@@ -945,6 +946,28 @@ HWTEST_F(AppSpawnClientTest, StartProcess_002, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "StartProcess_002 end");
 }
 
+/**
+ * @tc.name: DumpJITPermissionListToJson_001
+ * @tc.desc: appspawn client DumpJITPermissionListToJson_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientTest, DumpJITPermissionListToJson_001, TestSize.Level0)
+{
+    JITPermissionsList jitPermissionsList = {
+        "ohos.permission.jit1",
+        "ohos.permission.jit2"
+    };
+    std::string expectJITPermission1 = "ohos.permission.jit1";
+    std::string expectJITPermission2 = "ohos.permission.jit2";
+    std::string jsonJITPermissions = DumpJITPermissionListToJson(jitPermissionsList);
+
+    size_t pos = jsonJITPermissions.find(expectJITPermission1);
+    ASSERT_NE(pos, std::string::npos);
+    pos = jsonJITPermissions.find(expectJITPermission2);
+    ASSERT_NE(pos, std::string::npos);
+    pos = jsonJITPermissions.find(expectJITPermission2);
+    ASSERT_NE(pos, std::string::npos);
+}
 
 } // namespace AppExecFwk
 } // namespace OHOS

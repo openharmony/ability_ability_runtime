@@ -31,6 +31,7 @@
 #include "pending_want_record.h"
 #include "pending_want_common_event.h"
 #include "sender_info.h"
+#include "task_handler_wrap.h"
 #include "want_sender_info.h"
 
 namespace OHOS {
@@ -184,17 +185,10 @@ private:
 
     bool CheckWindowState(int32_t pid);
 
-    void EraseBundleRecord(const std::vector<WantsInfo> &wantsInfos, std::shared_ptr<PendingWantKey> key);
-
-    void InsertBundleRecord(const std::vector<WantsInfo> &wantsInfos, std::shared_ptr<PendingWantKey> key);
-
-    bool QueryRecordByBundle(const std::string &bundleName);
-
 private:
+    std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::map<std::shared_ptr<PendingWantKey>, sptr<PendingWantRecord>> wantRecords_;
-    std::map<std::string, std::vector<std::shared_ptr<PendingWantKey>>> bundleRecords_;
     ffrt::mutex mutex_;
-    ffrt::mutex bundleRecordsMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

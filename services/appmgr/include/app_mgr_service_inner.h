@@ -314,6 +314,8 @@ public:
     virtual int32_t KillApplicationSelf(const bool clearPageStack = false,
         const std::string& reason = "KillApplicationSelf");
 
+    int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack, const std::string& reason);
+
     /**
      * KillApplicationByUserId, kill the application by user ID.
      *
@@ -1237,9 +1239,7 @@ public:
     /**
      * Mark processes of the uid as the app is going to be restarted.
      */
-    int32_t SignRestartAppFlag(int32_t uid);
-
-    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) const;
+    int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
 
     /**
      * Set application assertion pause state.
@@ -1402,7 +1402,7 @@ private:
      */
     void RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord);
 
-    bool CheckLoadAbilityConditions(const sptr<IRemoteObject> &token,
+    bool CheckLoadAbilityConditions(std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
         const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo);
 
     /**
@@ -1471,7 +1471,8 @@ private:
     void StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
-                      bool isPreload = false, const std::string &moduleName = "", const std::string &abilityName = "",
+                      bool isPreload = false,  AppExecFwk::PreloadMode preloadMode = AppExecFwk::PreloadMode::PRE_MAKE,
+                      const std::string &moduleName = "", const std::string &abilityName = "",
                       bool strictMode = false, sptr<IRemoteObject> token = nullptr,
                       std::shared_ptr<AAFwk::Want> want = nullptr,
                       ExtensionAbilityType ExtensionAbilityType = ExtensionAbilityType::UNSPECIFIED);
@@ -1625,6 +1626,8 @@ private:
     void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
+    void RemoveRenderRecordNoAttach(const std::shared_ptr<AppRunningRecord> &hostRecord, int32_t renderPid);
+
 private:
     /**
      * ClearUpApplicationData, clear the application data.
@@ -1654,7 +1657,8 @@ private:
     int32_t KillApplicationByBundleName(const std::string &bundleName, const bool clearPageStack = false,
         const std::string& reason = "KillApplicationByBundleName");
 
-    bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+    bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload,
+        AppExecFwk::PreloadMode preloadMode);
 
     bool SendProcessStartFailedEvent(std::shared_ptr<AppRunningRecord> appRecord, ProcessStartFailedReason reason,
         int32_t subReason);
@@ -1736,7 +1740,8 @@ private:
         std::shared_ptr<AbilityInfo> abilityInfo, const std::string &processName,
         const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want,
-        bool appExistFlag, bool isPreload, sptr<IRemoteObject> token = nullptr);
+        bool appExistFlag, bool isPreload, AppExecFwk::PreloadMode preloadMode,
+        sptr<IRemoteObject> token = nullptr);
 
     int32_t CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName,
@@ -1776,6 +1781,8 @@ private:
      * @param appRecord indicates the process is going to die.
      */
     void NotifyAppAttachFailed(std::shared_ptr<AppRunningRecord> appRecord);
+
+    void NotifyLoadAbilityFailed(sptr<IRemoteObject> token);
 private:
     /**
      * Notify application status.

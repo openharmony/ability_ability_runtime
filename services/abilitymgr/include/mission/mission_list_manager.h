@@ -365,7 +365,7 @@ public:
 
     bool IsAbilityStarted(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord) override;
 
-    void SignRestartAppFlag(int32_t uid) override;
+    void SignRestartAppFlag(int32_t uid, const std::string &instanceKey) override;
 
     void SetAnimationFlag(bool IsAnimationEnabled);
 #ifdef SUPPORT_SCREEN
