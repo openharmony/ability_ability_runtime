@@ -1140,7 +1140,7 @@ void JsUIAbility::MakeOnContinueAsyncTask(OnContinueData &onContinueData)
     napi_create_reference(env, onContinueData.jsWantParams, 1, &onContinueData.jsWantParamsRef);
 
     // Release jsWantParamsRef at the same time as Promise object destruction
-    napi_add_finalizer(env, onContinueData, jsWantParamsRef, [](napi_env env, void *context, void *) {
+    napi_add_finalizer(env, onContinueData.promise, &onContinueData, [](napi_env env, void *context, void *) {
         TAG_LOGI(AAFwkTag::UIABILITY, "Release jsWantParamsRef");
         auto contextRef = reinterpret_cast<OnContinueData *>(context);
         if (contextRef->jsWantParamsRef != nullptr) {
@@ -1157,6 +1157,7 @@ void JsUIAbility::MakeOnContinueAsyncTask(OnContinueData &onContinueData)
         }
     }, nullptr, nullptr);
     AppExecFwk::AbilityInfo &abilityInfo = onContinueData.abilityInfo;
+    napi_ref jsWantParamsRef = onContinueData.jsWantParamsRef;
     auto resolveCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
         auto ability = abilityWeakPtr.lock();
         if (ability == nullptr) {
@@ -1166,7 +1167,7 @@ void JsUIAbility::MakeOnContinueAsyncTask(OnContinueData &onContinueData)
         ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
     };
 
-    resolveCallbackInfo->Push(resolveCallback);
+    onContinueData.resolveCallbackInfo->Push(resolveCallback);
 
     auto rejectCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
         auto ability = abilityWeakPtr.lock();
@@ -1178,7 +1179,7 @@ void JsUIAbility::MakeOnContinueAsyncTask(OnContinueData &onContinueData)
         ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
     };
 
-    rejectCallbackInfo->Push(rejectCallback);
+    onContinueData.rejectCallbackInfo->Push(rejectCallback);
 }
 
 int32_t JsUIAbility::OnContinueAsyncCB(napi_ref jsWantParamsRef, int32_t status,
