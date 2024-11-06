@@ -3799,6 +3799,23 @@ int32_t AbilityManagerStub::UpdateSessionInfoBySCBInner(MessageParcel &data, Mes
     return ERR_OK;
 }
 
+int32_t AbilityManagerStub::RestartAppInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return IPC_STUB_ERR;
+    }
+    bool isAppRecovery = data.ReadBool();
+    auto result = RestartApp(*want, isAppRecovery);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return IPC_STUB_ERR;
+    }
+    return ERR_OK;
+}
+
 int32_t AbilityManagerStub::GetUIExtensionRootHostInfoInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> callerToken = nullptr;
@@ -3851,23 +3868,6 @@ int32_t AbilityManagerStub::GetUIExtensionSessionInfoInner(MessageParcel &data, 
     }
 
     return NO_ERROR;
-}
-
-int32_t AbilityManagerStub::RestartAppInner(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
-    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
-        return IPC_STUB_ERR;
-    }
-    bool isAppRecovery = data.ReadBool();
-    auto result = RestartApp(*want, isAppRecovery);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return IPC_STUB_ERR;
-    }
-    return ERR_OK;
 }
 
 int32_t AbilityManagerStub::OpenAtomicServiceInner(MessageParcel &data, MessageParcel &reply)
@@ -3925,7 +3925,6 @@ int32_t AbilityManagerStub::IsEmbeddedOpenAllowedInner(MessageParcel &data, Mess
 
     std::string appId = data.ReadString();
     auto result = IsEmbeddedOpenAllowed(callerToken, appId);
-
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;
