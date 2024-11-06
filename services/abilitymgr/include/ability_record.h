@@ -275,6 +275,7 @@ struct AbilityRequest {
     bool uriReservedFlag = false;
     std::string reservedBundleName;
     bool isFromIcon = false;
+    bool isShellCall = false;
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -398,7 +399,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int LoadAbility();
+    int LoadAbility(bool isShellCall = false);
 
     /**
      * foreground the ability.
@@ -411,7 +412,7 @@ public:
      * process request of foregrounding the ability.
      *
      */
-    void ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag = 0);
+    void ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false);
 
      /**
      * post foreground timeout task for ui ability.
