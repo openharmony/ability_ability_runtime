@@ -63,6 +63,7 @@ ohos_shared_library("napi_common") {
     "json:nlohmann_json_static",
     "libuv:uv",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   public_external_deps = [
@@ -78,6 +79,7 @@ ohos_shared_library("napi_common") {
     ]
     public_external_deps += [
       "form_fwk:form_manager",
+      "graphic_2d:EGL",
       "window_manager:libdm",
     ]
   }

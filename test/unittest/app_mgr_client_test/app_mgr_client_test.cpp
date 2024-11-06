@@ -1317,19 +1317,6 @@ HWTEST_F(AppMgrClientTest, GetAppRunningUniqueIdByPid_001, TestSize.Level0)
 }
 
 /**
- * @tc.name: AppMgrClient_NotifyMemorySizeStateChanged_001
- * @tc.desc: NotifyMemorySizeStateChanged.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, NotifyMemorySizeStateChanged_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    bool isMemorySizeSufficient = false;
-    int32_t ret = appMgrClient->NotifyMemorySizeStateChanged(isMemorySizeSufficient);
-    EXPECT_EQ(ret, 1);
-}
-
-/**
  * @tc.name: AppMgrClient_SetSupportedProcessCacheSelf_001
  * @tc.desc: SetSupportedProcessCacheSelf.
  * @tc.type: FUNC
@@ -1340,6 +1327,19 @@ HWTEST_F(AppMgrClientTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
     bool isSupport = false;
     int32_t ret = appMgrClient->SetSupportedProcessCacheSelf(isSupport);
     EXPECT_NE(appMgrClient, nullptr);
+}
+
+/**
+ * @tc.name: AppMgrClient_NotifyMemorySizeStateChanged_001
+ * @tc.desc: NotifyMemorySizeStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, NotifyMemorySizeStateChanged_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    bool isMemorySizeSufficient = false;
+    int32_t ret = appMgrClient->NotifyMemorySizeStateChanged(isMemorySizeSufficient);
+    EXPECT_EQ(ret, 1);
 }
 
 /**

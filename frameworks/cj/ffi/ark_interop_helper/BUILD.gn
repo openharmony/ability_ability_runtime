@@ -27,7 +27,6 @@ ohos_shared_library("ark_interop_helper_ffi") {
     "hilog:libhilog",
     "napi:ace_napi",
     "napi:ark_interop",
-    "runtime_core:libarkbase_static",
   ]
   sanitize = {
     cfi = true

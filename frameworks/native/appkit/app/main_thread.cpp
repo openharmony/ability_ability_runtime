@@ -62,7 +62,7 @@
 #include "locale_config.h"
 #include "ace_forward_compatibility.h"
 #include "form_constants.h"
-#include "include/private/EGL/cache.h"
+#include "cache.h"
 #ifdef SUPPORT_APP_PREFERRED_LANGUAGE
 #include "preferred_language.h"
 #endif
@@ -191,6 +191,8 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
         libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
         TAG_LOGD(AAFwkTag::APPKIT, "lib path = %{private}s", libPath.c_str());
         appLibPaths["default"].emplace_back(libPath);
+    } else {
+        TAG_LOGI(AAFwkTag::APPKIT, "nativeLibraryPath is empty");
     }
 
     for (auto &hapInfo : bundleInfo.hapModuleInfos) {
@@ -2628,7 +2630,6 @@ void MainThread::ForceFullGC()
 
 void MainThread::Start()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPKIT, "App main thread create, pid:%{public}d", getprocpid());
 
     std::shared_ptr<EventRunner> runner = EventRunner::GetMainEventRunner();

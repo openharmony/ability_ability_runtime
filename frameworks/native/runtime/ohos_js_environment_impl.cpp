@@ -113,7 +113,7 @@ void OHOSJsEnvironmentImpl::InitTimerModule(NativeEngine* engine)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     CHECK_POINTER(engine);
-    auto ret = OHOS::JsSysModule::Timer::RegisterTime(reinterpret_cast<napi_env>(engine));
+    auto ret = JsSysModule::Timer::RegisterTime(reinterpret_cast<napi_env>(engine));
     if (!ret) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Register timer failed");
     }

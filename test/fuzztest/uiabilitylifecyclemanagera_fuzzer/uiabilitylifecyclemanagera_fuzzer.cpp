@@ -106,7 +106,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     auto uIAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>(userId);
     std::string strParam(data, size);
     int32_t uid = static_cast<int32_t>(GetU32Data(data));
-    uIAbilityLifecycleManager->SignRestartAppFlag(uid);
+    uIAbilityLifecycleManager->SignRestartAppFlag(uid, strParam);
     AbilityRequest abilityRequest;
     sptr<SessionInfo> sessionInfo;
     uint32_t sceneFlag = GetU32Data(data);

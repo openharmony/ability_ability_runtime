@@ -231,5 +231,23 @@ int32_t AbilityPermissionUtil::CheckMultiInstanceKeyForExtension(const AbilityRe
     }
     return ERR_OK;
 }
+
+bool AbilityPermissionUtil::VerifyCallerToken(AbilityRequest &abilityRequest)
+{
+    if (abilityRequest.callerToken == nullptr) {
+        return true;
+    }
+    if (PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        return true;
+    }
+    abilityRequest.want.SetParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST, true);
+    bool isAppKilling = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->IsAppKilling(
+        abilityRequest.callerToken));
+    if (isAppKilling) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller killing");
+        return false;
+    }
+    return true;
+}
 } // AAFwk
 } // OHOS

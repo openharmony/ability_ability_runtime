@@ -20,6 +20,7 @@
 #include <memory>
 #include <unordered_map>
 #include <functional>
+#include <atomic>
 
 #include "task_utils_wrap.h"
 
@@ -50,10 +51,21 @@ public:
     {
         return status_ && innerTaskHandle_;
     }
+    int32_t GetTaskId() const
+    {
+        return taskId_;
+    }
+    bool PrintTaskLog() const
+    {
+        return printTaskLog_;
+    }
 private:
     std::weak_ptr<TaskHandlerWrap> handler_;
     std::shared_ptr<InnerTaskHandle> innerTaskHandle_;
     std::shared_ptr<TaskStatus> status_;
+
+    int32_t taskId_ = 0;
+    bool printTaskLog_ = false;
 };
 
 class TaskHandlerWrap : public std::enable_shared_from_this<TaskHandlerWrap> {
@@ -81,23 +93,36 @@ public:
     TaskHandle SubmitTask(const std::function<void()> &task, const std::string &name,
         int64_t delayMillis, bool forceSubmit = true);
     TaskHandle SubmitTask(const std::function<void()> &task, const TaskAttribute &taskAttr);
-    // Task can't be canceled by name if submited with this mothed
+    // Task can't be canceled by name if submitted with this method
     TaskHandle SubmitTaskJust(const std::function<void()> &task, const std::string &name,
         int64_t delayMillis);
-    // This is only used for compatibility and could be be wrong if multi tasks with same name submited.
-    // TaskHandle::Cancel is prefered.
+    // This is only used for compatibility and could be be wrong if multi tasks with same name submitted.
+    // TaskHandle::Cancel is preferred.
     bool CancelTask(const std::string &name);
+    void SetPrintTaskLog(bool printTaskLog)
+    {
+        printTaskLog_ = printTaskLog;
+    }
 protected:
-    TaskHandlerWrap();
+    TaskHandlerWrap(const std::string &queueName);
     virtual std::shared_ptr<InnerTaskHandle> SubmitTaskInner(std::function<void()> &&task,
         const TaskAttribute &taskAttr) = 0;
     virtual bool CancelTaskInner(const std::shared_ptr<InnerTaskHandle> &taskHandle) = 0;
     virtual void WaitTaskInner(const std::shared_ptr<InnerTaskHandle> &taskHandle) = 0;
+    virtual uint64_t GetTaskCount()
+    {
+        return 0;
+    }
     bool RemoveTask(const std::string &name, const TaskHandle &taskHandle);
 protected:
+    static std::atomic_int32_t g_taskId;
+
     // this is used only for compatibility
     std::unordered_map<std::string, TaskHandle> tasks_;
     std::unique_ptr<ffrt::mutex> tasksMutex_;
+
+    bool printTaskLog_ = false;
+    std::string queueName_;
 };
 
 class AutoSyncTaskHandle {
