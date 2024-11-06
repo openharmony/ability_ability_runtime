@@ -567,29 +567,33 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             abilityRunningRecord->SetUIExtensionAbilityId(uiExtensionAbilityId);
         }
     }
-    AfterLoadAbility(appRecord, abilityInfo, loadParam->token);
+    AfterLoadAbility(appRecord, abilityInfo, loadParam);
 }
 
 void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord,
-    std::shared_ptr<AbilityInfo> abilityInfo, sptr<IRemoteObject> token)
+    std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (!appRecord || !abilityInfo) {
+    if (!appRecord || !abilityInfo || !loadParam) {
         return;
     }
-
     PerfProfile::GetInstance().SetAbilityLoadEndTime(GetTickCount());
     PerfProfile::GetInstance().Dump();
     PerfProfile::GetInstance().Reset();
-    appRecord->UpdateAbilityState(token, AbilityState::ABILITY_STATE_CREATE);
+    appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
 
-    auto reportLoadTask = [appRecord]() {
+    auto reportLoadTask = [appRecord, abilityRecordId = loadParam->abilityRecordId]() {
         auto priorityObj = appRecord->GetPriorityObject();
         if (priorityObj) {
             auto timeOut = AbilityRuntime::GlobalConstant::GetLoadTimeOutBase() *
                 AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
+            if (appRecord->GetExtensionType() == ExtensionAbilityType::SERVICE) {
+                timeOut = AbilityRuntime::GlobalConstant::GetLoadAndInactiveTimeout() *
+                    AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
+            }
+
             AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::LOAD_BEGIN,
-                priorityObj->GetPid(), appRecord->GetUid(), timeOut);
+                priorityObj->GetPid(), appRecord->GetUid(), timeOut, static_cast<int64_t>(abilityRecordId));
         }
     };
     if (taskHandler_) {

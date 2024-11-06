@@ -1392,7 +1392,7 @@ private:
     void PresetMaxChildProcess(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &maxChildProcess);
 
     void AfterLoadAbility(std::shared_ptr<AppRunningRecord> appRecord, std::shared_ptr<AbilityInfo> abilityInfo,
-        sptr<IRemoteObject> token);
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
 
 private:
     /**
