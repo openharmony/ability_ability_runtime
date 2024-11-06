@@ -113,9 +113,12 @@ int32_t ConvertDisplayId(std::string displayId)
     return std::stoi(displayId);
 }
 
-OHOS::AbilityRuntime::CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &configuration)
+namespace OHOS {
+namespace AbilityRuntime {
+
+CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &configuration)
 {
-    OHOS::AbilityRuntime::CConfiguration cfg;
+    CConfiguration cfg;
     cfg.language = CreateCStringFromString(configuration.GetItem(
         OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
     cfg.colorMode = ConvertColorMode(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
@@ -135,4 +138,6 @@ OHOS::AbilityRuntime::CConfiguration CreateCConfiguration(const OHOS::AppExecFwk
     cfg.mcc = CreateCStringFromString(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
     cfg.mnc = CreateCStringFromString(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
     return cfg;
+}
+}
 }
