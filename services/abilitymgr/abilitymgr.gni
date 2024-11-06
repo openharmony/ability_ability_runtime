@@ -66,6 +66,7 @@ abilityms_files = [
   "src/interceptor/screen_unlock_interceptor.cpp",
   "src/interceptor/start_other_app_interceptor.cpp",
   "src/window_focus_changed_listener.cpp",
+  "src/window_visibility_changed_listener.cpp",
 
   # start ability handler
   "src/start_ability_handler.cpp",

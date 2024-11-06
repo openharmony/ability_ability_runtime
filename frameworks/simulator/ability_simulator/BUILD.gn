@@ -119,6 +119,7 @@ ohos_shared_library("ability_simulator_inner") {
 
     if (ability_runtime_graphics) {
       external_deps += [
+        "ace_engine:ace_uicontent",
         "window_manager:previewer_window",
         "window_manager:previewer_window_napi",
       ]

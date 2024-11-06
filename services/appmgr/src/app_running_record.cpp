@@ -495,6 +495,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetJITEnabled(jitEnabled_);
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
+    launchData.SetIsNeedPreloadModule(isNeedPreloadModule_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
@@ -1176,6 +1177,9 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     }
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
+    if (abilityRecord) {
+        TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
+    }
     if (!isTimeout) {
         StateChangedNotifyObserver(
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
@@ -2534,5 +2538,11 @@ void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
         AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(prioObject->GetPid(), msg);
     }
 }
+
+void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
+{
+    isNeedPreloadModule_ = isNeedPreloadModule;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

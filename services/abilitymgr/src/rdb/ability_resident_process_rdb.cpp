@@ -14,6 +14,7 @@
  */
 
 #include "ability_resident_process_rdb.h"
+#include <charconv>
 
 #include "hilog_tag_wrapper.h"
 #include "parser_util.h"
@@ -205,13 +206,14 @@ int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundl
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, ret: %{public}d", ret);
         return Rdb_Search_Record_Err;
     }
-    try {
-        enable = static_cast<bool>(std::stoul(flag));
-    } catch (...) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "stoul fail, flag: %{public}s", flag.c_str());
+    unsigned long value = 0;
+    auto res = std::from_chars(flag.c_str(), flag.c_str() + flag.size(), value);
+    if (res.ec != std::errc()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "from_chars error flag:%{public}s", flag.c_str());
         return Rdb_Search_Record_Err;
     }
-    
+    enable = static_cast<bool>(value);
+
     return Rdb_OK;
 }
 
