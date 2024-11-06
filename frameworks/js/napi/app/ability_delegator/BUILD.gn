@@ -56,8 +56,8 @@ template("delegator") {
       "eventhandler:libeventhandler",
       "hilog:libhilog",
       "hitrace:hitrace_meter",
-      "napi:ace_napi",
       "ipc:ipc_napi",
+      "napi:ace_napi",
     ]
 
     cflags_cc = []

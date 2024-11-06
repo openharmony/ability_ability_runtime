@@ -419,9 +419,7 @@ ohos_shared_library("abilitykit_native") {
       "window_manager:libwsutils",
     ]
 
-    public_external_deps += [
-      "window_manager:libdm",
-    ]
+    public_external_deps += [ "window_manager:libdm" ]
   }
 
   innerapi_tags = [ "platformsdk" ]
@@ -571,6 +569,7 @@ config("uiability_config") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/distributed",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/recovery/",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
@@ -1163,16 +1162,10 @@ ohos_shared_library("continuation_ipc") {
     "json:nlohmann_json_static",
     "resource_management:global_resmgr",
   ]
-  public_external_deps = [
-    # "accessibility:accessibility_common",
-    # "libuv:uv",
-  ]
+  public_external_deps = []
 
   if (ability_runtime_graphics) {
-    public_external_deps += [
-      # "form_fwk:form_manager",
-      # "window_manager:libdm",
-    ]
+    public_external_deps += []
   }
 
   defines = []
@@ -1253,9 +1246,9 @@ ohos_shared_library("service_extension_module") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "json:nlohmann_json_static",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "json:nlohmann_json_static",
     "napi:ace_napi",
   ]
 
@@ -1380,6 +1373,7 @@ config("ui_extension_public_config") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/insight_intent_executor",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${windowmanager_path}/interfaces/kits/napi/embeddable_window_stage",
     "${windowmanager_path}/interfaces/kits/napi/extension_window",
   ]
@@ -1390,13 +1384,13 @@ ohos_shared_library("ui_extension") {
   sources = [
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_embeddable_ui_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_base.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_content_session.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_ui_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_uiservice_uiext_connection.cpp",
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/ui_extension_ability/ui_extension_servicehost_stub_impl.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/js_ui_extension_base.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/js_ui_extension_content_session.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/js_ui_extension_context.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/js_uiservice_uiext_connection.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/ui_extension_context.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_base/ui_extension_servicehost_stub_impl.cpp",
   ]
 
   public_configs = [ ":ui_extension_public_config" ]
@@ -1469,12 +1463,12 @@ ohos_shared_library("ui_extension_module") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "napi:ace_napi",
     "ipc:ipc_napi",
+    "napi:ace_napi",
     "window_manager:libwm",
   ]
   if (ability_runtime_graphics) {
-    external_deps += [ ]
+    external_deps += []
   }
 
   relative_install_dir = "extensionability/"
@@ -1487,7 +1481,7 @@ config("share_extension_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/share_extension_ability",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
@@ -1538,7 +1532,7 @@ config("action_extension_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/action_extension_ability",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
@@ -1606,15 +1600,13 @@ ohos_shared_library("share_extension_module") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "napi:ace_napi",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "napi:ace_napi",
   ]
 
   if (ability_runtime_graphics) {
-    external_deps += [
-      "window_manager:libwm",
-    ]
+    external_deps += [ "window_manager:libwm" ]
   }
 
   relative_install_dir = "extensionability/"
@@ -1671,15 +1663,13 @@ ohos_shared_library("action_extension_module") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "napi:ace_napi",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "napi:ace_napi",
   ]
 
   if (ability_runtime_graphics) {
-    external_deps += [
-      "window_manager:libwm",
-    ]
+    external_deps += [ "window_manager:libwm" ]
   }
 
   relative_install_dir = "extensionability/"
@@ -1692,7 +1682,7 @@ config("embedded_ui_extension_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/embedded_ui_extension_ability",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
@@ -1855,7 +1845,7 @@ config("auto_fill_extension_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/auto_fill_extension_ability",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
   ]
 }
 
@@ -1932,13 +1922,13 @@ ohos_shared_library("auto_fill_extension_module") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "napi:ace_napi",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "napi:ace_napi",
     "window_manager:libwm",
   ]
   if (ability_runtime_graphics) {
-    external_deps += [ ]
+    external_deps += []
   }
 
   relative_install_dir = "extensionability/"
@@ -1950,7 +1940,7 @@ config("photo_editor_extension_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
@@ -2041,9 +2031,9 @@ ohos_shared_library("photo_editor_extension_module") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "napi:ace_napi",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "napi:ace_napi",
   ]
 
   if (ability_runtime_graphics) {

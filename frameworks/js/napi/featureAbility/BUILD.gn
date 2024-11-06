@@ -68,7 +68,7 @@ ohos_shared_library("featureability") {
 
   if (ability_runtime_relational) {
     include_dirs += [ "data_ability/include" ]
-    sources += [      
+    sources += [
       "data_ability/js_utils.cpp",
       "data_ability/napi_data_ability_predicates.cpp",
       "data_ability/napi_rdb_js_utils.cpp",

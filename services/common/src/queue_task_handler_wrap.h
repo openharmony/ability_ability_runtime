@@ -32,6 +32,7 @@ protected:
         const TaskAttribute &taskAttr) override;
     bool CancelTaskInner(const std::shared_ptr<InnerTaskHandle> &taskHandle) override;
     void WaitTaskInner(const std::shared_ptr<InnerTaskHandle> &taskHandle) override;
+    uint64_t GetTaskCount() override;
 private:
     ffrt::queue taskQueue_;
 };

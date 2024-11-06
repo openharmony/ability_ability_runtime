@@ -730,10 +730,11 @@ public:
     /**
      * @brief mark a process which is going restart.
      * @param uid the uid of the process.
+     * @param instanceKey the instance key of the process.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t SignRestartAppFlag(int32_t uid)
+    virtual int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
     {
         return 0;
     }
@@ -855,13 +856,8 @@ public:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName, std::vector<int32_t> &pidList) = 0;
 
-    /**
-     * Get appIndex of pid.
-     * @param pid The pid.
-     * @param appIndex appIndex of pid.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+    virtual int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
+        const std::string& reason)
     {
         return 0;
     }

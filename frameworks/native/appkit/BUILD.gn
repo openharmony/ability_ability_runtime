@@ -12,9 +12,9 @@
 # limitations under the License.
 
 import("//build/config/components/ets_frontend/es2abc_config.gni")
-import("//commonlibrary/memory_utils/purgeable_mem_config.gni")
 import("//build/ohos.gni")
 import("//build/templates/abc/ohos_abc.gni")
+import("//commonlibrary/memory_utils/purgeable_mem_config.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_abc("delegator_mgmt") {
@@ -187,9 +187,9 @@ ohos_shared_library("appkit_native") {
     "faultloggerd:libfaultloggerd",
     "ffrt:libffrt",
     "graphic_2d:2d_graphics",
+    "graphic_2d:EGL",
     "graphic_2d:libcomposer",
     "graphic_2d:librender_service_base",
-    "graphic_2d:EGL",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",

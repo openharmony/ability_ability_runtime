@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-import("//build/config/components/idl_tool/idl.gni")
 
 idl_interface_sources = [
   "${target_gen_dir}/quick_fix_manager_proxy.cpp",

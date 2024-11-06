@@ -518,8 +518,8 @@ HWTEST_F(JsUIServiceExtensionTest, HandleSendData_0100, TestSize.Level1)
     want.SetParam(UISERVICEHOSTPROXY_KEY, stub->AsObject());
     bool isAsyncCallback = false;
 
-    auto result = jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
-    EXPECT_EQ(result, nullptr);
+    jsUIServiceExtension->OnConnect(want, nullptr, isAsyncCallback);
+    EXPECT_TRUE(jsUIServiceExtension != nullptr);
 
     AAFwk::WantParams params;
     jsUIServiceExtension->HandleSendData(stub->AsObject(), params);

@@ -365,6 +365,46 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
     return (pids.empty() ? false : true);
 }
 
+bool AppRunningManager::ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey,
+    std::list<pid_t> &pids, bool clearPageStack)
+{
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto &item : appRunningMap) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr) {
+            continue;
+        }
+        auto appInfo = appRecord->GetApplicationInfo();
+        if (appInfo == nullptr) {
+            continue;
+        }
+        if (appInfo->multiAppMode.multiAppModeType != MultiAppModeType::MULTI_INSTANCE) {
+            TAG_LOGI(AAFwkTag::APPMGR, "not multi-instance");
+        }
+        if (appInfo->accessTokenId != accessTokenId) {
+            continue;
+        }
+        if (appRecord->GetInstanceKey() != instanceKey) {
+            continue;
+        }
+        if (appRecord->GetPriorityObject() == nullptr) {
+            continue;
+        }
+        pid_t pid = appRecord->GetPriorityObject()->GetPid();
+        if (pid <= 0) {
+            continue;
+        }
+        pids.push_back(pid);
+        if (clearPageStack) {
+            appRecord->ScheduleClearPageStack();
+        }
+        appRecord->SetKilling();
+        appRecord->ScheduleProcessSecurityExit();
+    }
+
+    return pids.empty() ? false : true;
+}
+
 bool AppRunningManager::GetPidsByBundleNameUserIdAndAppIndex(const std::string &bundleName,
     const int userId, const int appIndex, std::list<pid_t> &pids)
 {
@@ -651,7 +691,10 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
     }
 #endif //SUPPORT_SCREEN
     auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
-    if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
+    auto isKeepAliveApp = appRecord->IsKeepAliveApp();
+    TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:isLast:%{public}d,keepAlive:%{public}d",
+        isLastAbility, isKeepAliveApp);
+    if (isLastAbility && (!isKeepAliveApp ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
         if (cacheProcMgr != nullptr) {
@@ -666,7 +709,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             }
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
+        TAG_LOGI(AAFwkTag::APPMGR, "Terminate last ability in app:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
             auto delayTime = appRecord->ExtensionAbilityRecordExists() ?
@@ -740,11 +783,10 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo) {
         info.bundleType = static_cast<int32_t>(appInfo->bundleType);
+        info.appMode = appInfo->multiAppMode.multiAppModeType;
     }
-    if (appInfo && (static_cast<int32_t>(appInfo->multiAppMode.multiAppModeType) ==
-            static_cast<int32_t>(MultiAppModeType::APP_CLONE))) {
-            info.appCloneIndex = appRecord->GetAppIndex();
-    }
+    info.appCloneIndex = appRecord->GetAppIndex();
+    info.instanceKey = appRecord->GetInstanceKey();
     return ERR_OK;
 }
 
@@ -1371,13 +1413,13 @@ std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(
     return nullptr;
 }
 
-int32_t AppRunningManager::SignRestartAppFlag(int32_t uid)
+int32_t AppRunningManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr || appRecord->GetUid() != uid) {
+        if (appRecord == nullptr || appRecord->GetUid() != uid || appRecord->GetInstanceKey() != instanceKey) {
             continue;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "sign");
@@ -1607,7 +1649,10 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
-
+    if (appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT) {
+        TAG_LOGI(AAFwkTag::APPMGR, "support porcess cache should not force clean");
+        return false;
+    }
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(abilityToken);
     if (!abilityRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null abilityRecord");
@@ -1616,8 +1661,7 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
     abilityRecord->SetUserRequestCleaningStatus();
 
     bool canKill = appRecord->IsAllAbilityReadyToCleanedByUserRequest();
-    bool isProcessSupportCache = appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT;
-    if (!canKill || isProcessSupportCache ||appRecord->IsKeepAliveApp()) {
+    if (!canKill || appRecord->IsKeepAliveApp()) {
         return false;
     }
 
@@ -1661,6 +1705,9 @@ int32_t AppRunningManager::UpdateConfigurationDelayed(const std::shared_ptr<AppR
     auto it = updateConfigurationDelayedMap_.find(appRecord->GetRecordId());
     if (it != updateConfigurationDelayedMap_.end() && it->second) {
         auto delayConfig = appRecord->GetDelayConfiguration();
+        if (delayConfig == nullptr) {
+            appRecord->ResetDelayConfiguration();
+        }
         TAG_LOGI(AAFwkTag::APPKIT, "delayConfig: %{public}s", delayConfig->GetName().c_str());
         result = appRecord->UpdateConfiguration(*delayConfig);
         appRecord->ResetDelayConfiguration();

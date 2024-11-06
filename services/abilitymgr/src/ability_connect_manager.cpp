@@ -27,6 +27,7 @@
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
 #include "multi_instance_utils.h"
+#include "param.h"
 #include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
@@ -1030,7 +1031,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     }
     CompleteStartServiceReq(abilityRecord->GetURI());
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_END, abilityRecord->GetPid(),
-        abilityRecord->GetUid());
+        abilityRecord->GetUid(), 0, abilityRecord->GetAbilityRecordId());
     return ERR_OK;
 }
 
@@ -1433,9 +1434,14 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     }
 
     UpdateUIExtensionInfo(abilityRecord);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = abilityRecord->GetRecordId();
+    loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    loadParam.token = token;
+    loadParam.preToken = perToken;
+    loadParam.instanceKey = abilityRecord->GetInstanceKey();
     DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token, perToken, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(),
-        abilityRecord->GetWant(), abilityRecord->GetRecordId(), abilityRecord->GetInstanceKey());
+        loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
     abilityRecord->SetLoadState(AbilityLoadState::LOADING);
 }
 
@@ -1506,7 +1512,7 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
         taskName = std::string("ConnectTimeout_") + std::to_string(connectRecordId);
         delayTime = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * CONNECT_TIMEOUT_MULTIPLE;
         ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::CONNECT_BEGIN, abilityRecord->GetPid(),
-            abilityRecord->GetUid(), delayTime);
+            abilityRecord->GetUid(), delayTime, abilityRecord->GetAbilityRecordId());
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "messageId error");
         return;
@@ -1667,6 +1673,11 @@ int AbilityConnectManager::DispatchInactive(const std::shared_ptr<AbilityRecord>
         return ERR_INVALID_VALUE;
     }
     eventHandler_->RemoveEvent(AbilityManagerService::INACTIVE_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+
+    if (abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END,
+            abilityRecord->GetPid(), abilityRecord->GetUid(), 0, abilityRecord->GetAbilityRecordId());
+    }
 
     // complete inactive
     abilityRecord->SetAbilityState(AbilityState::INACTIVE);
@@ -3115,18 +3126,19 @@ int32_t AbilityConnectManager::GetUIExtensionSessionInfo(const sptr<IRemoteObjec
     return uiExtensionAbilityRecordMgr_->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
 }
 
-void AbilityConnectManager::SignRestartAppFlag(int32_t uid)
+void AbilityConnectManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     {
         std::lock_guard lock(serviceMapMutex_);
         for (auto &[key, abilityRecord] : serviceMap_) {
-            if (abilityRecord == nullptr || abilityRecord->GetUid() != uid) {
+            if (abilityRecord == nullptr || abilityRecord->GetUid() != uid ||
+                abilityRecord->GetInstanceKey() != instanceKey) {
                 continue;
             }
             abilityRecord->SetRestartAppFlag(true);
         }
     }
-    AbilityCacheManager::GetInstance().SignRestartAppFlag(uid);
+    AbilityCacheManager::GetInstance().SignRestartAppFlag(uid, instanceKey);
 }
 
 bool AbilityConnectManager::AddToServiceMap(const std::string &key, std::shared_ptr<AbilityRecord> abilityRecord)

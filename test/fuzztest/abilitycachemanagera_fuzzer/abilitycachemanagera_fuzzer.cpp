@@ -111,7 +111,7 @@ void AbilityCacheManagerFuzztest1(bool boolParam, std::string &stringParam, int3
     mgr.FindRecordBySessionId(stringParam);
     mgr.FindRecordByServiceKey(stringParam);
     mgr.RemoveLauncherDeathRecipient();
-    mgr.SignRestartAppFlag(int32Param);
+    mgr.SignRestartAppFlag(int32Param, stringParam);
     mgr.DeleteInvalidServiceRecord(stringParam);
 }
 
