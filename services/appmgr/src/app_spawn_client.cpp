@@ -149,6 +149,15 @@ static std::string DumpHspListToJson(const HspList &hspList)
     return hspListJson.dump();
 }
 
+static std::string DumpAppEnvToJson(const std::map<std::string, std::string> &appEnv)
+{
+    nlohmann::json appEnvJson;
+    for (const auto &[envName, envValue] : appEnv) {
+        appEnvJson[envName] = envValue;
+    }
+    return appEnvJson.dump();
+}
+
 static std::string DumpJITPermissionListToJson(const JITPermissionsList &jitPermissionsList)
 {
     nlohmann::json jitPermissionsListJson;
@@ -158,15 +167,6 @@ static std::string DumpJITPermissionListToJson(const JITPermissionsList &jitPerm
         jitPermissionsListJson[JITPERMISSIONSLIST_PERMISSIONS_NAME].emplace_back(jitPermission);
     }
     return jitPermissionsListJson.dump();
-}
-
-static std::string DumpAppEnvToJson(const std::map<std::string, std::string> &appEnv)
-{
-    nlohmann::json appEnvJson;
-    for (const auto &[envName, envValue] : appEnv) {
-        appEnvJson[envName] = envValue;
-    }
-    return appEnvJson.dump();
 }
 
 int32_t AppSpawnClient::SetDacInfo(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle)

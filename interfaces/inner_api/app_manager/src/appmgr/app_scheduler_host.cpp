@@ -105,10 +105,10 @@ int32_t AppSchedulerHost::OnRemoteRequestInnerSecond(uint32_t code, MessageParce
     switch (static_cast<uint32_t>(code)) {
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_PROCESS_SECURITY_EXIT_TRANSACTION):
             return HandleScheduleProcessSecurityExit(data, reply);
-        case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_CLEAR_PAGE_STACK):
-            return HandleScheduleClearPageStack(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_ABILITY_STAGE_INFO):
             return HandleScheduleAbilityStage(data, reply);
+        case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_CLEAR_PAGE_STACK):
+            return HandleScheduleClearPageStack(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_ACCEPT_WANT):
             return HandleScheduleAcceptWant(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NEW_PROCESS_REQUEST):
