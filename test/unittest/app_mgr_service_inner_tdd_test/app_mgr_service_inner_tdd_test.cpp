@@ -102,6 +102,9 @@ void AppMgrServiceInnerTest::TearDown()
  * @tc.name: SendProcessStartEvent_001
  * @tc.desc: Verify that the SendProcessStartEvent interface calls abnormal parameter
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level1)
 {
@@ -109,7 +112,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level1)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     appMgrServiceInner->Init();
     EXPECT_NE(appMgrServiceInner, nullptr);
-    EXPECT_FALSE(appMgrServiceInner->SendProcessStartEvent(nullptr));
+    EXPECT_FALSE(appMgrServiceInner->SendProcessStartEvent(nullptr, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_001 end");
 }
 
@@ -117,6 +120,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level1)
  * @tc.name: SendProcessStartEvent_002
  * @tc.desc: Verify that the SendProcessStartEvent interface calls just like a service called
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level1)
 {
@@ -131,7 +137,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_002 end");
 }
 
@@ -139,6 +145,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level1)
  * @tc.name: SendProcessStartEvent_003
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level1)
 {
@@ -159,7 +168,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level1)
     moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
     std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
     appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_003 end");
 }
 
@@ -167,6 +176,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level1)
  * @tc.name: SendProcessStartEvent_004
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level1)
 {
@@ -190,7 +202,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
     moduleRunningRecord->abilities_[token] = abilityRecord;
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_004 end");
 }
 
@@ -198,6 +210,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level1)
  * @tc.name: SendProcessStartEvent_005
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level1)
 {
@@ -222,7 +237,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level1)
     auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
     moduleRunningRecord->abilities_[token] = abilityRecord;
     appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_005 end");
 }
 
@@ -230,6 +245,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level1)
  * @tc.name: SendProcessStartEvent_006
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level1)
 {
@@ -255,7 +273,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level1)
     moduleRunningRecord->abilities_[token] = abilityRecord;
     appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
     appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_006 end");
 }
 
@@ -263,6 +281,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level1)
  * @tc.name: SendProcessStartEvent_007
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a application called
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level1)
 {
@@ -298,7 +319,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level1)
     }
     appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
     appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_007 end");
 }
 
@@ -306,6 +327,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level1)
  * @tc.name: SendProcessStartEvent_008
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a application called
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_008, TestSize.Level1)
 {
@@ -342,7 +366,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_008, TestSize.Level1)
     }
     appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
     appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_008 end");
 }
 
@@ -350,6 +374,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_008, TestSize.Level1)
  * @tc.name: SendProcessStartFailedEvent_001
  * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls abnormal parameter
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_001, TestSize.Level1)
 {
@@ -367,6 +394,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_001, TestSize.Level
  * @tc.name: SendProcessStartFailedEvent_002
  * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls abnormal parameter
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_002, TestSize.Level1)
 {
@@ -385,9 +415,12 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_002, TestSize.Level
 }
 
 /**
- * @tc.name: SendProcessStartFailedEvent_003
+ * @tc.number: SendProcessStartFailedEvent_003
  * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
  * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_003, TestSize.Level1)
 {
@@ -430,9 +463,337 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_003, TestSize.Level
 }
 
 /**
+ * @tc.number: SendProcessStartFailedEvent_004
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "testBundleName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    auto abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
+        1));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_004 end");
+}
+
+/**
+ * @tc.number: SendProcessStartFailedEvent_005
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "testBundleName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
+        1));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_005 end");
+}
+
+/**
+ * @tc.number: SendProcessStartFailedEvent_006
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test.process";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "testBundleName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
+        1));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_006 end");
+}
+
+/**
+ * @tc.number: SendProcessStartFailedEvent_007
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_007 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test.process";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
+        1));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_007 end");
+}
+
+/**
+ * @tc.number: SendProcessStartFailedEvent_008
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_008 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test.process";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "testBundleName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    auto abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
+        1));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_008 end");
+}
+
+/**
+ * @tc.number: SendProcessStartFailedEvent_009
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_009 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test.process";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    auto abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
+        1));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_009 end");
+}
+
+/**
+ * @tc.number: SendProcessStartFailedEvent_010
+ * @tc.desc: Verify that the SendProcessStartFailedEvent interface calls like a application called
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessStartFailedEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartFailedEvent_010, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_010 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartFailedEvent(appRecord, ProcessStartFailedReason::APPSPAWN_FAILED,
+        1));
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessStartFailedEvent_010 end");
+}
+
+/**
  * @tc.name: SendProcessExitEvent_001
  * @tc.desc: Verify that the SendProcessExitEvent interface calls normally
  * @tc.type: FUNC
+ * @tc.Function: SendProcessExitEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_001, TestSize.Level1)
 {
@@ -449,6 +810,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_001, TestSize.Level1)
  * @tc.name: SendProcessExitEvent_002
  * @tc.desc: Verify that the SendProcessExitEvent interface calls normally
  * @tc.type: FUNC
+ * @tc.Function: SendProcessExitEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_002, TestSize.Level1)
 {
@@ -464,6 +828,9 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_002, TestSize.Level1)
  * @tc.name: CheckIsolationMode_001
  * @tc.desc: CheckIsolationMode
  * @tc.type: FUNC
+ * @tc.Function: CheckIsolationMode
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, CheckIsolationMode_001, TestSize.Level1)
 {
@@ -499,6 +866,9 @@ HWTEST_F(AppMgrServiceInnerTest, CheckIsolationMode_001, TestSize.Level1)
  * @tc.name: GenerateRenderUid_001
  * @tc.desc: Generate RenderUid
  * @tc.type: FUNC
+ * @tc.Function: GenerateRenderUid
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, GenerateRenderUid_001, TestSize.Level1)
 {
@@ -517,6 +887,9 @@ HWTEST_F(AppMgrServiceInnerTest, GenerateRenderUid_001, TestSize.Level1)
  * @tc.name: StartRenderProcessImpl_001
  * @tc.desc: start render process.
  * @tc.type: FUNC
+ * @tc.Function: StartRenderProcessImpl
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level0)
 {
@@ -550,6 +923,9 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level0)
  * @tc.name: NotifyAppFault_001
  * @tc.desc: Verify that the NotifyAppFault interface calls normally
  * @tc.type: FUNC
+ * @tc.Function: NotifyAppFault
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, NotifyAppFault_001, TestSize.Level1)
 {
@@ -566,6 +942,9 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAppFault_001, TestSize.Level1)
  * @tc.name: NotifyAppFaultBySA_001
  * @tc.desc: Verify that the NotifyAppFaultBySA interface calls normally
  * @tc.type: FUNC
+ * @tc.Function: NotifyAppFaultBySA
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, NotifyAppFaultBySA_001, TestSize.Level1)
 {
@@ -583,6 +962,9 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAppFaultBySA_001, TestSize.Level1)
  * @tc.name: FaultTypeToString_001
  * @tc.desc: Verify that the FaultTypeToString interface calls normally
  * @tc.type: FUNC
+ * @tc.Function: FaultTypeToString
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, FaultTypeToString_001, TestSize.Level1)
 {
@@ -603,6 +985,9 @@ HWTEST_F(AppMgrServiceInnerTest, FaultTypeToString_001, TestSize.Level1)
  * @tc.name: ChangeAppGcState_001
  * @tc.desc: Change app Gc state
  * @tc.type: FUNC
+ * @tc.Function: ChangeAppGcState
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, ChangeAppGcState_001, TestSize.Level1)
 {
@@ -621,6 +1006,9 @@ HWTEST_F(AppMgrServiceInnerTest, ChangeAppGcState_001, TestSize.Level1)
  * @tc.name: QueryExtensionSandBox_001
  * @tc.desc: query extension sandBox.
  * @tc.type: FUNC
+ * @tc.Function: QueryExtensionSandBox
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level0)
 {
@@ -655,6 +1043,9 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_001, TestSize.Level0)
  * @tc.name: QueryExtensionSandBox_002
  * @tc.desc: query extension sandBox.
  * @tc.type: FUNC
+ * @tc.Function: QueryExtensionSandBox
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level0)
 {
@@ -689,6 +1080,9 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_002, TestSize.Level0)
  * @tc.name: QueryExtensionSandBox_003
  * @tc.desc: query extension sandBox.
  * @tc.type: FUNC
+ * @tc.Function: QueryExtensionSandBox
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level0)
 {
@@ -717,6 +1111,9 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_003, TestSize.Level0)
  * @tc.name: QueryExtensionSandBox_004
  * @tc.desc: query extension sandBox.
  * @tc.type: FUNC
+ * @tc.Function: QueryExtensionSandBox
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level0)
 {
@@ -745,6 +1142,9 @@ HWTEST_F(AppMgrServiceInnerTest, QueryExtensionSandBox_004, TestSize.Level0)
  * @tc.name: SetAppEnvInfo_001
  * @tc.desc: The hwasanEnabled is true.
  * @tc.type: FUNC
+ * @tc.Function: SetAppEnvInfo
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_001, TestSize.Level1)
 {
@@ -764,6 +1164,9 @@ HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_001, TestSize.Level1)
  * @tc.name: SetAppEnvInfo_002
  * @tc.desc: The hwasanEnabled is false.
  * @tc.type: FUNC
+ * @tc.Function: SetAppEnvInfo
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_002, TestSize.Level1)
 {
@@ -783,6 +1186,9 @@ HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_002, TestSize.Level1)
  * @tc.name: SetAppEnvInfo_003
  * @tc.desc: The ubsanEnabled is false.
  * @tc.type: FUNC
+ * @tc.Function: SetAppEnvInfo
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_003, TestSize.Level1)
 {
@@ -802,6 +1208,9 @@ HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_003, TestSize.Level1)
  * @tc.name: SetAppEnvInfo_004
  * @tc.desc: The ubsanEnabled is true.
  * @tc.type: FUNC
+ * @tc.Function: SetAppEnvInfo
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
  */
 HWTEST_F(AppMgrServiceInnerTest, SetAppEnvInfo_004, TestSize.Level1)
 {

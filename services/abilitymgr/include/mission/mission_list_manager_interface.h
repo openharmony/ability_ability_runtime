@@ -113,7 +113,7 @@ public:
         const AAFwk::ContinueState &state) = 0;
 
     virtual bool IsAbilityStarted(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord) = 0;
-    virtual void SignRestartAppFlag(int32_t uid) = 0;
+    virtual void SignRestartAppFlag(int32_t uid, const std::string &instanceKey) = 0;
 #ifdef SUPPORT_SCREEN
 public:
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) = 0;

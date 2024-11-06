@@ -62,6 +62,7 @@ ohos_shared_library("napi_common") {
     "json:nlohmann_json_static",
     "libuv:uv",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   public_external_deps = [
