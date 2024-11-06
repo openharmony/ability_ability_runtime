@@ -2225,8 +2225,10 @@ void AbilityConnectManager::HandleAbilityDiedTask(
     }
 
     std::string serviceKey = GetServiceKey(abilityRecord);
-    if (GetServiceRecordByElementName(serviceKey) == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s ability record is not exist in service map.", serviceKey.c_str());
+    if (GetServiceRecordByElementName(serviceKey) == nullptr &&
+        (!IsCacheExtensionAbilityType(abilityRecord) ||
+        AbilityCacheManager::GetInstance().FindRecordByToken(abilityRecord->GetToken()) == nullptr)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s ability not in service map or cache.", serviceKey.c_str());
         return;
     }
 
