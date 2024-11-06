@@ -97,6 +97,10 @@
 #include "nweb_helper.h"
 #endif
 
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+#include "nweb_adapter_helper.h"
+#endif
+
 #ifdef IMAGE_PURGEABLE_PIXELMAP
 #include "purgeable_resource_manager.h"
 #endif
@@ -167,6 +171,12 @@ const std::string DEFAULT_APP_FONT_SIZE_SCALE = "nonFollowSystem";
 const std::string SYSTEM_DEFAULT_FONTSIZE_SCALE = "1.0";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
+
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+const std::string NWEB_SURFACE_NODE_NAME = "nwebPreloadSurface";
+const std::string BLANK_URL = "about:blank";
+constexpr uint32_t NWEB_SURFACE_SIZE = 1;
+#endif
 
 extern "C" int DFX_SetAppRunningUniqueId(const char* appRunningId, size_t len) __attribute__((weak));
 } // namespace
@@ -968,14 +978,6 @@ bool MainThread::InitCreate(
         TAG_LOGE(AAFwkTag::APPKIT, "create contextDeal failed");
         return false;
     }
-
-#if defined(NWEB)
-    nwebPreloadImpl_ = std::make_shared<NWeb::NWebPreload>();
-    if (!nwebPreloadImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "create nwebPreloadImpl failed");
-        return false;
-    }
-#endif
     AppExecFwk::AppfreezeInner::GetInstance()->SetApplicationInfo(applicationInfo_);
 
     application_->SetProcessInfo(processInfo_);
@@ -1777,18 +1779,53 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
         OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, app->GetAppContext()->GetBundleCodeDir());
     }).detach();
-
-    // nweb preload
-    if (mainHandler_ && appLaunchData.IsAllowedNWebPreload()) {
-        if (!nwebPreloadImpl_) {
-            TAG_LOGE(AAFwkTag::APPKIT, "nwebPreloadImpl is nullptr");
-            return;
-        }
-        mainHandler_->PostIdleTask(nwebPreloadImpl_->GetNWebPreloadTask(), "MainThread::NWEB_PRELOAD");
-        TAG_LOGI(AAFwkTag::APPKIT, "postIdleTask success");
+#endif
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+    if (appLaunchData.IsAllowedNWebPreload()) {
+        HandleNWebPreload();
     }
 #endif
 }
+
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+void MainThread::HandleNWebPreload()
+{
+    if (!mainHandler_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "mainHandler is nullptr");
+        return;
+    }
+
+    auto task = [this]() {
+        if (!NWeb::NWebHelper::Instance().InitAndRun(true)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "init NWebEngine failed");
+            return;
+        }
+        Rosen::RSSurfaceNodeConfig config;
+        config.SurfaceNodeName = NWEB_SURFACE_NODE_NAME;
+        preloadSurfaceNode_ = Rosen::RSSurfaceNode::Create(config, false);
+        auto surface = preloadSurfaceNode_->GetSurface();
+        if (!surface) {
+            TAG_LOGE(AAFwkTag::APPKIT, "preload surface is nullptr");
+            preloadSurfaceNode_ = nullptr;
+            return;
+        }
+        auto initArgs = std::make_shared<NWeb::NWebEngineInitArgsImpl>();
+        preloadNWeb_ = NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs,
+            NWEB_SURFACE_SIZE, NWEB_SURFACE_SIZE, false);
+        if (!preloadNWeb_) {
+            TAG_LOGE(AAFwkTag::APPKIT, "create preLoadNWeb failed");
+            return;
+        }
+        auto handler = std::make_shared<NWebPreloadHandlerImpl>();
+        preloadNWeb_->SetNWebHandler(handler);
+        preloadNWeb_->Load(BLANK_URL);
+        TAG_LOGI(AAFwkTag::APPKIT, "init NWeb success");
+    };
+
+    mainHandler_->PostIdleTask(task, "MainThread::NWEB_PRELOAD");
+    TAG_LOGI(AAFwkTag::APPKIT, "postIdleTask success");
+}
+#endif
 
 void MainThread::ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
