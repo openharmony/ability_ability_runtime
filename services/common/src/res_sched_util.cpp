@@ -153,7 +153,8 @@ bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
 #endif
 }
 
-void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid, int64_t timeDuration)
+void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
+    int64_t timeDuration, int64_t abilityRecordId)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_KEY_PERF_SCENE;
@@ -165,6 +166,10 @@ void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int3
     if (timeDuration > 0) { // millisecond
         eventParams.emplace("timeoutDuration", std::to_string(timeDuration));
     }
+    if (abilityRecordId > 0) {
+        eventParams.emplace("abilityRecordId", std::to_string(abilityRecordId));
+    }
+
     int64_t type = static_cast<int64_t>(stage);
     TAG_LOGD(AAFwkTag::DEFAULT, "call");
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, type, eventParams);
