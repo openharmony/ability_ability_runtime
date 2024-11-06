@@ -20,14 +20,10 @@ namespace AAFwk {
 std::shared_ptr<InnerTaskHandle> FfrtTaskHandlerWrap::SubmitTaskInner(std::function<void()> &&task,
     const TaskAttribute &taskAttr)
 {
-    if (taskAttr.IsDefault()) {
-        return std::make_shared<InnerTaskHandle>(ffrt::submit_h(std::move(task)));
-    } else {
-        ffrt::task_attr ffrtTaskAttr;
-        BuildFfrtTaskAttr(taskAttr, ffrtTaskAttr);
-        return std::make_shared<InnerTaskHandle>(ffrt::submit_h(std::move(task),
-            {}, {}, ffrtTaskAttr));
-    }
+    ffrt::task_attr ffrtTaskAttr;
+    BuildFfrtTaskAttr(taskAttr, ffrtTaskAttr);
+    return std::make_shared<InnerTaskHandle>(ffrt::submit_h(std::move(task),
+        {}, {}, ffrtTaskAttr));
 }
 
 bool FfrtTaskHandlerWrap::CancelTaskInner(const std::shared_ptr<InnerTaskHandle> &taskHandle)
