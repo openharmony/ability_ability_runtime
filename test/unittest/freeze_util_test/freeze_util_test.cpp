@@ -18,6 +18,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_object_stub.h"
+#include "time_util.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -54,10 +55,12 @@ HWTEST_F(FreezeUtilTest, FreezeUtilTest_001, TestSize.Level1)
     EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(flow), "");
     flow.state = FreezeUtil::TimeoutState::FOREGROUND;
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, "firstEntry");
-    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(flow), "firstEntry");
+    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(flow),
+        TimeUtil::DefaultCurrentTimeStr() + "; " + "firstEntry");
 
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, "secondEntry");
-    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(flow), "firstEntry\nsecondEntry");
+    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(flow), TimeUtil::DefaultCurrentTimeStr() + "; " +
+        "firstEntry\n" + TimeUtil::DefaultCurrentTimeStr() + "; " + "secondEntry");
     TAG_LOGI(AAFwkTag::TEST, "FreezeUtilTest_001 is end");
 }
 
@@ -71,7 +74,8 @@ HWTEST_F(FreezeUtilTest, FreezeUtilTest_002, TestSize.Level1)
     FreezeUtil::LifecycleFlow flow;
     flow.state = FreezeUtil::TimeoutState::LOAD;
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, "testDeleteEntry");
-    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(flow), "testDeleteEntry");
+    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(flow),
+        TimeUtil::DefaultCurrentTimeStr() + "; " + "testDeleteEntry");
     FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
     EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(flow), "");
     TAG_LOGI(AAFwkTag::TEST, "FreezeUtilTest_002 is end");
@@ -87,11 +91,13 @@ HWTEST_F(FreezeUtilTest, FreezeUtilTest_003, TestSize.Level1)
     sptr<IRemoteObject> token_(new IPCObjectStub());
     FreezeUtil::LifecycleFlow foregroundFlow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
     FreezeUtil::GetInstance().AddLifecycleEvent(foregroundFlow, "testDeleteLifecyleEventForground");
-    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(foregroundFlow), "testDeleteLifecyleEventForground");
+    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(foregroundFlow),
+        TimeUtil::DefaultCurrentTimeStr() + "; " + "testDeleteLifecyleEventForground");
 
     FreezeUtil::LifecycleFlow backgroundFlow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
     FreezeUtil::GetInstance().AddLifecycleEvent(backgroundFlow, "testDeleteLifecyleEventBackground");
-    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(backgroundFlow), "testDeleteLifecyleEventBackground");
+    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(backgroundFlow),
+        TimeUtil::DefaultCurrentTimeStr() + "; " + "testDeleteLifecyleEventBackground");
 
     FreezeUtil::GetInstance().DeleteLifecycleEvent(token_);
     EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(foregroundFlow), "");

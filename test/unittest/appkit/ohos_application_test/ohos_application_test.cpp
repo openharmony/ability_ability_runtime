@@ -449,7 +449,7 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_AddAbilityStage_030
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
     auto want = std::make_shared<Want>();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord =  std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
     EXPECT_TRUE(ohosApplication_->abilityStages_.empty());
     auto callback = [](const std::shared_ptr<AbilityRuntime::Context> &) {};
     bool isAsyncCallback = false;

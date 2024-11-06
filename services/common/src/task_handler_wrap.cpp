@@ -57,16 +57,22 @@ void TaskHandle::Sync() const
     handler->WaitTaskInner(innerTaskHandle_);
 }
 
+std::atomic_int32_t TaskHandlerWrap::g_taskId = 0;
+
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::CreateQueueHandler(const std::string &queueName,
     TaskQoS queueQos)
 {
-    return std::make_shared<QueueTaskHandlerWrap>(queueName, queueQos);
+    auto result = std::make_shared<QueueTaskHandlerWrap>(queueName, queueQos);
+    result->queueName_ = queueName;
+    return result;
 }
 
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::CreateConcurrentQueueHandler(const std::string &queueName,
     int32_t concurrentNum, TaskQoS queueQos)
 {
-    return std::make_shared<QueueTaskHandlerWrap>(queueName, concurrentNum, queueQos);
+    auto result = std::make_shared<QueueTaskHandlerWrap>(queueName, concurrentNum, queueQos);
+    result->queueName_ = queueName;
+    return result;
 }
 
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::GetFfrtHandler()
@@ -106,19 +112,19 @@ TaskHandle TaskHandlerWrap::SubmitTaskJust(const std::function<void()> &task,
 TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task,
     const std::string &name, int64_t delayMillis, bool forceSubmit)
 {
-    TaskAttribute atskAttr{name, delayMillis};
+    TaskAttribute taskAttr{name, delayMillis};
     std::lock_guard<ffrt::mutex> guard(*tasksMutex_);
     auto it = tasks_.find(name);
     if (it != tasks_.end()) {
         TAG_LOGD(AAFwkTag::DEFAULT, "SubmitTask repeated task: %{public}s", name.c_str());
         if (forceSubmit) {
-            return SubmitTask(task, atskAttr);
+            return SubmitTask(task, taskAttr);
         } else {
             return TaskHandle();
         }
     }
 
-    auto result = SubmitTask(task, atskAttr);
+    auto result = SubmitTask(task, taskAttr);
     tasks_.emplace(name, result);
 
     // submit clear task to clear map record
@@ -133,20 +139,38 @@ TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task,
 
     return result;
 }
+
 TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task, const TaskAttribute &taskAttr)
 {
     if (!task) {
         return TaskHandle();
     }
+
     TaskHandle result(shared_from_this(), nullptr);
-    auto taskWrap = [result, task]() {
+    result.taskId_ = ++g_taskId;
+    result.printTaskLog_ = printTaskLog_;
+    auto taskWrap = [result, task, taskName = taskAttr.taskName_]() {
+        if (result.PrintTaskLog()) {
+            TAG_LOGW(AAFwkTag::DEFAULT, "begin execute task name: %{public}s, taskId: %{public}d",
+                taskName.c_str(), result.GetTaskId());
+        }
         *result.status_ = TaskStatus::EXECUTING;
         task();
         *result.status_ = TaskStatus::FINISHED;
+        if (result.PrintTaskLog()) {
+            TAG_LOGW(AAFwkTag::DEFAULT, "end execute task name: %{public}s, taskId: %{public}d",
+                taskName.c_str(), result.GetTaskId());
+        }
     };
-    result.innerTaskHandle_ = SubmitTaskInner(taskWrap, taskAttr);
+
+    if (printTaskLog_) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "submit task name: %{public}s, taskId: %{public}d, queueName: %{public}s",
+            taskAttr.taskName_.c_str(), result.taskId_, queueName_.c_str());
+    }
+    result.innerTaskHandle_ = SubmitTaskInner(std::move(taskWrap), taskAttr);
     return result;
 }
+
 bool TaskHandlerWrap::CancelTask(const std::string &name)
 {
     TAG_LOGD(AAFwkTag::DEFAULT, "CancelTask task: %{public}s", name.c_str());
@@ -158,6 +182,10 @@ bool TaskHandlerWrap::CancelTask(const std::string &name)
 
     auto taskHandle = it->second;
     tasks_.erase(it);
+    if (printTaskLog_) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "cancel task name: %{public}s, taskId: %{public}d, queueName: %{public}s",
+            name.c_str(), taskHandle.taskId_, queueName_.c_str());
+    }
     return taskHandle.Cancel();
 }
 
@@ -171,6 +199,7 @@ bool TaskHandlerWrap::RemoveTask(const std::string &name, const TaskHandle &task
     tasks_.erase(it);
     return true;
 }
+
 ffrt::qos Convert2FfrtQos(TaskQoS taskqos)
 {
     switch (taskqos) {

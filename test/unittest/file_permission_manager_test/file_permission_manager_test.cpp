@@ -49,7 +49,7 @@ HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_001, TestSize.L
     uint32_t callerTokenId = 0;
     uint32_t flag = 0;
     std::vector<PolicyInfo> pathPolicies;
-    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, pathPolicies);
+    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, pathPolicies, "");
     bool res = false;
     if (ret.empty()) {
         res = true;

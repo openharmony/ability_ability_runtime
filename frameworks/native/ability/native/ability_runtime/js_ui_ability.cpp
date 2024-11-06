@@ -1528,7 +1528,7 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
     HandleScope handleScope(jsRuntime_);
     napi_value promiseCallback = nullptr;
     napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, OnContinuePromiseCallback,
-        resolveCallbackInfo, &promiseCallback);
+        callbackInfo, &promiseCallback);
     napi_value argv[2] = { promiseCallback, promiseCallback };
     napi_call_function(env, result, then, PROMISE_CALLBACK_PARAM_NUM, argv, nullptr);
     TAG_LOGI(AAFwkTag::UIABILITY, "end");

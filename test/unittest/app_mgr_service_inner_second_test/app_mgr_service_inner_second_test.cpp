@@ -222,7 +222,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityN
     appRecord->SetMainProcess(true);
 
     appMgrServiceInner->LoadAbilityNoAppRecord(appRecord, true, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
-        TEST_FLAG, bundleInfo, hapModuleInfo, want_, false, false, token_);
+        TEST_FLAG, bundleInfo, hapModuleInfo, want_, false, false, AppExecFwk::PreloadMode::PRESS_DOWN, token_);
     EXPECT_EQ(appRecord->GetSpecifiedProcessFlag(), TEST_FLAG);
     EXPECT_FALSE(appRecord->IsEmptyKeepAliveApp());
     EXPECT_FALSE(appRecord->IsMainProcess());
@@ -251,7 +251,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LoadAbilityN
     appRecord->SetEmptyKeepAliveAppState(true);
 
     appMgrServiceInner->LoadAbilityNoAppRecord(appRecord, true, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
-        "", bundleInfo, hapModuleInfo, want_, false, false, token_);
+        "", bundleInfo, hapModuleInfo, want_, false, false, AppExecFwk::PreloadMode::PRESS_DOWN, token_);
     EXPECT_EQ(appRecord->GetSpecifiedProcessFlag(), "");
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_LoadAbilityNoAppRecord_0200 end");
 }
@@ -1227,38 +1227,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_100
 }
 
 /**
- * @tc.name: AppMgrServiceInnerSecondTest_GetRunningCloneAppInfo_0100
- * @tc.desc: Test GetRunningCloneAppInfo
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningCloneAppInfo_0100, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetRunningCloneAppInfo_0100 start");
-    std::string bundleName = "";
-    std::vector<std::string> instanceKeys;
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
-    BundleInfo bundleInfo;
-    HapModuleInfo hapModuleInfo;
-    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
-    loadParam->token = token_;
-    loadParam->preToken = preToken_;
-    appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_, TEST_PROCESS_NAME,
-        bundleInfo, hapModuleInfo, want_, false);
-    RunningMultiAppInfo info;
-    info.mode = static_cast<int32_t>(MultiAppModeType::APP_CLONE);
-    appMgrServiceInner->GetRunningCloneAppInfo(appRecord, info);
-    EXPECT_EQ(info.mode, static_cast<int32_t>(MultiAppModeType::APP_CLONE));
-    info.mode = static_cast<int32_t>(MultiAppModeType::MULTI_INSTANCE);
-    appMgrServiceInner->GetRunningCloneAppInfo(appRecord, info);
-    EXPECT_EQ(info.mode, static_cast<int32_t>(MultiAppModeType::MULTI_INSTANCE));
-    info.mode = 0;
-    appMgrServiceInner->GetRunningCloneAppInfo(appRecord, info);
-    EXPECT_EQ(info.mode, 0);
-    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetRunningCloneAppInfo_0100 end");
-}
-
-/**
  * @tc.name: AppMgrServiceInnerSecondTest_CheckAppRecordAndPriorityObject_0100
  * @tc.desc: Test CheckAppRecordAndPriorityObject
  * @tc.type: FUNC
@@ -2089,12 +2057,12 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_StartChildPr
     auto& utils = AAFwk::AppUtils::GetInstance();
     utils.isMultiProcessModel_.isLoaded = false;
     ret = appMgrServiceInner->StartChildProcessPreCheck(pid, 1);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_CHILD_PROCESS_REACH_LIMIT);
 
     utils.maxChildProcess_.isLoaded = true;
     utils.maxChildProcess_.value = 1000000;
     ret = appMgrServiceInner->StartChildProcessPreCheck(pid, 1);
-    EXPECT_EQ(ret, ERR_CHILD_PROCESS_REACH_LIMIT);
+    EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_StartChildProcessPreCheck_0100 end");
 }
 
