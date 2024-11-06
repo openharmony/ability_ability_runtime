@@ -19,7 +19,6 @@
 #include <string>
 
 #include "configuration.h"
-#include "cj_common_ffi.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -37,6 +36,11 @@ struct CConfiguration {
     char* mnc;
 };
 
+struct CArrString {
+    char** head;
+    int64_t size;
+};
+
 struct CProcessInformation {
     int32_t pid;
     int32_t uid;
@@ -52,12 +56,12 @@ struct CArrProcessInformation {
     int64_t size;
 };
 
+CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &configuration);
 }
 }
 
 // The return variable needs free in CJ.
 char* CreateCStringFromString(const std::string& source);
 char** VectorToCArrString(const std::vector<std::string>& vec);
-OHOS::AbilityRuntime::CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &configuration);
 
 #endif // OHOS_ABILITY_RUNTIME_CJ_UTILS_FFI_H
