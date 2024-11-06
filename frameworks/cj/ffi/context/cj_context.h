@@ -18,15 +18,16 @@
 
 #include <memory>
 
+#include "bundle_manager_convert.h"
 #include "cj_macro.h"
 #include "cj_ability_stage_context.h"
 #include "cj_application_context.h"
-#include "cj_boundle_manager_utils.h"
 #include "ability_runtime/cj_ability_context.h"
 
 namespace OHOS {
 namespace FfiContext {
 using namespace OHOS::AbilityRuntime;
+using namespace OHOS::CJSystemapi::BundleManager;
 
 class CJContext : public FFI::FFIData {
 public:

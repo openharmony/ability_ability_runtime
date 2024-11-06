@@ -17,12 +17,14 @@
 
 #include "cj_utils_ffi.h"
 #include "cj_ability_runtime_error.h"
+#include "bundle_manager_convert.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace FfiContext {
 using namespace OHOS::FFI;
 using namespace OHOS::AbilityRuntime;
+using namespace OHOS::CJSystemapi::BundleManager;
 
 static constexpr int32_t ABILITY_CONTEXT = 0;
 static constexpr int32_t APPLICATION_CONTEXT = 1;
@@ -110,7 +112,7 @@ RetApplicationInfo FfiContextGetApplicationInfo(int64_t id, int32_t type)
         TAG_LOGE(AAFwkTag::CONTEXT, "null applicationInfo");
         return appInfo;
     }
-    return ConvertApplicationInfo(*applicationInfo);
+    return Convert::ConvertApplicationInfo(*applicationInfo);
 }
 
 char* FfiContextGetFilesDir(int64_t id, int32_t type)
