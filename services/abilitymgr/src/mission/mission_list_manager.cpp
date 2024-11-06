@@ -1074,8 +1074,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
                 continue;
             }
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -1092,8 +1092,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                     continue;
                 }
                 auto abilityRecord = missionInfo->GetAbilityRecord();
-                if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                    info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+                if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                     abilityRecord->SetAppState(info.state);
                 }
             }
@@ -1105,8 +1105,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 continue;
             }
             auto abilityRecord = missionInfo->GetAbilityRecord();
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -1117,8 +1117,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 continue;
             }
             auto abilityRecord = missionInfo->GetAbilityRecord();
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
