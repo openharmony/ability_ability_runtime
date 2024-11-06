@@ -201,6 +201,7 @@ ohos_shared_library("appkit_native") {
   ]
   public_external_deps = [ "ability_base:configuration" ]
 
+  defines = []
   if (ability_runtime_graphics) {
     external_deps += [
       "ace_engine:ace_forward_compatibility",
@@ -209,9 +210,10 @@ ohos_shared_library("appkit_native") {
       "icu:shared_icuuc",
       "window_manager:libwm",
     ]
+
+    defines += [ "NWEB_GRAPHIC" ]
   }
 
-  defines = []
   if (is_asan || asan_detector) {
     defines += [ "SUPPORT_ASAN" ]
   }
