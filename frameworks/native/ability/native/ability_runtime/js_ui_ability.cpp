@@ -1137,7 +1137,7 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
 }
 
 void JsUIAbility::ReleaseOnContinueAsset(const napi_env env, napi_value &promise,
-    napi_ref &jsWantParamsRef,AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo)
+    napi_ref &jsWantParamsRef, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo)
 {
     napi_add_finalizer(env, promise, jsWantParamsRef, [](napi_env env, void *context, void *) {
         TAG_LOGI(AAFwkTag::UIABILITY, "Release jsWantParamsRef");
