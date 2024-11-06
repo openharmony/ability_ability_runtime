@@ -15,6 +15,7 @@
 
 #include "task_handler_wrap.h"
 
+#include <cinttypes>
 #include <mutex>
 #include "cpp/mutex.h"
 #include "hilog_tag_wrapper.h"
@@ -46,12 +47,12 @@ void TaskHandle::Sync() const
 {
     auto handler = handler_.lock();
     if (!status_ || !handler || !innerTaskHandle_) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Invalid status");
+        TAG_LOGI(AAFwkTag::DEFAULT, "Invalid status");
         return;
     }
     auto &status = *status_;
     if (status == TaskStatus::FINISHED || status == TaskStatus::CANCELED) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Invalid status");
+        TAG_LOGI(AAFwkTag::DEFAULT, "Invalid status");
         return;
     }
     handler->WaitTaskInner(innerTaskHandle_);
@@ -62,17 +63,13 @@ std::atomic_int32_t TaskHandlerWrap::g_taskId = 0;
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::CreateQueueHandler(const std::string &queueName,
     TaskQoS queueQos)
 {
-    auto result = std::make_shared<QueueTaskHandlerWrap>(queueName, queueQos);
-    result->queueName_ = queueName;
-    return result;
+    return std::make_shared<QueueTaskHandlerWrap>(queueName, queueQos);
 }
 
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::CreateConcurrentQueueHandler(const std::string &queueName,
     int32_t concurrentNum, TaskQoS queueQos)
 {
-    auto result = std::make_shared<QueueTaskHandlerWrap>(queueName, concurrentNum, queueQos);
-    result->queueName_ = queueName;
-    return result;
+    return std::make_shared<QueueTaskHandlerWrap>(queueName, concurrentNum, queueQos);
 }
 
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::GetFfrtHandler()
@@ -81,7 +78,7 @@ std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::GetFfrtHandler()
     return ffrtHandler;
 }
 
-TaskHandlerWrap::TaskHandlerWrap()
+TaskHandlerWrap::TaskHandlerWrap(const std::string &queueName) : queueName_(queueName)
 {
     tasksMutex_ = std::make_unique<ffrt::mutex>();
 }
@@ -157,15 +154,11 @@ TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task, const 
         *result.status_ = TaskStatus::EXECUTING;
         task();
         *result.status_ = TaskStatus::FINISHED;
-        if (result.PrintTaskLog()) {
-            TAG_LOGW(AAFwkTag::DEFAULT, "end execute task name: %{public}s, taskId: %{public}d",
-                taskName.c_str(), result.GetTaskId());
-        }
     };
 
     if (printTaskLog_) {
-        TAG_LOGW(AAFwkTag::DEFAULT, "submit task name: %{public}s, taskId: %{public}d, queueName: %{public}s",
-            taskAttr.taskName_.c_str(), result.taskId_, queueName_.c_str());
+        TAG_LOGW(AAFwkTag::DEFAULT, "submitTask: %{public}s, taskId: %{public}d, queueName: %{public}s count: "
+            "%{public}" PRIu64"", taskAttr.taskName_.c_str(), result.taskId_, queueName_.c_str(), GetTaskCount());
     }
     result.innerTaskHandle_ = SubmitTaskInner(std::move(taskWrap), taskAttr);
     return result;
@@ -252,6 +245,9 @@ void BuildFfrtTaskAttr(const TaskAttribute &taskAttr, ffrt::task_attr &result)
     }
     if (taskAttr.taskPriority_ != TaskQueuePriority::LOW) {
         result.priority(Convert2FfrtPriority(taskAttr.taskPriority_));
+    }
+    if (taskAttr.timeoutMillis_ > 0) {
+        result.timeout(taskAttr.timeoutMillis_ * MILL_TO_MICRO);
     }
 }
 }  // namespace AAFWK
