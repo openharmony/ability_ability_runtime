@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 
 #include <cstdint>
+#include <cstdint>
 #include <future>
 #include <map>
 #include <memory>
@@ -31,6 +32,7 @@
 #include "ability_connect_manager.h"
 #include "ability_debug_deal.h"
 #include "ability_event_handler.h"
+#include "ability_info.h"
 #include "ability_info.h"
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
@@ -1770,7 +1772,7 @@ public:
         const std::list<std::string>& exportConfigs, int32_t flag) override;
 
     int32_t StartUIAbilityBySCBDefaultCommon(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
-        uint32_t sceneFlag, bool isColdStart);
+        uint32_t sceneFlag, bool &isColdStart);
 
     int32_t NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest);
 
@@ -2267,7 +2269,7 @@ private:
 
     void ReportCleanSession(const sptr<SessionInfo> &sessionInfo,
         const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t errCode);
-
+    
     void SendStartAbilityOtherExtensionEvent(const AppExecFwk::AbilityInfo& abilityInfo,
         const Want& want, uint32_t specifyTokenId);
 
