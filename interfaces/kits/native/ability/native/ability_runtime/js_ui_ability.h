@@ -96,7 +96,7 @@ public:
     /**
      * @brief The async callback of OnContinue.
      */
-    int32_t OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+    int32_t OnContinueAsyncCB(napi_ref jsWantParams, int32_t status,
         const AppExecFwk::AbilityInfo &abilityInfo) override;
 
     /**
@@ -332,6 +332,8 @@ private:
     bool BackPressDefaultValue();
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
+    void ReleaseOnContinueAsset(const napi_env env, napi_value &promise,
+        napi_ref &jsWantParamsRef, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo);
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
