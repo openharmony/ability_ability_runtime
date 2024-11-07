@@ -3740,7 +3740,7 @@ void AbilityRecord::UpdateDmsCallerInfo(Want &want)
     want.RemoveParam(DMS_CALLER_APP_IDENTIFIER);
 }
 
-void SetDebugUIExtension(boolean isDebugUIExt)
+void SetDebugUIExtension(bool isDebugUIExt)
 {
     if (!isDebugUIExt) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Invalid to debug UIExtension");
