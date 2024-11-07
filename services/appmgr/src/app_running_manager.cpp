@@ -640,6 +640,7 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
         }
         TAG_LOGI(AAFwkTag::APPMGR, "ability is the last:%{public}s", appRecord->GetName().c_str());
         appRecord->SetTerminating();
+        appRecord->SetClearSession(clearMissionFlag);
     }
 }
 
