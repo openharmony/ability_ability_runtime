@@ -427,7 +427,8 @@ HWTEST_F(DistributedClientTest, StartSyncRemoteMissions_0100, TestSize.Level3)
     std::string devId = "";
     bool fixConflict = true;
     int64_t tag = 0;
-    int32_t result = client->StartSyncRemoteMissions(devId, fixConflict, tag);
+    int32_t callingUid = 0;
+    int32_t result = client->StartSyncRemoteMissions(devId, fixConflict, tag, callingUid);
     if (client->GetDmsProxy() != nullptr) {
         EXPECT_EQ(result, OHOS::AAFwk::DMS_PERMISSION_DENIED);
     } else {
@@ -448,8 +449,9 @@ HWTEST_F(DistributedClientTest, StartSyncRemoteMissions_0200, TestSize.Level3)
     std::string devId = "";
     bool fixConflict = true;
     int64_t tag = 0;
+    int32_t callingUid = 0;
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
-    int32_t result = client->StartSyncRemoteMissions(devId, fixConflict, tag);
+    int32_t result = client->StartSyncRemoteMissions(devId, fixConflict, tag, callingUid);
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
     GTEST_LOG_(INFO) << "DistributedClientTest StartSyncRemoteMissions_0200 end";
 }
@@ -464,7 +466,8 @@ HWTEST_F(DistributedClientTest, StopSyncRemoteMissions_0100, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest StopSyncRemoteMissions_0100 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     std::string devId = "";
-    int32_t result = client->StopSyncRemoteMissions(devId);
+    int32_t callingUid = 0;
+    int32_t result = client->StopSyncRemoteMissions(devId, callingUid);
     if (client->GetDmsProxy() != nullptr) {
         EXPECT_EQ(result, OHOS::AAFwk::DMS_PERMISSION_DENIED);
     } else {
@@ -483,8 +486,9 @@ HWTEST_F(DistributedClientTest, StopSyncRemoteMissions_0200, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest StopSyncRemoteMissions_0200 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     std::string devId = "";
+    int32_t callingUid = 0;
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
-    int32_t result = client->StopSyncRemoteMissions(devId);
+    int32_t result = client->StopSyncRemoteMissions(devId, callingUid);
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
     GTEST_LOG_(INFO) << "DistributedClientTest StopSyncRemoteMissions_0200 end";
 }
@@ -499,8 +503,9 @@ HWTEST_F(DistributedClientTest, RegisterMissionListener_0100, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest RegisterMissionListener_0100 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     std::u16string devId = to_utf16("deviceId");
+    int32_t callingUid = 0;
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
-    int32_t result = client->RegisterMissionListener(devId, obj);
+    int32_t result = client->RegisterMissionListener(devId, obj, callingUid);
     if (client->GetDmsProxy() != nullptr) {
         EXPECT_EQ(result, OHOS::AAFwk::DMS_PERMISSION_DENIED);
     } else {
@@ -519,9 +524,10 @@ HWTEST_F(DistributedClientTest, RegisterMissionListener_0200, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest RegisterMissionListener_0200 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     std::u16string devId = to_utf16("deviceId");
+    int32_t callingUid = 0;
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
-    int32_t result = client->RegisterMissionListener(devId, obj);
+    int32_t result = client->RegisterMissionListener(devId, obj, callingUid);
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
     GTEST_LOG_(INFO) << "DistributedClientTest RegisterMissionListener_0200 end";
 }
@@ -612,8 +618,9 @@ HWTEST_F(DistributedClientTest, UnRegisterMissionListener_0100, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest UnRegisterMissionListener_0100 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     std::u16string devId = to_utf16("deviceId");
+    int32_t callingUid = 0;
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
-    client->RegisterMissionListener(devId, obj);
+    client->RegisterMissionListener(devId, obj, callingUid);
     int32_t result = client->UnRegisterMissionListener(devId, obj);
     if (client->GetDmsProxy() != nullptr) {
         EXPECT_EQ(result, OHOS::AAFwk::DMS_PERMISSION_DENIED);
@@ -633,8 +640,9 @@ HWTEST_F(DistributedClientTest, UnRegisterMissionListener_0200, TestSize.Level3)
     GTEST_LOG_(INFO) << "DistributedClientTest UnRegisterMissionListener_0200 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
     std::u16string devId = to_utf16("deviceId");
+    int32_t callingUid = 0;
     sptr<IRemoteObject> obj = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
-    client->RegisterMissionListener(devId, obj);
+    client->RegisterMissionListener(devId, obj, callingUid);
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
     int32_t result = client->UnRegisterMissionListener(devId, obj);
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
@@ -1152,9 +1160,10 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState_0100, TestSize.Level3)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState_0100 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
-    int32_t missionId = 0 ;
+    int32_t missionId = 0;
+    int32_t callingUid = 0;
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
-    int32_t result = client->SetMissionContinueState(missionId, state);
+    int32_t result = client->SetMissionContinueState(missionId, state, callingUid);
     if (client->GetDmsProxy() != nullptr) {
         EXPECT_EQ(result, 0);
     } else {
@@ -1172,10 +1181,11 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState_0200, TestSize.Level3)
 {
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState_0200 start";
     auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
-    int32_t missionId = 0 ;
+    int32_t missionId = 0;
+    int32_t callingUid = 0;
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
-    int32_t result = client->SetMissionContinueState(missionId, state);
+    int32_t result = client->SetMissionContinueState(missionId, state, callingUid);
     EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState_0200 end";
 }

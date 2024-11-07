@@ -48,6 +48,7 @@
 #include "interceptor/extension_control_interceptor.h"
 #include "interceptor/screen_unlock_interceptor.h"
 #include "interceptor/start_other_app_interceptor.h"
+#include "int_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "mock_session_manager_service.h"
@@ -155,6 +156,7 @@ constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.calle
 // Distributed continued session Id
 constexpr const char* DMS_CONTINUED_SESSION_ID = "ohos.dms.continueSessionId";
 constexpr const char* DMS_PERSISTENT_ID = "ohos.dms.persistentId";
+constexpr const char* DMS_CALLING_UID = "ohos.dms.callingUid";
 
 constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* NATIVE_DEBUG = "nativeDebug";
@@ -4384,6 +4386,8 @@ int AbilityManagerService::ContinueMission(const std::string &srcDeviceId, const
     }
 
     DistributedClient dmsClient;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    wantParams.SetParam(DMS_CALLING_UID, AAFwk::Integer::Box(callingUid));
     return dmsClient.ContinueMission(srcDeviceId, dstDeviceId, missionId, callBack, wantParams);
 }
 
@@ -4399,6 +4403,8 @@ int AbilityManagerService::ContinueMission(AAFwk::ContinueMissionInfo continueMi
     }
 
     DistributedClient dmsClient;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    continueMissionInfo.wantParams.SetParam(DMS_CALLING_UID, AAFwk::Integer::Box(callingUid));
     return dmsClient.ContinueMission(continueMissionInfo, callback);
 }
 
@@ -4528,7 +4534,8 @@ int AbilityManagerService::StartSyncRemoteMissions(const std::string& devId, boo
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
-    return dmsClient.StartSyncRemoteMissions(devId, fixConflict, tag);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    return dmsClient.StartSyncRemoteMissions(devId, fixConflict, tag, callingUid);
 }
 
 int AbilityManagerService::StopSyncRemoteMissions(const std::string& devId)
@@ -4539,7 +4546,8 @@ int AbilityManagerService::StopSyncRemoteMissions(const std::string& devId)
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
-    return dmsClient.StopSyncRemoteMissions(devId);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    return dmsClient.StopSyncRemoteMissions(devId, callingUid);
 }
 
 int AbilityManagerService::RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
@@ -4599,7 +4607,8 @@ int AbilityManagerService::RegisterMissionListener(const std::string &deviceId,
         return CHECK_PERMISSION_FAILED;
     }
     DistributedClient dmsClient;
-    return dmsClient.RegisterMissionListener(Str8ToStr16(deviceId), listener->AsObject());
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    return dmsClient.RegisterMissionListener(Str8ToStr16(deviceId), listener->AsObject(), callingUid);
 }
 
 int AbilityManagerService::RegisterOnListener(const std::string &type,
@@ -8975,7 +8984,8 @@ int AbilityManagerService::SetMissionContinueState(const sptr<IRemoteObject> &to
     }
 
     DistributedClient dmsClient;
-    auto result =  dmsClient.SetMissionContinueState(missionId, state);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    auto result =  dmsClient.SetMissionContinueState(missionId, state, callingUid);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR,
             "Notify DMS client failed, result: %{public}d. Mission id: %{public}d, state: %{public}d",
