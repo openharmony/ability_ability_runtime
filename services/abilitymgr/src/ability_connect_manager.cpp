@@ -1737,6 +1737,8 @@ int AbilityConnectManager::DispatchTerminate(const std::shared_ptr<AbilityRecord
     if (taskHandler_ != nullptr) {
         taskHandler_->CancelTask("terminate_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     }
+    ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::DESTROY_END, abilityRecord->GetPid(),
+        abilityRecord->GetUid(), 0, abilityRecord->GetRecordId());
     // complete terminate
     TerminateDone(abilityRecord);
     return ERR_OK;
