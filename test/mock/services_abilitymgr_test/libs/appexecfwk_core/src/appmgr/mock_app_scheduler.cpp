@@ -102,7 +102,7 @@ void AppScheduler::OnAbilityRequestDone(const sptr<IRemoteObject>& token, const 
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAbilityRequestDone()");
 }
 
-int AppScheduler::KillApplication(const std::string& bundleName, const bool clearPageStack)
+int AppScheduler::KillApplication(const std::string& bundleName, bool clearPageStack, int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::KillApplication()");
     return ERR_OK;

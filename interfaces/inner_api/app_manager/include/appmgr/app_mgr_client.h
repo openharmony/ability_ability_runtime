@@ -158,7 +158,8 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearPageStack = false);
+    virtual AppMgrResultCode KillApplication(const std::string &bundleName, bool clearPageStack = false,
+        int32_t appIndex = 0);
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
@@ -390,7 +391,8 @@ public:
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
+    virtual AppMgrResultCode UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+        int32_t appIndex = 0);
 
     /**
      * Register configuration observer.

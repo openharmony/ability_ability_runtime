@@ -340,12 +340,13 @@ ErrCode AmsMgrStub::HandleKillProcessWithAccount(MessageParcel &data, MessagePar
     std::string bundleName = data.ReadString();
     int accountId = data.ReadInt32();
     bool clearPageStack = data.ReadBool();
+    auto appIndex = data.ReadInt32();
 
     TAG_LOGI(AAFwkTag::APPMGR,
         "bundleName = %{public}s, accountId = %{public}d, clearPageStack = %{public}d",
         bundleName.c_str(), accountId, clearPageStack);
 
-    int32_t result = KillProcessWithAccount(bundleName, accountId, clearPageStack);
+    int32_t result = KillProcessWithAccount(bundleName, accountId, clearPageStack, appIndex);
     reply.WriteInt32(result);
 
     TAG_LOGI(AAFwkTag::APPMGR, "end");
@@ -358,12 +359,13 @@ ErrCode AmsMgrStub::HandleKillApplication(MessageParcel &data, MessageParcel &re
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
     bool clearPageStack = data.ReadBool();
+    auto appIndex = data.ReadInt32();
 
     TAG_LOGW(AAFwkTag::APPMGR,
         "KillApplication,callingPid=%{public}d,bundleName=%{public}s,clearPageStack=%{public}d",
         IPCSkeleton::GetCallingPid(), bundleName.c_str(), clearPageStack);
 
-    int32_t result = KillApplication(bundleName, clearPageStack);
+    int32_t result = KillApplication(bundleName, clearPageStack, appIndex);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
