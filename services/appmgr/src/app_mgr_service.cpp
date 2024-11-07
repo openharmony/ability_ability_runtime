@@ -1051,13 +1051,14 @@ int32_t AppMgrService::UpdateConfiguration(const Configuration& config, const in
     return appMgrServiceInner_->UpdateConfiguration(config, userId);
 }
 
-int32_t AppMgrService::UpdateConfigurationByBundleName(const Configuration& config, const std::string &name)
+int32_t AppMgrService::UpdateConfigurationByBundleName(const Configuration& config, const std::string &name,
+    int32_t appIndex)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->UpdateConfigurationByBundleName(config, name);
+    return appMgrServiceInner_->UpdateConfigurationByBundleName(config, name, appIndex);
 }
 
 int32_t AppMgrService::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)

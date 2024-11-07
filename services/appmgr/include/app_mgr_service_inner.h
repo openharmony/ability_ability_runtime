@@ -273,7 +273,7 @@ public:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = false);
+    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -700,7 +700,7 @@ public:
      */
     int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
-    int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
+    int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration();
 
@@ -857,7 +857,7 @@ public:
      *
      * @return
      */
-    void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
+    void NotifyAppStatus(const std::string &bundleName, int32_t appIndex, const std::string &eventData);
 
     int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
 
@@ -1653,7 +1653,7 @@ private:
      * @param clearPageStack should schedule clearPage lifecycle
      * @param reason caller function name
      */
-    int32_t KillApplicationByBundleName(const std::string &bundleName, const bool clearPageStack = false,
+    int32_t KillApplicationByBundleName(const std::string &bundleName, int32_t appIndex, bool clearPageStack = false,
         const std::string& reason = "KillApplicationByBundleName");
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload,

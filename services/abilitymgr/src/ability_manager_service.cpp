@@ -2436,7 +2436,7 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, const ExitReason 
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
     appExitReasonHelper_->RecordAppExitReason(bundleName, uid, appIndex, exitReason);
 
-    return DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName);
+    return DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, false, appIndex);
 }
 
 int32_t AbilityManagerService::GetConfiguration(AppExecFwk::Configuration& config)
@@ -6507,7 +6507,7 @@ void AbilityManagerService::ReleaseAbilityTokenMap(const sptr<IRemoteObject> &to
     }
 }
 
-int AbilityManagerService::KillProcess(const std::string &bundleName, const bool clearPageStack)
+int AbilityManagerService::KillProcess(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s, clearPageStack: %{public}d",
         bundleName.c_str(), clearPageStack);
@@ -6516,8 +6516,8 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, const bool
     CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
     int32_t userId = GetUserId();
     AppExecFwk::BundleInfo bundleInfo;
-    if (!IN_PROCESS_CALL(
-        bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
+    if (IN_PROCESS_CALL(bms->GetCloneBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, appIndex,
+        bundleInfo, userId)) != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundle info when kill process failed");
         return GET_BUNDLE_INFO_FAILED;
     }
@@ -6529,7 +6529,7 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, const bool
         return KILL_PROCESS_KEEP_ALIVE;
     }
 
-    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, clearPageStack);
+    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName, clearPageStack, appIndex);
     if (ret != ERR_OK) {
         return KILL_PROCESS_FAILED;
     }

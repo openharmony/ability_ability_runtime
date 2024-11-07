@@ -297,7 +297,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_010, TestSize.Level1)
     sptr<IRemoteObject> preToken;
 
     sptr<IAmsMgr> amsMgrScheduler(new MockAmsMgrScheduler());
-    EXPECT_CALL(*(static_cast<MockAmsMgrScheduler*>(amsMgrScheduler.GetRefPtr())), KillApplication(_, _))
+    EXPECT_CALL(*(static_cast<MockAmsMgrScheduler*>(amsMgrScheduler.GetRefPtr())), KillApplication(_, _, _))
         .Times(1)
         .WillOnce(Return(ERR_OK));
     EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
@@ -324,7 +324,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_011, TestSize.Level1)
     sptr<IRemoteObject> preToken;
     EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
     sptr<IAmsMgr> amsMgrScheduler(new MockAmsMgrScheduler());
-    EXPECT_CALL(*(static_cast<MockAmsMgrScheduler*>(amsMgrScheduler.GetRefPtr())), KillApplication(_, _))
+    EXPECT_CALL(*(static_cast<MockAmsMgrScheduler*>(amsMgrScheduler.GetRefPtr())), KillApplication(_, _, _))
         .Times(1)
         .WillOnce(Return(ERR_NO_MEMORY));
     EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),

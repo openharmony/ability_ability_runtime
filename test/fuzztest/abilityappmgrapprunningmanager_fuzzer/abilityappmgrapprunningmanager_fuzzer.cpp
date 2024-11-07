@@ -200,7 +200,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     manager->GetForegroundApplications(list);
     Configuration config;
     manager->UpdateConfiguration(config);
-    manager->UpdateConfigurationByBundleName(config, jsonStr);
+    manager->UpdateConfigurationByBundleName(config, jsonStr, appCloneIndex);
     int32_t level = static_cast<int32_t>(GetU32Data(data));
     manager->NotifyMemoryLevel(level);
     std::map<pid_t, MemoryLevel> procLevelMap;

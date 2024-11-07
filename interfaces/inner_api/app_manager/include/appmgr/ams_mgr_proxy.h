@@ -116,8 +116,8 @@ public:
      * @param accountId, account ID.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillProcessWithAccount(
-        const std::string &bundleName, const int accountId, const bool clearPageStack = false) override;
+    virtual int32_t KillProcessWithAccount(const std::string &bundleName, const int accountId,
+        const bool clearPageStack = false, int32_t appIndex = 0) override;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
@@ -135,7 +135,8 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName, const bool clearPageStack = false) override;
+    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false,
+        int32_t appIndex = 0) override;
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
