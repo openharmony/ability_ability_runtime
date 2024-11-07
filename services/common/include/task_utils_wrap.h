@@ -38,11 +38,8 @@ struct TaskAttribute {
     std::string taskName_;
     int64_t delayMillis_ = 0;
     TaskQoS taskQos_ = TaskQoS::DEFAULT;
-
-    bool IsDefault() const
-    {
-        return delayMillis_ <= 0 && taskName_.empty() && taskQos_ == TaskQoS::DEFAULT;
-    }
+    int64_t timeout_ = 0;
+    bool insertHead_ = false;
 };
 } // namespace AAFwk
 } // namespace OHOS

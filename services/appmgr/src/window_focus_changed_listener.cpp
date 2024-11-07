@@ -43,7 +43,7 @@ void WindowFocusChangedListener::OnFocused(const sptr<FocusChangeInfo> &focusCha
             }
             owner->HandleFocused(focusChangeInfo);
         };
-        taskHandler_->SubmitTask(task);
+        taskHandler_->SubmitTask(task, "WindowFocusChangedListener::OnFocused");
     }
 }
 
@@ -63,7 +63,7 @@ void WindowFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo> &focusC
             }
             owner->HandleUnfocused(focusChangeInfo);
         };
-        taskHandler_->SubmitTask(task);
+        taskHandler_->SubmitTask(task, "WindowFocusChangedListener::OnUnfocused");
     }
 }
 }  // namespace AppExecFwk

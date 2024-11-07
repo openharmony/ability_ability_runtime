@@ -149,6 +149,7 @@ ErrCode AppMgrService::Init()
     }
 
     taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("app_mgr_task_queue");
+    taskHandler_->SetPrintTaskLog(true);
     eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrServiceInner_);
     appMgrServiceInner_->SetTaskHandler(taskHandler_);
     appMgrServiceInner_->SetEventHandler(eventHandler_);
@@ -905,7 +906,7 @@ void AppMgrService::ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::
     auto task = [appMgrServiceInner = appMgrServiceInner_, recordId, want, flag]() {
         appMgrServiceInner->ScheduleAcceptWantDone(recordId, want, flag);
     };
-    taskHandler_->SubmitTask(task);
+    taskHandler_->SubmitTask(task, "ScheduleAcceptWantDone");
 }
 
 void AppMgrService::ScheduleNewProcessRequestDone(const int32_t recordId, const AAFwk::Want &want,
@@ -921,7 +922,10 @@ void AppMgrService::ScheduleNewProcessRequestDone(const int32_t recordId, const 
     auto task = [appMgrServiceInner = appMgrServiceInner_, recordId, want, flag]() {
         appMgrServiceInner->ScheduleNewProcessRequestDone(recordId, want, flag);
     };
-    taskHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+    taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = "ScheduleNewProcessRequestDone",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 int AppMgrService::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens)
