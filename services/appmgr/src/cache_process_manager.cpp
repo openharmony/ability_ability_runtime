@@ -278,7 +278,7 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
     return true;
 }
 
-bool CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord)
+void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (appRecord == nullptr || !warmStartProcesEnable_) {
         return;
