@@ -5578,7 +5578,7 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
         if (isNeedExit || (faultData.forceExit && !faultData.waitSaveState)) {
             TAG_LOGI(AAFwkTag::APPMGR, "FaultData %{public}s,pid == %{public}d is going to exit due to %{public}s.",
                 bundleName.c_str(), pid, innerService->FaultTypeToString(faultData.faultType).c_str());
-            innerService->KillProcessByPid(pid, "KillFaultApp");
+            innerService->KillProcessByPid(pid, faultData.errorObject.name);
             return;
         }
     };
