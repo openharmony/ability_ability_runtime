@@ -1169,7 +1169,8 @@ int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &rep
 {
     std::string bundleName = Str16ToStr8(data.ReadString16());
     bool clearPageStack = data.ReadBool();
-    int result = KillProcess(bundleName, clearPageStack);
+    auto appIndex = data.ReadInt32();
+    int result = KillProcess(bundleName, clearPageStack, appIndex);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove stack error");
         return ERR_INVALID_VALUE;

@@ -423,7 +423,8 @@ public:
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) override;
+    virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+        int32_t appIndex = 0) override;
 
     /**
      * @brief register a configuration observer which will receive notifies when updated.

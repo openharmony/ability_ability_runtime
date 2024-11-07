@@ -425,7 +425,8 @@ public:
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) = 0;
+    virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+        int32_t appIndex = 0) = 0;
 
     /**
      * Register configuration observer.

@@ -274,13 +274,13 @@ AppMgrResultCode AppMgrClient::UpdateApplicationInfoInstalled(const std::string 
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillApplication(const std::string &bundleName, bool const clearPageStack)
+AppMgrResultCode AppMgrClient::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->KillApplication(bundleName, clearPageStack);
+            int32_t result = amsService->KillApplication(bundleName, clearPageStack, appIndex);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }
@@ -737,7 +737,8 @@ AppMgrResultCode AppMgrClient::UpdateConfiguration(const Configuration &config, 
     return AppMgrResultCode::RESULT_OK;
 }
 
-AppMgrResultCode AppMgrClient::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name)
+AppMgrResultCode AppMgrClient::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+    int32_t appIndex)
 {
     if (!mgrHolder_) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
@@ -746,7 +747,7 @@ AppMgrResultCode AppMgrClient::UpdateConfigurationByBundleName(const Configurati
     if (service == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    service->UpdateConfigurationByBundleName(config, name);
+    service->UpdateConfigurationByBundleName(config, name, appIndex);
     return AppMgrResultCode::RESULT_OK;
 }
 

@@ -924,7 +924,8 @@ int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config, const int3
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name)
+int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+    int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationByBundleName");
     MessageParcel data;
@@ -937,6 +938,10 @@ int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config
     }
     if (!data.WriteString(name)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel name failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel appIndex failed");
         return ERR_INVALID_DATA;
     }
     MessageParcel reply;

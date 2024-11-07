@@ -365,6 +365,41 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
     return (pids.empty() ? false : true);
 }
 
+bool AppRunningManager::ProcessExitByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex,
+    std::list<pid_t> &pids, bool clearPageStack)
+{
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto &item : appRunningMap) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr) {
+            continue;
+        }
+        if (appRecord->IsKeepAliveApp() && ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient()) {
+            continue;
+        }
+        auto appInfo = appRecord->GetApplicationInfo();
+        if (appInfo == nullptr) {
+            continue;
+        }
+        if (appRecord->GetPriorityObject() == nullptr) {
+            continue;
+        }
+
+        if (appInfo->bundleName == bundleName && appRecord->GetAppIndex() == appIndex) {
+            pid_t pid = appRecord->GetPriorityObject()->GetPid();
+            if (pid <= 0) {
+                continue;
+            }
+            pids.push_back(pid);
+            if (clearPageStack) {
+                appRecord->ScheduleClearPageStack();
+            }
+            appRecord->ScheduleProcessSecurityExit();
+        }
+    }
+    return !pids.empty();
+}
+
 bool AppRunningManager::ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey,
     std::list<pid_t> &pids, bool clearPageStack)
 {
@@ -380,6 +415,7 @@ bool AppRunningManager::ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, 
         }
         if (appInfo->multiAppMode.multiAppModeType != MultiAppModeType::MULTI_INSTANCE) {
             TAG_LOGI(AAFwkTag::APPMGR, "not multi-instance");
+            continue;
         }
         if (appInfo->accessTokenId != accessTokenId) {
             continue;
@@ -402,7 +438,7 @@ bool AppRunningManager::ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, 
         appRecord->ScheduleProcessSecurityExit();
     }
 
-    return pids.empty() ? false : true;
+    return !pids.empty();
 }
 
 bool AppRunningManager::GetPidsByBundleNameUserIdAndAppIndex(const std::string &bundleName,
@@ -674,7 +710,8 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         if (result < 0) {
             TAG_LOGW(AAFwkTag::APPMGR, "failed, pid: %{public}d", pid);
         }
-        inner->NotifyAppStatus(appRecord->GetBundleName(), CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
+        inner->NotifyAppStatus(appRecord->GetBundleName(), appRecord->GetAppIndex(),
+            CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
         };
 
     if (clearMissionFlag && appRecord->IsDebugApp()) {
@@ -874,7 +911,8 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
     return result;
 }
 
-int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name)
+int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+    int32_t appIndex)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     int32_t result = ERR_OK;
@@ -884,8 +922,10 @@ int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &
             TAG_LOGD(AAFwkTag::APPMGR, "app not ready, appName is %{public}s", appRecord->GetBundleName().c_str());
             continue;
         }
-        if (appRecord && !isCollaboratorReserveType(appRecord) && appRecord->GetBundleName() == name) {
-            TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
+        if (appRecord && !isCollaboratorReserveType(appRecord) && appRecord->GetBundleName() == name &&
+            appRecord->GetAppIndex() == appIndex) {
+            TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s], index:%{public}d",
+                appRecord->GetName().c_str(), appIndex);
             result = appRecord->UpdateConfiguration(config);
         }
     }
