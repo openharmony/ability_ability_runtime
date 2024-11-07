@@ -24,6 +24,7 @@
 #include "assert_fault_callback_death_mgr.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
+#include "param.h"
 #include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
@@ -1362,9 +1363,13 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     }
 
     UpdateUIExtensionInfo(abilityRecord);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = abilityRecord->GetRecordId();
+    loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    loadParam.token = token;
+    loadParam.preToken = perToken;
     DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token, perToken, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(),
-        abilityRecord->GetWant(), abilityRecord->GetRecordId());
+        loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
 }
 
 void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilityRequest)
