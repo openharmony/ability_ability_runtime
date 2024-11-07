@@ -176,6 +176,7 @@ const int32_t TYPE_OTHERS = 2;
 const std::string NWEB_SURFACE_NODE_NAME = "nwebPreloadSurface";
 const std::string BLANK_URL = "about:blank";
 constexpr uint32_t NWEB_SURFACE_SIZE = 1;
+constexpr int32_t PRELOAD_TASK_DELAY_TIME = 2000;  //millisecond
 #endif
 
 extern "C" int DFX_SetAppRunningUniqueId(const char* appRunningId, size_t len) __attribute__((weak));
@@ -1822,7 +1823,7 @@ void MainThread::HandleNWebPreload()
         TAG_LOGI(AAFwkTag::APPKIT, "init NWeb success");
     };
 
-    mainHandler_->PostIdleTask(task, "MainThread::NWEB_PRELOAD");
+    mainHandler_->PostIdleTask(task, "MainThread::NWEB_PRELOAD", PRELOAD_TASK_DELAY_TIME);
     TAG_LOGI(AAFwkTag::APPKIT, "postIdleTask success");
 }
 #endif
