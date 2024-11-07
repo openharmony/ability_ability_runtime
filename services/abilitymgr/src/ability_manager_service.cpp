@@ -4673,11 +4673,14 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
     //sa caller and has uid，no need find from bms.
     bool isSpecifyUidBySa = (uid != -1) && (AAFwk::PermissionVerification::GetInstance()->IsSACall());
 
-    int32_t appUid = 0;
+    int32_t appUid = -1;
     int32_t appIndex = 0;
+    std::string bundleName = "";
     if (!wantSenderInfo.allWants.empty()) {
+        bundleName = wantSenderInfo.allWants.back().want.GetElement().GetBundleName();
+    }
+    if (!bundleName.empty()) {
         AppExecFwk::BundleInfo bundleInfo;
-        std::string bundleName = wantSenderInfo.allWants.back().want.GetElement().GetBundleName();
         MultiAppUtils::GetRunningMultiAppIndex(bundleName, callerUid, appIndex);
         if (!isSpecifyUidBySa) {
             bundleMgrResult = IN_PROCESS_CALL(bms->GetCloneBundleInfo(bundleName,
