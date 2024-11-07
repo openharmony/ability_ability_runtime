@@ -1427,13 +1427,14 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     auto uid = appRecord->GetUid();
     bool foreground = appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
         appRecord->GetState() == ApplicationState::APP_STATE_FOCUS;
+    std::string killReason = appRecord->IsClearSession() ? "Kill Reason:ClearSession" : "Kill Reason:app exit";
     auto result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PID, std::to_string(eventInfo.pid), EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_MESSAGE, "Kill Reason:app exit", EVENT_KEY_FOREGROUND, foreground);
+        EVENT_KEY_MESSAGE, killReason, EVENT_KEY_FOREGROUND, foreground);
     TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send [FRAMEWORK,PROCESS_KILL], pid=%{public}d,"
-        " processName=%{public}s, msg=Kill Reason:app exit, FOREGROUND = %{public}d",
-        result, eventInfo.pid, eventInfo.processName.c_str(), foreground);
+        " processName=%{public}s, msg=%{public}s, FOREGROUND = %{public}d",
+        result, eventInfo.pid, eventInfo.processName.c_str(), killReason.c_str(), foreground);
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 
