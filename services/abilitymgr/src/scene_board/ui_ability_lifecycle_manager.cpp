@@ -2630,20 +2630,18 @@ int32_t UIAbilityLifecycleManager::GetAbilityStateByPersistentId(int32_t persist
 }
 
 int32_t UIAbilityLifecycleManager::CleanUIAbility(
-    const std::shared_ptr<AbilityRecord> &abilityRecord, bool forceKillProcess)
+    const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (forceKillProcess) {
-        std::string element = abilityRecord->GetElementName().GetURI();
-        if (DelayedSingleton<AppScheduler>::GetInstance()->CleanAbilityByUserRequest(abilityRecord->GetToken())) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s success", element.c_str());
-            return ERR_OK;
-        }
-        TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "can not force kill when user request clean ability, schedule lifecycle:%{public}s", element.c_str());
+    std::string element = abilityRecord->GetElementName().GetURI();
+    if (DelayedSingleton<AppScheduler>::GetInstance()->CleanAbilityByUserRequest(abilityRecord->GetToken())) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s success", element.c_str());
+        return ERR_OK;
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "can not force kill when user request clean ability, schedule lifecycle:%{public}s", element.c_str());
     return CloseUIAbility(abilityRecord, -1, nullptr, true);
 }
 

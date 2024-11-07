@@ -2481,6 +2481,26 @@ bool AppRunningRecord::IsProcessAttached() const
     return appLifeCycleDeal_->GetApplicationClient() != nullptr;
 }
 
+void AppRunningRecord::SetUIAbilityLaunched(bool hasLaunched)
+{
+    hasUIAbilityLaunched_ = hasLaunched;
+}
+
+bool AppRunningRecord::HasUIAbilityLaunched()
+{
+    return hasUIAbilityLaunched_;
+}
+
+void AppRunningRecord::SetProcessCaching(bool isCaching)
+{
+    isCaching_ = isCaching;
+}
+
+bool AppRunningRecord::IsCaching()
+{
+    return isCaching_;
+}
+
 void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
 {
     auto prioObject = GetPriorityObject();
