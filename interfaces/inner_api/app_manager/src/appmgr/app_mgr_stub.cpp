@@ -965,7 +965,8 @@ int32_t AppMgrStub::HandleUpdateConfigurationByBundleName(MessageParcel &data, M
         return ERR_INVALID_VALUE;
     }
     std::string name = data.ReadString();
-    int32_t ret = UpdateConfigurationByBundleName(*config, name);
+    auto appIndex = data.ReadInt32();
+    int32_t ret = UpdateConfigurationByBundleName(*config, name, appIndex);
     if (!reply.WriteInt32(ret)) {
         return ERR_INVALID_VALUE;
     }

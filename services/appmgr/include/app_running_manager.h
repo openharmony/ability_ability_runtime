@@ -193,7 +193,7 @@ public:
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
+    int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
 
     /*
     *  Notify application background of current memory level.
@@ -254,6 +254,8 @@ public:
 
     bool ProcessExitByBundleNameAndUid(
         const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack = false);
+    bool ProcessExitByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::list<pid_t> &pids,
+        bool clearPageStack);
     bool ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey, std::list<pid_t> &pids,
         bool clearPageStack);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
