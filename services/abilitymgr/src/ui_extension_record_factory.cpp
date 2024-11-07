@@ -59,9 +59,28 @@ int32_t UIExtensionRecordFactory::CreateRecord(
     if (AAFwk::MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
         abilityRecord->SetInstanceKey(AAFwk::MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
     }
+    CreateDebugRecord(abilityRequest, abilityRecord);
     extensionRecord = std::make_shared<UIExtensionRecord>(abilityRecord);
     extensionRecord->processMode_ = GetExtensionProcessMode(abilityRequest, extensionRecord->isHostSpecified_);
     return ERR_OK;
+}
+
+void UIExtensionRecordFactory::CreateDebugRecord(const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    auto callerRecord = AAFwk::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerRecord) {
+        if (callerRecord->IsDebug() &&
+            callerRecord->GetApplicationInfo().appProvisionType ==
+            AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+                auto callerBundleName = callerRecord->GetAbilityInfo().bundleName;
+                auto isSameApp = callerBundleName == abilityRequest.abilityInfo.bundleName;
+                auto isCallerUIAbility = callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
+                if (isSameApp && isCallerUIAbility) {
+                    TAG_LOGD(AAFwkTag::ABILITYMGR, "Setting up debug UIExtension");
+                    abilityRecord->SetDebugUIExtension();
+                }
+        }
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
