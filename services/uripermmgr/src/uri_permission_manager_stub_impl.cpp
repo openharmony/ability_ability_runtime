@@ -124,11 +124,11 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
     const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t abilityId)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri:%{private}s", uri.ToString().c_str());
-    if (!UPMSUtils::IsSAOrSystemAppCall()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
-        return CHECK_PERMISSION_FAILED;
-    }
     std::vector<Uri> uriVec = { uri };
+    if (UPMSUtils::IsSystemAppCall(initiatorTokenId) && uriVec[0].GetScheme() != "file") {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Only support file uri");
+        return ERR_CODE_INVALID_URI_TYPE;
+    }
     return GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId, abilityId);
 }
 
@@ -592,9 +592,10 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
         return ERR_CODE_INVALID_URI_TYPE;
     }
     uint32_t targetTokenId = 0;
-    if (UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, targetTokenId) != ERR_OK) {
+    auto ret = UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, targetTokenId);
+    if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "get tokenId by bundleName fail");
-        return INNER_ERR;
+        return ret;
     }
 
     auto uriStr = uri.ToString();

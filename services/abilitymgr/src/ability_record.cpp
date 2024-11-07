@@ -165,6 +165,7 @@ CallerRecord::CallerRecord(int requestCode, std::weak_ptr<AbilityRecord> caller)
         callerInfo_->callerTokenId = callerAbilityRecord->GetApplicationInfo().accessTokenId;
         callerInfo_->callerUid =  callerAbilityRecord->GetUid();
         callerInfo_->callerPid =  callerAbilityRecord->GetPid();
+        callerInfo_->callerAppCloneIndex = callerAbilityRecord->GetAppIndex();
     }
 }
 
