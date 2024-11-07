@@ -1596,8 +1596,6 @@ private:
 
     int32_t VerifyKillProcessPermissionCommon() const;
 
-    bool CheckCallerIsAppGallery();
-
     void ApplicationTerminatedSendProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord);
 
