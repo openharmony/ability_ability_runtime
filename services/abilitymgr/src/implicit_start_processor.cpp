@@ -23,6 +23,9 @@
 #include "hitrace_meter.h"
 #include "start_ability_utils.h"
 #include "startup_util.h"
+#ifdef WITH_DLP
+#include "dlp_file_kits.h"
+#endif // WITH_DLP
 
 namespace OHOS {
 namespace AAFwk {
@@ -434,6 +437,13 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     if (!appLinkingOnly) {
         ProcessLinkType(abilityInfos);
     }
+
+#ifdef WITH_DLP
+    if (request.want.GetBoolParam(AbilityUtil::DLP_PARAMS_SANDBOX, false)) {
+        Security::DlpPermission::DlpFileKits::ConvertAbilityInfoWithSupportDlp(request.want, abilityInfos);
+        extensionInfos.clear();
+    }
+#endif // WITH_DLP
 
     if (abilityInfos.size() + extensionInfos.size() > 1) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "More than one target application, filter by erms");
