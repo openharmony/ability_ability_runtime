@@ -1071,7 +1071,7 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
         }
 
         // Then schedule application background when all ability is not foreground.
-        if (foregroundSize == 0 && mainBundleName_ != LAUNCHER_NAME && windowIds_.empty()) {
+        if (foregroundSize == 0 && mainBundleName_ != LAUNCHER_NAME && IsWindowIdsEmpty()) {
             auto pendingState = pendingState_;
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
             if (pendingState == ApplicationPendingState::READY) {
@@ -1997,6 +1997,7 @@ void AppRunningRecord::ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisi
         }
     }
 
+    std::lock_guard windowIdsLock(windowIdsLock_);
     auto iter = windowIds_.find(info->windowId_);
     if (iter != windowIds_.end() &&
         info->visibilityState_ == OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
@@ -2028,6 +2029,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
         if (info->pid_ != GetPriorityObject()->GetPid()) {
             continue;
         }
+        std::lock_guard windowIdsLock(windowIdsLock_);
         auto iter = windowIds_.find(info->windowId_);
         if (iter != windowIds_.end() &&
             info->visibilityState_ == OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
@@ -2041,26 +2043,32 @@ void AppRunningRecord::OnWindowVisibilityChanged(
     }
 
     TAG_LOGI(AAFwkTag::APPMGR, "window id empty: %{public}d, pState: %{public}d, cState: %{public}d",
-        windowIds_.empty(), pendingState_, curState_);
+        IsWindowIdsEmpty(), pendingState_, curState_);
     if (pendingState_ == ApplicationPendingState::READY) {
-        if (!windowIds_.empty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
+        if (!IsWindowIdsEmpty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
             ScheduleForegroundRunning();
         }
-        if (windowIds_.empty() && IsAbilitiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
+        if (IsWindowIdsEmpty() && IsAbilitiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
             ScheduleBackgroundRunning();
         }
     } else {
-        if (!windowIds_.empty()) {
+        if (!IsWindowIdsEmpty()) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         }
-        if (windowIds_.empty() && IsAbilitiesBackground() && foregroundingAbilityTokens_.empty()) {
+        if (IsWindowIdsEmpty() && IsAbilitiesBackground() && foregroundingAbilityTokens_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
         }
     }
 }
 #endif //SUPPORT_SCREEN
+
+bool AppRunningRecord::IsWindowIdsEmpty()
+{
+    std::lock_guard windowIdsLock(windowIdsLock_);
+    return windowIds_.empty();
+}
 
 bool AppRunningRecord::IsContinuousTask()
 {
