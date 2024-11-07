@@ -98,7 +98,7 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
         std::lock_guard<ffrt::recursive_mutex> queueLock(cacheQueueMtx);
         cachedAppRecordQueue_.push_back(appRecord);
         AddToApplicationSet(appRecord);
-	    if (warmStartProcesEnable_) {
+        if (warmStartProcesEnable_) {
             appRecord->SetProcessCaching(true);
         }
     }
