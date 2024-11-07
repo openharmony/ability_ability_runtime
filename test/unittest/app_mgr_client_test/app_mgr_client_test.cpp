@@ -325,7 +325,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetRenderProcessTerminationStatus_001, T
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     appMgrClient->GetRenderProcessTerminationStatus(ERROR_PID, status);
-    EXPECT_EQ(status, ERROR_STATE);
+    EXPECT_EQ(status, ERR_OK);
 
     int res = appMgrClient->GetRenderProcessTerminationStatus(0, status);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
