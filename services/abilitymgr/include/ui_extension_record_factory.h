@@ -32,7 +32,8 @@ public:
     int32_t CreateRecord(
         const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<ExtensionRecord> &extensionRecord) override;
 private:
-    void CreateDebugRecord(const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<AAFwk::AbilityRecord> abilityRecord);
+    void CreateDebugRecord(
+        const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<AAFwk::AbilityRecord> abilityRecord);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
