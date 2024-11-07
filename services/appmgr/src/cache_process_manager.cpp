@@ -50,7 +50,7 @@ CacheProcessManager::CacheProcessManager()
     if (maxProcCacheNum_ > 0) {
         allowedCacheNum_ = maxProcCacheNum_;
     }
-    TAG_LOGW(AAFwkTag::APPMGR, 
+    TAG_LOGW(AAFwkTag::APPMGR,
         "maxProcCacheNum %{public}d, allowedCacheNum_ %{public}d", maxProcCacheNum_, allowedCacheNum_);
 }
 
