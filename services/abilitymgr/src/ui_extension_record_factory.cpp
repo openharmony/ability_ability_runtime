@@ -65,7 +65,7 @@ int32_t UIExtensionRecordFactory::CreateRecord(
     return ERR_OK;
 }
 
-void UIExtensionRecordFactory::CreateDebugRecord(const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> abilityRecord)
+void UIExtensionRecordFactory::CreateDebugRecord(const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<AAFwk::AbilityRecord> abilityRecord)
 {
     auto callerRecord = AAFwk::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (callerRecord) {
