@@ -600,6 +600,9 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
+        if (cacheProcMgr != nullptr) {
+            cacheProcMgr->CheckAndSetProcessCacheEnable(appRecord);
+        }
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s supports process cache, not terminate record.",
@@ -1607,7 +1610,10 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
         TAG_LOGE(AAFwkTag::APPMGR, "failed to get appRecord.");
         return false;
     }
-
+    if (appRecord->GetSupportProcessCacheState() == SupportProcessCacheState::SUPPORT) {
+        TAG_LOGI(AAFwkTag::APPMGR, "support porcess cache should not force clean");
+        return false;
+    }
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(abilityToken);
     if (!abilityRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed to get abilityRecord.");

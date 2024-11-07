@@ -829,6 +829,9 @@ public:
     void SetProcessCacheBlocked(bool isBlocked);
     bool GetProcessCacheBlocked();
 
+    void SetProcessCaching(bool isCaching);
+    bool IsCaching();
+
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
      *
@@ -847,6 +850,10 @@ public:
     bool IsUserRequestCleaning() const;
     bool IsAllAbilityReadyToCleanedByUserRequest();
     bool IsProcessAttached() const;
+
+	// reocrds whehter uiability has launched before
+    void SetUIAbilityLaunched(bool hasLaunched);
+    bool HasUIAbilityLaunched();
 
     void AddAppLifecycleEvent(const std::string &msg);
 private:
@@ -927,6 +934,7 @@ private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
     bool isTerminating = false;
+    bool isCaching_  = false;
     std::string signCode_;  // the sign of this hap
     std::string jointUserId_;
     std::map<std::string, std::shared_ptr<ApplicationInfo>> appInfos_;
@@ -1004,6 +1012,7 @@ private:
     bool isAttachedToStatusBar = false;
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
+    bool hasUIAbilityLaunched_ = false;
 };
 
 }  // namespace AppExecFwk
