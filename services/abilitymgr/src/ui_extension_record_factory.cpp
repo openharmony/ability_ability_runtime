@@ -64,7 +64,7 @@ int32_t UIExtensionRecordFactory::CreateRecord(
     if (callerRecord) {
         if (callerRecord->IsDebug() &&
             callerRecord->GetApplicationInfo().appProvisionType ==
-                AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+            AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
             auto isSameApp = callerBundleName == abilityRequest.abilityInfo.bundleName;
             auto isCallerUIAbility = callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
             if (isSameApp && isCallerUIAbility) {
