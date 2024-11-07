@@ -982,6 +982,16 @@ public:
         return delayConfiguration_;
     }
 
+    inline void SetClearSession(bool isClearSession)
+    {
+        isClearSession_ = isClearSession;
+    }
+
+    inline bool IsClearSession() const
+    {
+        return isClearSession_;
+    }
+
     void AddAppLifecycleEvent(const std::string &msg);
 private:
     /**
@@ -1138,6 +1148,7 @@ private:
     bool hasUIAbilityLaunched_ = false;
     bool isKia_ = false;
     bool isNeedPreloadModule_ = false;
+    bool isClearSession_ = false;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
 };
 
