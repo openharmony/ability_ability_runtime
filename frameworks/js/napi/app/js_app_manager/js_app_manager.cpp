@@ -1056,7 +1056,7 @@ private:
         auto asyncTask = [appManager = appManager_, bundleName, accountId,
             env, task = napiAsyncTask.get()]() {
             if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr or amsMgr is nullptr.");
+                TAG_LOGW(AAFwkTag::APPMGR, "null appManager or amsMgr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 delete task;
                 return;
@@ -1295,13 +1295,13 @@ private:
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[0], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Get bundle name wrong.");
-            ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string");
+            ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
             return CreateJsUndefined(env);
         }
         int32_t appCloneIndex = 0;
         if (argc > ARGC_ONE && !ConvertFromJsValue(env, argv[1], appCloneIndex)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Get appCloneIndex wrong.");
-            ThrowInvalidParamError(env, "Parse param appCloneIndex failed, must be a string");
+            ThrowInvalidParamError(env, "Parse param appCloneIndex failed, must be a string.");
             return CreateJsUndefined(env);
         }
 
