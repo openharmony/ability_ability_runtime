@@ -611,7 +611,7 @@ bool UIAbilityImpl::AbilityTransaction(const AAFwk::Want &want, const AAFwk::Lif
                 Background();
             } else {
                 TAG_LOGD(AAFwkTag::UIABILITY, "handleExecuteInsightIntentBackground");
-                HandleExecuteInsightIntentBackground(want);
+                ret = HandleExecuteInsightIntentBackground(want);
             }
 #endif
             break;
@@ -829,6 +829,7 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundByColdBoot(const Want &want,
             }
             abilityImpl->Background();
             abilityImpl->ExecuteInsightIntentDone(intentId, result);
+            abilityImpl->AbilityTransactionCallback(AAFwk::ABILITY_STATE_BACKGROUND_NEW);
         };
     callback->Push(asyncCallback);
 
