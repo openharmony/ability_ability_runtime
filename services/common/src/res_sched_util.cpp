@@ -193,5 +193,19 @@ void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int3
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, type, eventParams);
 #endif
 }
+
+std::unordered_set<std::string> ResSchedUtil::GetNWebPreloadSet() const
+{
+    uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_GET_NWEB_PRELOAD_SET;
+    nlohmann::json payload;
+    nlohmann::json reply;
+    ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    if (!reply.contains("NWebPreloadSet")) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "does not get preload process set");
+        return {};
+    }
+    auto jsonObj = reply["NWebPreloadSet"];
+    return { jsonObj.begin(), jsonObj.end() };
+}
 } // namespace AAFwk
 } // namespace OHOS

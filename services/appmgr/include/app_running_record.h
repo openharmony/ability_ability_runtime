@@ -983,6 +983,8 @@ public:
     }
 
     void AddAppLifecycleEvent(const std::string &msg);
+
+    void SetNWebPreload(const bool isAllowedNWebPreload);
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1139,6 +1141,7 @@ private:
     bool isKia_ = false;
     bool isNeedPreloadModule_ = false;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
+    bool isAllowedNWebPreload_ = false;
 };
 
 }  // namespace AppExecFwk

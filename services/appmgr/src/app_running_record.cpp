@@ -496,6 +496,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
     launchData.SetIsNeedPreloadModule(isNeedPreloadModule_);
+    launchData.SetNWebPreload(isAllowedNWebPreload_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
@@ -2544,5 +2545,9 @@ void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
     isNeedPreloadModule_ = isNeedPreloadModule;
 }
 
+void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)
+{
+    isAllowedNWebPreload_ = isAllowedNWebPreload;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
