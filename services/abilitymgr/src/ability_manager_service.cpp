@@ -3485,11 +3485,6 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
             DeleteAbilityRecoverInfo(abilityInfo.applicationInfo.accessTokenId, abilityInfo.moduleName,
             abilityInfo.name);
     }
-    bool forceKillProcess = ResSchedUtil::GetInstance().CheckShouldForceKillProcess(abilityRecord->GetPid());
-    if (!forceKillProcess) {
-        IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->SetProcessCacheStatus(
-            abilityRecord->GetPid(), true));
-    }
     EventInfo eventInfo;
     eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
     eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
@@ -12006,12 +12001,7 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
     TAG_LOGI(AAFwkTag::ABILITYMGR, "user request ot clean session: %{public}d.", sessionInfo->persistentId);
     auto abilityRecord = uiAbilityManager->GetUIAbilityRecordBySessionInfo(sessionInfo);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    bool forceKillProcess = ResSchedUtil::GetInstance().CheckShouldForceKillProcess(abilityRecord->GetPid());
-    if (!forceKillProcess) {
-        IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->SetProcessCacheStatus(
-            abilityRecord->GetPid(), true));
-    }
-    int32_t errCode = uiAbilityManager->CleanUIAbility(abilityRecord, forceKillProcess);
+    int32_t errCode = uiAbilityManager->CleanUIAbility(abilityRecord);
     ReportCleanSession(sessionInfo, abilityRecord, errCode);
     return errCode;
 }
