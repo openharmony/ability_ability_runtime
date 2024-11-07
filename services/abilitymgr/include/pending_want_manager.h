@@ -31,6 +31,7 @@
 #include "pending_want_record.h"
 #include "pending_want_common_event.h"
 #include "sender_info.h"
+#include "task_handler_wrap.h"
 #include "want_sender_info.h"
 
 namespace OHOS {
@@ -184,6 +185,7 @@ private:
     bool CheckWindowState(int32_t pid);
 
 private:
+    std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::map<std::shared_ptr<PendingWantKey>, sptr<PendingWantRecord>> wantRecords_;
     ffrt::mutex mutex_;
 };
