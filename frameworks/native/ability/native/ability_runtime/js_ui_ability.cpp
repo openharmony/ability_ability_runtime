@@ -63,6 +63,7 @@ const int32_t BASE_DISPLAY_ID_NUM (10);
 #endif
 constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
+constexpr const int32_t PROMISE_CALLBACK_PARAM_NUM = 2;
 
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
@@ -84,11 +85,10 @@ napi_value OnContinuePromiseCallback(napi_env env, napi_callback_info info)
     int32_t onContinueRes = 0;
     if (!ConvertFromJsValue(env, argv, onContinueRes)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get value failed");
-        return nullptr;
+        onContinueRes = AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
     }
     auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *>(data);
     callbackInfo->Call(onContinueRes);
-    AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Destroy(callbackInfo);
     data = nullptr;
 
     return nullptr;
@@ -1115,15 +1115,17 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
         return OnContinueSyncCB(result, wantParams, jsWantParams);
     }
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
-    auto asyncCallback = [thisJsWantParams = jsWantParams, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
+    napi_ref jsWantParamsRef;
+    napi_create_reference(env, jsWantParams, 1, &jsWantParamsRef);
+    ReleaseOnContinueAsset(env, result, jsWantParamsRef, callbackInfo);
+    auto asyncCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
         auto ability = abilityWeakPtr.lock();
         if (ability == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
             return;
         }
-        ability->OnContinueAsyncCB(thisJsWantParams, status, abilityInfo);
+        ability->OnContinueAsyncCB(jsWantParamsRef, status, abilityInfo);
     };
-
     callbackInfo->Push(asyncCallback);
     if (!CallPromise(result, callbackInfo)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "call promise failed");
@@ -1134,13 +1136,36 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     return onContinueRes;
 }
 
-int32_t JsUIAbility::OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+void JsUIAbility::ReleaseOnContinueAsset(const napi_env env, napi_value &promise,
+    napi_ref &jsWantParamsRef, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo)
+{
+    napi_add_finalizer(env, promise, jsWantParamsRef, [](napi_env env, void *context, void *) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "Release jsWantParamsRef");
+        auto contextRef = reinterpret_cast<napi_ref>(context);
+        if (contextRef != nullptr) {
+            napi_delete_reference(env, contextRef);
+            contextRef = nullptr;
+        }
+    }, nullptr, nullptr);
+    napi_add_finalizer(env, promise, callbackInfo, [](napi_env env, void *context, void *) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "Release callbackInfo");
+        auto contextRef = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *>(context);
+        if (contextRef != nullptr) {
+            AppExecFwk::AbilityTransactionCallbackInfo<int32_t>::Destroy(contextRef);
+            contextRef = nullptr;
+        }
+    }, nullptr, nullptr);
+}
+
+int32_t JsUIAbility::OnContinueAsyncCB(napi_ref jsWantParamsRef, int32_t status,
     const AppExecFwk::AbilityInfo &abilityInfo)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "call");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     WantParams wantParams;
+    napi_value jsWantParams;
+    napi_get_reference_value(env, jsWantParamsRef, &jsWantParams);
     OHOS::AppExecFwk::UnwrapWantParams(env, jsWantParams, wantParams);
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
@@ -1515,8 +1540,8 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
     napi_value promiseCallback = nullptr;
     napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, OnContinuePromiseCallback,
         callbackInfo, &promiseCallback);
-    napi_value argv[1] = { promiseCallback };
-    napi_call_function(env, result, then, 1, argv, nullptr);
+    napi_value argv[2] = { promiseCallback, promiseCallback };
+    napi_call_function(env, result, then, PROMISE_CALLBACK_PARAM_NUM, argv, nullptr);
     TAG_LOGI(AAFwkTag::UIABILITY, "end");
     return true;
 }
