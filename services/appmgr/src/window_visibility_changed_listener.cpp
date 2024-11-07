@@ -48,7 +48,7 @@ void WindowVisibilityChangedListener::OnWindowVisibilityChanged(
         }
         serviceInner->HandleWindowVisibilityChanged(windowVisibilityInfos);
     };
-    taskHandler_->SubmitTask(task);
+    taskHandler_->SubmitTask(task, "OnWindowVisibilityChanged");
 }
 } // namespace AppExecFwk
 } // namespace OHOS
