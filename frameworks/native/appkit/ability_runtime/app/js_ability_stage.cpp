@@ -783,12 +783,17 @@ void JsAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
         napi_set_named_property(env, obj, "context", contextObj);
     }
     TAG_LOGD(AAFwkTag::APPKIT, "Set ability stage context");
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr ability stage context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::Context>*>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGD(AAFwkTag::APPKIT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
