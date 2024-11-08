@@ -1598,13 +1598,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 faultData.faultType = FaultDataType::JS_ERROR;
                 faultData.errorObject = appExecErrorObj;
                 DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
-                int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-                    HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName,
-                    "MSG", KILL_REASON);
-                TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
-                    " pid=%{public}d, processName=%{public}s, msg=%{public}s", result, pid, processName.c_str(),
-                    KILL_REASON);
-
                 if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
                     ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
                     return;
@@ -1613,6 +1606,17 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 TAG_LOGE(AAFwkTag::APPKIT,
                     "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s",
                     bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
+                bool foreground = false;
+                if (appThread->applicationImpl_ && appThread->applicationImpl_->GetState() ==
+                    ApplicationImpl::APP_STATE_FOREGROUND) {
+                    foreground = true;
+                }
+                int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+                    HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName,
+                    "MSG", KILL_REASON, "FOREGROUND", foreground);
+                TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
+                    " pid=%{public}d, processName=%{public}s, msg=%{public}s, foreground=%{public}d", result, pid,
+                    processName.c_str(), KILL_REASON, foreground);
                 AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObj.name };
                 AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
                 _exit(JS_ERROR_EXIT);
