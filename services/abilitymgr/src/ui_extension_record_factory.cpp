@@ -70,17 +70,17 @@ void UIExtensionRecordFactory::CreateDebugRecord(
 {
     auto callerRecord = AAFwk::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (!callerRecord) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "No caller record");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "No caller record");
         return;
     }
     if (!callerRecord->IsDebug() ||
         callerRecord->GetApplicationInfo().appProvisionType !=
         AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid to debug UIExtension");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "Not debug UIExtension");
             return;
     }
     auto callerBundleName = callerRecord->GetAbilityInfo().bundleName;
-    auto isSameApp = callerBundleName == abilityRequest.abilityInfo.bundleName;
+    auto isSameApp = strcmp(callerBundleName.c_str(), abilityRequest.abilityInfo.bundleName.c_str()) == 0;
     auto isCallerUIAbility = callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
     if (isSameApp && isCallerUIAbility) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Setting up debug UIExtension");
