@@ -124,12 +124,17 @@ napi_value AttachServiceExtensionContext(napi_env env, void *value, void *)
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachServiceExtensionContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<ServiceExtensionContext>(ptr);
-    napi_wrap(env, contextObj, workContext,
+    auto res = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "Finalizer for weak_ptr service extension context is called");
             delete static_cast<std::weak_ptr<ServiceExtensionContext> *>(data);
         },
         nullptr, nullptr);
+    if (res != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "napi_wrap failed:%{public}d", res);
+        delete workContext;
+        return nullptr;
+    }
     return contextObj;
 }
 
@@ -275,12 +280,16 @@ void JsServiceExtension::BindContext(napi_env env, napi_value obj)
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
 
-    napi_wrap(env, contextObj, workContext,
+    auto res = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             delete static_cast<std::weak_ptr<ServiceExtensionContext>*>(data);
         },
         nullptr, nullptr);
-
+    if (res != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "napi_wrap failed:%{public}d", res);
+        delete workContext;
+        return;
+    }
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "end");
 }
 
