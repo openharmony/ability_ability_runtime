@@ -190,4 +190,11 @@ declare_args() {
       defined(global_parts_info.accesscontrol_sandbox_manager)) {
     ability_runtime_feature_sandboxmanager = true
   }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.hiviewdfx_hicollie)) {
+    app_mgr_service_hicollie_enable = true
+  } else {
+    app_mgr_service_hicollie_enable = false
+  }
 }
