@@ -87,7 +87,7 @@ napi_value AttachUIExtensionBaseContext(napi_env env, void *value, void*)
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachUIExtensionBaseContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<UIExtensionContext>(ptr);
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void*) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer for weak_ptr ui extension context is called");
             if (data == nullptr) {
@@ -97,6 +97,12 @@ napi_value AttachUIExtensionBaseContext(napi_env env, void *value, void*)
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
     return contextObj;
 }
 
@@ -196,7 +202,7 @@ void JsUIExtensionBase::BindContext()
         env, contextObj, DetachCallbackFunc, AttachUIExtensionBaseContext, workContext, nullptr);
     context_->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void*) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer for weak_ptr ui extension context is called");
             if (data == nullptr) {
@@ -206,6 +212,11 @@ void JsUIExtensionBase::BindContext()
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
 }
 
 void JsUIExtensionBase::OnStart(
