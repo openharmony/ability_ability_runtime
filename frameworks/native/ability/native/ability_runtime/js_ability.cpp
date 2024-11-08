@@ -80,12 +80,18 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *)
     auto contextObj = systemModule->GetNapiValue();
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(ptr);
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             TAG_LOGD(AAFwkTag::ABILITY, "finalizer for weak_ptr ability context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
     return contextObj;
 }
 
@@ -200,12 +206,17 @@ void JsAbility::BindContext()
     napi_set_named_property(env, obj, "context", contextObj);
     TAG_LOGD(AAFwkTag::ABILITY, "set ability context");
 
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::ABILITY, "finalizer for weak_ptr ability context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
 }
 
 void JsAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)

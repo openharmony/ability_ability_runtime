@@ -127,12 +127,17 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *extValue)
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, extValue);
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(ptr);
     if (workContext != nullptr) {
-        napi_wrap(env, contextObj, workContext,
+        napi_status status = napi_wrap(env, contextObj, workContext,
             [](napi_env, void* data, void*) {
               TAG_LOGD(AAFwkTag::UIABILITY, "finalizer for weak_ptr ability context is called");
               delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
             },
             nullptr, nullptr);
+        if (status != napi_ok && workContext != nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "napi_wrap Failed: %{public}d", status);
+            delete workContext;
+            return nullptr;
+        }
     }
     return contextObj;
 }
@@ -252,12 +257,18 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     if (abilityRecovery_ != nullptr) {
         abilityRecovery_->SetJsAbility(reinterpret_cast<uintptr_t>(workContext));
     }
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *hint) {
             TAG_LOGD(AAFwkTag::UIABILITY, "finalizer for weak_ptr ability context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
             delete static_cast<std::weak_ptr<int32_t> *>(hint);
         }, workScreenMode, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
+
     TAG_LOGI(AAFwkTag::UIABILITY, "End");
 }
 
