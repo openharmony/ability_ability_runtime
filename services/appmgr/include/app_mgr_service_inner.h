@@ -60,6 +60,7 @@
 #include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
 #include "kia_interceptor_interface.h"
+#include "kill_process_config.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "remote_client_manager.h"
@@ -1369,12 +1370,6 @@ public:
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
     /**
-     * Is a process of a ability will be killed
-     * @param indicates the ability
-     */
-    bool IsAppKilling(sptr<IRemoteObject> token) const;
-
-    /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.
      * @param userId userId Designation User ID.
@@ -1515,7 +1510,7 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, int32_t appCloneIndex, int32_t userId,
-        const bool clearPageStack = false, const std::string& reason = "KillApplicationByUserIdLocked");
+        const KillProcessConfig &config = {});
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
