@@ -21,10 +21,6 @@
 
 
 extern "C" {
-struct CJAbilityResult {
-    int32_t resultCode;
-    WantHandle wantHandle;
-};
 
 struct CJPermissionRequestResult {
     VectorStringHandle permissions;
