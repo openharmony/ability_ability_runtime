@@ -274,6 +274,8 @@ public:
      */
     void ScheduleProcessSecurityExit() override;
 
+    void ScheduleClearPageStack() override;
+
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
@@ -344,7 +346,7 @@ public:
      */
     int32_t ScheduleDumpIpcStat(std::string& result) override;
 
-    void ScheduleClearPageStack() override;
+    void ScheduleCacheProcess() override;
     /**
      * ScheduleDumpFfrt, call ScheduleDumpFfrt(std::string& result) through proxy project,
      * Start querying the application's ffrt usage.
@@ -355,7 +357,6 @@ public:
      */
     int32_t ScheduleDumpFfrt(std::string& result) override;
 
-    void ScheduleCacheProcess() override;
 private:
     /**
      *

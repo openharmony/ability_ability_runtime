@@ -611,6 +611,15 @@ void AppScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
     appMgrClient_->BlockProcessCacheByPids(pids);
 }
 
+bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return false;
+    }
+    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
+}
+
 bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -620,15 +629,6 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
         return false;
     }
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
-}
-
-bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
-{
-    if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
-        return false;
-    }
-    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
 }
 bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {

@@ -70,7 +70,6 @@ private:
         const Ace::ModalUIExtensionCallbacks &callback,
         const AutoFill::AutoFillWindowType &autoFillWindowType,
         bool isSmartAutoFill);
-
     bool ConvertAutoFillWindowType(const AutoFill::AutoFillRequest &request,
         bool &isSmartAutoFill, AutoFill::AutoFillWindowType &autoFillWindowType);
     std::shared_ptr<AutoFillExtensionCallback> GetAutoFillExtensionCallback(uint32_t callbackId);
