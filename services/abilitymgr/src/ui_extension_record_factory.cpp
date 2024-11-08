@@ -80,7 +80,7 @@ void UIExtensionRecordFactory::CreateDebugRecord(
             return;
     }
     auto callerBundleName = callerRecord->GetAbilityInfo().bundleName;
-    auto isSameApp = strcmp(callerBundleName, abilityRequest.abilityInfo.bundleName);
+    auto isSameApp = callerBundleName == abilityRequest.abilityInfo.bundleName;
     auto isCallerUIAbility = callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
     if (isSameApp && isCallerUIAbility) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Setting up debug UIExtension");
