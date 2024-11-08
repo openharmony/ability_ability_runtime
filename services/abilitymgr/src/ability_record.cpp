@@ -3767,5 +3767,17 @@ void AbilityRecord::UpdateDmsCallerInfo(Want &want)
     want.SetParam(Want::PARAM_RESV_CALLER_APP_IDENTIFIER, want.GetStringParam(DMS_CALLER_APP_IDENTIFIER));
     want.RemoveParam(DMS_CALLER_APP_IDENTIFIER);
 }
+
+void AbilityRecord::SetDebugUIExtension()
+{
+    if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not UIExtension");
+        return;
+    }
+    std::lock_guard guard(wantLock_);
+    want_.SetParam(DEBUG_APP, true);
+    launchDebugInfo_.isDebugAppSet = true;
+    launchDebugInfo_.debugApp = true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
