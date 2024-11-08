@@ -71,6 +71,7 @@ void UIExtensionRecordFactory::CreateDebugRecord(
     auto callerRecord = AAFwk::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (!callerRecord) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no caller record");
+        return;
     }
     if (callerRecord->IsDebug() &&
         callerRecord->GetApplicationInfo().appProvisionType ==
