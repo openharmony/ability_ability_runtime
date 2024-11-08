@@ -899,8 +899,6 @@ public:
      */
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
-    bool IsAppKilling(sptr<IRemoteObject> token) const;
-
     /**
      * Check whether the bundle is running.
      *
