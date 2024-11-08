@@ -70,19 +70,21 @@ void UIExtensionRecordFactory::CreateDebugRecord(
 {
     auto callerRecord = AAFwk::Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (!callerRecord) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "no caller record");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "No caller record");
         return;
     }
-    if (callerRecord->IsDebug() &&
-        callerRecord->GetApplicationInfo().appProvisionType ==
+    if (!callerRecord->IsDebug() ||
+        callerRecord->GetApplicationInfo().appProvisionType !=
         AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
-            auto callerBundleName = callerRecord->GetAbilityInfo().bundleName;
-            auto isSameApp = callerBundleName == abilityRequest.abilityInfo.bundleName;
-            auto isCallerUIAbility = callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
-            if (isSameApp && isCallerUIAbility) {
-                TAG_LOGD(AAFwkTag::ABILITYMGR, "Setting up debug UIExtension");
-                abilityRecord->SetDebugUIExtension();
-            }
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid to debug UIExtension");
+            return;
+    }
+    auto callerBundleName = callerRecord->GetAbilityInfo().bundleName;
+    auto isSameApp = strcmp(callerBundleName, abilityRequest.abilityInfo.bundleName);
+    auto isCallerUIAbility = callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE;
+    if (isSameApp && isCallerUIAbility) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Setting up debug UIExtension");
+        abilityRecord->SetDebugUIExtension();
     }
 }
 } // namespace AbilityRuntime
