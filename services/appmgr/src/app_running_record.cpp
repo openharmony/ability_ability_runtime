@@ -48,30 +48,26 @@ constexpr const char *EVENT_KEY_SUPPORT_STATE = "SUPPORT_STATE";
 int64_t AppRunningRecord::appEventId_ = 0;
 
 RenderRecord::RenderRecord(pid_t hostPid, const std::string &renderParam,
-                           int32_t ipcFd, int32_t sharedFd, int32_t crashFd,
+                           FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
                            const std::shared_ptr<AppRunningRecord> &host)
-    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(ipcFd),
-      sharedFd_(sharedFd), crashFd_(crashFd), host_(host) {}
+    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(std::move(ipcFd)),
+      sharedFd_(std::move(sharedFd)), crashFd_(std::move(crashFd)), host_(host) {}
 
 RenderRecord::~RenderRecord()
-{
-    close(sharedFd_);
-    close(ipcFd_);
-    close(crashFd_);
-}
+{}
 
 std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(
-    pid_t hostPid, const std::string &renderParam, int32_t ipcFd,
-    int32_t sharedFd, int32_t crashFd,
+    pid_t hostPid, const std::string &renderParam,
+    FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
     const std::shared_ptr<AppRunningRecord> &host)
 {
-    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 ||
-        crashFd <= 0 || !host) {
+    if (hostPid <= 0 || renderParam.empty() || ipcFd.Get() <= 0 || sharedFd.Get() <= 0 ||
+        crashFd.Get() <= 0 || !host) {
         return nullptr;
     }
 
     auto renderRecord = std::make_shared<RenderRecord>(
-        hostPid, renderParam, ipcFd, sharedFd, crashFd, host);
+        hostPid, renderParam, std::move(ipcFd), std::move(sharedFd), std::move(crashFd), host);
     renderRecord->SetHostUid(host->GetUid());
     renderRecord->SetHostBundleName(host->GetBundleName());
     renderRecord->SetProcessName(host->GetProcessName());
@@ -140,17 +136,17 @@ std::string RenderRecord::GetRenderParam() const
 
 int32_t RenderRecord::GetIpcFd() const
 {
-    return ipcFd_;
+    return ipcFd_.Get();
 }
 
 int32_t RenderRecord::GetSharedFd() const
 {
-    return sharedFd_;
+    return sharedFd_.Get();
 }
 
 int32_t RenderRecord::GetCrashFd() const
 {
-    return crashFd_;
+    return crashFd_.Get();
 }
 
 ProcessType RenderRecord::GetProcessType() const
