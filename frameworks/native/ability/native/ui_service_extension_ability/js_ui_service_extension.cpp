@@ -222,11 +222,16 @@ void JsUIServiceExtension::BindContext(napi_env env, napi_value obj)
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
 
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             delete static_cast<std::weak_ptr<UIServiceExtensionContext>*>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UISERVC_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
 
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "end.");
 }
