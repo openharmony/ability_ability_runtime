@@ -6342,7 +6342,8 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
             !(request.abilityInfo.type == AppExecFwk::AbilityType::SERVICE ||
                 request.abilityInfo.type == AppExecFwk::AbilityType::EXTENSION)) {
-            ModalSystemDialogUtil::ShowDeveloperModeDialog(request.abilityInfo.bundleName, request.abilityInfo.name);
+            ModalSystemDialogUtil::ShowDeveloperModeDialog(
+                request.abilityInfo.bundleName, request.abilityInfo.moduleName, request.abilityInfo.labelId, userId);
         }
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not developer mode");
         return ERR_NOT_DEVELOPER_MODE;
