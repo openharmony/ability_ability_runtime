@@ -195,13 +195,16 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_006, TestSize.Level1)
     appfreezeManager->ClearOldInfo();
     int32_t pid = static_cast<int32_t>(getprocpid());
     int state = AppfreezeManager::AppFreezeState::APPFREEZE_STATE_FREEZE;
-    bool result = appfreezeManager->IsNeedIgnoreFreezeEvent(pid);
+    bool result = appfreezeManager->IsNeedIgnoreFreezeEvent(pid, "Test");
     EXPECT_TRUE(!result);
     appfreezeManager->ClearOldInfo();
     result = appfreezeManager->IsProcessDebug(pid, "Test");
     EXPECT_TRUE(!result);
-    result = appfreezeManager->IsNeedIgnoreFreezeEvent(pid);
+    result = appfreezeManager->IsNeedIgnoreFreezeEvent(pid, "Test");
     EXPECT_TRUE(result);
+    std::string errorName = "THREAD_BLOCK_3S";
+    result = appfreezeManager->IsNeedIgnoreFreezeEvent(12000, errorName);
+    EXPECT_TRUE(!result);
 }
 
 /**
@@ -215,8 +218,8 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_007, TestSize.Level1)
     int state = AppfreezeManager::AppFreezeState::APPFREEZE_STATE_IDLE;
     EXPECT_EQ(appfreezeManager->GetFreezeState(pid), state);
     appfreezeManager->SetFreezeState(pid,
-        AppfreezeManager::AppFreezeState::APPFREEZE_STATE_FREEZE);
-    appfreezeManager->SetFreezeState(pid, state);
+        AppfreezeManager::AppFreezeState::APPFREEZE_STATE_FREEZE, "Test");
+    appfreezeManager->SetFreezeState(pid, state, "Test");
     EXPECT_EQ(appfreezeManager->GetFreezeState(pid), state);
 }
 
