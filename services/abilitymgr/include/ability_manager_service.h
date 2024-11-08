@@ -1770,8 +1770,6 @@ public:
      */
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
 
-    void HandleRestartResidentProcessDependedOnWeb();
-
     /**
      * Open atomic service window prior to finishing free install.
      *
@@ -1788,6 +1786,8 @@ public:
 
     void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
         const std::string& reason);
+
+    void HandleRestartResidentProcessDependedOnWeb();
 
     int32_t TerminateMission(int32_t missionId) override;
 
@@ -2316,6 +2316,8 @@ private:
 
     void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
+    bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
+
     /**
      * @brief Check debug app in developer mode.
      * @param applicationInfo. The application info.
@@ -2329,8 +2331,6 @@ private:
      * @param abilityName. The abilityName of the blocked hap.
      */
     void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
-
-    bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
 
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
