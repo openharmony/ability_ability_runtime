@@ -6027,7 +6027,7 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
 }
 
 void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
-    const std::string& bundleName, const FaultData &faultData)
+    const std::string& bundleName, const std::string& processName, const FaultData &faultData)
 {
     bool isNeedExit = (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) ||
         (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT);
@@ -6046,7 +6046,7 @@ void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
             .pid = pid,
             .uid = uid,
             .bundleName = bundleName,
-            .processName = bundleName,
+            .processName = processName,
         };
         AppExecFwk::AppfreezeManager::GetInstance()->AppfreezeHandleWithStack(faultData, info);
     }
@@ -6064,6 +6064,7 @@ int32_t AppMgrServiceInner::TransformedNotifyAppFault(const AppFaultDataBySA &fa
     FaultData transformedFaultData = ConvertDataTypes(faultData);
     int32_t uid = record->GetUid();
     std::string bundleName = record->GetBundleName();
+    std::string processName = record->GetProcessName();
     if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
         TAG_LOGW(AAFwkTag::APPMGR,
             "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s.",
@@ -6084,8 +6085,8 @@ int32_t AppMgrServiceInner::TransformedNotifyAppFault(const AppFaultDataBySA &fa
         if (!AppExecFwk::AppfreezeManager::GetInstance()->IsHandleAppfreeze(bundleName) || record->IsDebugging()) {
             return ERR_OK;
         }
-        auto timeoutNotifyApp = [this, pid, uid, bundleName, transformedFaultData]() {
-            this->TimeoutNotifyApp(pid, uid, bundleName, transformedFaultData);
+        auto timeoutNotifyApp = [this, pid, uid, bundleName, processName, transformedFaultData]() {
+            this->TimeoutNotifyApp(pid, uid, bundleName, processName, transformedFaultData);
         };
         dfxTaskHandler_->SubmitTask(timeoutNotifyApp, transformedFaultData.timeoutMarkers, timeout);
     }
