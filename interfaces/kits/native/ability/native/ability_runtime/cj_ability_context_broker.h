@@ -17,15 +17,13 @@
 #define OHOS_ABILITY_RUNTIME_CJ_ABILITY_CONTEXT_BROKER_H
 
 #include "ability_context_impl.h"
+#include "bundle_manager_ffi.h"
+#include "cj_ability_context_utils.h"
 #include "cj_common_ffi.h"
 #include "cj_want_ffi.h"
+#include "cj_utils_ffi.h"
 
 extern "C" {
-struct CJStartOptions {
-    int32_t windowMode;
-    int32_t displayId;
-};
-
 using VectorStringHandle = void*;
 
 struct AbilityContextBroker {
@@ -65,6 +63,18 @@ struct AbilityContextBroker {
 
     int32_t (*setMissionLabel)(int64_t id, const char* label);
     int32_t (*setMissionIcon)(int64_t id, int64_t pixelMapId);
+    int32_t (*setRestoreEnabled)(int64_t id, bool enabled);
+    int32_t (*backToCallerAbilityWithResult)(int64_t id, CJAbilityResult abilityResult, char* requestCode);
+    int32_t (*setMissionContinueState)(int64_t id, int32_t state);
+    OHOS::AbilityRuntime::CConfiguration (*propConfiguration)(int64_t id, int32_t *errCode);
+    OHOS::CJSystemapi::BundleManager::RetAbilityInfo (*propAbilityInfo)(int64_t id, int32_t *errCode);
+    OHOS::CJSystemapi::BundleManager::RetHapModuleInfo (*propCurrentHapModuleInfo)(int64_t id, int32_t *errCode);
+    int32_t (*startAbilityByType)(int64_t id, char* cType, char* cWantParams,
+        void (*onError)(int32_t, char*, char*), void (*onResult)(CJAbilityResult));
+    int32_t (*moveAbilityToBackground)(int64_t id);
+    int32_t (*reportDrawnCompleted)(int64_t id);
+    int32_t (*openAtomicService)(int64_t id, char* cAppId,
+        CJAtomicServiceOptions cAtomicServiceOptions, int32_t requestCode, int64_t lambdaId);
 };
 }
 
