@@ -66,34 +66,29 @@ napi_value JsApplicationContextUtils::OnCreateBundleContext(napi_env env, NapiCa
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
     }
-
     if (info.argc == 0) {
         TAG_LOGE(AAFwkTag::APPKIT, "Not enough arguments");
         ThrowInvalidParamError(env, "Not enough params.");
         return CreateJsUndefined(env);
     }
-
     auto applicationContext = applicationContext_.lock();
     if (!applicationContext) {
         TAG_LOGW(AAFwkTag::APPKIT, "applicationContext is already released");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
-
     std::string bundleName;
     if (!ConvertFromJsValue(env, info.argv[0], bundleName)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse bundleName failed");
         ThrowInvalidParamError(env, "Parse param bundleName failed, bundleName must be string.");
         return CreateJsUndefined(env);
     }
-
     auto bundleContext = applicationContext->CreateBundleContext(bundleName);
     if (!bundleContext) {
         TAG_LOGE(AAFwkTag::APPKIT, "bundleContext is nullptr");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
-
     napi_value value = CreateJsBaseContext(env, bundleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
@@ -109,12 +104,17 @@ napi_value JsApplicationContextUtils::OnCreateBundleContext(napi_env env, NapiCa
     }
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(bundleContext);
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachBaseContext, workContext, nullptr);
-    napi_wrap(env, contextObj, workContext,
+    auto res = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr bundle context is called");
             delete static_cast<std::weak_ptr<Context> *>(data);
         },
         nullptr, nullptr);
+    if (res != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+        delete workContext;
+        return CreateJsUndefined(env);
+    }
     return contextObj;
 }
 
@@ -229,12 +229,17 @@ napi_value JsApplicationContextUtils::CreateJsModuleContext(napi_env env, const 
     }
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(moduleContext);
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachBaseContext, workContext, nullptr);
-    napi_wrap(env, contextObj, workContext,
+    auto res = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr module context is called");
             delete static_cast<std::weak_ptr<Context> *>(data);
         },
         nullptr, nullptr);
+    if (res != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+        delete workContext;
+        return CreateJsUndefined(env);
+    }
     return contextObj;
 }
 
@@ -1553,13 +1558,18 @@ napi_value JsApplicationContextUtils::OnGetApplicationContext(napi_env env, Napi
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachApplicationContext, workContext, nullptr);
     if (workContext != nullptr) {
-        napi_wrap(env, contextObj, workContext,
+        auto res = napi_wrap(env, contextObj, workContext,
             [](napi_env, void *data, void *) {
               TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
               delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
               data = nullptr;
             },
             nullptr, nullptr);
+        if (res != napi_ok && workContext != nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+            delete workContext;
+            return CreateJsUndefined(env);
+        }
     }
     return contextObj;
 }
