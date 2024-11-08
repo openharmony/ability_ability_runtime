@@ -1035,7 +1035,7 @@ napi_value JsWantAgent::WrapWantAgent(napi_env env, WantAgent* wantAgent)
         return nullptr;
     }
 
-    napi_wrap(env,
+    auto res = napi_wrap(env,
         result,
         reinterpret_cast<void*>(wantAgent),
         [](napi_env env, void* data, void* hint) {
@@ -1046,6 +1046,12 @@ napi_value JsWantAgent::WrapWantAgent(napi_env env, WantAgent* wantAgent)
         },
         nullptr,
         nullptr);
+    if (res != napi_ok && wantAgent != nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "napi_wrap failed:%{public}d", res);
+        delete wantAgent;
+        wantAgent = nullptr;
+        return nullptr;
+    }
     return result;
 }
 
