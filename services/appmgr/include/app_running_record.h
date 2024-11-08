@@ -37,6 +37,7 @@
 #include "app_record_id.h"
 #include "child_process_record.h"
 #include "fault_data.h"
+#include "fd_guard.h"
 #include "profile.h"
 #include "priority_object.h"
 #include "app_lifecycle_deal.h"
@@ -50,6 +51,7 @@ namespace Rosen {
 class WindowVisibilityInfo;
 }
 namespace AppExecFwk {
+using AAFwk::FdGuard;
 class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
@@ -71,15 +73,15 @@ private:
  */
 class RenderRecord {
 public:
-    RenderRecord(pid_t hostPid, const std::string &renderParam, int32_t ipcFd,
-                 int32_t sharedFd, int32_t crashFd,
+    RenderRecord(pid_t hostPid, const std::string &renderParam,
+                 FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
                  const std::shared_ptr<AppRunningRecord> &host);
 
     virtual ~RenderRecord();
 
     static std::shared_ptr<RenderRecord>
     CreateRenderRecord(pid_t hostPid, const std::string &renderParam,
-                       int32_t ipcFd, int32_t sharedFd, int32_t crashFd,
+                       FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
                        const std::shared_ptr<AppRunningRecord> &host);
 
     void SetPid(pid_t pid);
@@ -116,9 +118,9 @@ private:
     std::string hostBundleName_;
     std::string renderParam_;
     std::string processName_;
-    int32_t ipcFd_ = 0;
-    int32_t sharedFd_ = 0;
-    int32_t crashFd_ = 0;
+    FdGuard ipcFd_;
+    FdGuard sharedFd_;
+    FdGuard crashFd_;
     int32_t state_ = 0;
     ProcessType processType_ = ProcessType::RENDER;
     std::weak_ptr<AppRunningRecord> host_; // nweb host

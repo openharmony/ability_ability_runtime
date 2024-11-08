@@ -51,6 +51,7 @@
 #include "cpp/mutex.h"
 #include "event_report.h"
 #include "fault_data.h"
+#include "fd_guard.h"
 #include "hisysevent.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
@@ -81,6 +82,7 @@ class FocusChangeInfo;
 }
 namespace AppExecFwk {
 using OHOS::AAFwk::Want;
+using AAFwk::FdGuard;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
 class WindowPidVisibilityChangedListener;
@@ -830,8 +832,8 @@ public:
 
     virtual int32_t StartRenderProcess(const pid_t hostPid,
                                        const std::string &renderParam,
-                                       int32_t ipcFd, int32_t sharedFd,
-                                       int32_t crashFd, pid_t &renderPid, bool isGPU = false);
+                                       FdGuard &&ipcFd, FdGuard &&sharedFd,
+                                       FdGuard &&crashFd, pid_t &renderPid, bool isGPU = false);
 
     virtual void AttachRenderProcess(const pid_t pid, const sptr<IRenderScheduler> &scheduler);
 
