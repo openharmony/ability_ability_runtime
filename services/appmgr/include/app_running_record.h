@@ -269,6 +269,13 @@ public:
      */
     void SetUid(const int32_t uid);
 
+    /**
+     * @brief Obtains the application userid.
+     *
+     * @return Returns the application userid.
+     */
+    int32_t GetUserId() const;
+
     // Get current state for this process
 
     /**
@@ -997,6 +1004,10 @@ public:
     void AddAppLifecycleEvent(const std::string &msg);
 
     void SetNWebPreload(const bool isAllowedNWebPreload);
+    
+    void SetIsUnSetPermission(bool isUnSetPermission);
+    
+    bool IsUnSetPermission();
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1155,6 +1166,7 @@ private:
     bool isClearSession_ = false;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
     bool isAllowedNWebPreload_ = false;
+    bool isUnSetPermission_ = false;
 };
 
 }  // namespace AppExecFwk

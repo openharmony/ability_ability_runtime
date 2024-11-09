@@ -353,6 +353,11 @@ void AppRunningRecord::SetUid(const int32_t uid)
     mainUid_ = uid;
 }
 
+int32_t AppRunningRecord::GetUserId() const
+{
+    return mainUid_ / BASE_USER_RANGE;
+}
+
 ApplicationState AppRunningRecord::GetState() const
 {
     return curState_;
@@ -2544,6 +2549,16 @@ void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
 void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)
 {
     isAllowedNWebPreload_ = isAllowedNWebPreload;
+}
+
+void AppRunningRecord::SetIsUnSetPermission(bool isUnSetPermission)
+{
+    isUnSetPermission_ = isUnSetPermission;
+}
+
+bool AppRunningRecord::IsUnSetPermission()
+{
+    return isUnSetPermission_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
