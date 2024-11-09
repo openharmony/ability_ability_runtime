@@ -514,7 +514,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_GetAppRunningRecordByRen
     appInfo_->bundleName = BUNDLE_NAME;
     auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto record2 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
-    auto renderRecord = std::make_shared<RenderRecord>(0, "", -1, -1, -1, record2);
+    auto renderRecord = std::make_shared<RenderRecord>(0, "", FdGuard(-1), FdGuard(-1), FdGuard(-1), record2);
     record2->AddRenderRecord(renderRecord);
     auto ret = appRunningManager->GetAppRunningRecordByRenderPid(1);
 
