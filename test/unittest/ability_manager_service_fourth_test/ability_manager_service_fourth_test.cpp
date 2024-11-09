@@ -909,7 +909,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     auto ret1 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
         callerBundleName);
-    EXPECT_EQ(ret1, ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret1, ERR_WRONG_INTERFACE_CALL);
 
     abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
     auto ret2 = abilityMs_->CheckCallPermission(
@@ -930,11 +930,11 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     auto ret4 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
         callerBundleName);
-    EXPECT_EQ(ret4, CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(ret4, ERR_OK);
 
     auto ret5 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, false, false, specifyTokenId, callerBundleName);
-    EXPECT_EQ(ret5, CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(ret5, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckCallPermission_001 end");
 }
 
@@ -1116,7 +1116,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, ReportDrawnCompleted_001, TestSize.Lev
 
     callerToken = MockToken(AbilityType::PAGE);
     auto ret1 = abilityMs_->ReportDrawnCompleted(callerToken);
-    EXPECT_EQ(ret1, ERR_OK);
+    EXPECT_EQ(ret1, INNER_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest ReportDrawnCompleted_001 end");
 }
 

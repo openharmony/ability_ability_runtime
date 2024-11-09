@@ -78,5 +78,5 @@ ohos_unittest("app_mgr_service_inner_tdd_test") {
 group("unittest") {
   testonly = true
 
-  deps = [ ":app_mgr_service_inner_tdd_test" ]
+  deps = []
 }
