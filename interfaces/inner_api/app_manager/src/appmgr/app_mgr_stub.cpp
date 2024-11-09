@@ -227,6 +227,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleGetAllRenderProcesses(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_PROCESS_MEMORY_BY_PID):
             return HandleGetProcessMemoryByPid(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::IS_TERMINATING_BY_PID):
+            return HandleIsTerminatingByPid(data, reply);
     }
     return INVALID_FD;
 }
@@ -589,6 +591,21 @@ int32_t AppMgrStub::HandleJudgeSandboxByPid(MessageParcel &data, MessageParcel &
     bool isSandbox = false;
     auto result = JudgeSandboxByPid(pid, isSandbox);
     if (!reply.WriteBool(isSandbox)) {
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleIsTerminatingByPid(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    int32_t pid = data.ReadInt32();
+    bool isTerminating = false;
+    auto result = IsTerminatingByPid(pid, isTerminating);
+    if (!reply.WriteBool(isTerminating)) {
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(result)) {
