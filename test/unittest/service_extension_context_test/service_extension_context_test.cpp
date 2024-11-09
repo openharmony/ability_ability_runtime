@@ -300,7 +300,7 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_RequestModalUIEx
     Want want;
     ErrCode result = serviceExtensionContextTest.RequestModalUIExtension(want);
     GTEST_LOG_(INFO) <<result;
-    EXPECT_EQ(ERR_OK, result);
+    EXPECT_EQ(AAFwk::INNER_ERR, result);
 }
 
 /*

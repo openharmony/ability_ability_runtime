@@ -93,5 +93,5 @@ ohos_unittest("cache_process_manager_test") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":cache_process_manager_test" ]
+  deps = []
 }

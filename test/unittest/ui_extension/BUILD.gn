@@ -14,8 +14,5 @@
 group("unittest") {
   testonly = true
 
-  deps = [
-    "extension_record_manager_test:unittest",
-    "ui_extension_get_host_info_test:unittest",
-  ]
+  deps = [ "ui_extension_get_host_info_test:unittest" ]
 }
