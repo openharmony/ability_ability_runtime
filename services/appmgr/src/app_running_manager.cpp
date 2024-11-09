@@ -145,6 +145,9 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             if (appInfoIter == appInfoList.end()) {
                 continue;
             }
+            if (appRecord->IsCaching() && appRecord->GetProcessCacheBlocked()) {
+                continue;
+            }
             bool isProcCacheInner =
                 DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
             if (isProCache != nullptr) {

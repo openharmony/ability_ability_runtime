@@ -670,7 +670,12 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey);
     if (appRecord && appRecord->IsCaching()) {
-        TAG_LOGD(AAFwkTag::APPMGR, "process %{public}s is caching start ability set to blocked", processName.c_str());
+        auto priorityObj = appRecord->GetPriorityObject();
+        int32_t pid = priorityObj->GetPid();
+        if (priorityObj) {
+            TAG_LOGI(AAFwkTag::APPMGR, "process %{public}s is caching start ability set to blocked pid %{public}d",
+                processName.c_str(), pid);
+        }
         appRecord->SetProcessCacheBlocked(true);
         appRecord = nullptr;
     }
