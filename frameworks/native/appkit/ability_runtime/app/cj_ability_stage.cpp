@@ -29,7 +29,42 @@ CJ_EXPORT RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id)
         return RetHapModuleInfo();
     }
 
-    return abilityStageContext->GetHapModuleInfo();
+    return abilityStageContext->GetRetHapModuleInfo();
+}
+
+CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id)
+{
+    auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
+    if (abilityStageContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get abilityStageContext failed. ");
+        return nullptr;
+    }
+
+    auto hapInfo = abilityStageContext->GetHapModuleInfo();
+    if (hapInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CurrentHapModuleInfo is nullptr.");
+        return nullptr;
+    }
+
+    CurrentHapModuleInfo* buffer = static_cast<CurrentHapModuleInfo*>(malloc(sizeof(CurrentHapModuleInfo)));
+
+    if (buffer == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Create CurrentHapModuleInfo failed, CurrentHapModuleInfo is nullptr.");
+        return nullptr;
+    }
+
+    buffer->name = MallocCString(hapInfo->name);
+    buffer->icon = MallocCString(hapInfo->iconPath);
+    buffer->iconId = hapInfo->iconId;
+    buffer->label = MallocCString(hapInfo->label);
+    buffer->labelId = hapInfo->labelId;
+    buffer->description = MallocCString(hapInfo->description);
+    buffer->descriptionId = hapInfo->descriptionId;
+    buffer->mainElementName = MallocCString(hapInfo->mainElementName);
+    buffer->installationFree = hapInfo->installationFree;
+    buffer->hashValue = MallocCString(hapInfo->hashValue);
+
+    return buffer;
 }
 
 CJ_EXPORT CConfiguration FFICJGetConfiguration(int64_t id)
@@ -84,7 +119,7 @@ std::shared_ptr<CJAbilityStage> CJAbilityStage::Create(
         return nullptr;
     }
 
-    return std::make_shared<CJAbilityStage>(cjAbilityStageObject);
+    return std::make_shared<CJAbilityStage>(std::move(cjAbilityStageObject));
 }
 
 void CJAbilityStage::Init(const std::shared_ptr<Context> &context,

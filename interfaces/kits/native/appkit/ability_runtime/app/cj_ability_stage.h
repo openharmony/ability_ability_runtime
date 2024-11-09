@@ -30,6 +30,20 @@
 #endif
 
 extern "C" {
+struct CurrentHapModuleInfo {
+    const char* name;
+    const char* icon;
+    int32_t iconId;
+    const char* label;
+    int32_t labelId;
+    const char* description;
+    int32_t descriptionId;
+    const char* mainElementName;
+    bool installationFree;
+    const char* hashValue;
+};
+
+CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id);
 CJ_EXPORT OHOS::AbilityRuntime::RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id);
 CJ_EXPORT OHOS::AbilityRuntime::CConfiguration FFICJGetConfiguration(int64_t id);
 CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilityStageHandle);
@@ -42,7 +56,7 @@ public:
     static std::shared_ptr<CJAbilityStage> Create(
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
     explicit CJAbilityStage(
-        std::shared_ptr<CJAbilityStageObject> cjStage) : cjAbilityStageObject_(std::move(cjStage)) {}
+        std::unique_ptr<CJAbilityStageObject> cjStage) : cjAbilityStageObject_(std::move(cjStage)) {}
     ~CJAbilityStage() override = default;
 
     void Init(const std::shared_ptr<Context> &context,
@@ -55,7 +69,7 @@ public:
     void OnDestroy() const override;
 
 private:
-    std::shared_ptr<CJAbilityStageObject> cjAbilityStageObject_;
+    std::unique_ptr<CJAbilityStageObject> cjAbilityStageObject_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -592,7 +592,7 @@ CConfiguration ConvertConfiguration(const AppExecFwk::Configuration &configurati
     return cfg;
 }
 
-RetHapModuleInfo CJAbilityStageContext::GetHapModuleInfo()
+RetHapModuleInfo CJAbilityStageContext::GetRetHapModuleInfo()
 {
     auto context = GetContext();
     if (context == nullptr) {
@@ -607,6 +607,16 @@ RetHapModuleInfo CJAbilityStageContext::GetHapModuleInfo()
     }
 
     return ConvertHapModuleInfo(*hapInfo);
+}
+
+std::shared_ptr<AppExecFwk::HapModuleInfo> CJAbilityStageContext::GetHapModuleInfo()
+{
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null, getHapModuleInfo failed. ");
+        return nullptr;
+    }
+    return context->GetHapModuleInfo();
 }
 
 CConfiguration CJAbilityStageContext::GetConfiguration()

@@ -271,7 +271,8 @@ public:
     explicit CJAbilityStageContext(std::weak_ptr<AbilityRuntime::Context> &&abilityStageContext)
         :abilityStageContext_(std::move(abilityStageContext)){};
 
-    RetHapModuleInfo GetHapModuleInfo();
+    std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo();
+    RetHapModuleInfo GetRetHapModuleInfo();
     CConfiguration GetConfiguration();
     std::shared_ptr<Context> GetContext()
     {
@@ -283,7 +284,7 @@ private:
 };
 
 CConfiguration ConvertConfiguration(const AppExecFwk::Configuration &configuration);
-
+char *MallocCString(const std::string &origin);
 }
 }
 #endif //OHOS_ABILITY_RUNTIME_CJ_ABILITY_STAGE_CONTEXT_H
