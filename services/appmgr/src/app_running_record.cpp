@@ -26,7 +26,7 @@
 #include "app_mgr_service_dump_error_code.h"
 #include "window_visibility_info.h"
 #include "cache_process_manager.h"
-
+#include "uri_permission_manager_client.h"
 namespace OHOS {
 namespace AppExecFwk {
 using AbilityRuntime::FreezeUtil;
@@ -348,6 +348,11 @@ int32_t AppRunningRecord::GetUid() const
 void AppRunningRecord::SetUid(const int32_t uid)
 {
     mainUid_ = uid;
+}
+
+int32_t AppRunningRecord::GetUserId() const
+{
+    return mainUid_ / BASE_USER_RANGE;
 }
 
 ApplicationState AppRunningRecord::GetState() const
@@ -1427,12 +1432,19 @@ bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
     return pageAbilitySize == 1;
 }
 
-void AppRunningRecord::SetTerminating()
+void AppRunningRecord::SetTerminating(std::shared_ptr<AppRunningManager> appRunningMgr)
 {
     isTerminating = true;
     auto prioObject = GetPriorityObject();
     if (prioObject) {
         FreezeUtil::GetInstance().DeleteAppLifecycleEvent(prioObject->GetPid());
+    }
+    if (appRunningMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningMgr null");
+        return;
+    }
+    if (appRunningMgr->CheckAppRunningRecordIsLast(shared_from_this())) {
+        UnSetPolicy();
     }
 }
 
@@ -2516,6 +2528,32 @@ void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
 void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)
 {
     isAllowedNWebPreload_ = isAllowedNWebPreload;
+}
+
+void AppRunningRecord::SetIsUnSetPermission(bool isUnSetPermission)
+{
+    isUnSetPermission_ = isUnSetPermission;
+}
+
+bool AppRunningRecord::IsUnSetPermission()
+{
+    return isUnSetPermission_;
+}
+
+void AppRunningRecord::UnSetPolicy()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "UnSetPolicy call");
+    auto appInfo = GetApplicationInfo();
+    if (appInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appInfo  null");
+        return;
+    }
+    if (IsUnSetPermission()) {
+        TAG_LOGI(AAFwkTag::APPMGR, "app is unset permission");
+        return;
+    }
+    SetIsUnSetPermission(true);
+    AAFwk::UriPermissionManagerClient::GetInstance().ClearPermissionTokenByMap(appInfo->accessTokenId);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

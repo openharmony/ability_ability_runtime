@@ -113,6 +113,7 @@ enum class AppMgrInterfaceCode {
     GET_ALL_CHILDREN_PROCESSES = 88,
     SET_SUPPORTED_PROCESS_CACHE = 89,
     GET_APP_INDEX_BY_PID = 94,
+    IS_TERMINATING_BY_PID = 95,
 };
 } // AppExecFwk
 } // OHOS
