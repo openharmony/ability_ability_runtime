@@ -297,6 +297,21 @@ int32_t AppMgrProxy::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::IsTerminatingByPid(pid_t pid, bool &isTerminating)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::IS_TERMINATING_BY_PID, data, reply, option);
+    isTerminating = reply.ReadBool();
+    return reply.ReadInt32();
+}
+
 int32_t AppMgrProxy::GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId)
 {
     MessageParcel data;

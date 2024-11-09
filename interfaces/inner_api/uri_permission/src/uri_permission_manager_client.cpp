@@ -242,5 +242,27 @@ void UriPermissionManagerClient::UpmsDeathRecipient::OnRemoteDied([[maybe_unused
     TAG_LOGE(AAFwkTag::URIPERMMGR, "upms stub died.");
     proxy_();
 }
+
+int32_t UriPermissionManagerClient::ClearPermissionTokenByMap(const uint32_t tokenId)
+{
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    auto uriPermMgr = ConnectUriPermService();
+    if (uriPermMgr) {
+        return uriPermMgr->ClearPermissionTokenByMap(tokenId);
+    }
+    return INNER_ERR;
+}
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+int32_t UriPermissionManagerClient::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
+{
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    auto uriPermMgr = ConnectUriPermService();
+    if (uriPermMgr) {
+        return uriPermMgr->Active(policy, result);
+    }
+    return INNER_ERR;
+}
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk
 }  // namespace OHOS

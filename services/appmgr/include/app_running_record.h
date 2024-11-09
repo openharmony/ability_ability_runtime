@@ -53,6 +53,7 @@ namespace AppExecFwk {
 class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
+class AppRunningManager;
 
 class MultiUserConfigurationMgr {
 public:
@@ -266,6 +267,13 @@ public:
      * @param state, the application uid.
      */
     void SetUid(const int32_t uid);
+
+    /**
+     * @brief Obtains the application userid.
+     *
+     * @return Returns the application userid.
+     */
+    int32_t GetUserId() const;
 
     // Get current state for this process
 
@@ -532,7 +540,7 @@ public:
 
     bool ExtensionAbilityRecordExists();
 
-    void SetTerminating();
+    void SetTerminating(std::shared_ptr<AppRunningManager> appRunningMgr);
 
     bool IsTerminating();
 
@@ -857,6 +865,12 @@ public:
 
     void AddAppLifecycleEvent(const std::string &msg);
     void SetNWebPreload(const bool isAllowedNWebPreload);
+    
+    void SetIsUnSetPermission(bool isUnSetPermission);
+    
+    bool IsUnSetPermission();
+    
+    void UnSetPolicy();
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1015,6 +1029,7 @@ private:
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
     bool isAllowedNWebPreload_ = false;
+    bool isUnSetPermission_ = false;
 };
 
 }  // namespace AppExecFwk
