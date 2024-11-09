@@ -221,6 +221,16 @@ public:
     virtual int32_t JudgeSandboxByPid(pid_t pid, bool &isSandbox) override;
 
     /**
+     * IsTerminatingByPid, call IsTerminatingByPid() through proxy project.
+     * Obtains information about application processes that are running on the device.
+     *
+     * @param pid, the pid of current app running record.
+     * @param isTerminating, current app is or not terminating.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t IsTerminatingByPid(pid_t pid, bool &isTerminating) override;
+
+    /**
      * GetProcessRunningInfosByUserId, call GetProcessRunningInfosByUserId() through proxy project.
      * Obtains information about application processes that are running on the device.
      *

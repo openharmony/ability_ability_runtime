@@ -354,6 +354,10 @@ public:
 
     int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
+    bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void UnSetPolicy(const std::shared_ptr<AppRunningRecord> &appRecord);
+
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     int32_t AssignRunningProcessInfoByAppRecord(

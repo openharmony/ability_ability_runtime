@@ -345,5 +345,69 @@ int32_t UriPermissionManagerProxy::SendTransactCmd(uint32_t code, MessageParcel 
     }
     return NO_ERROR;
 }
+
+int UriPermissionManagerProxy::ClearPermissionTokenByMap(const uint32_t tokenId)
+{
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write interfaceToken failed");
+        return INNER_ERR;
+    }
+    if (!data.WriteUint32(tokenId)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write AccessTokenID failed");
+        return INNER_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int error = SendTransactCmd(UriPermMgrCmd::ON_CLEAR_PERMISSION_TOKEN_BY_MAP, data, reply, option);
+    if (error != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "SendRequest fail, error:%{public}d", error);
+        return INNER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+int UriPermissionManagerProxy::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
+{
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
+    if (policy.empty() || policy.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write interfaceToken failed");
+        return INNER_ERR;
+    }
+    if (!data.WriteUint32(policy.size())) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write size of policy failed");
+        return INNER_ERR;
+    }
+    for (const auto &policyInfo : policy) {
+        if (!data.WriteString(policyInfo.path)) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "Write policy path failed");
+            return INNER_ERR;
+        }
+        if (!data.WriteUint64(policyInfo.mode)) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "Write policy mode failed");
+            return INNER_ERR;
+        }
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int error = SendTransactCmd(UriPermMgrCmd::ON_ACTIVE, data, reply, option);
+    if (error != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "SendRequest fail, error:%{public}d", error);
+        return INNER_ERR;
+    }
+    auto res = reply.ReadUInt32Vector(&result);
+    if (res) {
+        return ERR_OK;
+    }
+    return INNER_ERR;
+}
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk
 }  // namespace OHOS
