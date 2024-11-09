@@ -68,7 +68,7 @@ static void ResolveGrantUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTas
     }
     if (errCode == AAFwk::CHECK_PERMISSION_FAILED || errCode == AAFwk::ERR_CODE_INVALID_URI_FLAG ||
         errCode == AAFwk::ERR_CODE_INVALID_URI_TYPE || errCode == AAFwk::ERR_CODE_GRANT_URI_PERMISSION ||
-        errCode == AAFwk::GET_BUNDLE_INFO_FAILED) {
+        errCode == AAFwk::ERR_GET_TARGET_BUNDLE_INFO_FAILED) {
         task.Reject(env, CreateJsErrorByNativeErr(env, errCode, "ohos.permission.PROXY_AUTHORIZATION_URI"));
         return;
     }
@@ -99,7 +99,7 @@ static void ResolveRevokeUriPermissionWithAppIndexTask(napi_env env, NapiAsyncTa
         return;
     }
     if (errCode == AAFwk::ERR_CODE_INVALID_URI_TYPE || errCode == AAFwk::ERR_CODE_GRANT_URI_PERMISSION ||
-        errCode == AAFwk::GET_BUNDLE_INFO_FAILED) {
+        errCode == AAFwk::ERR_GET_TARGET_BUNDLE_INFO_FAILED) {
         task.Reject(env, CreateJsErrorByNativeErr(env, errCode));
         return;
     }
