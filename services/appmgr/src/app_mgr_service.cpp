@@ -983,14 +983,8 @@ int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_
         return ERR_INVALID_OPERATION;
     }
 
-    auto result = appMgrServiceInner_->StartRenderProcess(IPCSkeleton::GetCallingPid(),
-        renderParam, ipcFd, sharedFd, crashFd, renderPid, isGPU);
-    if (result == ERR_OK) {
-        ipcFdGuard.Release();
-        sharedFdGuard.Release();
-        crashFdGuard.Release();
-    }
-    return result;
+    return appMgrServiceInner_->StartRenderProcess(IPCSkeleton::GetCallingPid(), renderParam,
+        std::move(ipcFdGuard), std::move(sharedFdGuard), std::move(crashFdGuard), renderPid, isGPU);
 }
 
 void AppMgrService::AttachRenderProcess(const sptr<IRemoteObject> &scheduler)
@@ -1396,13 +1390,7 @@ int32_t AppMgrService::StartChildProcess(pid_t &childPid, const ChildProcessRequ
         return ERR_INVALID_OPERATION;
     }
 
-    auto result = appMgrServiceInner_->StartChildProcess(IPCSkeleton::GetCallingPid(), childPid, request);
-    if (result == ERR_OK) {
-        for (auto &fd : fds) {
-            fd.Release();
-        }
-    }
-    return result;
+    return appMgrServiceInner_->StartChildProcess(IPCSkeleton::GetCallingPid(), childPid, request);
 }
 
 int32_t AppMgrService::GetChildProcessInfoForSelf(ChildProcessInfo &info)

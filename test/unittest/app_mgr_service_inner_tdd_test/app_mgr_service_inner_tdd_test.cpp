@@ -910,8 +910,8 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level0)
     int32_t ipcFd = 1;
     int32_t sharedFd = 1;
     int32_t crashFd = 1;
-    std::shared_ptr<RenderRecord> renderRecord =
-        RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, appRecord);
+    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+        FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), appRecord);
     EXPECT_NE(renderRecord, nullptr);
     pid_t renderPid = 1;
     appMgrServiceInner->StartRenderProcessImpl(nullptr, nullptr, renderPid);

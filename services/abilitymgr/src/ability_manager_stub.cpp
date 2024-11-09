@@ -17,6 +17,7 @@
 
 #include "ability_manager_errors.h"
 #include "ability_manager_radar.h"
+#include "fd_guard.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "status_bar_delegate_interface.h"
@@ -980,7 +981,7 @@ int32_t AbilityManagerStub::TerminateUIServiceExtensionAbilityInner(MessageParce
     if (data.ReadBool()) {
         token = data.ReadRemoteObject();
     }
-    
+
     int32_t result = TerminateUIServiceExtensionAbility(token);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -3699,8 +3700,8 @@ int32_t AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &re
         return ERR_DEAD_OBJECT;
     }
     auto flag = data.ReadInt32();
-    int fd = OpenFile(*uri, flag);
-    reply.WriteFileDescriptor(fd);
+    FdGuard fdGuard(OpenFile(*uri, flag));
+    reply.WriteFileDescriptor(fdGuard.Get());
     return ERR_OK;
 }
 

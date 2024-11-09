@@ -678,7 +678,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_UpdateRender
     ret = appMgrServiceInner->UpdateRenderState(INT_MAX, 0);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
-    auto renderRecord = std::make_shared<RenderRecord>(1, "", -1, -1, -1, appRecord);
+    auto renderRecord = std::make_shared<RenderRecord>(1, "", FdGuard(-1), FdGuard(-1), FdGuard(-1), appRecord);
     renderRecord->SetPid(100); // 100 means pid
     appRecord->AddRenderRecord(renderRecord);
     ret = appMgrServiceInner->UpdateRenderState(100, 1); // 100 means pid
@@ -1668,7 +1668,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetRunningMultiInstanceKeys_001, TestSize
     instanceKeys.push_back(appRecord->GetInstanceKey());
     appMgrServiceInner.GetRunningMultiInstanceKeys(appRecord, instanceKeys);
     EXPECT_FALSE(instanceKeys.size() == 1);
-    
+
     appRecord->priorityObject_ = nullptr;
     appMgrServiceInner.GetRunningMultiInstanceKeys(appRecord, instanceKeys);
     EXPECT_FALSE(instanceKeys.size() == 1 && instanceKeys[0] == appRecord->GetInstanceKey());
@@ -1719,7 +1719,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, UpdateAbilityState_001, TestSize.Level1)
     EXPECT_EQ(abilityRecord1->GetAbilityInfo(), nullptr);
 
     appMgrServiceInner->UpdateAbilityState(token1, AbilityState::ABILITY_STATE_CREATE);
-    
+
     abilityRecord1 =
         appMgrServiceInner->GetAppRunningRecordByAbilityToken(token1)->GetAbilityRunningRecordByToken(token1);
     abilityRecord1->SetState(AbilityState::ABILITY_STATE_TERMINATED);
@@ -1756,7 +1756,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, KillProcessByAbilityToken_001, TestSize.L
         applicationInfo_, abilityInfo_, processName, bundleInfo, hapModuleInfo, want);
     EXPECT_NE(appRecord, nullptr);
     appMgrServiceInner->KillProcessByAbilityToken(token);
-    
+
     appRecord->GetPriorityObject()->SetPid(1);
     appRecord->SetKeepAliveEnableState(true);
     appRecord->SetEmptyKeepAliveAppState(true);
@@ -1792,7 +1792,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, SetOverlayInfo_001, TestSize.Level1)
     appMgrServiceInner->SetOverlayInfo("testBundleName", 1, startMsg);
     EXPECT_EQ(startMsg.flags, 0);
     EXPECT_EQ(startMsg.overlayInfo, "");
-    
+
     TAG_LOGI(AAFwkTag::TEST, "SetOverlayInfo_001 end");
 }
 
@@ -1873,15 +1873,15 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ProcessAppDebug_0010, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-    
+
     appMgrServiceInner->appDebugManager_ = nullptr;
     appMgrServiceInner->ProcessAppDebug(nullptr, true);
     EXPECT_EQ(appMgrServiceInner->appDebugManager_, nullptr);
-    
+
     appMgrServiceInner->appDebugManager_ = std::make_shared<AppDebugManager>();
     appMgrServiceInner->ProcessAppDebug(nullptr, true);
     EXPECT_NE(appMgrServiceInner->appDebugManager_, nullptr);
-  
+
     appMgrServiceInner->appDebugManager_ = nullptr;
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
@@ -1916,7 +1916,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ProcessAppDebug_0010, TestSize.Level1)
     appRecord->SetDebugApp(true);
     appMgrServiceInner->ProcessAppDebug(appRecord, false);
     EXPECT_EQ(appRecord->IsDebugApp(), true);
-    
+
     TAG_LOGI(AAFwkTag::TEST, "ProcessAppDebug_0010 end");
 }
 
@@ -1931,7 +1931,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, FinishUserTest_0010, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "FinishUserTest_0010 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-    
+
     pid_t pid = 0;
     appMgrServiceInner->FinishUserTest("", 0, "", pid);
 
@@ -1961,7 +1961,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, FinishUserTest_0010, TestSize.Level1)
 
     appMgrServiceInner->remoteClientManager_ = nullptr;
     appMgrServiceInner->FinishUserTest(msg, 0, bundleName, pid);
-    
+
     TAG_LOGI(AAFwkTag::TEST, "FinishUserTest_0010 end");
 }
 
@@ -2153,7 +2153,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillChildPro
     appRecord->AddChildProcessRecord(childPid, childProcessRecord);
     appMgrServiceInner->KillChildProcess(appRecord);
     EXPECT_EQ(appMgrServiceInner->killedProcessMap_.size(), 1);
-    
+
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_KillChildProcess_0100 end");
 }
 
@@ -2282,8 +2282,8 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillRenderPr
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, TEST_PROCESS_NAME);
     EXPECT_NE(appRunningRecord, nullptr);
 
-    std::shared_ptr<RenderRecord> renderRecord =
-        RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, hostRecord);
+    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+        FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), hostRecord);
     EXPECT_NE(renderRecord, nullptr);
 
     renderRecord->SetPid(10);

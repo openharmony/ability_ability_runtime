@@ -47,7 +47,7 @@ public:
         return *this;
     }
 
-    int32_t GetFd() const
+    int32_t Get() const
     {
         return fd_;
     }
