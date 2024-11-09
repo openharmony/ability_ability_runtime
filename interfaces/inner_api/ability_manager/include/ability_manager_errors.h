@@ -650,6 +650,11 @@ enum {
      * Result (2097277) for invalid extension type.
      */
     ERR_INVALID_EXTENSION_TYPE = 2097277,
+    
+    /*
+     * Result (2097278) for get target bundle info failed.
+     */
+    ERR_GET_TARGET_BUNDLE_INFO_FAILED = 2097278,
 
     /**
      * Native error(3000000) for target bundle not exist.
