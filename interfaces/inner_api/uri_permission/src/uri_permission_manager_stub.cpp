@@ -56,6 +56,14 @@ int UriPermissionManagerStub::OnRemoteRequest(
         case UriPermMgrCmd::ON_CHECK_URI_AUTHORIZATION : {
             return HandleCheckUriAuthorization(data, reply);
         }
+        case UriPermMgrCmd::ON_CLEAR_PERMISSION_TOKEN_BY_MAP : {
+            return HandleClearPermissionTokenByMap(data, reply);
+        }
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+        case UriPermMgrCmd::ON_ACTIVE : {
+            return HandleActive(data, reply);
+        }
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -203,5 +211,36 @@ int32_t UriPermissionManagerStub::HandleCheckUriAuthorization(MessageParcel &dat
     }
     return ERR_OK;
 }
+
+int UriPermissionManagerStub::HandleClearPermissionTokenByMap(MessageParcel &data, MessageParcel &reply)
+{
+    auto tokenId = data.ReadUint32();
+    int result = ClearPermissionTokenByMap(tokenId);
+    reply.WriteInt32(result);
+    return ERR_OK;
+}
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+int UriPermissionManagerStub::HandleActive(MessageParcel &data, MessageParcel &reply)
+{
+    auto policySize = data.ReadUint32();
+    if (policySize == 0 || policySize > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "policy empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
+    std::vector<PolicyInfo> policy;
+    for (uint32_t i = 0; i < policySize; i++) {
+        PolicyInfo info = {data.ReadString(), data.ReadUint64()};
+        policy.emplace_back(info);
+    }
+    std::vector<uint32_t> result;
+    int res = Active(policy, result);
+    if (!reply.WriteUInt32Vector(result)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Write res failed");
+        return ERR_DEAD_OBJECT;
+    }
+    return res;
+}
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk
 }  // namespace OHOS
