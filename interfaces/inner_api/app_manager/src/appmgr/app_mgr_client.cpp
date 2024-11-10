@@ -688,6 +688,14 @@ void AppMgrClient::SetKeepAliveEnableState(const std::string &bundleName, bool e
     amsService_->SetKeepAliveEnableState(bundleName, enable, uid);
 }
 
+void AppMgrClient::SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid)
+{
+    if (!IsAmsServiceReady()) {
+        return;
+    }
+    amsService_->SetKeepAliveDkv(bundleName, enable, uid);
+}
+
 void AppMgrClient::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
     int32_t requestId)
 {
@@ -1402,6 +1410,16 @@ bool AppMgrClient::IsAppKilling(sptr<IRemoteObject> token) const
         return false;
     }
     return amsService->IsAppKilling(token);
+}
+
+AppMgrResultCode AppMgrClient::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+    bool &isRunning)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        return AppMgrResultCode(service->IsAppRunning(bundleName, appCloneIndex, isRunning));
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

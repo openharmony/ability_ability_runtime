@@ -40,9 +40,15 @@ struct KeepAliveAbilityInfo {
  * @class KeepAliveProcessManager
  * KeepAliveProcessManager
  */
-class KeepAliveProcessManager : public std::enable_shared_from_this<KeepAliveProcessManager> {
-    DECLARE_DELAYED_SINGLETON(KeepAliveProcessManager)
+class KeepAliveProcessManager {
 public:
+    /**
+     * Get the instance of KeepAliveProcessManager.
+     *
+     * @return Returns the instance of KeepAliveProcessManager.
+     */
+    static KeepAliveProcessManager &GetInstance();
+
     /**
      * Set the enable flag for keep-alive processes.
      *
@@ -102,8 +108,11 @@ public:
     void StartFailedKeepAliveAbilities();
 
 private:
-    void UpdateKeepAliveProcessesStatus(const AppExecFwk::BundleInfo &bundleInfo, int32_t userId,
-        bool localEnable, bool updateEnable);
+    KeepAliveProcessManager();
+    ~KeepAliveProcessManager();
+
+    int32_t CheckPermission();
+    int32_t CheckPermissionForEDM();
     void AddFailedKeepAliveAbility(const std::string &bundleName, const std::string &moduleName,
         const std::string &abilityName, int32_t userId);
     void StartKeepAliveProcessWithMainElementPerBundle(const AppExecFwk::BundleInfo &bundleInfo,
@@ -115,11 +124,10 @@ private:
     bool IsRunningAppInStatusBar(std::shared_ptr<AbilityManagerService> abilityMgr,
         const AppExecFwk::BundleInfo &bundleInfo);
 
-    std::shared_ptr<AbilityKeepAliveService> abilityKeepAliveService_;
-
     std::mutex failedKeepAliveAbilityInfoMutex_;
     std::list<KeepAliveAbilityInfo> failedKeepAliveAbilityInfos_;
     std::atomic_bool unlockedAfterBoot_ = false;
+    DISALLOW_COPY_AND_MOVE(KeepAliveProcessManager);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

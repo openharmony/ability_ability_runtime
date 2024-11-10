@@ -596,6 +596,22 @@ HWTEST_F(AppSchedulerTest, AppScheduler_NotifyStartResidentProcess_001, TestSize
 
 /*
  * Feature: AppScheduler
+ * Function: NotifyStartKeepAliveProcess
+ * SubFunction: NA
+ * FunctionPoints: AppScheduler NotifyStartKeepAliveProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyStartKeepAliveProcess
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_NotifyStartKeepAliveProcess_001, TestSize.Level1)
+{
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    ASSERT_NE(appStateMock_, nullptr);
+    DelayedSingleton<AppScheduler>::GetInstance()->callback_ = appStateMock_;
+    DelayedSingleton<AppScheduler>::GetInstance()->NotifyStartKeepAliveProcess(bundleInfos);
+}
+
+/*
+ * Feature: AppScheduler
  * Function: KillApplication
  * SubFunction: NA
  * FunctionPoints: AppScheduler KillApplication

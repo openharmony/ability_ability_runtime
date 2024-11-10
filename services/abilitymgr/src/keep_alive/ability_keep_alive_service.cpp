@@ -17,18 +17,16 @@
 
 #include "ability_keep_alive_data_manager.h"
 #include "ability_manager_service.h"
-#include "ability_util.h"
 #include "hilog_tag_wrapper.h"
-#include "in_process_call_wrapper.h"
-#include "main_element_utils.h"
-#include "permission_constants.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AAFwk;
-namespace {
-constexpr char PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED[] = "const.product.enterprisefeature.setting.enabled";
-} // namespace
+AbilityKeepAliveService &AbilityKeepAliveService::GetInstance()
+{
+    static AbilityKeepAliveService instance;
+    return instance;
+}
 
 AbilityKeepAliveService::AbilityKeepAliveService() {}
 
@@ -39,14 +37,8 @@ int32_t AbilityKeepAliveService::SetApplicationKeepAlive(KeepAliveInfo &info, bo
     TAG_LOGD(AAFwkTag::KEEP_ALIVE, "SetApplicationKeepAlive is called,"
         " bundleName: %{public}s, userId: %{public}d, flag: %{public}d",
         info.bundleName.c_str(), info.userId, static_cast<int>(flag));
-    int32_t code = CheckPermission();
-    if (code != ERR_OK) {
-        return code;
-    }
 
     GetValidUserId(info.userId);
-    info.appType = KeepAliveAppType::APP;
-    info.setter = KeepAliveSetter::USER;
 
     if (flag) {
         return SetKeepAliveTrue(info);
@@ -56,36 +48,22 @@ int32_t AbilityKeepAliveService::SetApplicationKeepAlive(KeepAliveInfo &info, bo
 
 int32_t AbilityKeepAliveService::SetKeepAliveTrue(const KeepAliveInfo &info)
 {
-    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-    if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "null bundleMgrHelper");
-        return INNER_ERR;
-    }
-
-    // check main element
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(info.bundleName,
-        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, info.userId))) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "failed get bundle info");
-        return ERR_TARGET_BUNDLE_NOT_EXIST;
-    }
-    std::string mainElementName;
-    if (!MainElementUtils::CheckMainUIAbility(bundleInfo, mainElementName)) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "bundle has no main uiability");
-        return ERR_NO_MAIN_ABILITY;
-    }
-
     KeepAliveStatus status = AbilityKeepAliveDataManager::GetInstance().QueryKeepAliveData(info);
     if (status.code != ERR_OK && status.code != ERR_NAME_NOT_FOUND) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "QueryKeepAliveData fail");
         return status.code;
     }
 
-    if (status.code == ERR_OK) {
-        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "app is already set");
-        return status.code;
+    if (status.code == ERR_NAME_NOT_FOUND) {
+        return AbilityKeepAliveDataManager::GetInstance().InsertKeepAliveData(info);
     }
 
+    if (static_cast<int32_t>(status.setter) <= static_cast<int32_t>(info.setter)) {
+        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "app is already set");
+        return ERR_OK;
+    }
+
+    (void)AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveData(info);
     return AbilityKeepAliveDataManager::GetInstance().InsertKeepAliveData(info);
 }
 
@@ -97,8 +75,13 @@ int32_t AbilityKeepAliveService::CancelKeepAlive(const KeepAliveInfo &info)
         return status.code;
     }
 
-    if (!status.isKeepAlive) {
+    if (status.code == ERR_NAME_NOT_FOUND) {
         return ERR_TARGET_BUNDLE_NOT_EXIST;
+    }
+
+    if (static_cast<int32_t>(status.setter) < static_cast<int32_t>(info.setter)) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "app is set keep-alive by system, cannot unset by user");
+        return CHECK_PERMISSION_FAILED;
     }
 
     return AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveData(info);
@@ -107,57 +90,12 @@ int32_t AbilityKeepAliveService::CancelKeepAlive(const KeepAliveInfo &info)
 int32_t AbilityKeepAliveService::QueryKeepAliveApplications(int32_t userId,
     int32_t appType, std::vector<KeepAliveInfo> &infoList)
 {
-    int32_t code = CheckPermission();
-    if (code != ERR_OK) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "permission verification fail");
-        return code;
-    }
-
     GetValidUserId(userId);
     KeepAliveInfo queryParam;
     queryParam.userId = userId;
     queryParam.appType = KeepAliveAppType(appType);
-    queryParam.setter = KeepAliveSetter::USER;
     return AbilityKeepAliveDataManager::GetInstance().QueryKeepAliveApplications(
         queryParam, infoList);
-}
-
-int32_t AbilityKeepAliveService::QueryKeepAliveApplicationsByEDM(int32_t userId,
-    int32_t appType, std::vector<KeepAliveInfo> &infoList)
-{
-    int32_t code = CheckPermissionForEDM();
-    if (code != ERR_OK) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "permission verification fail");
-        return code;
-    }
-
-    GetValidUserId(userId);
-    KeepAliveInfo queryParam;
-    queryParam.userId = userId;
-    queryParam.appType = KeepAliveAppType(appType);
-    queryParam.setter = KeepAliveSetter::SYSTEM;
-    return AbilityKeepAliveDataManager::GetInstance().QueryKeepAliveApplications(
-        queryParam, infoList);
-}
-
-int32_t AbilityKeepAliveService::SetApplicationKeepAliveByEDM(KeepAliveInfo &info, bool flag)
-{
-    TAG_LOGD(AAFwkTag::KEEP_ALIVE, "SetApplicationKeepAliveByEDM is called,"
-        " bundleName: %{public}s, userId: %{public}d, flag: %{public}d",
-        info.bundleName.c_str(), info.userId, static_cast<int>(flag));
-    int32_t code = CheckPermissionForEDM();
-    if (code != ERR_OK) {
-        return code;
-    }
-
-    GetValidUserId(info.userId);
-    info.appType = KeepAliveAppType::APP;
-    info.setter = KeepAliveSetter::SYSTEM;
-
-    if (flag) {
-        return SetKeepAliveTrue(info);
-    }
-    return CancelKeepAlive(info);
 }
 
 void AbilityKeepAliveService::GetValidUserId(int32_t &userId)
@@ -176,54 +114,11 @@ void AbilityKeepAliveService::GetValidUserId(int32_t &userId)
     }
 }
 
-int32_t AbilityKeepAliveService::CheckPermission()
+bool AbilityKeepAliveService::IsKeepAliveApp(const std::string &bundleName, int32_t userId)
 {
-    if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "not supported");
-        return ERR_CAPABILITY_NOT_SUPPORT;
-    }
-
-    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "not use system-api");
-        return ERR_NOT_SYSTEM_APP;
-    }
-
-    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
-        PermissionConstants::PERMISSION_MANAGE_APP_KEEP_ALIVE)) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "verify PERMISSION_MANAGE_APP_KEEP_ALIVE fail");
-        return CHECK_PERMISSION_FAILED;
-    }
-
-    return ERR_OK;
-}
-
-int32_t AbilityKeepAliveService::CheckPermissionForEDM()
-{
-    if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "not supported");
-        return ERR_CAPABILITY_NOT_SUPPORT;
-    }
-    if (!PermissionVerification::GetInstance()->IsSACall() ||
-        !PermissionVerification::GetInstance()->VerifyCallingPermission(
-            PermissionConstants::PERMISSION_MANAGE_APP_KEEP_ALIVE_INTERNAL)) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "verify PERMISSION_MANAGE_APP_KEEP_ALIVE_INTERNAL fail");
-        return CHECK_PERMISSION_FAILED;
-    }
-    return ERR_OK;
-}
-
-int32_t AbilityKeepAliveService::GetKeepAliveProcessEnable(const std::string &bundleName, int32_t userId,
-    bool &isKeepAlive)
-{
-    if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
-        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "not supported");
-        isKeepAlive = false;
-        return ERR_OK;
-    }
-
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "bundle name empty");
-        return ERR_INVALID_VALUE;
+        return false;
     }
 
     GetValidUserId(userId);
@@ -231,20 +126,11 @@ int32_t AbilityKeepAliveService::GetKeepAliveProcessEnable(const std::string &bu
     info.bundleName = bundleName;
     info.userId = userId;
     KeepAliveStatus status = AbilityKeepAliveDataManager::GetInstance().QueryKeepAliveData(info);
-    if (status.code != ERR_OK) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "QueryKeepAliveData fail");
-        return status.code;
-    }
-    isKeepAlive = status.isKeepAlive;
-    return ERR_OK;
+    return (status.code == ERR_OK);
 }
 
 int32_t AbilityKeepAliveService::GetKeepAliveApplications(int32_t userId, std::vector<KeepAliveInfo> &infoList)
 {
-    if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
-        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "not supported");
-        return ERR_OK;
-    }
     KeepAliveInfo queryParam;
     queryParam.userId = userId;
     return AbilityKeepAliveDataManager::GetInstance().QueryKeepAliveApplications(
