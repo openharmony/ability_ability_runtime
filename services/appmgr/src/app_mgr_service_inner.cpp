@@ -3863,6 +3863,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
 
     if (!appRunningManager_->CheckAppRunningRecordIsExistByBundleName(appRecord->GetBundleName())) {
         appRunningManager_->UnSetPolicy(appRecord);
+        TAG_LOGW(AAFwkTag::APPMGR, "before OnAppStopped");
         OnAppStopped(appRecord);
     }
 
@@ -3874,6 +3875,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     ClearAppRunningDataForKeepAlive(appRecord);
 
     auto uid = appRecord->GetUid();
+    TAG_LOGW(AAFwkTag::APPMGR, "before NotifyAppRunningStatusEvent");
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 
