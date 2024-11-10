@@ -500,6 +500,10 @@ void AbilityRecord::PostForegroundTimeoutTask()
     }
     int foregroundTimeout =
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * FOREGROUND_TIMEOUT_MULTIPLE;
+    if (InsightIntentExecuteParam::IsInsightIntentExecute(GetWant())) {
+        foregroundTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+            INSIGHT_INTENT_TIMEOUT_MULTIPLE;
+    }
     SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, foregroundTimeout / HALF_TIMEOUT);
     SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, foregroundTimeout);
     std::string methodName = "ProcessForegroundAbility";
@@ -544,6 +548,10 @@ void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
         case AbilityManagerService::FOREGROUND_TIMEOUT_MSG: {
             uint32_t timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
                 static_cast<uint32_t>(FOREGROUND_TIMEOUT_MULTIPLE);
+            if (InsightIntentExecuteParam::IsInsightIntentExecute(GetWant())) {
+                timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+                    static_cast<uint32_t>(INSIGHT_INTENT_TIMEOUT_MULTIPLE);
+            }
             SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout, recordId_, true);
             ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
@@ -1261,6 +1269,10 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
         if (handler && task) {
             int backgroundTimeout =
                 AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * BACKGROUND_TIMEOUT_MULTIPLE;
+            if (InsightIntentExecuteParam::IsInsightIntentExecute(GetWant())) {
+                backgroundTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+                    INSIGHT_INTENT_TIMEOUT_MULTIPLE;
+            }
             handler->SubmitTask(task, "background_" + std::to_string(recordId_), backgroundTimeout, false);
 
             if (abilityInfo_.type == AppExecFwk::AbilityType::PAGE) {
