@@ -101,14 +101,6 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->ConvertAutoStartupInfoFromKeyAndValue(key2, value3);
 
     nlohmann::json jsonObject = nlohmann::json::parse(key1.ToString(), nullptr, false);
-    dataMgr->IsEqual(jsonObject, "abilityName", "ability", boolParam); // branch,return true
-    dataMgr->IsEqual(jsonObject, "abilityName", "NaN", boolParam); // branch,return true
-    dataMgr->IsEqual(jsonObject, "userId", "ability", boolParam); // branch
-    dataMgr->IsEqual(jsonObject, "NaN", "ability", boolParam); // branch
-
-    dataMgr->IsEqual(jsonObject, "userId", 100); // 100 means userid,branch
-    dataMgr->IsEqual(jsonObject, "userId", int32Param); // branch
-    dataMgr->IsEqual(jsonObject, "NaN", int32Param);
     dataMgr->IsEqual(key1, info);
     dataMgr->IsEqual(key2, info);
     dataMgr->IsEqual(key1Illegal, info);

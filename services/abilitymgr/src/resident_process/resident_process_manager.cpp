@@ -19,6 +19,7 @@
 #include "ability_resident_process_rdb.h"
 #include "ability_util.h"
 #include "ffrt.h"
+#include "keep_alive_utils.h"
 #include "main_element_utils.h"
 
 namespace OHOS {
@@ -70,40 +71,7 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
     std::set<uint32_t> needEraseIndexSet;
 
     for (size_t i = 0; i < bundleInfos.size(); i++) {
-        if (userId != 0 && !AmsConfigurationParameter::GetInstance().InResidentWhiteList(bundleInfos[i].name)) {
-            needEraseIndexSet.insert(i);
-            continue;
-        }
-        std::string processName = bundleInfos[i].applicationInfo.process;
-        bool keepAliveEnable = bundleInfos[i].isKeepAlive;
-        // Check startup permissions
-        AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfos[i].name, keepAliveEnable);
-        if (!keepAliveEnable || processName.empty()) {
-            needEraseIndexSet.insert(i);
-            continue;
-        }
-        for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {
-            std::string mainElement;
-            if (!MainElementUtils::CheckMainElement(hapModuleInfo,
-                processName, mainElement, needEraseIndexSet, i, userId)) {
-                continue;
-            }
-
-            needEraseIndexSet.insert(i);
-            // startAbility
-            Want want;
-            want.SetElementName(hapModuleInfo.bundleName, mainElement);
-            ResidentAbilityInfoGuard residentAbilityInfoGuard(hapModuleInfo.bundleName, mainElement, userId);
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "call, bundleName: %{public}s, mainElement: %{public}s",
-                hapModuleInfo.bundleName.c_str(), mainElement.c_str());
-            auto ret = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, userId,
-                DEFAULT_INVAL_VALUE);
-            MainElementUtils::UpdateMainElement(hapModuleInfo.bundleName,
-                hapModuleInfo.name, mainElement, true, userId);
-            if (ret != ERR_OK) {
-                AddFailedResidentAbility(hapModuleInfo.bundleName, mainElement, userId);
-            }
-        }
+        StartResidentProcessWithMainElementPerBundle(bundleInfos[i], i, needEraseIndexSet, userId);
     }
 
     // delete item which process has been started.
@@ -112,21 +80,59 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
     }
 }
 
-void ResidentProcessManager::NotifyDisableResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos,
-    int32_t userId)
+void ResidentProcessManager::StartResidentProcessWithMainElementPerBundle(const AppExecFwk::BundleInfo &bundleInfo,
+    size_t index, std::set<uint32_t> &needEraseIndexSet, int32_t userId)
 {
-    std::set<uint32_t> needEraseIndexSet; // no use
-    for (size_t i = 0; i < bundleInfos.size(); i++) {
-        std::string processName = bundleInfos[i].applicationInfo.process;
-        for (const auto &hapModuleInfo : bundleInfos[i].hapModuleInfos) {
-            std::string mainElement;
-            if (!MainElementUtils::CheckMainElement(hapModuleInfo,
-                processName, mainElement, needEraseIndexSet, i, userId)) {
-                continue;
-            }
-            MainElementUtils::UpdateMainElement(hapModuleInfo.bundleName,
-                hapModuleInfo.name, mainElement, false, userId);
+    if (userId != 0 && !AmsConfigurationParameter::GetInstance().InResidentWhiteList(bundleInfo.name)) {
+        needEraseIndexSet.insert(index);
+        return;
+    }
+    std::string processName = bundleInfo.applicationInfo.process;
+    bool keepAliveEnable = bundleInfo.isKeepAlive;
+    // Check startup permissions
+    AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfo.name, keepAliveEnable);
+    if (!keepAliveEnable || processName.empty()) {
+        needEraseIndexSet.insert(index);
+        return;
+    }
+    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+        StartResidentProcessWithMainElementPerBundleHap(hapModuleInfo, processName, index, needEraseIndexSet, userId);
+    }
+}
+
+void ResidentProcessManager::StartResidentProcessWithMainElementPerBundleHap(
+    const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &processName,
+    size_t index, std::set<uint32_t> &needEraseIndexSet, int32_t userId)
+{
+    std::string mainElement;
+    bool isDataAbility = false;
+    std::string uriStr;
+    if (!MainElementUtils::CheckMainElement(hapModuleInfo,
+        processName, mainElement, isDataAbility, uriStr, userId)) {
+        if (isDataAbility) {
+            // dataability, need use AcquireDataAbility
+            needEraseIndexSet.insert(index);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "call, mainElement: %{public}s, uri: %{public}s",
+                mainElement.c_str(), uriStr.c_str());
+            Uri uri(uriStr);
+            DelayedSingleton<AbilityManagerService>::GetInstance()->AcquireDataAbility(uri, true, nullptr);
         }
+        return;
+    }
+
+    needEraseIndexSet.insert(index);
+    // startAbility
+    Want want;
+    want.SetElementName(hapModuleInfo.bundleName, mainElement);
+    ResidentAbilityInfoGuard residentAbilityInfoGuard(hapModuleInfo.bundleName, mainElement, userId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call, bundleName: %{public}s, mainElement: %{public}s",
+        hapModuleInfo.bundleName.c_str(), mainElement.c_str());
+    auto ret = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want, userId,
+        DEFAULT_INVAL_VALUE);
+    MainElementUtils::UpdateMainElement(hapModuleInfo.bundleName,
+        hapModuleInfo.name, mainElement, true, userId);
+    if (ret != ERR_OK) {
+        AddFailedResidentAbility(hapModuleInfo.bundleName, mainElement, userId);
     }
 }
 
@@ -211,7 +217,7 @@ void ResidentProcessManager::UpdateResidentProcessesStatus(
         } else if (!updateEnable && localEnable) {
             // just update
             std::vector<AppExecFwk::BundleInfo> bundleInfos{ bundleInfo };
-            NotifyDisableResidentProcess(bundleInfos, userId);
+            KeepAliveUtils::NotifyDisableKeepAliveProcesses(bundleInfos, userId);
         }
     }
 }

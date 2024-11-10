@@ -1269,6 +1269,16 @@ public:
      */
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
+    /**
+     * @brief Set non-resident keep-alive process status.
+     * when one process started, this method will be called from ability mgr with data selected from db.
+     *
+     * @param bundleName processed of witch to be configed
+     * @param enable config value
+     * @param uid indicates user, 0 for all users
+     */
+    void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid);
+
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
     int32_t GetAllUIExtensionRootHostPid(pid_t pid, std::vector<pid_t> &hostPids);
@@ -1412,6 +1422,11 @@ private:
      * If one app needs keepalive and dies, restart the app again
      */
     void RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord);
+
+    /**
+     * If one app needs keepalive and dies, restart the app again
+     */
+    void RestartKeepAliveProcess(std::shared_ptr<AppRunningRecord> appRecord);
 
     bool CheckLoadAbilityConditions(std::shared_ptr<AAFwk::Want> want,
         std::shared_ptr<AbilityRuntime::LoadParam> loadParam, const std::shared_ptr<AbilityInfo> &abilityInfo,
@@ -1609,6 +1624,8 @@ private:
 
     void ApplicationTerminatedSendProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void ClearResidentProcessAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void ClearNonResidentKeepAliveAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     int32_t StartChildProcessPreCheck(pid_t callingPid, int32_t childProcessType);
 
@@ -1822,6 +1839,7 @@ private:
     void AddUIExtensionLauncherItem(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AppRunningRecord> appRecord,
         sptr<IRemoteObject> token);
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos);
+    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos);
     void RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunningRecord> appRecord, sptr<IRemoteObject> token);
     bool IsSceneBoardCall();
     void CheckCleanAbilityByUserRequest(const std::shared_ptr<AppRunningRecord> &appRecord,

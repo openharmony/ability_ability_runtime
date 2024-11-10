@@ -590,6 +590,11 @@ public:
     bool IsKeepAliveApp() const;
 
     /**
+     * @brief Whether the process is non-resident keep-alive.
+     */
+    bool IsKeepAliveDkv() const;
+
+    /**
      * @brief Whether the process can keep empty alive.
      */
     bool IsEmptyKeepAliveApp() const;
@@ -614,6 +619,14 @@ public:
      * @param isKeepAliveEnable new value
      */
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
+
+    /**
+     * @brief A process can be configured non-resident keep-alive.
+     * when one process started, this method will be called from ability mgr with data selected from db.
+     *
+     * @param isKeepAliveDkv new value
+     */
+    void SetKeepAliveDkv(bool isKeepAliveDkv);
 
     /**
      * @brief roughly considered as a value from the process's bundle info.
@@ -1056,6 +1069,7 @@ private:
     bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
     bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
+    bool isKeepAliveDkv_ = false; // Only non-resident keep-alive processes can be set to true, please choose carefully
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
     bool isStageBasedModel_ = false;

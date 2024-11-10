@@ -2114,6 +2114,19 @@ HWTEST_F(AbilityManagerServiceFirstTest, NotifyStartResidentProcess_0100, TestSi
 }
 
 /**
+ * @tc.name: AbilityManagerServiceFirstTest_NotifyStartKeepAliveProcess_0100
+ * @tc.desc: Test NotifyStartKeepAliveProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, NotifyStartKeepAliveProcess_0100, TestSize.Level1)
+{
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    abilityMs->NotifyStartKeepAliveProcess(bundleInfos);
+}
+
+/**
  * @tc.name: AbilityManagerServiceFirstTest_OnAppRemoteDied_0100
  * @tc.desc: Test OnAppRemoteDied.
  * @tc.type: FUNC

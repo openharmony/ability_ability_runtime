@@ -34,6 +34,7 @@
 #include "ability_info.h"
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
+#include "ability_keep_alive_service.h"
 #include "ams_configuration_parameter.h"
 #include "app_debug_listener_interface.h"
 #include "app_exit_reason_helper.h"
@@ -1819,6 +1820,46 @@ public:
     int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable, int32_t userId);
 
+    bool IsInStatusBar(uint32_t accessTokenId);
+
+    /**
+     * Set keep-alive flag for application under a specific user.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAlive(const std::string &bundleName, int32_t userId, bool flag) override;
+
+    /**
+     * Get keep-alive applications by EDM.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplications(int32_t appType, int32_t userId,
+        std::vector<KeepAliveInfo> &list) override;
+
+    /**
+     * Set keep-alive flag for application under a specific user by EDM.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag) override;
+
+    /**
+     * Get keep-alive applications by EDM.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId,
+        std::vector<KeepAliveInfo> &list) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1851,6 +1892,8 @@ protected:
     void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
 
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+
+    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     /**
      * @brief Notify abilityms app process pre cache
@@ -2026,6 +2069,8 @@ private:
     bool IsNeedTimeoutForTest(const std::string &abilityName, const std::string &state) const;
 
     void StartResidentApps(int32_t userId);
+
+    void StartKeepAliveApps(int32_t userId);
 
     void StartAutoStartupApps();
     void RetryStartAutoStartupApps(const std::vector<AutoStartupInfo> &infoList, int32_t retryCount);

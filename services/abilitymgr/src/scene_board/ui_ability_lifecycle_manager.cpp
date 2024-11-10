@@ -2505,6 +2505,13 @@ bool UIAbilityLifecycleManager::IsCallerInStatusBar()
     return statusBarDelegateManager->IsCallerInStatusBar();
 }
 
+bool UIAbilityLifecycleManager::IsInStatusBar(uint32_t accessTokenId)
+{
+    auto statusBarDelegateManager = GetStatusBarDelegateManager();
+    CHECK_POINTER_AND_RETURN(statusBarDelegateManager, false);
+    return statusBarDelegateManager->IsInStatusBar(accessTokenId);
+}
+
 int32_t UIAbilityLifecycleManager::DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     auto statusBarDelegateManager = GetStatusBarDelegateManager();
@@ -2591,14 +2598,16 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
 
-    if (!IsCallerInStatusBar() && (sessionInfo->processOptions != nullptr &&
-        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
+    if (!IsCallerInStatusBar() && sessionInfo->processOptions != nullptr &&
+        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
+        !sessionInfo->processOptions->isRestartKeepAlive) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
         return ERR_START_OPTIONS_CHECK_FAILED;
     }
     if (sessionInfo->processOptions == nullptr ||
         (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
-        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
+        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
+        !sessionInfo->processOptions->isRestartKeepAlive)) {
         auto ret = DoCallerProcessAttachment(abilityRecord);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);

@@ -345,7 +345,10 @@ public:
     int32_t UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, std::vector<int32_t> &sessionIds);
 
     int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
+
     bool IsCallerInStatusBar();
+
+    bool IsInStatusBar(uint32_t accessTokenId);
 
     int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
 

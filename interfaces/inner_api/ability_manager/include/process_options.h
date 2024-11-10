@@ -56,6 +56,7 @@ public:
     ProcessMode processMode = ProcessMode::UNSPECIFIED;
     StartupVisibility startupVisibility = StartupVisibility::UNSPECIFIED;
     std::string processName;
+    bool isRestartKeepAlive = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
