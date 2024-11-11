@@ -37,3 +37,107 @@ char* CreateCStringFromString(const std::string& source)
     }
     return res;
 }
+
+char** VectorToCArrString(const std::vector<std::string>& vec)
+{
+    if (vec.size() == 0) {
+        return nullptr;
+    }
+    char** result = static_cast<char**>(malloc(sizeof(char*) * vec.size()));
+    if (result == nullptr) {
+        return nullptr;
+    }
+    for (size_t i = 0; i < vec.size(); i++) {
+        result[i] = CreateCStringFromString(vec[i]);
+    }
+    return result;
+}
+
+int32_t ConvertColorMode(std::string colormode)
+{
+    auto resolution = -1;
+    static const std::vector<std::pair<std::string, int32_t>> resolutions = {
+        { "dark", 0 },
+        { "light", 1 },
+    };
+    for (const auto& [tempColorMode, value] : resolutions) {
+        if (tempColorMode == colormode) {
+            resolution = value;
+            break;
+        }
+    }
+    return resolution;
+}
+
+int32_t ConvertDirection(std::string direction)
+{
+    auto resolution = -1;
+    static const std::vector<std::pair<std::string, int32_t>> resolutions = {
+        { "vertical", 0 },
+        { "horizontal", 1 },
+    };
+    for (const auto& [tempDirection, value] : resolutions) {
+        if (tempDirection == direction) {
+            resolution = value;
+            break;
+        }
+    }
+    return resolution;
+}
+
+int32_t ConvertDensity(std::string density)
+{
+    auto resolution = 0;
+    static const std::vector<std::pair<std::string, int32_t>> resolutions = {
+        { "sdpi", 120 },
+        { "mdpi", 160 },
+        { "ldpi", 240 },
+        { "xldpi", 320 },
+        { "xxldpi", 480 },
+        { "xxxldpi", 640 },
+    };
+    for (const auto& [tempdensity, value] : resolutions) {
+        if (tempdensity == density) {
+            resolution = value;
+            break;
+        }
+    }
+    return resolution;
+}
+
+int32_t ConvertDisplayId(std::string displayId)
+{
+    if (displayId == OHOS::AppExecFwk::ConfigurationInner::EMPTY_STRING) {
+        return -1;
+    }
+    return std::stoi(displayId);
+}
+
+namespace OHOS {
+namespace AbilityRuntime {
+
+CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &configuration)
+{
+    CConfiguration cfg;
+    cfg.language = CreateCStringFromString(configuration.GetItem(
+        OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+    cfg.colorMode = ConvertColorMode(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
+    std::string direction = configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
+    cfg.direction = ConvertDirection(direction);
+    std::string density = configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+    cfg.screenDensity = ConvertDensity(density);
+    cfg.displayId = ConvertDisplayId(configuration.GetItem(
+        OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DISPLAYID));
+    std::string hasPointerDevice = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    cfg.hasPointerDevice = hasPointerDevice == "true" ? true : false;
+    std::string fontSizeScale = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    cfg.fontSizeScale = fontSizeScale == "" ? 1.0 : std::stod(fontSizeScale);
+    std::string fontWeightScale = configuration.GetItem(
+        OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    cfg.fontWeightScale = fontWeightScale == "" ? 1.0 : std::stod(fontWeightScale);
+    cfg.mcc = CreateCStringFromString(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
+    cfg.mnc = CreateCStringFromString(configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
+    return cfg;
+}
+}
+}
