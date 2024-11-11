@@ -96,6 +96,10 @@
 #include "fault_data.h"
 #include "modal_system_app_freeze_uiextension.h"
 #endif
+#ifdef APP_MGR_SERVICE_HICOLLIE_ENABLE
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -5959,10 +5963,96 @@ void AppMgrServiceInner::AppRecoveryNotifyApp(int32_t pid, const std::string& bu
     taskHandler_->SubmitTask(waitSaveTask, timeOutName, timeOut);
 }
 
+void AppMgrServiceInner::ParseInfoToAppfreeze(const FaultData &faultData, int32_t pid, int32_t uid,
+    const std::string &bundleName, const std::string &processName, const bool isOccurException)
+{
+    if (faultData.faultType == FaultDataType::APP_FREEZE) {
+        AppfreezeManager::AppInfo info = {
+            .pid = pid,
+            .uid = uid,
+            .bundleName = bundleName,
+            .processName = processName,
+            .isOccurException = isOccurException,
+        };
+        AppExecFwk::AppfreezeManager::GetInstance()->AppfreezeHandleWithStack(faultData, info);
+    }
+
+    TAG_LOGW(AAFwkTag::APPMGR,
+        "name: %{public}s, faultType: %{public}d, uid: %{public}d, pid: %{public}d, bundleName: %{public}s,"
+        " processName: %{public}s, faultData.forceExit:%{public}d, faultData.waitSaveState:%{public}d,"
+        " isOccurException:%{public}d",
+        faultData.errorObject.name.c_str(), faultData.faultType, uid, pid, bundleName.c_str(),
+        processName.c_str(), faultData.forceExit, faultData.waitSaveState, isOccurException);
+}
+
+
+int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const std::string &bundleName,
+    const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid, const int32_t callerUid)
+{
+    auto exceptionCallback = [faultData, bundleName, appRecord, pid, callerUid,
+        innerService = shared_from_this()](void *) {
+        auto threadTask = [faultData, bundleName, appRecord, pid, callerUid, innerService]() {
+            if (innerService->CheckAppFault(appRecord, faultData)) {
+                TAG_LOGI(AAFwkTag::APPMGR, "current dfx task is working.");
+                return;
+            }
+            bool isOccurException = true;
+            innerService->ParseInfoToAppfreeze(faultData, pid, callerUid, bundleName, appRecord->GetProcessName(),
+                isOccurException);
+            if (faultData.errorObject.name != AppFreezeType::THREAD_BLOCK_3S ||
+                faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+                TAG_LOGI(AAFwkTag::APPMGR, "faultData: %{public}s,pid: %{public}d will exit because %{public}s",
+                    bundleName.c_str(), pid, innerService->FaultTypeToString(faultData.faultType).c_str());
+                innerService->KillProcessByPid(pid, faultData.errorObject.name);
+                return;
+            }
+        };
+        std::thread dfxThread(threadTask);
+        if (dfxThread.joinable()) {
+            dfxThread.join();
+        }
+    };
+    constexpr uint32_t timeout = 15; // 15s
+    int exceptionId = -1;
+#ifdef APP_MGR_SERVICE_HICOLLIE_ENABLE
+    exceptionId = HiviewDFX::XCollie::GetInstance().SetTimer("DfxFault::Exception", timeout,
+        exceptionCallback, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG | HiviewDFX::XCOLLIE_FLAG_RECOVERY);
+#endif
+    return exceptionId;
+}
+
+int32_t AppMgrServiceInner::SubmitDfxFaultTask(const FaultData &faultData, const std::string &bundleName,
+    const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid)
+{
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    std::string processName = appRecord->GetProcessName();
+    int exceptionId = GetExceptionTimerId(faultData, bundleName, appRecord, pid, callerUid);
+    auto notifyAppTask = [appRecord, pid, callerUid, bundleName, processName, faultData, exceptionId,
+        innerService = shared_from_this()]() {
+        innerService->ParseInfoToAppfreeze(faultData, pid, callerUid, bundleName, processName);
+#ifdef APP_MGR_SERVICE_HICOLLIE_ENABLE
+        HiviewDFX::XCollie::GetInstance().CancelTimer(exceptionId);
+#endif
+    };
+
+    if (!dfxTaskHandler_) {
+        TAG_LOGW(AAFwkTag::APPMGR, "get dfx handler fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
+    constexpr int delayTime = 15 * 1000; // 15s
+    auto task = [pid, innerService = shared_from_this()]() {
+        AppExecFwk::AppfreezeManager::GetInstance()->DeleteStack(pid);
+    };
+    dfxTaskHandler_->SubmitTask(task, "DeleteStack", delayTime);
+
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
-    int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (appRecord == nullptr) {
@@ -5975,7 +6065,6 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         return ERR_OK;
     }
     std::string bundleName = appRecord->GetBundleName();
-    std::string processName = appRecord->GetProcessName();
     if (AppExecFwk::AppfreezeManager::GetInstance()->IsProcessDebug(pid, bundleName)) {
         TAG_LOGW(AAFwkTag::APPMGR,
             "don't report event and kill:%{public}s, pid:%{public}d, bundleName:%{public}s",
@@ -5992,37 +6081,18 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
             AppRecoveryNotifyApp(pid, bundleName, FaultDataType::APP_FREEZE, "recoveryTimeout");
         }
     }
-
-    auto notifyAppTask = [appRecord, pid, callerUid, bundleName, processName, faultData,
-        innerService = shared_from_this()]() {
-        if (faultData.faultType == FaultDataType::APP_FREEZE) {
-            AppfreezeManager::AppInfo info = {
-                .pid = pid,
-                .uid = callerUid,
-                .bundleName = bundleName,
-                .processName = processName,
-            };
-            AppExecFwk::AppfreezeManager::GetInstance()->AppfreezeHandleWithStack(faultData, info);
+    if (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT ||
+        faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK ||
+        faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S ||
+        faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
+        if (AppExecFwk::AppfreezeManager::GetInstance()->IsNeedIgnoreFreezeEvent(pid, faultData.errorObject.name)) {
+            TAG_LOGE(AAFwkTag::APPDFR, "appFreeze happend");
+            return ERR_OK;
         }
-
-        TAG_LOGW(AAFwkTag::APPMGR,
-            "name: %{public}s, faultType: %{public}d, uid: %{public}d, pid: %{public}d, bundleName: %{public}s,"
-            " processName: %{public}s, faultData.forceExit:%{public}d, faultData.waitSaveState:%{public}d",
-            faultData.errorObject.name.c_str(), faultData.faultType, callerUid, pid, bundleName.c_str(),
-            processName.c_str(), faultData.forceExit, faultData.waitSaveState);
-    };
-
-    if (!dfxTaskHandler_) {
-        TAG_LOGW(AAFwkTag::APPMGR, "get dfx handler fail");
+    }
+    if (SubmitDfxFaultTask(faultData, bundleName, appRecord, pid) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
-
-    dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
-    constexpr int delayTime = 15 * 1000; // 15s
-    auto task = [pid, innerService = shared_from_this()]() {
-        AppExecFwk::AppfreezeManager::GetInstance()->DeleteStack(pid);
-    };
-    dfxTaskHandler_->SubmitTask(task, "DeleteStack", delayTime);
 
     if (appRecord->GetApplicationInfo()->asanEnabled) {
         TAG_LOGI(AAFwkTag::APPMGR,

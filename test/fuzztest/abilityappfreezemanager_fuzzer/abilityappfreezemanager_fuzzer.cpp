@@ -65,7 +65,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     int32_t pid = static_cast<int32_t>(GetU32Data(data));
     std::string processName(data, size);
     freeze->IsProcessDebug(pid, processName);
-    freeze->IsNeedIgnoreFreezeEvent(pid);
+    std::string errorName(data, size);
+    freeze->IsNeedIgnoreFreezeEvent(pid, errorName);
     freeze->CancelAppFreezeDetect(pid, bundleName);
     freeze->ResetAppfreezeState(pid, bundleName);
     freeze->IsValidFreezeFilter(pid, bundleName);
@@ -81,7 +82,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string binderInfo(data, size);
     freeze->NotifyANR(faultData, appInfo, binderInfo, memoryContent);
     int state = static_cast<int>(GetU32Data(data));
-    freeze->SetFreezeState(pid, state);
+    freeze->SetFreezeState(pid, state, errorName);
     freeze->GetFreezeState(pid);
     freeze->GetFreezeTime(pid);
     return true;
