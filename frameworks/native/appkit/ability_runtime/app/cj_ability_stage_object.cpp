@@ -44,7 +44,7 @@ void RegisterCJAbilityStageFuncs(void (*registerFunc)(CJAbilityStageFuncs* resul
     registerFunc(&g_cjAbilityStageFuncs);
 }
 
-std::unique_ptr<CJAbilityStageObject> CJAbilityStageObject::LoadModule(const std::string& moduleName)
+std::shared_ptr<CJAbilityStageObject> CJAbilityStageObject::LoadModule(const std::string& moduleName)
 {
     if (g_cjAbilityStageFuncs.LoadAbilityStage == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.LoadAbilityStage are not registered");
@@ -59,7 +59,7 @@ std::unique_ptr<CJAbilityStageObject> CJAbilityStageObject::LoadModule(const std
         return nullptr;
     }
 
-    return std::make_unique<CJAbilityStageObject>(handle);
+    return std::make_shared<CJAbilityStageObject>(handle);
 }
 
 CJAbilityStageObject::~CJAbilityStageObject()

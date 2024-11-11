@@ -60,7 +60,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class CJAbilityStageObject {
 public:
-    static std::unique_ptr<CJAbilityStageObject> LoadModule(const std::string& moduleName);
+    static std::shared_ptr<CJAbilityStageObject> LoadModule(const std::string& moduleName);
 
     explicit CJAbilityStageObject(int64_t id) : id_(id) {}
     ~CJAbilityStageObject();

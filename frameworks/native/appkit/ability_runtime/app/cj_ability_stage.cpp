@@ -119,7 +119,7 @@ std::shared_ptr<CJAbilityStage> CJAbilityStage::Create(
         return nullptr;
     }
 
-    return std::make_shared<CJAbilityStage>(std::move(cjAbilityStageObject));
+    return std::make_shared<CJAbilityStage>(cjAbilityStageObject);
 }
 
 void CJAbilityStage::Init(const std::shared_ptr<Context> &context,
