@@ -505,6 +505,16 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:start_window_option"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/application_context/include",
+              "header_files": [
+                "cj_ability_lifecycle_callback.h",
+                "cj_application_context.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi:cj_ability_ffi"
           }
         ],
         "test": [

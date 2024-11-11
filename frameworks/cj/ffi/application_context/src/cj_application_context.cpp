@@ -30,6 +30,11 @@ using namespace OHOS::AbilityRuntime;
 std::vector<std::shared_ptr<CjAbilityLifecycleCallback>> CJApplicationContext::callbacks_;
 CJApplicationContext* CJApplicationContext::cjApplicationContext_ = nullptr;
 
+CJApplicationContext* CJApplicationContext::GetInstance()
+{
+    return GetCJApplicationContext(AbilityRuntime::ApplicationContext::GetInstance());
+}
+
 CJApplicationContext* CJApplicationContext::GetCJApplicationContext(
     std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext)
 {
@@ -455,7 +460,7 @@ int32_t CJApplicationContext::OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync
         TAG_LOGD(AAFwkTag::CONTEXT, "callback_ is not nullptr.");
         return callback_->Register(cFuncIds, isSync);
     }
-    callback_ = std::make_shared<CjAbilityLifecycleCallback>();
+    callback_ = std::make_shared<CjAbilityLifecycleCallbackImpl>();
     int32_t callbackId = callback_->Register(cFuncIds, isSync);
     RegisterAbilityLifecycleCallback(callback_);
     return callbackId;
@@ -513,7 +518,7 @@ void CJApplicationContext::OnOffAbilityLifecycle(int32_t callbackId, int32_t *er
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
-    std::weak_ptr<CjAbilityLifecycleCallback> callbackWeak(callback_);
+    std::weak_ptr<CjAbilityLifecycleCallbackImpl> callbackWeak(callback_);
     auto lifecycle_callback = callbackWeak.lock();
     if (lifecycle_callback == nullptr) {
         TAG_LOGD(AAFwkTag::CONTEXT, "env_callback is not nullptr.");
