@@ -1863,6 +1863,12 @@ private:
     int32_t KillProcessByPidInner(const pid_t pid, const std::string& reason,
         const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord);
     bool IsAllowedNWebPreload(const std::string &processName);
+    void ParseInfoToAppfreeze(const FaultData &faultData, int32_t pid, int32_t uid, const std::string &bundleName,
+        const std::string &processName, const bool isOccurException = false);
+    int GetExceptionTimerId(const FaultData &faultData, const std::string &bundleName,
+        const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid, const int32_t callerUid);
+    int32_t SubmitDfxFaultTask(const FaultData &faultData, const std::string &bundleName,
+        const std::shared_ptr<AppRunningRecord> &appRecord, const int32_t pid);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;

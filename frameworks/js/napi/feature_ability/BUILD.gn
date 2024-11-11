@@ -34,8 +34,10 @@ ohos_shared_library("featureability_napi") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "napi:ace_napi",
   ]

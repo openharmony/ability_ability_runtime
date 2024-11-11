@@ -20,11 +20,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-CjAbilityLifecycleCallback::CjAbilityLifecycleCallback()
-{
-}
-
-int32_t CjAbilityLifecycleCallback::serialNumber_ = 0;
+int32_t CjAbilityLifecycleCallbackImpl::serialNumber_ = 0;
 
 void EmplaceAbilityFunc(int32_t callbackId, int64_t cFuncId,
     std::map<int32_t, std::function<void(int64_t)>> &cFuncMap)
@@ -40,7 +36,7 @@ void EmplaceAbilityWindowStageFunc(int32_t callbackId, int64_t cFuncId,
     cFuncMap.emplace(callbackId, callback);
 }
 
-int32_t CjAbilityLifecycleCallback::Register(CArrI64 cFuncIds, bool isSync)
+int32_t CjAbilityLifecycleCallbackImpl::Register(CArrI64 cFuncIds, bool isSync)
 {
     int32_t callbackId = serialNumber_;
     if (serialNumber_ < INT32_MAX) {
@@ -79,7 +75,7 @@ int32_t CjAbilityLifecycleCallback::Register(CArrI64 cFuncIds, bool isSync)
     return callbackId;
 }
 
-bool CjAbilityLifecycleCallback::UnRegister(int32_t callbackId, bool isSync)
+bool CjAbilityLifecycleCallbackImpl::UnRegister(int32_t callbackId, bool isSync)
 {
     TAG_LOGI(AAFwkTag::APPKIT, "callbackId : %{public}d", callbackId);
     if (isSync) {
@@ -115,7 +111,7 @@ bool CjAbilityLifecycleCallback::UnRegister(int32_t callbackId, bool isSync)
     return onAbilitySaveStatecallbacks_.erase(callbackId) == 1;
 }
 
-void CjAbilityLifecycleCallback::OnAbilityCreate(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityCreate(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityCreate");
     if (!ability) {
@@ -131,7 +127,7 @@ void CjAbilityLifecycleCallback::OnAbilityCreate(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnWindowStageCreate(const int64_t &ability, WindowStagePtr windowStage)
+void CjAbilityLifecycleCallbackImpl::OnWindowStageCreate(const int64_t &ability, WindowStagePtr windowStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageCreate");
     if (!ability || !windowStage) {
@@ -147,7 +143,7 @@ void CjAbilityLifecycleCallback::OnWindowStageCreate(const int64_t &ability, Win
     }
 }
 
-void CjAbilityLifecycleCallback::OnWindowStageActive(const int64_t &ability, WindowStagePtr windowStage)
+void CjAbilityLifecycleCallbackImpl::OnWindowStageActive(const int64_t &ability, WindowStagePtr windowStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageActive");
     if (!ability || !windowStage) {
@@ -163,7 +159,7 @@ void CjAbilityLifecycleCallback::OnWindowStageActive(const int64_t &ability, Win
     }
 }
 
-void CjAbilityLifecycleCallback::OnWindowStageInactive(const int64_t &ability, WindowStagePtr windowStage)
+void CjAbilityLifecycleCallbackImpl::OnWindowStageInactive(const int64_t &ability, WindowStagePtr windowStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageInactive");
     if (!ability || !windowStage) {
@@ -179,7 +175,7 @@ void CjAbilityLifecycleCallback::OnWindowStageInactive(const int64_t &ability, W
     }
 }
 
-void CjAbilityLifecycleCallback::OnWindowStageDestroy(const int64_t &ability, WindowStagePtr windowStage)
+void CjAbilityLifecycleCallbackImpl::OnWindowStageDestroy(const int64_t &ability, WindowStagePtr windowStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageDestroy");
     if (!ability || !windowStage) {
@@ -195,7 +191,7 @@ void CjAbilityLifecycleCallback::OnWindowStageDestroy(const int64_t &ability, Wi
     }
 }
 
-void CjAbilityLifecycleCallback::OnAbilityDestroy(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityDestroy(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityDestroy");
     if (!ability) {
@@ -211,7 +207,7 @@ void CjAbilityLifecycleCallback::OnAbilityDestroy(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnAbilityForeground(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityForeground(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityForeground");
     if (!ability) {
@@ -227,7 +223,7 @@ void CjAbilityLifecycleCallback::OnAbilityForeground(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnAbilityBackground(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityBackground(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityBackground");
     if (!ability) {
@@ -243,7 +239,7 @@ void CjAbilityLifecycleCallback::OnAbilityBackground(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnAbilityContinue(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityContinue(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityContinue");
     if (!ability) {
@@ -260,7 +256,7 @@ void CjAbilityLifecycleCallback::OnAbilityContinue(const int64_t &ability)
 }
 
 // optional callbacks
-void CjAbilityLifecycleCallback::OnAbilityWillCreate(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityWillCreate(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillCreate");
     if (!ability) {
@@ -276,7 +272,7 @@ void CjAbilityLifecycleCallback::OnAbilityWillCreate(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnWindowStageWillCreate(const int64_t &ability, WindowStagePtr windowStage)
+void CjAbilityLifecycleCallbackImpl::OnWindowStageWillCreate(const int64_t &ability, WindowStagePtr windowStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageWillCreate");
     if (!ability || !windowStage) {
@@ -292,7 +288,7 @@ void CjAbilityLifecycleCallback::OnWindowStageWillCreate(const int64_t &ability,
     }
 }
 
-void CjAbilityLifecycleCallback::OnWindowStageWillDestroy(const int64_t &ability, WindowStagePtr windowStage)
+void CjAbilityLifecycleCallbackImpl::OnWindowStageWillDestroy(const int64_t &ability, WindowStagePtr windowStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageWillDestroy");
     if (!ability || !windowStage) {
@@ -308,7 +304,7 @@ void CjAbilityLifecycleCallback::OnWindowStageWillDestroy(const int64_t &ability
     }
 }
 
-void CjAbilityLifecycleCallback::OnAbilityWillDestroy(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityWillDestroy(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillDestroy");
     if (!ability) {
@@ -323,7 +319,7 @@ void CjAbilityLifecycleCallback::OnAbilityWillDestroy(const int64_t &ability)
         callback.second(ability);
     }
 }
-void CjAbilityLifecycleCallback::OnAbilityWillForeground(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityWillForeground(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillForeground");
     if (!ability) {
@@ -338,7 +334,7 @@ void CjAbilityLifecycleCallback::OnAbilityWillForeground(const int64_t &ability)
         callback.second(ability);
     }
 }
-void CjAbilityLifecycleCallback::OnAbilityWillBackground(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityWillBackground(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillBackground");
     if (!ability) {
@@ -354,7 +350,7 @@ void CjAbilityLifecycleCallback::OnAbilityWillBackground(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnNewWant(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnNewWant(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnNewWant");
     if (!ability) {
@@ -370,7 +366,7 @@ void CjAbilityLifecycleCallback::OnNewWant(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnWillNewWant(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnWillNewWant(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWillNewWant");
     if (!ability) {
@@ -386,7 +382,7 @@ void CjAbilityLifecycleCallback::OnWillNewWant(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnAbilityWillContinue(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityWillContinue(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillContinue");
     if (!ability) {
@@ -402,7 +398,7 @@ void CjAbilityLifecycleCallback::OnAbilityWillContinue(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnWindowStageWillRestore(const int64_t &ability, WindowStagePtr windowStage)
+void CjAbilityLifecycleCallbackImpl::OnWindowStageWillRestore(const int64_t &ability, WindowStagePtr windowStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageWillRestore");
     if (!ability || !windowStage) {
@@ -418,7 +414,7 @@ void CjAbilityLifecycleCallback::OnWindowStageWillRestore(const int64_t &ability
     }
 }
 
-void CjAbilityLifecycleCallback::OnWindowStageRestore(const int64_t &ability, WindowStagePtr windowStage)
+void CjAbilityLifecycleCallbackImpl::OnWindowStageRestore(const int64_t &ability, WindowStagePtr windowStage)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnWindowStageRestore");
     if (!ability || !windowStage) {
@@ -434,7 +430,7 @@ void CjAbilityLifecycleCallback::OnWindowStageRestore(const int64_t &ability, Wi
     }
 }
 
-void CjAbilityLifecycleCallback::OnAbilityWillSaveState(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilityWillSaveState(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilityWillSaveState");
     if (!ability) {
@@ -450,7 +446,7 @@ void CjAbilityLifecycleCallback::OnAbilityWillSaveState(const int64_t &ability)
     }
 }
 
-void CjAbilityLifecycleCallback::OnAbilitySaveState(const int64_t &ability)
+void CjAbilityLifecycleCallbackImpl::OnAbilitySaveState(const int64_t &ability)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "methodName = OnAbilitySaveState");
     if (!ability) {

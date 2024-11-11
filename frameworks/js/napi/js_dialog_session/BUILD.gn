@@ -37,7 +37,6 @@ ohos_shared_library("dialogsession_napi") {
   }
   external_deps = [
     "ability_base:extractortool",
-    "ability_base:session_info",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -47,10 +46,10 @@ ohos_shared_library("dialogsession_napi") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "json:nlohmann_json_static",
-    "jsoncpp:jsoncpp",
+    "ipc:ipc_napi",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "window_manager:libwm",
   ]
 
   cflags_cc = []
