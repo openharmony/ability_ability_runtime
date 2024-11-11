@@ -752,15 +752,6 @@ bool AmsMgrScheduler::IsProcessAttached(sptr<IRemoteObject> token)
     return amsMgrServiceInner_->IsProcessAttached(token);
 }
 
-bool AmsMgrScheduler::IsAppKilling(sptr<IRemoteObject> token)
-{
-    if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
-        return false;
-    }
-    return amsMgrServiceInner_->IsAppKilling(token);
-}
-
 void AmsMgrScheduler::SetAppExceptionCallback(sptr<IRemoteObject> callback)
 {
     if (!IsReady()) {

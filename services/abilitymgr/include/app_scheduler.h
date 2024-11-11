@@ -568,8 +568,6 @@ public:
 
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
-    bool IsAppKilling(sptr<IRemoteObject> token) const;
-
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.

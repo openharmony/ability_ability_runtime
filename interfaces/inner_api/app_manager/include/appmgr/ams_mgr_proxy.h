@@ -400,8 +400,6 @@ public:
      */
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
-    virtual bool IsAppKilling(sptr<IRemoteObject> token) override;
-
     virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) override;
 
 private:

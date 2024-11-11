@@ -355,7 +355,7 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         loadParam, abilityInfo_, abilityInfo_.applicationInfo, want_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
-    want_.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
+    want_.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     SetLoadState(AbilityLoadState::LOADING);
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName)) {
         SetAttachDebug(true);

@@ -1344,28 +1344,6 @@ bool AmsMgrProxy::IsProcessAttached(sptr<IRemoteObject> token)
     return reply.ReadBool();
 }
 
-bool AmsMgrProxy::IsAppKilling(sptr<IRemoteObject> token)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
-        return false;
-    }
-    if (!data.WriteRemoteObject(token.GetRefPtr())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
-        return false;
-    }
-
-    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_APP_KILLING), data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, error code is %{public}d.", ret);
-        return false;
-    }
-    return reply.ReadBool();
-}
-
 void AmsMgrProxy::SetAppExceptionCallback(sptr<IRemoteObject> callback)
 {
     MessageParcel data;
