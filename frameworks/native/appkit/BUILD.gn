@@ -186,6 +186,10 @@ ohos_shared_library("appkit_native") {
     "faultloggerd:libdfx_procinfo",
     "faultloggerd:libfaultloggerd",
     "ffrt:libffrt",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:EGL",
+    "graphic_2d:libcomposer",
+    "graphic_2d:librender_service_base",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -193,8 +197,11 @@ ohos_shared_library("appkit_native") {
     "i18n:preferred_language",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "preferences:native_preferences",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -315,6 +322,7 @@ ohos_shared_library("app_context") {
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -386,6 +394,7 @@ ohos_shared_library("app_context_utils") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -456,9 +465,11 @@ ohos_shared_library("appkit_delegator") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   public_external_deps = [ "ability_base:configuration" ]
@@ -547,7 +558,6 @@ ohos_shared_library("application_context_manager") {
   }
 
   external_deps = [
-    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "napi:ace_napi",
   ]

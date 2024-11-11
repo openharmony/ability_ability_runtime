@@ -253,6 +253,7 @@ ohos_source_set("abilityms_test_source") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "kv_store:distributeddata_inner",
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",

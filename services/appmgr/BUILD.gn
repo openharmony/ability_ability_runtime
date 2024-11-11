@@ -122,6 +122,7 @@ ohos_shared_library("libappms") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hicollie:libhicollie",
     "hilog:libhilog",
@@ -177,6 +178,9 @@ ohos_shared_library("libappms") {
 
   if (ability_runtime_app_no_response_dialog) {
     defines += [ "APP_NO_RESPONSE_DIALOG" ]
+  }
+  if (app_mgr_service_hicollie_enable) {
+    defines += [ "APP_MGR_SERVICE_HICOLLIE_ENABLE" ]
   }
   cflags += [ "-DAPP_NO_RESPONSE_BUNDLENAME=\"${ability_runtime_app_no_response_bundlename}\"" ]
 
