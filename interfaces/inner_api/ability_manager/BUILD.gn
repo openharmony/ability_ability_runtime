@@ -143,9 +143,12 @@ ohos_shared_library("ability_manager") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "jsoncpp:jsoncpp",
     "relational_store:native_dataability",
     "samgr:samgr_proxy",
   ]
+
   if (host_cpu != "arm64") {
     external_deps += [ "relational_store:native_rdb" ]
   }
@@ -273,6 +276,9 @@ ohos_shared_library("ability_manager_c") {
   external_deps = [
     "ability_base:session_info",
     "c_utils:utils",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
   ]
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
