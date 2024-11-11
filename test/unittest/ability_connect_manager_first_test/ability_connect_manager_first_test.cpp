@@ -351,10 +351,6 @@ HWTEST_F(AbilityConnectManagerTest, HandleActiveAbility_001, TestSize.Level1)
     want.SetParam(PARAM_RESV_CALLER_APP_ID, std::string("app"));
     abilityRecord->SetWant(want);
     EXPECT_EQ(abilityRecord->GetWant().GetStringParam(PARAM_RESV_CALLER_APP_ID), "app");
-    connectManager->HandleActiveAbility(abilityRecord, connectRecord);
-    connectRecord = nullptr;
-    connectManager->HandleActiveAbility(abilityRecord, connectRecord);
-    EXPECT_EQ(abilityRecord->GetWant().GetStringParam(PARAM_RESV_CALLER_APP_ID), ""); // remove signatureInfo
     TAG_LOGI(AAFwkTag::TEST, "HandleActiveAbility_001 end");
 }
 

@@ -64,6 +64,12 @@ public:
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
     /**
+     * @brief Notify abilityms start keep-alive process.
+     * @param bundleInfos resident process bundle infos.
+     */
+    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
+
+    /**
      * @brief Notify abilityms app process OnRemoteDied
      * @param abilityTokens abilities in died process.
      */
@@ -82,7 +88,8 @@ public:
         TRANSACT_ON_NOTIFY_CONFIG_CHANGE,
         TRANSACT_ON_NOTIFY_START_RESIDENT_PROCESS,
         TRANSACT_ON_APP_REMOTE_DIED,
-        TRANSACT_ON_APP_PRE_CACHE
+        TRANSACT_ON_APP_PRE_CACHE,
+        TRANSACT_ON_NOTIFY_START_KEEP_ALIVE_PROCESS
     };
 };
 }  // namespace AppExecFwk

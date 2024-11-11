@@ -34,6 +34,7 @@
 #include "ability_info.h"
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
+#include "ability_keep_alive_service.h"
 #include "ams_configuration_parameter.h"
 #include "app_debug_listener_interface.h"
 #include "app_exit_reason_helper.h"
@@ -75,6 +76,7 @@ class IStatusBarDelegate;
 }
 namespace Rosen {
 class FocusChangeInfo;
+class WindowVisibilityInfo;
 }
 
 namespace AAFwk {
@@ -87,6 +89,7 @@ constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 using OHOS::AppExecFwk::IAbilityController;
 struct StartAbilityInfo;
 class WindowFocusChangedListener;
+class WindowVisibilityChangedListener;
 
 /**
  * @class AbilityManagerService
@@ -846,7 +849,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = false) override;
+    virtual int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0) override;
 
     /**
      * Uninstall app
@@ -1196,6 +1199,9 @@ public:
     void HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
+
+    void HandleWindowVisibilityChanged(
+        const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
 
     virtual int GetDialogSessionInfo(const std::string &dialogSessionId,
         sptr<DialogSessionInfo> &dialogSessionInfo) override;
@@ -1765,8 +1771,6 @@ public:
      */
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
 
-    void HandleRestartResidentProcessDependedOnWeb();
-
     /**
      * Open atomic service window prior to finishing free install.
      *
@@ -1783,6 +1787,8 @@ public:
 
     void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
         const std::string& reason);
+
+    void HandleRestartResidentProcessDependedOnWeb();
 
     int32_t TerminateMission(int32_t missionId) override;
 
@@ -1813,6 +1819,46 @@ public:
 
     int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable, int32_t userId);
+
+    bool IsInStatusBar(uint32_t accessTokenId);
+
+    /**
+     * Set keep-alive flag for application under a specific user.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAlive(const std::string &bundleName, int32_t userId, bool flag) override;
+
+    /**
+     * Get keep-alive applications by EDM.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplications(int32_t appType, int32_t userId,
+        std::vector<KeepAliveInfo> &list) override;
+
+    /**
+     * Set keep-alive flag for application under a specific user by EDM.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag) override;
+
+    /**
+     * Get keep-alive applications by EDM.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId,
+        std::vector<KeepAliveInfo> &list) override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1846,6 +1892,8 @@ protected:
     void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
 
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+
+    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     /**
      * @brief Notify abilityms app process pre cache
@@ -1921,6 +1969,9 @@ private:
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
     int StartAbilityPrechainInterceptor(StartAbilityParams &params);
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
+    void InitWindowVisibilityChangedListener();
+    void FreeWindowVisibilityChangedListener();
+    bool CheckProcessIsBackground(int32_t pid, AbilityState currentState);
 
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
@@ -2018,6 +2069,8 @@ private:
     bool IsNeedTimeoutForTest(const std::string &abilityName, const std::string &state) const;
 
     void StartResidentApps(int32_t userId);
+
+    void StartKeepAliveApps(int32_t userId);
 
     void StartAutoStartupApps();
     void RetryStartAutoStartupApps(const std::vector<AutoStartupInfo> &infoList, int32_t retryCount);
@@ -2255,8 +2308,9 @@ private:
 
     void WaitBootAnimationStart();
 
-    int32_t SignRestartAppFlag(int32_t userId, int32_t uid, bool isAppRecovery = false);
-    int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex);
+    int32_t SignRestartAppFlag(int32_t userId, int32_t uid, const std::string &instanceKey,
+        AppExecFwk::MultiAppModeType type, bool isAppRecovery = false);
+    int32_t CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId);
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
         bool isPendingWantCaller, int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
@@ -2307,6 +2361,8 @@ private:
 
     void SetMinimizedDuringFreeInstall(const sptr<SessionInfo>& sessionInfo);
 
+    bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
+
     /**
      * @brief Check debug app in developer mode.
      * @param applicationInfo. The application info.
@@ -2321,8 +2377,7 @@ private:
      */
     void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
 
-    bool CheckWorkSchedulerPermission(const sptr<IRemoteObject> &callerToken, const uint32_t uid);
-
+    sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
@@ -2334,10 +2389,13 @@ private:
     std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;
+    std::unordered_set<int32_t> windowVisibleList_;
+
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;
     ffrt::mutex preStartSessionMapLock_;
+    ffrt::mutex windowVisibleListLock_;
 
     std::multimap<std::string, std::string> timeoutMap_;
     std::map<std::string, sptr<SessionInfo>> preStartSessionMap_;

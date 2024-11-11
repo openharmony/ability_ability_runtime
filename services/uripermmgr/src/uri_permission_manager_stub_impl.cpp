@@ -47,6 +47,7 @@ constexpr uint32_t FLAG_WRITE_URI = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_READ_URI = Want::FLAG_AUTH_READ_URI_PERMISSION;
 constexpr const char* CLOUND_DOCS_URI_MARK = "?networkid=";
 constexpr uint32_t INVALID_ABILITYID = -1;
+constexpr const char* FOUNDATION_PROCESS = "foundation";
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId)
@@ -124,11 +125,11 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
     const std::string targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t abilityId)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri:%{private}s", uri.ToString().c_str());
-    if (!UPMSUtils::IsSAOrSystemAppCall()) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "not SA/SystemApp");
-        return CHECK_PERMISSION_FAILED;
-    }
     std::vector<Uri> uriVec = { uri };
+    if (UPMSUtils::IsSystemAppCall(initiatorTokenId) && uriVec[0].GetScheme() != "file") {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Only support file uri");
+        return ERR_CODE_INVALID_URI_TYPE;
+    }
     return GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId, abilityId);
 }
 
@@ -592,9 +593,10 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
         return ERR_CODE_INVALID_URI_TYPE;
     }
     uint32_t targetTokenId = 0;
-    if (UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, targetTokenId) != ERR_OK) {
+    auto ret = UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, targetTokenId);
+    if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "get tokenId by bundleName fail");
-        return INNER_ERR;
+        return ret;
     }
 
     auto uriStr = uri.ToString();
@@ -872,5 +874,61 @@ bool UriPermissionManagerStubImpl::CheckUriTypeIsValid(Uri uri)
     }
     return true;
 }
+
+int32_t UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t tokenId)
+{
+    bool isCallingPermission =
+        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
+    if (!isCallingPermission) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    std::lock_guard<std::mutex> lock(ptMapMutex_);
+    if (permissionTokenMap_.find(tokenId) == permissionTokenMap_.end()) {
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "permissionTokenMap_ empty");
+        return ERR_OK;
+    }
+    uint64_t timeNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    auto ret = SandboxManagerKit::UnSetAllPolicyByToken(tokenId, timeNow);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "ClearPermission failed, ret is %{public}d", ret);
+        return ret;
+    }
+    permissionTokenMap_.erase(tokenId);
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    return ERR_OK;
+}
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+int32_t UriPermissionManagerStubImpl::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
+{
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    bool isTerminating = false;
+    if (appMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "appMgr_ null");
+        return INNER_ERR;
+    }
+    if (IN_PROCESS_CALL(appMgr_->IsTerminatingByPid(callingPid, isTerminating)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IsTerminatingByPid failed");
+        return INNER_ERR;
+    }
+    if (isTerminating) {
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "app is terminating");
+        return ERR_OK;
+    }
+    uint64_t timeNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    auto ret = SandboxManagerKit::StartAccessingPolicy(policy, result, false, tokenId, timeNow);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "StartAccessingPolicy failed");
+        return ret;
+    }
+    permissionTokenMap_.insert(tokenId);
+    return ERR_OK;
+}
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk
 }  // namespace OHOS

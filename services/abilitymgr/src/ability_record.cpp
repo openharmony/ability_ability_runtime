@@ -32,6 +32,7 @@
 #include "global_constant.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
+#include "keep_alive_process_manager.h"
 #include "multi_instance_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
@@ -41,6 +42,7 @@
 #include "system_ability_token_callback.h"
 #include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
+#include "param.h"
 #include "permission_constants.h"
 #include "process_options.h"
 #include "uri_utils.h"
@@ -164,6 +166,7 @@ CallerRecord::CallerRecord(int requestCode, std::weak_ptr<AbilityRecord> caller)
         callerInfo_->callerTokenId = callerAbilityRecord->GetApplicationInfo().accessTokenId;
         callerInfo_->callerUid =  callerAbilityRecord->GetUid();
         callerInfo_->callerPid =  callerAbilityRecord->GetPid();
+        callerInfo_->callerAppCloneIndex = callerAbilityRecord->GetAppIndex();
     }
 }
 
@@ -308,7 +311,7 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, FreezeUtil::TimeoutState::LOAD, methodName);
 }
 
-int AbilityRecord::LoadAbility()
+int AbilityRecord::LoadAbility(bool isShellCall)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -320,37 +323,41 @@ int AbilityRecord::LoadAbility()
     }
 
     std::string appName = abilityInfo_.applicationInfo.name;
-    if (appName.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "app name empty");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!CanRestartRootLauncher()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "root launcher restart out of max");
-        return ERR_INVALID_VALUE;
-    }
+    CHECK_TRUE_RETURN_RET(appName.empty(), ERR_INVALID_VALUE, "app name empty");
+    CHECK_TRUE_RETURN_RET(!CanRestartRootLauncher(), ERR_INVALID_VALUE, "root launcher restart out of max");
 
     if (isRestarting_) {
         restartTime_ = AbilityUtil::SystemTimeMillis();
     }
 
-    sptr<Token> callerToken_ = nullptr;
+    sptr<Token> callerToken = nullptr;
     if (!callerList_.empty() && callerList_.back()) {
         auto caller = callerList_.back()->GetCaller();
         if (caller) {
-            callerToken_ = caller->GetToken();
+            callerToken = caller->GetToken();
         }
     }
 
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
+    AbilityRuntime::LoadParam loadParam;
+    loadParam.abilityRecordId = recordId_;
+    loadParam.isShellCall = Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ? isShellCall
+        : AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    loadParam.token = token_;
+    loadParam.preToken = callerToken;
+    loadParam.instanceKey = instanceKey_;
+    want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
+    if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
+        want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
+        loadParam.isKeepAlive = true;
+    }
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token_, callerToken_, abilityInfo_, abilityInfo_.applicationInfo, want_, recordId_, instanceKey_);
+        loadParam, abilityInfo_, abilityInfo_.applicationInfo, want_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
+    want_.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
     SetLoadState(AbilityLoadState::LOADING);
-
-    auto isAttachDebug = DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName);
-    if (isAttachDebug) {
+    if (DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName)) {
         SetAttachDebug(true);
     }
     return result;
@@ -448,7 +455,7 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag)
+void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag, bool isShellCall)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetElementName().GetURI();
@@ -476,7 +483,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
     } else {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        LoadAbility();
+        LoadAbility(isShellCall);
     }
 }
 
@@ -489,10 +496,10 @@ void AbilityRecord::PostForegroundTimeoutTask()
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * FOREGROUND_TIMEOUT_MULTIPLE;
     SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, foregroundTimeout / HALF_TIMEOUT);
     SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, foregroundTimeout);
-    std::string methodName = "ForegroundAbility";
+    std::string methodName = "ProcessForegroundAbility";
     g_addLifecycleEventTask(token_, FreezeUtil::TimeoutState::FOREGROUND, methodName);
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
-        foregroundTimeout);
+        foregroundTimeout, GetAbilityRecordId());
 }
 
 void AbilityRecord::RemoveForegroundTimeoutTask()
@@ -534,7 +541,7 @@ void AbilityRecord::PostUIExtensionAbilityTimeoutTask(uint32_t messageId)
             SendEvent(AbilityManagerService::FOREGROUND_HALF_TIMEOUT_MSG, timeout / HALF_TIMEOUT, recordId_, true);
             SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, timeout, recordId_, true);
             ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_BEGIN, GetPid(), GetUid(),
-                timeout);
+                timeout, GetAbilityRecordId());
             break;
         }
         default: {
@@ -1444,7 +1451,8 @@ void AbilityRecord::SetAbilityState(AbilityState state)
         SetRestarting(false);
     }
     if (state == AbilityState::FOREGROUND) {
-        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_END, GetPid(), GetUid());
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::FOREGROUND_END, GetPid(),
+            GetUid(), 0, GetAbilityRecordId());
     }
 }
 #endif // SUPPORT_SCREEN
@@ -1503,7 +1511,11 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
 void AbilityRecord::AfterLoaded()
 {
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(GetPid());
-    ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(), GetUid());
+    if (GetAbilityInfo().extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
+        ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::LOAD_END, GetPid(),
+            GetUid(), 0, GetAbilityRecordId());
+    }
+
     if (IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Sceneboard Added");
     }
@@ -3748,6 +3760,18 @@ void AbilityRecord::UpdateDmsCallerInfo(Want &want)
     want.RemoveParam(DMS_CALLER_APP_ID);
     want.SetParam(Want::PARAM_RESV_CALLER_APP_IDENTIFIER, want.GetStringParam(DMS_CALLER_APP_IDENTIFIER));
     want.RemoveParam(DMS_CALLER_APP_IDENTIFIER);
+}
+
+void AbilityRecord::SetDebugUIExtension()
+{
+    if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not UIExtension");
+        return;
+    }
+    std::lock_guard guard(wantLock_);
+    want_.SetParam(DEBUG_APP, true);
+    launchDebugInfo_.isDebugAppSet = true;
+    launchDebugInfo_.debugApp = true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

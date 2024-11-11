@@ -33,7 +33,7 @@ public:
     {
         return std::make_shared<MockTaskHandlerWrap>();
     }
-    MockTaskHandlerWrap() = default;
+    MockTaskHandlerWrap() : TaskHandlerWrap("MockTaskHandlerWrap") {}
     MockTaskHandlerWrap(TaskHandlerWrap &) = delete;
     void operator=(MockTaskHandlerWrap &) = delete;
     virtual ~MockTaskHandlerWrap() {}

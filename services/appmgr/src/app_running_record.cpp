@@ -48,30 +48,26 @@ constexpr const char *EVENT_KEY_SUPPORT_STATE = "SUPPORT_STATE";
 int64_t AppRunningRecord::appEventId_ = 0;
 
 RenderRecord::RenderRecord(pid_t hostPid, const std::string &renderParam,
-                           int32_t ipcFd, int32_t sharedFd, int32_t crashFd,
+                           FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
                            const std::shared_ptr<AppRunningRecord> &host)
-    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(ipcFd),
-      sharedFd_(sharedFd), crashFd_(crashFd), host_(host) {}
+    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(std::move(ipcFd)),
+      sharedFd_(std::move(sharedFd)), crashFd_(std::move(crashFd)), host_(host) {}
 
 RenderRecord::~RenderRecord()
-{
-    close(sharedFd_);
-    close(ipcFd_);
-    close(crashFd_);
-}
+{}
 
 std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(
-    pid_t hostPid, const std::string &renderParam, int32_t ipcFd,
-    int32_t sharedFd, int32_t crashFd,
+    pid_t hostPid, const std::string &renderParam,
+    FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
     const std::shared_ptr<AppRunningRecord> &host)
 {
-    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 ||
-        crashFd <= 0 || !host) {
+    if (hostPid <= 0 || renderParam.empty() || ipcFd.Get() <= 0 || sharedFd.Get() <= 0 ||
+        crashFd.Get() <= 0 || !host) {
         return nullptr;
     }
 
     auto renderRecord = std::make_shared<RenderRecord>(
-        hostPid, renderParam, ipcFd, sharedFd, crashFd, host);
+        hostPid, renderParam, std::move(ipcFd), std::move(sharedFd), std::move(crashFd), host);
     renderRecord->SetHostUid(host->GetUid());
     renderRecord->SetHostBundleName(host->GetBundleName());
     renderRecord->SetProcessName(host->GetProcessName());
@@ -140,17 +136,17 @@ std::string RenderRecord::GetRenderParam() const
 
 int32_t RenderRecord::GetIpcFd() const
 {
-    return ipcFd_;
+    return ipcFd_.Get();
 }
 
 int32_t RenderRecord::GetSharedFd() const
 {
-    return sharedFd_;
+    return sharedFd_.Get();
 }
 
 int32_t RenderRecord::GetCrashFd() const
 {
-    return crashFd_;
+    return crashFd_.Get();
 }
 
 ProcessType RenderRecord::GetProcessType() const
@@ -357,6 +353,11 @@ void AppRunningRecord::SetUid(const int32_t uid)
     mainUid_ = uid;
 }
 
+int32_t AppRunningRecord::GetUserId() const
+{
+    return mainUid_ / BASE_USER_RANGE;
+}
+
 ApplicationState AppRunningRecord::GetState() const
 {
     return curState_;
@@ -496,6 +497,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
     launchData.SetIsNeedPreloadModule(isNeedPreloadModule_);
+    launchData.SetNWebPreload(isAllowedNWebPreload_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
@@ -1177,6 +1179,9 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     }
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
+    if (abilityRecord) {
+        TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
+    }
     if (!isTimeout) {
         StateChangedNotifyObserver(
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
@@ -1453,9 +1458,19 @@ bool AppRunningRecord::IsKeepAliveApp() const
     return true;
 }
 
+bool AppRunningRecord::IsKeepAliveDkv() const
+{
+    return isKeepAliveDkv_;
+}
+
 void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 {
     isKeepAliveRdb_ = isKeepAliveEnable;
+}
+
+void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
+{
+    isKeepAliveDkv_ = isKeepAliveDkv;
 }
 
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)
@@ -2541,5 +2556,19 @@ void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
     isNeedPreloadModule_ = isNeedPreloadModule;
 }
 
+void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)
+{
+    isAllowedNWebPreload_ = isAllowedNWebPreload;
+}
+
+void AppRunningRecord::SetIsUnSetPermission(bool isUnSetPermission)
+{
+    isUnSetPermission_ = isUnSetPermission;
+}
+
+bool AppRunningRecord::IsUnSetPermission()
+{
+    return isUnSetPermission_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

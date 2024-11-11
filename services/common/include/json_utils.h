@@ -24,15 +24,60 @@
 
 namespace OHOS {
 namespace AAFwk {
+/**
+ * @class JsonUtils
+ * provides json utilities.
+ */
 class JsonUtils {
 public:
+    /**
+     * GetInstance, get an instance of JsonUtils.
+     *
+     * @return an instance of JsonUtils.
+     */
     static JsonUtils &GetInstance()
     {
         static JsonUtils instance;
         return instance;
     }
+
+    /**
+     * JsonUtils, destructor.
+     *
+     */
     ~JsonUtils() = default;
+
+    /**
+     * LoadConfiguration, load configuration.
+     *
+     * @param path The json file path.
+     * @param jsonBuf The json buffer to be returned.
+     * @param defaultPath The default output path.
+     * @return Whether or not the load operation succeeds.
+     */
     bool LoadConfiguration(const std::string& path, nlohmann::json& jsonBuf, const std::string& defaultPath = "");
+
+    /**
+     * IsEqual, check if json object contains certain key.
+     *
+     * @param jsonObject The json object.
+     * @param key The key.
+     * @param value The string value.
+     * @param checkEmpty The flag indicates whether the value can be empty.
+     * @return Whether or not the json object contains certain key.
+     */
+    bool IsEqual(nlohmann::json &jsonObject, const std::string &key,
+        const std::string &value, bool checkEmpty = false);
+    
+    /**
+     * IsEqual, check if json object contains certain key.
+     *
+     * @param jsonObject The json object.
+     * @param key The key.
+     * @param value The int32_t value.
+     * @return Whether or not the json object contains certain key.
+     */
+    bool IsEqual(nlohmann::json &jsonObject, const std::string &key, int32_t value);
 
 private:
     std::string GetConfigPath(const std::string& path, const std::string& defaultPath);

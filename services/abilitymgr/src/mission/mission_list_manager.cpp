@@ -1074,8 +1074,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
                 continue;
             }
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -1092,8 +1092,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                     continue;
                 }
                 auto abilityRecord = missionInfo->GetAbilityRecord();
-                if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                    info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+                if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                     abilityRecord->SetAppState(info.state);
                 }
             }
@@ -1105,8 +1105,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 continue;
             }
             auto abilityRecord = missionInfo->GetAbilityRecord();
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -1117,8 +1117,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 continue;
             }
             auto abilityRecord = missionInfo->GetAbilityRecord();
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -4272,20 +4272,20 @@ void MissionListManager::SendKeyEvent(const AbilityRequest &abilityRequest)
     EventReport::SendKeyEvent(EventName::START_PRIVATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
-void MissionListManager::SignRestartAppFlag(int32_t uid)
+void MissionListManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     std::lock_guard guard(managerLock_);
     for (const auto& missionList : currentMissionLists_) {
         if (!missionList) {
             continue;
         }
-        missionList->SignRestartAppFlag(uid);
+        missionList->SignRestartAppFlag(uid, instanceKey);
     }
     if (defaultStandardList_) {
-        defaultStandardList_->SignRestartAppFlag(uid);
+        defaultStandardList_->SignRestartAppFlag(uid, instanceKey);
     }
     if (defaultSingleList_) {
-        defaultSingleList_->SignRestartAppFlag(uid);
+        defaultSingleList_->SignRestartAppFlag(uid, instanceKey);
     }
 }
 

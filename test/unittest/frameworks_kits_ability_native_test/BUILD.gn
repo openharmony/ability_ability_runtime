@@ -38,7 +38,6 @@ config("module_private_config") {
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
-
     "${ability_runtime_services_path}/common/include",
     "${distributeddatamgr_path}/distributeddatamgr/interfaces/innerkits/app_distributeddata/include",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
@@ -413,7 +412,6 @@ ohos_unittest("data_ability_helper_test") {
   include_dirs = [
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
-
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
   ]
@@ -470,7 +468,6 @@ ohos_unittest("data_ability_helper_impl_test") {
   include_dirs = [
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
-
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
@@ -1302,7 +1299,6 @@ ohos_unittest("data_ability_impl_test") {
   include_dirs = [
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
-
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_base_kits_path}/extractortool/include",
     "${distributeddatamgr_path}/relational_store/frameworks/js/napi/rdb/include",

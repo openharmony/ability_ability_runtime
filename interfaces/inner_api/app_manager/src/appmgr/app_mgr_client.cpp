@@ -274,13 +274,13 @@ AppMgrResultCode AppMgrClient::UpdateApplicationInfoInstalled(const std::string 
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::KillApplication(const std::string &bundleName, bool const clearPageStack)
+AppMgrResultCode AppMgrClient::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t result = amsService->KillApplication(bundleName, clearPageStack);
+            int32_t result = amsService->KillApplication(bundleName, clearPageStack, appIndex);
             if (result == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }
@@ -688,6 +688,14 @@ void AppMgrClient::SetKeepAliveEnableState(const std::string &bundleName, bool e
     amsService_->SetKeepAliveEnableState(bundleName, enable, uid);
 }
 
+void AppMgrClient::SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid)
+{
+    if (!IsAmsServiceReady()) {
+        return;
+    }
+    amsService_->SetKeepAliveDkv(bundleName, enable, uid);
+}
+
 void AppMgrClient::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
     int32_t requestId)
 {
@@ -737,7 +745,8 @@ AppMgrResultCode AppMgrClient::UpdateConfiguration(const Configuration &config, 
     return AppMgrResultCode::RESULT_OK;
 }
 
-AppMgrResultCode AppMgrClient::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name)
+AppMgrResultCode AppMgrClient::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+    int32_t appIndex)
 {
     if (!mgrHolder_) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
@@ -746,7 +755,7 @@ AppMgrResultCode AppMgrClient::UpdateConfigurationByBundleName(const Configurati
     if (service == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    service->UpdateConfigurationByBundleName(config, name);
+    service->UpdateConfigurationByBundleName(config, name, appIndex);
     return AppMgrResultCode::RESULT_OK;
 }
 
@@ -1345,22 +1354,6 @@ AppMgrResultCode AppMgrClient::BlockProcessCacheByPids(const std::vector<int32_t
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-bool AppMgrClient::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "get appmgrservice is nullptr.");
-        return false;
-    }
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "get abilityms service is nullptr.");
-        return false;
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "call");
-    return amsService->CleanAbilityByUserRequest(token);
-}
-
 bool AppMgrClient::IsKilledForUpgradeWeb(const std::string &bundleName)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1375,6 +1368,22 @@ bool AppMgrClient::IsKilledForUpgradeWeb(const std::string &bundleName)
     }
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     return amsService->IsKilledForUpgradeWeb(bundleName);
+}
+
+bool AppMgrClient::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get appmgrservice is nullptr.");
+        return false;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get abilityms service is nullptr.");
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    return amsService->CleanAbilityByUserRequest(token);
 }
 
 bool AppMgrClient::IsProcessAttached(sptr<IRemoteObject> token) const
@@ -1401,6 +1410,16 @@ bool AppMgrClient::IsAppKilling(sptr<IRemoteObject> token) const
         return false;
     }
     return amsService->IsAppKilling(token);
+}
+
+AppMgrResultCode AppMgrClient::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+    bool &isRunning)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        return AppMgrResultCode(service->IsAppRunning(bundleName, appCloneIndex, isRunning));
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

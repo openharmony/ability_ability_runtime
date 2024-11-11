@@ -25,6 +25,7 @@
 #include "app_death_recipient.h"
 #include "app_mgr_constants.h"
 #include "datetime_ex.h"
+#include "fd_guard.h"
 #include "freeze_util.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
@@ -42,6 +43,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+using AAFwk::FdGuard;
 constexpr const char* OPTION_KEY_HELP = "-h";
 constexpr const char* OPTION_KEY_DUMP_IPC = "--ipc";
 constexpr const char* OPTION_KEY_DUMP_FFRT = "--ffrt";
@@ -149,6 +151,7 @@ ErrCode AppMgrService::Init()
 
     taskHandler_ = AAFwk::TaskHandlerWrap::CreateConcurrentQueueHandler("app_mgr_task_queue",
         DEFAULT_CONCURRENT_NUMBER);
+    taskHandler_->SetPrintTaskLog(true);
     eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrServiceInner_);
     appMgrServiceInner_->SetTaskHandler(taskHandler_);
     appMgrServiceInner_->SetEventHandler(eventHandler_);
@@ -465,6 +468,28 @@ int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
         return ERR_OK;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "current app is not a sandbox.");
+    return ERR_OK;
+}
+
+int32_t AppMgrService::IsTerminatingByPid(pid_t pid, bool &isTerminating)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    bool isCallingPermission =
+        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
+    if (!isCallingPermission) {
+        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        return ERR_PERMISSION_DENIED;
+    }
+    auto appRunningRecord = appMgrServiceInner_->GetAppRunningRecordByPid(pid);
+    if (appRunningRecord && appRunningRecord->IsTerminating()) {
+        isTerminating = true;
+        TAG_LOGD(AAFwkTag::APPMGR, "current pid %{public}d is terminating.", pid);
+        return ERR_OK;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "current pid %{public}d is not terminating.", pid);
     return ERR_OK;
 }
 
@@ -922,7 +947,7 @@ void AppMgrService::ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::
     auto task = [appMgrServiceInner = appMgrServiceInner_, recordId, want, flag]() {
         appMgrServiceInner->ScheduleAcceptWantDone(recordId, want, flag);
     };
-    taskHandler_->SubmitTask(task);
+    taskHandler_->SubmitTask(task, "ScheduleAcceptWantDone");
 }
 
 void AppMgrService::ScheduleNewProcessRequestDone(const int32_t recordId, const AAFwk::Want &want,
@@ -938,7 +963,10 @@ void AppMgrService::ScheduleNewProcessRequestDone(const int32_t recordId, const 
     auto task = [appMgrServiceInner = appMgrServiceInner_, recordId, want, flag]() {
         appMgrServiceInner->ScheduleNewProcessRequestDone(recordId, want, flag);
     };
-    taskHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+    taskHandler_->SubmitTask(task, AAFwk::TaskAttribute{
+        .taskName_ = "ScheduleNewProcessRequestDone",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 int AppMgrService::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens)
@@ -969,13 +997,16 @@ int32_t AppMgrService::PreStartNWebSpawnProcess()
 int32_t AppMgrService::StartRenderProcess(const std::string &renderParam, int32_t ipcFd,
     int32_t sharedFd, int32_t crashFd, pid_t &renderPid, bool isGPU)
 {
+    FdGuard ipcFdGuard(ipcFd);
+    FdGuard sharedFdGuard(sharedFd);
+    FdGuard crashFdGuard(crashFd);
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
 
-    return appMgrServiceInner_->StartRenderProcess(IPCSkeleton::GetCallingPid(),
-        renderParam, ipcFd, sharedFd, crashFd, renderPid, isGPU);
+    return appMgrServiceInner_->StartRenderProcess(IPCSkeleton::GetCallingPid(), renderParam,
+        std::move(ipcFdGuard), std::move(sharedFdGuard), std::move(crashFdGuard), renderPid, isGPU);
 }
 
 void AppMgrService::AttachRenderProcess(const sptr<IRemoteObject> &scheduler)
@@ -1036,13 +1067,14 @@ int32_t AppMgrService::UpdateConfiguration(const Configuration& config, const in
     return appMgrServiceInner_->UpdateConfiguration(config, userId);
 }
 
-int32_t AppMgrService::UpdateConfigurationByBundleName(const Configuration& config, const std::string &name)
+int32_t AppMgrService::UpdateConfigurationByBundleName(const Configuration& config, const std::string &name,
+    int32_t appIndex)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->UpdateConfigurationByBundleName(config, name);
+    return appMgrServiceInner_->UpdateConfigurationByBundleName(config, name, appIndex);
 }
 
 int32_t AppMgrService::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
@@ -1371,10 +1403,15 @@ int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCl
 int32_t AppMgrService::StartChildProcess(pid_t &childPid, const ChildProcessRequest &request)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::vector<FdGuard> fds;
+    for (const auto &[name, fd] : request.args.fds) {
+        fds.emplace_back(fd);
+    }
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
+
     return appMgrServiceInner_->StartChildProcess(IPCSkeleton::GetCallingPid(), childPid, request);
 }
 
@@ -1474,7 +1511,7 @@ int32_t AppMgrService::UpdateRenderState(pid_t renderPid, int32_t state)
     return appMgrServiceInner_->UpdateRenderState(renderPid, state);
 }
 
-int32_t AppMgrService::SignRestartAppFlag(int32_t uid)
+int32_t AppMgrService::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
@@ -1486,7 +1523,7 @@ int32_t AppMgrService::SignRestartAppFlag(int32_t uid)
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return ERR_PERMISSION_DENIED;
     }
-    return appMgrServiceInner_->SignRestartAppFlag(uid);
+    return appMgrServiceInner_->SignRestartAppFlag(uid, instanceKey);
 }
 
 int32_t AppMgrService::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId)
@@ -1667,19 +1704,14 @@ int32_t AppMgrService::CheckIsKiaProcess(pid_t pid, bool &isKia)
     return appMgrServiceInner_->CheckIsKiaProcess(pid, isKia);
 }
 
-int32_t AppMgrService::GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+int32_t AppMgrService::KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
+    const std::string& reason)
 {
-    bool isCallingPermission =
-        AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
-    if (!isCallingPermission) {
-        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
-        return ERR_PERMISSION_DENIED;
-    }
     if (!appMgrServiceInner_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
         return ERR_INVALID_VALUE;
     }
-    return appMgrServiceInner_->GetAppIndexByPid(pid, appIndex);
+    return appMgrServiceInner_->KillAppSelfWithInstanceKey(instanceKey, clearPageStack, reason);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

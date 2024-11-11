@@ -49,7 +49,7 @@ void WindowVisibilityChangedListener::OnWindowVisibilityChanged(
         }
         serviceInner->HandleWindowVisibilityChanged(windowVisibilityInfos);
     };
-    taskHandler_->SubmitTask(task);
+    taskHandler_->SubmitTask(task, "OnWindowVisibilityChanged");
 }
 #endif // SUPPORT_SCREEN
 } // namespace AppExecFwk

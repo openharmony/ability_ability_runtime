@@ -266,7 +266,6 @@ sptr<Rosen::Window> UIExtensionContext::GetWindow()
 {
     return window_;
 }
-
 Ace::UIContent* UIExtensionContext::GetUIContent()
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "called");
@@ -289,12 +288,6 @@ ErrCode UIExtensionContext::OpenAtomicService(AAFwk::Want& want, const AAFwk::St
     return err;
 }
 
-ErrCode UIExtensionContext::OpenLink(const AAFwk::Want& want, int requestCode)
-{
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
-}
-
 ErrCode UIExtensionContext::AddFreeInstallObserver(const sptr<IFreeInstallObserver> &observer)
 {
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(token_, observer);
@@ -302,6 +295,12 @@ ErrCode UIExtensionContext::AddFreeInstallObserver(const sptr<IFreeInstallObserv
         TAG_LOGE(AAFwkTag::UI_EXT, "error, ret: %{public}d", ret);
     }
     return ret;
+}
+
+ErrCode UIExtensionContext::OpenLink(const AAFwk::Want& want, int requestCode)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
 }
 
 int32_t UIExtensionContext::curRequestCode_ = 0;
