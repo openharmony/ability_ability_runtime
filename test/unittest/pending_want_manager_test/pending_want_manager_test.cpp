@@ -1014,5 +1014,33 @@ HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4000, TestSize.Level1)
     int32_t ret = pendingManager_->GetAllRunningInstanceKeysByBundleName(bundleName, appKeyVec);
     EXPECT_NE(ret, ERR_INVALID_VALUE);
 }
+
+/*
+ * @tc.number    : PendingWantManagerTest_4100
+ * @tc.name      : PendingWantManager ClearPendingWantRecordTask
+ * @tc.desc      : 1.ClearPendingWantRecordTask.
+ */
+HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_4100, TestSize.Level1)
+{
+    Want want1;
+    ElementName element("device", "bundleName1", "abilityName1");
+    want1.SetElement(element);
+    Want want2;
+    ElementName element2("device", "bundleName2", "abilityName2");
+    want2.SetElement(element2);
+    std::vector<Want> wants;
+    wants.emplace_back(want1);
+    wants.emplace_back(want2);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(wants, 0, 0);
+    EXPECT_FALSE(((unsigned int)wantSenderInfo.flags & (unsigned int)Flags::NO_BUILD_FLAG) != 0);
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    auto pendingRecord = iface_cast<PendingWantRecord>(
+    pendingManager_->GetWantSenderLocked(1, 1, wantSenderInfo.userId, wantSenderInfo, nullptr)->AsObject());
+    EXPECT_NE(pendingRecord, nullptr);
+    EXPECT_EQ((int)pendingManager_->wantRecords_.size(), 1);
+    pendingManager_->ClearPendingWantRecordTask("bundleName2", 1);
+    EXPECT_EQ((int)pendingManager_->wantRecords_.size(), 0);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
