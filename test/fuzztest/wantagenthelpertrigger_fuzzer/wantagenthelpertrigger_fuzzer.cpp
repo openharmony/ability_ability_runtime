@@ -29,7 +29,6 @@ using namespace OHOS::AbilityRuntime::WantAgent;
 #define DISABLE_FUZZ
 namespace OHOS {
 namespace {
-constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 const std::string GET_BUNDLE_INFO_PERMISSION = "ohos.permission.GET_BUNDLE_INFO";
 }
@@ -84,7 +83,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (size < OHOS::U32_AT_SIZE) {
         return 0;
     }
 
