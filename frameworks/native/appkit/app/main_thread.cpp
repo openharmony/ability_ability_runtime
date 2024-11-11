@@ -1869,7 +1869,7 @@ void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleIn
         appThread->appMgr_->AddAbilityStageDone(appThread->applicationImpl_->GetRecordId());
     };
     bool isAsyncCallback = false;
-    application_->AddAbilityStage(abilityStage, callback, isAsyncCallback);
+    application_->AddAbilityStage(entryHapModuleInfo, callback, isAsyncCallback);
     if (isAsyncCallback) {
         return;
     }
