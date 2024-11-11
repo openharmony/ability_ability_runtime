@@ -19,7 +19,6 @@
 #include <cstdint>
 
 #include "bundle_manager_convert.h"
-#include "cj_common_ffi.h"
 #include "cj_utils_ffi.h"
 #include "configuration.h"
 #include "ffi_remote_data.h"
