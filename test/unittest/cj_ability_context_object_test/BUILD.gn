@@ -19,6 +19,7 @@ ohos_unittest("cj_ability_context_object_test") {
   module_out_path = "ability_runtime/cj_ability_context_object_test"
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
+    "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     "${ability_runtime_path}/frameworks/cj/ffi",
     "${ability_base_kits_path}/extractortool/include",
     "${ability_runtime_path}/utils/global/time/include",

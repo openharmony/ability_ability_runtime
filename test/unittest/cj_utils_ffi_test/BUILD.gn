@@ -33,7 +33,7 @@ ohos_unittest("cj_utils_ffi_test") {
   ]
 
   sources = [
-    "${ability_runtime_path}/frameworks/cj/ffi/cj_utils_ffi.cpp",
+    "${ability_runtime_path}/frameworks/cj/ffi/application_context/src/cj_utils_ffi.cpp",
     "cj_utils_ffi_test.cpp",
   ]
 
