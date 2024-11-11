@@ -9274,6 +9274,25 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
     }
     return result;
 }
+int AbilityManagerService::CheckCallAutoFillExtensionPermission(const AbilityRequest &abilityRequest)
+{
+    if (!abilityRequest.appInfo.isSystemApp) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "application requesting call isn't system application");
+        return CHECK_PERMISSION_FAILED;
+    }
+    std::string jsonDataStr = abilityRequest.want.GetStringParam(WANT_PARAMS_VIEW_DATA_KEY);
+    AbilityBase::ViewData viewData;
+    viewData.FromJsonString(jsonDataStr.c_str());
+    std::string callerName;
+    int32_t uid = 0;
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(callerPid, callerName, uid);
+    if (viewData.bundleName != callerName) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not %{public}s called, no allowed", viewData.bundleName.c_str());
+        return ERR_WRONG_INTERFACE_CALL;
+    }
+    return ERR_OK;
+}
 
 int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityRequest &abilityRequest)
 {
@@ -9297,18 +9316,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     }
     if (extensionType == AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD ||
         extensionType == AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART) {
-        if (!abilityRequest.appInfo.isSystemApp) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "The application requesting the call is a non system application.");
-            return CHECK_PERMISSION_FAILED;
-        }
-        std::string jsonDataStr = abilityRequest.want.GetStringParam(WANT_PARAMS_VIEW_DATA_KEY);
-        AbilityBase::ViewData viewData;
-        viewData.FromJsonString(jsonDataStr.c_str());
-        if (!CheckCallingTokenId(viewData.bundleName)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Not %{public}s called, not allowed.", viewData.bundleName.c_str());
-            return ERR_WRONG_INTERFACE_CALL;
-        }
-        return ERR_OK;
+        return CheckCallAutoFillExtensionPermission(abilityRequest);
     }
     if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
         return CheckUIExtensionPermission(abilityRequest);
