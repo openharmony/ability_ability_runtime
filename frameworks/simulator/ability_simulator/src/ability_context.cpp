@@ -70,7 +70,7 @@ void AbilityContext::SetOptions(const Options &options)
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "themeId:%{public}d", options.themeId);
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "deviceWidth:%{public}d", options.deviceWidth);
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "deviceHeight:%{public}d", options.deviceHeight);
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "isRound:%{public}d", options.themeId);
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "isRound:%{public}d", options.isRound);
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "compatibleVersion:%{public}d", options.compatibleVersion);
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "installationFree:%{public}d", options.installationFree);
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "labelId:%{public}d", options.labelId);

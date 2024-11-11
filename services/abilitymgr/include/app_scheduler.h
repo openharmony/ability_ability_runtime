@@ -40,6 +40,9 @@ namespace OHOS {
 namespace AppExecFwk {
 class Configuration;
 }
+namespace AbilityRuntime {
+struct LoadParam;
+}
 namespace AAFwk {
 /**
  * @enum AppAbilityState
@@ -74,6 +77,9 @@ struct AppInfo {
     std::string processName;
     AppState state;
     pid_t pid = 0;
+    int32_t appIndex = 0;
+    std::string instanceKey = "";
+    std::string bundleName = "";
 };
 /**
  * @class AppStateCallback
@@ -93,6 +99,8 @@ public:
     virtual void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) {}
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
+
+    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
 
     /**
      * @brief Notify abilityms app process pre cache
@@ -139,16 +147,14 @@ public:
     /**
      * load ability with token, ability info and application info.
      *
-     * @param token, the token of ability.
-     * @param preToken, the token of ability's caller.
+     * @param loadParam, the loadParam of ability.
      * @param abilityInfo, ability info.
      * @param applicationInfo, application info.
      * @param want ability want
      * @return true on success ,false on failure.
      */
-    int LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-        const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-        const Want &want, int32_t abilityRecordId, const std::string &instanceKey);
+    int LoadAbility(const AbilityRuntime::LoadParam &loadParam, const AppExecFwk::AbilityInfo &abilityInfo,
+        const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want);
 
     /**
      * terminate ability with token.
@@ -240,7 +246,7 @@ public:
      *
      * @param bundleName.
      */
-    int KillApplication(const std::string &bundleName, const bool clearPageStack = false);
+    int KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
 
     /**
      * ForceKillApplication, force kill the application.
@@ -592,6 +598,12 @@ protected:
      * @param bundleInfos resident process bundle infos.
      */
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+
+    /**
+     * @brief Notify abilityms start keep-alive process.
+     * @param bundleInfos resident process bundle infos.
+     */
+    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     /**
      * @brief Notify abilityms app process OnRemoteDied

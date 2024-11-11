@@ -45,6 +45,11 @@
 #endif
 #define ABILITY_LIBRARY_LOADER
 
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+#include "nweb_preload.h"
+#include "ui/rs_surface_node.h"
+#endif
+
 class Runtime;
 namespace OHOS {
 namespace AppExecFwk {
@@ -269,6 +274,8 @@ public:
      */
     void ScheduleProcessSecurityExit() override;
 
+    void ScheduleClearPageStack() override;
+
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
     void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
@@ -339,7 +346,7 @@ public:
      */
     int32_t ScheduleDumpIpcStat(std::string& result) override;
 
-    void ScheduleClearPageStack() override;
+    void ScheduleCacheProcess() override;
     /**
      * ScheduleDumpFfrt, call ScheduleDumpFfrt(std::string& result) through proxy project,
      * Start querying the application's ffrt usage.
@@ -350,7 +357,6 @@ public:
      */
     int32_t ScheduleDumpFfrt(std::string& result) override;
 
-    void ScheduleCacheProcess() override;
 private:
     /**
      *
@@ -631,6 +637,10 @@ private:
      */
     void ParseAppConfigurationParams(const std::string configuration, Configuration &config);
 
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+    void HandleNWebPreload();
+#endif
+
     class MainHandler : public EventHandler {
     public:
         MainHandler(const std::shared_ptr<EventRunner> &runner, const sptr<MainThread> &thread);
@@ -666,6 +676,10 @@ private:
     std::string abilityLibraryType_ = ".so";
     static std::weak_ptr<OHOSApplication> applicationForDump_;
     bool isDeveloperMode_ = false;
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+    Rosen::RSSurfaceNode::SharedPtr preloadSurfaceNode_ = nullptr;
+    std::shared_ptr<NWeb::NWeb> preloadNWeb_ = nullptr;
+#endif
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**

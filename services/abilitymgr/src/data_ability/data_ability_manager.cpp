@@ -339,8 +339,8 @@ void DataAbilityManager::OnAppStateChanged(const AppInfo &info)
             continue;
         }
         auto abilityRecord = it->second->GetAbilityRecord();
-        if (abilityRecord && (info.processName == abilityRecord->GetAbilityInfo().process ||
-                                 info.processName == abilityRecord->GetApplicationInfo().bundleName)) {
+        if (abilityRecord && info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+            info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
             auto appName = abilityRecord->GetApplicationInfo().name;
             auto uid = abilityRecord->GetAbilityInfo().applicationInfo.uid;
             auto isExist = [&appName, &uid](
@@ -357,8 +357,8 @@ void DataAbilityManager::OnAppStateChanged(const AppInfo &info)
             continue;
         }
         auto abilityRecord = it->second->GetAbilityRecord();
-        if (abilityRecord && (info.processName == abilityRecord->GetAbilityInfo().process ||
-                                 info.processName == abilityRecord->GetApplicationInfo().bundleName)) {
+        if (abilityRecord && info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+            info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
             auto appName = abilityRecord->GetApplicationInfo().name;
             auto uid = abilityRecord->GetAbilityInfo().applicationInfo.uid;
             auto isExist = [&appName, &uid](

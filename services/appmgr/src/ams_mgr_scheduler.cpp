@@ -51,8 +51,9 @@ constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility
 constexpr const char* TASK_SCENE_BOARD_ATTACH_TIMEOUT = "sceneBoardAttachTimeoutTask";
 constexpr const char* TASK_ATTACHED_TO_STATUS_BAR = "AttachedToStatusBar";
 constexpr const char* TASK_BLOCK_PROCESS_CACHE_BY_PIDS = "BlockProcessCacheByPids";
+constexpr const char* POWER_OFF_ABILITY = "BlockProcessCacheByPids";
 constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
-constexpr const char* TASK_LOAD_ABILITY = "LoadAbilityTask";
+constexpr int32_t LOAD_TASK_TIMEOUT = 30000; // ms
 };  // namespace
 
 AmsMgrScheduler::AmsMgrScheduler(
@@ -109,16 +110,20 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
         amsHandler_->SubmitTask(timeoutTask, TASK_SCENE_BOARD_ATTACH_TIMEOUT, SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME);
     }
 
+    AAFwk::TaskAttribute taskAttr{
+        .taskName_ = "LoadAbilityTask",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE,
+        .timeoutMillis_ = LOAD_TASK_TIMEOUT
+    };
+
     if (abilityInfo->bundleName == AAFwk::AppUtils::GetInstance().GetMigrateClientBundleName()) {
-        amsHandler_->SubmitTask(loadAbilityFunc, AAFwk::TaskAttribute{
-            .taskName_ = TASK_LOAD_ABILITY,
-            .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE,
-            .taskPriority_ = AAFwk::TaskQueuePriority::IMMEDIATE
-        });
-        return;
+        taskAttr.taskPriority_ = AAFwk::TaskQueuePriority::IMMEDIATE;
+    }
+    if (abilityInfo->bundleName == SCENE_BOARD_BUNDLE_NAME && abilityInfo->name == POWER_OFF_ABILITY) {
+        taskAttr.insertHead_ = true;
     }
 
-    amsHandler_->SubmitTask(loadAbilityFunc);
+    amsHandler_->SubmitTask(loadAbilityFunc, taskAttr);
 }
 
 void AmsMgrScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const AbilityState state)
@@ -275,14 +280,14 @@ void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const 
 }
 
 int32_t AmsMgrScheduler::KillProcessWithAccount(
-    const std::string &bundleName, const int accountId, const bool clearPageStack)
+    const std::string &bundleName, const int accountId, const bool clearPageStack, int32_t appIndex)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d, clearPageStack = %{public}d",
-        bundleName.c_str(), accountId, clearPageStack);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundle=%{public}s, appIndex=%{public}d, userId=%{public}d, clearPageStack=%{public}d",
+        bundleName.c_str(), appIndex, accountId, clearPageStack);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId, clearPageStack,
+    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, appIndex, accountId, clearPageStack,
         "KillProcessWithAccount");
 }
 
@@ -300,7 +305,7 @@ void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
     auto task = [amsMgrServiceInner = amsMgrServiceInner_, token]() {
         amsMgrServiceInner->HandleAbilityAttachTimeOut(token);
     };
-    amsHandler_->SubmitTask(task);
+    amsHandler_->SubmitTask(task, "AbilityAttachTimeOut");
 }
 
 void AmsMgrScheduler::PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag)
@@ -315,7 +320,10 @@ void AmsMgrScheduler::PrepareTerminate(const sptr<IRemoteObject> &token, bool cl
         return;
     }
     auto task = [=]() { amsMgrServiceInner_->PrepareTerminate(token, clearMissionFlag); };
-    amsHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+    amsHandler_->SubmitTask(task, {
+        .taskName_ = "PrepareTerminate",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
@@ -327,7 +335,7 @@ int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundl
     return amsMgrServiceInner_->UpdateApplicationInfoInstalled(bundleName, uid);
 }
 
-int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
+int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, clearPageStack = %{public}d",
         bundleName.c_str(), clearPageStack);
@@ -335,7 +343,7 @@ int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, const bo
         return ERR_INVALID_OPERATION;
     }
 
-    return amsMgrServiceInner_->KillApplication(bundleName, clearPageStack);
+    return amsMgrServiceInner_->KillApplication(bundleName, clearPageStack, appIndex);
 }
 
 int32_t AmsMgrScheduler::ForceKillApplication(const std::string &bundleName,
@@ -421,7 +429,10 @@ void AmsMgrScheduler::StartSpecifiedAbility(const AAFwk::Want &want, const AppEx
         return;
     }
     auto task = [=]() { amsMgrServiceInner_->StartSpecifiedAbility(want, abilityInfo, requestId); };
-    amsHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+    amsHandler_->SubmitTask(task, {
+        .taskName_ = "StartSpecifiedAbility",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 void AmsMgrScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
@@ -437,7 +448,10 @@ void AmsMgrScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppEx
         return;
     }
     auto task = [=]() { amsMgrServiceInner_->StartSpecifiedProcess(want, abilityInfo, requestId); };
-    amsHandler_->SubmitTask(task, AAFwk::TaskQoS::USER_INTERACTIVE);
+    amsHandler_->SubmitTask(task, {
+        .taskName_ = "StartSpecifiedProcess",
+        .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
+    });
 }
 
 void AmsMgrScheduler::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response)
@@ -450,7 +464,7 @@ void AmsMgrScheduler::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpe
         return;
     }
     auto task = [=]() { amsMgrServiceInner_->RegisterStartSpecifiedAbilityResponse(response); };
-    amsHandler_->SubmitTask(task);
+    amsHandler_->SubmitTask(task, "RegisterStartSpecifiedAbilityResponse");
 }
 
 int AmsMgrScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug)
@@ -613,6 +627,15 @@ void AmsMgrScheduler::SetKeepAliveEnableState(const std::string &bundleName, boo
     amsMgrServiceInner_->SetKeepAliveEnableState(bundleName, enable, uid);
 }
 
+void AmsMgrScheduler::SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return;
+    }
+    amsMgrServiceInner_->SetKeepAliveDkv(bundleName, enable, uid);
+}
+
 void AmsMgrScheduler::ClearProcessByToken(sptr<IRemoteObject> token)
 {
     if (!IsReady()) {
@@ -683,6 +706,15 @@ void AmsMgrScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
     amsHandler_->SubmitTask(blockProcCacheFunc, TASK_BLOCK_PROCESS_CACHE_BY_PIDS);
 }
 
+bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return false;
+    }
+    return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
+}
+
 bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
 {
     if (!IsReady()) {
@@ -695,15 +727,6 @@ bool AmsMgrScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token
         return false;
     }
     return amsMgrServiceInner_->CleanAbilityByUserRequest(token);
-}
-
-bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
-{
-    if (!IsReady()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
-        return false;
-    }
-    return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
 }
 bool AmsMgrScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {

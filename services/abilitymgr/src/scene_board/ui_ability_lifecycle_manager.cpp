@@ -30,6 +30,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
 #include "ui_extension_utils.h"
+#include "utils/ability_permission_util.h"
 #ifdef SUPPORT_GRAPHICS
 #include "ability_first_frame_state_observer_manager.h"
 #endif
@@ -46,6 +47,7 @@ constexpr int DEFAULT_DMS_MISSION_ID = -1;
 constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 constexpr const char* DMS_PROCESS_NAME = "distributedsched";
 constexpr const char* DMS_PERSISTENT_ID = "ohos.dms.persistentId";
+constexpr const char* IS_SHELL_CALL = "isShellCall";
 #ifdef SUPPORT_ASAN
 constexpr int KILL_TIMEOUT_MULTIPLE = 45;
 #else
@@ -108,7 +110,8 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     if (!uiAbilityRecord->IsReady() || sessionInfo->isNewWant) {
         AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
     }
-    uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId, sceneFlag);
+    auto isShellCall = abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
+    uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId, sceneFlag, isShellCall);
     CheckSpecified(abilityRequest, uiAbilityRecord);
     SendKeyEvent(abilityRequest);
     return ERR_OK;
@@ -130,6 +133,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
             TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionToken invalid");
             return nullptr;
         }
+        abilityRequest.want.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
         uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
         if (sessionInfo->isNewWant) {
             uiAbilityRecord->SetWant(abilityRequest.want);
@@ -163,6 +167,14 @@ bool UIAbilityLifecycleManager::CheckSessionInfo(sptr<SessionInfo> sessionInfo) 
     if (descriptor != "OHOS.ISession") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "token's Descriptor: %{public}s", descriptor.c_str());
         return false;
+    }
+    bool needCheckCallerIsExist = sessionInfo->want.GetBoolParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST, false);
+    if (needCheckCallerIsExist && sessionInfo->callerToken) {
+        auto callerAbility = Token::GetAbilityRecordByToken(sessionInfo->callerToken);
+        if (callerAbility == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbility not exist");
+            return false;
+        }
     }
     return true;
 }
@@ -335,11 +347,15 @@ int UIAbilityLifecycleManager::AbilityWindowConfigTransactionDone(const sptr<IRe
     return ERR_OK;
 }
 
-int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest)
+int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &abilityRequest)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    abilityRequest.want.SetParam(IS_SHELL_CALL, AAFwk::PermissionVerification::GetInstance()->IsShellCall());
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    // start abilty with persistentId by dms
+    if (!AbilityPermissionUtil::GetInstance().VerifyCallerToken(abilityRequest)) {
+        return ERR_INVALID_VALUE;
+    }
+    // start ability with persistentId by dms
     int32_t persistentId = abilityRequest.want.GetIntParam(DMS_PERSISTENT_ID, 0);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "NotifySCBToStartUIAbility, want with persistentId: %{public}d.", persistentId);
     if (persistentId != 0 &&
@@ -362,9 +378,10 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
         return ERR_OK;
     }
     auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
-    if (isSpecified) {
+    auto isCreating = abilityRequest.want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
+    if (isSpecified && !isCreating) {
         CancelSameAbilityTimeoutTask(abilityInfo);
-        PreCreateProcessName(const_cast<AbilityRequest &>(abilityRequest));
+        PreCreateProcessName(abilityRequest);
         specifiedRequestMap_.emplace(specifiedRequestId_, abilityRequest);
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(
             abilityRequest.want, abilityRequest.abilityInfo, specifiedRequestId_);
@@ -373,7 +390,6 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
     }
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
-    auto isCreating = abilityRequest.want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
     if (abilityInfo.applicationInfo.multiAppMode.multiAppModeType != AppExecFwk::MultiAppModeType::MULTI_INSTANCE ||
         !isCreating) {
         sessionInfo->persistentId = GetPersistentIdByAbilityRequest(abilityRequest, sessionInfo->reuse);
@@ -2240,8 +2256,8 @@ void UIAbilityLifecycleManager::OnAppStateChanged(const AppInfo &info)
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "null abilityRecord");
                 continue;
             }
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -2253,8 +2269,8 @@ void UIAbilityLifecycleManager::OnAppStateChanged(const AppInfo &info)
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "null abilityRecord");
                 continue;
             }
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
 #ifdef SUPPORT_SCREEN
                 abilityRecord->SetColdStartFlag(true);
 #endif // SUPPORT_SCREEN
@@ -2268,8 +2284,8 @@ void UIAbilityLifecycleManager::OnAppStateChanged(const AppInfo &info)
             TAG_LOGW(AAFwkTag::ABILITYMGR, "null abilityRecord");
             continue;
         }
-        if (info.processName == abilityRecord->GetAbilityInfo().process ||
-            info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+        if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+            info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
             abilityRecord->SetAppState(info.state);
         }
     }
@@ -2489,6 +2505,13 @@ bool UIAbilityLifecycleManager::IsCallerInStatusBar()
     return statusBarDelegateManager->IsCallerInStatusBar();
 }
 
+bool UIAbilityLifecycleManager::IsInStatusBar(uint32_t accessTokenId)
+{
+    auto statusBarDelegateManager = GetStatusBarDelegateManager();
+    CHECK_POINTER_AND_RETURN(statusBarDelegateManager, false);
+    return statusBarDelegateManager->IsInStatusBar(accessTokenId);
+}
+
 int32_t UIAbilityLifecycleManager::DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     auto statusBarDelegateManager = GetStatusBarDelegateManager();
@@ -2575,14 +2598,16 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
 
-    if (!IsCallerInStatusBar() && (sessionInfo->processOptions != nullptr &&
-        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
+    if (!IsCallerInStatusBar() && sessionInfo->processOptions != nullptr &&
+        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
+        !sessionInfo->processOptions->isRestartKeepAlive) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "caller not add to status bar");
         return ERR_START_OPTIONS_CHECK_FAILED;
     }
     if (sessionInfo->processOptions == nullptr ||
         (!ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode) &&
-        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode))) {
+        !ProcessOptions::IsNoAttachmentMode(sessionInfo->processOptions->processMode) &&
+        !sessionInfo->processOptions->isRestartKeepAlive)) {
         auto ret = DoCallerProcessAttachment(abilityRecord);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "caller attach to status bar failed, ret: %{public}d", ret);
@@ -2652,12 +2677,13 @@ int32_t UIAbilityLifecycleManager::UpdateSessionInfoBySCB(std::list<SessionInfo>
     return ERR_OK;
 }
 
-void UIAbilityLifecycleManager::SignRestartAppFlag(int32_t uid, bool isAppRecovery)
+void UIAbilityLifecycleManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey, bool isAppRecovery)
 {
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     auto tempSessionAbilityMap = sessionAbilityMap_;
     for (auto &[sessionId, abilityRecord] : tempSessionAbilityMap) {
-        if (abilityRecord == nullptr || abilityRecord->GetUid() != uid) {
+        if (abilityRecord == nullptr || abilityRecord->GetUid() != uid ||
+            abilityRecord->GetInstanceKey() != instanceKey) {
             continue;
         }
         abilityRecord->SetRestartAppFlag(true);

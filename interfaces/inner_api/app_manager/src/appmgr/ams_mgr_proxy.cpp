@@ -312,7 +312,7 @@ void AmsMgrProxy::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr
 }
 
 int32_t AmsMgrProxy::KillProcessWithAccount(
-    const std::string &bundleName, const int accountId, const bool clearPageStack)
+    const std::string &bundleName, const int accountId, const bool clearPageStack, int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
 
@@ -338,6 +338,11 @@ int32_t AmsMgrProxy::KillProcessWithAccount(
         return ERR_FLATTEN_OBJECT;
     }
 
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel appIndex failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESS_WITH_ACCOUNT), data, reply, option);
     if (ret != NO_ERROR) {
@@ -350,7 +355,7 @@ int32_t AmsMgrProxy::KillProcessWithAccount(
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool clearPageStack)
+int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -367,6 +372,11 @@ int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool c
 
     if (!data.WriteBool(clearPageStack)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel appIndex failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -897,7 +907,7 @@ int32_t AmsMgrProxy::AttachAppDebug(const std::string &bundleName)
     }
 
     if (bundleName.empty() || !data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write bundle name failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "Write bundleName failed");
         return ERR_INVALID_DATA;
     }
 
@@ -956,6 +966,31 @@ void AmsMgrProxy::SetKeepAliveEnableState(const std::string &bundleName, bool en
     MessageParcel reply;
     MessageOption option;
     auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_ENABLE_STATE),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
+    }
+}
+
+void AmsMgrProxy::SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return;
+    }
+    if (bundleName.empty() || !data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write bundleName fail");
+        return;
+    }
+    if (!data.WriteBool(enable) || !data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write flag or uid fail");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_DKV),
         data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
@@ -1243,28 +1278,6 @@ void AmsMgrProxy::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }
 
-bool AmsMgrProxy::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
-        return false;
-    }
-    if (!data.WriteRemoteObject(token.GetRefPtr())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
-        return false;
-    }
-
-    int32_t ret = SendTransactCmd(
-        static_cast<uint32_t>(IAmsMgr::Message::CLEAN_UIABILITY_BY_USER_REQUEST), data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
-    }
-    return reply.ReadBool();
-}
-
 bool AmsMgrProxy::IsKilledForUpgradeWeb(const std::string &bundleName)
 {
     MessageParcel data;
@@ -1283,6 +1296,28 @@ bool AmsMgrProxy::IsKilledForUpgradeWeb(const std::string &bundleName)
     if (ret != NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
         return false;
+    }
+    return reply.ReadBool();
+}
+
+bool AmsMgrProxy::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteRemoteObject(token.GetRefPtr())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
+        return false;
+    }
+
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IAmsMgr::Message::CLEAN_UIABILITY_BY_USER_REQUEST), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
     }
     return reply.ReadBool();
 }

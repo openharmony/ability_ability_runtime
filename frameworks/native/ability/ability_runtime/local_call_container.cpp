@@ -124,7 +124,7 @@ int LocalCallContainer::ReleaseCall(const std::shared_ptr<CallerCallBack>& callb
 
 void LocalCallContainer::ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback)
 {
-    TAG_LOGD(AAFwkTag::LOCAL_CALL, "called");
+    TAG_LOGI(AAFwkTag::LOCAL_CALL, "called");
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "callback is nullptr");
         return;
@@ -141,7 +141,16 @@ void LocalCallContainer::ClearFailedCallConnection(const std::shared_ptr<CallerC
         TAG_LOGE(AAFwkTag::LOCAL_CALL, "connection conversion failed");
         return;
     }
-
+    std::string deviceId = localCallRecord->GetElementName().GetDeviceID();
+    if (deviceId.empty()) {
+        connections_.erase(connect);
+        return;
+    }
+    TAG_LOGI(AAFwkTag::LOCAL_CALL, "try releaseCall");
+    auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityClient != nullptr) {
+        abilityClient->ReleaseCall(connect, localCallRecord->GetElementName());
+    }
     connections_.erase(connect);
 }
 

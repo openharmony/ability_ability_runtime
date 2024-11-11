@@ -67,7 +67,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "allow ecological rule");
         return ERR_OK;
     }
-    
+
     std::string supportErms = OHOS::system::GetParameter(ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE, "true");
     if (supportErms == "false") {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "not support erms");
@@ -117,9 +117,7 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     InitErmsCallerInfo(want, nullptr, callerInfo, userId);
 
     ExperienceRule rule;
-    AAFwk::Want newWant = want;
-    newWant.RemoveAllFd();
-    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
+    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,
         callerInfo, rule));
     if (ret != ERR_OK) {
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule failed");
@@ -189,7 +187,7 @@ void EcologicalRuleInterceptor::GetEcologicalCallerInfo(const Want &want, ErmsCa
             return;
         }
     }
-    
+
     callerInfo.callerAppProvisionType = callerAppInfo.appProvisionType;
     if (callerAppInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "atomic service caller type");
@@ -222,7 +220,7 @@ void EcologicalRuleInterceptor::InitErmsCallerInfo(const Want &want,
     callerInfo.pid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingPid());
     callerInfo.embedded = want.GetIntParam("send_to_erms_embedded", 0);
     callerInfo.userId = userId;
-    
+
     GetEcologicalTargetInfo(want, abilityInfo, callerInfo);
     GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
     TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "ERMS's %{public}s", callerInfo.ToString().c_str());

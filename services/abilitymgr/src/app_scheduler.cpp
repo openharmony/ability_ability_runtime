@@ -66,21 +66,14 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
     return true;
 }
 
-int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-    const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-    const Want &want, int32_t abilityRecordId, const std::string &instanceKey)
+int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const AppExecFwk::AbilityInfo &abilityInfo,
+    const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
-    AbilityRuntime::LoadParam loadParam;
-    loadParam.abilityRecordId = abilityRecordId;
-    loadParam.isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
-    loadParam.token = token;
-    loadParam.preToken = preToken;
-    loadParam.instanceKey = instanceKey;
     int ret = static_cast<int>(IN_PROCESS_CALL(
         appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {
@@ -222,6 +215,13 @@ void AppScheduler::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo
     callback->NotifyStartResidentProcess(bundleInfos);
 }
 
+void AppScheduler::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    auto callback = callback_.lock();
+    CHECK_POINTER(callback);
+    callback->NotifyStartKeepAliveProcess(bundleInfos);
+}
+
 void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     auto callback = callback_.lock();
@@ -236,11 +236,11 @@ void AppScheduler::NotifyAppPreCache(int32_t pid, int32_t userId)
     callback->NotifyAppPreCache(pid, userId);
 }
 
-int AppScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
+int AppScheduler::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int ret = (int)appMgrClient_->KillApplication(bundleName, clearPageStack);
+    int ret = (int)appMgrClient_->KillApplication(bundleName, clearPageStack, appIndex);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed kill app");
         return INNER_ERR;
@@ -317,6 +317,9 @@ void AppScheduler::OnAppStateChanged(const AppExecFwk::AppProcessData &appData)
     info.processName = appData.processName;
     info.state = static_cast<AppState>(appData.appState);
     info.pid = appData.pid;
+    info.appIndex = appData.appIndex;
+    info.instanceKey = appData.instanceKey;
+    info.bundleName = appData.bundleName;
     callback->OnAppStateChanged(info);
 }
 
@@ -615,6 +618,15 @@ void AppScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
     appMgrClient_->BlockProcessCacheByPids(pids);
 }
 
+bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return false;
+    }
+    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
+}
+
 bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -624,15 +636,6 @@ bool AppScheduler::CleanAbilityByUserRequest(const sptr<IRemoteObject> &token)
         return false;
     }
     return IN_PROCESS_CALL(appMgrClient_->CleanAbilityByUserRequest(token));
-}
-
-bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
-{
-    if (!appMgrClient_) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
-        return false;
-    }
-    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
 }
 bool AppScheduler::IsProcessContainsOnlyUIAbility(const pid_t pid)
 {

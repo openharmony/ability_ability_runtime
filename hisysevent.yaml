@@ -325,6 +325,7 @@ PROCESS_EXIT:
   EXIT_PID: {type: INT32, desc: pid}
   PROCESS_NAME: {type: STRING, desc: process name}
   EXTENSION_TYPE: {type: INT32, desc: process exit extension type}
+  EXIT_REASON: {type: INT32, desc: process exit reason}
 
 PROCESS_START_FAILED:
   __BASE: {type: FAULT, level: CRITICAL, tag: app, desc: process start failed, preserve: true}

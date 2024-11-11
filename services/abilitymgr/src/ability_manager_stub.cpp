@@ -17,6 +17,7 @@
 
 #include "ability_manager_errors.h"
 #include "ability_manager_radar.h"
+#include "fd_guard.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "status_bar_delegate_interface.h"
@@ -714,7 +715,6 @@ int AbilityManagerStub::OnRemoteRequestInnerEighteenth(uint32_t code, MessagePar
     return ERR_CODE_NOT_EXIST;
 }
 
-
 int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
@@ -760,6 +760,25 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     }
     if (interfaceCode == AbilityManagerInterfaceCode::UPDATE_ASSOCIATE_CONFIG_LIST) {
         return UpdateAssociateConfigListInner(data, reply);
+    }
+    return ERR_CODE_NOT_EXIST;
+}
+
+int AbilityManagerStub::OnRemoteRequestInnerTwentieth(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
+{
+    AbilityManagerInterfaceCode interfaceCode = static_cast<AbilityManagerInterfaceCode>(code);
+    if (interfaceCode == AbilityManagerInterfaceCode::SET_APPLICATION_KEEP_ALLIVE) {
+        return SetApplicationKeepAliveInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_APPLICATIONS_KEEP_ALIVE) {
+        return QueryKeepAliveApplicationsInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::SET_APPLICATION_KEEP_ALLIVE_BY_EDM) {
+        return SetApplicationKeepAliveByEDMInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_APPLICATIONS_KEEP_ALIVE_BY_EDM) {
+        return QueryKeepAliveApplicationsByEDMInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -864,6 +883,10 @@ int AbilityManagerStub::HandleOnRemoteRequestInnerSecond(uint32_t code, MessageP
         return retCode;
     }
     retCode = OnRemoteRequestInnerNineteenth(code, data, reply, option);
+    if (retCode != ERR_CODE_NOT_EXIST) {
+        return retCode;
+    }
+    retCode = OnRemoteRequestInnerTwentieth(code, data, reply, option);
     if (retCode != ERR_CODE_NOT_EXIST) {
         return retCode;
     }
@@ -980,7 +1003,7 @@ int32_t AbilityManagerStub::TerminateUIServiceExtensionAbilityInner(MessageParce
     if (data.ReadBool()) {
         token = data.ReadRemoteObject();
     }
-    
+
     int32_t result = TerminateUIServiceExtensionAbility(token);
     reply.WriteInt32(result);
     return NO_ERROR;
@@ -1169,7 +1192,8 @@ int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &rep
 {
     std::string bundleName = Str16ToStr8(data.ReadString16());
     bool clearPageStack = data.ReadBool();
-    int result = KillProcess(bundleName, clearPageStack);
+    auto appIndex = data.ReadInt32();
+    int result = KillProcess(bundleName, clearPageStack, appIndex);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove stack error");
         return ERR_INVALID_VALUE;
@@ -3698,8 +3722,8 @@ int32_t AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &re
         return ERR_DEAD_OBJECT;
     }
     auto flag = data.ReadInt32();
-    int fd = OpenFile(*uri, flag);
-    reply.WriteFileDescriptor(fd);
+    FdGuard fdGuard(OpenFile(*uri, flag));
+    reply.WriteFileDescriptor(fdGuard.Get());
     return ERR_OK;
 }
 
@@ -3799,6 +3823,23 @@ int32_t AbilityManagerStub::UpdateSessionInfoBySCBInner(MessageParcel &data, Mes
     return ERR_OK;
 }
 
+int32_t AbilityManagerStub::RestartAppInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return IPC_STUB_ERR;
+    }
+    bool isAppRecovery = data.ReadBool();
+    auto result = RestartApp(*want, isAppRecovery);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return IPC_STUB_ERR;
+    }
+    return ERR_OK;
+}
+
 int32_t AbilityManagerStub::GetUIExtensionRootHostInfoInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> callerToken = nullptr;
@@ -3851,23 +3892,6 @@ int32_t AbilityManagerStub::GetUIExtensionSessionInfoInner(MessageParcel &data, 
     }
 
     return NO_ERROR;
-}
-
-int32_t AbilityManagerStub::RestartAppInner(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
-    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
-        return IPC_STUB_ERR;
-    }
-    bool isAppRecovery = data.ReadBool();
-    auto result = RestartApp(*want, isAppRecovery);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return IPC_STUB_ERR;
-    }
-    return ERR_OK;
 }
 
 int32_t AbilityManagerStub::OpenAtomicServiceInner(MessageParcel &data, MessageParcel &reply)
@@ -3925,7 +3949,6 @@ int32_t AbilityManagerStub::IsEmbeddedOpenAllowedInner(MessageParcel &data, Mess
 
     std::string appId = data.ReadString();
     auto result = IsEmbeddedOpenAllowed(callerToken, appId);
-
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;
@@ -4091,6 +4114,70 @@ int32_t AbilityManagerStub::UpdateAssociateConfigListInner(MessageParcel &data, 
     }
     reply.WriteInt32(result);
     return NO_ERROR;
+}
+
+int AbilityManagerStub::SetApplicationKeepAliveInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
+    bool flag = data.ReadBool();
+    int32_t result = SetApplicationKeepAlive(bundleName, userId, flag);
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return result;
+}
+
+int AbilityManagerStub::QueryKeepAliveApplicationsInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    int32_t appType = data.ReadInt32();
+    int32_t userId = data.ReadInt32();
+    std::vector<KeepAliveInfo> list;
+    int32_t result = QueryKeepAliveApplications(appType, userId, list);
+    reply.WriteInt32(list.size());
+    for (auto &it : list) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return result;
+}
+
+int AbilityManagerStub::SetApplicationKeepAliveByEDMInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
+    bool flag = data.ReadBool();
+    int32_t result = SetApplicationKeepAliveByEDM(bundleName, userId, flag);
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return result;
+}
+
+int AbilityManagerStub::QueryKeepAliveApplicationsByEDMInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    int32_t appType = data.ReadInt32();
+    int32_t userId = data.ReadInt32();
+    std::vector<KeepAliveInfo> list;
+    int32_t result = QueryKeepAliveApplicationsByEDM(appType, userId, list);
+    reply.WriteInt32(list.size());
+    for (auto &it : list) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS

@@ -58,6 +58,12 @@ public:
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     /**
+     * @brief Notify abilityms start keep-alive process.
+     * @param bundleInfos resident process bundle infos.
+     */
+    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+
+    /**
      * @brief Notify abilityms app process OnRemoteDied
      * @param abilityTokens abilities in died process.
      */

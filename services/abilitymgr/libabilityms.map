@@ -61,6 +61,11 @@
       *ImplicitStartProcessor*;
       *InnerMissionInfo*;
       *InsightIntentUtils*;
+      *JsonUtils*;
+      *KeepAliveAppType*;
+      *KeepAliveInfo*;
+      *KeepAliveSetter*;
+      *KeepAliveUtils*;
       *LaunchParam*;
       *LifeCycleStateInfo*;
       *Mission*;

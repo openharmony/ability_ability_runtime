@@ -15,6 +15,7 @@
 
 #include "task_handler_wrap.h"
 
+#include <cinttypes>
 #include <mutex>
 #include "cpp/mutex.h"
 #include "hilog_tag_wrapper.h"
@@ -46,16 +47,18 @@ void TaskHandle::Sync() const
 {
     auto handler = handler_.lock();
     if (!status_ || !handler || !innerTaskHandle_) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Invalid status");
+        TAG_LOGI(AAFwkTag::DEFAULT, "Invalid status");
         return;
     }
     auto &status = *status_;
     if (status == TaskStatus::FINISHED || status == TaskStatus::CANCELED) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Invalid status");
+        TAG_LOGI(AAFwkTag::DEFAULT, "Invalid status");
         return;
     }
     handler->WaitTaskInner(innerTaskHandle_);
 }
+
+std::atomic_int32_t TaskHandlerWrap::g_taskId = 0;
 
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::CreateQueueHandler(const std::string &queueName,
     TaskQoS queueQos)
@@ -75,7 +78,7 @@ std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::GetFfrtHandler()
     return ffrtHandler;
 }
 
-TaskHandlerWrap::TaskHandlerWrap()
+TaskHandlerWrap::TaskHandlerWrap(const std::string &queueName) : queueName_(queueName)
 {
     tasksMutex_ = std::make_unique<ffrt::mutex>();
 }
@@ -106,19 +109,19 @@ TaskHandle TaskHandlerWrap::SubmitTaskJust(const std::function<void()> &task,
 TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task,
     const std::string &name, int64_t delayMillis, bool forceSubmit)
 {
-    TaskAttribute atskAttr{name, delayMillis};
+    TaskAttribute taskAttr{name, delayMillis};
     std::lock_guard<ffrt::mutex> guard(*tasksMutex_);
     auto it = tasks_.find(name);
     if (it != tasks_.end()) {
         TAG_LOGD(AAFwkTag::DEFAULT, "SubmitTask repeated task: %{public}s", name.c_str());
         if (forceSubmit) {
-            return SubmitTask(task, atskAttr);
+            return SubmitTask(task, taskAttr);
         } else {
             return TaskHandle();
         }
     }
 
-    auto result = SubmitTask(task, atskAttr);
+    auto result = SubmitTask(task, taskAttr);
     tasks_.emplace(name, result);
 
     // submit clear task to clear map record
@@ -133,20 +136,34 @@ TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task,
 
     return result;
 }
+
 TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task, const TaskAttribute &taskAttr)
 {
     if (!task) {
         return TaskHandle();
     }
+
     TaskHandle result(shared_from_this(), nullptr);
-    auto taskWrap = [result, task]() {
+    result.taskId_ = ++g_taskId;
+    result.printTaskLog_ = printTaskLog_;
+    auto taskWrap = [result, task, taskName = taskAttr.taskName_]() {
+        if (result.PrintTaskLog()) {
+            TAG_LOGW(AAFwkTag::DEFAULT, "begin execute task name: %{public}s, taskId: %{public}d",
+                taskName.c_str(), result.GetTaskId());
+        }
         *result.status_ = TaskStatus::EXECUTING;
         task();
         *result.status_ = TaskStatus::FINISHED;
     };
-    result.innerTaskHandle_ = SubmitTaskInner(taskWrap, taskAttr);
+
+    if (printTaskLog_) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "submitTask: %{public}s, taskId: %{public}d, queueName: %{public}s count: "
+            "%{public}" PRIu64"", taskAttr.taskName_.c_str(), result.taskId_, queueName_.c_str(), GetTaskCount());
+    }
+    result.innerTaskHandle_ = SubmitTaskInner(std::move(taskWrap), taskAttr);
     return result;
 }
+
 bool TaskHandlerWrap::CancelTask(const std::string &name)
 {
     TAG_LOGD(AAFwkTag::DEFAULT, "CancelTask task: %{public}s", name.c_str());
@@ -158,6 +175,10 @@ bool TaskHandlerWrap::CancelTask(const std::string &name)
 
     auto taskHandle = it->second;
     tasks_.erase(it);
+    if (printTaskLog_) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "cancel task name: %{public}s, taskId: %{public}d, queueName: %{public}s",
+            name.c_str(), taskHandle.taskId_, queueName_.c_str());
+    }
     return taskHandle.Cancel();
 }
 
@@ -171,6 +192,7 @@ bool TaskHandlerWrap::RemoveTask(const std::string &name, const TaskHandle &task
     tasks_.erase(it);
     return true;
 }
+
 ffrt::qos Convert2FfrtQos(TaskQoS taskqos)
 {
     switch (taskqos) {
@@ -223,6 +245,9 @@ void BuildFfrtTaskAttr(const TaskAttribute &taskAttr, ffrt::task_attr &result)
     }
     if (taskAttr.taskPriority_ != TaskQueuePriority::LOW) {
         result.priority(Convert2FfrtPriority(taskAttr.taskPriority_));
+    }
+    if (taskAttr.timeoutMillis_ > 0) {
+        result.timeout(taskAttr.timeoutMillis_ * MILL_TO_MICRO);
     }
 }
 }  // namespace AAFWK

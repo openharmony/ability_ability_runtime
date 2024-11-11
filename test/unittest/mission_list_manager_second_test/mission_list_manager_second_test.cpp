@@ -162,17 +162,17 @@ HWTEST_F(MissionListManagerSecondTest, SignRestartAppFlag_001, TestSize.Level1)
     missionList->missions_.push_front(mission);
     missionListManager->currentMissionLists_.push_front(missionList);
     missionListManager->currentMissionLists_.push_front(missionList2);
-    missionListManager->SignRestartAppFlag(uid);
+    missionListManager->SignRestartAppFlag(uid, "");
     auto result = missionListManager->currentMissionLists_.size();
     EXPECT_EQ(2, result);
 
     missionListManager->defaultStandardList_ = missionList;
-    missionListManager->SignRestartAppFlag(uid);
+    missionListManager->SignRestartAppFlag(uid, "");
     result = missionListManager->defaultStandardList_->missions_.size();
     EXPECT_EQ(0, result);
 
     missionListManager->defaultSingleList_ = missionList;
-    missionListManager->SignRestartAppFlag(uid);
+    missionListManager->SignRestartAppFlag(uid, "");
     result = missionListManager->defaultSingleList_->missions_.size();
     EXPECT_EQ(0, result);
 }

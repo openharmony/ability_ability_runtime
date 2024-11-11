@@ -43,6 +43,7 @@ constexpr const char *EVENT_KEY_CALLER_PROCESS_ID = "CALLER_PROCESS_ID";
 constexpr const char *EVENT_KEY_EXIT_TIME = "EXIT_TIME";
 constexpr const char *EVENT_KEY_EXIT_RESULT = "EXIT_RESULT";
 constexpr const char *EVENT_KEY_EXIT_PID = "EXIT_PID";
+constexpr const char *EVENT_KEY_EXIT_REASON = "EXIT_REASON";
 constexpr const char *EVENT_KEY_BUNDLE_TYPE = "BUNDLE_TYPE";
 constexpr const char *EVENT_KEY_START_TYPE = "START_TYPE";
 constexpr const char *EVENT_KEY_CALLER_STATE = "CALLER_STATE";
@@ -555,7 +556,8 @@ void EventReport::SendProcessExitEvent(const EventName &eventName, const EventIn
         EVENT_KEY_EXIT_RESULT, eventInfo.exitResult,
         EVENT_KEY_EXIT_PID, eventInfo.pid,
         EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType);
+        EVENT_KEY_EXTENSION_TYPE, eventInfo.extensionType,
+        EVENT_KEY_EXIT_REASON, eventInfo.exitReason);
 }
 
 void EventReport::SendStartServiceEvent(const EventName &eventName, const EventInfo &eventInfo)

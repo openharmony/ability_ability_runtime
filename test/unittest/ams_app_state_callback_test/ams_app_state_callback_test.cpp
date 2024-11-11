@@ -125,6 +125,22 @@ HWTEST_F(AmsAppStateCallBackTest, NotifyStartResidentProcess_001, TestSize.Level
 /*
  * Feature: AppStateCallBackHost
  * Function: AppStateCallBackHost
+ * SubFunction: NotifyStartKeepAliveProcess Function
+ * FunctionPoints: NotifyStartKeepAliveProcess Onreceived interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Verify if Onreceived works when ability request done.
+ */
+HWTEST_F(AmsAppStateCallBackTest, NotifyStartKeepAliveProcess_001, TestSize.Level1)
+{
+    sptr<AppStateCallbackHost> host(new AppStateCallbackHost());
+    EXPECT_NE(host, nullptr);
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    host->NotifyStartKeepAliveProcess(bundleInfos);
+}
+
+/*
+ * Feature: AppStateCallBackHost
+ * Function: AppStateCallBackHost
  * SubFunction: OnAppStateChanged Function
  * FunctionPoints: OnAppStateChanged Onreceived interface
  * EnvConditions: Mobile that can run ohos test framework
