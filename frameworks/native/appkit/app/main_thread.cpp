@@ -1516,9 +1516,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             };
             runtime->SetDeviceDisconnectCallback(cb);
         }
-        if (appLaunchData.IsNeedPreloadModule()) {
-            PreloadModule(entryHapModuleInfo, runtime);
-        }
         auto perfCmd = appLaunchData.GetPerfCmd();
         int32_t pid = -1;
         std::string processName = "";
@@ -1774,6 +1771,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         HandleNWebPreload();
     }
 #endif
+    if (appLaunchData.IsNeedPreloadModule()) {
+        PreloadModule(entryHapModuleInfo, application_->GetRuntime());
+    }
 }
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
@@ -1823,7 +1823,7 @@ void MainThread::HandleNWebPreload()
 #endif
 }
 
-void MainThread::ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+void MainThread::ProcessMainAbility(const AbilityInfo &info, const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
     std::string srcPath(info.package);
     if (!info.isModuleJson) {
@@ -1852,28 +1852,32 @@ void MainThread::ProcessMainAbility(const AbilityInfo &info, std::unique_ptr<Abi
 }
 
 void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleInfo,
-    std::unique_ptr<AbilityRuntime::Runtime>& runtime)
+    const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
     TAG_LOGI(AAFwkTag::APPKIT, "preload module %{public}s", entryHapModuleInfo.moduleName.c_str());
-    bool useCommonTrunk = false;
-    for (const auto &md : entryHapModuleInfo.metadata) {
-        if (md.name == "USE_COMMON_CHUNK") {
-            useCommonTrunk = md.value == "true";
-            break;
+    wptr<MainThread> weak = this;
+    auto callback = [weak]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+            return;
         }
+        if (!appThread->appMgr_ || !appThread->applicationImpl_) {
+            TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+            return;
+        }
+        appThread->appMgr_->AddAbilityStageDone(appThread->applicationImpl_->GetRecordId());
+    };
+    bool isAsyncCallback = false;
+    application_->AddAbilityStage(abilityStage, callback, isAsyncCallback);
+    if (isAsyncCallback) {
+        return;
     }
-    bool isEsmode = entryHapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE;
-    std::string srcPath(entryHapModuleInfo.name);
-    std::string moduleName(entryHapModuleInfo.moduleName);
-    moduleName.append("::").append("AbilityStage");
-    srcPath.append("/assets/js/");
-    if (entryHapModuleInfo.srcPath.empty()) {
-        srcPath.append("AbilityStage.abc");
-    } else {
-        srcPath.append(entryHapModuleInfo.srcPath);
-        srcPath.append("/AbilityStage.abc");
+    if (!appMgr_ || !applicationImpl_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
+        return;
     }
-    runtime->PreloadModule(moduleName, srcPath, entryHapModuleInfo.hapPath, isEsmode, useCommonTrunk);
+    appMgr_->AddAbilityStageDone(applicationImpl_->GetRecordId());
     for (const auto &info : entryHapModuleInfo.abilityInfos) {
         if (info.name == entryHapModuleInfo.mainAbility) {
             ProcessMainAbility(info, runtime);
