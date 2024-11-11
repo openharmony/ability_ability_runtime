@@ -59,7 +59,7 @@ std::unique_ptr<CJAbilityStageObject> CJAbilityStageObject::LoadModule(const std
         return nullptr;
     }
 
-    return std::unique_ptr<CJAbilityStageObject>(handle);
+    return std::make_unique<CJAbilityStageObject>(handle);
 }
 
 CJAbilityStageObject::~CJAbilityStageObject()
