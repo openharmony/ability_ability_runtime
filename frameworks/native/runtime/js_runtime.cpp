@@ -191,15 +191,13 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
-            if (isDebugApp) {
-                ConnectServerManager::Get().StopConnectServer(false);
-            }
+            // if has old connect server, stop it
+            ConnectServerManager::Get().StopConnectServer(false);
             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
-            if (isDebugApp) {
-                weak->StopDebugger(option);
-            }
+            // if has old debugger server, stop it
+            weak->StopDebugger(option);
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
@@ -328,15 +326,13 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
-            if (isDebugApp) {
-                ConnectServerManager::Get().StopConnectServer(false);
-            }
+            // if has old connect server, stop it
+            ConnectServerManager::Get().StopConnectServer(false);
             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
-            if (isDebugApp) {
-                weak->StopDebugger(option);
-            }
+            // if has old debugger server, stop it
+            weak->StopDebugger(option);
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
