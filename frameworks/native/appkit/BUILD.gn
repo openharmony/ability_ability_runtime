@@ -249,6 +249,7 @@ ohos_shared_library("appkit_native") {
 
     external_deps += [
       "bundle_framework:appexecfwk_base",
+      "bundle_framework:cj_bundle_manager_ffi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
     ]
