@@ -171,6 +171,7 @@ constexpr const char* PERMISSION_MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 constexpr const char* PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
 constexpr const char* PERMISSION_TEMP_JIT_ALLOW = "TEMPJITALLOW";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
+constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 
 #ifdef WITH_DLP
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
@@ -8283,7 +8284,7 @@ bool AppMgrServiceInner::CleanAbilityByUserRequest(const sptr<IRemoteObject> &to
     }
     TAG_LOGI(AAFwkTag::APPMGR, "clean ability set up bg, force kill pid:%{public}d", targetPid);
     willKillPidsNum_ += 1;
-    int32_t delayTime = willKillPidsNum_ * KILL_PROCESS_BY_USER_INTERVAL;
+    int32_t delayTime = willKillPidsNum_ * KILL_PROCESS_BY_USER_INTERVAL + KILL_PROCESS_BY_USER_DELAY_BASE;
     TAG_LOGD(AAFwkTag::APPMGR, "delayTime:%{public}d", delayTime);
     auto delayKillTask = [targetPid, innerServicerWeak = weak_from_this()]() {
         auto self = innerServicerWeak.lock();
