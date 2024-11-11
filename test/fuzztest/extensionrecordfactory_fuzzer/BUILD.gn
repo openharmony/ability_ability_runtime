@@ -36,7 +36,7 @@ ohos_fuzztest("ExtensionRecordFactoryFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/extension_record_factory.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/extension_record/extension_record_factory.cpp",
     "${ability_runtime_services_path}/common/src/app_utils.cpp",
     "${ability_runtime_services_path}/common/src/json_utils.cpp",
     "extensionrecordfactory_fuzzer.cpp",
