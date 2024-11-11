@@ -85,8 +85,6 @@ public:
      */
     int32_t CheckMultiInstanceKeyForExtension(const AbilityRequest &abilityRequest);
 
-    bool VerifyCallerToken(AbilityRequest &abilityRequest);
-
 private:
     /**
      * AbilityPermissionUtil, the private constructor.
