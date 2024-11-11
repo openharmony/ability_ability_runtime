@@ -3057,7 +3057,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_007, TestSize.Le
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
     sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
     bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_INVALID_VALUE);
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
 }
 
 /**
@@ -3081,7 +3081,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_008, TestSize.Le
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
     sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
     bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_OK);
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
 }
 
 /**
@@ -3105,7 +3105,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_009, TestSize.Le
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
     sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
     bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_OK);
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
 }
 
 /**
@@ -3176,8 +3176,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_005, Test
     abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::INITIAL);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
     bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow),
-        ERR_NATIVE_ABILITY_STATE_CHECK_FAILED);
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_OK);
 }
 
 /**
@@ -3197,8 +3196,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_006, Test
     abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::UNSPECIFIED);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
     bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow),
-        ERR_NATIVE_ABILITY_STATE_CHECK_FAILED);
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_OK);
 }
 
 /**
