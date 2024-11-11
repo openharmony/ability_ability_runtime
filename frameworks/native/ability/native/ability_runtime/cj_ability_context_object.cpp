@@ -694,7 +694,7 @@ int32_t FFIAbilityContextOpenLink(int64_t id, char* cLink, CJOpenLinkOptions cOp
     }
     AAFwk::WantParams wantParams =
         OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(cOpenLinkOptions.parameters);
-        
+
     want.SetParams(wantParams);
     bool appLinkingOnly = cOpenLinkOptions.appLinkingOnly;
     openLinkOptions.SetAppLinkingOnly(appLinkingOnly);
@@ -744,16 +744,7 @@ EXPORT AbilityContextBroker* FFIAbilityContextGetBroker()
         .startAbilityForResultWithAccountAndOption = FFIAbilityContextStartAbilityForResultWithAccountAndOption,
         .requestPermissionsFromUser = FFIAbilityContextRequestPermissionsFromUser,
         .setMissionLabel = FFIAbilityContextSetMissionLabel,
-        .setMissionIcon = FFIAbilityContextSetMissionIcon,
-        .setRestoreEnabled = FFIAbilityContextSetRestoreEnabled,
-        .setMissionContinueState = FFIAbilityContextSetMissionContinueState,
-        .propConfiguration = FFIAbilityContextPropConfiguration,
-        .propAbilityInfo = FFIAbilityContextPropAbilityInfo,
-        .propCurrentHapModuleInfo = FFIAbilityContextPropCurrentHapModuleInfo,
-        .startAbilityByType = FFIAbilityContextStartAbilityByType,
-        .moveAbilityToBackground = FFIAbilityContextMoveAbilityToBackground,
-        .reportDrawnCompleted = FFIAbilityContextReportDrawnCompleted,
-        .openAtomicService = FFIAbilityContextOpenAtomicService
+        .setMissionIcon = FFIAbilityContextSetMissionIcon
     };
     return &contextFuncs;
 }
