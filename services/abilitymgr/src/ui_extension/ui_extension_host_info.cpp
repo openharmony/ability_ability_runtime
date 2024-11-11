@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ui_extension_host_info.h"
+#include "ui_extension/ui_extension_host_info.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {

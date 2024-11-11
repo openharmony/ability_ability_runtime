@@ -24,8 +24,8 @@
 
 #include "ability_record.h"
 #include "extension_record.h"
-#include "ui_extension_host_info.h"
-#include "ui_extension_session_info.h"
+#include "ui_extension/ui_extension_host_info.h"
+#include "ui_extension/ui_extension_session_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

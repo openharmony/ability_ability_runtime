@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "insight_intent_profile.cpp"
+#include "insight_intent/insight_intent_profile.cpp"
 #include "insight_intent_profile.h"
 
 using namespace testing;
@@ -101,7 +101,7 @@ HWTEST_F(InsightIntentProfileTest, TransformToInsightIntentInfo_0100, TestSize.L
     InsightIntentInfo info;
     insightIntent.intentName = "";
     EXPECT_FALSE(TransformToInsightIntentInfo(insightIntent, info));
-    
+
     insightIntent.intentName = "testIntent";
     insightIntent.intentDomain = "testDomain";
     insightIntent.intentVersion = "1.0";
