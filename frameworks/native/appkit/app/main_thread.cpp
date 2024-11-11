@@ -62,7 +62,7 @@
 #include "locale_config.h"
 #include "ace_forward_compatibility.h"
 #include "form_constants.h"
-#include "include/private/EGL/cache.h"
+#include "cache.h"
 #ifdef SUPPORT_APP_PREFERRED_LANGUAGE
 #include "preferred_language.h"
 #endif
