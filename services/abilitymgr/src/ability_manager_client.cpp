@@ -1065,7 +1065,7 @@ ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbility
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s", want.GetElement().GetURI().c_str());
     return abms->StartAbilityByCall(want, connect, nullptr, DEFAULT_INVAL_VALUE);
 }
 
@@ -1074,7 +1074,8 @@ ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbility
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s, userId:%{public}d",
+        want.GetElement().GetURI().c_str(), accountId);
     return abms->StartAbilityByCall(want, connect, callToken, accountId);
 }
 
