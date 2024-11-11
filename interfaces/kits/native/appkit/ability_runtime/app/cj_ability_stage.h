@@ -56,7 +56,7 @@ public:
     static std::shared_ptr<CJAbilityStage> Create(
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
     explicit CJAbilityStage(
-        std::unique_ptr<CJAbilityStageObject> cjStage) : cjAbilityStageObject_(std::move(cjStage)) {}
+        std::shared_ptr<CJAbilityStageObject> cjStage) : cjAbilityStageObject_(cjStage) {}
     ~CJAbilityStage() override = default;
 
     void Init(const std::shared_ptr<Context> &context,
@@ -69,7 +69,7 @@ public:
     void OnDestroy() const override;
 
 private:
-    std::unique_ptr<CJAbilityStageObject> cjAbilityStageObject_;
+    std::shared_ptr<CJAbilityStageObject> cjAbilityStageObject_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
