@@ -63,19 +63,25 @@ struct AbilityContextBroker {
 
     int32_t (*setMissionLabel)(int64_t id, const char* label);
     int32_t (*setMissionIcon)(int64_t id, int64_t pixelMapId);
-    int32_t (*setRestoreEnabled)(int64_t id, bool enabled);
-    int32_t (*backToCallerAbilityWithResult)(int64_t id, CJAbilityResult abilityResult, char* requestCode);
-    int32_t (*setMissionContinueState)(int64_t id, int32_t state);
-    OHOS::AbilityRuntime::CConfiguration (*propConfiguration)(int64_t id, int32_t *errCode);
-    OHOS::CJSystemapi::BundleManager::RetAbilityInfo (*propAbilityInfo)(int64_t id, int32_t *errCode);
-    OHOS::CJSystemapi::BundleManager::RetHapModuleInfo (*propCurrentHapModuleInfo)(int64_t id, int32_t *errCode);
-    int32_t (*startAbilityByType)(int64_t id, char* cType, char* cWantParams,
-        void (*onError)(int32_t, char*, char*), void (*onResult)(CJAbilityResult));
-    int32_t (*moveAbilityToBackground)(int64_t id);
-    int32_t (*reportDrawnCompleted)(int64_t id);
-    int32_t (*openAtomicService)(int64_t id, char* cAppId,
-        CJAtomicServiceOptions cAtomicServiceOptions, int32_t requestCode, int64_t lambdaId);
 };
+
+CJ_EXPORT int32_t FFIAbilityContextSetRestoreEnabled(int64_t id, bool enabled);
+CJ_EXPORT int32_t FFIAbilityContextBackToCallerAbilityWithResult(int64_t id,
+    CJAbilityResult abilityResult, char* requestCode);
+CJ_EXPORT int32_t FFIAbilityContextSetMissionContinueState(int64_t id, int32_t state);
+CJ_EXPORT OHOS::AbilityRuntime::CConfiguration FFIAbilityContextPropConfiguration(
+    int64_t id, int32_t *errCode);
+CJ_EXPORT OHOS::CJSystemapi::BundleManager::RetAbilityInfo FFIAbilityContextPropAbilityInfo(
+    int64_t id, int32_t *errCode);
+CJ_EXPORT OHOS::CJSystemapi::BundleManager::RetHapModuleInfo FFIAbilityContextPropCurrentHapModuleInfo(
+    int64_t id, int32_t *errCode);
+CJ_EXPORT int32_t FFIAbilityContextStartAbilityByType(int64_t id, char* cType, char* cWantParams,
+    void (*onError)(int32_t, char*, char*), void (*onResult)(CJAbilityResult));
+CJ_EXPORT int32_t FFIAbilityContextMoveAbilityToBackground(int64_t id);
+CJ_EXPORT int32_t FFIAbilityContextReportDrawnCompleted(int64_t id);
+CJ_EXPORT int32_t FFIAbilityContextOpenAtomicService(int64_t id, char* cAppId,
+    CJAtomicServiceOptions cAtomicServiceOptions, int32_t requestCode, int64_t lambdaId);
+
 }
 
 #endif // OHOS_ABILITY_RUNTIME_CJ_ABILITY_CONTEXT_BROKER_H
