@@ -1671,7 +1671,7 @@ void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 void AppRunningRecord::ScheduleAcceptWantDone()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
-
+    RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG);
 }
 
@@ -1690,7 +1690,7 @@ void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const 
 void AppRunningRecord::ScheduleNewProcessRequestDone()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
-
+    RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG);
 }
 
@@ -1698,6 +1698,7 @@ void AppRunningRecord::ApplicationTerminated()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Application terminated bundle %{public}s", mainBundleName_.c_str());
 
+    RemoveEvent(AMSEventHandler::TERMINATE_APPLICATION_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG);
 }
 
