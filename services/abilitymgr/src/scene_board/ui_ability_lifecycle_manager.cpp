@@ -898,7 +898,7 @@ void UIAbilityLifecycleManager::MoveToBackground(const std::shared_ptr<AbilityRe
 
 int UIAbilityLifecycleManager::ResolveLocked(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability_name:%{public}s", abilityRequest.want.GetElement().GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s", abilityRequest.want.GetElement().GetURI().c_str());
 
     if (!abilityRequest.IsCallType(AbilityCallType::CALL_REQUEST_TYPE)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s, resolve ability_name:", __func__);
