@@ -33,6 +33,7 @@
 #include "tokenid_kit.h"
 #include "uri_permission_utils.h"
 #include "want.h"
+#include "hitrace_meter.h"
 
 #define READ_MODE (1<<0)
 #define WRITE_MODE (1<<1)
@@ -877,6 +878,8 @@ bool UriPermissionManagerStubImpl::CheckUriTypeIsValid(Uri uri)
 
 int32_t UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t tokenId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     bool isCallingPermission =
         AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS);
     if (!isCallingPermission) {
@@ -891,7 +894,9 @@ int32_t UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t t
     }
     uint64_t timeNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "clear %{private}d permission", tokenId);
     auto ret = SandboxManagerKit::UnSetAllPolicyByToken(tokenId, timeNow);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "clear permission end");
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "ClearPermission failed, ret is %{public}d", ret);
         return ret;
@@ -904,12 +909,15 @@ int32_t UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t t
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 int32_t UriPermissionManagerStubImpl::Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     auto callingPid = IPCSkeleton::GetCallingPid();
-    bool isTerminating = false;
+    ConnectManager(appMgr_, APP_MGR_SERVICE_ID);
     if (appMgr_ == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "appMgr_ null");
         return INNER_ERR;
     }
+    bool isTerminating = false;
     if (IN_PROCESS_CALL(appMgr_->IsTerminatingByPid(callingPid, isTerminating)) != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "IsTerminatingByPid failed");
         return INNER_ERR;
@@ -921,7 +929,9 @@ int32_t UriPermissionManagerStubImpl::Active(const std::vector<PolicyInfo> &poli
     uint64_t timeNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     auto tokenId = IPCSkeleton::GetCallingTokenID();
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "active %{private}d permission", tokenId);
     auto ret = SandboxManagerKit::StartAccessingPolicy(policy, result, false, tokenId, timeNow);
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "active permission end");
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "StartAccessingPolicy failed");
         return ret;
