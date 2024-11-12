@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,27 +18,27 @@
 #define private public
 #define protected public
 #include "distributed_kv_data_manager.h"
+#include "foundation/distributeddatamgr/kv_store/kvstoremock/frameworks/innerkitsimpl/kvdb/include/store_manager.h"
 #include "kvstore.h"
+#include "distributed_kv_data_manager.h"
 #undef private
 #undef protected
 
 namespace OHOS {
+
 class MockSingleKvStore : public DistributedKv::SingleKvStore {
 public:
-    MockSingleKvStore(){};
+    MockSingleKvStore() {};
 
-    virtual ~MockSingleKvStore(){};
+    virtual ~MockSingleKvStore() {};
 
     DistributedKv::Status Get(const DistributedKv::Key &key, DistributedKv::Value &value) override
     {
         return DistributedKv::Status::SUCCESS;
     };
 
-    DistributedKv::Status GetEntries(
-        const DistributedKv::Key &prefix, std::vector<DistributedKv::Entry> &entries) const override
-    {
-        return GetEntries_;
-    };
+    MOCK_CONST_METHOD2(GetEntries,
+        DistributedKv::Status(const DistributedKv::Key &prefix, std::vector<DistributedKv::Entry> &entries));
 
     DistributedKv::Status GetEntries(
         const DistributedKv::DataQuery &query, std::vector<DistributedKv::Entry> &entries) const override
@@ -52,7 +52,8 @@ public:
         return DistributedKv::Status::SUCCESS;
     };
 
-    DistributedKv::Status GetResultSet(const DistributedKv::DataQuery &query,
+    DistributedKv::Status GetResultSet(
+        const DistributedKv::DataQuery &query,
         std::shared_ptr<DistributedKv::KvStoreResultSet> &resultSet) const override
     {
         return DistributedKv::Status::SUCCESS;
@@ -84,8 +85,8 @@ public:
         return DistributedKv::Status::SUCCESS;
     };
 
-    DistributedKv::Status Sync(const std::vector<std::string> &devices, DistributedKv::SyncMode mode,
-        const DistributedKv::DataQuery &query,
+    DistributedKv::Status Sync(
+        const std::vector<std::string> &devices, DistributedKv::SyncMode mode, const DistributedKv::DataQuery &query,
         std::shared_ptr<DistributedKv::KvStoreSyncCallback> syncCallback) override
     {
         return DistributedKv::Status::SUCCESS;
@@ -116,8 +117,8 @@ public:
         return DistributedKv::Status::SUCCESS;
     };
 
-    DistributedKv::Status SetCapabilityRange(
-        const std::vector<std::string> &localLabels, const std::vector<std::string> &remoteLabels) const override
+    DistributedKv::Status SetCapabilityRange(const std::vector<std::string> &localLabels,
+        const std::vector<std::string> &remoteLabels) const override
     {
         return DistributedKv::Status::SUCCESS;
     };
@@ -130,12 +131,6 @@ public:
 
     DistributedKv::Status UnsubscribeWithQuery(
         const std::vector<std::string> &devices, const DistributedKv::DataQuery &query) override
-    {
-        return DistributedKv::Status::SUCCESS;
-    };
-
-    DistributedKv::Status SetIdentifier(const std::string &accountId, const std::string &appId,
-        const std::string &storeId, const std::vector<std::string> &tagretDev) override
     {
         return DistributedKv::Status::SUCCESS;
     };
@@ -213,5 +208,5 @@ public:
     DistributedKv::Status Delete_ = DistributedKv::Status::SUCCESS;
     DistributedKv::Status Put_ = DistributedKv::Status::SUCCESS;
 };
-} // namespace OHOS
+}
 #endif
