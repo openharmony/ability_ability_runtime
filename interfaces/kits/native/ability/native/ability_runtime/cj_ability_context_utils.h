@@ -29,12 +29,25 @@ struct CJStartOptions {
     int32_t displayId;
 };
 
+struct CJNewStartOptions {
+    int32_t windowMode;
+    int32_t displayId;
+    bool withAnimation;
+    int32_t windowLeft;
+    int32_t windowTop;
+    int32_t windowWidth;
+    int32_t windowHeight;
+};
+
 struct CJAtomicServiceOptions {
+    bool hasValue;
     int32_t flags;
     char* parameters;
+    CJNewStartOptions startOptions;
 };
 
 struct CJOpenLinkOptions {
+    bool hasValue;
     bool appLinkingOnly;
     char* parameters;
 };

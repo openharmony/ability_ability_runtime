@@ -85,6 +85,17 @@ void UnWrapStartOption(CJStartOptions* source, AAFwk::StartOptions& target)
     target.SetDisplayID(source->displayId);
 }
 
+void UnWrapStartOptions(CJNewStartOptions source, AAFwk::StartOptions& target)
+{
+    target.SetWindowMode(source.windowMode);
+    target.SetDisplayID(source.displayId);
+    target.SetWithAnimation(source.withAnimation);
+    target.SetWindowLeft(source.windowLeft);
+    target.SetWindowTop(source.windowTop);
+    target.SetWindowWidth(source.windowWidth);
+    target.SetWindowHeight(source.windowHeight);
+}
+
 std::function<void(int32_t, CJAbilityResult*)> WrapCJAbilityResultTask(int64_t lambdaId)
 {
     auto cjTask = [lambdaId](int32_t error, CJAbilityResult* abilityResult) {
@@ -532,7 +543,8 @@ int32_t FFIAbilityContextBackToCallerAbilityWithResult(
     int32_t resultCode = abilityResult.resultCode;
     std::string requestCodeStr = std::string(requestCode);
     auto requestCodeInt64 = RequestCodeFromStringToInt64(requestCodeStr);
-    return context->BackToCallerAbilityWithResult(*want, resultCode, requestCodeInt64);
+    auto innerErrCod = context->BackToCallerAbilityWithResult(*want, resultCode, requestCodeInt64);
+    return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
 }
 
 int32_t FFIAbilityContextSetMissionContinueState(int64_t id, int32_t intState)
@@ -547,7 +559,8 @@ int32_t FFIAbilityContextSetMissionContinueState(int64_t id, int32_t intState)
         TAG_LOGE(AAFwkTag::CONTEXT, "invalid params, state: %{public}d", state);
         return static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
     }
-    return context->SetMissionContinueState(state);
+    auto innerErrCod = context->SetMissionContinueState(state);
+    return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
 }
 
 CConfiguration FFIAbilityContextPropConfiguration(int64_t id, int32_t *errCode)
@@ -621,7 +634,7 @@ int32_t FFIAbilityContextStartAbilityByType(int64_t id, char* cType, char* cWant
 #ifdef SUPPORT_SCREEN    
     innerErrCod = context->StartAbilityByType(type, wantParm, callback);
 #endif
-    return innerErrCod;
+    return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
 }
 
 int32_t FFIAbilityContextMoveAbilityToBackground(int64_t id)
@@ -631,7 +644,8 @@ int32_t FFIAbilityContextMoveAbilityToBackground(int64_t id)
         TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    return context->MoveUIAbilityToBackground();
+    auto innerErrCod = context->MoveUIAbilityToBackground();
+    return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
 }
 
 int32_t FFIAbilityContextReportDrawnCompleted(int64_t id)
@@ -641,7 +655,8 @@ int32_t FFIAbilityContextReportDrawnCompleted(int64_t id)
         TAG_LOGE(AAFwkTag::CONTEXT, "null CJAbilityContext");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    return context->ReportDrawnCompleted();
+    auto innerErrCod = context->ReportDrawnCompleted();
+    return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
 }
 
 int32_t FFIAbilityContextOpenAtomicService(int64_t id, char* cAppId,
@@ -659,10 +674,15 @@ int32_t FFIAbilityContextOpenAtomicService(int64_t id, char* cAppId,
     std::string appId = std::string(cAppId);
     AAFwk::Want want;
     AAFwk::StartOptions startOptions;
-    AAFwk::WantParams wantParams =
-        OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(cAtomicServiceOptions.parameters);
-    want.SetParams(wantParams);
-    want.SetFlags(cAtomicServiceOptions.flags);
+    if (cAtomicServiceOptions.hasValue) {
+        AAFwk::WantParams wantParams =
+            OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(cAtomicServiceOptions.parameters);
+        want.SetParams(wantParams);
+        if (cAtomicServiceOptions.flags != 0) {
+            want.SetFlags(cAtomicServiceOptions.flags);
+        }
+        UnWrapStartOptions(cAtomicServiceOptions.startOptions, startOptions);
+    }
     std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
     TAG_LOGD(AAFwkTag::CONTEXT, "bundleName: %{public}s", bundleName.c_str());
     want.SetBundle(bundleName);
@@ -692,13 +712,14 @@ int32_t FFIAbilityContextOpenLink(int64_t id, char* cLink, CJOpenLinkOptions cOp
         TAG_LOGE(AAFwkTag::CONTEXT, "invalid link parames");
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
     }
-    AAFwk::WantParams wantParams =
-        OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(cOpenLinkOptions.parameters);
-
-    want.SetParams(wantParams);
-    bool appLinkingOnly = cOpenLinkOptions.appLinkingOnly;
-    openLinkOptions.SetAppLinkingOnly(appLinkingOnly);
-    want.SetParam(APP_LINKING_ONLY, appLinkingOnly);
+    if (cOpenLinkOptions.hasValue) {
+        AAFwk::WantParams wantParams =
+            OHOS::AAFwk::WantParamWrapper::ParseWantParamsWithBrackets(cOpenLinkOptions.parameters);
+        want.SetParams(wantParams);
+        bool appLinkingOnly = cOpenLinkOptions.appLinkingOnly;
+        openLinkOptions.SetAppLinkingOnly(appLinkingOnly);
+        want.SetParam(APP_LINKING_ONLY, appLinkingOnly);
+    }
     if (!want.HasParameter(APP_LINKING_ONLY)) {
         want.SetParam(APP_LINKING_ONLY, false);
     }
@@ -712,7 +733,11 @@ int32_t FFIAbilityContextOpenLink(int64_t id, char* cLink, CJOpenLinkOptions cOp
         RuntimeTask task = WrapRuntimeTask(cjTask, SUCCESS_CODE);
         context->CreateOpenLinkTask(std::move(task), requestCode, want, nativeRequestCode);
     }
-    return context->OpenLink(want, requestCode);
+    auto innerErrCod = context->OpenLink(want, requestCode);
+    if (innerErrCod == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+        return SUCCESS_CODE;
+    }
+    return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
 }
 
 #define EXPORT __attribute__((visibility("default")))
