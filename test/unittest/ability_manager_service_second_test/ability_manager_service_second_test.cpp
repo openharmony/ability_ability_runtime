@@ -1795,5 +1795,39 @@ HWTEST_F(AbilityManagerServiceSecondTest, UpdateKeepAliveEnableState_001, TestSi
     EXPECT_NE(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UpdateKeepAliveEnableState_001 end");
 }
+
+/**
+ * @tc.name: CheckCallAutoFillExtensionPermission_001
+ * @tc.desc: Check can't start non-system app when extension type is AUTO_FILL_PASSWORD.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
+    abilityRequest_.abilityInfo.visible = true;
+    abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD;
+    abilityRequest_.appInfo.isSystemApp = false;
+    abilityRequest_.appInfo.bundleName = "test.bundleName";
+    EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), CHECK_PERMISSION_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "testcase end.");
+}
+
+/**
+ * @tc.name: CheckCallAutoFillExtensionPermission_002
+ * @tc.desc: Check can't start non-system app when bundleName different.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
+    abilityRequest_.abilityInfo.visible = true;
+    abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD;
+    abilityRequest_.appInfo.isSystemApp = true;
+    abilityRequest_.appInfo.bundleName = "test.bundleName";
+    EXPECT_EQ(abilityMs_->CheckCallAutoFillExtensionPermission(abilityRequest_), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "testcase end.");
+}
 }  // namespace AAFwk
 }  // namespace OHOS
