@@ -14,21 +14,28 @@
  */
 
 #include <gtest/gtest.h>
+#include "gmock/gmock.h"
 
 #define private public
 #define protected public
 #include "app_exit_reason_data_manager.h"
+#include "mock_single_kv_store.h"
 #undef private
 #undef protected
 
 using namespace testing;
 using namespace testing::ext;
+using testing::_;
+using testing::Return;
+using testing::SetArgReferee;
+using ::testing::DoAll;
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 const std::string MODULE_NAME = "module_name";
 const std::string ABILITY_NAME = "ability_name";
+const std::string BUNDLE_NAME = "bundle_name";
 constexpr uint32_t ACCESS_TOKEN_ID = 123;
 const int SESSION_ID = 111;
 }  // namespace
@@ -146,6 +153,145 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_GetAbilityRecove
         ACCESS_TOKEN_ID, MODULE_NAME, ABILITY_NAME, hasRecoverInfo);
     EXPECT_EQ(result, ERR_OK);
     EXPECT_EQ(hasRecoverInfo, true);
+}
+
+/**
+ * @tc.name: AppExitReasonDataManager_SetAppExitReason_001
+ * @tc.desc: SetAppExitReason
+ * @tc.type: FUNC
+ * @tc.require: issuesI7N79U
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_SetAppExitReason_001, TestSize.Level1)
+{
+    std::vector<std::string> abilityList;
+    abilityList.push_back(ABILITY_NAME);
+    AAFwk::ExitReason exitReason = { AAFwk::REASON_JS_ERROR, "Js Error." };
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        "", ACCESS_TOKEN_ID, abilityList, exitReason);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        BUNDLE_NAME, 0, abilityList, exitReason);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    auto tempKv = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+    auto& tempStoreId =
+        const_cast<DistributedKv::StoreId&>(DelayedSingleton<AppExitReasonDataManager>::GetInstance()->storeId_);
+    tempStoreId.storeId = "app_**exit_reason_infos";
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        BUNDLE_NAME, ACCESS_TOKEN_ID, abilityList, exitReason);
+    EXPECT_EQ(result, ERR_NO_INIT);
+
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = tempKv;
+    tempStoreId.storeId = "app_exit_reason_infos";
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        BUNDLE_NAME, ACCESS_TOKEN_ID, abilityList, exitReason);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AppExitReasonDataManager_DeleteAppExitReason_001
+ * @tc.desc: DeleteAppExitReason
+ * @tc.type: FUNC
+ * @tc.require: issuesI7N79U
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_DeleteAppExitReason_001, TestSize.Level1)
+{
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(BUNDLE_NAME, -1, 0);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(BUNDLE_NAME, 1, 0);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason("", 0);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    auto tempKv = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+    auto& tempStoreId =
+        const_cast<DistributedKv::StoreId&>(DelayedSingleton<AppExitReasonDataManager>::GetInstance()->storeId_);
+    tempStoreId.storeId = "app_**exit_reason_infos";
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(BUNDLE_NAME,
+        ACCESS_TOKEN_ID);
+    EXPECT_EQ(result, ERR_NO_INIT);
+
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = tempKv;
+    tempStoreId =
+        const_cast<DistributedKv::StoreId&>(DelayedSingleton<AppExitReasonDataManager>::GetInstance()->storeId_);
+    tempStoreId.storeId = "app_exit_reason_infos";
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(BUNDLE_NAME,
+        ACCESS_TOKEN_ID);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AppExitReasonDataManager_GetAppExitReason_001
+ * @tc.desc: GetAppExitReason
+ * @tc.type: FUNC
+ * @tc.require: issuesI7N79U
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_GetAppExitReason_001, TestSize.Level1)
+{
+    bool isSetReason = false;
+    AAFwk::ExitReason exitReason = { AAFwk::REASON_JS_ERROR, "Js Error." };
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
+        "", ACCESS_TOKEN_ID, ABILITY_NAME, isSetReason, exitReason);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
+        BUNDLE_NAME, 0, ABILITY_NAME, isSetReason, exitReason);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    auto tempKv = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+    auto& tempStoreId =
+        const_cast<DistributedKv::StoreId&>(DelayedSingleton<AppExitReasonDataManager>::GetInstance()->storeId_);
+    tempStoreId.storeId = "app_**exit_reason_infos";
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
+        BUNDLE_NAME, ACCESS_TOKEN_ID, ABILITY_NAME, isSetReason, exitReason);
+    EXPECT_EQ(result, ERR_NO_INIT);
+
+    tempStoreId.storeId = "app_exit_reason_infos";
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
+    EXPECT_CALL(*kvStorePtr, GetEntries(_, _)).Times(1)
+        .WillOnce(DoAll(Return(DistributedKv::Status::ERROR)));
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
+        BUNDLE_NAME, ACCESS_TOKEN_ID, ABILITY_NAME, isSetReason, exitReason);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    DistributedKv::Entry entry;
+    entry.key = std::to_string(ACCESS_TOKEN_ID);;
+    entry.value = "test_value";
+    std::vector<DistributedKv::Entry> allEntries;
+    allEntries.push_back(entry);
+    EXPECT_CALL(*kvStorePtr, GetEntries(_, _)).Times(1)
+        .WillOnce(DoAll(SetArgReferee<1>(allEntries), Return(DistributedKv::Status::SUCCESS)));
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
+        BUNDLE_NAME, ACCESS_TOKEN_ID, ABILITY_NAME, isSetReason, exitReason);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AppExitReasonDataManager_DeleteAllRecoverInfoByTokenId_001
+ * @tc.desc: DeleteAllRecoverInfoByTokenId
+ * @tc.type: FUNC
+ * @tc.require: issuesI7N79U
+ */
+HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_DeleteAllRecoverInfoByTokenId_001, TestSize.Level1)
+{
+    auto tempKv = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = nullptr;
+    auto& tempStoreId =
+        const_cast<DistributedKv::StoreId&>(DelayedSingleton<AppExitReasonDataManager>::GetInstance()->storeId_);
+    tempStoreId.storeId = "app_**exit_reason_infos";
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->
+        DeleteAllRecoverInfoByTokenId(ACCESS_TOKEN_ID);
+    EXPECT_EQ(result, ERR_NO_INIT);
+
+    tempStoreId.storeId = "app_exit_reason_infos";
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = tempKv;
+    result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->
+        DeleteAllRecoverInfoByTokenId(ACCESS_TOKEN_ID);
+    EXPECT_EQ(result, ERR_OK);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
