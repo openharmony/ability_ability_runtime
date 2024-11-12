@@ -1065,6 +1065,7 @@ private:
             return reinterpret_cast<size_t>(remoteObj.GetRefPtr());
         }
     };
+    bool IsWindowIdsEmpty();
 
     bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
     bool isKeepAliveBundle_ = false;
@@ -1156,6 +1157,7 @@ private:
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
 
     std::set<uint32_t> windowIds_;
+    ffrt::mutex windowIdsLock_;
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
     ffrt::mutex childProcessRecordMapLock_;
 
