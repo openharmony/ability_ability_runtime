@@ -87,7 +87,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_001, TestSize.Level1)
     const sptr<IRemoteObject> callerToken = MockToken();
     int res = 0;
 
-    usleep(100000);
+    usleep(100000); // 100000 means us.
     // from freeInstallManager_->freeInstallList_ find startInstallTime
     for (auto it = freeInstallManager_->freeInstallList_.begin(); it != freeInstallManager_->freeInstallList_.end();) {
         std::string bundleName = (*it).want.GetElement().GetBundleName();
@@ -115,7 +115,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_002, TestSize.Level1)
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
-    const int32_t userId = 100;
+    const int32_t userId = 100; // 100 means userId
     const int requestCode = 0;
     // token is nullptr, IsTopAbility failed
     const sptr<IRemoteObject> callerToken = nullptr;
@@ -142,7 +142,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_003, TestSize.Level1)
     const sptr<IRemoteObject> callerToken = MockToken();
     int res = 0;
 
-    usleep(100000);
+    usleep(100000); // 100000 means us.
     // from freeInstallManager_->freeInstallList_ find startInstallTime
     for (auto it = freeInstallManager_->freeInstallList_.begin(); it != freeInstallManager_->freeInstallList_.end();) {
         std::string bundleName = (*it).want.GetElement().GetBundleName();
