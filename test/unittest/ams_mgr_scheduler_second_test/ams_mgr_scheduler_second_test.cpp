@@ -2060,6 +2060,71 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsProcessAttached_
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsProcessAttached_003 end");
 }
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_IsCallerKilling_001
+ * @tc.desc: Test IsCallerKilling
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsCallerKilling_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsCallerKilling_001 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, nullptr);
+
+    /**
+     * @tc.steps: step1. amsMgrScheduler isReady false
+     * @tc.expected: step1. expect ERR_INVALID_OPERATION
+     */
+    auto ret = amsMgrScheduler->IsCallerKilling("");
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsCallerKilling_001 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_IsCallerKilling_002
+ * @tc.desc: Test IsCallerKilling
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsCallerKilling_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsCallerKilling_002 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+
+    /**
+     * @tc.steps: step1. amsMgrScheduler isReady false
+     * @tc.expected: step1. expect ERR_INVALID_OPERATION
+     */
+    IPCSkeleton::SetCallingUid(-1);
+    auto ret = amsMgrScheduler->IsCallerKilling("");
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsCallerKilling_002 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_IsCallerKilling_003
+ * @tc.desc: Test IsCallerKilling
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsCallerKilling_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsCallerKilling_003 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+
+    /**
+     * @tc.steps: step1. amsMgrScheduler isReady false
+     * @tc.expected: step1. expect ERR_INVALID_OPERATION
+     */
+    IPCSkeleton::SetCallingUid(Constants::FOUNDATION_UID);
+    auto ret = amsMgrScheduler->IsCallerKilling("");
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsCallerKilling_003 end");
+}
 } // AppExecFwk
 } // OHOS
 

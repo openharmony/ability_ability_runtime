@@ -655,6 +655,15 @@ bool AppScheduler::IsProcessAttached(sptr<IRemoteObject> token) const
     return appMgrClient_->IsProcessAttached(token);
 }
 
+bool AppScheduler::IsCallerKilling(const std::string& callerKey) const
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsCallerKilling(callerKey);
+}
+
 void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
 {
     if (!appMgrClient_) {

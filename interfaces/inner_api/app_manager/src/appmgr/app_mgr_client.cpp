@@ -1399,6 +1399,19 @@ bool AppMgrClient::IsProcessAttached(sptr<IRemoteObject> token) const
     return amsService->IsProcessAttached(token);
 }
 
+bool AppMgrClient::IsCallerKilling(const std::string& callerKey) const
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return false;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        return false;
+    }
+    return amsService->IsCallerKilling(callerKey);
+}
+
 AppMgrResultCode AppMgrClient::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
     bool &isRunning)
 {

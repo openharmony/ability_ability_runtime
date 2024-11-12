@@ -28,9 +28,9 @@ class KillingProcessManager {
 public:
     static KillingProcessManager& GetInstance();
     ~KillingProcessManager() = default;
-    bool IsCallerKilling(std::string callerKey) const;
-    void AddKillingCallerKey(std::string callerKey);
-    void RemoveKillingCallerKey(std::string callerKey);
+    bool IsCallerKilling(const std::string& callerKey) const;
+    void AddKillingCallerKey(const std::string& callerKey);
+    void RemoveKillingCallerKey(const std::string& callerKey);
 
 private:
     KillingProcessManager() = default;
