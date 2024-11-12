@@ -3844,7 +3844,7 @@ void MissionListManager::AddUninstallTags(const std::string &bundleName, int32_t
         if (missionList) {
             missionList->HandleUnInstallApp(bundleName, uid); // add tag here.
             if (missionList->IsEmpty()) {
-                currentMissionLists_.erase(it++);
+                it = currentMissionLists_.erase(it);
                 continue;
             }
         }

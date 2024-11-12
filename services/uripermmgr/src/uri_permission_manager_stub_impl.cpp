@@ -508,7 +508,7 @@ void UriPermissionManagerStubImpl::RemoveUriRecord(std::vector<std::string> &uri
             break;
         }
         if (list.empty()) {
-            uriMap_.erase(iter++);
+            iter = uriMap_.erase(iter);
             continue;
         }
         ++iter;
@@ -549,7 +549,7 @@ int UriPermissionManagerStubImpl::RevokeAllUriPermissions(uint32_t tokenId)
                 for (const auto &record : iter->second) {
                     uriLists[record.targetTokenId].emplace_back(iter->first);
                 }
-                uriMap_.erase(iter++);
+                iter = uriMap_.erase(iter);
                 continue;
             }
             auto& list = iter->second;
@@ -557,13 +557,13 @@ int UriPermissionManagerStubImpl::RevokeAllUriPermissions(uint32_t tokenId)
                 if (it->targetTokenId == tokenId || it->fromTokenId == tokenId) {
                     TAG_LOGI(AAFwkTag::URIPERMMGR, "Erase an uri permission record");
                     uriLists[it->targetTokenId].emplace_back(iter->first);
-                    list.erase(it++);
+                    it = list.erase(it);
                     continue;
                 }
                 it++;
             }
             if (list.empty()) {
-                uriMap_.erase(iter++);
+                iter = uriMap_.erase(iter);
                 continue;
             }
             iter++;

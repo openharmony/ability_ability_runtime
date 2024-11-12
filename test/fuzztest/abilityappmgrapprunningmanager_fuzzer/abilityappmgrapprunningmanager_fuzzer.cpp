@@ -26,6 +26,7 @@
 #undef private
 #include "securec.h"
 #include "ability_record.h"
+#include "kill_process_config.h"
 
 
 using namespace OHOS::AAFwk;
@@ -82,8 +83,9 @@ void DoSomethingInterestingWithMyAPIadda(const char* data, size_t size)
     ApplicationInfo appInfos;
     manager->ProcessUpdateApplicationInfoInstalled(appInfos);
     std::list<pid_t> pids;
-    bool clearPageStack = *data % ENABLE;
-    manager->ProcessExitByBundleNameAndUid(jsonStr, uid, pids, clearPageStack);
+    KillProcessConfig config;
+    config.clearPageStack = *data % ENABLE;
+    manager->ProcessExitByBundleNameAndUid(jsonStr, uid, pids, config);
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     manager->GetPidsByUserId(userId, pids);
     manager->PrepareTerminate(token, clearMissionFlag);

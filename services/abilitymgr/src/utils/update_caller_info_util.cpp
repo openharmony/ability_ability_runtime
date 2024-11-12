@@ -68,7 +68,7 @@ void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject
     want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);
-    want.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
+    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!abilityRecord) {
@@ -148,7 +148,7 @@ void UpdateCallerInfoUtil::UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteO
     want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);
-    want.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
+    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
 
     auto abilityRecord = Token::GetAbilityRecordByToken(asCallerSourceToken);
     if (abilityRecord == nullptr) {
@@ -186,7 +186,7 @@ void UpdateCallerInfoUtil::UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<I
     want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);
-    want.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
+    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER(callerRecord);
     auto sourceInfo = callerRecord->GetCallerInfo();
@@ -229,7 +229,7 @@ bool UpdateCallerInfoUtil::UpdateAsCallerInfoFromDialog(Want& want)
     want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);
-    want.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
+    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     if (callerBundleName == "") {
         want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME,
             dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME));
@@ -258,7 +258,7 @@ void UpdateCallerInfoUtil::UpdateCallerInfoFromToken(Want& want, const sptr<IRem
     want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);
-    want.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
+    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
 
     std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
     want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);

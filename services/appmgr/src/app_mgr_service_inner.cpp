@@ -54,6 +54,7 @@
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "itest_observer.h"
+#include "killing_process_manager.h"
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
 #endif
@@ -842,19 +843,11 @@ bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AAFwk::Want>
         TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo and appInfo have diff appName");
         return false;
     }
-    bool needCheckCallerIsExist = false;
     if (want) {
-        needCheckCallerIsExist = want->GetBoolParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST, false);
-        want->RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
-    }
-    if (needCheckCallerIsExist && loadParam->preToken) {
-        auto appRecord = GetAppRunningRecordByAbilityToken(loadParam->preToken);
-        if (appRecord == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "preToken not exist");
-            return false;
-        }
-        if (appRecord->IsKilling()) {
-            TAG_LOGE(AAFwkTag::APPMGR, "app is killing");
+        std::string callerKey = want->GetStringParam(Want::PARAMS_REAL_CALLER_KEY);
+        want->RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
+        if (!callerKey.empty() && KillingProcessManager::GetInstance().IsCallerKilling(callerKey)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "caller is killing");
             return false;
         }
     }
@@ -1692,7 +1685,8 @@ int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack, const
     auto callingUid = IPCSkeleton::GetCallingUid();
     TAG_LOGI(AAFwkTag::APPMGR, "uid value: %{public}d", callingUid);
     std::list<pid_t> pids;
-    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, callingUid, pids, clearPageStack)) {
+    KillProcessConfig config{clearPageStack, false, reason};
+    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, callingUid, pids, config)) {
         TAG_LOGI(AAFwkTag::APPMGR, "unstart");
         return ERR_OK;
     }
@@ -1783,12 +1777,12 @@ int32_t AppMgrServiceInner::KillApplicationByUserId(
         return ERR_PERMISSION_DENIED;
     }
 
-    return KillApplicationByUserIdLocked(bundleName, appCloneIndex, userId, clearPageStack, reason);
+    KillProcessConfig config{clearPageStack, true, reason};
+    return KillApplicationByUserIdLocked(bundleName, appCloneIndex, userId, config);
 }
 
 int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(
-    const std::string &bundleName, int32_t appCloneIndex, const int userId,
-    const bool clearPageStack, const std::string& reason)
+    const std::string &bundleName, int32_t appCloneIndex, const int userId, const KillProcessConfig &config)
 {
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
@@ -1811,7 +1805,7 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(
     TAG_LOGI(AAFwkTag::APPMGR, "uId value: %{public}d", userId);
     int uid = IN_PROCESS_CALL(bundleMgrHelper->GetUidByBundleName(bundleName, userId, appCloneIndex));
     TAG_LOGI(AAFwkTag::APPMGR, "uID value: %{public}d", uid);
-    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, uid, pids, clearPageStack)) {
+    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, uid, pids, config)) {
         TAG_LOGI(AAFwkTag::APPMGR, "process corresponding package name unstart");
         return result;
     }
@@ -1820,7 +1814,7 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(
         return result;
     }
     for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        result = KillProcessByPid(*iter, reason);
+        result = KillProcessByPid(*iter, config.reason);
         if (result < 0) {
             TAG_LOGE(AAFwkTag::APPMGR, "killApplication fail bundleName: %{public}s pid: %{public}d",
                 bundleName.c_str(), *iter);
@@ -4380,7 +4374,8 @@ int AppMgrServiceInner::StartUserTestProcess(
         return ERR_INVALID_VALUE;
     }
 
-    if (KillApplicationByUserIdLocked(bundleName, 0, userId, false, "StartUserTestProcess")) {
+    KillProcessConfig config{false, false, "StartUserTestProcess"};
+    if (KillApplicationByUserIdLocked(bundleName, 0, userId, config)) {
         TAG_LOGE(AAFwkTag::APPMGR, "kill app fail");
         return ERR_INVALID_VALUE;
     }
@@ -4532,7 +4527,8 @@ int AppMgrServiceInner::FinishUserTest(
 
     FinishUserTestLocked(msg, resultCode, appRecord);
 
-    int ret = KillApplicationByUserIdLocked(bundleName, 0, userTestRecord->userId, false, "FinishUserTest");
+    KillProcessConfig config{false, false, "FinishUserTest"};
+    int ret = KillApplicationByUserIdLocked(bundleName, 0, userTestRecord->userId, config);
     if (ret) {
         TAG_LOGE(AAFwkTag::APPMGR, "kill process fail");
         return ret;
@@ -8432,21 +8428,6 @@ bool AppMgrServiceInner::IsProcessAttached(sptr<IRemoteObject> token) const
         return false;
     }
     return appRecord->IsProcessAttached();
-}
-
-bool AppMgrServiceInner::IsAppKilling(sptr<IRemoteObject> token) const
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
-        return false;
-    }
-    auto appRecord = GetAppRunningRecordByAbilityToken(token);
-    if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr");
-        return false;
-    }
-    return appRecord->IsKilling();
 }
 
 int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bundleName,

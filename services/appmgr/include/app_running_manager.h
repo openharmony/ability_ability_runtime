@@ -32,6 +32,7 @@
 #include "bundle_info.h"
 #include "configuration.h"
 #include "iremote_object.h"
+#include "kill_process_config.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "running_process_info.h"
@@ -253,7 +254,7 @@ public:
     int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
 
     bool ProcessExitByBundleNameAndUid(
-        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack = false);
+        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const KillProcessConfig &config = {});
     bool ProcessExitByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::list<pid_t> &pids,
         bool clearPageStack);
     bool ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey, std::list<pid_t> &pids,
