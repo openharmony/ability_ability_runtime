@@ -47,9 +47,6 @@ public:
 private:
     std::weak_ptr<AbilityRuntime::Context> abilityStageContext_;
 };
-
-CConfiguration ConvertConfiguration(const AppExecFwk::Configuration &configuration);
-char *MallocCString(const std::string &origin);
 }
 }
 #endif //OHOS_ABILITY_RUNTIME_CJ_ABILITY_STAGE_CONTEXT_H
