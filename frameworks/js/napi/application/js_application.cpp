@@ -257,12 +257,17 @@ void JsApplication::SetCreateCompleteCallback(std::shared_ptr<std::shared_ptr<Co
 
         auto workContext = new (std::nothrow) std::weak_ptr<Context>(context);
         napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachBaseContext, workContext, nullptr);
-        napi_wrap(env, object, workContext,
+        napi_status ret = napi_wrap(env, object, workContext,
             [](napi_env, void *data, void *) {
                 TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr module context is called");
                 delete static_cast<std::weak_ptr<Context> *>(data);
             },
             nullptr, nullptr);
+        if (ret != napi_ok && workContext != nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap Failed: %{public}d", ret);
+            delete workContext;
+            return;
+        }
         task.ResolveWithNoError(env, object);
     };
 }
@@ -285,12 +290,19 @@ napi_value JsApplication::CreateJsContext(napi_env env, const std::shared_ptr<Co
 
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(context);
     napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachBaseContext, workContext, nullptr);
-    napi_wrap(env, object, workContext,
+    napi_status status = napi_wrap(env, object, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr module context is called");
             delete static_cast<std::weak_ptr<Context> *>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        ThrowInvalidParamError(env, "invalid param.");
+        return CreateJsUndefined(env);
+    }
+
     return object;
 }
 
