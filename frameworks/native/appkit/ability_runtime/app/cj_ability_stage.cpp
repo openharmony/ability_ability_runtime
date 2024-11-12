@@ -21,6 +21,7 @@
 
 using namespace OHOS::AbilityRuntime;
 
+extern "C" {
 CJ_EXPORT RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id)
 {
     auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
@@ -53,16 +54,16 @@ CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id)
         return nullptr;
     }
 
-    buffer->name = MallocCString(hapInfo->name);
-    buffer->icon = MallocCString(hapInfo->iconPath);
+    buffer->name = CreateCStringFromString(hapInfo->name);
+    buffer->icon = CreateCStringFromString(hapInfo->iconPath);
     buffer->iconId = hapInfo->iconId;
-    buffer->label = MallocCString(hapInfo->label);
+    buffer->label = CreateCStringFromString(hapInfo->label);
     buffer->labelId = hapInfo->labelId;
-    buffer->description = MallocCString(hapInfo->description);
+    buffer->description = CreateCStringFromString(hapInfo->description);
     buffer->descriptionId = hapInfo->descriptionId;
-    buffer->mainElementName = MallocCString(hapInfo->mainElementName);
+    buffer->mainElementName = CreateCStringFromString(hapInfo->mainElementName);
     buffer->installationFree = hapInfo->installationFree;
-    buffer->hashValue = MallocCString(hapInfo->hashValue);
+    buffer->hashValue = CreateCStringFromString(hapInfo->hashValue);
 
     return buffer;
 }
@@ -96,6 +97,7 @@ CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilitySta
         return ERR_INVALID_INSTANCE_CODE;
     }
     return cjStageContext->GetID();
+}
 }
 
 std::shared_ptr<CJAbilityStage> CJAbilityStage::Create(

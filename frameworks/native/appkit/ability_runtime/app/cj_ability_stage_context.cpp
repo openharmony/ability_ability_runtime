@@ -22,111 +22,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 
-char *MallocCString(const std::string &origin)
-{
-    if (origin.empty()) {
-        return nullptr;
-    }
-    auto len = origin.length() + 1;
-    char* res = static_cast<char *>(malloc(sizeof(char) * len));
-    if (res == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "MallocCString malloc failed");
-        return nullptr;
-    }
-    return std::char_traits<char>::copy(res, origin.c_str(), len);
-}
-
-static Global::Resource::ColorMode ConvertColorMode(const std::string& colormode)
-{
-    auto resolution = Global::Resource::ColorMode::COLOR_MODE_NOT_SET;
-
-    static const std::vector<std::pair<std::string, Global::Resource::ColorMode>> resolutions = {
-        { "dark", Global::Resource::ColorMode::DARK },
-        { "light", Global::Resource::ColorMode::LIGHT },
-    };
-
-    for (const auto& [tempColorMode, value] : resolutions) {
-        if (tempColorMode == colormode) {
-            resolution = value;
-            break;
-        }
-    }
-
-    return resolution;
-}
-
-static Global::Resource::Direction ConvertDirection(const std::string& direction)
-{
-    auto resolution = Global::Resource::Direction::DIRECTION_NOT_SET;
-
-    static const std::vector<std::pair<std::string, Global::Resource::Direction>> resolutions = {
-        { "vertical", Global::Resource::Direction::DIRECTION_VERTICAL },
-        { "horizontal", Global::Resource::Direction::DIRECTION_HORIZONTAL },
-    };
-
-    for (const auto& [tempDirection, value] : resolutions) {
-        if (tempDirection == direction) {
-            resolution = value;
-            break;
-        }
-    }
-
-    return resolution;
-}
-
-static Global::Resource::ScreenDensity ConvertDensity(const std::string& density)
-{
-    auto resolution = Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET;
-
-    static const std::vector<std::pair<std::string, Global::Resource::ScreenDensity>> resolutions = {
-        { "sdpi", Global::Resource::ScreenDensity::SCREEN_DENSITY_SDPI },
-        { "mdpi", Global::Resource::ScreenDensity::SCREEN_DENSITY_MDPI },
-        { "ldpi", Global::Resource::ScreenDensity::SCREEN_DENSITY_LDPI },
-        { "xldpi", Global::Resource::ScreenDensity::SCREEN_DENSITY_XLDPI },
-        { "xxldpi", Global::Resource::ScreenDensity::SCREEN_DENSITY_XXLDPI },
-        { "xxxldpi", Global::Resource::ScreenDensity::SCREEN_DENSITY_XXXLDPI },
-    };
-
-    for (const auto& [tempdensity, value] : resolutions) {
-        if (tempdensity == density) {
-            resolution = value;
-            break;
-        }
-    }
-
-    return resolution;
-}
-
-static int32_t ConvertDisplayId(const std::string& displayId)
-{
-    if (displayId == AppExecFwk::ConfigurationInner::EMPTY_STRING) {
-        return -1;
-    }
-
-    return std::stoi(displayId);
-}
-
-CConfiguration ConvertConfiguration(const AppExecFwk::Configuration &configuration)
-{
-    CConfiguration cfg;
-    cfg.language = MallocCString(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
-    cfg.colorMode = ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
-    std::string direction = configuration.GetItem(AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
-    cfg.direction = ConvertDirection(direction);
-    std::string density = configuration.GetItem(AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
-    cfg.screenDensity = ConvertDensity(density);
-    cfg.displayId = ConvertDisplayId(configuration.GetItem(AppExecFwk::ConfigurationInner::APPLICATION_DISPLAYID));
-    std::string hasPointerDevice = configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    cfg.hasPointerDevice = hasPointerDevice == "true" ? true : false;
-    std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    cfg.fontSizeScale = fontSizeScale == "" ? 1.0 : std::stod(fontSizeScale);
-    std::string fontWeightScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
-    cfg.fontWeightScale = fontWeightScale == "" ? 1.0 : std::stod(fontWeightScale);
-    cfg.mcc = MallocCString(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
-    cfg.mnc = MallocCString(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
-    return cfg;
-}
-
 RetHapModuleInfo CJAbilityStageContext::GetRetHapModuleInfo()
 {
     auto context = GetContext();
@@ -168,7 +63,7 @@ CConfiguration CJAbilityStageContext::GetConfiguration()
         return CConfiguration();
     }
 
-    return ConvertConfiguration(*configuration);
+    return CreateCConfiguration(*configuration);
 }
 
 }
