@@ -206,7 +206,7 @@ bool MissionInfoMgr::DeleteAllMissionInfos(const std::shared_ptr<MissionListener
             if (listenerController) {
                 listenerController->NotifyMissionDestroyed(listIter->missionInfo.id);
             }
-            missionInfoList_.erase(listIter++);
+            listIter = missionInfoList_.erase(listIter);
         } else {
             ++listIter;
         }

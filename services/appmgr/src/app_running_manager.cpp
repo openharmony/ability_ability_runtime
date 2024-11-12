@@ -26,6 +26,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "killing_process_manager.h"
 #include "os_account_manager_wrapper.h"
 #include "perf_profile.h"
 #include "parameters.h"
@@ -338,7 +339,7 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const Applicati
 }
 
 bool AppRunningManager::ProcessExitByBundleNameAndUid(
-    const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack)
+    const std::string &bundleName, const int uid, std::list<pid_t> &pids, const KillProcessConfig &config)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -356,8 +357,12 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
             continue;
         }
         pids.push_back(pid);
-        if (clearPageStack) {
+        if (config.clearPageStack) {
             appRecord->ScheduleClearPageStack();
+        }
+        if (config.addKillingCaller) {
+            std::string callerKey = std::to_string(pid) + ":" + std::to_string(appRecord->GetUid());
+            KillingProcessManager::GetInstance().AddKillingCallerKey(callerKey);
         }
         appRecord->SetKilling();
         appRecord->ScheduleProcessSecurityExit();

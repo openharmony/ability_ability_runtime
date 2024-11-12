@@ -45,6 +45,7 @@ ohos_shared_library("cj_ability_ffi") {
   public_configs = [ ":cj_ability_public_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
   ]

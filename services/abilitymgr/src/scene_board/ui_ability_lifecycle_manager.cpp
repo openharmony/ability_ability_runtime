@@ -133,7 +133,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
             TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionToken invalid");
             return nullptr;
         }
-        abilityRequest.want.RemoveParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST);
+        abilityRequest.want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
         uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
         if (sessionInfo->isNewWant) {
             uiAbilityRecord->SetWant(abilityRequest.want);
@@ -167,14 +167,6 @@ bool UIAbilityLifecycleManager::CheckSessionInfo(sptr<SessionInfo> sessionInfo) 
     if (descriptor != "OHOS.ISession") {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "token's Descriptor: %{public}s", descriptor.c_str());
         return false;
-    }
-    bool needCheckCallerIsExist = sessionInfo->want.GetBoolParam(Want::PARAMS_NEED_CHECK_CALLER_IS_EXIST, false);
-    if (needCheckCallerIsExist && sessionInfo->callerToken) {
-        auto callerAbility = Token::GetAbilityRecordByToken(sessionInfo->callerToken);
-        if (callerAbility == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbility not exist");
-            return false;
-        }
     }
     return true;
 }
@@ -351,10 +343,10 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     abilityRequest.want.SetParam(IS_SHELL_CALL, AAFwk::PermissionVerification::GetInstance()->IsShellCall());
+    std::string callerKey = std::to_string(IPCSkeleton::GetCallingPid()) + ":" +
+        std::to_string(IPCSkeleton::GetCallingUid());
+    abilityRequest.want.SetParam(Want::PARAMS_REAL_CALLER_KEY, callerKey);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    if (!AbilityPermissionUtil::GetInstance().VerifyCallerToken(abilityRequest)) {
-        return ERR_INVALID_VALUE;
-    }
     // start ability with persistentId by dms
     int32_t persistentId = abilityRequest.want.GetIntParam(DMS_PERSISTENT_ID, 0);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "NotifySCBToStartUIAbility, want with persistentId: %{public}d.", persistentId);

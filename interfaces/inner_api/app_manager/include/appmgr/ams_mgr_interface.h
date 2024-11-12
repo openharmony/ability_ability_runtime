@@ -449,11 +449,6 @@ public:
         return false;
     }
 
-    virtual bool IsAppKilling(sptr<IRemoteObject> token)
-    {
-        return false;
-    }
-
     virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) {}
 
     enum class Message {
@@ -507,7 +502,6 @@ public:
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
         IS_PROCESS_ATTACHED,
-        IS_APP_KILLING,
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
         SET_APP_EXCEPTION_CALLBACK,
         SET_KEEP_ALIVE_DKV,
