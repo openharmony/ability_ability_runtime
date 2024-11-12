@@ -1929,6 +1929,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         if (IPCSkeleton::GetCallingTokenID() == abilityRequest.appInfo.accessTokenId) {
             abilityRequest.startWindowOption = startOptions.startWindowOption;
         }
+        abilityRequest.supportWindowModes = startOptions.supportWindowModes_;
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         return uiAbilityManager->NotifySCBToStartUIAbility(abilityRequest);
