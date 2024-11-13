@@ -35,6 +35,7 @@ const std::unordered_map<std::string, ExtensionAbilityType> EXTENSION_TYPE_MAP =
     { "dataShare", ExtensionAbilityType::DATASHARE },
     { "fileShare", ExtensionAbilityType::FILESHARE },
     { "staticSubscriber", ExtensionAbilityType::STATICSUBSCRIBER },
+    { "fence", ExtensionAbilityType::FENCE },
     { "wallpaper", ExtensionAbilityType::WALLPAPER },
     { "backup", ExtensionAbilityType::BACKUP },
     { "window", ExtensionAbilityType::WINDOW },
