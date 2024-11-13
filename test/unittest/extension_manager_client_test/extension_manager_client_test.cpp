@@ -62,7 +62,6 @@ HWTEST_F(ExtensionManagerClientTest, ExtensionManagerClientTest_001, TestSize.Le
 HWTEST_F(ExtensionManagerClientTest, ExtensionManagerClientTest_002, TestSize.Level1)
 {
     auto client = std::make_shared<ExtensionManagerClient>();
-    client->bmsReady_ = true;
     EXPECT_NE(client->GetExtensionManager(), nullptr);
 }
 
