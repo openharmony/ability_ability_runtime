@@ -20,27 +20,30 @@
 #include <string>
 #include <vector>
 #include "uri.h"
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 #include "sandbox_manager_kit.h"
+#include "policy_info.h"
+#else
+#include "upms_policy_info.h"
+#endif
 
 namespace OHOS {
 namespace AAFwk {
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 using namespace AccessControl::SandboxManager;
+#endif
 typedef enum OperationMode {
     READ_MODE = 1 << 0,
     WRITE_MODE = 1 << 1,
 } OperationMode;
-
-struct PathPolicyInfo {
-    std::string path = "";
-    uint32_t mode = OperationMode::READ_MODE;
-};
 
 class FilePermissionManager {
 public:
     static std::vector<bool>
     CheckUriPersistentPermission(std::vector<Uri> &uriVec,
                                  uint32_t callerTokenId, uint32_t flag,
-                                 std::vector<PolicyInfo> &pathPolicies);
+                                 std::vector<PolicyInfo> &pathPolicies, const std::string &bundleName);
 
     static PolicyInfo GetPathPolicyInfoFromUri(Uri &uri, uint32_t flag, const std::string &bundleName = "");
 };
