@@ -73,11 +73,13 @@ private:
 
     sptr<IExtensionManager> GetExtensionManager();
     void Connect();
+    bool QueryBMSReady();
     void ResetProxy(const wptr<IRemoteObject>& remote);
 
     std::mutex mutex_;
     sptr<IExtensionManager> proxy_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
+    bool bmsReady_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
