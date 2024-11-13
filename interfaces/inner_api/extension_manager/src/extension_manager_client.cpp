@@ -16,6 +16,7 @@
 #include "extension_manager_client.h"
 
 #include "ability_manager_errors.h"
+#include "bundle_mgr_interface.h"
 #include "extension_ability_info.h"
 #include "extension_manager_proxy.h"
 #include "hilog_tag_wrapper.h"
@@ -45,6 +46,14 @@ sptr<IExtensionManager> ExtensionManagerClient::GetExtensionManager()
         Connect();
     }
 
+    if (!bmsReady_) {
+        if (!QueryBMSReady()) {
+            TAG_LOGE(AAFwkTag::EXTMGR, "BMS not ready");
+            return nullptr;
+        }
+        bmsReady_ = true;
+    }
+
     return proxy_;
 }
 
@@ -71,9 +80,27 @@ void ExtensionManagerClient::Connect()
     TAG_LOGD(AAFwkTag::EXTMGR, "Connect AMS success");
 }
 
+bool ExtensionManagerClient::QueryBMSReady()
+{
+    TAG_LOGD(AAFwkTag::EXTMGR, "QueryBMSReady");
+    auto saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        TAG_LOGE(AAFwkTag::EXTMGR, "Get SAMgr failed");
+        return false;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObj == nullptr || iface_cast<AppExecFwk::IBundleMgr>(remoteObj) == nullptr) {
+        TAG_LOGE(AAFwkTag::EXTMGR, "Get bundleMgr remote object failed");
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::EXTMGR, "QueryBMSReady success");
+    return true;
+}
+
 void ExtensionManagerClient::ResetProxy(const wptr<IRemoteObject>& remote)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    bmsReady_ = false;
     if (proxy_ == nullptr) {
         TAG_LOGI(AAFwkTag::EXTMGR, "null proxy_, no need reset");
         return;
