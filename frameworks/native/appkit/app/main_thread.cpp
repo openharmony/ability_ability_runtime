@@ -1864,18 +1864,7 @@ void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleIn
     const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
     TAG_LOGI(AAFwkTag::APPKIT, "preload module %{public}s", entryHapModuleInfo.moduleName.c_str());
-    wptr<MainThread> weak = this;
-    auto callback = [weak]() {
-        auto appThread = weak.promote();
-        if (appThread == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
-            return;
-        }
-        if (!appThread->appMgr_ || !appThread->applicationImpl_) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
-            return;
-        }
-    };
+    auto callback = []() {};
     bool isAsyncCallback = false;
     application_->AddAbilityStage(entryHapModuleInfo, callback, isAsyncCallback);
     if (isAsyncCallback) {
