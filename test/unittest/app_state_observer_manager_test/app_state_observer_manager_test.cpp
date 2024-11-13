@@ -305,9 +305,9 @@ HWTEST_F(AppSpawnSocketTest, OnProcessCreated_001, TestSize.Level0)
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord;
-    manager->OnProcessCreated(appRecord);
+    manager->OnProcessCreated(appRecord, false);
     manager->Init();
-    manager->OnProcessCreated(appRecord);
+    manager->OnProcessCreated(appRecord, false);
 }
 
 /*
@@ -795,9 +795,9 @@ HWTEST_F(AppSpawnSocketTest, HandleOnAppProcessCreated_001, TestSize.Level0)
 {
     auto manager = std::make_shared<AppStateObserverManager>();
     ASSERT_NE(manager, nullptr);
-    manager->HandleOnAppProcessCreated(nullptr);
+    manager->HandleOnAppProcessCreated(nullptr, false);
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
-    manager->HandleOnAppProcessCreated(appRecord);
+    manager->HandleOnAppProcessCreated(appRecord, false);
 }
 
 /*

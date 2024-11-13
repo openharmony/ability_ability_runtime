@@ -67,6 +67,7 @@ struct ProcessData : public Parcelable {
     int32_t exitReason = 0;
     std::string exitMsg = "";
     int32_t childUid = -1;
+    bool isPreload = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
