@@ -931,7 +931,6 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
     const std::string &name, const std::string &hapModuleName, std::string &loadPath,
     std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos)
 {
-    std::lock_guard<std::mutex> lock(overlaySubscriberMutex_);
     if (overlaySubscriber_ != nullptr) {
         return;
     }
@@ -953,7 +952,6 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
 
 void ContextImpl::UnsubscribeToOverlayEvents()
 {
-    std::lock_guard<std::mutex> lock(overlaySubscriberMutex_);
     if (overlaySubscriber_ != nullptr) {
         EventFwk::CommonEventManager::UnSubscribeCommonEvent(overlaySubscriber_);
         overlaySubscriber_ = nullptr;
