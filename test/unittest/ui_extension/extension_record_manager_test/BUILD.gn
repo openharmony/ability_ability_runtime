@@ -99,5 +99,5 @@ ohos_unittest("extension_record_manager_test") {
 
 group("unittest") {
   testonly = true
-  deps = []
+  deps = [ ":extension_record_manager_test" ]
 }

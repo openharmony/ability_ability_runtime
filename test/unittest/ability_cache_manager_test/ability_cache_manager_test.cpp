@@ -629,7 +629,7 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerSignRestartAppFlag_001, Tes
     abilityRequest.abilityInfo = abilityInfo;
     abilityRequest.appInfo = applicationInfo;
     auto recordFind = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
-    EXPECT_EQ(recordFind->GetRestartAppFlag(), false);
+    EXPECT_EQ(recordFind->GetRestartAppFlag(), true);
 }
 
 /**
