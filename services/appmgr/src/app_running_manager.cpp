@@ -626,9 +626,6 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
     bool isPage = false;
     if (abilityRecord) {
         abilityRecord->SetTerminating();
-        if ((CheckAppRunningRecordIsLast(appRecord))) {
-            UnSetPolicy(appRecord);
-        }
         if (abilityRecord->GetAbilityInfo() != nullptr) {
             isPage = (abilityRecord->GetAbilityInfo()->type == AbilityType::PAGE);
         }
@@ -672,9 +669,6 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
     if (abilityRecord) {
         abilityRecord->SetTerminating();
-        if (CheckAppRunningRecordIsLast(appRecord)) {
-            UnSetPolicy(appRecord);
-        }
     }
 
     // set app record terminating when close last page ability
@@ -691,6 +685,9 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
         }
         TAG_LOGI(AAFwkTag::APPMGR, "ability is the last:%{public}s", appRecord->GetName().c_str());
         appRecord->SetTerminating();
+        if (CheckAppRunningRecordIsLast(appRecord)) {
+            UnSetPolicy(appRecord);
+        }
         appRecord->SetClearSession(clearMissionFlag);
     }
 }
