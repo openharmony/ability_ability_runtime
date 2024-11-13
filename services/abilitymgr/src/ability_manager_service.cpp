@@ -4696,9 +4696,9 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
         bundleName = wantSenderInfo.allWants.back().want.GetElement().GetBundleName();
     }
     if (!bundleName.empty()) {
-        AppExecFwk::BundleInfo bundleInfo;
-        MultiAppUtils::GetRunningMultiAppIndex(bundleName, callerUid, appIndex);
         if (!isSpecifyUidBySa) {
+            AppExecFwk::BundleInfo bundleInfo;
+            MultiAppUtils::GetRunningMultiAppIndex(bundleName, callerUid, appIndex);
             bundleMgrResult = IN_PROCESS_CALL(bms->GetCloneBundleInfo(bundleName,
                 static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
                 appIndex, bundleInfo, userId));
@@ -4715,15 +4715,7 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
         return nullptr;
     }
 
-    bool isSystemApp = false;
-    if (!wantSenderInfo.bundleName.empty() && !isSpecifyUidBySa) {
-        AppExecFwk::BundleInfo bundleInfo;
-        bundleMgrResult = IN_PROCESS_CALL(bms->GetBundleInfo(wantSenderInfo.bundleName,
-            AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
-        if (bundleMgrResult) {
-            isSystemApp = bundleInfo.applicationInfo.isSystemApp;
-        }
-    }
+    bool isSystemApp = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName = %{public}s, appIndex:%{public}d",
         wantSenderInfo.bundleName.c_str(), appIndex);
