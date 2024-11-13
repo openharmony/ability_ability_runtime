@@ -1875,18 +1875,22 @@ void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleIn
             TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
             return;
         }
-        appThread->appMgr_->AddAbilityStageDone(appThread->applicationImpl_->GetRecordId());
     };
     bool isAsyncCallback = false;
     application_->AddAbilityStage(entryHapModuleInfo, callback, isAsyncCallback);
     if (isAsyncCallback) {
+        for (const auto &info : entryHapModuleInfo.abilityInfos) {
+            if (info.name == entryHapModuleInfo.mainAbility) {
+                ProcessMainAbility(info, runtime);
+                return;
+            }
+        }
         return;
     }
     if (!appMgr_ || !applicationImpl_) {
         TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
         return;
     }
-    appMgr_->AddAbilityStageDone(applicationImpl_->GetRecordId());
     for (const auto &info : entryHapModuleInfo.abilityInfos) {
         if (info.name == entryHapModuleInfo.mainAbility) {
             ProcessMainAbility(info, runtime);
