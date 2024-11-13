@@ -759,6 +759,10 @@ public:
 
     bool IsPreloaded() const;
 
+    void SetPreloadMode(PreloadMode mode);
+
+    PreloadMode GetPreloadMode();
+
     /**
      * @brief Obtains the app record assign tokenId.
      *
@@ -988,6 +992,7 @@ private:
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
     bool jitEnabled_ = false;
     PreloadState preloadState_ = PreloadState::NONE;
+    PreloadMode preloadMode_ = PreloadMode::PRESS_DOWN;
     int32_t exitReason_ = 0;
     std::string exitMsg_ = "";
 
