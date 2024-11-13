@@ -327,7 +327,7 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const Applicati
         }
         auto appInfoList = appRecord->GetAppInfoList();
         for (auto iter : appInfoList) {
-            if (iter->uid == appInfo.uid) {
+            if (iter->bundleName == appInfo.bundleName && iter->uid == appInfo.uid) {
                 appRecord->UpdateApplicationInfoInstalled(appInfo);
                 break;
             }
