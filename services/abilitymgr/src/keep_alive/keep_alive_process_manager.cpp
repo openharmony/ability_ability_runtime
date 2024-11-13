@@ -94,26 +94,27 @@ void KeepAliveProcessManager::AfterStartKeepAliveApp(const AppExecFwk::BundleInf
 {
     uint32_t accessTokenId = 0;
     MainElementUtils::GetMainUIAbilityAccessTokenId(bundleInfo, mainElementName, accessTokenId);
+    if (accessTokenId == 0) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "invalid accessTokenId, unsetting keep-alive");
+        (void)SetApplicationKeepAlive(bundleInfo.name, userId, false, true);
+        return;
+    }
     bool isCreated = false;
     std::shared_ptr<bool> isCanceled = std::make_shared<bool>(false);
     ffrt::condition_variable taskCv;
     ffrt::mutex taskMutex;
     ffrt::submit([&isCreated, &taskCv, &taskMutex, isCanceled, accessTokenId,
         abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance()]() {
-        if (accessTokenId == 0) {
-            TAG_LOGE(AAFwkTag::KEEP_ALIVE, "access token id is invalid");
-            *isCanceled = true;
-            taskCv.notify_all();
-            return;
-        }
         while (!abilityMgr || !abilityMgr->IsInStatusBar(accessTokenId)) {
-            {
-                if (!isCanceled || *isCanceled) {
-                    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "canceled in the middle");
-                    return;
-                }
+            if (!isCanceled || *isCanceled) {
+                TAG_LOGE(AAFwkTag::KEEP_ALIVE, "canceled in the middle");
+                return;
             }
             usleep(REPOLL_TIME_MICRO_SECONDS);
+        }
+        if (!isCanceled || *isCanceled) {
+            TAG_LOGE(AAFwkTag::KEEP_ALIVE, "canceled");
+            return;
         }
         {
             std::lock_guard<ffrt::mutex> lock(taskMutex);
@@ -135,7 +136,7 @@ void KeepAliveProcessManager::AfterStartKeepAliveApp(const AppExecFwk::BundleInf
     }
     if (isCreated) { return; }
     TAG_LOGW(AAFwkTag::KEEP_ALIVE, "not created, cancel keep-alive");
-    SetApplicationKeepAlive(bundleInfo.name, userId, false, true);
+    (void)SetApplicationKeepAlive(bundleInfo.name, userId, false, true);
     (void)DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->KillApplication(bundleInfo.name);
 }
 
@@ -168,13 +169,13 @@ int32_t KeepAliveProcessManager::SetApplicationKeepAlive(const std::string &bund
         std::string mainElementName;
         CHECK_TRUE_RETURN_RET(!MainElementUtils::CheckMainUIAbility(bundleInfo, mainElementName),
             ERR_NO_MAIN_ABILITY, "bundle has no main uiability");
+        CHECK_TRUE_RETURN_RET(!MainElementUtils::CheckStatusBarAbility(bundleInfo),
+            ERR_NO_STATUS_BAR_ABILITY, "app has no status bar");
         bool isRunning = false;
         result = IN_PROCESS_CALL(appMgrClient->IsAppRunning(bundleName, 0, isRunning));
         CHECK_RET_RETURN_RET(result, "IsAppRunning failed");
-        CHECK_TRUE_RETURN_RET((!isRunning && !MainElementUtils::CheckStatusBarAbility(bundleInfo)),
-            ERR_NO_STATUS_BAR_ABILITY, "app has no status bar");
         CHECK_TRUE_RETURN_RET((isRunning && !IsRunningAppInStatusBar(abilityMgr, bundleInfo)),
-            ERR_NOT_ATTACHED_TO_STATUS_BAR, "app is not in status bar");
+            ERR_NOT_ATTACHED_TO_STATUS_BAR, "app is not attached to status bar");
     }
 
     KeepAliveInfo info;
