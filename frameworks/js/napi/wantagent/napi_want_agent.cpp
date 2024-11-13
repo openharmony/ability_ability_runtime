@@ -514,30 +514,34 @@ napi_value JsWantAgent::OnGetBundleName(napi_env env, napi_callback_info info)
 
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
     NapiAsyncTask::CompleteCallback complete;
-    SetOnGetBundleNameCallback(wantAgent, complete);
+    NapiAsyncTask::ExecuteCallback execute;
+    SetOnGetBundleNameCallback(wantAgent, complete, execute);
 
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnGetBundleName",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
 void JsWantAgent::SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgent,
-    NapiAsyncTask::CompleteCallback &complete)
+    NapiAsyncTask::CompleteCallback &complete, NapiAsyncTask::ExecuteCallback &execute)
 {
-    complete = [wantAgent](napi_env env, NapiAsyncTask &task, int32_t status) {
+    auto retCode = std::make_shared<int32_t>(NO_ERROR);
+    auto bundleName = std::make_shared<std::string>();
+    execute = [wantAgent, retCode, bundleName] () {
+        TAG_LOGI(AAFwkTag::WANTAGENT, "start");
+        *retCode = WantAgentHelper::GetBundleName(wantAgent, *bundleName);
+    };
+    complete = [retCode, bundleName](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "called");
-        std::string bundleName = "";
 #ifdef ENABLE_ERRCODE
-        ErrCode result = WantAgentHelper::GetBundleName(wantAgent, bundleName);
-        if (result != NO_ERROR) {
-            task.Reject(env, CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result)));
+        if (*retCode != NO_ERROR) {
+            task.Reject(env, CreateJsError(env, *retCode, AbilityRuntimeErrorUtil::GetErrMessage(*retCode)));
         } else {
-            task.ResolveWithNoError(env, CreateJsValue(env, bundleName));
+            task.ResolveWithNoError(env, CreateJsValue(env, *bundleName));
         }
 #else
-        WantAgentHelper::GetBundleName(wantAgent, bundleName);
-        task.Resolve(env, CreateJsValue(env, bundleName));
+        task.Resolve(env, CreateJsValue(env, *bundleName));
 #endif
     };
 }
@@ -1150,12 +1154,19 @@ napi_value JsWantAgent::OnNapiGetWant(napi_env env, napi_callback_info info)
     }
 
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
-    NapiAsyncTask::CompleteCallback complete = [wantAgent](napi_env env, NapiAsyncTask &task, int32_t status) {
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    auto retCode = std::make_shared<int32_t>(NO_ERROR);
+    NapiAsyncTask::ExecuteCallback execute = [wantAgent, retCode, want] () {
+        TAG_LOGI(AAFwkTag::WANTAGENT, "start");
+        std::shared_ptr<Want> retWant = std::make_shared<Want>();
+        *retCode = WantAgentHelper::GetWant(wantAgent, retWant);
+        *want = *retWant;
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [retCode, want](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "start");
-        std::shared_ptr<Want> want = std::make_shared<Want>();
-        ErrCode result = WantAgentHelper::GetWant(wantAgent, want);
-        if (result != NO_ERROR) {
-            task.Reject(env, CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result)));
+        if (*retCode != NO_ERROR) {
+            task.Reject(env, CreateJsError(env, *retCode, AbilityRuntimeErrorUtil::GetErrMessage(*retCode)));
             return;
         }
         task.ResolveWithNoError(env, CreateJsWant(env, *(want)));
@@ -1163,7 +1174,7 @@ napi_value JsWantAgent::OnNapiGetWant(napi_env env, napi_callback_info info)
     napi_value lastParam = (argc >= ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiGetWant",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -1295,21 +1306,25 @@ napi_value JsWantAgent::OnNapiGetOperationType(napi_env env, napi_callback_info 
     }
 
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
-    NapiAsyncTask::CompleteCallback complete = [wantAgent](napi_env env, NapiAsyncTask &task, int32_t status) {
+    auto operType = std::make_shared<int32_t>(NO_ERROR);
+    auto retCode = std::make_shared<int32_t>(NO_ERROR);
+    NapiAsyncTask::ExecuteCallback execute = [wantAgent, retCode, operType] () {
+        TAG_LOGI(AAFwkTag::WANTAGENT, "start");
+        *retCode = WantAgentHelper::GetType(wantAgent, *operType);
+    };
+    NapiAsyncTask::CompleteCallback complete = [retCode, operType](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "called");
-        int32_t operType;
-        ErrCode ret = WantAgentHelper::GetType(wantAgent, operType);
-        if (ret != NO_ERROR) {
-            task.Reject(env, CreateJsError(env, ret, AbilityRuntimeErrorUtil::GetErrMessage(ret)));
+        if (*retCode != NO_ERROR) {
+            task.Reject(env, CreateJsError(env, *retCode, AbilityRuntimeErrorUtil::GetErrMessage(*retCode)));
         } else {
-            task.ResolveWithNoError(env, CreateJsValue(env, operType));
+            task.ResolveWithNoError(env, CreateJsValue(env, *operType));
         }
     };
 
     napi_value lastParam = (argc >= ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiGetOperationType",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
 
