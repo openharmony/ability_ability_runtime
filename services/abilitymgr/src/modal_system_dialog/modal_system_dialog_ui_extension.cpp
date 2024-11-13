@@ -17,6 +17,7 @@
 
 #include "ability_manager_client.h"
 #include "hilog_tag_wrapper.h"
+#include "in_process_call_wrapper.h"
 #include "scene_board_judgement.h"
 
 namespace OHOS {
@@ -44,7 +45,8 @@ bool ModalSystemDialogUIExtension::CreateModalUIExtension(const std::string &com
     AAFwk::Want systemUIWant;
     systemUIWant.SetElementName(SYSTEM_SCENEBOARD_BUNDLE_NAME, SYSTEM_SCENEBOARD_ABILITY_NAME);
 
-    auto result = abilityManagerClient->ConnectAbility(systemUIWant, connectionCallback, INVALID_USERID);
+    auto result =
+        IN_PROCESS_CALL(abilityManagerClient->ConnectAbility(systemUIWant, connectionCallback, INVALID_USERID));
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connect ability failed, result: %{public}d", result);
         return false;

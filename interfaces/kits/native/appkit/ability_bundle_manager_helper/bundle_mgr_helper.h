@@ -107,6 +107,8 @@ public:
         ExtensionAbilityInfo &extensionInfo, int32_t userId);
     ErrCode GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes, int32_t userId);
     ErrCode GetSignatureInfoByBundleName(const std::string &bundleName, SignatureInfo &signatureInfo);
+    std::string GetStringById(
+        const std::string &bundleName, const std::string &moduleName, uint32_t resId, int32_t userId);
 
 private:
     sptr<IBundleMgr> Connect();
