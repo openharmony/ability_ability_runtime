@@ -33,7 +33,7 @@
 #include "extension_running_info.h"
 #include "connection_record.h"
 #include "element_name.h"
-#include "ui_extension_ability_connect_info.h"
+#include "ui_extension/ui_extension_ability_connect_info.h"
 #include "extension_record_manager.h"
 #include "want.h"
 #include "iremote_object.h"

@@ -142,7 +142,10 @@ ohos_shared_library("abilitykit_utils") {
     "${ability_runtime_native_path}/ability/native/configuration_utils.cpp",
   ]
 
-  deps = [ ":configuration_helper" ]
+  deps = [
+    ":configuration_helper",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+  ]
 
   configs = [ ":abilitykit_utils_exceptions" ]
 
