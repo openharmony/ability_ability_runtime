@@ -1870,12 +1870,6 @@ void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleIn
     bool isAsyncCallback = false;
     application_->AddAbilityStage(entryHapModuleInfo, callback, isAsyncCallback);
     if (isAsyncCallback) {
-        for (const auto &info : entryHapModuleInfo.abilityInfos) {
-            if (info.name == entryHapModuleInfo.mainAbility) {
-                ProcessMainAbility(info, runtime);
-                return;
-            }
-        }
         return;
     }
     if (!appMgr_ || !applicationImpl_) {
