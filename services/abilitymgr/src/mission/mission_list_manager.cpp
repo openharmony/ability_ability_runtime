@@ -3354,7 +3354,8 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     // new version started by call type
     auto ret = ResolveAbility(targetAbilityRecord, abilityRequest);
     bool isStartToForeground = targetAbilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false);
-    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ || targetAbilityRecord->IsReady()) {
+    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ || (ret == ResolveResultType::OK_NO_REMOTE_OBJ &&
+        targetAbilityRecord->GetStartTime() > 0)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved.");
         if (isStartToForeground) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");

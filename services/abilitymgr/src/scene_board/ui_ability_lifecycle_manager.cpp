@@ -142,7 +142,10 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
             sessionInfo->want.CloseAllFd();
         }
     } else {
-        uiAbilityRecord = CreateAbilityRecord(abilityRequest, sessionInfo);
+        uiAbilityRecord = FindRecordFromTmpMap(abilityRequest);
+        if (uiAbilityRecord == nullptr) {
+            uiAbilityRecord = CreateAbilityRecord(abilityRequest, sessionInfo);
+        }
         isColdStart = true;
         UpdateProcessName(abilityRequest, uiAbilityRecord);
         if (isSCBRecovery_) {
@@ -154,6 +157,26 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     }
     return uiAbilityRecord;
+}
+
+std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromTmpMap(
+    const AbilityRequest &abilityRequest)
+{
+    int32_t appIndex = 0;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
+    auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
+    for (const auto &[recordId, abilityRecord] : tmpAbilityMap_) {
+        if (abilityRecord) {
+            const auto &info = abilityRecord->GetAbilityInfo();
+            if (info.name == abilityRequest.abilityInfo.name &&
+                info.bundleName == abilityRequest.abilityInfo.bundleName &&
+                info.moduleName == abilityRequest.abilityInfo.moduleName &&
+                appIndex == abilityRecord->GetAppIndex() && instanceKey == abilityRecord->GetInstanceKey()) {
+                return abilityRecord;
+            }
+        }
+    }
+    return nullptr;
 }
 
 bool UIAbilityLifecycleManager::CheckSessionInfo(sptr<SessionInfo> sessionInfo) const
@@ -187,7 +210,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::CreateAbilityRecord(Ab
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "user id: %{public}d.", userId_);
     uiAbilityRecord->SetOwnerMissionUserId(userId_);
-    SetRevicerInfo(abilityRequest, uiAbilityRecord);
+    SetReceiverInfo(abilityRequest, uiAbilityRecord);
     return uiAbilityRecord;
 }
 
@@ -716,6 +739,7 @@ void UIAbilityLifecycleManager::EraseAbilityRecord(const std::shared_ptr<Ability
             break;
         }
     }
+    callRequestCache_.erase(abilityRecord);
 }
 
 void UIAbilityLifecycleManager::EraseSpecifiedAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -929,9 +953,15 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     bool reuse = false;
     auto persistentId = GetPersistentIdByAbilityRequest(abilityRequest, reuse);
     if (persistentId == 0) {
+        uiAbilityRecord = FindRecordFromTmpMap(abilityRequest);
+        if (uiAbilityRecord != nullptr) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "cache call request");
+            callRequestCache_[uiAbilityRecord].push_back(abilityRequest);
+            return ERR_OK;
+        }
         uiAbilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
         uiAbilityRecord->SetOwnerMissionUserId(userId_);
-        SetRevicerInfo(abilityRequest, uiAbilityRecord);
+        SetReceiverInfo(abilityRequest, uiAbilityRecord);
     } else {
         uiAbilityRecord = sessionAbilityMap_.at(persistentId);
     }
@@ -942,10 +972,11 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     // new version started by call type
     const auto& abilityInfo = abilityRequest.abilityInfo;
     auto ret = ResolveAbility(uiAbilityRecord, abilityRequest);
-    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ || (persistentId != 0 && !uiAbilityRecord->IsReady())) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved.");
+    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ || (ret == ResolveResultType::OK_NO_REMOTE_OBJ &&
+        persistentId != 0)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved: %{public}d", ret);
         if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
             auto sessionInfo = CreateSessionInfo(abilityRequest);
             sessionInfo->persistentId = persistentId;
             sessionInfo->state = CallToState::FOREGROUND;
@@ -1001,14 +1032,20 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
     TAG_LOGD(AAFwkTag::ABILITYMGR, "SCB output abilityId is %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
     auto search = tmpAbilityMap_.find(sessionInfo->uiAbilityId);
     if (search == tmpAbilityMap_.end()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "not find UIAbility");
-        return;
+        if (sessionInfo->uiAbilityId == 0 && tmpAbilityMap_.size() == 1) {
+            search = tmpAbilityMap_.begin();
+        } else {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "not find UIAbility");
+            return;
+        }
     }
     auto uiAbilityRecord = search->second;
+    tmpAbilityMap_.erase(search);
     CHECK_POINTER_LOG(uiAbilityRecord, "UIAbility not exist.");
     auto sessionSearch = sessionAbilityMap_.find(sessionInfo->persistentId);
     if (sessionSearch != sessionAbilityMap_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "session exist");
+        // ability could be in loading state, waiting for callback
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "session exist");
         return;
     }
     isColdStart = true;
@@ -1017,7 +1054,6 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
         sessionInfo->want.GetElement().GetAbilityName(), sessionInfo->want.GetElement().GetModuleName());
 
     sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
-    tmpAbilityMap_.erase(search);
     uiAbilityRecord->SetSessionInfo(sessionInfo);
     if (sessionInfo->state == CallToState::BACKGROUND) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "set pending BACKGROUND");
@@ -1945,6 +1981,27 @@ void UIAbilityLifecycleManager::CallRequestDone(const std::shared_ptr<AbilityRec
         return;
     }
     abilityRecord->CallRequestDone(callStub);
+
+    auto iter = callRequestCache_.find(abilityRecord);
+    if (iter == callRequestCache_.end()) {
+        return;
+    }
+    auto requestList = std::move(iter->second);
+    callRequestCache_.erase(iter);
+    auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    if (taskHandler == nullptr) {
+        return;
+    }
+    auto wThis = weak_from_this();
+    for (const auto &request : requestList) {
+        auto task = [request, wThis]() {
+            auto pThis = wThis.lock();
+            if (pThis) {
+                pThis->CallAbilityLocked(request);
+            }
+        };
+        taskHandler->SubmitTask(task);
+    }
 }
 
 int UIAbilityLifecycleManager::ReleaseCallLocked(
@@ -2036,7 +2093,7 @@ int32_t UIAbilityLifecycleManager::GetSessionIdByAbilityToken(const sptr<IRemote
     return 0;
 }
 
-void UIAbilityLifecycleManager::SetRevicerInfo(const AbilityRequest &abilityRequest,
+void UIAbilityLifecycleManager::SetReceiverInfo(const AbilityRequest &abilityRequest,
     std::shared_ptr<AbilityRecord> &abilityRecord) const
 {
     CHECK_POINTER(abilityRecord);
