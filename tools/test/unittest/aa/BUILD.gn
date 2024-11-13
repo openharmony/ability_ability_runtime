@@ -315,6 +315,7 @@ group("unittest") {
     ":aa_command_attach_test",
     ":aa_command_dump_test",
     ":aa_command_dumpsys_test",
+    ":aa_command_force_stop_test",
     ":aa_command_start_test",
     ":aa_command_stop_service_test",
     ":aa_command_test",
