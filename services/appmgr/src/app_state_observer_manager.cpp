@@ -335,20 +335,20 @@ void AppStateObserverManager::OnProcessStateChanged(const std::shared_ptr<AppRun
     handler_->SubmitTask(task);
 }
 
-void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
+void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload)
 {
     if (handler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnProcessCreated failed.");
         return;
     }
 
-    auto task = [weak = weak_from_this(), appRecord]() {
+    auto task = [weak = weak_from_this(), appRecord, isPreload]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnProcessCreated failed.");
             return;
         }
-        self->HandleOnAppProcessCreated(appRecord);
+        self->HandleOnAppProcessCreated(appRecord, isPreload);
     };
     handler_->SubmitTask(task);
 }
@@ -565,13 +565,15 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
     }
 }
 
-void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
+void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord,
+    bool isPreload)
 {
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "app record is null");
         return;
     }
     ProcessData data = WrapProcessData(appRecord);
+    data.isPreload = isPreload;
     if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "bundleName is com.huawei.chmos.vassistant, change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
