@@ -335,49 +335,7 @@ void AppStateObserverManager::OnProcessStateChanged(const std::shared_ptr<AppRun
     handler_->SubmitTask(task);
 }
 
-<<<<<<< HEAD
-void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
-=======
-void AppStateObserverManager::OnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord)
-{
-    if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnWindowShow failed.");
-        return;
-    }
-
-    auto task = [weak = weak_from_this(), appRecord]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnWindowShow failed.");
-            return;
-        }
-        TAG_LOGD(AAFwkTag::APPMGR, "OnWindowShow come.");
-        self->HandleOnWindowShow(appRecord);
-    };
-    handler_->SubmitTask(task);
-}
-
-void AppStateObserverManager::OnWindowHidden(const std::shared_ptr<AppRunningRecord> &appRecord)
-{
-    if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnWindowHidden failed.");
-        return;
-    }
-
-    auto task = [weak = weak_from_this(), appRecord]() {
-        auto self = weak.lock();
-        if (self == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "self is nullptr, OnWindowHidden failed.");
-            return;
-        }
-        TAG_LOGD(AAFwkTag::APPMGR, "OnWindowHidden come.");
-        self->HandleOnWindowHidden(appRecord);
-    };
-    handler_->SubmitTask(task);
-}
-
 void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload)
->>>>>>> 23e957bab9 (add isPreload)
 {
     if (handler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "handler is nullptr, OnProcessCreated failed.");
