@@ -3470,10 +3470,11 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     int32_t pid = 0;
     int32_t uid = 0;
     std::string bundleName = "test_processName";
+    std::string processName = "test_processName";
     FaultData faultData;
     faultData.errorObject.name = "1234";
     faultData.faultType = FaultDataType::APP_FREEZE;
-    appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, faultData);
+    appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, processName, faultData);
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 end");
 }
 
