@@ -718,6 +718,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         if (appRecord->IsPreloaded()) {
             if (appRecord->GetPreloadMode() != PreloadMode::PRESS_DOWN) {
                 SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::HOT);
+            } else {
+                SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD);
             }
             appRecord->SetPreloadState(PreloadState::NONE);
         }
