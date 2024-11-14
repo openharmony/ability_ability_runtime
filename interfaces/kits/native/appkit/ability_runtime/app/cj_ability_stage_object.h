@@ -20,6 +20,7 @@
 
 #include "configuration.h"
 #include "want.h"
+#include "cj_utils_ffi.h"
 
 #ifdef WINDOWS_PLATFORM
 #define CJ_EXPORT __declspec(dllexport)
@@ -47,6 +48,9 @@ struct CJAbilityStageFuncs {
     void (*AbilityStageOnConfigurationUpdated)(int64_t id, CJConfiguration configuration);
     void (*AbilityStageOnMemoryLevel)(int64_t id, int32_t level);
     void (*AbilityStageInit)(int64_t id, void* abilityStage);
+    void (*AbilityStageOnConfigurationUpdated2)(int64_t id, OHOS::AbilityRuntime::CConfiguration configuration);
+    void (*AbilityStageOnDestroy)(int64_t id);
+    char* (*AbilityStageOnNewProcessRequest)(int64_t id, OHOS::AAFwk::Want* want);
 };
 
 CJ_EXPORT void RegisterCJAbilityStageFuncs(void (*registerFunc)(CJAbilityStageFuncs* result));
@@ -63,7 +67,9 @@ public:
 
     void Init(AbilityStageHandle abilityStage) const;
     void OnCreate() const;
+    void OnDestroy() const;
     std::string OnAcceptWant(const AAFwk::Want& want) const;
+    std::string OnNewProcessRequest(const AAFwk::Want& want) const;
     void OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration) const;
     void OnMemoryLevel(int32_t level) const;
 
