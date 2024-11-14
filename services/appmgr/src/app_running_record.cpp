@@ -2259,7 +2259,8 @@ void SetPreloadMode(PreloadMode mode)
     preloadMode_ = mode;
 }
 
-PreloadMode GetPreloadMode() {
+PreloadMode GetPreloadMode()
+{
     return preloadMode_;
 }
 
