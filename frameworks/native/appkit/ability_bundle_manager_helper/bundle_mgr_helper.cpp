@@ -217,7 +217,7 @@ std::string BundleMgrHelper::GetAppIdByBundleName(const std::string &bundleName,
 void BundleMgrHelper::ConnectTillSuccess()
 {
     while (Connect() == nullptr) {
-        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null Connect()");
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null connect");
         usleep(REPOLL_TIME_MICRO_SECONDS);
     }
 }

@@ -62,7 +62,7 @@ napi_value JsApplicationContextUtils::CreateBundleContext(napi_env env, napi_cal
 napi_value JsApplicationContextUtils::OnCreateBundleContext(napi_env env, NapiCallbackInfo& info)
 {
     if (!CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
+        TAG_LOGE(AAFwkTag::APPKIT, "not system-app");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
     }
@@ -103,7 +103,7 @@ napi_value JsApplicationContextUtils::OnCreateBundleContext(napi_env env, NapiCa
     }
     napi_value contextObj = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get context native object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -111,7 +111,7 @@ napi_value JsApplicationContextUtils::OnCreateBundleContext(napi_env env, NapiCa
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachBaseContext, workContext, nullptr);
     napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
-            TAG_LOGD(AAFwkTag::APPKIT, "finalizer for weak_ptr bundle context called");
+            TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr bundle context is called");
             delete static_cast<std::weak_ptr<Context> *>(data);
         },
         nullptr, nullptr);
@@ -196,7 +196,7 @@ napi_value JsApplicationContextUtils::OnCreateModuleContext(napi_env env, NapiCa
             return CreateJsUndefined(env);
         }
         if (!CheckCallerIsSystemApp()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
+            TAG_LOGE(AAFwkTag::APPKIT, "not system-app");
             AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
             return CreateJsUndefined(env);
         }
@@ -223,7 +223,7 @@ napi_value JsApplicationContextUtils::CreateJsModuleContext(napi_env env, const 
     }
     napi_value contextObj = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get context native object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
@@ -309,7 +309,7 @@ napi_value JsApplicationContextUtils::OnCreateModuleResourceManager(napi_env env
         return CreateJsUndefined(env);
     }
     if (!CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
+        TAG_LOGE(AAFwkTag::APPKIT, "not system-app");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
     }
@@ -1201,7 +1201,7 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
     }
 
     if (!CheckTypeForNapiValue(env, info.argv[0], napi_string)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "param0 invalid");
+        TAG_LOGE(AAFwkTag::APPKIT, "param invalid");
         ThrowInvalidParamError(env, "Parse param type failed, type must be string.");
         return CreateJsUndefined(env);
     }
@@ -1243,7 +1243,7 @@ napi_value JsApplicationContextUtils::OnOff(napi_env env, NapiCallbackInfo& info
     }
 
     if (!CheckTypeForNapiValue(env, info.argv[0], napi_string)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "param0 invalid");
+        TAG_LOGE(AAFwkTag::APPKIT, "param invalid");
         ThrowInvalidParamError(env, "Parse param type failed, type must be string.");
         return CreateJsUndefined(env);
     }
@@ -1545,7 +1545,7 @@ napi_value JsApplicationContextUtils::OnGetApplicationContext(napi_env env, Napi
     }
     napi_value contextObj = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get context native object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }

@@ -159,7 +159,7 @@ void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return;
     }
 
@@ -193,7 +193,7 @@ void JsAbilityStage::OnDestroy() const
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return;
     }
 
@@ -221,7 +221,7 @@ std::string JsAbilityStage::OnAcceptWant(const AAFwk::Want &want)
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return "";
     }
 
@@ -255,7 +255,7 @@ std::string JsAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return "";
     }
 
@@ -312,7 +312,7 @@ void JsAbilityStage::OnMemoryLevel(int32_t level)
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return;
     }
 
@@ -597,14 +597,14 @@ napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const *
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get AbilityStage object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return nullptr;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, obj, name, &method);
     if (!CheckTypeForNapiValue(env, method, napi_function)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get '%{public}s' from AbilityStage object failed", name);
+        TAG_LOGE(AAFwkTag::APPKIT, "get '%{public}s' object failed", name);
         return nullptr;
     }
 
@@ -758,7 +758,7 @@ void JsAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
     if (jsAbilityStageObj_) {
         obj = jsAbilityStageObj_->GetNapiValue();
         if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get AbilityStage object failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
             return;
         }
     }
@@ -771,7 +771,7 @@ void JsAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
     }
     contextObj = shellContextRef_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get context native object failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(context);

@@ -31,7 +31,7 @@ int32_t AssertFaultCallback::OnRemoteRequest(
     std::u16string descriptor = AssertFaultCallback::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        TAG_LOGE(AAFwkTag::APPKIT, "local descriptor not remote");
+        TAG_LOGE(AAFwkTag::APPKIT, "descriptor not equal to remote");
         return ERR_INVALID_STATE;
     }
 
