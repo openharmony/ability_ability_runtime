@@ -360,6 +360,14 @@ public:
         const Want *resultWant) override;
 
     /**
+     * CloseUIExtensionAbilityBySCB, terminate the specified ui extension ability by SCB.
+     *
+     * @param token the ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject> token) override;
+
+    /**
      * CloseUIAbilityBySCB, close the special ability by scb.
      *
      * @param sessionInfo the session info of the ability to terminate.
