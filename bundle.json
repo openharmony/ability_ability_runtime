@@ -88,6 +88,7 @@
             "os_account",
             "power_manager",
             "preferences",
+            "previewer",
             "qos_manager",
             "relational_store",
             "resource_management",
