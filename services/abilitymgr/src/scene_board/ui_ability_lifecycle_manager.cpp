@@ -1036,6 +1036,7 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
     sessionInfo->want = abilityRequest.want;
     sessionInfo->processOptions = abilityRequest.processOptions;
     sessionInfo->startWindowOption = abilityRequest.startWindowOption;
+    sessionInfo->supportWindowModes = abilityRequest.supportWindowModes;
     if (abilityRequest.startSetting != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Assign start setting to session.");
         sessionInfo->startSetting = abilityRequest.startSetting;
@@ -1050,12 +1051,14 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "windowLeft=%{public}d,windowTop=%{public}d,"
-        "windowHeight=%{public}d,windowWidth=%{public}d,windowMode=%{public}d",
+        "windowHeight=%{public}d,windowWidth=%{public}d,windowMode=%{public}d,"
+        "supportWindowModes.size=%{public}zu",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0),
-        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0));
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0),
+        (sessionInfo->supportWindowModes).size());
     TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0));
     auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
