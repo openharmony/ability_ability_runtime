@@ -4803,6 +4803,7 @@ HWTEST_F(AppMgrServiceInnerTest, SetJITPermissions_001, TestSize.Level0)
     uint32_t accessTokenId = 0;
     AppSpawnStartMsg startMsg = {0};
     AppspawnUtil::SetJITPermissions(accessTokenId, startMsg.jitPermissionsList);
+    EXPECT_EQ(startMsg.jitPermissionsList.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "SetJITPermissions_001 end");
 }
 

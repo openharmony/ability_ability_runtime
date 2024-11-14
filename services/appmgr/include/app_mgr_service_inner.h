@@ -1912,7 +1912,7 @@ private:
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
     sptr<IKiaInterceptor> kiaInterceptor_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
-    int32_t willKillPidsNum_;
+    std::atomic<int32_t> willKillPidsNum_ = 0;
     std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
 };
