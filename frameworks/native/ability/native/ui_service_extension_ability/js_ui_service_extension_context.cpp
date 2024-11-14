@@ -382,7 +382,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::UISERVC_EXT, "DisConnect ServiceExtensionAbility start");
         if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::UISERVC_EXT, "not enough params.");
+            TAG_LOGE(AAFwkTag::UISERVC_EXT, "not enough params");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }

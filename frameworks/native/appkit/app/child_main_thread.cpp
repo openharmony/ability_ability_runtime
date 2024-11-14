@@ -412,7 +412,7 @@ void ChildMainThread::UpdateNativeChildLibModuleName(const AppLibPathMap &appLib
         }
     }
 
-    TAG_LOGE(AAFwkTag::APPKIT, "not find native lib(%{private}s) in any app module", processInfo_->srcEntry.c_str());
+    TAG_LOGE(AAFwkTag::APPKIT, "not find native lib(%{private}s)", processInfo_->srcEntry.c_str());
 }
 
 void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList,

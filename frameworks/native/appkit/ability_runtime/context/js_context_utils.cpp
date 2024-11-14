@@ -184,7 +184,7 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
             return CreateJsUndefined(env);
         }
         if (!CheckCallerIsSystemApp()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
+            TAG_LOGE(AAFwkTag::APPKIT, "not system-app");
             AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
             return CreateJsUndefined(env);
         }
@@ -297,7 +297,7 @@ napi_value JsBaseContext::OnCreateModuleResourceManager(napi_env env, NapiCallba
         return CreateJsUndefined(env);
     }
     if (!CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
+        TAG_LOGE(AAFwkTag::APPKIT, "not system-app");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
     }
@@ -519,7 +519,7 @@ napi_value JsBaseContext::OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info
 napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& info)
 {
     if (!CheckCallerIsSystemApp()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application not system-app, not use system-api");
+        TAG_LOGE(AAFwkTag::APPKIT, "not system-app");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return CreateJsUndefined(env);
     }

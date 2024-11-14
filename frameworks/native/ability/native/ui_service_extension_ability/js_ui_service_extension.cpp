@@ -324,7 +324,7 @@ sptr<IRemoteObject> JsUIServiceExtension::OnConnect(const AAFwk::Want &want,
         stubObject = extensionStub_->AsObject();
     }
     if (hostProxyMap_.find(hostProxy) != hostProxyMap_.end()) {
-        TAG_LOGI(AAFwkTag::UISERVC_EXT, "hostpProxy exist");
+        TAG_LOGI(AAFwkTag::UISERVC_EXT, "hostProxy exist");
         return stubObject;
     }
     napi_ref hostProxyNref = AAFwk::JsUIServiceHostProxy::CreateJsUIServiceHostProxy(env, hostProxy);

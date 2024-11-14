@@ -1165,7 +1165,7 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
 
     // 2.add/remove overlay hapPath
     if (loadPath.empty() || overlayModuleInfos.empty()) {
-        TAG_LOGW(AAFwkTag::APPKIT, "not any hapPath in overlayModuleInfo");
+        TAG_LOGW(AAFwkTag::APPKIT, "hapPath empty");
     } else {
         if (isEnable) {
             std::vector<std::string> overlayPaths = GetAddOverlayPaths(overlayModuleInfos);
@@ -1264,7 +1264,8 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
             // if app's callback has been registered, let app decide whether exit or not.
             TAG_LOGE(AAFwkTag::APPKIT,
                 "\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s\n"
-                "message: %{public}s\nstack: %{public}s",
+                "message: %{public}s\n"
+                "stack: %{public}s",
                 bundleName.c_str(), errName.c_str(), summary.c_str(), errMsg.c_str(), errStack.c_str());
             AAFwk::ExitReason exitReason = { REASON_CJ_ERROR, errName };
             AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
@@ -1317,7 +1318,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
     BundleInfo bundleInfo;
     if (!GetBundleForLaunchApplication(bundleMgrHelper, bundleName, appLaunchData.GetAppIndex(), bundleInfo)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "get bundle info failed");
+        TAG_LOGE(AAFwkTag::APPKIT, "get bundleInfo failed");
         return;
     }
 
@@ -1671,7 +1672,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
         if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "prepare ability delegator failed");
+            TAG_LOGE(AAFwkTag::APPKIT, "PrepareAbilityDelegator failed");
             return;
         }
     }
