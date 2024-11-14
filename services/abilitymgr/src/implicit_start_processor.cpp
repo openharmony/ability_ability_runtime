@@ -542,6 +542,9 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAppIndexes(int32_t userId, A
     abilityInfos.emplace_back(request.abilityInfo);
     for (auto &appIndex: appIndexes) {
         AppExecFwk::AbilityInfo abilityInfo;
+        TAG_LOGD(AAFwkTag::ABILITYMGR,
+            "abilityName: %{public}s, appIndex: %{public}d, userId: %{public}d",
+            request.want.GetElement().GetAbilityName().c_str(), appIndex, userId);
         IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneAbilityInfo(request.want.GetElement(), abilityInfoFlag, appIndex,
             abilityInfo, userId));
         if (abilityInfo.name.empty() || abilityInfo.bundleName.empty()) {
@@ -577,6 +580,9 @@ int ImplicitStartProcessor::FindExtensionInfo(const Want &want, int32_t flags, i
     auto bms = GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
+        "abilityName: %{public}s, appIndex: %{public}d, userId: %{public}d",
+        want.GetElement().GetAbilityName().c_str(), appIndex, userId);
     IN_PROCESS_CALL_WITHOUT_RET(bms->QueryCloneExtensionAbilityInfoWithAppIndex(want.GetElement(),
         flags, appIndex, extensionInfo, userId));
     if (extensionInfo.bundleName.empty() || extensionInfo.name.empty()) {
@@ -611,6 +617,8 @@ int ImplicitStartProcessor::QueryBmsAppInfos(AbilityRequest &request, int32_t us
         Want want;
         want.SetElementName(appInfos[0], queryAbilityName);
 
+        TAG_LOGD(AAFwkTag::ABILITYMGR,
+            "abilityName: %{public}s, userId: %{public}d", want.GetElement().GetAbilityName().c_str(), userId);
         IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(want, abilityInfoFlag,
             userId, abilityInfo));
         if (!abilityInfo.name.empty() && !abilityInfo.bundleName.empty() && !abilityInfo.moduleName.empty()) {
@@ -779,6 +787,8 @@ void ImplicitStartProcessor::GetEcologicalCallerInfo(const Want &want, ErmsCalle
 
     std::string targetBundleName = want.GetBundle();
     AppExecFwk::ApplicationInfo targetAppInfo;
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
+        "targetBundleName: %{public}s, userId: %{public}d", targetBundleName.c_str(), userId);
     bool getTargetResult = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(targetBundleName,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, targetAppInfo));
     if (!getTargetResult) {
@@ -883,6 +893,7 @@ bool ImplicitStartProcessor::IsExistDefaultApp(int32_t userId, const std::string
 {
     auto defaultMgr = GetDefaultAppProxy();
     AppExecFwk::BundleInfo bundleInfo;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d, typeName: %{public}s", userId, typeName.c_str());
     ErrCode ret =
         IN_PROCESS_CALL(defaultMgr->GetDefaultApplication(userId, typeName, bundleInfo));
     if (ret != ERR_OK) {

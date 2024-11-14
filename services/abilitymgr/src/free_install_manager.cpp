@@ -183,6 +183,7 @@ FreeInstallInfo FreeInstallManager::BuildFreeInstallInfo(const Want &want, int32
     }
     auto identity = IPCSkeleton::ResetCallingIdentity();
     info.identity = identity;
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", identity.c_str());
     IPCSkeleton::SetCallingIdentity(identity);
     return info;
 }
@@ -356,6 +357,7 @@ void FreeInstallManager::StartAbilityByFreeInstall(FreeInstallInfo &info, std::s
 {
     info.want.SetFlags(info.want.GetFlags() ^ Want::FLAG_INSTALL_ON_DEMAND);
     auto identity = IPCSkeleton::ResetCallingIdentity();
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", info.identity.c_str());
     IPCSkeleton::SetCallingIdentity(info.identity);
     int32_t result = ERR_OK;
     if (info.want.GetElement().GetAbilityName().empty()) {
@@ -377,6 +379,7 @@ void FreeInstallManager::StartAbilityByPreInstall(int32_t recordId, FreeInstallI
 {
     info.want.SetFlags(info.want.GetFlags() ^ Want::FLAG_INSTALL_ON_DEMAND);
     auto identity = IPCSkeleton::ResetCallingIdentity();
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", info.identity.c_str());
     IPCSkeleton::SetCallingIdentity(info.identity);
     int32_t result = ERR_OK;
     if (info.want.GetElement().GetAbilityName().empty()) {
@@ -390,6 +393,7 @@ void FreeInstallManager::StartAbilityByPreInstall(int32_t recordId, FreeInstallI
             info.want.GetStringParam(KEY_SESSION_ID),
             result, "start ability failed");
     }
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", identity.c_str());
     IPCSkeleton::SetCallingIdentity(identity);
     TAG_LOGI(AAFwkTag::FREE_INSTALL, "preInstall result: %{public}d", result);
     DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinished(
@@ -400,6 +404,7 @@ void FreeInstallManager::StartAbilityByConvertedWant(FreeInstallInfo &info, cons
 {
     info.want.SetFlags(info.want.GetFlags() ^ Want::FLAG_INSTALL_ON_DEMAND);
     auto identity = IPCSkeleton::ResetCallingIdentity();
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", info.identity.c_str());
     IPCSkeleton::SetCallingIdentity(info.identity);
     int32_t result = ERR_OK;
     if (info.want.GetElement().GetAbilityName().empty()) {
@@ -409,6 +414,7 @@ void FreeInstallManager::StartAbilityByConvertedWant(FreeInstallInfo &info, cons
         result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(info.want,
             info.callerToken, info.userId, info.requestCode);
     }
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", identity.c_str());
     IPCSkeleton::SetCallingIdentity(identity);
     auto url = info.want.GetUriString();
     int32_t recordId = GetRecordIdByToken(info.callerToken);
@@ -419,6 +425,7 @@ void FreeInstallManager::StartAbilityByConvertedWant(FreeInstallInfo &info, cons
 void FreeInstallManager::StartAbilityByOriginalWant(FreeInstallInfo &info, const std::string &startTime)
 {
     auto identity = IPCSkeleton::ResetCallingIdentity();
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", info.identity.c_str());
     IPCSkeleton::SetCallingIdentity(info.identity);
     int result = ERR_INVALID_VALUE;
     if (info.originalWant) {
@@ -428,6 +435,7 @@ void FreeInstallManager::StartAbilityByOriginalWant(FreeInstallInfo &info, const
     } else {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null original want");
     }
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "identity: %{public}s", identity.c_str());
     IPCSkeleton::SetCallingIdentity(identity);
     TAG_LOGI(AAFwkTag::FREE_INSTALL, "startAbility result: %{public}d", result);
     auto url = info.want.GetUriString();
@@ -441,6 +449,7 @@ int32_t FreeInstallManager::UpdateElementName(Want &want, int32_t userId) const
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, ERR_INVALID_VALUE);
     Want launchWant;
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "bundleName: %{public}s, userId: %{public}d", want.GetBundle().c_str(), userId);
     auto errCode = IN_PROCESS_CALL(bundleMgrHelper->GetLaunchWantForBundle(want.GetBundle(), launchWant, userId));
     if (errCode != ERR_OK) {
         return errCode;
@@ -507,6 +516,10 @@ int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
 
     AppExecFwk::AbilityInfo abilityInfo;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+    TAG_LOGD(AAFwkTag::FREE_INSTALL,
+        "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, userId: %{public}d",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetModuleName().c_str(),
+        want.GetElement().GetAbilityName().c_str(), userId);
     if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(
         want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfo)) &&
         !IN_PROCESS_CALL(bundleMgrHelper->QueryExtensionAbilityInfos(
@@ -553,8 +566,9 @@ void FreeInstallManager::PostUpgradeAtomicServiceTask(int resultCode, const Want
         auto updateAtmoicServiceTask = [want, userId, thisWptr, &timeStampMap = timeStampMap_]() {
             auto sptr = thisWptr.lock();
             TAG_LOGD(AAFwkTag::FREE_INSTALL,
-                "bundleName: %{public}s, moduleName: %{public}s", want.GetElement().GetBundleName().c_str(),
-                want.GetElement().GetModuleName().c_str());
+                "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, userId: %{public}d",
+                want.GetElement().GetBundleName().c_str(), want.GetElement().GetModuleName().c_str(),
+                want.GetElement().GetAbilityName().c_str(), userId);
             std::string nameKey = want.GetElement().GetBundleName() + want.GetElement().GetModuleName();
             if (timeStampMap.find(nameKey) == timeStampMap.end() ||
                 sptr->GetTimeStamp() - timeStampMap[nameKey] > UPDATE_ATOMOIC_SERVICE_TASK_TIMER) {

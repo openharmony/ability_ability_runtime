@@ -440,7 +440,8 @@ bool AbilityAutoStartupService::GetBundleInfo(const std::string &bundleName,
         }
         userId = abilityMgr->GetUserId();
     }
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "userId: %{public}d", userId);
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "bundleName: %{public}s, userId: %{public}d, appIndex: %{public}d",
+        bundleName.c_str(), userId, appIndex);
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null bundleMgrHelper");
