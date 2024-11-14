@@ -106,6 +106,7 @@ void UpdateCallerInfoUtil::UpdateSignatureInfo(std::string bundleName, Want& wan
     auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgr != nullptr) {
         AppExecFwk::SignatureInfo signatureInfo;
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s", bundleName.c_str());
         IN_PROCESS_CALL(bundleMgr->GetSignatureInfoByBundleName(bundleName, signatureInfo));
         std::string callerAppId = isRemote ? DMS_CALLER_APP_ID : Want::PARAM_RESV_CALLER_APP_ID;
         std::string callerAppIdentifier = isRemote ? DMS_CALLER_APP_IDENTIFIER : Want::PARAM_RESV_CALLER_APP_IDENTIFIER;

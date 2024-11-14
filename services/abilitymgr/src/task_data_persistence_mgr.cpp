@@ -109,6 +109,7 @@ bool TaskDataPersistenceMgr::RemoveUserDir(int32_t userId)
         return false;
     }
     std::string userDir = std::string(TASK_DATA_FILE_BASE_PATH) + "/" + std::to_string(userId);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "userDir: %{public}s", userDir.c_str());
     bool ret = OHOS::ForceRemoveDirectory(userDir);
     if (!ret) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove user dir %{public}s failed", userDir.c_str());
