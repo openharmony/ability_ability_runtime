@@ -250,12 +250,16 @@ ohos_shared_library("appkit_native") {
     include_dirs += [
       "${ability_runtime_path}/cj_environment/interfaces/inner_api",
       "${ability_runtime_path}/frameworks/cj/ffi",
+      "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     ]
 
     defines += [ "CJ_FRONTEND" ]
 
+    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
+
     external_deps += [
       "bundle_framework:appexecfwk_base",
+      "bundle_framework:cj_bundle_manager_ffi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
     ]
