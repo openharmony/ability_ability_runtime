@@ -68,6 +68,7 @@
 #include "softbus_bus_center.h"
 #include "start_ability_handler/start_ability_sandbox_savefile.h"
 #include "start_ability_utils.h"
+#include "hidden_start_utils.h"
 #include "startup_util.h"
 #include "status_bar_delegate_interface.h"
 #include "string_wrapper.h"
@@ -1587,7 +1588,14 @@ int AbilityManagerService::StartUIAbilityForOptionWrap(const Want &want, const S
     bool isCallByShortcut)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    auto ret = CheckProcessOptions(want, options, userId);
+    int32_t ret = ERR_OK;
+
+    if (HiddenStartUtils::IsHiddenStart(want, options)) {
+        ret = HiddenStartUtils::CheckHiddenStartSupported(want, options);
+    } else {
+        ret = CheckProcessOptions(want, options, userId);
+    }
+
     if (ret != ERR_OK) {
         return ret;
     }
