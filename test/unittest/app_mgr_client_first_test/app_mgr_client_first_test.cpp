@@ -194,5 +194,19 @@ HWTEST_F(AppMgrClientFirstTest, CleanAbilityByUserRequest_001, TestSize.Level0)
     EXPECT_TRUE(result != true);
     TAG_LOGI(AAFwkTag::TEST, "CleanAbilityByUserRequest_001 end");
 }
+
+/**
+ * @tc.name: IsCallerKilling_001
+ * @tc.desc: AppMgrClient test for IsCallerKilling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientFirstTest, IsCallerKilling_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsCallerKilling_001 start");
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    auto result = appMgrClient->IsCallerKilling("");
+    EXPECT_TRUE(result != true);
+    TAG_LOGI(AAFwkTag::TEST, "IsCallerKilling_001 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -624,9 +624,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         TAG_LOGE(AAFwkTag::APPMGR, "null loadParam");
         return;
     }
-    if (!CheckLoadAbilityConditions(want, loadParam, abilityInfo, appInfo)) {
+    if (!CheckLoadAbilityConditions(loadParam->token, abilityInfo, appInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "checkLoadAbilityConditions fail");
-        NotifyLoadAbilityFailed(loadParam->token);
         return;
     }
     if (abilityInfo->type == AbilityType::PAGE) {
@@ -649,8 +648,11 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     int32_t appIndex = 0;
+    std::string callerKey;
     if (want != nullptr) {
         (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, appIndex);
+        callerKey = want->GetStringParam(Want::PARAMS_REAL_CALLER_KEY);
+        want->RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     }
     if (!GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
         TAG_LOGE(AAFwkTag::APPMGR, "getBundleAndHapInfo fail");
@@ -692,6 +694,11 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
 
     if (!appRecord) {
         TAG_LOGD(AAFwkTag::APPMGR, "appRecord null");
+        if (KillingProcessManager::GetInstance().IsCallerKilling(callerKey)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "caller is killing");
+            NotifyLoadAbilityFailed(loadParam->token);
+            return;
+        }
         bool appExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(bundleInfo.name);
         bool appMultiUserExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByUid(bundleInfo.uid);
         if (!appMultiUserExistFlag) {
@@ -836,11 +843,10 @@ void AppMgrServiceInner::RemoveUIExtensionLauncherItem(std::shared_ptr<AppRunnin
     appRunningManager_->RemoveUIExtensionLauncherItemById(uiExtensionAbilityId);
 }
 
-bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AAFwk::Want> want,
-    std::shared_ptr<AbilityRuntime::LoadParam> loadParam, const std::shared_ptr<AbilityInfo> &abilityInfo,
-    const std::shared_ptr<ApplicationInfo> &appInfo)
+bool AppMgrServiceInner::CheckLoadAbilityConditions(const sptr<IRemoteObject> &token,
+    const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo)
 {
-    if (!loadParam || !loadParam->token || !abilityInfo || !appInfo) {
+    if (!token || !abilityInfo || !appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
         return false;
     }
@@ -851,14 +857,6 @@ bool AppMgrServiceInner::CheckLoadAbilityConditions(std::shared_ptr<AAFwk::Want>
     if (abilityInfo->applicationName != appInfo->name) {
         TAG_LOGE(AAFwkTag::APPMGR, "abilityInfo and appInfo have diff appName");
         return false;
-    }
-    if (want) {
-        std::string callerKey = want->GetStringParam(Want::PARAMS_REAL_CALLER_KEY);
-        want->RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
-        if (!callerKey.empty() && KillingProcessManager::GetInstance().IsCallerKilling(callerKey)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "caller is killing");
-            return false;
-        }
     }
 
     return true;
@@ -8439,6 +8437,16 @@ bool AppMgrServiceInner::IsProcessAttached(sptr<IRemoteObject> token) const
         return false;
     }
     return appRecord->IsProcessAttached();
+}
+
+bool AppMgrServiceInner::IsCallerKilling(const std::string& callerKey) const
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return false;
+    }
+    return KillingProcessManager::GetInstance().IsCallerKilling(callerKey);
 }
 
 int32_t AppMgrServiceInner::GetSupportedProcessCachePids(const std::string &bundleName,
