@@ -359,6 +359,8 @@ public:
 
     void UnSetPolicy(const std::shared_ptr<AppRunningRecord> &appRecord);
 
+    void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
+
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     int32_t AssignRunningProcessInfoByAppRecord(

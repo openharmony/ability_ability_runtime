@@ -875,6 +875,8 @@ public:
     {
         return 0;
     }
+
+    virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) {}
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
