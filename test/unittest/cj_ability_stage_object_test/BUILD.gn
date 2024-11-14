@@ -28,8 +28,6 @@ ohos_unittest("cj_ability_stage_object_test") {
     "${ability_runtime_native_path}/runtime",
     "${ability_runtime_path}/cj_environment/interfaces/inner_api",
     "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
-    "${bundlefwk_path}/interfaces/kits/cj/src",
-    "${arkui_path}/napi/interfaces/inner_api/cjffi/cj_ffi",
   ]
 
   sources = [
