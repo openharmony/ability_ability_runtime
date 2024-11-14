@@ -1537,14 +1537,17 @@ int32_t AppMgrService::NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
     return appMgrServiceInner_->NotifyMemorySizeStateChanged(isMemorySizeSufficent);
 }
 
-int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
+int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+    const sptr<IRemoteObject> &callback)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
+ 
+    return appMgrServiceInner_->StartNativeChildProcess(
+        IPCSkeleton::GetCallingPid(), libName, childProcessCount, callback);
 }
 
 int32_t AppMgrService::SetSupportedProcessCache(int32_t pid, bool isSupport)
@@ -1571,17 +1574,14 @@ void AppMgrService::SetAppAssertionPauseState(bool flag)
     return appMgrServiceInner_->SetAppAssertionPauseState(flag);
 }
 
-int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
-    const sptr<IRemoteObject> &callback)
+int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
     }
-
-    return appMgrServiceInner_->StartNativeChildProcess(
-        IPCSkeleton::GetCallingPid(), libName, childProcessCount, callback);
+    return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
 }
 
 int32_t AppMgrService::CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest)
