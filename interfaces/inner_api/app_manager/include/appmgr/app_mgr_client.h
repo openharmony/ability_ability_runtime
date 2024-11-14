@@ -899,6 +899,8 @@ public:
      */
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
+    bool IsCallerKilling(const std::string& callerKey) const;
+
     /**
      * Check whether the bundle is running.
      *

@@ -213,6 +213,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleKillProcessesByAccessTokenId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_ATTACHED):
             return HandleIsProcessAttached(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_CALLER_KILLING):
+            return HandleIsCallerKilling(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_DKV):
             return HandleSetKeepAliveDkv(data, reply);
     }
@@ -855,6 +857,18 @@ int32_t AmsMgrStub::HandleIsProcessAttached(MessageParcel &data, MessageParcel &
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     auto isAttached = IsProcessAttached(token);
     if (!reply.WriteBool(isAttached)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsCallerKilling(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    auto callerKey = data.ReadString();
+    auto isCallerKilling = IsCallerKilling(callerKey);
+    if (!reply.WriteBool(isCallerKilling)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
     }

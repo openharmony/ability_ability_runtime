@@ -1370,6 +1370,12 @@ public:
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
     /**
+     * Is a process of a ability killing
+     * @param indicates the ability
+     */
+    bool IsCallerKilling(const std::string& callerKey) const;
+
+    /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.
      * @param userId userId Designation User ID.
@@ -1423,9 +1429,8 @@ private:
      */
     void RestartKeepAliveProcess(std::shared_ptr<AppRunningRecord> appRecord);
 
-    bool CheckLoadAbilityConditions(std::shared_ptr<AAFwk::Want> want,
-        std::shared_ptr<AbilityRuntime::LoadParam> loadParam, const std::shared_ptr<AbilityInfo> &abilityInfo,
-        const std::shared_ptr<ApplicationInfo> &appInfo);
+    bool CheckLoadAbilityConditions(const sptr<IRemoteObject> &token,
+        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo);
 
     /**
      * query bundle info for the given bundleName

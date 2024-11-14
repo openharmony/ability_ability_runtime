@@ -31,13 +31,13 @@ KillingProcessManager& KillingProcessManager::GetInstance()
     return instance;
 }
 
-bool KillingProcessManager::IsCallerKilling(std::string callerKey) const
+bool KillingProcessManager::IsCallerKilling(const std::string& callerKey) const
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
     return killingCallerKeySet_.find(callerKey) != killingCallerKeySet_.end();
 }
 
-void KillingProcessManager::AddKillingCallerKey(std::string callerKey)
+void KillingProcessManager::AddKillingCallerKey(const std::string& callerKey)
 {
     auto taskHandler = AAFwk::TaskHandlerWrap::GetFfrtHandler();
     if (taskHandler == nullptr) {
@@ -54,6 +54,7 @@ void KillingProcessManager::AddKillingCallerKey(std::string callerKey)
         auto ret = killingCallerKeySet_.insert(callerKey);
         if (!ret.second) {
             TAG_LOGI(AAFwkTag::APPMGR, "already inserted");
+            return;
         }
     }
     auto task = [callerKey] () {
@@ -62,7 +63,7 @@ void KillingProcessManager::AddKillingCallerKey(std::string callerKey)
     taskHandler->SubmitTask(task, "clearCallerKey", CLEAR_CALLER_KEY_DELAY_TIME);
 }
 
-void KillingProcessManager::RemoveKillingCallerKey(std::string callerKey)
+void KillingProcessManager::RemoveKillingCallerKey(const std::string& callerKey)
 {
     if (callerKey.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid callerKey");
