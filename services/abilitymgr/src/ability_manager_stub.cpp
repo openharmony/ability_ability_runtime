@@ -546,6 +546,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::TERMINATE_UI_SERVICE_EXTENSION_ABILITY) {
         return TerminateUIServiceExtensionAbilityInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::CLOSE_UI_EXTENSION_ABILITY_BY_SCB) {
+        return CloseUIExtensionAbilityBySCBInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -995,6 +998,18 @@ int AbilityManagerStub::TerminateUIExtensionAbilityInner(MessageParcel &data, Me
     if (resultWant != nullptr) {
         delete resultWant;
     }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::CloseUIExtensionAbilityBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = nullptr;
+    if (data.ReadBool()) {
+        token = data.ReadRemoteObject();
+    }
+
+    int32_t result = CloseUIExtensionAbilityBySCB(token);
+    reply.WriteInt32(result);
     return NO_ERROR;
 }
 

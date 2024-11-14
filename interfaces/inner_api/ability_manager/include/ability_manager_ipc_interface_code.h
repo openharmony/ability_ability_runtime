@@ -412,7 +412,10 @@ enum class AbilityManagerInterfaceCode {
 
     //terminate UIServiceExtensionAbility
     TERMINATE_UI_SERVICE_EXTENSION_ABILITY = 1068,
-    
+
+    // ipc id for close ui extension ability by scb
+    CLOSE_UI_EXTENSION_ABILITY_BY_SCB = 1069,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
