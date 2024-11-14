@@ -146,6 +146,7 @@ abilityms_files = [
   "src/utils/multi_app_utils.cpp",
   "src/utils/multi_instance_utils.cpp",
   "src/utils/start_ability_utils.cpp",
+  "src/utils/hidden_start_utils.cpp",
   "src/utils/state_utils.cpp",
   "src/utils/update_caller_info_util.cpp",
   "src/utils/uri_utils.cpp",
