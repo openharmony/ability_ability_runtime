@@ -349,6 +349,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleCheckIsKiaProcess(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::KILL_APP_SELF_WITH_INSTANCE_KEY):
             return HandleKillAppSelfWithInstanceKey(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID):
+            return HandleUpdateInstanceKeyBySpecifiedId(data, reply);
     }
     return INVALID_FD;
 }
@@ -1721,6 +1723,14 @@ int32_t AppMgrStub::HandleKillAppSelfWithInstanceKey(MessageParcel &data, Messag
         TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUpdateInstanceKeyBySpecifiedId(MessageParcel &data, MessageParcel &reply)
+{
+    auto specifiedId = data.ReadInt32();
+    auto instanceKey = data.ReadString();
+    UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

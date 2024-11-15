@@ -4696,7 +4696,6 @@ void AppMgrServiceInner::ScheduleAcceptWantDone(
         startSpecifiedAbilityResponse_->OnAcceptWantResponse(want, flag,
             appRecord->GetSpecifiedRequestId());
     }
-    appRecord->ResetSpecifiedRequestId();
 }
 
 void AppMgrServiceInner::HandleStartSpecifiedAbilityTimeOut(std::shared_ptr<AppRunningRecord> appRecord)
@@ -8505,6 +8504,15 @@ int32_t AppMgrServiceInner::CheckIsKiaProcess(pid_t pid, bool &isKia)
         return ERR_INVALID_VALUE;
     }
     return appRunningManager_->CheckIsKiaProcess(pid, isKia);
+}
+
+void AppMgrServiceInner::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
+{
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return;
+    }
+    appRunningManager_->UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

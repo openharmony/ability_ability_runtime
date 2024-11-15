@@ -160,6 +160,7 @@ private:
     int32_t HandleKillProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRestartResidentProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillAppSelfWithInstanceKey(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUpdateInstanceKeyBySpecifiedId(MessageParcel &data, MessageParcel &reply);
     int32_t OnRemoteRequestInner(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
     int32_t OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
