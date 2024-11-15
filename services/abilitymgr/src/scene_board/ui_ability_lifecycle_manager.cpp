@@ -290,7 +290,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     return ERR_OK;
 }
 
-void UIAbilityLifecycleManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, int32_t state) const
+void UIAbilityLifecycleManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, int32_t state)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability request state %{public}d done.", state);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -304,6 +304,9 @@ void UIAbilityLifecycleManager::OnAbilityRequestDone(const sptr<IRemoteObject> &
             auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
             CHECK_POINTER(handler);
             abilityRecord->RemoveForegroundTimeoutTask();
+            DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
+            abilityRecord->SetPendingState(AbilityState::INITIAL);
+            CompleteTerminateLocked(abilityRecord);
             return;
         }
         std::string element = abilityRecord->GetElementName().GetURI();
@@ -1422,6 +1425,14 @@ void UIAbilityLifecycleManager::CompleteTerminate(const std::shared_ptr<AbilityR
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER(abilityRecord);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
+
+    CompleteTerminateLocked(abilityRecord);
+}
+
+void UIAbilityLifecycleManager::CompleteTerminateLocked(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    CHECK_POINTER(abilityRecord);
 
     if (abilityRecord->GetAbilityState() != AbilityState::TERMINATING) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, %{public}s, ability not terminating", __func__);
