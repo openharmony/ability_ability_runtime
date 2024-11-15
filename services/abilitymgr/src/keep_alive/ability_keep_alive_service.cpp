@@ -70,7 +70,7 @@ int32_t AbilityKeepAliveService::SetKeepAliveTrue(const KeepAliveInfo &info)
 int32_t AbilityKeepAliveService::CancelKeepAlive(const KeepAliveInfo &info)
 {
     KeepAliveStatus status = AbilityKeepAliveDataManager::GetInstance().QueryKeepAliveData(info);
-    if (status.code != ERR_OK) {
+    if (status.code != ERR_OK && status.code != ERR_NAME_NOT_FOUND) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "QueryKeepAliveData fail");
         return status.code;
     }

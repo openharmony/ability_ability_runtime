@@ -292,6 +292,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_ProcessExitByBundleName_
     record1->SetUid(BASE_USER_RANGE);
     record1->SetKeepAliveBundle(true);
     record1->SetKeepAliveEnableState(true);
+    record1->SetKeepAliveDkv(true);
     record1->SetMainProcess(true);
     record1->GetPriorityObject()->SetPid(10000); // 10000 means valid process id
     ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent(); // marked mem insufficient
