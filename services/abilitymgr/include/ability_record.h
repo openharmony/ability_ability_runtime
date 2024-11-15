@@ -273,6 +273,7 @@ struct AbilityRequest {
 
     AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
+    std::string customProcess;
 
     sptr<SessionInfo> sessionInfo;
     uint32_t specifyTokenId = 0;
@@ -1009,6 +1010,8 @@ public:
     void SetStartToBackground(const bool flag);
     bool IsStartToForeground() const;
     void SetStartToForeground(const bool flag);
+    bool IsCallerSetProcess() const;
+    void SetCallerSetProcess(const bool flag);
     void SetSessionInfo(sptr<SessionInfo> sessionInfo);
     void UpdateSessionInfo(sptr<IRemoteObject> sessionToken);
     void SetMinimizeReason(bool fromUser);
@@ -1302,6 +1305,7 @@ private:
     bool isStartedByCall_ = false;
     bool isStartToBackground_ = false;
     bool isStartToForeground_ = false;
+    bool isCallerSetProcess_ = false;
     int32_t appIndex_ = 0;
     bool minimizeReason_ = false;
 
