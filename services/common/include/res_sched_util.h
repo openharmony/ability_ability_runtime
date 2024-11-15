@@ -49,6 +49,7 @@ public:
     bool CheckShouldForceKillProcess(int32_t pid);
     void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
         int64_t timeDuration = 0, int64_t abilityRecordId = -1);
+    std::unordered_set<std::string> GetNWebPreloadSet() const;
 private:
     ResSchedUtil() = default;
     ~ResSchedUtil() = default;
