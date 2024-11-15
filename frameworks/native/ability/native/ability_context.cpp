@@ -87,7 +87,7 @@ ErrCode AbilityContext::TerminateAbility()
     ErrCode err = ERR_OK;
     switch (info->type) {
         case AppExecFwk::AbilityType::PAGE:
-            TAG_LOGD(AAFwkTag::CONTEXT, "page type, ability: %{public}s", info->name.c_str());
+            TAG_LOGD(AAFwkTag::CONTEXT, "type:page, ability: %{public}s", info->name.c_str());
 #ifdef SUPPORT_SCREEN
             if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
                 auto sessionToken = GetSessionToken();

@@ -28,11 +28,11 @@ RestartAppManager &RestartAppManager::GetInstance()
     return instance;
 }
 
-bool RestartAppManager::IsRestartAppFrequent(int32_t uid, time_t time)
+bool RestartAppManager::IsRestartAppFrequent(const RestartAppKeyType &key, time_t time)
 {
     std::lock_guard<ffrt::mutex> lock(restartAppMapLock_);
     constexpr int64_t MIN_RESTART_TIME = 10;
-    auto it = restartAppHistory_.find(uid);
+    auto it = restartAppHistory_.find(key);
     if ((it != restartAppHistory_.end()) && (it->second + MIN_RESTART_TIME > time)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "restart too frequently. try again at least 10s later");
         return true;
@@ -40,24 +40,11 @@ bool RestartAppManager::IsRestartAppFrequent(int32_t uid, time_t time)
     return false;
 }
 
-void RestartAppManager::AddRestartAppHistory(int32_t uid, time_t time)
+void RestartAppManager::AddRestartAppHistory(const RestartAppKeyType &key, time_t time)
 {
     std::lock_guard<ffrt::mutex> lock(restartAppMapLock_);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Refresh history, uid=%{public}d", uid);
-    restartAppHistory_[uid] = time;
-}
-
-bool RestartAppManager::IsForegroundToRestartApp() const
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    auto callerPid = IPCSkeleton::GetCallingPid();
-    AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
-    if (processInfo.isFocused || processInfo.isAbilityForegrounding) {
-        return true;
-    }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "IsForegroundToRestartApp, state not foreground");
-    return false;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Refresh uid=%{public}d, instanceKey:%{public}s", key.uid, key.instanceKey.c_str());
+    restartAppHistory_[key] = time;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

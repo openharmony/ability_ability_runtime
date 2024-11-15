@@ -77,6 +77,7 @@ HWTEST_F(ResidentProcessManagerTest, StartResidentProcessWithMainElement_001, Te
     bundleInfos.emplace_back(bundleInfo1);
     bundleInfos.emplace_back(bundleInfo2);
     manager->StartResidentProcessWithMainElement(bundleInfos, 0);
+    EXPECT_TRUE(manager != nullptr);
 }
 
 /*

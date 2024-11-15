@@ -387,6 +387,7 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
         TAG_LOGI(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
         return ret;
     }
+    isPrepareTerminateAbilityDone_.store(false);
     wptr<UIAbilityThread> weak = this;
     auto task = [weak]() {
         TAG_LOGI(AAFwkTag::UIABILITY, "prepare terminate task");

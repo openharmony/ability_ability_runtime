@@ -175,7 +175,7 @@ void ConnectionRecord::CompleteDisconnect(int resultCode, bool isCallerDied, boo
     }
     CHECK_POINTER(targetService_);
     const AppExecFwk::AbilityInfo &abilityInfo = targetService_->GetAbilityInfo();
-    AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName,
+    AppExecFwk::ElementName element(targetService_->GetWant().GetDeviceId(), abilityInfo.bundleName,
         abilityInfo.name, abilityInfo.moduleName);
     auto code = isTargetDied ? (resultCode - 1) : resultCode;
     auto onDisconnectDoneTask = [connCallback = GetAbilityConnectCallback(), element, code]() {

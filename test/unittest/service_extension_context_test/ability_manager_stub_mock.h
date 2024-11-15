@@ -174,7 +174,7 @@ public:
         return 0;
     }
 
-    virtual int KillProcess(const std::string& bundleName, const bool clearPageStack = false)
+    virtual int KillProcess(const std::string& bundleName, bool clearPageStack = false, int32_t appIndex = 0)
     {
         return 0;
     }

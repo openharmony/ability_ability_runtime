@@ -38,6 +38,9 @@ private:
     void UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteObject> asCallerSourceToken);
     void UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken);
     bool UpdateAsCallerInfoFromDialog(Want& want);
+    void UpdateCallerBundleName(Want& want, const std::string &bundleName);
+    void UpdateCallerAbilityName(Want& want, const std::string &abilityName);
+    void UpdateCallerAppCloneIndex(Want& want, int32_t appIndex);
 
     DISALLOW_COPY_AND_MOVE(UpdateCallerInfoUtil);
 };

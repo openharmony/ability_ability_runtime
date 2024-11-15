@@ -15,16 +15,16 @@
 
 #include "queue_task_handler_wrap.h"
 
-
 namespace OHOS {
 namespace AAFwk {
 constexpr int32_t QUEUE_TIME_OUT = 500000; // us
 QueueTaskHandlerWrap::QueueTaskHandlerWrap(const std::string &queueName, TaskQoS queueQos)
-    : taskQueue_(queueName.c_str(), ffrt::queue_attr().qos(Convert2FfrtQos(queueQos)).timeout(QUEUE_TIME_OUT))
+    : TaskHandlerWrap(queueName),
+    taskQueue_(queueName.c_str(), ffrt::queue_attr().qos(Convert2FfrtQos(queueQos)).timeout(QUEUE_TIME_OUT))
 {}
 
 QueueTaskHandlerWrap::QueueTaskHandlerWrap(const std::string &queueName, int32_t concurrentNum, TaskQoS queueQos)
-    : taskQueue_(
+    : TaskHandlerWrap(queueName), taskQueue_(
         ffrt::queue_type::queue_concurrent,
         queueName.c_str(),
         ffrt::queue_attr().qos(Convert2FfrtQos(queueQos)).timeout(QUEUE_TIME_OUT).max_concurrency(concurrentNum))
@@ -33,15 +33,14 @@ QueueTaskHandlerWrap::QueueTaskHandlerWrap(const std::string &queueName, int32_t
 std::shared_ptr<InnerTaskHandle> QueueTaskHandlerWrap::SubmitTaskInner(std::function<void()> &&task,
     const TaskAttribute &taskAttr)
 {
-    if (taskAttr.IsDefault()) {
-        return std::make_shared<InnerTaskHandle>(taskQueue_.submit_h(std::move(task)));
-    } else {
-        ffrt::task_attr ffrtTaskAttr;
-        BuildFfrtTaskAttr(taskAttr, ffrtTaskAttr);
-        return std::make_shared<InnerTaskHandle>(taskQueue_.submit_h(std::move(task),
-            ffrtTaskAttr));
+    ffrt::task_attr ffrtTaskAttr{};
+    BuildFfrtTaskAttr(taskAttr, ffrtTaskAttr);
+    if (taskAttr.insertHead_) {
+        return std::make_shared<InnerTaskHandle>(taskQueue_.submit_head_h(std::move(task), ffrtTaskAttr));
     }
+    return std::make_shared<InnerTaskHandle>(taskQueue_.submit_h(std::move(task), ffrtTaskAttr));
 }
+
 bool QueueTaskHandlerWrap::CancelTaskInner(const std::shared_ptr<InnerTaskHandle> &taskHandle)
 {
     if (!taskHandle) {
@@ -55,6 +54,11 @@ void QueueTaskHandlerWrap::WaitTaskInner(const std::shared_ptr<InnerTaskHandle> 
         return;
     }
     taskQueue_.wait(taskHandle->GetFfrtHandle());
+}
+
+uint64_t QueueTaskHandlerWrap::GetTaskCount()
+{
+    return taskQueue_.get_task_cnt();
 }
 } // namespace AAFwk
 } // namespace OHOS

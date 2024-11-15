@@ -56,7 +56,7 @@ public:
         }
     };
 
-    void SignRestartAppFlag(int32_t uid, bool isAppRecovery = false);
+    void SignRestartAppFlag(int32_t uid, const std::string &instanceKey, bool isAppRecovery = false);
 
     /**
      * StartUIAbility with request.
@@ -104,7 +104,7 @@ public:
      * @param token ability's token.
      * @param state the state of ability lift cycle.
      */
-    void OnAbilityRequestDone(const sptr<IRemoteObject> &token, int32_t state) const;
+    void OnAbilityRequestDone(const sptr<IRemoteObject> &token, int32_t state);
 
     /**
      * Check whether the UIAbility is alive.
@@ -162,7 +162,7 @@ public:
      */
     void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
 
-    int NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest);
+    int NotifySCBToStartUIAbility(AbilityRequest &abilityRequest);
     void CancelSameAbilityTimeoutTask(const AppExecFwk::AbilityInfo &abilityInfo);
 
     int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
@@ -345,7 +345,10 @@ public:
     int32_t UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, std::vector<int32_t> &sessionIds);
 
     int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
+
     bool IsCallerInStatusBar();
+
+    bool IsInStatusBar(uint32_t accessTokenId);
 
     int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
 
@@ -399,6 +402,7 @@ private:
     void PrintTimeOutLog(std::shared_ptr<AbilityRecord> ability, uint32_t msgId, bool isHalf = false);
     void DelayCompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void CompleteTerminateLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
     bool IsContainsAbilityInner(const sptr<IRemoteObject> &token) const;
     bool CheckProperties(const std::shared_ptr<AbilityRecord> &abilityRecord, const AbilityRequest &abilityRequest,
         AppExecFwk::LaunchMode launchMode) const;

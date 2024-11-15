@@ -72,6 +72,7 @@ private:
     int BackToCallerInner(MessageParcel &data, MessageParcel &reply);
     int32_t TerminateUIServiceExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
     int TerminateUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int CloseUIExtensionAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int CloseUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int SendResultToAbilityInner(MessageParcel &data, MessageParcel &reply);
     int MinimizeAbilityInner(MessageParcel &data, MessageParcel &reply);
@@ -303,6 +304,10 @@ private:
     int32_t NotifyFrozenProcessByRSSInner(MessageParcel &data, MessageParcel &reply);
     int32_t CleanUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int32_t PreStartMissionInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetApplicationKeepAliveInner(MessageParcel &data, MessageParcel &reply);
+    int32_t QueryKeepAliveApplicationsInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetApplicationKeepAliveByEDMInner(MessageParcel &data, MessageParcel &reply);
+    int32_t QueryKeepAliveApplicationsByEDMInner(MessageParcel &data, MessageParcel &reply);
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
@@ -342,6 +347,8 @@ private:
     int OnRemoteRequestInnerEighteenth(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int OnRemoteRequestInnerNineteenth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int OnRemoteRequestInnerTwentieth(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);

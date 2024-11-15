@@ -25,8 +25,7 @@
 #include "ability_context.h"
 #include "ability_stage_context.h"
 #include "bundle_container.h"
-#include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
-#include "commonlibrary/ets_utils/js_sys_module/console/console.h"
+#include "console.h"
 #include "declarative_module_preloader.h"
 #include "hilog_tag_wrapper.h"
 #include "js_ability_context.h"
@@ -43,6 +42,7 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "resource_manager.h"
 #include "window_scene.h"
+#include "sys_timer.h"
 
 extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];

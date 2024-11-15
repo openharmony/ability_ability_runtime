@@ -242,5 +242,19 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner__Dump_002, TestSize.Level1)
     EXPECT_EQ("", handlerDumper.GetTag());
     GTEST_LOG_(INFO) << "AppfreezeInner__Dump_002 end";
 }
+
+/**
+ * @tc.number: AppfreezeInner_AppfreezeHandleOverReportCount_001
+ * @tc.name: AppfreezeHandleOverReportCount
+ * @tc.desc: Verify that function AppfreezeHandleOverReportCount.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_AppfreezeHandleOverReportCount_001, TestSize.Level1)
+{
+    bool isSixSecondEvent = true;
+    appfreezeInner->AppfreezeHandleOverReportCount(isSixSecondEvent);
+    isSixSecondEvent = false;
+    appfreezeInner->AppfreezeHandleOverReportCount(isSixSecondEvent);
+    EXPECT_TRUE(!isSixSecondEvent);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

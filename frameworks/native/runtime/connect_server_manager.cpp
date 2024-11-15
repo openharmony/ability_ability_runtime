@@ -62,6 +62,7 @@ using SetRecordCallBack = void (*)(const std::function<void(void)> &startRecordF
 std::mutex g_debuggerMutex;
 std::mutex g_loadsoMutex;
 std::mutex ConnectServerManager::instanceMutex_;
+std::mutex ConnectServerManager::callbackMutex_;
 std::unordered_map<int, std::pair<void*, const DebuggerPostTask>> g_debuggerInfo;
 
 ConnectServerManager::~ConnectServerManager()
@@ -110,6 +111,13 @@ void ConnectServerManager::StartConnectServer(const std::string& bundleName, int
         return;
     }
     startServerForSocketPair(socketFd);
+
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    for (const auto &callback : connectServerCallbacks_) {
+        if (callback != nullptr) {
+            callback();
+        }
+    }
 }
 
 void ConnectServerManager::StopConnectServer(bool isCloseSo)
@@ -442,4 +450,22 @@ void ConnectServerManager::SetRecordResults(const std::string &jsonArrayStr)
     }
     sendLayoutMessage(jsonArrayStr);
 }
+
+void ConnectServerManager::RegistConnectServerCallback(const ServerConnectCallback &connectServerCallback)
+{
+    if (connectServerCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null callback");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    for (const auto &callback : connectServerCallbacks_) {
+        if (callback == connectServerCallback) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "callback exist");
+            return;
+        }
+    }
+    connectServerCallbacks_.emplace_back(connectServerCallback);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "regist succeed");
+}
+
 } // namespace OHOS::AbilityRuntime

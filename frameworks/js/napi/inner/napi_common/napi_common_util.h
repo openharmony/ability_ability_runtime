@@ -117,6 +117,19 @@ bool SetPropertyValueByPropertyName(napi_env env, napi_value jsObject, const cha
 bool UnwrapInt32ByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, int32_t &value);
 
 /**
+ * @brief Get the native array number(int32) from the JSObject of the given property name.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param jsObject Indicates object passed by JS.
+ * @param propertyName Indicates the name of the property.
+ * @param value Indicates the returned native value.
+ *
+ * @return Return true if successful, else return false.
+ */
+bool UnwrapInt32ArrayByPropertyName(napi_env env, napi_value jsObject, const char *propertyName,
+    std::vector<int32_t> &value);
+
+/**
  * @brief Get the native number(double) from the JSObject of the given property name.
  *
  * @param env The environment that the Node-API call is invoked under.

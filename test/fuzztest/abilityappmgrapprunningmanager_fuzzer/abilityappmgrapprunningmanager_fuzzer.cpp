@@ -26,6 +26,7 @@
 #undef private
 #include "securec.h"
 #include "ability_record.h"
+#include "kill_process_config.h"
 
 
 using namespace OHOS::AAFwk;
@@ -82,8 +83,9 @@ void DoSomethingInterestingWithMyAPIadda(const char* data, size_t size)
     ApplicationInfo appInfos;
     manager->ProcessUpdateApplicationInfoInstalled(appInfos);
     std::list<pid_t> pids;
-    bool clearPageStack = *data % ENABLE;
-    manager->ProcessExitByBundleNameAndUid(jsonStr, uid, pids, clearPageStack);
+    KillProcessConfig config;
+    config.clearPageStack = *data % ENABLE;
+    manager->ProcessExitByBundleNameAndUid(jsonStr, uid, pids, config);
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     manager->GetPidsByUserId(userId, pids);
     manager->PrepareTerminate(token, clearMissionFlag);
@@ -131,7 +133,7 @@ void DoSomethingInterestingWithMyAPIaddb(const char* data, size_t size)
     manager->OnChildProcessRemoteDied(remote);
     manager->GetAllAppRunningRecordCountByBundleName(jsonStr);
     auto uid = static_cast<int32_t>(GetU32Data(data));
-    manager->SignRestartAppFlag(uid);
+    manager->SignRestartAppFlag(uid, jsonStr);
     manager->GetAppRunningUniqueIdByPid(pidApps, jsonStr);
     std::vector<pid_t> hostPids;
     manager->GetAllUIExtensionRootHostPid(pidApps, hostPids);
@@ -200,7 +202,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     manager->GetForegroundApplications(list);
     Configuration config;
     manager->UpdateConfiguration(config);
-    manager->UpdateConfigurationByBundleName(config, jsonStr);
+    manager->UpdateConfigurationByBundleName(config, jsonStr, appCloneIndex);
     int32_t level = static_cast<int32_t>(GetU32Data(data));
     manager->NotifyMemoryLevel(level);
     std::map<pid_t, MemoryLevel> procLevelMap;

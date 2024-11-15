@@ -54,8 +54,8 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_001, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     std::string processName = "processName";
     std::string mainElement = "";
-    std::set<uint32_t> needEraseIndexSet;
-    size_t bundleInfoIndex = 0;
+    bool isDataAbility = false;
+    std::string uriStr;
     AbilityInfo abilityInfo;
     hapModuleInfo.mainAbility = "mainAbility";
     hapModuleInfo.isModuleJson = false;
@@ -63,7 +63,7 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_001, TestSize.Level1)
     abilityInfo.name = "mainAbility";
     hapModuleInfo.abilityInfos.push_back(abilityInfo);
     bool res = MainElementUtils::CheckMainElement(hapModuleInfo,
-        processName, mainElement, needEraseIndexSet, bundleInfoIndex);
+        processName, mainElement, isDataAbility, uriStr);
     EXPECT_FALSE(res);
 }
 
@@ -80,8 +80,8 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_002, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     std::string processName = "processName";
     std::string mainElement = "";
-    std::set<uint32_t> needEraseIndexSet;
-    size_t bundleInfoIndex = 0;
+    bool isDataAbility = false;
+    std::string uriStr;
     AbilityInfo abilityInfo;
     hapModuleInfo.mainAbility = "mainAbility";
     hapModuleInfo.isModuleJson = false;
@@ -89,7 +89,7 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_002, TestSize.Level1)
     abilityInfo.name = "";
     hapModuleInfo.abilityInfos.push_back(abilityInfo);
     bool res = MainElementUtils::CheckMainElement(hapModuleInfo,
-        processName, mainElement, needEraseIndexSet, bundleInfoIndex);
+        processName, mainElement, isDataAbility, uriStr);
     EXPECT_FALSE(res);
 }
 
@@ -106,8 +106,8 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_003, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     std::string processName = "processName";
     std::string mainElement = "";
-    std::set<uint32_t> needEraseIndexSet;
-    size_t bundleInfoIndex = 0;
+    bool isDataAbility = false;
+    std::string uriStr;
     AbilityInfo abilityInfo;
     hapModuleInfo.mainAbility = "mainAbility";
     hapModuleInfo.isModuleJson = false;
@@ -117,7 +117,7 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_003, TestSize.Level1)
     abilityInfo.type = AbilityType::DATA;
     hapModuleInfo.abilityInfos.push_back(abilityInfo);
     bool res = MainElementUtils::CheckMainElement(hapModuleInfo,
-        processName, mainElement, needEraseIndexSet, bundleInfoIndex);
+        processName, mainElement, isDataAbility, uriStr);
     EXPECT_FALSE(res);
 }
 
@@ -134,8 +134,8 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_004, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     std::string processName = "processName";
     std::string mainElement = "";
-    std::set<uint32_t> needEraseIndexSet;
-    size_t bundleInfoIndex = 0;
+    bool isDataAbility = false;
+    std::string uriStr;
     AbilityInfo abilityInfo;
     hapModuleInfo.mainAbility = "mainAbility";
     hapModuleInfo.isModuleJson = false;
@@ -145,7 +145,7 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_004, TestSize.Level1)
     abilityInfo.type = AbilityType::PAGE;
     hapModuleInfo.abilityInfos.push_back(abilityInfo);
     bool res = MainElementUtils::CheckMainElement(hapModuleInfo,
-        processName, mainElement, needEraseIndexSet, bundleInfoIndex);
+        processName, mainElement, isDataAbility, uriStr);
     EXPECT_FALSE(res);
 }
 
@@ -162,12 +162,12 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_005, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     std::string processName = "processName";
     std::string mainElement = "";
-    std::set<uint32_t> needEraseIndexSet;
-    size_t bundleInfoIndex = 0;
+    bool isDataAbility = false;
+    std::string uriStr;
     hapModuleInfo.mainAbility = "";
     hapModuleInfo.isModuleJson = true;
     bool res = MainElementUtils::CheckMainElement(hapModuleInfo,
-        processName, mainElement, needEraseIndexSet, bundleInfoIndex);
+        processName, mainElement, isDataAbility, uriStr);
     EXPECT_FALSE(res);
 }
 
@@ -184,13 +184,13 @@ HWTEST_F(MainElementUtilsTest, CheckMainElement_006, TestSize.Level1)
     HapModuleInfo hapModuleInfo;
     std::string processName = "processName";
     std::string mainElement = "";
-    std::set<uint32_t> needEraseIndexSet;
-    size_t bundleInfoIndex = 0;
+    bool isDataAbility = false;
+    std::string uriStr;
     hapModuleInfo.mainAbility = "mainAbility";
     hapModuleInfo.isModuleJson = true;
     hapModuleInfo.process = "";
     bool res = MainElementUtils::CheckMainElement(hapModuleInfo,
-        processName, mainElement, needEraseIndexSet, bundleInfoIndex);
+        processName, mainElement, isDataAbility, uriStr);
     EXPECT_FALSE(res);
 }
 }  // namespace AAFwk

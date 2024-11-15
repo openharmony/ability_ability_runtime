@@ -931,5 +931,19 @@ ErrCode BundleMgrHelper::GetSignatureInfoByBundleName(const std::string &bundleN
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetSignatureInfoByBundleName(bundleName, signatureInfo);
 }
+
+std::string BundleMgrHelper::GetStringById(
+    const std::string &bundleName, const std::string &moduleName, uint32_t resId, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect");
+        return "";
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetStringById(bundleName, moduleName, resId, userId);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -17,7 +17,10 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 config("uripermkit_public_config") {
   visibility = [ ":*" ]
   visibility += [ "${ability_runtime_test_path}/unittest/*" ]
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${ability_runtime_services_path}/uripermmgr/include",
+  ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -49,6 +52,11 @@ ohos_shared_library("uri_permission_mgr") {
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
   ]
+
+  if (ability_runtime_feature_sandboxmanager) {
+    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
+  }
 
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"

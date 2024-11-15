@@ -40,6 +40,7 @@ public:
         int uid;
         std::string bundleName;
         std::string processName;
+        bool isOccurException = false;
     };
 
     enum TypeAttribute {
@@ -58,6 +59,7 @@ public:
         int32_t pid = 0;
         int state = 0;
         int64_t occurTime = 0;
+        std::string errorName = "";
     };
 
     struct ParamInfo {
@@ -79,7 +81,7 @@ public:
     std::string WriteToFile(const std::string& fileName, std::string& content);
     bool IsHandleAppfreeze(const std::string& bundleName);
     bool IsProcessDebug(int32_t pid, std::string bundleName);
-    bool IsNeedIgnoreFreezeEvent(int32_t pid);
+    bool IsNeedIgnoreFreezeEvent(int32_t pid, const std::string& errorName);
     void DeleteStack(int pid);
     bool CancelAppFreezeDetect(int32_t pid, const std::string& bundleName);
     void RemoveDeathProcess(std::string bundleName);
@@ -100,11 +102,12 @@ private:
     int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
         const std::string& binderInfo, const std::string& memoryContent);
     int64_t GetFreezeCurrentTime();
-    void SetFreezeState(int32_t pid, int state);
+    void SetFreezeState(int32_t pid, int state, const std::string& errorName);
     int GetFreezeState(int32_t pid);
     int64_t GetFreezeTime(int32_t pid);
     void ClearOldInfo();
     void CollectFreezeSysMemory(std::string& memoryContent);
+    int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;

@@ -227,6 +227,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleGetAllRenderProcesses(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_PROCESS_MEMORY_BY_PID):
             return HandleGetProcessMemoryByPid(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::IS_TERMINATING_BY_PID):
+            return HandleIsTerminatingByPid(data, reply);
     }
     return INVALID_FD;
 }
@@ -337,16 +339,16 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
             return HandleKillProcessDependedOnWeb(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::RESTART_RESIDENT_PROCESS_DEPENDED_ON_WEB):
             return HandleRestartResidentProcessDependedOnWeb(data, reply);
-        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS):
-            return HandleGetSupportedProcessCachePids(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_CHILDREN_PROCESSES):
             return HandleGetAllChildrenProcesses(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_SUPPORTED_PROCESS_CACHE_PIDS):
+            return HandleGetSupportedProcessCachePids(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_KIA_INTERCEPTOR):
             return HandleRegisterKiaInterceptor(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::CHECK_IS_KIA_PROCESS):
             return HandleCheckIsKiaProcess(data, reply);
-        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_INDEX_BY_PID):
-            return HandleGetAppIndexByPid(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::KILL_APP_SELF_WITH_INSTANCE_KEY):
+            return HandleKillAppSelfWithInstanceKey(data, reply);
     }
     return INVALID_FD;
 }
@@ -589,6 +591,21 @@ int32_t AppMgrStub::HandleJudgeSandboxByPid(MessageParcel &data, MessageParcel &
     bool isSandbox = false;
     auto result = JudgeSandboxByPid(pid, isSandbox);
     if (!reply.WriteBool(isSandbox)) {
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleIsTerminatingByPid(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    int32_t pid = data.ReadInt32();
+    bool isTerminating = false;
+    auto result = IsTerminatingByPid(pid, isTerminating);
+    if (!reply.WriteBool(isTerminating)) {
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(result)) {
@@ -965,7 +982,8 @@ int32_t AppMgrStub::HandleUpdateConfigurationByBundleName(MessageParcel &data, M
         return ERR_INVALID_VALUE;
     }
     std::string name = data.ReadString();
-    int32_t ret = UpdateConfigurationByBundleName(*config, name);
+    auto appIndex = data.ReadInt32();
+    int32_t ret = UpdateConfigurationByBundleName(*config, name, appIndex);
     if (!reply.WriteInt32(ret)) {
         return ERR_INVALID_VALUE;
     }
@@ -1468,7 +1486,8 @@ int32_t AppMgrStub::HandleSignRestartAppFlag(MessageParcel &data, MessageParcel 
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto uid = data.ReadInt32();
-    auto ret = SignRestartAppFlag(uid);
+    auto instanceKey = data.ReadString();
+    auto ret = SignRestartAppFlag(uid, instanceKey);
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
@@ -1547,18 +1566,6 @@ int32_t AppMgrStub::HandleNotifyMemorySizeStateChanged(MessageParcel &data, Mess
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "called");
-    bool isSupport = data.ReadBool();
-    auto ret = SetSupportedProcessCacheSelf(isSupport);
-    if (!reply.WriteInt32(ret)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
-        return IPC_STUB_ERR;
-    }
-    return NO_ERROR;
-}
-
 int32_t AppMgrStub::HandleSetSupportedProcessCache(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -1580,18 +1587,15 @@ int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, Message
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    std::string libName = data.ReadString();
-    int32_t childCount = data.ReadInt32();
-    sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    int32_t result = StartNativeChildProcess(libName, childCount, callback);
-    if (!reply.WriteInt32(result)) {
+    bool isSupport = data.ReadBool();
+    auto ret = SetSupportedProcessCacheSelf(isSupport);
+    if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
     }
-
     return NO_ERROR;
 }
 
@@ -1609,6 +1613,21 @@ int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, Messag
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
     }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::string libName = data.ReadString();
+    int32_t childCount = data.ReadInt32();
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    int32_t result = StartNativeChildProcess(libName, childCount, callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+
     return NO_ERROR;
 }
 
@@ -1691,19 +1710,16 @@ int32_t AppMgrStub::HandleCheckIsKiaProcess(MessageParcel &data, MessageParcel &
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleGetAppIndexByPid(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleKillAppSelfWithInstanceKey(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
-    auto pid = data.ReadInt32();
-    int32_t appIndex = -1;
-    int32_t result = GetAppIndexByPid(pid, appIndex);
+    auto instanceKey = data.ReadString();
+    auto clearPageStack = data.ReadBool();
+    auto reason = data.ReadString();
+    auto result = KillAppSelfWithInstanceKey(instanceKey, clearPageStack, reason);
     if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "fail to write GetAppIndexByPid result.");
-        return IPC_STUB_ERR;
-    }
-    if (!reply.WriteInt32(appIndex)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "fail to write appIndex.");
-        return IPC_STUB_ERR;
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
+        return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
 }

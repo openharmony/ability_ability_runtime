@@ -27,6 +27,7 @@ ohos_unittest("cj_ability_stage_object_test") {
     "${ability_runtime_path}/interfaces/inner_api/runtime/include",
     "${ability_runtime_native_path}/runtime",
     "${ability_runtime_path}/cj_environment/interfaces/inner_api",
+    "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
   ]
 
   sources = [
@@ -34,6 +35,7 @@ ohos_unittest("cj_ability_stage_object_test") {
     "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
     "${ability_runtime_native_path}/appkit/app/application_cleaner.cpp",
     "${ability_runtime_native_path}/appkit/app/ohos_application.cpp",
+    "${ability_runtime_path}/frameworks/native/appkit/ability_runtime/app/cj_ability_stage_context.cpp",
     "${ability_runtime_path}/frameworks/native/appkit/ability_runtime/app/cj_ability_stage_object.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_bundle_manager.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_overlay_manager.cpp",
@@ -57,6 +59,7 @@ ohos_unittest("cj_ability_stage_object_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -71,6 +74,7 @@ ohos_unittest("cj_ability_stage_object_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:cj_bundle_manager_ffi",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -80,6 +84,8 @@ ohos_unittest("cj_ability_stage_object_test") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
     "resource_management:global_resmgr",
   ]
 

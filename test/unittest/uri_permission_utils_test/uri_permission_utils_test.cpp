@@ -174,7 +174,7 @@ HWTEST_F(UriPermissionUtilsTest, Upms_GetTokenIdByBundleName_001, TestSize.Level
     int32_t appIndex = 10;
     uint32_t tokenId;
     auto testTokenId = UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, tokenId);
-    EXPECT_EQ(testTokenId, 2097183);
+    EXPECT_EQ(testTokenId, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
 }
 
 }  // namespace AAFwk

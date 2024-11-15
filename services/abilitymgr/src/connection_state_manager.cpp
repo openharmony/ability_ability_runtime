@@ -461,7 +461,7 @@ void ConnectionStateManager::HandleDataAbilityDiedInner(const sptr<IRemoteObject
     for (auto it = connectionStates_.begin(); it != connectionStates_.end();) {
         auto item = it->second;
         if (!item) {
-            connectionStates_.erase(it++);
+            it = connectionStates_.erase(it);
             continue;
         }
 
@@ -471,7 +471,7 @@ void ConnectionStateManager::HandleDataAbilityDiedInner(const sptr<IRemoteObject
         }
 
         if (item->IsEmpty()) {
-            connectionStates_.erase(it++);
+            it = connectionStates_.erase(it);
         } else {
             it++;
         }

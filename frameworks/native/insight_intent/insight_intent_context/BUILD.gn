@@ -41,11 +41,11 @@ ohos_shared_library("insightintentcontext") {
   ]
 
   external_deps = [
-    "ability_base:session_info",
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "ipc:ipc_core",
     "ipc:ipc_single",
     "napi:ace_napi",
   ]
