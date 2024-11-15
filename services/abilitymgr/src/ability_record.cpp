@@ -3079,7 +3079,7 @@ bool AbilityRecord::IsCallerSetProcess() const
     return isCallerSetProcess_;
 }
 
-void AbilityRecord::SetStartToForeground(const bool flag)
+void AbilityRecord::SetCallerSetProcess(const bool flag)
 {
     isCallerSetProcess_ = flag;
 }
