@@ -537,6 +537,15 @@ public:
     void LaunchApplication(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     /**
+     * LaunchApplicationExt, to solve the nbnc of method over 50.
+     *
+     * @param appRecord, the application record.
+     *
+     * @return
+     */
+    void LaunchApplicationExt(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    /**
      * Notice of AddAbilityStageInfo()
      *
      * @param recordId, the application record.
@@ -1563,6 +1572,7 @@ private:
     void DealMultiUserConfig(const Configuration &config, const int32_t userId);
     int32_t KillProcessByPidInner(const pid_t pid, const std::string& reason,
         const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord);
+    bool IsAllowedNWebPreload(const std::string &processName);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
@@ -1609,6 +1619,7 @@ private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
 
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
+    std::unordered_set<std::string> nwebPreloadSet_ {};
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

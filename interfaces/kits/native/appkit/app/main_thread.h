@@ -43,6 +43,11 @@
 #include "app_jsheap_mem_info.h"
 #define ABILITY_LIBRARY_LOADER
 
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+#include "nweb_preload.h"
+#include "ui/rs_surface_node.h"
+#endif
+
 class Runtime;
 namespace OHOS {
 namespace AppExecFwk {
@@ -623,6 +628,10 @@ private:
      */
     void ParseAppConfigurationParams(const std::string configuration, Configuration &config);
 
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+    void HandleNWebPreload();
+#endif
+
     class MainHandler : public EventHandler {
     public:
         MainHandler(const std::shared_ptr<EventRunner> &runner, const sptr<MainThread> &thread);
@@ -659,6 +668,10 @@ private:
     std::string abilityLibraryType_ = ".so";
     static std::weak_ptr<OHOSApplication> applicationForDump_;
     bool isDeveloperMode_ = false;
+#if defined(NWEB) && defined(NWEB_GRAPHIC)
+    Rosen::RSSurfaceNode::SharedPtr preloadSurfaceNode_ = nullptr;
+    std::shared_ptr<NWeb::NWeb> preloadNWeb_ = nullptr;
+#endif
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**
