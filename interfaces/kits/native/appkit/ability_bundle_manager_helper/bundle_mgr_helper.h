@@ -31,6 +31,7 @@ public:
     DISALLOW_COPY_AND_MOVE(BundleMgrHelper);
     void PreConnect();
     void ConnectTillSuccess();
+    void SetBmsReady(bool bmsReady);
     ErrCode GetNameForUid(const int32_t uid, std::string &name);
     ErrCode GetNameAndIndexForUid(const int32_t uid, std::string &bundleName, int32_t &appIndex);
     bool GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId);
@@ -112,6 +113,7 @@ public:
 
 private:
     sptr<IBundleMgr> Connect();
+    sptr<IBundleMgr> Connect(bool checkBmsReady);
     sptr<IBundleInstaller> ConnectBundleInstaller();
     void OnDeath();
     std::string ParseBundleNameByAppId(const std::string &appId) const;
@@ -122,6 +124,7 @@ private:
     sptr<IBundleMgr> bundleMgr_;
     sptr<IBundleInstaller> bundleInstaller_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
+    bool bmsReady_ = true;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
