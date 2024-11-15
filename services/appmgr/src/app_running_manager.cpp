@@ -1836,5 +1836,17 @@ void AppRunningManager::UnSetPolicy(const std::shared_ptr<AppRunningRecord> &app
     appRecord->SetIsUnSetPermission(true);
     AAFwk::UriPermissionManagerClient::GetInstance().ClearPermissionTokenByMap(appInfo->accessTokenId);
 }
+
+void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
+{
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto& item : appRunningMap) {
+        const auto& appRecord = item.second;
+        if (appRecord && appRecord->GetSpecifiedRequestId() == specifiedId) {
+            TAG_LOGI(AAFwkTag::APPMGR, "set instanceKey:%{public}s", instanceKey.c_str());
+            appRecord->SetInstanceKey(instanceKey);
+        }
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

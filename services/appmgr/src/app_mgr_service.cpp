@@ -1713,5 +1713,18 @@ int32_t AppMgrService::KillAppSelfWithInstanceKey(const std::string &instanceKey
     }
     return appMgrServiceInner_->KillAppSelfWithInstanceKey(instanceKey, clearPageStack, reason);
 }
+
+void AppMgrService::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
+{
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not foundation");
+        return;
+    }
+    if (!appMgrServiceInner_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner_ is nullptr");
+        return;
+    }
+    appMgrServiceInner_->UpdateInstanceKeyBySpecifiedId(specifiedId, instanceKey);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
