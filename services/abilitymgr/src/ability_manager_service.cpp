@@ -193,6 +193,8 @@ constexpr char PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED[] = "const.product.ent
 constexpr int32_t RESOURCE_SCHEDULE_UID = 1096;
 constexpr int32_t UPDATE_CONFIG_FLAG_COVER = 1;
 constexpr int32_t UPDATE_CONFIG_FLAG_APPEND = 2;
+constexpr int32_t START_AUTO_START_APP_DELAY_TIME = 200;
+constexpr int32_t START_AUTO_START_APP_RETRY_MAX_TIMES = 5;
 
 const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
@@ -7108,46 +7110,52 @@ void AbilityManagerService::StartAutoStartupApps()
         return;
     }
 
-    constexpr int retryCount = 5;
-    RetryStartAutoStartupApps(infoList, retryCount);
+    if (taskHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskHandler null");
+        return;
+    }
+    std::queue<AutoStartupInfo> infoQueue;
+    for (auto &info : infoList) {
+        info.retryCount = START_AUTO_START_APP_RETRY_MAX_TIMES;
+        infoQueue.push(info);
+    }
+    StartAutoStartupApps(infoQueue);
 }
 
-void AbilityManagerService::RetryStartAutoStartupApps(
-    const std::vector<AutoStartupInfo> &infoList, int32_t retryCount)
+void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> infoQueue)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR,
-        "Called, retryCount: %{public}d, infoList.size:%{public}zu", retryCount, infoList.size());
-    std::vector<AutoStartupInfo> failedList;
-    for (auto info : infoList) {
-        AppExecFwk::ElementName element;
-        element.SetBundleName(info.bundleName);
-        element.SetAbilityName(info.abilityName);
-        element.SetModuleName(info.moduleName);
-        Want want;
-        want.SetElement(element);
-        want.SetParam(Want::PARAM_APP_AUTO_STARTUP_LAUNCH_REASON, true);
-        if (info.appCloneIndex > 0 && info.appCloneIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
-            want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, info.appCloneIndex);
-        }
-        if (StartAbility(want) != ERR_OK) {
-            failedList.push_back(info);
-        }
+    if (infoQueue.empty()) {
+        return;
     }
-
-    TAG_LOGD(AAFwkTag::ABILITYMGR,
-        "RetryCount: %{public}d, failedList.size:%{public}zu", retryCount, failedList.size());
-    if (!failedList.empty() && retryCount > 0) {
-        auto retryStartAutoStartupAppsTask = [aams = weak_from_this(), list = failedList, retryCount]() {
-            auto obj = aams.lock();
-            if (obj == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "retry start auto startup app error, obj null");
-                return;
-            }
-            obj->RetryStartAutoStartupApps(list, retryCount - 1);
-        };
-        constexpr int delaytime = 2000;
-        taskHandler_->SubmitTask(retryStartAutoStartupAppsTask, "RetryStartAutoStartupApps", delaytime);
+    if (taskHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "taskHandler null");
+        return;
     }
+    auto info = infoQueue.front();
+    infoQueue.pop();
+    AppExecFwk::ElementName element;
+    element.SetBundleName(info.bundleName);
+    element.SetAbilityName(info.abilityName);
+    element.SetModuleName(info.moduleName);
+    Want want;
+    want.SetElement(element);
+    want.SetParam(Want::PARAM_APP_AUTO_STARTUP_LAUNCH_REASON, true);
+    if (info.appCloneIndex > 0 && info.appCloneIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+        want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, info.appCloneIndex);
+    }
+    if (StartAbility(want) != ERR_OK && info.retryCount > 0) {
+        info.retryCount--;
+        infoQueue.push(info);
+    }
+    auto nextStartAutoStartupAppsTask = [aams = weak_from_this(), infoQueue]() {
+        auto obj = aams.lock();
+        if (obj == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "start auto startup app error, obj null");
+            return;
+        }
+        obj->StartAutoStartupApps(infoQueue);
+    };
+    taskHandler_->SubmitTask(nextStartAutoStartupAppsTask, "StartAutoStartupApps", START_AUTO_START_APP_DELAY_TIME);
 }
 
 void AbilityManagerService::SubscribeScreenUnlockedEvent()
@@ -7170,18 +7178,27 @@ void AbilityManagerService::SubscribeScreenUnlockedEvent()
             TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid taskHandler pointer");
             return;
         }
-        auto startAutoStartupAppsTask = [abilityManager]() {
+        auto screenUnlockTask = [abilityManager]() {
             auto abilityMgr = abilityManager.lock();
             if (abilityMgr == nullptr) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid abilityMgr pointer");
                 return;
             }
             abilityMgr->RemoveScreenUnlockInterceptor();
-            abilityMgr->StartAutoStartupApps();
             abilityMgr->UnSubscribeScreenUnlockedEvent();
             DelayedSingleton<ResidentProcessManager>::GetInstance()->StartFailedResidentAbilities();
         };
-        taskHandler->SubmitTask(startAutoStartupAppsTask, "StartAutoStartupApps");
+        taskHandler->SubmitTask(screenUnlockTask, "ScreenUnlockTask");
+        auto delayStartAutoStartupAppTask = [abilityManager]() {
+            auto abilityMgr = abilityManager.lock();
+            if (abilityMgr == nullptr) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid abilityMgr pointer");
+                return;
+            }
+            abilityMgr->StartAutoStartupApps();
+        };
+        taskHandler->SubmitTask(delayStartAutoStartupAppTask, "DelayStartAutoStartupApps",
+            START_AUTO_START_APP_DELAY_TIME);
     };
     screenSubscriber_ = std::make_shared<AbilityRuntime::AbilityManagerEventSubscriber>(subscribeInfo, nullptr,
         userScreenUnlockCallback);
