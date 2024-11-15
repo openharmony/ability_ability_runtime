@@ -2081,7 +2081,7 @@ private:
     void StartKeepAliveApps(int32_t userId);
 
     void StartAutoStartupApps();
-    void RetryStartAutoStartupApps(const std::vector<AutoStartupInfo> &infoList, int32_t retryCount);
+    void StartAutoStartupApps(std::queue<AutoStartupInfo> infoList);
     void SubscribeScreenUnlockedEvent();
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
