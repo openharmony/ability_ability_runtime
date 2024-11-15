@@ -856,6 +856,7 @@ public:
     bool HasUIAbilityLaunched();
 
     void AddAppLifecycleEvent(const std::string &msg);
+    void SetNWebPreload(const bool isAllowedNWebPreload);
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1013,6 +1014,7 @@ private:
     bool isDependedOnArkWeb_ = false;
     bool isUserRequestCleaning_ = false;
     bool hasUIAbilityLaunched_ = false;
+    bool isAllowedNWebPreload_ = false;
 };
 
 }  // namespace AppExecFwk
