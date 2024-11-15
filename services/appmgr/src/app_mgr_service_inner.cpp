@@ -5999,7 +5999,7 @@ int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const st
         innerService = shared_from_this()](void *) {
         auto threadTask = [faultData, bundleName, appRecord, pid, callerUid, innerService]() {
             if (innerService->CheckAppFault(appRecord, faultData)) {
-                TAG_LOGI(AAFwkTag::APPMGR, "current dfx task is working.");
+                TAG_LOGI(AAFwkTag::APPMGR, "Ffrt Exception current dfx task is working.");
                 return;
             }
             bool isOccurException = true;
@@ -6007,8 +6007,9 @@ int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const st
                 isOccurException);
             if (faultData.errorObject.name != AppFreezeType::THREAD_BLOCK_3S ||
                 faultData.errorObject.name != AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
-                TAG_LOGI(AAFwkTag::APPMGR, "faultData: %{public}s,pid: %{public}d will exit because %{public}s",
-                    bundleName.c_str(), pid, innerService->FaultTypeToString(faultData.faultType).c_str());
+                TAG_LOGI(AAFwkTag::APPMGR, "Ffrt Exception faultData: %{public}s,pid: %{public}d "
+                    "will exit because"" %{public}s", bundleName.c_str(), pid,
+                    innerService->FaultTypeToString(faultData.faultType).c_str());
                 innerService->KillProcessByPid(pid, faultData.errorObject.name);
                 return;
             }
@@ -6018,11 +6019,11 @@ int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const st
             dfxThread.join();
         }
     };
-    constexpr uint32_t timeout = 15; // 15s
+    constexpr uint32_t timeout = 30; // 30s
     int exceptionId = -1;
 #ifdef APP_MGR_SERVICE_HICOLLIE_ENABLE
     exceptionId = HiviewDFX::XCollie::GetInstance().SetTimer("DfxFault::Exception", timeout,
-        exceptionCallback, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG | HiviewDFX::XCOLLIE_FLAG_RECOVERY);
+        exceptionCallback, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
 #endif
     return exceptionId;
 }
@@ -6045,8 +6046,9 @@ int32_t AppMgrServiceInner::SubmitDfxFaultTask(const FaultData &faultData, const
         TAG_LOGW(AAFwkTag::APPMGR, "get dfx handler fail");
         return ERR_INVALID_VALUE;
     }
-
+    TAG_LOGI(AAFwkTag::APPMGR, "dfx submit freeze task start.");
     dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
+    TAG_LOGI(AAFwkTag::APPMGR, "dfx submit freeze task end.");
     constexpr int delayTime = 15 * 1000; // 15s
     auto task = [pid, innerService = shared_from_this()]() {
         AppExecFwk::AppfreezeManager::GetInstance()->DeleteStack(pid);
