@@ -416,6 +416,19 @@ ErrCode AbilityManagerClient::TerminateUIExtensionAbility(sptr<SessionInfo> exte
     return abms->TerminateUIExtensionAbility(extensionSessionInfo, resultCode, resultWant);
 }
 
+ErrCode AbilityManagerClient::CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject> token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
+        return ERR_INVALID_VALUE;
+    }
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CloseUIExtensionAbilityBySCB");
+    return abms->CloseUIExtensionAbilityBySCB(token);
+}
+
 ErrCode AbilityManagerClient::MoveAbilityToBackground(sptr<IRemoteObject> token)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
