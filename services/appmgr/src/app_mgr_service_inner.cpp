@@ -6143,8 +6143,8 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
             return;
         }
     };
-    constexpr int32_t waitTime = 2000;
-    // wait 2s before kill application
+    constexpr int32_t waitTime = 3500;
+    // wait 3.5s before kill application
     taskHandler_->SubmitTask(killAppTask, "killAppTask", waitTime);
     return ERR_OK;
 }
@@ -6258,7 +6258,7 @@ bool AppMgrServiceInner::SetAppFreezeFilter(int32_t pid)
             AppExecFwk::AppfreezeManager::GetInstance()->ResetAppfreezeState(pid, bundleName);
         };
         constexpr int32_t waitTime = 120000; // wait 2min
-        taskHandler_->SubmitTask(resetAppfreezeTask, "resetAppfreezeTask", waitTime);
+        dfxTaskHandler_->SubmitTask(resetAppfreezeTask, "resetAppfreezeTask", waitTime);
         return cancelResult;
     }
     TAG_LOGE(AAFwkTag::APPDFR, "SetAppFreezeFilter failed, pid %{public}d calling pid %{public}d",
