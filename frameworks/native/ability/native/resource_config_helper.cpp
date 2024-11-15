@@ -151,7 +151,13 @@ void ResourceConfigHelper::UpdateResConfig(std::unique_ptr<Global::Resource::Res
             TAG_LOGD(AAFwkTag::ABILITY, "set themeId: %{public}u", resConfig->GetThemeId());
         }
     }
-    resConfig->SetThemeIcon(!themeIcon_.empty());
+    if (!themeIcon_.empty()) {
+        uint32_t themeIcon = 0;
+        if (ConvertStringToUint32(themeIcon_, themeIcon)) {
+            resConfig->SetThemeIcon(themeIcon);
+            TAG_LOGD(AAFwkTag::ABILITY, "set themeIcon: %{public}u", themeIcon);
+        }
+    }
 }
 
 bool ResourceConfigHelper::ConvertStringToUint32(std::string source, uint32_t &result)

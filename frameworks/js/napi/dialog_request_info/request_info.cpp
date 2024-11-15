@@ -76,7 +76,13 @@ napi_value RequestInfo::WrapRequestInfo(napi_env env, RequestInfo *request)
             requestInfo = nullptr;
         }
     };
-    napi_wrap(env, result, request, nativeFinalize, nullptr, nullptr);
+    napi_status status = napi_wrap(env, result, request, nativeFinalize, nullptr, nullptr);
+    if (status != napi_ok && request != nullptr) {
+        TAG_LOGE(AAFwkTag::DIALOG, "napi_wrap Failed: %{public}d", status);
+        delete request;
+        request = nullptr;
+        return nullptr;
+    }
     napi_set_named_property(env, result, "windowRect",
         CreateJsWindowRect(env, request->left_, request->top_, request->width_, request->height_));
     return result;

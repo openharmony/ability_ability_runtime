@@ -50,9 +50,10 @@ void RestartAppManagerTest::SetUp()
 HWTEST_F(RestartAppManagerTest, IsRestartAppFrequent_001, TestSize.Level1)
 {
     RestartAppManager &instance = RestartAppManager::GetInstance();
+    RestartAppKeyType key("", 123);
     time_t time = 0;
-    instance.restartAppHistory_[1] = time;
-    auto res = instance.IsRestartAppFrequent(1, time);
+    instance.restartAppHistory_[key] = time;
+    auto res = instance.IsRestartAppFrequent(key, time);
     EXPECT_EQ(res, true);
 }
 
@@ -65,21 +66,9 @@ HWTEST_F(RestartAppManagerTest, IsRestartAppFrequent_001, TestSize.Level1)
 HWTEST_F(RestartAppManagerTest, IsRestartAppFrequent_002, TestSize.Level1)
 {
     RestartAppManager &instance = RestartAppManager::GetInstance();
+    RestartAppKeyType key("", 123);
     time_t time = 20;
-    auto res = instance.IsRestartAppFrequent(1, time);
-    EXPECT_EQ(res, false);
-}
-
-/**
- * @tc.number: IsForegroundToRestartApp_001
- * @tc.name: IsForegroundToRestartApp
- * @tc.desc: Test whether IsForegroundToRestartApp is called normally.
- * @tc.type: FUNC
- */
-HWTEST_F(RestartAppManagerTest, IsForegroundToRestartApp_001, TestSize.Level1)
-{
-    RestartAppManager &instance = RestartAppManager::GetInstance();
-    auto res = instance.IsForegroundToRestartApp();
+    auto res = instance.IsRestartAppFrequent(key, time);
     EXPECT_EQ(res, false);
 }
 } // namespace AAFwk

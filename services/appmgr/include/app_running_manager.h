@@ -32,6 +32,7 @@
 #include "bundle_info.h"
 #include "configuration.h"
 #include "iremote_object.h"
+#include "kill_process_config.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "running_process_info.h"
@@ -193,7 +194,7 @@ public:
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
+    int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
 
     /*
     *  Notify application background of current memory level.
@@ -253,7 +254,11 @@ public:
     int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
 
     bool ProcessExitByBundleNameAndUid(
-        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack = false);
+        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const KillProcessConfig &config = {});
+    bool ProcessExitByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::list<pid_t> &pids,
+        bool clearPageStack);
+    bool ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey, std::list<pid_t> &pids,
+        bool clearPageStack);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
 
     void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
@@ -310,7 +315,7 @@ public:
      */
     int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
 
-    int32_t SignRestartAppFlag(int32_t uid);
+    int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -349,6 +354,10 @@ public:
     void SetMultiUserConfigurationMgr(const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr);
 
     int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
+
+    bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void UnSetPolicy(const std::shared_ptr<AppRunningRecord> &appRecord);
 
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);

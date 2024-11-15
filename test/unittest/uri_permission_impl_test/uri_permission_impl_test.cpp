@@ -754,7 +754,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_003, TestSize.Level
     const std::vector<Uri> uris = { uri1 };
     auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
     MyFlag::permissionPrivileged_ = false;
-    EXPECT_EQ(ret, GET_BUNDLE_INFO_FAILED);
+    EXPECT_EQ(ret, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
 }
 
 /*

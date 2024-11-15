@@ -30,9 +30,9 @@
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "js_ui_service_extension_context.h"
+#include "js_ui_service_host_proxy.h"
 #include "js_window_stage.h"
 #include "js_window.h"
-#include "js_ui_service_host_proxy.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "napi_common_configuration.h"
@@ -222,11 +222,16 @@ void JsUIServiceExtension::BindContext(napi_env env, napi_value obj)
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
 
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             delete static_cast<std::weak_ptr<UIServiceExtensionContext>*>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UISERVC_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
 
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "end.");
 }

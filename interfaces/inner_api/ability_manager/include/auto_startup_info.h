@@ -35,6 +35,8 @@ public:
     std::string accessTokenId;
     int32_t appCloneIndex = 0;
     int32_t userId = -1;
+    // Only use in count, don't mashall and unmashall
+    int32_t retryCount = 0;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

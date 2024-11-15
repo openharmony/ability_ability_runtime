@@ -32,13 +32,14 @@ public:
      * @param hapModuleInfo The hap module info.
      * @param processName The process name.
      * @param mainElement The returned main element.
-     * @param needEraseIndexSet The returned set of indices that need to be erased.
-     * @param bundleInfoIndex The index of the bundle info.
+     * @param isDataAbility The returned flag indicates whether the module contains data ability.
+     * @param uri Returned URI of the data ability.
      * @param userId User id.
      * @return Whether or not the hap module has the main element.
      */
-    static bool CheckMainElement(const AppExecFwk::HapModuleInfo &hapModuleInfo, const std::string &processName,
-        std::string &mainElement, std::set<uint32_t> &needEraseIndexSet, size_t bundleInfoIndex, int32_t userId = 0);
+    static bool CheckMainElement(const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::string &processName, std::string &mainElement, bool &isDataAbility,
+        std::string &uriStr, int32_t userId = 0);
     
     /**
      * UpdateMainElement, update main element.
@@ -51,6 +52,33 @@ public:
      */
     static void UpdateMainElement(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable, int32_t userId);
+
+    /**
+     * CheckMainUIAbility, check if bundle has main UIAbility.
+     *
+     * @param bundleInfo The bundle info.
+     * @param mainElementName The returned main element name.
+     * @return Whether or not the bundle has the main element.
+     */
+    static bool CheckMainUIAbility(const AppExecFwk::BundleInfo &bundleInfo, std::string& mainElementName);
+
+    /**
+     * CheckStatusBarAbility, check if bundle has status bar ability.
+     *
+     * @param bundleInfo The bundle info.
+     * @return Whether or not the bundle has a status bar ability.
+     */
+    static bool CheckStatusBarAbility(const AppExecFwk::BundleInfo &bundleInfo);
+
+    /**
+     * GetMainUIAbilityAccessTokenId, get the access token id of the main uiability.
+     *
+     * @param bundleInfo The bundle info.
+     * @param mainElementName The main element name.
+     * @param accessTokenId The returned access token id.
+     */
+    static void GetMainUIAbilityAccessTokenId(const AppExecFwk::BundleInfo &bundleInfo,
+        const std::string &mainElementName, uint32_t &accessTokenId);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -20,6 +20,7 @@
 
 #include "ability_stage.h"
 #include "cj_ability_stage_object.h"
+#include "cj_ability_stage_context.h"
 #include "ffi_remote_data.h"
 
 #ifdef WINDOWS_PLATFORM
@@ -43,9 +44,10 @@ struct CurrentHapModuleInfo {
 };
 
 CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id);
+CJ_EXPORT OHOS::CJSystemapi::BundleManager::RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id);
+CJ_EXPORT OHOS::AbilityRuntime::CConfiguration FFICJGetConfiguration(int64_t id);
 CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilityStageHandle);
 }
-
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -54,15 +56,17 @@ public:
     static std::shared_ptr<CJAbilityStage> Create(
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
     explicit CJAbilityStage(
-        std::shared_ptr<CJAbilityStageObject> cjStage) : cjAbilityStageObject_(std::move(cjStage)) {}
+        std::shared_ptr<CJAbilityStageObject> cjStage) : cjAbilityStageObject_(cjStage) {}
     ~CJAbilityStage() override = default;
 
     void Init(const std::shared_ptr<Context> &context,
         const std::weak_ptr<AppExecFwk::OHOSApplication> application) override;
     void OnCreate(const AAFwk::Want& want) const override;
     std::string OnAcceptWant(const AAFwk::Want& want) override;
+    std::string OnNewProcessRequest(const AAFwk::Want& want) override;
     void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
     void OnMemoryLevel(int level) override;
+    void OnDestroy() const override;
 
 private:
     std::shared_ptr<CJAbilityStageObject> cjAbilityStageObject_;

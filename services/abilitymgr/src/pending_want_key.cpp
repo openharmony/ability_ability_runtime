@@ -142,5 +142,13 @@ bool PendingWantKey::IsEqualsRequestWant(const Want &otherWant)
     std::lock_guard<std::mutex> lock(requestWantMutex_);
     return requestWant_.IsEquals(otherWant);
 }
+
+void PendingWantKey::GetAllBundleNames(std::vector<std::string> &bundleNames)
+{
+    std::lock_guard<std::mutex> lock(wantsInfosMutex_);
+    for (const auto &wantInfo : allWantsInfos_) {
+        bundleNames.emplace_back(wantInfo.want.GetBundle());
+    }
+}
 }  // namespace AAFwk
 }  // namespace OHOS

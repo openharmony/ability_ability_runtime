@@ -166,11 +166,12 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
         static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
     AddIdentity(tokenId, identity);
-    if (dialogAppInfos.size() == 0 && AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
-        if ((request.want.GetFlags() & Want::FLAG_START_WITHOUT_TIPS) == Want::FLAG_START_WITHOUT_TIPS) {
+    if (dialogAppInfos.size() == 0 &&
+        (request.want.GetFlags() & Want::FLAG_START_WITHOUT_TIPS) == Want::FLAG_START_WITHOUT_TIPS) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "hint dialog generate fail");
             return ERR_IMPLICIT_START_ABILITY_FAIL;
         }
+    if (dialogAppInfos.size() == 0 && AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
         ret = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, want, request.callerToken);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "GetSelectorDialogWant failed");
@@ -209,10 +210,6 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
             return ret;
         }
         if (dialogAllAppInfos.size() == 0) {
-            if ((request.want.GetFlags() & Want::FLAG_START_WITHOUT_TIPS) == Want::FLAG_START_WITHOUT_TIPS) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "null hint dialog");
-                return ERR_IMPLICIT_START_ABILITY_FAIL;
-            }
             Want dialogWant = sysDialogScheduler->GetTipsDialogWant(request.callerToken);
             abilityMgr->StartAbility(dialogWant);
             return ERR_IMPLICIT_START_ABILITY_FAIL;

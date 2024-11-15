@@ -191,15 +191,13 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
-            if (isDebugApp) {
-                ConnectServerManager::Get().StopConnectServer(false);
-            }
+            // if has old connect server, stop it
+            ConnectServerManager::Get().StopConnectServer(false);
             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
-            if (isDebugApp) {
-                weak->StopDebugger(option);
-            }
+            // if has old debugger server, stop it
+            weak->StopDebugger(option);
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
@@ -328,15 +326,13 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
-            if (isDebugApp) {
-                ConnectServerManager::Get().StopConnectServer(false);
-            }
+            // if has old connect server, stop it
+            ConnectServerManager::Get().StopConnectServer(false);
             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
-            if (isDebugApp) {
-                weak->StopDebugger(option);
-            }
+            // if has old debugger server, stop it
+            weak->StopDebugger(option);
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
@@ -735,7 +731,12 @@ bool JsRuntime::Initialize(const Options& options)
         std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
         bool newCreate = false;
         std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
-        bool hasFile = extractor->HasEntry(MERGE_SOURCE_MAP_PATH);
+        bool hasFile = false;
+        if (!extractor) {
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "Get extractor failed. hapPath[%{private}s]", loadPath.c_str());
+        } else {
+            hasFile = extractor->HasEntry(MERGE_SOURCE_MAP_PATH);
+        }
         auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.bundleName, isModular,
                                                                       hasFile);
         InitSourceMap(operatorObj);
@@ -1298,9 +1299,14 @@ bool JsRuntime::PopPreloadObj(const std::string& key, std::unique_ptr<NativeRefe
     if (preloadList_.find(key) == preloadList_.end()) {
         return false;
     }
-    obj = std::move(preloadList_[key]);
+    if (preloadList_[key] != nullptr) {
+        obj = std::move(preloadList_[key]);
+        preloadList_.erase(key);
+        return true;
+    }
+
     preloadList_.erase(key);
-    return true;
+    return false;
 }
 
 NativeEngine& JsRuntime::GetNativeEngine() const

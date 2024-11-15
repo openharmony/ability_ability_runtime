@@ -112,7 +112,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level1)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     appMgrServiceInner->Init();
     EXPECT_NE(appMgrServiceInner, nullptr);
-    EXPECT_FALSE(appMgrServiceInner->SendProcessStartEvent(nullptr));
+    EXPECT_FALSE(appMgrServiceInner->SendProcessStartEvent(nullptr, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_001 end");
 }
 
@@ -137,7 +137,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
     EXPECT_NE(appRecord, nullptr);
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_002 end");
 }
 
@@ -168,7 +168,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level1)
     moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
     std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
     appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_003 end");
 }
 
@@ -202,7 +202,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
     moduleRunningRecord->abilities_[token] = abilityRecord;
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_004 end");
 }
 
@@ -237,7 +237,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level1)
     auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
     moduleRunningRecord->abilities_[token] = abilityRecord;
     appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_005 end");
 }
 
@@ -273,7 +273,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level1)
     moduleRunningRecord->abilities_[token] = abilityRecord;
     appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
     appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_006 end");
 }
 
@@ -319,7 +319,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level1)
     }
     appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
     appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_007 end");
 }
 
@@ -366,7 +366,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_008, TestSize.Level1)
     }
     appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
     appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
-    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord, false, AppExecFwk::PreloadMode::PRESS_DOWN));
     TAG_LOGI(AAFwkTag::TEST, "SendProcessStartEvent_008 end");
 }
 
@@ -910,8 +910,8 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level0)
     int32_t ipcFd = 1;
     int32_t sharedFd = 1;
     int32_t crashFd = 1;
-    std::shared_ptr<RenderRecord> renderRecord =
-        RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, appRecord);
+    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+        FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), appRecord);
     EXPECT_NE(renderRecord, nullptr);
     pid_t renderPid = 1;
     appMgrServiceInner->StartRenderProcessImpl(nullptr, nullptr, renderPid);

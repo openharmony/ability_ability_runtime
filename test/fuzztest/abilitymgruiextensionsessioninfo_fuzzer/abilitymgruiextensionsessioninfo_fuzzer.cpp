@@ -20,7 +20,7 @@
 #include "securec.h"
 #include <iostream>
 #define private public
-#include "ui_extension_session_info.h"
+#include "ui_extension/ui_extension_session_info.h"
 #undef private
 
 using namespace OHOS::AAFwk;
