@@ -4400,7 +4400,7 @@ int AppMgrServiceInner::StartUserTestProcess(
     }
 
     std::string processName;
-    MakeProcessName(std::make_shared<ApplicationInfo>(bundleInfo.applicationInfo), hapModuleInfo, processName, false);
+    MakeProcessName(std::make_shared<ApplicationInfo>(bundleInfo.applicationInfo), hapModuleInfo, processName);
     TAG_LOGI(AAFwkTag::APPMGR, "processName: [%{public}s]", processName.c_str());
 
     // Inspection records
