@@ -347,6 +347,8 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.token = token_;
     loadParam.preToken = callerToken;
     loadParam.instanceKey = instanceKey_;
+    auto abilityRecord(shared_from_this());
+    loadParam.isCallerSetProcess = abilityRecord->IsCallerSetProcess();
     want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
     if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
         want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
@@ -3070,6 +3072,16 @@ bool AbilityRecord::IsStartToForeground() const
 void AbilityRecord::SetStartToForeground(const bool flag)
 {
     isStartToForeground_ = flag;
+}
+
+bool AbilityRecord::IsCallerSetProcess() const
+{
+    return isCallerSetProcess_;
+}
+
+void AbilityRecord::SetStartToForeground(const bool flag)
+{
+    isCallerSetProcess_ = flag;
 }
 
 void AbilityRecord::CallRequest()

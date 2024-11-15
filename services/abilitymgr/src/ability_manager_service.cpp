@@ -6394,6 +6394,7 @@ int32_t AbilityManagerService::InitialAbilityRequest(AbilityRequest &request,
 {
     request.abilityInfo = abilityInfo.abilityInfo;
     request.extensionProcessMode = abilityInfo.extensionProcessMode;
+    request.customProcess = abilityInfo.customProcess;
     if (request.abilityInfo.applicationInfo.name.empty() || request.abilityInfo.applicationInfo.bundleName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get app info failed");
         return RESOLVE_APP_ERR;
