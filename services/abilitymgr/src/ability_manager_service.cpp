@@ -299,6 +299,10 @@ void AbilityManagerService::OnStart()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "instance_ null");
         return;
     }
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    if (bundleMgrHelper) {
+        bundleMgrHelper->SetBmsReady(false);
+    }
     bool ret = Publish(instance_);
     if (!ret) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "publish failed");
@@ -2518,6 +2522,10 @@ void AbilityManagerService::OnAddSystemAbility(int32_t systemAbilityId, const st
             break;
         }
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID: {
+            auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+            if (bundleMgrHelper) {
+                bundleMgrHelper->SetBmsReady(true);
+            }
             SubscribeBundleEventCallback();
             break;
         }
@@ -6268,9 +6276,13 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ExtensionAbilityInfo extensionAbilityInfo;
     int attemptNums = 0;
-    while (!IN_PROCESS_CALL(bms->ImplicitQueryInfoByPriority(want,
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT, userId,
-        abilityInfo, extensionAbilityInfo))) {
+    while (true) {
+        bms->PreConnect();
+        if (IN_PROCESS_CALL(bms->ImplicitQueryInfoByPriority(want,
+            AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT, userId,
+            abilityInfo, extensionAbilityInfo))) {
+            break;
+        }
         TAG_LOGI(AAFwkTag::ABILITYMGR, "waiting query highest priority ability info completed");
         ++attemptNums;
         if (!isBoot && attemptNums > SWITCH_ACCOUNT_TRY) {
