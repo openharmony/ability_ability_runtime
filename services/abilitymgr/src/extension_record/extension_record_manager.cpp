@@ -257,7 +257,7 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
             break;
         }
         case PROCESS_MODE_CUSTOM: {
-            std::string process = abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.customProcess;
+            std::string process = abilityRequest.abilityInfo.bundleName + abilityRequest.customProcess;
             abilityRecord->SetProcessName(process);
             break;
         }
