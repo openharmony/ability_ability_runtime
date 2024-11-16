@@ -1212,8 +1212,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return result;
     }
 #ifdef SUPPORT_SCREEN
-    if (result != ERR_OK && isReplaceWantExist && !isSendDialogResult &&
-        callerBundleName != BUNDLE_NAME_DIALOG) {
+    if (result != ERR_OK && isReplaceWantExist && callerBundleName != BUNDLE_NAME_DIALOG) {
         return DialogSessionManager::GetInstance().HandleErmsResult(abilityRequest, GetUserId(), newWant);
     }
     if (result == ERR_OK &&
