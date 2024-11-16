@@ -50,7 +50,6 @@ sptr<Token> GetFuzzAbilityToken()
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    FreezeUtil::LifecycleFlow flow;
     std::string JsonStr(data, size);
     FreezeUtil::GetInstance();
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
@@ -58,11 +57,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
         std::cout << "Get ability token failed." << std::endl;
         return false;
     };
-    FreezeUtil::GetInstance().AddLifecycleEvent(flow, JsonStr);
-    FreezeUtil::GetInstance().GetLifecycleEvent(flow);
-    FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    FreezeUtil::GetInstance().AddLifecycleEvent(token, JsonStr);
+    FreezeUtil::GetInstance().GetLifecycleEvent(token);
     FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
-    FreezeUtil::GetInstance().DeleteLifecycleEventInner(flow);
     return true;
 }
 }

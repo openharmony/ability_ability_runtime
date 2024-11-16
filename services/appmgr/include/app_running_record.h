@@ -938,6 +938,7 @@ public:
     bool GetIsGPU();
     void SetGPUPid(pid_t gpuPid);
     pid_t GetGPUPid();
+    pid_t GetPid();
 
     inline void SetStrictMode(bool strictMode)
     {
@@ -1021,9 +1022,9 @@ public:
     void AddAppLifecycleEvent(const std::string &msg);
 
     void SetNWebPreload(const bool isAllowedNWebPreload);
-    
+
     void SetIsUnSetPermission(bool isUnSetPermission);
-    
+
     bool IsUnSetPermission();
 private:
     /**

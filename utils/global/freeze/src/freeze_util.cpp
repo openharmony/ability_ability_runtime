@@ -19,82 +19,90 @@
 #include "time_util.h"
 
 namespace OHOS::AbilityRuntime {
+namespace {
+constexpr int32_t MAX_ENTRY_COUNT = 10;
+std::string ConcatStr(const std::list<std::string> &strList, const std::string &split)
+{
+    if (strList.empty()) {
+        return "";
+    }
+    if (strList.size() == 1) {
+        return strList.front();
+    }
+
+    int32_t reserveSize = 0;
+    for (const auto &item : strList) {
+        reserveSize += split.size() + item.size();
+    }
+    reserveSize -= split.size();
+    std::string result;
+    if (reserveSize > 0) {
+        result.reserve(reserveSize);
+    }
+    result.append(strList.front());
+    auto iter = strList.begin();
+    for (++iter; iter != strList.end(); ++iter) {
+        result.append(split).append(*iter);
+    }
+    return result;
+}
+}
+
 FreezeUtil& FreezeUtil::GetInstance()
 {
     static FreezeUtil instance;
     return instance;
 }
 
-void FreezeUtil::AddLifecycleEvent(const LifecycleFlow &flow, const std::string &entry)
+void FreezeUtil::AddLifecycleEvent(sptr<IRemoteObject> token, const std::string &entry)
 {
     auto newEntry = TimeUtil::DefaultCurrentTimeStr() + "; " + entry;
     std::lock_guard lock(mutex_);
-    auto iter = lifecycleFlow_.find(flow);
-    if (iter != lifecycleFlow_.end()) {
-        iter->second += "\n" + newEntry;
-    } else {
-        lifecycleFlow_.emplace(flow, newEntry);
+    auto &entryList = lifecycleFlow_[token];
+    entryList.emplace_back(TimeUtil::DefaultCurrentTimeStr() + "; " + entry);
+    if (entryList.size() > MAX_ENTRY_COUNT) {
+        entryList.pop_front();
     }
 }
 
-bool FreezeUtil::AppendLifecycleEvent(const LifecycleFlow &flow, const std::string &entry)
+bool FreezeUtil::AppendLifecycleEvent(sptr<IRemoteObject> token, const std::string &entry)
 {
     std::lock_guard lock(mutex_);
-    auto iter = lifecycleFlow_.find(flow);
+    auto iter = lifecycleFlow_.find(token);
     if (iter == lifecycleFlow_.end()) {
         return false;
     }
-    auto newEntry = TimeUtil::DefaultCurrentTimeStr() + "; " + entry;
-    iter->second += "\n" + newEntry;
+    auto &entryList = iter->second;
+    entryList.emplace_back(TimeUtil::DefaultCurrentTimeStr() + "; " + entry);
+    if (entryList.size() > MAX_ENTRY_COUNT) {
+        entryList.pop_front();
+    }
     return true;
 }
 
-std::string FreezeUtil::GetLifecycleEvent(const LifecycleFlow &flow)
+std::string FreezeUtil::GetLifecycleEvent(sptr<IRemoteObject> token)
 {
     std::lock_guard lock(mutex_);
-    auto search = lifecycleFlow_.find(flow);
+    auto search = lifecycleFlow_.find(token);
     if (search != lifecycleFlow_.end()) {
-        return search->second;
+        return ConcatStr(search->second, "\n");
     }
     return "";
-}
-
-void FreezeUtil::DeleteLifecycleEvent(const LifecycleFlow &flow)
-{
-    std::lock_guard lock(mutex_);
-    DeleteLifecycleEventInner(flow);
 }
 
 void FreezeUtil::DeleteLifecycleEvent(sptr<IRemoteObject> token)
 {
     std::lock_guard lock(mutex_);
-    if (lifecycleFlow_.empty()) {
-        return;
-    }
-    LifecycleFlow foregroundFlow = { token, TimeoutState::FOREGROUND };
-    DeleteLifecycleEventInner(foregroundFlow);
-
-    LifecycleFlow backgroundFlow = { token, TimeoutState::BACKGROUND };
-    DeleteLifecycleEventInner(backgroundFlow);
-}
-
-void FreezeUtil::DeleteLifecycleEventInner(const LifecycleFlow &flow)
-{
-    if (lifecycleFlow_.count(flow)) {
-        lifecycleFlow_.erase(flow);
-    }
-    TAG_LOGD(AAFwkTag::DEFAULT, "lifecycleFlow size: %{public}zu", lifecycleFlow_.size());
+    lifecycleFlow_.erase(token);
 }
 
 void FreezeUtil::AddAppLifecycleEvent(pid_t pid, const std::string &entry)
 {
     std::lock_guard lock(mutex_);
-    auto newEntry = TimeUtil::DefaultCurrentTimeStr() + "; " + entry;
-    auto iter = appLifeCycleFlow_.find(pid);
-    if (iter != appLifeCycleFlow_.end()) {
-        iter->second += "\n" + newEntry;
-    } else {
-        appLifeCycleFlow_.emplace(pid, newEntry);
+    auto &entryList = appLifeCycleFlow_[pid];
+    entryList.emplace_back(TimeUtil::DefaultCurrentTimeStr() + "; " + entry);
+    if (entryList.size() > MAX_ENTRY_COUNT) {
+        entryList.pop_front();
     }
 }
 
@@ -109,7 +117,7 @@ std::string FreezeUtil::GetAppLifecycleEvent(pid_t pid)
     std::lock_guard lock(mutex_);
     auto search = appLifeCycleFlow_.find(pid);
     if (search != appLifeCycleFlow_.end()) {
-        return search->second;
+        return ConcatStr(search->second, "\n");
     }
     return "";
 }

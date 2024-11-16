@@ -15,7 +15,7 @@
 
 #include "app_scheduler_proxy.h"
 
-#include "app_exception_manager.h"
+#include "error_msg_util.h"
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -46,6 +46,9 @@ bool AppSchedulerProxy::ScheduleForegroundApplication()
     if (!WriteInterfaceToken(data)) {
         return false;
     }
+    auto msgKey = AbilityRuntime::ErrorMgsUtil::BuildErrorKey(reinterpret_cast<uintptr_t>(this),
+        "ScheduleForegroundRunning");
+    AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "AppScheduler::ScheduleForegroundApplication");
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_FOREGROUND_APPLICATION_TRANSACTION),
             data,
@@ -53,6 +56,8 @@ bool AppSchedulerProxy::ScheduleForegroundApplication()
             option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey,
+            std::string("ScheduleForegroundApplication ipc error ") + std::to_string(ret));
         return false;
     }
     return true;
@@ -193,7 +198,6 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
         return;
     }
     data.WriteParcelable(&info);
-    AbilityRuntime::FreezeUtil::LifecycleFlow flow = {token, AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
     if (token) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(token.GetRefPtr())) {
             TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag and token");
@@ -208,7 +212,7 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
 
     if (!data.WriteParcelable(want.get())) {
         TAG_LOGE(AAFwkTag::APPMGR, "write want fail.");
-        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(flow,
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
             "ERROR AppLifeCycleDeal::LaunchAbility; write want fail");
         return;
     }
@@ -220,8 +224,8 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
         static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_LAUNCH_ABILITY_TRANSACTION), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
-        AppExceptionManager::GetInstance().LaunchAbilityFailed(token, std::string("SendRequest failed") +
-            std::to_string(ret));
+        AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
+            "ERROR AppLifeCycleDeal::LaunchAbility; ipc fail " + std::to_string(ret));
     }
 }
 
@@ -258,13 +262,18 @@ void AppSchedulerProxy::ScheduleLaunchApplication(const AppLaunchData &launchDat
         return;
     }
 
+    auto msgKey = AbilityRuntime::ErrorMgsUtil::BuildErrorKey(reinterpret_cast<uintptr_t>(this),
+        "LaunchApplication");
+    AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "AppScheduler::ScheduleLaunchApplication");
     if (!data.WriteParcelable(&launchData)) {
         TAG_LOGE(AAFwkTag::APPMGR, "WriteParcelable launchData failed");
+        AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write launchData fail");
         return;
     }
 
     if (!data.WriteParcelable(&config)) {
         TAG_LOGE(AAFwkTag::APPMGR, "WriteParcelable config failed");
+        AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write config fail");
         return ;
     }
 
@@ -272,6 +281,8 @@ void AppSchedulerProxy::ScheduleLaunchApplication(const AppLaunchData &launchDat
         static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_LAUNCH_APPLICATION_TRANSACTION), data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey,
+            std::string("ScheduleLaunchApplication ipc error ") + std::to_string(ret));
     }
 }
 

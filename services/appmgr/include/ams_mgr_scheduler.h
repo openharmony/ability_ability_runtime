@@ -429,8 +429,6 @@ public:
 
     virtual bool IsCallerKilling(const std::string& callerKey) override;
 
-    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) override;
-
 private:
     /**
      * @brief Judge whether the application service is ready.
