@@ -21,16 +21,6 @@
 namespace OHOS {
 namespace AAFwk {
 /**
- * @class KeepAliveType
- * defines what type of keep-alive.
- */
-enum class KeepAliveType : int32_t {
-    UNSPECIFIED = -1,
-    RESIDENT_PROCESS = 0,
-    THIRD_PARTY = 1,
-};
-
-/**
  * @class KeepAliveUtils
  * provides keep-alive utilities.
  */
@@ -44,17 +34,7 @@ public:
      * @return Whether or not the hap module has the main element.
      */
     static void NotifyDisableKeepAliveProcesses(const std::vector<AppExecFwk::BundleInfo> &bundleInfos,
-        int32_t userId);
-
-    /**
-     * IsKeepAliveBundle, check if bundle is keep-alive.
-     *
-     * @param bundleInfo The bundle info.
-     * @param userId User id.
-     * @param type The returned type of keep-alive.
-     * @return Whether or not the bundle is keep-alive.
-     */
-    static bool IsKeepAliveBundle(const AppExecFwk::BundleInfo &bundleInfo, int32_t userId, KeepAliveType &type);
+        int32_t userId) {}
 };
 }  // namespace AAFwk
 }  // namespace OHOS

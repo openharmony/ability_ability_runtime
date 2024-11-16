@@ -19,6 +19,7 @@
 #include "ffrt.h"
 #include "keep_alive_utils.h"
 #include "main_element_utils.h"
+#include "parameters.h"
 #include "permission_constants.h"
 #include "process_options.h"
 
