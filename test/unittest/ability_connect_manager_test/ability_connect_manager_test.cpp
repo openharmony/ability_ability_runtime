@@ -2597,7 +2597,7 @@ HWTEST_F(AbilityConnectManagerTest, CompleteBackground_003, TestSize.Level1)
     abilityRecord->SetSwitchingPause(false);
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToBackground(true);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     connectManager->CompleteBackground(abilityRecord);
     connectManager.reset();
 }
@@ -2621,7 +2621,7 @@ HWTEST_F(AbilityConnectManagerTest, CompleteBackground_004, TestSize.Level1)
     abilityRecord->SetSwitchingPause(false);
     abilityRecord->SetStartedByCall(false);
     abilityRecord->SetStartToBackground(true);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     abilityRecord2->currentState_ = AbilityState::BACKGROUND;
     connectManager->CompleteBackground(abilityRecord);
     connectManager.reset();
@@ -2646,7 +2646,7 @@ HWTEST_F(AbilityConnectManagerTest, CompleteBackground_005, TestSize.Level1)
     abilityRecord->SetSwitchingPause(false);
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToBackground(false);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     abilityRecord2->currentState_ = AbilityState::BACKGROUND;
     connectManager->CompleteBackground(abilityRecord);
     connectManager.reset();
@@ -2671,6 +2671,7 @@ HWTEST_F(AbilityConnectManagerTest, CompleteBackground_006, TestSize.Level1)
     abilityRecord->SetSwitchingPause(false);
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToBackground(true);
+    abilityRecord->isReady_ = false;
     abilityRecord2->currentState_ = AbilityState::FOREGROUND;
     connectManager->CompleteBackground(abilityRecord);
     connectManager.reset();

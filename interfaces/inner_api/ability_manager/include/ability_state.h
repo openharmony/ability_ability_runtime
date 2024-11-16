@@ -68,13 +68,6 @@ enum UserStatus {
     ASSERT_RETRY,
 };
 
-enum class AbilityLoadState: uint8_t {
-    INIT,
-    LOADING,
-    LOADED,
-    FAILED
-};
-
 enum class FreezeStrategy : uint8_t {
     PRINT_FREEZE_LOG,
     NOTIFY_FREEZE_MGR,

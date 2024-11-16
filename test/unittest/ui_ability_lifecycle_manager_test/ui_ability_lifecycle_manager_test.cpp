@@ -632,7 +632,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteForegroundSuccess_003, TestSize.
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToForeground(true);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     mgr->CompleteForegroundSuccess(abilityRecord);
     EXPECT_NE(mgr, nullptr);
 }
@@ -650,7 +650,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteForegroundSuccess_004, TestSize.
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToForeground(true);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     abilityRecord->SetSessionInfo(new SessionInfo());
     mgr->CompleteForegroundSuccess(abilityRecord);
     EXPECT_NE(mgr, nullptr);
@@ -949,7 +949,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_005, TestSize.Level1)
     abilityRecord->currentState_ = AbilityState::BACKGROUNDING;
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToBackground(true);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     mgr->CompleteBackground(abilityRecord);
     EXPECT_NE(mgr, nullptr);
 }
@@ -1905,7 +1905,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallAbilityLocked_001, TestSize.Level1)
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
 
     uiAbilityLifecycleManager->CallAbilityLocked(abilityRequest);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
@@ -4014,7 +4014,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ResolveAbility_004, TestSize.Level1)
     abilityRequest.connect = new UIAbilityLifcecycleManagerTestStub();
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     auto targetAbility = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    targetAbility->SetLoadState(AbilityLoadState::LOADED);
+    targetAbility->isReady_ = true;
     EXPECT_EQ(uiAbilityLifecycleManager->ResolveAbility(targetAbility, abilityRequest),
         ResolveResultType::OK_HAS_REMOTE_OBJ);
 }
@@ -4244,7 +4244,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_001, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4266,7 +4266,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_002, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4288,7 +4288,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_003, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4320,7 +4320,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_004, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4351,7 +4351,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_005, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4359,7 +4359,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_005, TestS
     int32_t pid = 1;
     bool backFlag = true;
     int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
-
+    
     std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
     callerAbilityRecord->pid_ = pid;
     auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
@@ -4386,7 +4386,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_006, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4394,7 +4394,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_006, TestS
     int32_t pid = 1;
     bool backFlag = true;
     int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
-
+    
     std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
     callerAbilityRecord->pid_ = pid;
     auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
