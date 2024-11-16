@@ -1365,27 +1365,5 @@ bool AmsMgrProxy::IsCallerKilling(const std::string& callerKey)
     }
     return reply.ReadBool();
 }
-
-void AmsMgrProxy::SetAppExceptionCallback(sptr<IRemoteObject> callback)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
-        return;
-    }
-    if (!data.WriteRemoteObject(callback.GetRefPtr())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write callback");
-        return;
-    }
-
-    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::SET_APP_EXCEPTION_CALLBACK),
-        data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, error code is %{public}d.", ret);
-        return;
-    }
-}
 } // namespace AppExecFwk
 } // namespace OHOS

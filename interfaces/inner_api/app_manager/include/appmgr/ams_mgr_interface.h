@@ -454,8 +454,6 @@ public:
         return false;
     }
 
-    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) {}
-
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -509,7 +507,6 @@ public:
         IS_PROCESS_ATTACHED,
         IS_CALLER_KILLING,
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
-        SET_APP_EXCEPTION_CALLBACK,
         SET_KEEP_ALIVE_DKV,
         // Add enumeration values above
         END

@@ -26,7 +26,10 @@ ohos_shared_library("freeze_util") {
     "${ability_runtime_services_path}/common/include",
   ]
 
-  sources = [ "src/freeze_util.cpp" ]
+  sources = [
+    "src/error_msg_util.cpp",
+    "src/freeze_util.cpp",
+  ]
 
   public_configs = [ ":freeze_util_config" ]
 

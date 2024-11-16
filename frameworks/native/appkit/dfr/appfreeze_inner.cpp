@@ -188,9 +188,8 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
         FaultData faultData;
         faultData.errorObject.message = it->errorObject.message + "\n";
         if (it->state != 0) {
-            FreezeUtil::LifecycleFlow flow = { it->token, static_cast<FreezeUtil::TimeoutState>(it->state) };
             faultData.errorObject.message += "client:\n" +
-                FreezeUtil::GetInstance().GetLifecycleEvent(flow) + "\nclient app:\n" +
+                FreezeUtil::GetInstance().GetLifecycleEvent(it->token) + "\nclient app:\n" +
                 FreezeUtil::GetInstance().GetAppLifecycleEvent(0) + "\n";
         }
         faultData.errorObject.stack = stack;
