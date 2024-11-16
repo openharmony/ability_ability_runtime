@@ -109,6 +109,7 @@ std::shared_ptr<AppRunningRecord> AppSpawnSocketTest::MockAppRecord()
     appRecord->SetState(ApplicationState::APP_STATE_CREATE);
     appRecord->SetContinuousTaskAppState(false);
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetRequestProcCode(1);
     appRecord->isFocused_ = false;

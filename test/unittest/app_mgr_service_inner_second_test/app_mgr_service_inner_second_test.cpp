@@ -937,6 +937,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_LaunchApplic
     appMgrServiceInner->LaunchApplication(appRecord);
     appRecord->SetEmptyKeepAliveAppState(true);
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appMgrServiceInner->LaunchApplication(appRecord);
     appRecord->SetKeepAliveEnableState(true);
     appRecord->SetEmptyKeepAliveAppState(false);
@@ -1578,6 +1579,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ClearAppRunn
     appRecord->SetUid(uid);
     appRecord->SetKeepAliveBundle(true);
     appRecord->SetKeepAliveEnableState(true);
+    appRecord->SetKeepAliveDkv(true);
     appRecord->SetSingleton(true);
     appMgrServiceInner->ClearAppRunningDataForKeepAlive(appRecord);
 
@@ -1759,6 +1761,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, KillProcessByAbilityToken_001, TestSize.L
 
     appRecord->GetPriorityObject()->SetPid(1);
     appRecord->SetKeepAliveEnableState(true);
+    appRecord->SetKeepAliveDkv(true);
     appRecord->SetEmptyKeepAliveAppState(true);
     appMgrServiceInner->KillProcessByAbilityToken(token);
 

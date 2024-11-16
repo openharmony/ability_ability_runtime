@@ -1369,6 +1369,20 @@ HWTEST_F(AppMgrClientTest, SetKeepAliveEnableState_001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: AppMgrClient_SetKeepAliveDkv_001
+ * @tc.desc: SetKeepAliveDkv.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, SetKeepAliveDkv_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    std::string bundleName = "com.ix.First.Test";
+    bool enable = false;
+    appMgrClient->SetKeepAliveDkv(bundleName, enable, 0);
+    EXPECT_NE(appMgrClient, nullptr);
+}
+
+/**
  * @tc.name: AppMgrClient_SaveBrowserChannel_001
  * @tc.desc: SaveBrowserChannel.
  * @tc.type: FUNC
