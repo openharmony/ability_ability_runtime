@@ -1808,6 +1808,10 @@ void MainThread::HandleNWebPreload()
         Rosen::RSSurfaceNodeConfig config;
         config.SurfaceNodeName = NWEB_SURFACE_NODE_NAME;
         preloadSurfaceNode_ = Rosen::RSSurfaceNode::Create(config, false);
+        if (!preloadSurfaceNode_) {
+            TAG_LOGE(AAFwkTag::APPKIT, "preload surface node is nullptr");
+            return;
+        }
         auto surface = preloadSurfaceNode_->GetSurface();
         if (!surface) {
             TAG_LOGE(AAFwkTag::APPKIT, "preload surface is nullptr");
