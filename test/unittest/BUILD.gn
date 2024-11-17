@@ -537,6 +537,7 @@ group("unittest") {
       "js_ui_service_host_proxy_test:unittest",
       "js_ui_service_proxy_test:unittest",
       "js_uiservice_uiext_connection_test:unittest",
+      "keep_alive_process_manager_test:unittest",
       "lifecycle_deal_test:unittest",
       "lifecycle_test:unittest",
       "main_element_utils_test:unittest",

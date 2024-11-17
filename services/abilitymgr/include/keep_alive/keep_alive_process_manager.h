@@ -19,7 +19,6 @@
 #include <list>
 #include <mutex>
 
-#include "ability_keep_alive_service.h"
 #include "ability_manager_service.h"
 #include "app_scheduler.h"
 #include "bundle_info.h"
