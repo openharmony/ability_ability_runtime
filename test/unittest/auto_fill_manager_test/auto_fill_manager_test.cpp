@@ -122,56 +122,6 @@ HWTEST_F(AutoFillManagerTest, HandleRequestExecuteInner_0100, TestSize.Level1)
 
 /*
  * Feature: AutoFillManager
- * Function: SetTimeOutEvent
- * SubFunction: NA
- * FunctionPoints:Calling SetTimeOutEvent can create an eventHandler_ object.
- * EnvConditions: NA
- * CaseDescription: Verify create eventHandler_ after calling SetTimeOutEvent, which is not empty.
- */
-HWTEST_F(AutoFillManagerTest, SetTimeOutEvent_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AutoFillManagerTest, SetTimeOutEvent_0100, TestSize.Level1";
-    auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
-    manager.SetTimeOutEvent(EVENT_ID);
-    EXPECT_NE(manager.eventHandler_, nullptr);
-}
-
-/*
- * Feature: AutoFillManager
- * Function: RemoveEvent
- * SubFunction: NA
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify only after calling SetTimeOutEvent can effectively call RemoveEvent.
- */
-HWTEST_F(AutoFillManagerTest, RemoveEvent_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AutoFillManagerTest, SetTimeOutEvent_0100, TestSize.Level1";
-    auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
-    manager.SetTimeOutEvent(EVENT_ID);
-    EXPECT_NE(manager.eventHandler_, nullptr);
-    manager.RemoveEvent(EVENT_ID);
-    EXPECT_NE(manager.eventHandler_, nullptr);
-}
-
-/*
- * Feature: AutoFillManager
- * Function: RemoveEvent
- * SubFunction: NA
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify directly calling remove is invalid.
- */
-HWTEST_F(AutoFillManagerTest, RemoveEvent_0200, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AutoFillManagerTest, RemoveEvent_0200, TestSize.Level1";
-    auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
-    manager.RemoveEvent(EVENT_ID);
-    EXPECT_NE(manager.eventHandler_, nullptr);
-}
-
-/*
- * Feature: AutoFillManager
  * Function: UpdateCustomPopupUIExtension
  * SubFunction: NA
  * FunctionPoints: NA
@@ -185,26 +135,6 @@ HWTEST_F(AutoFillManagerTest, UpdateCustomPopupUIExtension_0100, TestSize.Level1
     EXPECT_EQ(manager.extensionCallbacks_.size(), 0);
     const AbilityBase::ViewData viewdata;
     manager.UpdateCustomPopupUIExtension(1, viewdata);
-}
-
-/*
- * Feature: AutoFillManager
- * Function: HandleTimeOut
- * SubFunction: NA
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify if the processing timeout is valid.
- */
-HWTEST_F(AutoFillManagerTest, HandleTimeOut_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AutoFillManagerTest, HandleTimeOut_0100, TestSize.Level1";
-    auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
-    EXPECT_EQ(manager.extensionCallbacks_.size(), 0);
-    auto extensionCallback = std::make_shared<AbilityRuntime::AutoFillExtensionCallback>();
-    manager.extensionCallbacks_.emplace(extensionCallback->GetCallbackId(), extensionCallback);
-    manager.HandleTimeOut(extensionCallback->GetCallbackId());
-    EXPECT_EQ(manager.extensionCallbacks_.size(), 0);
-    manager.extensionCallbacks_.clear();
 }
 
 /*

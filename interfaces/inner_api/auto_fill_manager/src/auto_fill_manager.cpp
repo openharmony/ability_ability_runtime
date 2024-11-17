@@ -18,6 +18,7 @@
 #include "auto_fill_error.h"
 #include "auto_fill_manager_util.h"
 #include "extension_ability_info.h"
+#include "ffrt_inner.h"
 #include "hilog_tag_wrapper.h"
 #include "parameters.h"
 
@@ -36,6 +37,7 @@ constexpr static char WANT_PARAMS_AUTO_FILL_TYPE_KEY[] = "ability.want.params.Au
 constexpr static char AUTO_FILL_MANAGER_THREAD[] = "AutoFillManager";
 constexpr static uint32_t AUTO_FILL_REQUEST_TIME_OUT_VALUE = 1000;
 constexpr static uint32_t AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID = 0;
+constexpr static uint32_t MILL_TO_MICRO = 1000;
 #endif //SUPPORT_GRAPHICS
 } // namespace
 #ifdef SUPPORT_GRAPHICS
@@ -43,12 +45,6 @@ AutoFillManager &AutoFillManager::GetInstance()
 {
     static AutoFillManager instance;
     return instance;
-}
-
-AutoFillManager::AutoFillManager()
-{
-    auto runner = AppExecFwk::EventRunner::Create(AUTO_FILL_MANAGER_THREAD);
-    eventHandler_ = std::make_shared<AutoFillEventHandler>(runner);
 }
 
 AutoFillManager::~AutoFillManager()
@@ -269,35 +265,60 @@ bool AutoFillManager::ConvertAutoFillWindowType(const AutoFill::AutoFillRequest 
     return ret;
 }
 
+void AutoFillManager::RemoveTask(uint32_t eventId)
+{
+    std::lock_guard<std::mutex> lock(taskHandlesMutex_);
+    taskHandles_.erase(eventId);
+}
+
 void AutoFillManager::SetTimeOutEvent(uint32_t eventId)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
-    if (eventHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null eventHandler");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "%{public}s called", __func__);
+    auto taskWrap = [ eventId ]() {
+        TAG_LOGI(AAFwkTag::AUTOFILLMGR, "execute HandleTimeout, eventId: %{public}d", eventId);
+        auto extensionCallback = GetInstance().GetAutoFillExtensionCallback(eventId);
+        if (extensionCallback == nullptr) {
+            TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null extensionCallback");
+            return;
+        }
+        extensionCallback->HandleTimeOut();
+        TAG_LOGI(AAFwkTag::AUTOFILLMGR, "execute HandleTimeout done, eventId: %{public}d", eventId);
+        AutoFillManager::GetInstance().RemoveTask(eventId);
+    };
+    ffrt::task_attr ffrtTaskAttr;
+    ffrtTaskAttr.delay(AUTO_FILL_REQUEST_TIME_OUT_VALUE * MILL_TO_MICRO);
+    auto ffrtTaskHandle = ffrt::submit_h(std::move(taskWrap), {}, {}, ffrtTaskAttr);
+    if (ffrtTaskHandle == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null ffrtTaskHandle");
         return;
     }
-    eventHandler_->SendEvent(eventId, AUTO_FILL_REQUEST_TIME_OUT_VALUE);
+    std::shared_ptr<ffrt::task_handle> taskHandle = std::make_shared<ffrt::task_handle>(
+        std::move(ffrtTaskHandle));
+    std::lock_guard<std::mutex> lock(taskHandlesMutex_);
+    taskHandles_.emplace(eventId, taskHandle);
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "%{public}s done", __func__);
 }
 
 void AutoFillManager::RemoveEvent(uint32_t eventId)
 {
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "called");
-    if (eventHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null eventHandler");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "%{public}s called", __func__);
+    std::lock_guard<std::mutex> lock(taskHandlesMutex_);
+    auto iter = taskHandles_.find(eventId);
+    if (iter == taskHandles_.end()) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "not find, eventId: %{public}d", eventId);
         return;
     }
-    eventHandler_->RemoveEvent(eventId);
-}
-
-void AutoFillManager::HandleTimeOut(uint32_t eventId)
-{
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "called");
-    auto extensionCallback = GetAutoFillExtensionCallback(eventId);
-    if (extensionCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null extensionCallback");
+    auto taskHandle = iter->second;
+    if (!taskHandle) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null taskHandle");
         return;
     }
-    extensionCallback->HandleTimeOut();
+    auto ret = ffrt::skip(*taskHandle);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "autofill task skip failed");
+    }
+    taskHandles_.erase(eventId);
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "%{public}s done, eventId: %{public}d", __func__, eventId);
 }
 
 bool AutoFillManager::IsNeedToCreatePopupWindow(const AbilityBase::AutoFillType &autoFillType)
