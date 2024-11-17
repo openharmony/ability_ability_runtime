@@ -389,6 +389,36 @@ int32_t AmsMgrProxy::KillProcessWithAccount(
     return reply.ReadInt32();
 }
 
+int32_t AmsMgrProxy::KillProcessesInBatch(const std::vector<int32_t> &pids)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteUint32(pids.size())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (const auto &pid: pids) {
+        if (!data.WriteInt32(pid)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write pid failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+
+    int32_t ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_IN_BATCH),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+
 int32_t AmsMgrProxy::KillApplication(const std::string &bundleName, const bool clearPageStack)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
