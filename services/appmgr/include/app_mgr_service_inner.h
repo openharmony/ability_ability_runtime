@@ -196,6 +196,15 @@ public:
     virtual void KillProcessesByPids(std::vector<int32_t> &pids);
 
     /**
+     * KillProcessesInBatch, kill processes in batch;
+     * the killed bundle won't be started by the watcher.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t KillProcessesInBatch(const std::vector<int32_t> &pids);
+
+    /**
      * Set child and parent relationship
      * @param token child process
      * @param callerToken parent process
@@ -1922,6 +1931,8 @@ private:
     std::atomic<int32_t> willKillPidsNum_ = 0;
     std::shared_ptr<AAFwk::TaskHandlerWrap> delayKillTaskHandler_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
+    ffrt::mutex killedBundleSetMutex_;
+    std::set<std::string> killedBundleSet_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

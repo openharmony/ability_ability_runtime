@@ -120,6 +120,15 @@ public:
         const bool clearPageStack = false, int32_t appIndex = 0) override;
 
     /**
+     * KillProcessesInBatch, kill processes in batch, call KillProcessesInBatch() through proxy object;
+     * the killed bundle won't be started by the watcher.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t KillProcessesInBatch(const std::vector<int32_t> &pids) override;
+
+    /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
      * update the application info after new module installed.
      *

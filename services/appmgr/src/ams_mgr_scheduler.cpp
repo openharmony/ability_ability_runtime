@@ -291,6 +291,15 @@ int32_t AmsMgrScheduler::KillProcessWithAccount(
         "KillProcessWithAccount");
 }
 
+int32_t AmsMgrScheduler::KillProcessesInBatch(const std::vector<int32_t> &pids)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "pids.size=%{public}zu", pids.size());
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return amsMgrServiceInner_->KillProcessesInBatch(pids);
+}
+
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
