@@ -609,9 +609,12 @@ void PendingWantManager::ClearPendingWantRecordTask(const std::string &bundleNam
         bool hasBundle = false;
         const auto &pendingRecord = iter->second;
         if ((pendingRecord != nullptr)) {
-            auto wantInfos = pendingRecord->GetKey()->GetAllWantsInfos();
-            for (const auto &wantInfo: wantInfos) {
-                if (wantInfo.want.GetBundle() == bundleName && uid == pendingRecord->GetUid()) {
+            std::vector<std::string> bundleNameVec;
+            if (pendingRecord->GetKey()) {
+                pendingRecord->GetKey()->GetAllBundleNames(bundleNameVec);
+            }
+            for (const auto &bundleItem: bundleNameVec) {
+                if (bundleItem == bundleName && uid == pendingRecord->GetUid()) {
                     hasBundle = true;
                     break;
                 }
