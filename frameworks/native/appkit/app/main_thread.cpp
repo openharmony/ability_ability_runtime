@@ -1870,10 +1870,6 @@ void MainThread::PreloadModule(const AppExecFwk::HapModuleInfo &entryHapModuleIn
     if (isAsyncCallback) {
         return;
     }
-    if (!appMgr_ || !applicationImpl_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appMgr_ is nullptr");
-        return;
-    }
     for (const auto &info : entryHapModuleInfo.abilityInfos) {
         if (info.name == entryHapModuleInfo.mainAbility) {
             ProcessMainAbility(info, runtime);
