@@ -75,7 +75,7 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
             return;
         }
         if (abilityInfo->type == AbilityType::PAGE) {
-            std::string entry = "AppLifeCycleDeal::LaunchAbility; the LoadAbility lifecycle.";
+            std::string entry = "AppLifeCycleDeal::LaunchAbility";
             FreezeUtil::GetInstance().AddLifecycleEvent(ability->GetToken(), entry);
         }
         TAG_LOGD(AAFwkTag::APPMGR, "Launch");

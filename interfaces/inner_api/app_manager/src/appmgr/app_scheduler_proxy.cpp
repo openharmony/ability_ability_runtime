@@ -213,7 +213,7 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
     if (!data.WriteParcelable(want.get())) {
         TAG_LOGE(AAFwkTag::APPMGR, "write want fail.");
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
-            "ERROR AppLifeCycleDeal::LaunchAbility; write want fail");
+            "AppLifeCycleDeal::LaunchAbility; write want fail");
         return;
     }
     if (!data.WriteInt32(abilityRecordId)) {
@@ -225,7 +225,7 @@ void AppSchedulerProxy::ScheduleLaunchAbility(const AbilityInfo &info, const spt
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token,
-            "ERROR AppLifeCycleDeal::LaunchAbility; ipc fail " + std::to_string(ret));
+            "AppLifeCycleDeal::LaunchAbility; ipc error " + std::to_string(ret));
     }
 }
 

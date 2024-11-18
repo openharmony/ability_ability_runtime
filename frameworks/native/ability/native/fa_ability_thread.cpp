@@ -315,7 +315,7 @@ void FAAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     abilityImpl_->Init(application, abilityRecord, currentAbility_, abilityHandler_, token_);
     // 4. ability attach : ipc
     TAG_LOGD(AAFwkTag::FA, "attach ability");
-    std::string entry = "AbilityThread::Attach; the load lifecycle.";
+    std::string entry = "AbilityThread::Attach";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
@@ -495,11 +495,11 @@ void FAAbilityThread::AddLifecycleEvent(uint32_t state, std::string &methodName)
         return;
     }
     if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
-        std::string entry = "AbilityThread::" + methodName + "; the foreground lifecycle.";
+        std::string entry = "AbilityThread::" + methodName;
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     }
     if (state == AAFwk::ABILITY_STATE_BACKGROUND_NEW) {
-        std::string entry = "AbilityThread::" + methodName + "; the background lifecycle.";
+        std::string entry = "AbilityThread::" + methodName;
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     }
 }

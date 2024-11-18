@@ -219,7 +219,7 @@ void UIAbilityImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleStat
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
         lifecycleState_ = AAFwk::ABILITY_STATE_FOREGROUND_NEW;
-        std::string entry = "AbilityManagerClient::AbilityTransitionDone; the transaction start.";
+        std::string entry = "AbilityManagerClient::AbilityTransitionDone";
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     }
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, state, GetRestoreData());
@@ -418,7 +418,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
         TAG_LOGE(AAFwkTag::UIABILITY, "null owner");
         return;
     }
-    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle.";
+    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterForeground";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
 
     bool needNotifyAMS = false;
@@ -435,7 +435,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 
     if (needNotifyAMS) {
         TAG_LOGI(AAFwkTag::UIABILITY, "notify ability manager service");
-        entry = "AbilityManagerClient::AbilityTransitionDone; the transaction start.";
+        entry = "AbilityManagerClient::AbilityTransitionDone";
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
         owner->lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
         AppExecFwk::PacMap restoreData;
@@ -452,7 +452,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:call");
-    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
+    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterBackground";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
 
     AppExecFwk::PacMap restoreData;
@@ -487,7 +487,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterUnfocused()
 void UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 {
     TAG_LOGE(AAFwkTag::UIABILITY, "scb call, ForegroundFailed");
-    std::string entry = "ERROR UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed; GoForeground failed.";
+    std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed; GoForeground failed";
     FreezeUtil::GetInstance().AppendLifecycleEvent(token_, entry);
     AppExecFwk::PacMap restoreData;
     switch (type) {

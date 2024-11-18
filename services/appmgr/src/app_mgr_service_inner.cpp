@@ -629,7 +629,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         return;
     }
     if (abilityInfo->type == AbilityType::PAGE) {
-        std::string entry = "AppMgrServiceInner::LoadAbility; the load lifecycle.";
+        std::string entry = "AppMgrServiceInner::LoadAbility";
         AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(loadParam->token, entry);
     }
 
