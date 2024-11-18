@@ -2575,6 +2575,11 @@ void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
     isNeedPreloadModule_ = isNeedPreloadModule;
 }
 
+bool AppRunningRecord::GetNeedPreloadModule();
+{
+    return isNeedPreloadModule_;
+}
+
 void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)
 {
     isAllowedNWebPreload_ = isAllowedNWebPreload;
