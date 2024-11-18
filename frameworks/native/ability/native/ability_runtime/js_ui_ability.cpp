@@ -362,13 +362,13 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
 
 void JsUIAbility::AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
-    auto entry = std::string("JsUIAbility::") + methodName + "; the " + methodName + " begin.";
+    auto entry = std::string("JsUIAbility::") + methodName + " begin";
     FreezeUtil::GetInstance().AddLifecycleEvent(AbilityContext::token_, entry);
 }
 
 void JsUIAbility::AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
-    auto entry = std::string("JsUIAbility::") + methodName + "; the " + methodName + " end.";
+    auto entry = std::string("JsUIAbility::") + methodName + " end";
     FreezeUtil::GetInstance().AddLifecycleEvent(AbilityContext::token_, entry);
 }
 
@@ -877,7 +877,7 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "init window scene failed");
         FreezeUtil::GetInstance().AppendLifecycleEvent(AbilityContext::token_,
-            std::string("ERROR JsUIAbility::DoOnForegroundForSceneIsNull: ") + std::to_string(static_cast<int>(ret)));
+            std::string("JsUIAbility::DoOnForegroundForSceneIsNull; error ") + std::to_string(static_cast<int>(ret)));
         return;
     }
 

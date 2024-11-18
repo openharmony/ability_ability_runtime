@@ -20,7 +20,7 @@
 
 namespace OHOS::AbilityRuntime {
 namespace {
-constexpr int32_t MAX_ENTRY_COUNT = 10;
+constexpr int32_t MAX_ENTRY_COUNT = 20;
 std::string ConcatStr(const std::list<std::string> &strList, const std::string &split)
 {
     if (strList.empty()) {

@@ -734,7 +734,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
         tmpWatchdog->SetBgWorkingThreadStatus(IsBgWorkingThread(info));
         tmpWatchdog = nullptr;
     }
-    std::string entry = "MainThread::ScheduleLaunchAbility; the load lifecycle.";
+    std::string entry = "MainThread::ScheduleLaunchAbility";
     FreezeUtil::GetInstance().AddLifecycleEvent(token, entry);
 
     wptr<MainThread> weak = this;
@@ -1296,7 +1296,7 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
 void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication:begin");
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication begin");
     if (!CheckForHandleLaunchApplication(appLaunchData)) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckForHandleLaunchApplication failed");
         return;
@@ -1747,7 +1747,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_->PerformAppReady failed");
         return;
     }
-    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication:end");
+    FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleLaunchApplication end");
     // L1 needs to add corresponding interface
     ApplicationEnvImpl *pAppEvnIml = ApplicationEnvImpl::GetInstance();
 
@@ -2158,7 +2158,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
 
     auto abilityToken = abilityRecord->GetToken();
     CHECK_POINTER_LOG(abilityToken, "abilityRecord->GetToken failed");
-    std::string entry = "MainThread::HandleLaunchAbility; the load lifecycle.";
+    std::string entry = "MainThread::HandleLaunchAbility";
     FreezeUtil::GetInstance().AddLifecycleEvent(abilityToken, entry);
 
     abilityRecordMgr_->SetToken(abilityToken);
@@ -2330,7 +2330,7 @@ void MainThread::HandleForegroundApplication()
     }
 
     if (!applicationImpl_->PerformForeground()) {
-        FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleForegroundApplication fail");
+        FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "HandleForegroundApplication; fail");
         TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_->PerformForeground() failed");
     }
 

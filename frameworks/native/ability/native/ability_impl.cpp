@@ -617,7 +617,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
         TAG_LOGE(AAFwkTag::ABILITY, "null stage mode ability/abilityImpl");
         return;
     }
-    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle";
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterForeground";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
 
     bool needNotifyAMS = false;
@@ -652,7 +652,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         TAG_LOGW(AAFwkTag::ABILITY, "not stage");
         return;
     }
-    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterBackground";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
 
     TAG_LOGI(AAFwkTag::ABILITY, "window after background");

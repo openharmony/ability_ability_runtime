@@ -167,11 +167,11 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
 
     // ability attach : ipc
     TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Attach");
-    std::string entry = "AbilityThread::Attach start; the load lifecycle.";
+    std::string entry = "AbilityThread::Attach";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
-        entry = std::string("AbilityThread::Attach failed ipc error: ") + std::to_string(err);
+        entry = std::string("AbilityThread::Attach; error ") + std::to_string(err);
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
         TAG_LOGE(AAFwkTag::UIABILITY, "err: %{public}d", err);
         return;
@@ -249,11 +249,11 @@ void UIAbilityThread::HandleAbilityTransaction(
 void UIAbilityThread::AddLifecycleEvent(uint32_t state, std::string &methodName) const
 {
     if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
-        std::string entry = "AbilityThread::" + methodName + "; the foreground lifecycle.";
+        std::string entry = "AbilityThread::" + methodName;
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     }
     if (state == AAFwk::ABILITY_STATE_BACKGROUND_NEW) {
-        std::string entry = "AbilityThread::" + methodName + "; the background lifecycle.";
+        std::string entry = "AbilityThread::" + methodName;
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     }
 }
