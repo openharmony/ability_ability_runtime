@@ -587,9 +587,6 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(int32_t pid, const std::string& e
         if (errorName == "THREAD_BLOCK_3S") {
             return false;
         }
-        if (currentTime > FREEZE_TIME_LIMIT && diff < FREEZE_TIME_LIMIT) {
-            return true;
-        }
         SetFreezeState(pid, AppFreezeState::APPFREEZE_STATE_FREEZE, errorName);
         TAG_LOGI(AAFwkTag::APPDFR, "durationTime: %{public}" PRId64 ", SetFreezeState: "
             "%{public}s", diff, errorName.c_str());
