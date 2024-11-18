@@ -853,6 +853,7 @@ public:
     void SetProcessCaching(bool isCaching);
     bool IsCaching();
     void SetNeedPreloadModule(bool isNeedPreloadModule);
+    bool GetNeedPreloadModule();
 
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
