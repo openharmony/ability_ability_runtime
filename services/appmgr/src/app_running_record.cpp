@@ -2557,7 +2557,7 @@ void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
     isNeedPreloadModule_ = isNeedPreloadModule;
 }
 
-bool AppRunningRecord::GetNeedPreloadModule();
+bool AppRunningRecord::GetNeedPreloadModule()
 {
     return isNeedPreloadModule_;
 }
