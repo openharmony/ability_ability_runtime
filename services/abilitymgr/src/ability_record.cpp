@@ -3075,12 +3075,12 @@ void AbilityRecord::SetStartToForeground(const bool flag)
 
 bool AbilityRecord::IsCallerSetProcess() const
 {
-    return isCallerSetProcess_;
+    return isCallerSetProcess_.load();
 }
 
 void AbilityRecord::SetCallerSetProcess(const bool flag)
 {
-    isCallerSetProcess_ = flag;
+    isCallerSetProcess_.store(flag);
 }
 
 void AbilityRecord::CallRequest()
