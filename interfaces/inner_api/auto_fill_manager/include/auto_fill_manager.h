@@ -19,7 +19,6 @@
 #include <string>
 
 #include "auto_fill_custom_config.h"
-#include "auto_fill_event_handler.h"
 #include "auto_fill_extension_callback.h"
 #include "fill_request_callback_interface.h"
 #include "nocopyable.h"
@@ -28,6 +27,10 @@
 #ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
 #endif // SUPPORT_GRAPHICS
+
+namespace ffrt {
+class task_handle;
+};
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -47,8 +50,7 @@ public:
     void UpdateCustomPopupUIExtension(uint32_t autoFillSessionId, const AbilityBase::ViewData &viewData);
 
     void CloseUIExtension(uint32_t autoFillSessionId);
-
-    void HandleTimeOut(uint32_t eventId);
+    void RemoveTask(uint32_t eventId);
     void SetTimeOutEvent(uint32_t eventId);
     void RemoveEvent(uint32_t eventId);
 
@@ -56,7 +58,7 @@ public:
         Ace::ModalUIExtensionCallbacks &callback);
     void RemoveAutoFillExtensionCallback(uint32_t callbackId);
 private:
-    AutoFillManager();
+    AutoFillManager() = default;
     ~AutoFillManager();
     DISALLOW_COPY_AND_MOVE(AutoFillManager);
 
@@ -79,7 +81,8 @@ private:
     std::mutex extensionCallbacksMutex_;
     std::map<uint32_t, std::shared_ptr<AutoFillExtensionCallback>> extensionCallbacks_;
 
-    std::shared_ptr<AutoFillEventHandler> eventHandler_;
+    std::mutex taskHandlesMutex_;
+    std::map<uint32_t, std::shared_ptr<ffrt::task_handle>> taskHandles_;
 };
 #endif // SUPPORT_GRAPHICS
 } // AbilityRuntime

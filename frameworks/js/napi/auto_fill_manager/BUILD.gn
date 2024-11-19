@@ -40,6 +40,7 @@ ohos_shared_library("autofillmanager_napi") {
     "ability_base:want",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
