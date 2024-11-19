@@ -205,7 +205,7 @@ bool UPMSUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int
         TAG_LOGE(AAFwkTag::URIPERMMGR, "bundleMgrClient is nullptr.");
         return false;
     }
-    auto bmsRet = bmsClient->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dirName);
+    auto bmsRet = IN_PROCESS_CALL(bmsClient->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dirName));
     if (bmsRet != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GetDirByBundleNameAndAppIndex failed, ret:%{public}d", bmsRet);
         return false;
