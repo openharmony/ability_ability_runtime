@@ -1794,7 +1794,7 @@ HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_001, TestSize.Level0)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->ClearAppRunningData(nullptr, true);
+    appMgrServiceInner->ClearAppRunningData(nullptr);
     TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_001 end");
 }
 
@@ -1812,41 +1812,8 @@ HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_002, TestSize.Level0)
     std::string processName = "test_processName";
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
-    appMgrServiceInner->ClearAppRunningData(appRecord, true);
+    appMgrServiceInner->ClearAppRunningData(appRecord);
     TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_002 end");
-}
-
-/**
- * @tc.name: ClearAppRunningData_003
- * @tc.desc: clear app running data.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_003, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_003 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-    BundleInfo info;
-    std::string processName = "test_processName";
-    std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
-    appMgrServiceInner->ClearAppRunningData(appRecord, false);
-    TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_003 end");
-}
-
-/**
- * @tc.name: ClearAppRunningData_004
- * @tc.desc: clear app running data.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_004, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_004 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-
-    appMgrServiceInner->ClearAppRunningData(nullptr, false);
-    TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_004 end");
 }
 
 /**

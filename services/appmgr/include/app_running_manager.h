@@ -88,13 +88,12 @@ public:
 #endif
 
     /**
-     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     * Check whether the process of the application exists.
      *
-     * @param bundleName, the bundle name.
-     *
+     * @param accessTokenId, the accessTokenId.
      * @return, Return true if exist.
      */
-    bool CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName);
+    bool IsAppExist(uint32_t accessTokenId);
 
     /**
      * CheckAppRunningRecordIsExistByUid, check app exist when concurrent.
@@ -105,10 +104,10 @@ public:
     bool CheckAppRunningRecordIsExistByUid(int32_t uid);
 
     /**
-     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     * Check whether the process of the application exists.
      *
      * @param bundleName Indicates the bundle name of the bundle.
-     * @param appCloneIndex the appindex of the bundle.
+     * @param appCloneIndex the app index of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
      * @return, Return ERR_OK if success, others fail.
      */
