@@ -347,8 +347,7 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.token = token_;
     loadParam.preToken = callerToken;
     loadParam.instanceKey = instanceKey_;
-    auto abilityRecord(shared_from_this());
-    loadParam.isCallerSetProcess = abilityRecord->IsCallerSetProcess();
+    loadParam.isCallerSetProcess = IsCallerSetProcess();
     want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
     if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
         want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
