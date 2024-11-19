@@ -834,6 +834,10 @@ public:
      */
     bool IsConnectListEmpty();
 
+    size_t GetConnectedListSize();
+
+    size_t GetConnectingListSize();
+
     void RemoveCallerRequestCode(std::shared_ptr<AbilityRecord> callerAbilityRecord, int32_t requestCode);
 
     /**
