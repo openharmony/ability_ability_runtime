@@ -14,6 +14,9 @@
  */
 
 #include "insight_intent_execute_param.h"
+
+#include <charconv>
+
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
@@ -83,9 +86,9 @@ bool InsightIntentExecuteParam::GenerateFromWant(const AAFwk::Want &want,
         return false;
     }
     uint64_t insightIntentId = 0;
-    try {
-        insightIntentId = std::stoull(wantParams.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_ID));
-    } catch (...) {
+    std::string idStr = wantParams.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_ID);
+    auto res = std::from_chars(idStr.c_str(), idStr.c_str() + idStr.size(), insightIntentId);
+    if (res.ec != std::errc()) {
         TAG_LOGE(AAFwkTag::ABILITY, "invalid insight intent ID");
         return false;
     }
