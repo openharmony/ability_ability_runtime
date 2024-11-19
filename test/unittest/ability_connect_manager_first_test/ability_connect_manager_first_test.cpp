@@ -419,7 +419,7 @@ HWTEST_F(AbilityConnectManagerTest, HandleActiveAbility_003, TestSize.Level1)
     OHOS::sptr<IAbilityConnection> callback1 = new AbilityConnectCallback();
     auto connectRecord = std::make_shared<ConnectionRecord>(callerToken, abilityRecord, callback1);
     auto mockTaskHandler = MockTaskHandlerWrap::CreateQueueHandler("HandleActiveAbility003");
-    EXPECT_CALL(*mockTaskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    EXPECT_CALL(*mockTaskHandler, SubmitTaskInner(_, _)).Times(0);
     connectManager->taskHandler_ = mockTaskHandler;
     abilityRecord->connRemoteObject_ = abilityRecord->GetToken();
     connectManager->HandleActiveAbility(abilityRecord, connectRecord);

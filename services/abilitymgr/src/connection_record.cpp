@@ -136,6 +136,7 @@ int ConnectionRecord::DisconnectAbility()
 void ConnectionRecord::CompleteConnect(int resultCode)
 {
     CHECK_POINTER(targetService_);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CompleteConnect,%{public}s", targetService_->GetAbilityInfo().name.c_str());
     if (resultCode == ERR_OK) {
         SetConnectState(ConnectionState::CONNECTED);
         targetService_->SetAbilityState(AbilityState::ACTIVE);
