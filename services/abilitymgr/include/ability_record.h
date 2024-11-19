@@ -1305,7 +1305,7 @@ private:
     bool isStartedByCall_ = false;
     bool isStartToBackground_ = false;
     bool isStartToForeground_ = false;
-    bool isCallerSetProcess_ = false;
+    std::atomic_bool isCallerSetProcess_ = false;
     int32_t appIndex_ = 0;
     bool minimizeReason_ = false;
 
