@@ -31,6 +31,7 @@ namespace {
 constexpr int INPUT_ZERO = 0;
 constexpr int INPUT_ONE = 1;
 constexpr int INPUT_THREE = 3;
+constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 constexpr uint8_t ENABLE = 2;
 constexpr size_t OFFSET_ZERO = 24;
@@ -90,7 +91,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
+    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return 0;
     }
 
