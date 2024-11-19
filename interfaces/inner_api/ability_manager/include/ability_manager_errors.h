@@ -650,11 +650,16 @@ enum {
      * Result (2097278) for replying failed while executing insight intent.
      */
     ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED = 2097278,
-    
+
     /*
-     * Result (2097278) for get target bundle info failed.
+     * Result (2097279) for get target bundle info failed.
      */
     ERR_GET_TARGET_BUNDLE_INFO_FAILED = 2097279,
+
+    /*
+     * Result (2097280) for UIAbility in starting state.
+     */
+    ERR_UI_ABILITY_IS_STARTING = 2097280,
 
     /**
      * Native error(3000000) for target bundle not exist.
