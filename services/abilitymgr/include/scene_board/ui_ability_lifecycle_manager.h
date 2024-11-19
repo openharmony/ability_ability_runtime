@@ -455,6 +455,10 @@ private:
         bool &isColdStart);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
     bool AddStartCallerTimestamp(int32_t callerUid);
+    std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
+    bool HasAbilityRequest(const AbilityRequest &abilityRequest);
+    void AddAbilityRequest(const AbilityRequest &abilityRequest);
+    void RemoveAbilityRequest(const AbilityRequest &abilityRequest);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -475,6 +479,7 @@ private:
 
     ffrt::mutex startUIAbilityCallerTimestampsLock_;
     std::map<int32_t, std::vector<int64_t>> startUIAbilityCallerTimestamps_;
+    std::list<std::shared_ptr<AbilityRequest>> startAbilityCheckList_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
