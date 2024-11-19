@@ -365,6 +365,7 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
             KillingProcessManager::GetInstance().AddKillingCallerKey(callerKey);
         }
         appRecord->SetKilling();
+        appRecord->SetKillReason(config.reason);
         appRecord->ScheduleProcessSecurityExit();
     }
 
@@ -688,7 +689,8 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
         if (CheckAppRunningRecordIsLast(appRecord)) {
             UnSetPolicy(appRecord);
         }
-        appRecord->SetClearSession(clearMissionFlag);
+        std::string killReason = clearMissionFlag ? "Kill Reason:ClearSession" : "";
+        appRecord->SetKillReason(killReason);
     }
 }
 
