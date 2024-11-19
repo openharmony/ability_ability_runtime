@@ -23,6 +23,8 @@
 #include "hitrace_meter.h"
 #include "running_process_info.h"
 #include "exit_reason.h"
+#include "bundle_mgr_client.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -879,6 +881,27 @@ void ApplicationContext::ProcessSecurityExit(const AAFwk::ExitReason &exitReason
 
     TAG_LOGI(AAFwkTag::APPKIT, "Proc exit, reason: %{public}s", exitReason.exitMsg.c_str());
     appProcessExitCallback_(exitReason);
+}
+
+std::string ApplicationContext::GetDataDir()
+{
+    std::lock_guard<std::mutex> lock(dataDirMutex_);
+    if (dataDir_.empty()) {
+        auto bmsClient = DelayedSingleton<AppExecFwk::BundleMgrClient>::GetInstance();
+        if (bmsClient == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "bmsClient null");
+            return nullptr;
+        }
+        std::string dataDir;
+        bmsClient->GetDirByBundleNameAndAppIndex(GetBundleName(), appIndex_, dataDir);
+        if (dataDir.empty()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "dataDir is empty");
+            return nullptr;
+        }
+        dataDir_ = dataDir;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "GetDataDir is %{public}s", dataDir_.c_str());
+    return dataDir_;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

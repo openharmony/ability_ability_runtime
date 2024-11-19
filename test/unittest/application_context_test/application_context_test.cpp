@@ -1534,5 +1534,18 @@ HWTEST_F(ApplicationContextTest, SetMnc_0100, TestSize.Level1)
     context_->SetMnc("mnc");
     EXPECT_TRUE(context_ != nullptr);
 }
+
+/**
+ * @tc.number:GetDataDir_0100
+ * @tc.name: GetDataDir
+ * @tc.desc: Get DataDir fail
+ */
+HWTEST_F(ApplicationContextTest, GetDataDir_0100, TestSize.Level1)
+{
+    std::string dataDir = "DataDir";
+    context_->SetDataDir(dataDir);
+    std::string res = context_->GetDataDir();
+    EXPECT_EQ(res, dataDir);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
