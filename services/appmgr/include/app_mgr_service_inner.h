@@ -855,7 +855,7 @@ public:
 
     int VerifyRequestPermission() const;
 
-    void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
+    void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord);
 

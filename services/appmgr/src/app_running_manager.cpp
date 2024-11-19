@@ -185,7 +185,7 @@ bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleNa
 }
 #endif
 
-bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName)
+bool AppRunningManager::IsAppExist(uint32_t accessTokenId)
 {
     std::lock_guard guard(runningRecordMapMutex_);
     if (appRunningRecordMap_.empty()) {
@@ -193,7 +193,14 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
     }
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord && appRecord->GetBundleName() == bundleName && !(appRecord->GetRestartAppFlag())) {
+        if (appRecord == nullptr) {
+            continue;
+        }
+        auto appInfo = appRecord->GetApplicationInfo();
+        if (appInfo == nullptr) {
+            continue;
+        }
+        if (appInfo->accessTokenId == accessTokenId && !(appRecord->GetRestartAppFlag())) {
             return true;
         }
     }
