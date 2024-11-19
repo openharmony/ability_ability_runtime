@@ -628,13 +628,6 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         TAG_LOGE(AAFwkTag::APPMGR, "checkLoadAbilityConditions fail");
         return;
     }
-    {
-        std::lock_guard lock(killedBundleSetMutex_);
-        if (killedBundleSet_.find(abilityInfo->bundleName) != killedBundleSet_.end()) {
-            TAG_LOGW(AAFwkTag::APPMGR, "%{public}s is being killed", abilityInfo->bundleName.c_str());
-            return;
-        }
-    }
     if (abilityInfo->type == AbilityType::PAGE) {
         AbilityRuntime::FreezeUtil::LifecycleFlow flow = {loadParam->token,
             AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
@@ -2927,25 +2920,16 @@ int32_t AppMgrServiceInner::KillProcessesInBatch(const std::vector<int32_t> &pid
         TAG_LOGE(AAFwkTag::APPMGR, "not supported.");
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
-    std::vector<int32_t> killPids;
     for (const auto& pid: pids) {
         auto appRecord = GetAppRunningRecordByPid(pid);
         if (appRecord == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
             continue;
         }
-        killPids.emplace_back(pid);
-        std::string bundleName = appRecord->GetBundleName();
-        {
-            std::lock_guard lock(killedBundleSetMutex_);
-            killedBundleSet_.insert(bundleName);
-        }
-    }
-    std::lock_guard lock(killedBundleSetMutex_);
-    for (const auto& pid: killPids) {
+        std::string callerKey = std::to_string(pid) + ":" + std::to_string(appRecord->GetUid());
+        KillingProcessManager::GetInstance().AddKillingCallerKey(callerKey);
         (void)KillProcessByPid(pid, "KillProcessesInBatch");
     }
-    killedBundleSet_.clear();
     return ERR_OK;
 }
 
