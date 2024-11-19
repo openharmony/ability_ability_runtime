@@ -162,12 +162,32 @@ bool CJAbilityObject::OnBackPress(bool defaultRet) const
     return g_cjAbilityFuncs->cjAbilityOnBackPress(id_);
 }
 
+bool CJAbilityObject::OnPrepareTerminate() const
+{
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnPrepareTerminate == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
+        return false;
+    }
+    return g_cjAbilityFuncs->cjAbilityOnPrepareTerminate(id_);
+}
+
 void CJAbilityObject::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration) const
 {
-    if (g_cjAbilityFuncs == nullptr) {
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnConfigurationUpdate == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
         return;
     }
+    auto cfg = CreateCConfiguration(*configuration);
+    return g_cjAbilityFuncs->cjAbilityOnConfigurationUpdate(id_, cfg);
+}
+
+void CJAbilityObject::OnMemoryLevel(int32_t level) const
+{
+    if (g_cjAbilityFuncs == nullptr || g_cjAbilityFuncs->cjAbilityOnMemoryLevel == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityFunc");
+        return;
+    }
+    g_cjAbilityFuncs->cjAbilityOnMemoryLevel(id_, level);
 }
 
 void CJAbilityObject::OnNewWant(const AAFwk::Want& want, const AAFwk::LaunchParam& launchParam) const

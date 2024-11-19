@@ -81,7 +81,6 @@ CJ_EXPORT int32_t FFIAbilityContextMoveAbilityToBackground(int64_t id);
 CJ_EXPORT int32_t FFIAbilityContextReportDrawnCompleted(int64_t id);
 CJ_EXPORT int32_t FFIAbilityContextOpenAtomicService(int64_t id, char* cAppId,
     CJAtomicServiceOptions cAtomicServiceOptions, int32_t requestCode, int64_t lambdaId);
-
 }
 
 #endif // OHOS_ABILITY_RUNTIME_CJ_ABILITY_CONTEXT_BROKER_H

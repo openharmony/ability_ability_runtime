@@ -20,6 +20,7 @@
 
 #include "ability.h"
 #include "cj_runtime.h"
+#include "cj_utils_ffi.h"
 #include "configuration.h"
 
 #ifdef WINDOWS_PLATFORM
@@ -67,6 +68,9 @@ struct CJAbilityFuncs {
     void (*cjAbilityInit)(int64_t id, void* ability);
     bool (*cjAbilityOnBackPress)(int64_t id);
     void (*cjAbilityOnSceneWillDestroy)(int64_t id, WindowStagePtr cjWindowStage);
+    void (*cjAbilityOnConfigurationUpdate)(int64_t id, OHOS::AbilityRuntime::CConfiguration configuration);
+    void (*cjAbilityOnMemoryLevel)(int64_t id, int32_t level);
+    bool (*cjAbilityOnPrepareTerminate)(int64_t id);
 };
 
 CJ_EXPORT void RegisterCJAbilityFuncs(void (*registerFunc)(CJAbilityFuncs*));
@@ -100,6 +104,8 @@ public:
     int32_t OnContinue(AAFwk::WantParams &wantParams) const;
     void Init(AbilityHandle ability) const;
     int64_t GetId() const;
+    void OnMemoryLevel(int32_t level) const;
+    bool OnPrepareTerminate() const;
 
 private:
     int64_t id_ = 0;
