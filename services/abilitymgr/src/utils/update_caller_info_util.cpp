@@ -24,6 +24,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
+#include "permission_verification.h"
 #include "scene_board_judgement.h"
 #include "start_ability_utils.h"
 #include "startup_util.h"
@@ -124,7 +125,7 @@ void UpdateCallerInfoUtil::UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObje
         return;
     }
 #endif // SUPPORT_SCREEN
-    if (asCallerSourceToken != nullptr) {
+    if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Update as caller source info from token.");
         UpdateAsCallerInfoFromToken(want, asCallerSourceToken);
     } else if (callerToken != nullptr) {
