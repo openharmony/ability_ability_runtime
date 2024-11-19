@@ -548,6 +548,13 @@ bool CJUIAbility::OnPrepareTerminate()
     UIAbility::OnPrepareTerminate();
 
     return true;
+    if (!cjAbilityObj_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj");
+        return false;
+    }
+    bool ret = cjAbilityObj_->OnPrepareTerminate();
+    TAG_LOGD(AAFwkTag::UIABILITY, "end ret: %{public}d", ret);
+    return ret;
 }
 
 void CJUIAbility::GetPageStackFromWant(const Want &want, std::string &pageStack)
@@ -865,6 +872,13 @@ void CJUIAbility::OnMemoryLevel(int level)
 {
     UIAbility::OnMemoryLevel(level);
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (!cjAbilityObj_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
+        return;
+    }
+    auto memLevel = static_cast<int32_t>(level);
+    cjAbilityObj_->OnMemoryLevel(memLevel);
+    TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
 void CJUIAbility::UpdateContextConfiguration()
