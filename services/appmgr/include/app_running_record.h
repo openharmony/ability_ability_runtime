@@ -1008,14 +1008,14 @@ public:
         return delayConfiguration_;
     }
 
-    inline void SetClearSession(bool isClearSession)
+    inline void SetKillReason(std::string killReason)
     {
-        isClearSession_ = isClearSession;
+        killReason_ = killReason;
     }
 
-    inline bool IsClearSession() const
+    inline std::string GetKillReason() const
     {
-        return isClearSession_;
+        return killReason_;
     }
 
     void AddAppLifecycleEvent(const std::string &msg);
@@ -1184,10 +1184,10 @@ private:
     bool hasUIAbilityLaunched_ = false;
     bool isKia_ = false;
     bool isNeedPreloadModule_ = false;
-    bool isClearSession_ = false;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
+    std::string killReason_ = "";
 };
 
 }  // namespace AppExecFwk
