@@ -959,11 +959,13 @@ bool UIAbilityLifecycleManager::IsAbilityStarted(AbilityRequest &abilityRequest,
         return false;
     }
     targetRecord = sessionAbilityMap_.at(persistentId);
-    if (targetRecord) {
+    if (targetRecord && targetRecord->GetScheduler() != nullptr) {
         targetRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, abilityRequest.want);
         targetRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
+        return true;
     }
-    return true;
+
+    return false;
 }
 
 int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
