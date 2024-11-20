@@ -161,6 +161,15 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/want_agent/include",
+              "header_files": [
+                "cj_want_agent_ffi.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi/want_agent:cj_want_agent_ffi"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include",
               "header_files": [
                 "ability_manager_client.h",
