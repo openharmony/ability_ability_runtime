@@ -1018,6 +1018,7 @@ napi_value JsAbilityContext::OnStartAbilityForResultWithAccount(napi_env env, Na
 
 napi_value JsAbilityContext::OnStartExtensionAbility(napi_env env, NapiCallbackInfo& info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::CONTEXT, "called");
     if (info.argc < ARGC_ONE) {
         ThrowTooFewParametersError(env);
@@ -1056,6 +1057,7 @@ napi_value JsAbilityContext::OnStartExtensionAbility(napi_env env, NapiCallbackI
 
 napi_value JsAbilityContext::OnStartExtensionAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::CONTEXT, "called");
     if (info.argc < ARGC_TWO) {
         TAG_LOGE(AAFwkTag::CONTEXT, "param is too few");
@@ -1096,6 +1098,7 @@ napi_value JsAbilityContext::OnStartExtensionAbilityWithAccount(napi_env env, Na
 
 napi_value JsAbilityContext::OnStopExtensionAbility(napi_env env, NapiCallbackInfo& info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::CONTEXT, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::CONTEXT, "param is too few for stop extension ability");
@@ -1134,6 +1137,7 @@ napi_value JsAbilityContext::OnStopExtensionAbility(napi_env env, NapiCallbackIn
 
 napi_value JsAbilityContext::OnStopExtensionAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::CONTEXT, "called");
     if (info.argc < ARGC_TWO) {
         TAG_LOGE(AAFwkTag::CONTEXT, "param is too few for stop extension ability with account");
@@ -1320,6 +1324,7 @@ napi_value JsAbilityContext::OnConnectAbility(napi_env env, NapiCallbackInfo& in
 
 napi_value JsAbilityContext::OnConnectAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // only support three params
     if (info.argc < ARGC_THREE) {
         TAG_LOGE(AAFwkTag::CONTEXT, "not enough params");
@@ -1377,6 +1382,7 @@ napi_value JsAbilityContext::OnConnectAbilityWithAccount(napi_env env, NapiCallb
 
 napi_value JsAbilityContext::OnDisconnectAbility(napi_env env, NapiCallbackInfo& info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::recursive_mutex> lock(gConnectsLock_);
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::CONTEXT, "not enough params");
