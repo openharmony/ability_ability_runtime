@@ -3409,7 +3409,7 @@ void AbilityRecord::GrantDmsUriPermission(Want &want, std::string targetBundleNa
         return;
     }
     std::vector<Uri> uriVec;
-    for (auto &uriStr: uriVec) {
+    for (auto &uriStr: uriStrVec) {
         uriVec.emplace_back(uriStr);
     }
     auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermissionPrivileged(uriVec,
