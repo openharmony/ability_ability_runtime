@@ -49,6 +49,12 @@ extern "C" {
 struct CJLaunchParam {
     int32_t launchReason;
     int32_t lastExitReason;
+    char* lastExitMessage;
+};
+
+struct CJNumberParmas {
+    int32_t numberResult;
+    char* params;
 };
 
 struct CJAbilityFuncs {
@@ -71,6 +77,9 @@ struct CJAbilityFuncs {
     void (*cjAbilityOnConfigurationUpdate)(int64_t id, OHOS::AbilityRuntime::CConfiguration configuration);
     void (*cjAbilityOnMemoryLevel)(int64_t id, int32_t level);
     bool (*cjAbilityOnPrepareTerminate)(int64_t id);
+    CJNumberParmas (*cjAbilityOnSaveState)(int64_t id_, int32_t reason, const char* params);
+    char* (*cjAbilityOnShare)(int64_t id_, const char* params);
+    CJNumberParmas (*cjAbilityOnContinueWithParams)(int64_t id, const char* params);
 };
 
 CJ_EXPORT void RegisterCJAbilityFuncs(void (*registerFunc)(CJAbilityFuncs*));
@@ -106,6 +115,8 @@ public:
     int64_t GetId() const;
     void OnMemoryLevel(int32_t level) const;
     bool OnPrepareTerminate() const;
+    int32_t OnSaveState(int32_t reason, WantParams &wantParams) const;
+    int32_t OnShare(WantParams &wantParams) const;
 
 private:
     int64_t id_ = 0;

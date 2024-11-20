@@ -196,7 +196,11 @@ void CJUIAbility::AddLifecycleEventAfterCall(FreezeUtil::TimeoutState state, con
 int32_t CJUIAbility::OnShare(WantParams &wantParams)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    return ERR_OK;
+    if (!cjAbilityObj_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
+        return ERR_INVALID_VALUE;
+    }
+    return cjAbilityObj_->OnShare(wantParams);
 }
 
 void CJUIAbility::OnStop()
@@ -546,8 +550,6 @@ bool CJUIAbility::OnPrepareTerminate()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
     UIAbility::OnPrepareTerminate();
-
-    return true;
     if (!cjAbilityObj_) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj");
         return false;
@@ -832,6 +834,10 @@ int32_t CJUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
 
 int32_t CJUIAbility::OnSaveState(int32_t reason, WantParams &wantParams)
 {
+    if (!cjAbilityObj_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
+        return -1;
+    }
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
         auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
@@ -839,6 +845,7 @@ int32_t CJUIAbility::OnSaveState(int32_t reason, WantParams &wantParams)
             appContext->DispatchOnAbilityWillSaveState(cjAbilityObj_->GetId());
         }
     }
+    int32_t numberResult = cjAbilityObj_->OnSaveState(reason, wantParams);
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
         auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(applicationContext);
@@ -846,7 +853,7 @@ int32_t CJUIAbility::OnSaveState(int32_t reason, WantParams &wantParams)
             appContext->DispatchOnAbilitySaveState(cjAbilityObj_->GetId());
         }
     }
-    return 0;
+    return numberResult;
 }
 
 void CJUIAbility::OnConfigurationUpdated(const Configuration &configuration)

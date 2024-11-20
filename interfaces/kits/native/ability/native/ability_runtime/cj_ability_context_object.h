@@ -19,9 +19,7 @@
 #include "cj_want_ffi.h"
 #include "cj_ability_context_broker.h"
 
-
 extern "C" {
-
 struct CJPermissionRequestResult {
     VectorStringHandle permissions;
     VectorInt32Handle authResults;
