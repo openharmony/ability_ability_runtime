@@ -369,7 +369,7 @@ int32_t CJAbilityContext::SetMissionContinueState(const AAFwk::ContinueState &st
 }
 
 int32_t CJAbilityContext::StartAbilityByType(const std::string &type, AAFwk::WantParams &wantParams,
-        const std::shared_ptr<CjUIExtensionCallback> &uiExtensionCallbacks)
+    const std::shared_ptr<CjUIExtensionCallback> &uiExtensionCallbacks)
 {
     if (context_ == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");

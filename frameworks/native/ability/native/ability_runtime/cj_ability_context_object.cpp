@@ -631,7 +631,7 @@ int32_t FFIAbilityContextStartAbilityByType(int64_t id, char* cType, char* cWant
     std::shared_ptr<CjUIExtensionCallback> callback = std::make_shared<CjUIExtensionCallback>();
     callback->SetCjCallbackOnResult(CJLambda::Create(onResult));
     callback->SetCjCallbackOnError(CJLambda::Create(onError));
-#ifdef SUPPORT_SCREEN    
+#ifdef SUPPORT_SCREEN
     innerErrCod = context->StartAbilityByType(type, wantParm, callback);
 #endif
     return static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCod));
