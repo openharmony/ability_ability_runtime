@@ -20,8 +20,9 @@
 
 #include "want_agent_constant.h"
 #include "want_agent_helper.h"
-#include "cj_want_ffi.h"
 #include "cj_common_ffi.h"
+
+using WantHandle = void*;
 
 namespace OHOS {
 namespace FfiWantAgent {
