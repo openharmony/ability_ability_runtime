@@ -817,6 +817,7 @@ void UIAbilityLifecycleManager::UpdateProcessName(const AbilityRequest &abilityR
         processName = GenerateProcessNameForNewProcessMode(abilityRequest.abilityInfo);
     }
     abilityRecord->SetProcessName(processName);
+    abilityRecord->SetCallerSetProcess(true);
 }
 
 void UIAbilityLifecycleManager::UpdateAbilityRecordLaunchReason(

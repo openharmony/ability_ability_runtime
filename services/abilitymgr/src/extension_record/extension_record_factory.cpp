@@ -25,7 +25,8 @@ using namespace OHOS::AppExecFwk;
 namespace {
 const std::map<AppExecFwk::ExtensionAbilityType, ExtensionRecordConfig> EXTENSION_RECORD_CONFIG_MAP = {
     { AppExecFwk::ExtensionAbilityType::EMBEDDED_UI,
-      { PROCESS_MODE_BUNDLE, PROCESS_MODE_SUPPORT_DEFAULT | PROCESS_MODE_HOST_SPECIFIED | PROCESS_MODE_HOST_INSTANCE,
+      { PROCESS_MODE_BUNDLE, PROCESS_MODE_SUPPORT_DEFAULT | PROCESS_MODE_HOST_SPECIFIED |
+        PROCESS_MODE_HOST_INSTANCE | PROCESS_MODE_CUSTOM,
         PRE_CHECK_FLAG_CALLED_WITHIN_THE_BUNDLE | PRE_CHECK_FLAG_MULTIPLE_PROCESSES }},
     { AppExecFwk::ExtensionAbilityType::STATUS_BAR_VIEW,
       { PROCESS_MODE_BUNDLE, PROCESS_MODE_SUPPORT_DEFAULT | PROCESS_MODE_RUN_WITH_MAIN_PROCESS,
@@ -108,6 +109,12 @@ uint32_t ExtensionRecordFactory::GetExtensionProcessMode(
             if (hostInstance) {
                 return PROCESS_MODE_INSTANCE;
             }
+        }
+    }
+
+    if (config.processModeSupport & PROCESS_MODE_CUSTOM) {
+        if (!abilityRequest.customProcess.empty()) {
+            return PROCESS_MODE_CUSTOM;
         }
     }
 
