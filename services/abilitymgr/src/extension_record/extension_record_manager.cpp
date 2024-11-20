@@ -256,6 +256,11 @@ int32_t ExtensionRecordManager::UpdateProcessName(const AAFwk::AbilityRequest &a
             abilityRecord->SetProcessName(process);
             break;
         }
+        case PROCESS_MODE_CUSTOM: {
+            std::string process = abilityRequest.abilityInfo.bundleName + abilityRequest.customProcess;
+            abilityRecord->SetProcessName(process);
+            break;
+        }
         case PROCESS_MODE_HOST_SPECIFIED: {
             std::string process = abilityRequest.want.GetStringParam(PROCESS_MODE_HOST_SPECIFIED_KEY);
             if (!IsHostSpecifiedProcessValid(abilityRequest, record, process)) {

@@ -1461,7 +1461,7 @@ private:
      */
     void MakeProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo, int32_t appIndex,
-        const std::string &specifiedProcessFlag, std::string &processName) const;
+        const std::string &specifiedProcessFlag, std::string &processName, bool isCallerSetProcess) const;
 
     /**
      * Build a process's name based on the info given
