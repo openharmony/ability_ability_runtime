@@ -13,26 +13,25 @@
  * limitations under the License.
  */
 
-#include "cj_ability_lifecycle_callback.h"
-#include "cj_lambda.h"
+#include "cj_ability_lifecycle_callback_impl.h"
 
+#include "cj_lambda.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 int32_t CjAbilityLifecycleCallbackImpl::serialNumber_ = 0;
 
-void EmplaceAbilityFunc(int32_t callbackId, int64_t cFuncId,
-    std::map<int32_t, std::function<void(int64_t)>> &cFuncMap)
+void EmplaceAbilityFunc(int32_t callbackId, int64_t cFuncId, std::map<int32_t, std::function<void(int64_t)>> &cFuncMap)
 {
-    auto callback = CJLambda::Create(reinterpret_cast<void(*)(int64_t)>(cFuncId));
+    auto callback = CJLambda::Create(reinterpret_cast<void (*)(int64_t)>(cFuncId));
     cFuncMap.emplace(callbackId, callback);
 }
 
 void EmplaceAbilityWindowStageFunc(int32_t callbackId, int64_t cFuncId,
-    std::map<int32_t, std::function<void(int64_t, WindowStagePtr)>> &cFuncMap)
+                                   std::map<int32_t, std::function<void(int64_t, WindowStagePtr)>> &cFuncMap)
 {
-    auto callback = CJLambda::Create(reinterpret_cast<void(*)(int64_t, WindowStagePtr)>(cFuncId));
+    auto callback = CJLambda::Create(reinterpret_cast<void (*)(int64_t, WindowStagePtr)>(cFuncId));
     cFuncMap.emplace(callbackId, callback);
 }
 
@@ -462,5 +461,5 @@ void CjAbilityLifecycleCallbackImpl::OnAbilitySaveState(const int64_t &ability)
     }
 }
 
-}  // namespace AbilityRuntime
-}  // namespace OHOS
+} // namespace AbilityRuntime
+} // namespace OHOS

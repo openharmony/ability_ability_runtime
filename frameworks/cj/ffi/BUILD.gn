@@ -62,13 +62,14 @@ ohos_shared_library("cj_ability_ffi") {
   ]
 
   sources = [
-    "application_context/src/cj_ability_lifecycle_callback.cpp",
+    "application_context/src/cj_ability_lifecycle_callback_impl.cpp",
     "application_context/src/cj_application_context.cpp",
     "application_context/src/cj_application_state_change_callback.cpp",
     "application_context/src/cj_environment_callback.cpp",
     "application_context/src/cj_utils_ffi.cpp",
     "cj_ability_delegator.cpp",
     "cj_ability_delegator_args.cpp",
+    "cj_application_context_ffi.cpp",
     "cj_element_name_ffi.cpp",
     "cj_want_ffi.cpp",
   ]
