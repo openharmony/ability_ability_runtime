@@ -160,6 +160,7 @@ void JsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     const std::shared_ptr<OHOSApplication> &application, std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     ServiceExtension::Init(record, application, handler, token);
     std::string srcPath = "";
     GetSrcPath(srcPath);
@@ -295,6 +296,7 @@ void JsServiceExtension::BindContext(napi_env env, napi_value obj)
 
 void JsServiceExtension::OnStart(const AAFwk::Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnStart(want);
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "call");
 
@@ -323,6 +325,7 @@ void JsServiceExtension::OnStart(const AAFwk::Want &want)
 
 void JsServiceExtension::OnStop()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     ServiceExtension::OnStop();
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
     CallObjectMethod("onDestroy");
@@ -354,6 +357,7 @@ void JsServiceExtension::OnStop()
 
 sptr<IRemoteObject> JsServiceExtension::OnConnect(const AAFwk::Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HandleScope handleScope(jsRuntime_);
     napi_value result = CallOnConnect(want);
     napi_env env = jsRuntime_.GetNapiEnv();
@@ -367,6 +371,7 @@ sptr<IRemoteObject> JsServiceExtension::OnConnect(const AAFwk::Want &want)
 sptr<IRemoteObject> JsServiceExtension::OnConnect(const AAFwk::Want &want,
     AppExecFwk::AbilityTransactionCallbackInfo<sptr<IRemoteObject>> *callbackInfo, bool &isAsyncCallback)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value result = CallOnConnect(want);
@@ -451,6 +456,7 @@ void JsServiceExtension::OnDisconnect(const AAFwk::Want &want,
 
 void JsServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnCommand(want, restart, startId);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "restart=%{public}s,startId=%{public}d",
         restart ? "true" : "false",
@@ -563,6 +569,7 @@ bool JsServiceExtension::OnInsightIntentExecuteDone(uint64_t intentId,
 
 napi_value JsServiceExtension::CallObjectMethod(const char* name, napi_value const* argv, size_t argc)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "name:%{public}s", name);
 
     if (!jsObj_) {
@@ -656,6 +663,7 @@ napi_value JsServiceExtension::CallOnConnect(const AAFwk::Want &want)
 
 napi_value JsServiceExtension::CallOnDisconnect(const AAFwk::Want &want, bool withResult)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HandleEscape handleEscape(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
@@ -741,6 +749,7 @@ bool JsServiceExtension::CallPromise(napi_value result, AppExecFwk::AbilityTrans
 
 void JsServiceExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     ServiceExtension::OnConfigurationUpdated(configuration);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
     auto context = GetContext();
