@@ -34,6 +34,7 @@ ohos_unittest("cj_application_context_test") {
 
   sources = [
     "${ability_runtime_path}/frameworks/cj/ffi/application_context/src/cj_application_context.cpp",
+    "${ability_runtime_path}/frameworks/cj/ffi/cj_application_context_ffi.cpp",
     "cj_application_context_test.cpp",
   ]
 
