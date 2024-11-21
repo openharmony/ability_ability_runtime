@@ -104,8 +104,7 @@
             "zlib"
   ],
           "third_party": [
-            "libjpeg-turbo",
-            "googletest"
+            "libjpeg-turbo"
           ]
       },
       "build": {
