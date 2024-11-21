@@ -1128,16 +1128,6 @@ public:
         return securityFlag_;
     }
 
-    FreezeStrategy GetFreezeStrategy() const
-    {
-        return freezeStrategy_;
-    }
-
-    void SetFreezeStrategy(FreezeStrategy value)
-    {
-        freezeStrategy_ = value;
-    }
-
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false);
 
@@ -1365,7 +1355,6 @@ private:
     LaunchDebugInfo launchDebugInfo_;
     std::string instanceKey_ = "";
     bool securityFlag_ = false;
-    std::atomic<FreezeStrategy> freezeStrategy_{FreezeStrategy::NOTIFY_FREEZE_MGR};
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -816,7 +816,7 @@ ProcessData AppStateObserverManager::WrapProcessData(const std::shared_ptr<AppRu
 {
     ProcessData processData;
     processData.bundleName = appRecord->GetBundleName();
-    processData.pid = appRecord->GetPriorityObject()->GetPid();
+    processData.pid = appRecord->GetPid();
     processData.uid = appRecord->GetUid();
     auto applicationInfo = appRecord->GetApplicationInfo();
     if (applicationInfo) {
@@ -1025,7 +1025,7 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
     const ApplicationState state)
 {
     AppStateData appStateData;
-    appStateData.pid = appRecord->GetPriorityObject()->GetPid();
+    appStateData.pid = appRecord->GetPid();
     appStateData.bundleName = appRecord->GetBundleName();
     appStateData.state = static_cast<int32_t>(state);
     appStateData.uid = appRecord->GetUid();

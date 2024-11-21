@@ -248,7 +248,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByPid(co
 {
     std::lock_guard guard(runningRecordMapMutex_);
     auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&pid](const auto &pair) {
-        return pair.second->GetPriorityObject()->GetPid() == pid;
+        return pair.second->GetPid() == pid;
     });
     return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
 }
@@ -277,7 +277,7 @@ bool AppRunningManager::ProcessExitByBundleName(
         // Before using this method, consider whether you need.
         if (appRecord && (!appRecord->IsKeepAliveApp() ||
             !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient())) {
-            pid_t pid = appRecord->GetPriorityObject()->GetPid();
+            pid_t pid = appRecord->GetPid();
             auto appInfoList = appRecord->GetAppInfoList();
             auto isExist = [&bundleName](const std::shared_ptr<ApplicationInfo> &appInfo) {
                 return appInfo->bundleName == bundleName;
@@ -306,7 +306,7 @@ bool AppRunningManager::GetPidsByUserId(int32_t userId, std::list<pid_t> &pids)
             int32_t id = -1;
             if ((DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->
                 GetOsAccountLocalIdFromUid(appRecord->GetUid(), id) == 0) && (id == userId)) {
-                pid_t pid = appRecord->GetPriorityObject()->GetPid();
+                pid_t pid = appRecord->GetPid();
                 if (pid > 0) {
                     pids.push_back(pid);
                     appRecord->ScheduleProcessSecurityExit();
@@ -352,7 +352,7 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
             return appInfo->bundleName == bundleName && appInfo->uid == uid;
         };
         auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-        pid_t pid = appRecord->GetPriorityObject()->GetPid();
+        pid_t pid = appRecord->GetPid();
         if (iter == appInfoList.end() || pid <= 0) {
             continue;
         }
@@ -393,7 +393,7 @@ bool AppRunningManager::ProcessExitByBundleNameAndAppIndex(const std::string &bu
         }
 
         if (appInfo->bundleName == bundleName && appRecord->GetAppIndex() == appIndex) {
-            pid_t pid = appRecord->GetPriorityObject()->GetPid();
+            pid_t pid = appRecord->GetPid();
             if (pid <= 0) {
                 continue;
             }
@@ -433,7 +433,7 @@ bool AppRunningManager::ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, 
         if (appRecord->GetPriorityObject() == nullptr) {
             continue;
         }
-        pid_t pid = appRecord->GetPriorityObject()->GetPid();
+        pid_t pid = appRecord->GetPid();
         if (pid <= 0) {
             continue;
         }
@@ -463,7 +463,7 @@ bool AppRunningManager::GetPidsByBundleNameUserIdAndAppIndex(const std::string &
                 appInfo->appIndex == appIndex;
         };
         auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-        pid_t pid = appRecord->GetPriorityObject()->GetPid();
+        pid_t pid = appRecord->GetPid();
         if (iter == appInfoList.end() || pid <= 0) {
             continue;
         }
@@ -523,7 +523,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
         }
     }
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
-        RemoveUIExtensionLauncherItem(appRecord->GetPriorityObject()->GetPid());
+        RemoveUIExtensionLauncherItem(appRecord->GetPid());
     }
 
     return appRecord;
@@ -552,8 +552,8 @@ void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
     }
 
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
-        RemoveUIExtensionLauncherItem(appRecord->GetPriorityObject()->GetPid());
-        AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(appRecord->GetPriorityObject()->GetPid());
+        RemoveUIExtensionLauncherItem(appRecord->GetPid());
+        AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(appRecord->GetPid());
     }
 }
 
@@ -782,7 +782,7 @@ void AppRunningManager::NotifyAppPreCache(const std::shared_ptr<AppRunningRecord
         appRecord->GetPriorityObject() == nullptr) {
         return;
     }
-    int32_t pid = appRecord->GetPriorityObject()->GetPid();
+    int32_t pid = appRecord->GetPid();
     int32_t userId = appRecord->GetUid() / BASE_USER_RANGE;
     auto notifyAppPreCache = [pid, userId, inner = appMgrServiceInner]() {
         if (inner == nullptr) {
@@ -821,7 +821,7 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
     }
 
     info.processName_ = appRecord->GetProcessName();
-    info.pid_ = appRecord->GetPriorityObject()->GetPid();
+    info.pid_ = appRecord->GetPid();
     info.uid_ = appRecord->GetUid();
     info.bundleNames.emplace_back(appRecord->GetBundleName());
     info.state_ = static_cast<AppExecFwk::AppProcessState>(appRecord->GetState());
@@ -877,7 +877,7 @@ void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &lis
             AppStateData appData;
             appData.bundleName = appRecord->GetBundleName();
             appData.uid = appRecord->GetUid();
-            appData.pid = appRecord->GetPriorityObject()->GetPid();
+            appData.pid = appRecord->GetPid();
             appData.state = static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND);
             auto appInfo = appRecord->GetApplicationInfo();
             appData.accessTokenId = appInfo ? appInfo->accessTokenId : 0;
@@ -1131,7 +1131,7 @@ bool AppRunningManager::GetAppRunningStateByBundleName(const std::string &bundle
             TAG_LOGD(AAFwkTag::APPMGR, "Process of [%{public}s] is running, processName: %{public}s.",
                 bundleName.c_str(), appRecord->GetProcessName().c_str());
             if (IPCSkeleton::GetCallingUid() == QUICKFIX_UID && appRecord->GetPriorityObject() != nullptr) {
-                TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}d", appRecord->GetPriorityObject()->GetPid());
+                TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}d", appRecord->GetPid());
             }
             return true;
         }
@@ -1575,7 +1575,7 @@ int AppRunningManager::DumpIpcAllStart(std::string& result)
     for (const auto &item : GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
         TAG_LOGD(AAFwkTag::APPMGR, "AppRunningManager::DumpIpcAllStart::pid:%{public}d",
-            appRecord->GetPriorityObject()->GetPid());
+            appRecord->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStart(currentResult);
         result += currentResult + "\n";
@@ -1593,7 +1593,7 @@ int AppRunningManager::DumpIpcAllStop(std::string& result)
     for (const auto &item : GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
         TAG_LOGD(AAFwkTag::APPMGR, "AppRunningManager::DumpIpcAllStop::pid:%{public}d",
-            appRecord->GetPriorityObject()->GetPid());
+            appRecord->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStop(currentResult);
         result += currentResult + "\n";
@@ -1611,7 +1611,7 @@ int AppRunningManager::DumpIpcAllStat(std::string& result)
     for (const auto &item : GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
         TAG_LOGD(AAFwkTag::APPMGR, "AppRunningManager::DumpIpcAllStat::pid:%{public}d",
-            appRecord->GetPriorityObject()->GetPid());
+            appRecord->GetPid());
         std::string currentResult;
         errCode = appRecord->DumpIpcStat(currentResult);
         result += currentResult + "\n";
@@ -1725,7 +1725,7 @@ bool AppRunningManager::HandleUserRequestClean(const sptr<IRemoteObject> &abilit
 
     appRecord->SetUserRequestCleaning();
     if (appRecord->GetPriorityObject()) {
-        pid = appRecord->GetPriorityObject()->GetPid();
+        pid = appRecord->GetPid();
     }
     uid = appRecord->GetUid();
     return true;
@@ -1805,7 +1805,7 @@ bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRun
     auto appIndex = appRecord->GetAppIndex();
     auto appRecordId = appRecord->GetRecordId();
     auto userId = appRecord->GetUserId();
-    
+
     for (const auto &item : appRunningRecordMap_) {
         const auto &itemAppRecord = item.second;
         if (itemAppRecord != nullptr &&

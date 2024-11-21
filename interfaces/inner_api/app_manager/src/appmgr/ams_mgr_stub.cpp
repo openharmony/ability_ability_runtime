@@ -901,12 +901,5 @@ int32_t AmsMgrStub::HandleIsCallerKilling(MessageParcel &data, MessageParcel &re
     }
     return NO_ERROR;
 }
-
-int32_t AmsMgrStub::HandleSetAppExceptionCallback(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    SetAppExceptionCallback(callback);
-    return NO_ERROR;
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS
