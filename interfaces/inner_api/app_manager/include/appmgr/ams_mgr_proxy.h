@@ -411,8 +411,6 @@ public:
 
     virtual bool IsCallerKilling(const std::string& callerKey) override;
 
-    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) override;
-
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);

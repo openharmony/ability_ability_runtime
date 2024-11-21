@@ -167,17 +167,16 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
 
     // ability attach : ipc
     TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Attach");
-    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::LOAD };
-    std::string entry = "AbilityThread::Attach start; the load lifecycle.";
-    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+    std::string entry = "AbilityThread::Attach";
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
-        entry = std::string("AbilityThread::Attach failed ipc error: ") + std::to_string(err);
-        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+        entry = std::string("AbilityThread::Attach; error ") + std::to_string(err);
+        FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
         TAG_LOGE(AAFwkTag::UIABILITY, "err: %{public}d", err);
         return;
     }
-    FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(token_);
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
 }
 
@@ -250,14 +249,12 @@ void UIAbilityThread::HandleAbilityTransaction(
 void UIAbilityThread::AddLifecycleEvent(uint32_t state, std::string &methodName) const
 {
     if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
-        FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-        std::string entry = "AbilityThread::" + methodName + "; the foreground lifecycle.";
-        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+        std::string entry = "AbilityThread::" + methodName;
+        FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     }
     if (state == AAFwk::ABILITY_STATE_BACKGROUND_NEW) {
-        FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-        std::string entry = "AbilityThread::" + methodName + "; the background lifecycle.";
-        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+        std::string entry = "AbilityThread::" + methodName;
+        FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     }
 }
 

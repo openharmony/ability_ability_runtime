@@ -67,11 +67,6 @@ enum UserStatus {
     ASSERT_CONTINUE,
     ASSERT_RETRY,
 };
-
-enum class FreezeStrategy : uint8_t {
-    PRINT_FREEZE_LOG,
-    NOTIFY_FREEZE_MGR,
-};
 }  // namespace AAFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ABILITY_STATE_H

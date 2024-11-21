@@ -144,7 +144,7 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
     };
     std::string taskName = "DELAY_CACHED_STATE_NOTIFY";
     if (appRecord->GetPriorityObject()) {
-        taskName += std::to_string(appRecord->GetPriorityObject()->GetPid());
+        taskName += std::to_string(appRecord->GetPid());
     }
     auto res = appRecord->CancelTask(taskName);
     if (res) {
@@ -301,7 +301,7 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
         return;
     }
     bool forceKillProcess =
-        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
+        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPid());
     if (forceKillProcess) {
         appRecord->SetProcessCacheBlocked(true);
         return;
