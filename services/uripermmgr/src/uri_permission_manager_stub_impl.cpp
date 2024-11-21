@@ -808,19 +808,15 @@ std::vector<bool> UriPermissionManagerStubImpl::CheckUriPermission(TokenIdPermis
     std::vector<bool> result(uriVec.size(), false);
     std::vector<Uri> mediaUris;
     std::vector<int32_t> mediaUriIndexs;
-    bool isFoundationCall = UPMSUtils::IsFoundationCall();
     std::string callerAlterableBundleName;
     UPMSUtils::GetAlterableBundleNameByTokenId(tokenId, callerAlterableBundleName);
     for (size_t i = 0; i < uriVec.size(); i++) {
         auto uri = uriVec[i];
         auto &&scheme = uri.GetScheme();
-        if (scheme != "content" && scheme != "file") {
+        // checkUriPermission not support content uri
+        if (scheme != "file") {
             TAG_LOGW(AAFwkTag::URIPERMMGR, "invalid uri:%{private}s", uri.ToString().c_str());
             result[i] = false;
-            continue;
-        }
-        if (scheme == "content") {
-            result[i] = isFoundationCall;
             continue;
         }
         auto &&authority = uri.GetAuthority();
