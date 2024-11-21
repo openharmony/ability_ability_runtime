@@ -3277,12 +3277,10 @@ bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUr
     }
 
     uint32_t initiatorTokenId = IPCSkeleton::GetCallingTokenID();
-    for (auto&& uri : uriVec) {
-        auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermission(uri, flag, targetPkg,
-            appIndex_, initiatorTokenId, recordId_));
-        if (ret == ERR_OK) {
-            isGrantedUriPermission_ = true;
-        }
+    auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermissionPrivileged(uriVec,
+        flag, targetPkg, appIndex_, initiatorTokenId, recordId_));
+    if (ret == ERR_OK) {
+        isGrantedUriPermission_ = true;
     }
     return true;
 }
