@@ -81,6 +81,7 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
         return ERR_INVALID_VALUE;
     }
 
+    TAG_LOGI(AAFwkTag::WANTAGENT, "before CancelWantSenderLocked");
     if (((uint32_t)key_->GetFlags() & (uint32_t)Flags::ONE_TIME_FLAG) != 0) {
         pendingWantManager->CancelWantSenderLocked(*this, true);
     }
