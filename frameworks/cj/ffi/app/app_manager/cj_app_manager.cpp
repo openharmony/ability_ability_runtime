@@ -29,14 +29,14 @@
 
 using namespace OHOS::AbilityRuntime;
 
-namespace OHOS{
-namespace AbilityRuntime{
+namespace OHOS {
+namespace AbilityRuntime {
 enum CjAppProcessState {
     STATE_CREATE,
     STATE_FOREGROUND,
     STATE_ACTIVE,
     STATE_BACKGROUND,
-    STATE_DESTROY
+    STATE_DESTROY,
 };
 
 OHOS::sptr<OHOS::AppExecFwk::IAppMgr> GetAppManagerInstance()
