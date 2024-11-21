@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/ace_engine/ace_gen_obj.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 config("ability_simulator_public_config") {
   include_dirs = [ "include" ]
