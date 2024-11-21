@@ -366,7 +366,8 @@ void UIAbilityImpl::UpdateSilentForeground(const AAFwk::LifeCycleStateInfo &targ
     }
     if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL &&
         sessionInfo && sessionInfo->processOptions &&
-        AAFwk::ProcessOptions::IsValidProcessMode(sessionInfo->processOptions->processMode) &&
+        (sessionInfo->processOptions->isRestartKeepAlive
+            || AAFwk::ProcessOptions::IsValidProcessMode(sessionInfo->processOptions->processMode)) &&
         sessionInfo->processOptions->startupVisibility == AAFwk::StartupVisibility::STARTUP_HIDE) {
         TAG_LOGI(AAFwkTag::UIABILITY, "set IsSilentForeground to true");
         ability_->SetIsSilentForeground(true);
