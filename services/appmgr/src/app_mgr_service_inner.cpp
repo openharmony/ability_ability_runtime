@@ -1450,7 +1450,7 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     auto uid = appRecord->GetUid();
     bool foreground = appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
         appRecord->GetState() == ApplicationState::APP_STATE_FOCUS;
-    std::string killReason = appRecord->GetKillReason().empty() ? "Kill Reason:app exit" : appRecord->GetKillReason();
+    std::string killReason = appRecord->IsClearSession() ? "Kill Reason:ClearSession" : "Kill Reason:app exit";
     auto result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PID, std::to_string(eventInfo.pid), EVENT_KEY_PROCESS_NAME, eventInfo.processName,
@@ -1617,8 +1617,7 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
     int64_t startTime = SystemTimeMillisecond();
     std::list<pid_t> pids;
     TAG_LOGI(AAFwkTag::APPMGR, "uid value: %{public}d", uid);
-    KillProcessConfig config{false, false, reason};
-    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, uid, pids, config)) {
+    if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, uid, pids)) {
         TAG_LOGI(AAFwkTag::APPMGR, "unstart");
         return result;
     }
@@ -2520,17 +2519,16 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
-    std::string newReason = appRecord->GetKillReason().empty() ? killReason : appRecord->GetKillReason();
     bool foreground = appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
         appRecord->GetState() == ApplicationState::APP_STATE_FOCUS;
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
     int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PID, std::to_string(eventInfo.pid),
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, newReason,
+        EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, killReason,
         EVENT_KEY_FOREGROUND, foreground);
     TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
         "%{public}d, processName=%{public}s, msg=%{public}s, FOREGROUND = %{public}d",
-        result, pid, eventInfo.processName.c_str(), newReason.c_str(), foreground);
+        result, pid, eventInfo.processName.c_str(), killReason.c_str(), foreground);
     return ret;
 }
 
