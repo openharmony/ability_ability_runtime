@@ -33,6 +33,7 @@ struct KeepAliveAbilityInfo {
     std::string moduleName;
     std::string abilityName;
     int32_t userId = 0;
+    int32_t appCloneIndex = 0;
 };
 
 /**
@@ -112,12 +113,10 @@ private:
 
     int32_t CheckPermission();
     int32_t CheckPermissionForEDM();
-    void AddFailedKeepAliveAbility(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, int32_t userId);
+    void AddFailedKeepAliveAbility(const KeepAliveAbilityInfo &info);
     void StartKeepAliveProcessWithMainElementPerBundle(const AppExecFwk::BundleInfo &bundleInfo,
         int32_t userId);
-    int32_t StartAbility(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, int32_t userId);
+    int32_t StartAbility(const KeepAliveAbilityInfo &info);
     void AfterStartKeepAliveApp(const AppExecFwk::BundleInfo &bundleInfo,
         const std::string &mainElementName, int32_t userId);
     bool IsRunningAppInStatusBar(std::shared_ptr<AbilityManagerService> abilityMgr,
