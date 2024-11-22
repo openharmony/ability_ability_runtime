@@ -531,7 +531,7 @@ void ConnectionStateManager::InitAppStateObserver()
                 }
                 self->InitAppStateObserver();
             };
-            handler_->SubmitTask(initConnectionStateManagerTask, "InitConnectionStateManager", DELAY_TIME);
+            handler_->SubmitTaskJust(initConnectionStateManagerTask, "InitConnectionStateManager", DELAY_TIME);
             retry_++;
         }
         return;
