@@ -141,27 +141,6 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetTempDir(
     return WriteStringToBuffer(tempDir, buffer, bufferSize, writeLength);
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(
-    char* buffer, const int32_t bufferSize, int32_t* writeLength)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "getResourceDir called");
-    auto ret = CheckParameters(buffer, writeLength);
-    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
-        return ret;
-    }
-    const auto appContext = Context::GetApplicationContext();
-    if (appContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
-        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
-    }
-    const std::string resourceDir = appContext->GetResourceDir();
-    if (resourceDir.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "resourceDir is empty");
-        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
-    }
-    return WriteStringToBuffer(resourceDir, buffer, bufferSize, writeLength);
-}
-
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetFilesDir(
     char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
