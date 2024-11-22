@@ -58,7 +58,13 @@ void TaskHandle::Sync() const
     handler->WaitTaskInner(innerTaskHandle_);
 }
 
-std::atomic_int32_t TaskHandlerWrap::g_taskId = 0;
+uint64_t TaskHandle::GetTaskId() const
+{
+    if (innerTaskHandle_) {
+        return innerTaskHandle_->GetId();
+    }
+    return 0;
+}
 
 std::shared_ptr<TaskHandlerWrap> TaskHandlerWrap::CreateQueueHandler(const std::string &queueName,
     TaskQoS queueQos)
@@ -144,23 +150,22 @@ TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task, const 
     }
 
     TaskHandle result(shared_from_this(), nullptr);
-    result.taskId_ = ++g_taskId;
     result.printTaskLog_ = printTaskLog_;
     auto taskWrap = [result, task, taskName = taskAttr.taskName_]() {
         if (result.PrintTaskLog()) {
-            TAG_LOGW(AAFwkTag::DEFAULT, "begin execute task name: %{public}s, taskId: %{public}d",
-                taskName.c_str(), result.GetTaskId());
+            TAG_LOGW(AAFwkTag::DEFAULT, "begin execute task name: %{public}s, taskId: %{public}" PRIu64"",
+                taskName.c_str(), ffrt::this_task::get_id());
         }
         *result.status_ = TaskStatus::EXECUTING;
         task();
         *result.status_ = TaskStatus::FINISHED;
     };
 
-    if (printTaskLog_) {
-        TAG_LOGW(AAFwkTag::DEFAULT, "submitTask: %{public}s, taskId: %{public}d, queueName: %{public}s count: "
-            "%{public}" PRIu64"", taskAttr.taskName_.c_str(), result.taskId_, queueName_.c_str(), GetTaskCount());
-    }
     result.innerTaskHandle_ = SubmitTaskInner(std::move(taskWrap), taskAttr);
+    if (printTaskLog_) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "submitTask: %{public}s, taskId: %{public}" PRIu64", queueName: %{public}s count: "
+            "%{public}" PRIu64"", taskAttr.taskName_.c_str(), result.GetTaskId(), queueName_.c_str(), GetTaskCount());
+    }
     return result;
 }
 
@@ -176,8 +181,8 @@ bool TaskHandlerWrap::CancelTask(const std::string &name)
     auto taskHandle = it->second;
     tasks_.erase(it);
     if (printTaskLog_) {
-        TAG_LOGW(AAFwkTag::DEFAULT, "cancel task name: %{public}s, taskId: %{public}d, queueName: %{public}s",
-            name.c_str(), taskHandle.taskId_, queueName_.c_str());
+        TAG_LOGW(AAFwkTag::DEFAULT, "cancel task name: %{public}s, taskId: %{public}" PRIu64", queueName: %{public}s",
+            name.c_str(), taskHandle.GetTaskId(), queueName_.c_str());
     }
     return taskHandle.Cancel();
 }
