@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AbilityDelegatorCJ {
 using namespace OHOS::FFI;
 using namespace OHOS::AbilityRuntime;
- 
+
 int32_t CJAbilityDelegator::StartAbility(const AAFwk::Want &want)
 {
     return delegator_->StartAbility(want);
@@ -68,7 +68,7 @@ void CJAbilityDelegator::FinishTest(const char* msg, int64_t code)
 {
     delegator_->FinishUserTest(msg, code);
 }
- 
+
 extern "C" {
 int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator()
 {
@@ -84,7 +84,7 @@ int64_t FFIAbilityDelegatorRegistryGetAbilityDelegator()
     }
     return cjDelegator->GetID();
 }
- 
+
 int32_t FFIAbilityDelegatorStartAbility(int64_t id, WantHandle want)
 {
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
@@ -163,6 +163,7 @@ void FFIAbilityDelegatorFinishTest(int64_t id, const char* msg, int64_t code)
     auto cjDelegator = FFI::FFIData::GetData<CJAbilityDelegator>(id);
     if (cjDelegator == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null cj delegator");
+        return;
     }
     cjDelegator->FinishTest(msg, code);
 }
