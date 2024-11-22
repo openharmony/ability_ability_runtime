@@ -33,6 +33,7 @@ constexpr size_t U32_AT_SIZE = 4;
 }
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
+    (void)data;
     auto saMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saMgr == nullptr) {
         return false;
