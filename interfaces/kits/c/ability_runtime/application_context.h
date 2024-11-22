@@ -110,23 +110,6 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetTempDir(
     char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
- * @brief Obtain the resource directory of the application.
- *
- * @param buffer A pointer to a buffer that receives the resource directory of the application.
- * @param bufferSize The length of the buffer.
- * @param writeLength The string length actually written to the buffer,
- *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
- * @return The error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
- *         or the buffer size is less than the minimum buffer size.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
- * @since 16
- */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(
-    char* buffer, const int32_t bufferSize, int32_t* writeLength);
-
-/**
  * @brief Obtain the files directory of the application.
  *
  * @param buffer A pointer to a buffer that receives the files directory of the application.
