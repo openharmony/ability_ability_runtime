@@ -30,6 +30,7 @@
 #ifdef SUPPORT_SCREEN
 #include "window_visibility_info.h"
 #endif //SUPPORT_SCREEN
+#include "uri_permission_manager_client.h"
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
@@ -1451,12 +1452,19 @@ bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
     return pageAbilitySize == 1;
 }
 
-void AppRunningRecord::SetTerminating()
+void AppRunningRecord::SetTerminating(std::shared_ptr<AppRunningManager> appRunningMgr)
 {
     isTerminating = true;
     auto prioObject = GetPriorityObject();
     if (prioObject) {
         AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(prioObject->GetPid());
+    }
+    if (appRunningMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningMgr null");
+        return;
+    }
+    if (appRunningMgr->CheckAppRunningRecordIsLast(shared_from_this())) {
+        UnSetPolicy();
     }
 }
 
@@ -2621,6 +2629,22 @@ void AppRunningRecord::SetIsUnSetPermission(bool isUnSetPermission)
 bool AppRunningRecord::IsUnSetPermission()
 {
     return isUnSetPermission_;
+}
+
+void AppRunningRecord::UnSetPolicy()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "UnSetPolicy call");
+    auto appInfo = GetApplicationInfo();
+    if (appInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appInfo  null");
+        return;
+    }
+    if (IsUnSetPermission()) {
+        TAG_LOGI(AAFwkTag::APPMGR, "app is unset permission");
+        return;
+    }
+    SetIsUnSetPermission(true);
+    AAFwk::UriPermissionManagerClient::GetInstance().ClearPermissionTokenByMap(appInfo->accessTokenId);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
