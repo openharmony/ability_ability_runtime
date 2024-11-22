@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1338,6 +1338,21 @@ HWTEST_F(ContextImplTest, GetGroupDir_0100, TestSize.Level1)
     EXPECT_EQ(res, 0);
     res = contextImpl->GetSystemDatabaseDir("", false, systemDatabaseDir);
     EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: GetProcessName_0100
+ * @tc.desc: Get process name test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, GetProcessName_0100, TestSize.Level1)
+{
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(contextImpl, nullptr);
+
+    contextImpl->SetProcessName("process_name");
+    auto processName = contextImpl->GetProcessName();
+    EXPECT_EQ(processName, "process_name");
 }
 
 HWTEST_F(ContextImplTest, GetGroupPreferencesDirWithCheck_0100, TestSize.Level1)

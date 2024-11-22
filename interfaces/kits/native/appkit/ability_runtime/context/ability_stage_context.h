@@ -73,6 +73,9 @@ public:
     void SwitchArea(int mode) override;
     int GetArea() override;
 
+    std::string GetProcessName() override;
+    void SetProcessName(const std::string &processName);
+
     Global::Resource::DeviceType GetDeviceType() const override;
 
     using SelfType = AbilityStageContext;
