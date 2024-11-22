@@ -51,10 +51,7 @@ public:
     {
         return status_ && innerTaskHandle_;
     }
-    int32_t GetTaskId() const
-    {
-        return taskId_;
-    }
+    uint64_t GetTaskId() const;
     bool PrintTaskLog() const
     {
         return printTaskLog_;
@@ -64,7 +61,6 @@ private:
     std::shared_ptr<InnerTaskHandle> innerTaskHandle_;
     std::shared_ptr<TaskStatus> status_;
 
-    int32_t taskId_ = 0;
     bool printTaskLog_ = false;
 };
 
@@ -115,8 +111,6 @@ protected:
     }
     bool RemoveTask(const std::string &name, const TaskHandle &taskHandle);
 protected:
-    static std::atomic_int32_t g_taskId;
-
     // this is used only for compatibility
     std::unordered_map<std::string, TaskHandle> tasks_;
     std::unique_ptr<ffrt::mutex> tasksMutex_;

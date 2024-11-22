@@ -1459,7 +1459,7 @@ void UIAbilityLifecycleManager::DelayCompleteTerminate(const std::shared_ptr<Abi
         self->CompleteTerminate(abilityRecord);
     };
     int killTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * KILL_TIMEOUT_MULTIPLE;
-    handler->SubmitTask(timeoutTask, "DELAY_KILL_PROCESS", killTimeout);
+    handler->SubmitTaskJust(timeoutTask, "DELAY_KILL_PROCESS", killTimeout);
 }
 
 void UIAbilityLifecycleManager::CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord)
