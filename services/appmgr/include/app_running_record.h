@@ -55,6 +55,7 @@ using AAFwk::FdGuard;
 class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
+class AppRunningManager;
 
 class MultiUserConfigurationMgr {
 public:
@@ -591,7 +592,7 @@ public:
      * @brief indicates one process will go dying.
      * Then the process won't be reused.
      */
-    void SetTerminating();
+    void SetTerminating(std::shared_ptr<AppRunningManager> appRunningMgr);
 
     /**
      * @brief Whether the process is dying.
@@ -1041,6 +1042,8 @@ public:
     void SetIsUnSetPermission(bool isUnSetPermission);
 
     bool IsUnSetPermission();
+    
+    void UnSetPolicy();
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
