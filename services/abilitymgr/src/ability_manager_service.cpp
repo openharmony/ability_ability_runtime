@@ -427,7 +427,7 @@ void AbilityManagerService::InitPushTask()
             auto task = []() {
                 ApplicationUtil::AppFwkBootEventCallback(BOOTEVENT_BOOT_COMPLETED, "true", nullptr);
             };
-            handler->SubmitTask(task, "BootCompletedDelayTask", BOOTEVENT_COMPLETED_DELAY_TIME);
+            handler->SubmitTaskJust(task, "BootCompletedDelayTask", BOOTEVENT_COMPLETED_DELAY_TIME);
         } else {
             WatchParameter(BOOTEVENT_BOOT_COMPLETED, ApplicationUtil::AppFwkBootEventCallback, nullptr);
             TAG_LOGI(AAFwkTag::ABILITYMGR, "init call, InitPushTask suc");
@@ -9350,7 +9350,7 @@ void AbilityManagerService::InitFocusListener()
         }
     };
     if (taskHandler_) {
-        taskHandler_->SubmitTask(registerTask, "RegisterFocusListenerTask", REGISTER_FOCUS_DELAY);
+        taskHandler_->SubmitTaskJust(registerTask, "RegisterFocusListenerTask", REGISTER_FOCUS_DELAY);
     }
 }
 

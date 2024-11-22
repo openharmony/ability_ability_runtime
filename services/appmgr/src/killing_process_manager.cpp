@@ -60,7 +60,7 @@ void KillingProcessManager::AddKillingCallerKey(const std::string& callerKey)
     auto task = [callerKey] () {
         KillingProcessManager::GetInstance().RemoveKillingCallerKey(callerKey);
     };
-    taskHandler->SubmitTask(task, "clearCallerKey", CLEAR_CALLER_KEY_DELAY_TIME);
+    taskHandler->SubmitTaskJust(task, "clearCallerKey", CLEAR_CALLER_KEY_DELAY_TIME);
 }
 
 void KillingProcessManager::RemoveKillingCallerKey(const std::string& callerKey)
