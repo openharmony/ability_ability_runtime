@@ -2520,18 +2520,7 @@ void AbilityManagerService::ReportEventToRSS(const AppExecFwk::AbilityInfo &abil
     sptr<IRemoteObject> callerToken)
 {
     CHECK_POINTER_LOG(taskHandler_, "taskhandler null");
-    std::string reason;
-    if (abilityInfo.type == AppExecFwk::AbilityType::PAGE) {
-        reason = "THAW_BY_START_PAGE_ABILITY";
-    } else if (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
-               abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-        reason = "THAW_BY_START_SERVICE_EXTENSION";
-    } else if (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
-               AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType)) {
-        reason = "THAW_BY_START_UI_EXTENSION";
-    } else {
-        reason = "THAW_BY_START_NOT_PAGE_ABILITY";
-    }
+    std::string reason = ResSchedUtil::GetInstance().GetThawReasonByAbilityType(abilityInfo);
     const auto uid = abilityInfo.applicationInfo.uid;
     const auto bundleName = abilityInfo.applicationInfo.bundleName;
     auto callerAbility = Token::GetAbilityRecordByToken(callerToken);
@@ -2539,7 +2528,7 @@ void AbilityManagerService::ReportEventToRSS(const AppExecFwk::AbilityInfo &abil
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}d_%{public}s reason=%{public}s callerPid=%{public}d", uid,
         bundleName.c_str(), reason.c_str(), callerPid);
     taskHandler_->SubmitTask([reason, uid, bundleName, callerPid]() {
-        ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, reason, callerPid);
+        ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, reason, -1, callerPid);
     });
 }
 
@@ -4107,7 +4096,10 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         return ERR_INVALID_VALUE;
     }
 
-    ReportEventToRSS(abilityInfo, callerToken);
+    if (targetExtensionType != AppExecFwk::ExtensionAbilityType::REMOTE_NOTIFICATION) {
+        // this extension type is reported in connectManager instead of here
+        ReportEventToRSS(abilityInfo, callerToken);
+    }
     UriUtils::GetInstance().CheckUriPermissionForServiceExtension(const_cast<Want &>(abilityRequest.want),
         abilityRequest.abilityInfo.extensionAbilityType);
     return connectManager->ConnectAbilityLocked(abilityRequest, connect, callerToken, sessionInfo, connectInfo);
