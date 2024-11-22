@@ -81,6 +81,7 @@ uint32_t GetU32Data(const char* ptr)
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
+    (void)data;
     std::shared_ptr<ConnectionObserver> observer = std::make_shared<MyConnectionObserver>();
     // fuzz for connectionObserverClient
     auto connectionObserverClient = std::make_shared<ConnectionObserverClient>();
