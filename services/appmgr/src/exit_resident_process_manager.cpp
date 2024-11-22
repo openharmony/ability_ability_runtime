@@ -106,8 +106,18 @@ void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<ExitResi
         return;
     }
     for (const auto &item: exitProcessInfos) {
-        if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(item.bundleName,
-            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, item.uid / BASE_USER_RANGE))) {
+        std::string bundleName;
+        int32_t appIndex;
+        if (IN_PROCESS_CALL(bundleMgrHelper->GetNameAndIndexForUid(item.uid, bundleName, appIndex))) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to get appIndex for %{public}s", item.bundleName.c_str());
+            continue;
+        }
+        auto flags = static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)
+            | static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)
+            | static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY)
+            | static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY);
+        if (IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(item.bundleName, flags, appIndex, bundleInfo,
+            item.uid / BASE_USER_RANGE)) != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "fail from %{public}s", item.bundleName.c_str());
             continue;
         }
