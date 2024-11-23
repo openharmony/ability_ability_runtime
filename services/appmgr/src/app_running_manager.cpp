@@ -109,24 +109,21 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
-        "appName: %{public}s, processName: %{public}s, uid: %{public}d, specifiedProcessFlag: %{public}s,
-        customProcessFlag: %{public}s",
-        appName.c_str(), processName.c_str(), uid, specifiedProcessFlag.c_str(), customProcessFlag.c_str());
+        "appName: %{public}s, processName: %{public}s, uid: %{public}d, specifiedProcessFlag: %{public}s",
+        appName.c_str(), processName.c_str(), uid, specifiedProcessFlag.c_str());
     std::regex rule("[a-zA-Z.]+[-_#]{1}");
     std::string signCode;
     auto jointUserId = bundleInfo.jointUserId;
     TAG_LOGD(AAFwkTag::APPMGR, "jointUserId : %{public}s", jointUserId.c_str());
     ClipStringContent(rule, bundleInfo.appId, signCode);
-
-    auto FindSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId, customProcessFlag](const auto &pair) {
-        return (pair.second != nullptr) &&
+    auto FindSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId, customProcessFlag]
+        (const auto &pair) { return (pair.second != nullptr) &&
             (specifiedProcessFlag.empty() || pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
             (customProcessFlag.empty() || pair.second->GetCustomProcessFlag() == customProcessFlag) &&
             (pair.second->GetSignCode() == signCode) && (pair.second->GetProcessName() == processName) &&
             (pair.second->GetJointUserId() == jointUserId) && !(pair.second->IsTerminating()) &&
             !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag());
     };
-
     auto appRunningMap = GetAppRunningRecordMap();
     if (!jointUserId.empty()) {
         auto iter = std::find_if(appRunningMap.begin(), appRunningMap.end(), FindSameProcess);
