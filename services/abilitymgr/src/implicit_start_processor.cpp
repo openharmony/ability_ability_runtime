@@ -44,6 +44,7 @@ const int NFC_QUERY_LENGTH = 2;
 const std::string OPEN_LINK_APP_LINKING_ONLY = "appLinkingOnly";
 const std::string HTTP_SCHEME_NAME = "http";
 const std::string HTTPS_SCHEME_NAME = "https";
+const std::string FILE_SCHEME_NAME = "file";
 const std::string APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr const char* SUPPORT_ACTION_START_SELECTOR = "persist.sys.ability.support.action_start_selector";
 
@@ -168,9 +169,14 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     AddIdentity(tokenId, identity);
     if (dialogAppInfos.size() == 0 &&
         (request.want.GetFlags() & Want::FLAG_START_WITHOUT_TIPS) == Want::FLAG_START_WITHOUT_TIPS) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "hint dialog generate fail");
-            return ERR_IMPLICIT_START_ABILITY_FAIL;
-        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start ability fail");
+        return ERR_IMPLICIT_START_ABILITY_FAIL;
+    }
+    if (dialogAppInfos.size() == 0 && request.want.HasParameter(OPEN_LINK_APP_LINKING_ONLY) &&
+        (request.want.GetUriString() == "" || request.want.GetUri().GetScheme() != FILE_SCHEME_NAME)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start ability fail");
+        return ERR_IMPLICIT_START_ABILITY_FAIL;
+    }
     if (dialogAppInfos.size() == 0 && AppUtils::GetInstance().IsSelectorDialogDefaultPossion()) {
         ret = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, want, request.callerToken);
         if (ret != ERR_OK) {
