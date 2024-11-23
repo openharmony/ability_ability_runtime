@@ -342,6 +342,15 @@ const std::string &AppRunningRecord::GetSpecifiedProcessFlag() const
 {
     return specifiedProcessFlag_;
 }
+void AppRunningRecord::SetCustomProcessFlag(const std::string &flag)
+{
+    customProcessFlag_ = flag;
+}
+
+const std::string &AppRunningRecord::GetCustomProcessFlag() const
+{
+    return customProcessFlag_;
+}
 
 int32_t AppRunningRecord::GetUid() const
 {

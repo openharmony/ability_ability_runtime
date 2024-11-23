@@ -1459,6 +1459,7 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     loadParam.preToken = perToken;
     loadParam.instanceKey = abilityRecord->GetInstanceKey();
     loadParam.isCallerSetProcess = abilityRecord->IsCallerSetProcess();
+    loadParam.customProcessFlag = abilityRecord->GetCustomProcessFlag();
     DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
 }

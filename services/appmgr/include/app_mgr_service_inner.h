@@ -1780,7 +1780,7 @@ private:
         const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want,
         bool appExistFlag, bool isPreload, AppExecFwk::PreloadMode preloadMode,
-        sptr<IRemoteObject> token = nullptr);
+        sptr<IRemoteObject> token = nullptr, const std::string &customProcessFlag = "");
 
     int32_t CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName,
