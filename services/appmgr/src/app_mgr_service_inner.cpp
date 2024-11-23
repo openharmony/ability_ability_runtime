@@ -528,6 +528,10 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     MakeProcessName(abilityInfo, appInfo, hapModuleInfo, request.appIndex, specifiedProcessFlag, processName, false);
     TAG_LOGD(AAFwkTag::APPMGR, "HandlePreloadApplication processName = %{public}s", processName.c_str());
 
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "handlePreloadApplication fail");
+        return;
+    }
     std::shared_ptr<AppRunningRecord> appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, specifiedProcessFlag);
     if (appRecord) {
@@ -535,11 +539,7 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
         return;
     }
 
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "handlePreloadApplication fail");
-        return;
-    }
-    bool appExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(bundleInfo.name);
+    bool appExistFlag = appRunningManager_->IsAppExist(appInfo->accessTokenId);
     bool appMultiUserExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByUid(bundleInfo.uid);
     if (!appMultiUserExistFlag) {
         NotifyAppRunningStatusEvent(
@@ -698,7 +698,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             NotifyLoadAbilityFailed(loadParam->token);
             return;
         }
-        bool appExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(bundleInfo.name);
+        bool appExistFlag = appRunningManager_->IsAppExist(appInfo->accessTokenId);
         bool appMultiUserExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByUid(bundleInfo.uid);
         if (!appMultiUserExistFlag) {
             NotifyAppRunningStatusEvent(
@@ -3872,16 +3872,13 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     ClearData(appRecord);
 }
 
-void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp)
+void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (!appRecord) {
         return;
     }
 
-    if (containsApp) {
-        appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
-    }
-
+    appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
     FinishUserTestLocked("App died", -1, appRecord);
     appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_REMOTE_DIED);
 
@@ -3900,7 +3897,8 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
 
     SendProcessExitEvent(appRecord);
 
-    if (!appRunningManager_->CheckAppRunningRecordIsExistByBundleName(appRecord->GetBundleName())) {
+    auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo != nullptr && !appRunningManager_->IsAppExist(appInfo->accessTokenId)) {
         appRunningManager_->UnSetPolicy(appRecord);
         TAG_LOGW(AAFwkTag::APPMGR, "before OnAppStopped");
         OnAppStopped(appRecord);
@@ -4030,7 +4028,8 @@ void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRe
     }
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
-    if (!appRunningManager_->CheckAppRunningRecordIsExistByBundleName(appRecord->GetBundleName())) {
+    auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo != nullptr && !appRunningManager_->IsAppExist(appInfo->accessTokenId)) {
         OnAppStopped(appRecord);
     }
 
@@ -4165,7 +4164,7 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         return;
     }
 
-    bool appExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(info.name);
+    bool appExistFlag = appRunningManager_->IsAppExist(info.applicationInfo.accessTokenId);
     bool appMultiUserExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByUid(info.uid);
     auto appInfo = std::make_shared<ApplicationInfo>(info.applicationInfo);
 
@@ -4495,7 +4494,7 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
         return ERR_INVALID_VALUE;
     }
 
-    bool appExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(info.name);
+    bool appExistFlag = appRunningManager_->IsAppExist(info.applicationInfo.accessTokenId);
     bool appMultiUserExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByUid(info.uid);
     auto appInfo = std::make_shared<ApplicationInfo>(info.applicationInfo);
     if (!appMultiUserExistFlag) {
@@ -4637,7 +4636,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, bundleInfo,
         "", nullptr, instanceKey);
     if (!appRecord) {
-        bool appExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(bundleInfo.name);
+        bool appExistFlag = appRunningManager_->IsAppExist(appInfo->accessTokenId);
         bool appMultiUserExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByUid(bundleInfo.uid);
         if (!appMultiUserExistFlag) {
             NotifyAppRunningStatusEvent(
@@ -6361,8 +6360,7 @@ int32_t AppMgrServiceInner::IsApplicationRunning(const std::string &bundleName, 
         return ERR_PERMISSION_DENIED;
     }
 
-    isRunning = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(bundleName);
-    return ERR_OK;
+    return appRunningManager_->CheckAppCloneRunningRecordIsExistByBundleName(bundleName, 0, isRunning);
 }
 
 int32_t AppMgrServiceInner::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
@@ -7013,7 +7011,8 @@ void AppMgrServiceInner::ApplicationTerminatedSendProcessEvent(const std::shared
         TAG_LOGE(AAFwkTag::APPMGR, "running manager null");
         return;
     }
-    if (!appRunningManager_->CheckAppRunningRecordIsExistByBundleName(appRecord->GetBundleName())) {
+    auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo != nullptr && !appRunningManager_->IsAppExist(appInfo->accessTokenId)) {
         OnAppStopped(appRecord);
     }
 
@@ -7722,7 +7721,7 @@ void AppMgrServiceInner::ClearData(std::shared_ptr<AppRunningRecord> appRecord)
         TAG_LOGW(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
-    ClearAppRunningData(appRecord, false);
+    ClearAppRunningData(appRecord);
     if (!GetAppRunningStateByBundleName(appRecord->GetBundleName())) {
         RemoveRunningSharedBundleList(appRecord->GetBundleName());
     }
