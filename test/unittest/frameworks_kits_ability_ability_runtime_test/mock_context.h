@@ -107,6 +107,8 @@ public:
 
     std::string GetGroupDir(std::string groupId) override;
 
+    std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
+
     int32_t mode_ = 0;
 };
 }  // namespace AbilityRuntime
