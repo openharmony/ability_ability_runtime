@@ -50,6 +50,7 @@ public:
 };
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
+    (void)data;
     auto context = ApplicationContext::GetInstance();
     if (!context) {
         return false;
