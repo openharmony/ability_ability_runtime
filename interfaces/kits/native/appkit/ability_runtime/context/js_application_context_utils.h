@@ -129,6 +129,7 @@ public:
     static napi_value GetCurrentInstanceKey(napi_env env, napi_callback_info info);
     static napi_value GetAllRunningInstanceKeys(napi_env env, napi_callback_info info);
     static napi_value SetFontSizeScale(napi_env env, napi_callback_info info);
+    static napi_value CreateAreaModeContext(napi_env env, napi_callback_info info);
 
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;
@@ -142,6 +143,8 @@ private:
     napi_value CreateJsModuleContext(napi_env env, const std::shared_ptr<Context>& moduleContext);
     napi_value OnCreateSystemHspModuleResourceManager(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo& info);
+    napi_value OnCreateAreaModeContext(napi_env env, NapiCallbackInfo &info);
+    napi_value CreateJsAreaContext(napi_env env, const std::shared_ptr<Context> &areaContext);
     bool CheckCallerIsSystemApp();
     static void BindNativeApplicationContextOne(napi_env env, napi_value object);
     static void BindNativeApplicationContextTwo(napi_env env, napi_value object);
