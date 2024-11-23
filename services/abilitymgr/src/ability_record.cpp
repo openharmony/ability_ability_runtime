@@ -234,7 +234,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->SetSecurityFlag(abilityRequest.want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
     abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
     abilityRecord->sessionInfo_ = abilityRequest.sessionInfo;
-    if (abilityRequest.abilityInfo.type == == AppExecFwk::AbilityType::PAGE &&
+    if (abilityRequest.abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
         !abilityRequest.customProcess.empty()) {
             abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
         }
@@ -3026,7 +3026,7 @@ void AbilityRecord::SetWantAppIndex(const int32_t appIndex)
 
 int32_t AbilityRecord::GetWantAppIndex() const
 {
-    return want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    return want_.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
 }
 
 bool AbilityRecord::IsMinimizeFromUser() const

@@ -238,7 +238,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
             return request;
         }
         request->extensionProcessMode = extensionInfo.extensionProcessMode;
-        abilityInfo->customProcess = request->abilityInfo.process;
+        request->customProcess = request->abilityInfo.process;
         // For compatibility translates to AbilityInfo
         AbilityRuntime::StartupUtil::InitAbilityInfoFromExtension(extensionInfo, request->abilityInfo);
     }
