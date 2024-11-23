@@ -56,6 +56,16 @@ int32_t UIExtensionRecordFactory::CreateRecord(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "create record failed");
         return ERR_NULL_OBJECT;
     }
+    if (abilityRequest.extensionType == AppExecFwk::ExtensionAbilityType::EMBEDDED_UI &&
+        abilityRequest.sessionInfo != nullptr) {
+        auto callerToken = abilityRequest.sessionInfo->callerToken;
+        auto callerAbilityRecord = AAFwk::Token::GetAbilityRecordByToken(callerToken);
+        if (callerAbilityRecord != nullptr) {
+            int32_t appIndex = callerAbilityRecord->GetAppIndex();
+            abilityRecord->SetAppIndex(appIndex);
+            abilityRecord->SetWantAppIndex(appIndex);
+        }
+    }
     if (AAFwk::MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
         abilityRecord->SetInstanceKey(AAFwk::MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
     }

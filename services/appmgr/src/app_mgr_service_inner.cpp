@@ -675,8 +675,10 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
 
     std::shared_ptr<AppRunningRecord> appRecord;
     bool isProcCache = false;
+    std::string customProcessFlag = loadParam->customProcessFlag;
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
-        processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey);
+        processName, appInfo->uid, bundleInfo, specifiedProcessFlag, &isProcCache, loadParam->instanceKey,
+        customProcessFlag);
     if (appRecord && appRecord->IsCaching()) {
         auto priorityObj = appRecord->GetPriorityObject();
         if (priorityObj) {
@@ -708,7 +710,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             processName, bundleInfo, hapModuleInfo, want, isKia);
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
-            AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token);
+            AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token, customProcessFlag);
         if (ProcessKia(isKia, appRecord, watermarkBusinessName, isWatermarkEnabled) != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "ProcessKia failed");
             return;
@@ -899,7 +901,11 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
     }
     if (!abilityInfo->process.empty() && (isCallerSetProcess || specifiedProcessFlag.empty())) {
         TAG_LOGD(AAFwkTag::APPMGR, "Process not null");
-        processName = abilityInfo->process;
+        if (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel) {
+            processName = appInfo->bundleName + abilityInfo->process;
+        } else {
+            processName = abilityInfo->process;
+        }
         // extension's process is bundleName:extensionType, generated at installation time
         MakeIsolateSandBoxProcessName(abilityInfo, hapModuleInfo, processName);
         if (appIndex != 0) {
@@ -953,7 +959,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     std::shared_ptr<AbilityInfo> abilityInfo, const std::string &processName,
     const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo, const HapModuleInfo &hapModuleInfo,
     std::shared_ptr<AAFwk::Want> want, bool appExistFlag, bool isPreload, AppExecFwk::PreloadMode preloadMode,
-    sptr<IRemoteObject> token)
+    sptr<IRemoteObject> token, const std::string &customProcessFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "processName:%{public}s, isPreload:%{public}d",
@@ -964,6 +970,9 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     }
     if (!specifiedProcessFlag.empty()) {
         appRecord->SetSpecifiedProcessFlag(specifiedProcessFlag);
+    }
+    if (!customProcessFlag.empty()) {
+        appRecord->SetCustomProcessFlag(customProcessFlag);
     }
     if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, processName)) {
         appRecord->SetEmptyKeepAliveAppState(false);

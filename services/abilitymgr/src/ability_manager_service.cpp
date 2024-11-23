@@ -6377,6 +6377,7 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
     }
     request.abilityInfo = abilityInfo->abilityInfo;
     request.extensionProcessMode = abilityInfo->extensionProcessMode;
+    request.customProcess = abilityInfo->customProcess;
 
     if (request.abilityInfo.applicationInfo.codePath == std::to_string(CollaboratorType::RESERVE_TYPE)) {
         request.collaboratorType = CollaboratorType::RESERVE_TYPE;
