@@ -386,6 +386,15 @@ public:
      */
     Global::Resource::DeviceType GetDeviceType() const override;
 
+    /**
+     * @brief Create a area mode context.
+     *
+     * @param areaMode Indicates the area mode.
+     *
+     * @return Returns the context with the specified area mode.
+     */
+    std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
+
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
     void PrintTokenInfo() const;
@@ -395,6 +404,7 @@ public:
     static const int EL_DEFAULT = 1;
 
 protected:
+    // Adding a new attribute requires adding a copy in the CreateAreaModeContext function
     sptr<IRemoteObject> token_;
 
 private:
@@ -476,6 +486,7 @@ private:
     void UnsubscribeToOverlayEvents();
 
     static Global::Resource::DeviceType deviceType_;
+    // Adding a new attribute requires adding a copy in the CreateAreaModeContext function
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo_ = nullptr;
     std::shared_ptr<Context> parentContext_ = nullptr;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_ = nullptr;
