@@ -1097,5 +1097,10 @@ std::shared_ptr<AAFwk::Want> AbilityContextImpl::GetWant()
     }
     return abilityCallback->GetWant();
 }
+
+std::shared_ptr<Context> AbilityContextImpl::CreateAreaModeContext(int areaMode)
+{
+    return stageContext_ ? stageContext_->CreateAreaModeContext(areaMode) : nullptr;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
