@@ -109,6 +109,8 @@ public:
 
     std::string GetProcessName() override;
 
+    std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
+
     int32_t mode_ = 0;
 };
 }  // namespace AbilityRuntime
