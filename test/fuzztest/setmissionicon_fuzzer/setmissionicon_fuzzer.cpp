@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "ability_connect_callback_interface.h"
 #include "ability_manager_client.h"
@@ -26,32 +27,28 @@ using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
-namespace {
-constexpr size_t U32_AT_SIZE = 4;
-}
-sptr<Token> GetFuzzAbilityToken()
+sptr<Token> GetFuzzAbilityToken(FuzzedDataProvider *fdp)
 {
     sptr<Token> token = nullptr;
-
     AbilityRequest abilityRequest;
-    abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.type = AbilityType::DATA;
+    abilityRequest.abilityInfo.type = static_cast<AbilityType>(fdp->ConsumeIntegral<int32_t>());
+    abilityRequest.appInfo.bundleName = fdp->ConsumeRandomLengthString();
+    abilityRequest.abilityInfo.name = abilityRequest.appInfo.bundleName;
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     if (abilityRecord) {
         token = abilityRecord->GetToken();
     }
-
     return token;
 }
-bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+
+bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
 {
     auto abilityMgr = AbilityManagerClient::GetInstance();
     if (!abilityMgr) {
         return false;
     }
 
-    sptr<Token> token = GetFuzzAbilityToken();
+    sptr<Token> token = GetFuzzAbilityToken(fdp);
     if (!token) {
         std::cout << "Get ability token failed." << std::endl;
         return false;
@@ -71,32 +68,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    if (data == nullptr) {
-        std::cout << "invalid data" << std::endl;
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = (char*)malloc(size + 1);
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-    free(ch);
-    ch = nullptr;
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
