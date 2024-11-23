@@ -420,11 +420,11 @@ bool AppRunningManager::ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, 
         if (appInfo == nullptr) {
             continue;
         }
-        if (appInfo->multiAppMode.multiAppModeType != MultiAppModeType::MULTI_INSTANCE) {
-            TAG_LOGI(AAFwkTag::APPMGR, "not multi-instance");
+        if (appInfo->accessTokenId != accessTokenId) {
             continue;
         }
-        if (appInfo->accessTokenId != accessTokenId) {
+        if (appInfo->multiAppMode.multiAppModeType != MultiAppModeType::MULTI_INSTANCE) {
+            TAG_LOGI(AAFwkTag::APPMGR, "not multi-instance");
             continue;
         }
         if (appRecord->GetInstanceKey() != instanceKey) {
