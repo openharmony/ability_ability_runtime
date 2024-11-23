@@ -3026,6 +3026,7 @@ void AbilityRecord::SetWantAppIndex(const int32_t appIndex)
 
 int32_t AbilityRecord::GetWantAppIndex() const
 {
+    std::lock_guard guard(wantLock_);
     return want_.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
 }
 

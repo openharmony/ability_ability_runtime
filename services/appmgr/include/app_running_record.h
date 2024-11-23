@@ -1108,7 +1108,7 @@ private:
     int32_t appRecordId_ = 0;
     std::string processName_;  // the name of this process
     std::string specifiedProcessFlag_; // the flag of specified Process
-    std::string customProcessFlag_;
+    std::string customProcessFlag_; // the flag of custom process
     std::unordered_set<sptr<IRemoteObject>, RemoteObjHash> foregroundingAbilityTokens_;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
     sptr<AppDeathRecipient> appDeathRecipient_ = nullptr;

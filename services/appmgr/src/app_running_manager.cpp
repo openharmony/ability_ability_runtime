@@ -116,7 +116,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     auto jointUserId = bundleInfo.jointUserId;
     TAG_LOGD(AAFwkTag::APPMGR, "jointUserId : %{public}s", jointUserId.c_str());
     ClipStringContent(rule, bundleInfo.appId, signCode);
-    auto FindSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId, customProcessFlag]
+    auto findSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId, customProcessFlag]
         (const auto &pair) {
             return (pair.second != nullptr) &&
             (specifiedProcessFlag.empty() || pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag) &&
@@ -127,7 +127,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     };
     auto appRunningMap = GetAppRunningRecordMap();
     if (!jointUserId.empty()) {
-        auto iter = std::find_if(appRunningMap.begin(), appRunningMap.end(), FindSameProcess);
+        auto iter = std::find_if(appRunningMap.begin(), appRunningMap.end(), findSameProcess);
         return ((iter == appRunningMap.end()) ? nullptr : iter->second);
     }
     for (const auto &item : appRunningMap) {
