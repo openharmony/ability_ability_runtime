@@ -179,7 +179,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     manager->CreateAppRunningRecord(appInfo, jsonStr, bundleInfo, "");
     int uid = static_cast<int>(GetU32Data(data));
     manager->CheckAppRunningRecordIsExist(jsonStr, jsonStr, uid, bundleInfo, jsonStr);
-    manager->CheckAppRunningRecordIsExistByBundleName(jsonStr);
+    auto accessTokenId = static_cast<uint32_t>(GetU32Data(data));
+    manager->IsAppExist(accessTokenId);
     int32_t appCloneIndex = static_cast<int32_t>(GetU32Data(data));
     bool isRunning = *data % ENABLE;
     manager->CheckAppCloneRunningRecordIsExistByBundleName(jsonStr, appCloneIndex, isRunning);
