@@ -1411,6 +1411,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     // create contextImpl
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
     contextImpl->SetApplicationInfo(std::make_shared<ApplicationInfo>(appInfo));
+    contextImpl->SetProcessName(processInfo.GetProcessName());
     std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
         AbilityRuntime::ApplicationContext::GetInstance();
     int32_t appIndex = appLaunchData.GetAppIndex();

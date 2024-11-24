@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1088,6 +1088,30 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SwitchArea_0100, Function 
     int32_t mode = 2;
     context_->SwitchArea(mode);
     EXPECT_EQ(context_->GetArea(), mode);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_GetProcessName_0100
+ * @tc.name: GetProcessName
+ * @tc.desc: Get process name sucess
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetProcessName_0100, Function | MediumTest | Level1)
+{
+    context_->SetStageContext(mock_);
+    auto ret = context_->GetProcessName();
+    EXPECT_EQ(ret, "processName");
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_GetProcessName_0200
+ * @tc.name: GetProcessName
+ * @tc.desc: Get process name failed
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetProcessName_0200, Function | MediumTest | Level1)
+{
+    context_->SetStageContext(nullptr);
+    auto ret = context_->GetProcessName();
+    EXPECT_EQ(ret, "");
 }
 
 /**

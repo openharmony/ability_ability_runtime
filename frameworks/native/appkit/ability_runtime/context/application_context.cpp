@@ -783,6 +783,11 @@ int ApplicationContext::GetArea()
     return contextImpl_->GetArea();
 }
 
+std::string ApplicationContext::GetProcessName()
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetProcessName() : "";
+}
+
 std::shared_ptr<AppExecFwk::Configuration> ApplicationContext::GetConfiguration() const
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetConfiguration() : nullptr;

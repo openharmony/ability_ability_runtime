@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,6 +63,7 @@ public:
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
     std::string GetGroupDir(std::string groupId) override;
+    std::string GetProcessName() override;
     int32_t GetSystemDatabaseDir(const std::string &groupId, bool checkExist, std::string &databaseDir) override;
     int32_t GetSystemPreferencesDir(const std::string &groupId, bool checkExist, std::string &preferencesDir) override;
     std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
