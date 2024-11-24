@@ -34,11 +34,6 @@ public:
     T value;
 };
 
-struct AccessTokenServiceConfig {
-    std::string grantBundleName;
-    std::string grantAbilityName;
-};
-
 /**
  * @class AppUtils
  * provides app utils.
@@ -261,14 +256,6 @@ public:
      */
     std::string GetMigrateClientBundleName();
 
-    /**
-     * IsAccessTokenConfig, check if it access token config.
-     *
-     * @param AccessTokenServiceConfig Configuration structure.
-     * @return Whether it access token config.
-     */
-    bool IsAccessTokenConfig(AccessTokenServiceConfig &config);
-
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -287,12 +274,6 @@ private:
      *
      */
     void LoadStartAbilityWithoutCallerToken();
-
-    /**
-     * LoadAccessTokenConfig, access token config.
-     *
-     */
-    void LoadAccessTokenConfig();
 
     /**
      * AppUtils, private constructor.
@@ -331,8 +312,6 @@ private:
     volatile DeviceConfiguration<int32_t> collaboratorBrokerReserveUid_ = {false, DEFAULT_INVALID_VALUE};
     volatile DeviceConfiguration<int32_t> maxChildProcess_ = {false, DEFAULT_MAX_CHILD_PROCESS};
     DeviceConfiguration<std::string> migrateClientBundleName_ = {true, "com.huwei.hmos.migratecilent"};
-    DeviceConfiguration<AccessTokenServiceConfig> accessTokenConfig_ = {false, {}};
-    std::mutex accessTokenConfigMutex_;
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk
