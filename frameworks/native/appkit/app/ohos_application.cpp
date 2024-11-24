@@ -374,6 +374,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         stageContext->SetParentContext(abilityRuntimeContext_);
         stageContext->InitHapModuleInfo(abilityInfo);
         stageContext->SetConfiguration(GetConfiguration());
+        stageContext->SetProcessName(GetProcessName());
         std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo = stageContext->GetHapModuleInfo();
         if (hapModuleInfo == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo is nullptr");

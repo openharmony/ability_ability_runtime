@@ -382,6 +382,26 @@ int AbilityStageContext::GetArea()
     return contextImpl_->GetArea();
 }
 
+std::string AbilityStageContext::GetProcessName()
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        return {};
+    }
+
+    return contextImpl_->GetProcessName();
+}
+
+void AbilityStageContext::SetProcessName(const std::string &processName)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Invalid contextImpl");
+        return;
+    }
+
+    contextImpl_->SetProcessName(processName);
+}
+
 Global::Resource::DeviceType AbilityStageContext::GetDeviceType() const
 {
     if (contextImpl_ == nullptr) {

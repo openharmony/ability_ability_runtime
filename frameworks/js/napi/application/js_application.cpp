@@ -111,6 +111,7 @@ napi_value JsApplication::OnCreateModuleContext(napi_env env, NapiCallbackInfo &
         ThrowInvalidParamError(env, "create context failed.");
         return CreateJsUndefined(env);
     }
+    contextImpl->SetProcessName(context->GetProcessName());
     std::string moduleName = "";
     std::string bundleName = "";
     if (info.argc == ARGC_TWO) {
@@ -234,6 +235,7 @@ napi_value JsApplication::OnCreateBundleContext(napi_env env, NapiCallbackInfo &
 
     auto bundleContext = std::make_shared<std::shared_ptr<Context>>();
     std::shared_ptr<ContextImpl> contextImpl = std::make_shared<ContextImpl>();
+    contextImpl->SetProcessName(context->GetProcessName());
 
     NapiAsyncTask::ExecuteCallback execute = [bundleName, contextImpl,
         bundleContext, inputContextPtr]() {
