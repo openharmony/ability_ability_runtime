@@ -3687,12 +3687,12 @@ std::string AbilityRecord::GetProcessName() const
 
 void AbilityRecord::SetCustomProcessFlag(const std::string &process)
 {
-    abilityInfo_.process = process;
+    customProcessFlag_ = process;
 }
 
 std::string AbilityRecord::GetCustomProcessFlag() const
 {
-    return abilityInfo_.process;
+    return customProcessFlag_;
 }
 
 void AbilityRecord::SetUIExtensionAbilityId(const int32_t uiExtensionAbilityId)
