@@ -41,9 +41,12 @@ constexpr int32_t DIGIT_NUM = 64;
 const std::string MEGER_SOURCE_MAP_PATH = "ets/sourceMaps.map";
 const std::string FLAG_SOURCES = "    \"sources\":";
 const std::string FLAG_MAPPINGS = "    \"mappings\": \"";
+const std::string FLAG_ENTRY_PACKAGE_INFO = "    \"entry-package-info\": \"";
+const std::string FLAG_PACKAGE_INFO = "    \"package-info\": \"";
 const std::string FLAG_END = "  }";
 static constexpr size_t FLAG_MAPPINGS_LEN = 17;
-static constexpr size_t REAL_SOURCE_SIZE = 7;
+static constexpr size_t FLAG_ENTRY_PACKAGE_INFO_SIZE = 27;
+static constexpr size_t FLAG_PACKAGE_INFO_SIZE = 21;
 static constexpr size_t REAL_URL_INDEX = 3;
 static constexpr size_t REAL_SOURCE_INDEX = 7;
 } // namespace
@@ -185,6 +188,32 @@ std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
     return ans;
 }
 
+
+void SourceMap::SetSourceMapData()
+{
+    for (auto it = sources_.begin(); it != sources_.end(); ++it) {
+        std::string mappings = mappings_[it->first];
+        if (mappings.size() < FLAG_MAPPINGS_LEN + 1) {
+            TAG_LOGE(AAFwkTag::JSENV, "Translate failed, url: %{public}s", it->first.c_str());
+            continue;
+        }
+        std::shared_ptr<SourceMapData> modularMap = std::make_shared<SourceMapData>();
+        if (modularMap == nullptr) {
+            TAG_LOGE(AAFwkTag::JSENV, "New SourceMapData failed";
+            continue;
+        }
+        modularMap->entryPackageInfo_.push_back(entryPackageInfo_[it->first]);
+        modularMap->packageInfo_.push_back(packageInfo_[it->first]);
+        ExtractSourceMapData(mappings.substr(FLAG_MAPPINGS_LEN, mappings.size() - FLAG_MAPPINGS_LEN - 1), modularMap);
+        modularMap->sources_.push_back(it->second);
+        sourceMaps_[it->first] = modularMap;
+    }
+    mappings_.clear();
+    sources_.clear();
+    entryPackageInfo_.clear();
+    packageInfo_.clear();
+}
+
 void SourceMap::SplitSourceMap(const std::string& sourceMapData)
 {
     std::lock_guard<std::mutex> lock(sourceMapMutex_);
@@ -202,8 +231,8 @@ void SourceMap::SplitSourceMap(const std::string& sourceMapData)
     std::getline(ss, tmp);
     bool isUrl = true;
     while (std::getline(ss, tmp)) {
-        if (isUrl && tmp.size() > REAL_SOURCE_SIZE) {
-            url = tmp.substr(REAL_URL_INDEX, tmp.size() - REAL_SOURCE_SIZE);
+        if (isUrl && tmp.size() > REAL_SOURCE_INDEX) {
+            url = tmp.substr(REAL_URL_INDEX, tmp.size() - REAL_SOURCE_INDEX);
             isUrl = false;
             continue;
         }
@@ -216,27 +245,19 @@ void SourceMap::SplitSourceMap(const std::string& sourceMapData)
             mappings_.emplace(url, tmp);
             continue;
         }
+        if (StringStartWith(tmp.c_str(), FLAG_ENTRY_PACKAGE_INFO)) {
+            entryPackageInfo_.emplace(url, tmp);
+            continue;
+        }
+        if (StringStartWith(tmp.c_str(), FLAG_PACKAGE_INFO)) {
+            packageInfo_.emplace(url, tmp);
+            continue;
+        }
         if (StringStartWith(tmp.c_str(), FLAG_END)) {
             isUrl = true;
         }
     }
-    for (auto it = sources_.begin(); it != sources_.end(); ++it) {
-        std::string mappings = mappings_[it->first];
-        if (mappings.size() < FLAG_MAPPINGS_LEN + 1) {
-            TAG_LOGE(AAFwkTag::JSENV, "Translate failed, url: %{public}s", it->first.c_str());
-            continue;
-        }
-        std::shared_ptr<SourceMapData> modularMap = std::make_shared<SourceMapData>();
-        ExtractSourceMapData(mappings.substr(FLAG_MAPPINGS_LEN, mappings.size() - FLAG_MAPPINGS_LEN - 1), modularMap);
-        if (modularMap == nullptr) {
-            TAG_LOGE(AAFwkTag::JSENV, "Extract mappings failed, url: %{public}s", it->first.c_str());
-            continue;
-        }
-        modularMap->sources_.push_back(it->second);
-        sourceMaps_[it->first] = modularMap;
-    }
-    mappings_.clear();
-    sources_.clear();
+    SetSourceMapData();
 }
 
 void SourceMap::ExtractStackInfo(const std::string& stackStr, std::vector<std::string>& res)
@@ -300,7 +321,7 @@ void SourceMap::ExtractSourceMapData(const std::string& allmappings, std::shared
 MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targetMap, const std::string& key)
 {
     if (row < 1 || col < 1 || targetMap.afterPos_.empty() || targetMap.sources_[0].empty()) {
-        return MappingInfo {0, 0, ""};
+        return MappingInfo {row, col, key};
     }
     row--;
     col--;
@@ -322,7 +343,7 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
         }
     }
     std::string sources = targetMap.sources_[0].substr(REAL_SOURCE_INDEX,
-                                                       targetMap.sources_[0].size() - REAL_SOURCE_SIZE - 1);
+                                                       targetMap.sources_[0].size() - REAL_SOURCE_INDEX - 1);
     auto pos = sources.find(WEBPACK);
     if (pos != std::string::npos) {
         sources.replace(pos, sizeof(WEBPACK) - 1, "");
@@ -474,11 +495,14 @@ std::string SourceMap::GetSourceInfo(const std::string& line, const std::string&
 #else
         mapInfo = Find(StringToInt(line) - offSet, StringToInt(column), targetMap, key);
 #endif
-    if (mapInfo.row == 0 || mapInfo.col == 0) {
-        return "";
-    }
     std::string sources = isModular_ ? mapInfo.sources : GetRelativePath(mapInfo.sources);
-    sourceInfo = "(" + sources + ":" + std::to_string(mapInfo.row) + ":" + std::to_string(mapInfo.col) + ")";
+    std::string entryPackageInfo = targetMap.entryPackageInfo_[0];
+    std::string packageInfo = targetMap.packageInfo_[0];
+    std::string packageName = packageInfo.empty() ? entryPackageInfo.substr(FLAG_ENTRY_PACKAGE_INFO_SIZE,
+        entryPackageInfo.rfind('|') - FLAG_ENTRY_PACKAGE_INFO_SIZE) : packageInfo.substr(FLAG_PACKAGE_INFO_SIZE,
+        packageInfo.rfind('|') - FLAG_PACKAGE_INFO_SIZE);
+    sourceInfo = packageName + " (" + sources + ":" + std::to_string(mapInfo.row) + ":" +
+        std::to_string(mapInfo.col) + ")";
     return sourceInfo;
 }
 
