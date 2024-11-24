@@ -980,6 +980,8 @@ public:
     void SetRestartTime(const int64_t restartTime);
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
+    void SetWantAppIndex(const int32_t appIndex);
+    int32_t GetWantAppIndex() const;
     bool IsRestarting() const;
     void SetAppState(const AppState &state);
     AppState GetAppState() const;
@@ -1082,6 +1084,10 @@ public:
     void SetProcessName(const std::string &process);
 
     std::string GetProcessName() const;
+
+    void SetCustomProcessFlag(const std::string &process);
+
+    std::string GetCustomProcessFlag() const;
 
     void SetURI(const std::string &uri);
     std::string GetURI() const;
@@ -1298,6 +1304,7 @@ private:
     bool isStartToBackground_ = false;
     bool isStartToForeground_ = false;
     std::atomic_bool isCallerSetProcess_ = false;
+    std::string customProcessFlag_ = "";
     int32_t appIndex_ = 0;
     bool minimizeReason_ = false;
 
