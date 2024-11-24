@@ -234,6 +234,10 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->SetSecurityFlag(abilityRequest.want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
     abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
     abilityRecord->sessionInfo_ = abilityRequest.sessionInfo;
+    if (abilityRequest.abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
+        !abilityRequest.customProcess.empty()) {
+            abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
+        }
     if (abilityRequest.sessionInfo != nullptr) {
         abilityRecord->instanceKey_ = abilityRequest.sessionInfo->instanceKey;
     }
@@ -347,6 +351,7 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.preToken = callerToken;
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
+    loadParam.customProcessFlag = customProcessFlag_;
     want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
     if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
         want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
@@ -3013,6 +3018,18 @@ int32_t AbilityRecord::GetAppIndex() const
     return appIndex_;
 }
 
+void AbilityRecord::SetWantAppIndex(const int32_t appIndex)
+{
+    std::lock_guard guard(wantLock_);
+    want_.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+}
+
+int32_t AbilityRecord::GetWantAppIndex() const
+{
+    std::lock_guard guard(wantLock_);
+    return want_.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+}
+
 bool AbilityRecord::IsMinimizeFromUser() const
 {
     return minimizeReason_;
@@ -3664,6 +3681,16 @@ void AbilityRecord::SetProcessName(const std::string &process)
 std::string AbilityRecord::GetProcessName() const
 {
     return abilityInfo_.process;
+}
+
+void AbilityRecord::SetCustomProcessFlag(const std::string &process)
+{
+    customProcessFlag_ = process;
+}
+
+std::string AbilityRecord::GetCustomProcessFlag() const
+{
+    return customProcessFlag_;
 }
 
 void AbilityRecord::SetUIExtensionAbilityId(const int32_t uiExtensionAbilityId)

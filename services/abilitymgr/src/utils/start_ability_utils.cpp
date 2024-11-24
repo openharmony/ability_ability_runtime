@@ -215,6 +215,8 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
         IN_PROCESS_CALL_WITHOUT_RET(bms->GetSandboxAbilityInfo(want, appIndex,
             abilityInfoFlag, userId, request->abilityInfo));
     }
+    request->customProcess = request->abilityInfo.process;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "abilityInfo customProcess: %{public}s", request->customProcess.c_str());
     if (request->abilityInfo.name.empty() || request->abilityInfo.bundleName.empty()) {
         // try to find extension
         std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
