@@ -885,5 +885,10 @@ void ApplicationContext::ProcessSecurityExit(const AAFwk::ExitReason &exitReason
     TAG_LOGI(AAFwkTag::APPKIT, "Proc exit, reason: %{public}s", exitReason.exitMsg.c_str());
     appProcessExitCallback_(exitReason);
 }
+
+std::shared_ptr<Context> ApplicationContext::CreateAreaModeContext(int areaMode)
+{
+    return contextImpl_ ? contextImpl_->CreateAreaModeContext(areaMode) : nullptr;
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
