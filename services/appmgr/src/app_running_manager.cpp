@@ -109,8 +109,9 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
-        "appName: %{public}s, processName: %{public}s, uid: %{public}d, specifiedProcessFlag: %{public}s",
-        appName.c_str(), processName.c_str(), uid, specifiedProcessFlag.c_str());
+        "appName: %{public}s, processName: %{public}s, uid: %{public}d, specifiedProcessFlag: %{public}s, \
+         customProcessFlag: %{public}s",
+        appName.c_str(), processName.c_str(), uid, specifiedProcessFlag.c_str(), customProcessFlag.c_str());
     std::regex rule("[a-zA-Z.]+[-_#]{1}");
     std::string signCode;
     auto jointUserId = bundleInfo.jointUserId;
@@ -139,8 +140,10 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             !(appRecord->IsUserRequestCleaning()) && !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked())) {
             auto appInfoList = appRecord->GetAppInfoList();
             TAG_LOGD(AAFwkTag::APPMGR,
-                "appInfoList: %{public}zu, processName: %{public}s, specifiedProcessFlag: %{public}s",
-                appInfoList.size(), appRecord->GetProcessName().c_str(), specifiedProcessFlag.c_str());
+                "appInfoList: %{public}zu, processName: %{public}s, specifiedProcessFlag: %{public}s, \
+                 customProcessFlag: %{public}s",
+                appInfoList.size(), appRecord->GetProcessName().c_str(), specifiedProcessFlag.c_str(),
+                customProcessFlag.c_str());
             auto isExist = [&appName, &uid](const std::shared_ptr<ApplicationInfo> &appInfo) {
                 TAG_LOGD(AAFwkTag::APPMGR, "appInfo->name: %{public}s", appInfo->name.c_str());
                 return appInfo->name == appName && appInfo->uid == uid;
