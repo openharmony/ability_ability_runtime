@@ -208,7 +208,11 @@ class ApplicationContext {
   getAllRunningInstanceKeys() {
     return this.__context_impl__.getAllRunningInstanceKeys();
   }
-  
+
+  createAreaModeContext(areaMode) {
+    return this.__context_impl__.createAreaModeContext(areaMode);
+  }
+
   set area(mode) {
     return this.__context_impl__.switchArea(mode);
   }
