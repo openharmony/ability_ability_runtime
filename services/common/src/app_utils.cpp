@@ -68,10 +68,6 @@ constexpr const char* COLLABORATOR_BROKER_RESERVE_UID = "const.sys.abilityms.col
 constexpr const char* MAX_CHILD_PROCESS = "const.max_native_child_process";
 constexpr const char* SUPPORT_MULTI_INSTANCE = "const.abilityms.support_multi_instance";
 constexpr const char* MIGRATE_CLIENT_BUNDLE_NAME = "const.sys.abilityms.migrate_client_bundle_name";
-constexpr const char* ACCESS_TOKEN_CONFIG_PATH = "/system/variant/phone/base/etc/access_token/accesstoken_config.json";
-constexpr const char* KEY_ACCESS_TOKEN = "accesstoken";
-constexpr const char* PERMISSION_MANAGER_BUNDLE_NAME = "permission_manager_bundle_name";
-constexpr const char* GRANT_ABILITY_NAME = "grant_ability_name";
 }
 
 AppUtils::~AppUtils() {}
@@ -466,54 +462,5 @@ std::string AppUtils::GetMigrateClientBundleName()
     TAG_LOGD(AAFwkTag::DEFAULT, "migrateClientBundleName_ is %{public}s", migrateClientBundleName_.value.c_str());
     return migrateClientBundleName_.value;
 }
-
-bool AppUtils::IsAccessTokenConfig(AccessTokenServiceConfig &config)
-{
-    std::lock_guard lock(accessTokenConfigMutex_);
-    if (!accessTokenConfig_.isLoaded) {
-        LoadAccessTokenConfig();
-        accessTokenConfig_.isLoaded = true;
-    }
-    TAG_LOGD(AAFwkTag::DEFAULT, "isLoaded: %{public}d", accessTokenConfig_.isLoaded);
-
-    if (accessTokenConfig_.value.grantBundleName.empty() || accessTokenConfig_.value.grantAbilityName.empty()) {
-        return false;
-    }
-    config.grantBundleName = accessTokenConfig_.value.grantBundleName;
-    config.grantAbilityName = accessTokenConfig_.value.grantAbilityName;
-    
-    return true;
-}
-
-void AppUtils::LoadAccessTokenConfig()
-{
-    nlohmann::json object;
-    if (!JsonUtils::GetInstance().LoadConfiguration(ACCESS_TOKEN_CONFIG_PATH, object)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "load access token config failed");
-        return;
-    }
-
-    if (!object.contains(KEY_ACCESS_TOKEN)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "token config invalid");
-        return;
-    }
-
-    for (auto &item : object.at(KEY_ACCESS_TOKEN).items()) {
-        const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.contains(PERMISSION_MANAGER_BUNDLE_NAME) ||
-            !jsonObject.at(PERMISSION_MANAGER_BUNDLE_NAME).is_string()) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "load permission_manager_bundle_name failed");
-            return;
-        }
-        if (!jsonObject.contains(GRANT_ABILITY_NAME) || !jsonObject.at(GRANT_ABILITY_NAME).is_string()) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "load grant_ability_name failed");
-            return;
-        }
-        std::string permissionManagerBundleName = jsonObject.at(PERMISSION_MANAGER_BUNDLE_NAME).get<std::string>();
-        std::string grantAbilityName = jsonObject.at(GRANT_ABILITY_NAME).get<std::string>();
-        accessTokenConfig_.value = AccessTokenServiceConfig{permissionManagerBundleName, grantAbilityName};
-    }
-}
-
 }  // namespace AAFwk
 }  // namespace OHOS
