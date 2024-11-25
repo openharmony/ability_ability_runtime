@@ -889,6 +889,8 @@ public:
 
     PreloadMode GetPreloadMode();
 
+    bool IsPreload();
+
     /**
      * @brief Obtains the app record assign tokenId.
      *
@@ -1205,6 +1207,7 @@ private:
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
     std::string killReason_ = "";
+    bool is
 };
 
 }  // namespace AppExecFwk

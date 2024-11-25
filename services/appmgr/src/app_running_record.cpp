@@ -2622,5 +2622,11 @@ bool AppRunningRecord::IsUnSetPermission()
 {
     return isUnSetPermission_;
 }
+
+bool IsPreload()
+{
+    return preloadMode_!= PreloadMode::PRESS_DOWN;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
