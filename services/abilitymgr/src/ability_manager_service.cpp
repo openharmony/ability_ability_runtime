@@ -4839,19 +4839,10 @@ void AbilityManagerService::CancelWantSender(const sptr<IWantSender> &sender)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "getOsAccountLocalIdFromUid failed uid=%{public}d", callerUid);
         return;
     }
-    bool isSystemApp = false;
-    if (record->GetKey() != nullptr && !record->GetKey()->GetBundleName().empty()) {
-        AppExecFwk::BundleInfo bundleInfo;
-        bool bundleMgrResult = IN_PROCESS_CALL(bms->GetBundleInfo(record->GetKey()->GetBundleName(),
-            AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
-        if (!bundleMgrResult) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "getBundleInfo fail");
-            return;
-        }
-        isSystemApp = bundleInfo.applicationInfo.isSystemApp;
-    }
 
-    pendingWantManager->CancelWantSender(isSystemApp, sender);
+    bool isSystemAppCall = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
+
+    pendingWantManager->CancelWantSender(isSystemAppCall, sender);
 }
 
 int AbilityManagerService::GetPendingWantUid(const sptr<IWantSender> &target)
