@@ -413,7 +413,7 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
 void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:Call");
+    TAG_LOGI(AAFwkTag::UIABILITY, "wnd call, AfterForeground");
     auto owner = owner_.lock();
     if (owner == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null owner");
@@ -435,7 +435,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
     }
 
     if (needNotifyAMS) {
-        TAG_LOGI(AAFwkTag::UIABILITY, "notify ability manager service");
+        TAG_LOGI(AAFwkTag::UIABILITY, "wnd call, notify ability manager service");
         entry = "AbilityManagerClient::AbilityTransitionDone";
         FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
         owner->lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
@@ -452,7 +452,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle:call");
+    TAG_LOGI(AAFwkTag::UIABILITY, "wnd call, AfterBackground");
     std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::AfterBackground";
     FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
 
@@ -487,7 +487,7 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterUnfocused()
 
 void UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 {
-    TAG_LOGE(AAFwkTag::UIABILITY, "scb call, ForegroundFailed");
+    TAG_LOGE(AAFwkTag::UIABILITY, "wnd call, ForegroundFailed");
     std::string entry = "UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed; GoForeground failed";
     FreezeUtil::GetInstance().AppendLifecycleEvent(token_, entry);
     AppExecFwk::PacMap restoreData;
@@ -542,7 +542,7 @@ void UIAbilityImpl::Foreground(const AAFwk::Want &want)
 
 void UIAbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    TAG_LOGE(AAFwkTag::UIABILITY, "wnd call, BackgroundFailed");
     if (type == static_cast<int32_t>(OHOS::Rosen::WMError::WM_DO_NOTHING)) {
         AppExecFwk::PacMap restoreData;
         AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
