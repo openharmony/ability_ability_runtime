@@ -2552,6 +2552,11 @@ bool AppRunningRecord::IsCaching()
     return isCaching_;
 }
 
+bool IsPreload()
+{
+    return preloadMode_!= PreloadMode::PRESS_DOWN;
+}
+
 void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
 {
     isNeedPreloadModule_ = isNeedPreloadModule;
