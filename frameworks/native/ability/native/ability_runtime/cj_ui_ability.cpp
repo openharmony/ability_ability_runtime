@@ -141,6 +141,9 @@ void CJUIAbility::SetAbilityContext(
         return;
     }
     cjAbilityObj_->Init(this);
+    if (abilityRecovery_ != nullptr) {
+        abilityRecovery_->SetJsAbility(reinterpret_cast<uintptr_t>(abilityContext_.get()));
+    }
 }
 
 void CJUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
