@@ -763,6 +763,8 @@ public:
 
     PreloadMode GetPreloadMode();
 
+    bool IsPreload();
+
     /**
      * @brief Obtains the app record assign tokenId.
      *
