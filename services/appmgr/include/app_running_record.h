@@ -982,6 +982,8 @@ public:
     bool IsCaching();
     void SetNeedPreloadModule(bool isNeedPreloadModule);
     bool GetNeedPreloadModule();
+    void SetNeedLimitPrio(bool isNeedLimitPrio);
+    bool GetNeedLimitPrio();
 
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
@@ -1204,6 +1206,7 @@ private:
     bool hasUIAbilityLaunched_ = false;
     bool isKia_ = false;
     bool isNeedPreloadModule_ = false;
+    bool isNeedLimitPrio_ = false;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
