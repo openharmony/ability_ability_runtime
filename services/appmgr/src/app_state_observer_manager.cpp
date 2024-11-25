@@ -574,7 +574,7 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
     }
     ProcessData data = WrapProcessData(appRecord);
     data.isPreload = isPreload;
-    data.isPreloadModule = appRecord->IsPreload();
+    data.isPreloadModule = appRecord->GetNeedLimitPrio();
     if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "bundleName is com.huawei.chmos.vassistant, change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
@@ -950,7 +950,7 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
     appStateData.state = static_cast<int32_t>(state);
     appStateData.uid = appRecord->GetUid();
     appStateData.extensionType = appRecord->GetExtensionType();
-    appStateData.isPreloadModule = appRecord->IsPreload();
+    appStateData.isPreloadModule = appRecord->GetNeedLimitPrio();
     if (appRecord->GetApplicationInfo() != nullptr) {
         appStateData.accessTokenId = static_cast<uint32_t>(appRecord->GetApplicationInfo()->accessTokenId);
     }

@@ -2582,6 +2582,16 @@ bool AppRunningRecord::IsUnSetPermission()
     return isUnSetPermission_;
 }
 
+bool AppRunningRecord::GetNeedLimitPrio()
+{
+    return isNeedLimitPrio_;
+}
+
+void AppRunningRecord::SetNeedLimitPrio(bool isNeedLimitPrio)
+{
+    isNeedLimitPrio_ = isNeedLimitPrio;
+}
+
 void AppRunningRecord::UnSetPolicy()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "UnSetPolicy call");
