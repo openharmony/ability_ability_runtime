@@ -119,6 +119,21 @@ void UpdateCallerInfoUtil::UpdateSignatureInfo(std::string bundleName, Want& wan
 void UpdateCallerInfoUtil::UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObject> asCallerSourceToken,
     sptr<IRemoteObject> callerToken)
 {
+    if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
+        want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
+        want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
+    }
+    want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_UID);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
+    want.RemoveParam(IS_SHELL_CALL);
+    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
 #ifdef SUPPORT_SCREEN
     if (UpdateAsCallerInfoFromDialog(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Update as caller source info from dialog.");
@@ -136,21 +151,6 @@ void UpdateCallerInfoUtil::UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObje
 
 void UpdateCallerInfoUtil::UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteObject> asCallerSourceToken)
 {
-    if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(asCallerSourceToken)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
-        want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
-        want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
-    }
-    want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_UID);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
-    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
-    want.RemoveParam(IS_SHELL_CALL);
-    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
-
     auto abilityRecord = Token::GetAbilityRecordByToken(asCallerSourceToken);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed update caller info from token");
@@ -173,21 +173,6 @@ void UpdateCallerInfoUtil::UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteO
 
 void UpdateCallerInfoUtil::UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<IRemoteObject> callerToken)
 {
-    if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(callerToken)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "not call from anco or broker.");
-        want.RemoveParam(PARAM_RESV_ANCO_CALLER_UID);
-        want.RemoveParam(PARAM_RESV_ANCO_CALLER_BUNDLENAME);
-    }
-    want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_UID);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
-    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
-    want.RemoveParam(IS_SHELL_CALL);
-    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER(callerRecord);
     auto sourceInfo = callerRecord->GetCallerInfo();
@@ -227,10 +212,6 @@ bool UpdateCallerInfoUtil::UpdateAsCallerInfoFromDialog(Want& want)
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
     want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, callerAppCloneIndex);
-    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
-    want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
-    want.RemoveParam(IS_SHELL_CALL);
-    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
     if (callerBundleName == "") {
         want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME,
             dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME));
