@@ -54,6 +54,7 @@ private:
     int32_t HandleKillProcessesByPids(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachPidToParent(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessWithAccount(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleKillProcessesInBatch(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillApplication(MessageParcel &data, MessageParcel &reply);
     int32_t HandleForceKillApplication(MessageParcel &data, MessageParcel &reply);
     int32_t HandleKillProcessesByAccessTokenId(MessageParcel &data, MessageParcel &reply);
@@ -85,6 +86,7 @@ private:
     int32_t HandleClearProcessByToken(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsMemorySizeSufficent(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetKeepAliveEnableState(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetKeepAliveDkv(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachedToStatusBar(MessageParcel &data, MessageParcel &reply);
     int32_t OnRemoteRequestInner(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
@@ -101,8 +103,7 @@ private:
     int32_t HandleCleanAbilityByUserRequest(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsProcessAttached(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleIsAppKilling(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleSetAppExceptionCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsCallerKilling(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AmsMgrStub);
 };
 }  // namespace AppExecFwk

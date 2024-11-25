@@ -404,7 +404,7 @@ HWTEST_F(OHOSApplicationFirstTest, AppExecFwk_OHOSApplicationTest_OnConfiguratio
     sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
     std::shared_ptr<AbilityInfo> info =  nullptr;
     auto want = std::make_shared<Want>();
-    std::shared_ptr<AbilityLocalRecord> abilityRecord =  std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
     ohosApplication_->abilityRecordMgr_->abilityRecords_.emplace(token, abilityRecord);
     sptr<AbilityThread> abilityThread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
     abilityRecord->SetAbilityThread(abilityThread);

@@ -284,13 +284,14 @@ void AbilityCacheManager::RemoveLauncherDeathRecipient()
     }
 }
 
-void AbilityCacheManager::SignRestartAppFlag(int32_t uid)
+void AbilityCacheManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto it = devRecLru_.begin();
     while (it != devRecLru_.end()) {
         auto abilityRecord = *it;
-        if (abilityRecord != nullptr && abilityRecord->GetUid() == uid) {
+        if (abilityRecord != nullptr && abilityRecord->GetUid() == uid &&
+            abilityRecord->GetInstanceKey() == instanceKey) {
             abilityRecord->SetRestartAppFlag(true);
         }
         it++;

@@ -97,6 +97,7 @@ const std::string TARGET_OHM = "targetohm";
 const std::string SINCE_VERSION = "sinceVersion";
 
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
+const std::string MERGE_SOURCE_MAP_PATH = "ets/sourceMaps.map";
 static auto PermissionCheckFunc = []() {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
 
@@ -190,15 +191,13 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
-            if (isDebugApp) {
-                ConnectServerManager::Get().StopConnectServer(false);
-            }
+            // if has old connect server, stop it
+            ConnectServerManager::Get().StopConnectServer(false);
             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
-            if (isDebugApp) {
-                weak->StopDebugger(option);
-            }
+            // if has old debugger server, stop it
+            weak->StopDebugger(option);
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
@@ -327,15 +326,13 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
             return;
         }
         if (option.find(DEBUGGER) == std::string::npos) {
-            if (isDebugApp) {
-                ConnectServerManager::Get().StopConnectServer(false);
-            }
+            // if has old connect server, stop it
+            ConnectServerManager::Get().StopConnectServer(false);
             ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
-            if (isDebugApp) {
-                weak->StopDebugger(option);
-            }
+            // if has old debugger server, stop it
+            weak->StopDebugger(option);
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
@@ -732,8 +729,17 @@ bool JsRuntime::Initialize(const Options& options)
     }
 
     if (!options.preload) {
+        std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
+        bool newCreate = false;
+        std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
+        bool hasFile = false;
+        if (!extractor) {
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "Get extractor failed. hapPath[%{private}s]", loadPath.c_str());
+        } else {
+            hasFile = extractor->HasEntry(MERGE_SOURCE_MAP_PATH);
+        }
         auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.bundleName, isModular,
-                                                                      options.isDebugVersion);
+                                                                      hasFile);
         InitSourceMap(operatorObj);
 
         if (options.isUnique) {
@@ -1266,6 +1272,42 @@ void JsRuntime::PreloadSystemModule(const std::string& moduleName)
     napi_value refValue = methodRequireNapiRef_->GetNapiValue();
     napi_value args[1] = { className };
     napi_call_function(env, globalObj, refValue, 1, args, nullptr);
+}
+
+void JsRuntime::PreloadMainAbility(const std::string& moduleName, const std::string& srcPath,
+    const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance)
+{
+    HandleScope handleScope(*this);
+    std::string key(moduleName);
+    key.append("::");
+    key.append(srcPath);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadMainAbility srcPath: %{public}s", srcPath.c_str());
+    preloadList_[key] = LoadModule(moduleName, srcPath, hapPath, isEsMode, false, srcEntrance);
+}
+
+void JsRuntime::PreloadModule(const std::string& moduleName, const std::string& srcPath,
+    const std::string& hapPath, bool isEsMode, bool useCommonTrunk)
+{
+    std::string key(moduleName);
+    key.append("::");
+    key.append(srcPath);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "PreloadModule srcPath: %{public}s", srcPath.c_str());
+    preloadList_[key] = LoadModule(moduleName, srcPath, hapPath, isEsMode, useCommonTrunk);
+}
+
+bool JsRuntime::PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj)
+{
+    if (preloadList_.find(key) == preloadList_.end()) {
+        return false;
+    }
+    if (preloadList_[key] != nullptr) {
+        obj = std::move(preloadList_[key]);
+        preloadList_.erase(key);
+        return true;
+    }
+
+    preloadList_.erase(key);
+    return false;
 }
 
 NativeEngine& JsRuntime::GetNativeEngine() const

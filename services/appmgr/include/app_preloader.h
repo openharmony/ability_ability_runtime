@@ -32,6 +32,7 @@ struct PreloadRequest {
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     int32_t appIndex = 0; // not used
+    AppExecFwk::PreloadMode preloadMode;
 };
 
 class AppPreloader {

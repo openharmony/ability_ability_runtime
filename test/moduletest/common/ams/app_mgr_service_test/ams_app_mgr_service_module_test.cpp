@@ -463,7 +463,7 @@ HWTEST_F(AppMgrServiceModuleTest, KillApplication_001, TestSize.Level1)
     Semaphore sem(0);
 
     auto mockHandler = [&testResult, testBundleName, &sem](
-        const std::string& bundleName, const bool clearPageStack = false) {
+        const std::string& bundleName, const bool clearPageStack = false, int32_t appIndex = 0) {
         testResult = (bundleName == testBundleName);
         sem.Post();
         return 0;
@@ -472,7 +472,7 @@ HWTEST_F(AppMgrServiceModuleTest, KillApplication_001, TestSize.Level1)
     for (int i = 0; i < COUNT; ++i) {
         testResult = false;
 
-        EXPECT_CALL(*mockAppMgrServiceInner_, KillApplication(_, _)).Times(1).WillOnce(Invoke(mockHandler));
+        EXPECT_CALL(*mockAppMgrServiceInner_, KillApplication(_, _, _)).Times(1).WillOnce(Invoke(mockHandler));
 
         int ret = appMgrService_->GetAmsMgr()->KillApplication(testBundleName);
 

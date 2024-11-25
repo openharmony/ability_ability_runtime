@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_FREEZE_UTIL_H
 #define OHOS_ABILITY_RUNTIME_FREEZE_UTIL_H
 
+#include <list>
 #include <mutex>
 #include <unordered_map>
 
@@ -34,11 +35,6 @@ public:
     struct LifecycleFlow {
         sptr<IRemoteObject> token;
         TimeoutState state = TimeoutState::UNKNOWN;
-
-        bool operator==(const LifecycleFlow &other) const
-        {
-            return token == other.token && state == other.state;
-        }
     };
 
     FreezeUtil& operator=(const FreezeUtil&) = delete;
@@ -46,10 +42,9 @@ public:
     virtual ~FreezeUtil() = default;
     static FreezeUtil& GetInstance();
 
-    void AddLifecycleEvent(const LifecycleFlow &flow, const std::string &entry);
-    bool AppendLifecycleEvent(const LifecycleFlow &flow, const std::string &entry);
-    std::string GetLifecycleEvent(const LifecycleFlow &flow);
-    void DeleteLifecycleEvent(const LifecycleFlow &flow);
+    void AddLifecycleEvent(sptr<IRemoteObject> token, const std::string &entry);
+    bool AppendLifecycleEvent(sptr<IRemoteObject> token, const std::string &entry);
+    std::string GetLifecycleEvent(sptr<IRemoteObject> token);
     void DeleteLifecycleEvent(sptr<IRemoteObject> token);
 
     void AddAppLifecycleEvent(pid_t pid, const std::string &entry);
@@ -57,19 +52,18 @@ public:
     std::string GetAppLifecycleEvent(pid_t pid);
 private:
     FreezeUtil() = default;
-    void DeleteLifecycleEventInner(const LifecycleFlow &flow);
 
-    class LifecycleFlowObjHash {
+    class RemoteObjHash {
     public:
-        size_t operator() (const LifecycleFlow &flow) const
+        size_t operator() (const sptr<IRemoteObject> &obj) const
         {
-            return reinterpret_cast<size_t>(flow.token.GetRefPtr()) + std::hash<int>()(static_cast<int>(flow.state));
+            return std::hash<IRemoteObject*>()(obj.GetRefPtr());
         }
     };
 
     std::mutex mutex_;
-    std::unordered_map<LifecycleFlow, std::string, LifecycleFlowObjHash> lifecycleFlow_;
-    std::unordered_map<pid_t, std::string> appLifeCycleFlow_;
+    std::unordered_map<sptr<IRemoteObject>, std::list<std::string>, RemoteObjHash> lifecycleFlow_;
+    std::unordered_map<pid_t, std::list<std::string>> appLifeCycleFlow_;
 };
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_FREEZE_UTIL_H

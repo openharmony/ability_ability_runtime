@@ -139,7 +139,7 @@ napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
     g_dataAbilityHelperList.emplace_back(dataAbilityHelper);
     auto wrapper = new NAPIDataAbilityHelperWrapper(dataAbilityHelper);
 
-    napi_wrap(
+    status = napi_wrap(
         env,
         thisVar,
         wrapper,
@@ -168,6 +168,11 @@ napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
         },
         nullptr,
         nullptr);
+    if (status != napi_ok && wrapper != nullptr) {
+        TAG_LOGE(AAFwkTag::FA, "napi_wrap Failed: %{public}d", status);
+        delete wrapper;
+        return nullptr;
+    }
 
     dataAbilityHelperStatus = true;
     return thisVar;

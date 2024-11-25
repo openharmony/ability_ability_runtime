@@ -659,15 +659,16 @@ HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2200, TestSize.Level1)
 
 /*
  * @tc.number    : PendingWantRecordTest_2300
- * @tc.name      : BuildSendWant
- * @tc.desc      : 1.BuildSendWant
+ * @tc.name      : CheckAppInstanceKey
+ * @tc.desc      : 1.Verification failure case, bundle name empty
  */
 HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2300, TestSize.Level1)
 {
     Want want;
     ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
     want.SetElement(element);
-    want.SetParam(std::string("ohos.extra.param.key.appInstance"), std::string("app_instance_100"));
+    want.SetParam(std::string("ohos.extra.param.key.appInstance"), std::string("app_instance_3"));
+
     pendingManager_ = std::make_shared<PendingWantManager>();
     EXPECT_NE(pendingManager_, nullptr);
     WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::ONE_TIME_FLAG, 0);
@@ -678,11 +679,70 @@ HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2300, TestSize.Level1)
         std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
     EXPECT_NE(pendingWantRecord, nullptr);
 
-    SenderInfo info;
-    Want senderWant;
-    pendingWantRecord->BuildSendWant(info, senderWant);
-    EXPECT_EQ(senderWant.GetParams().GetStringParam(
-        std::string("ohos.extra.param.key.appInstance")), std::string());
+    std::string bundleName{ "" };
+    auto params = want.GetParams();
+    pendingWantRecord->CheckAppInstanceKey(bundleName, params);
+    EXPECT_EQ(params.GetStringParam(
+        std::string("ohos.extra.param.key.appInstance")), std::string("app_instance_3"));
+}
+
+
+/*
+ * @tc.number    : PendingWantRecordTest_2400
+ * @tc.name      : CheckAppInstanceKey
+ * @tc.desc      : 1.Successful verification cases
+ */
+HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2400, TestSize.Level1)
+{
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    want.SetParam(std::string("ohos.extra.param.key.appInstance"), std::string("app_instance_1"));
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::ONE_TIME_FLAG, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    EXPECT_NE(key, nullptr);
+    key->SetType(static_cast<int32_t>(OperationType::START_ABILITY));
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    std::string bundleName{ "com.ix.hiMusic" };
+    auto params = want.GetParams();
+    pendingWantRecord->CheckAppInstanceKey(bundleName, params);
+    EXPECT_EQ(params.GetStringParam(
+        std::string("ohos.extra.param.key.appInstance")), std::string("app_instance_1"));
+}
+
+/*
+ * @tc.number    : PendingWantRecordTest_2500
+ * @tc.name      : CheckAppInstanceKey
+ * @tc.desc      : 1.Do not check the START_SERVICE type
+ */
+HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_2500, TestSize.Level1)
+{
+    Want want;
+    ElementName element("device", "com.ix.hiMusic", "MusicSAbility");
+    want.SetElement(element);
+    want.SetParam(std::string("ohos.extra.param.key.appInstance"), std::string("app_instance_3"));
+
+    pendingManager_ = std::make_shared<PendingWantManager>();
+    EXPECT_NE(pendingManager_, nullptr);
+    WantSenderInfo wantSenderInfo = MakeWantSenderInfo(want, (int32_t)Flags::ONE_TIME_FLAG, 0);
+    std::shared_ptr<PendingWantKey> key = MakeWantKey(wantSenderInfo);
+    EXPECT_NE(key, nullptr);
+    key->SetType(static_cast<int32_t>(OperationType::START_SERVICE));
+    std::shared_ptr<PendingWantRecord> pendingWantRecord =
+        std::make_shared<PendingWantRecord>(pendingManager_, 1, 0, nullptr, key);
+    EXPECT_NE(pendingWantRecord, nullptr);
+
+    std::string bundleName{ "com.ix.hiMusic" };
+    auto params = want.GetParams();
+    pendingWantRecord->CheckAppInstanceKey(bundleName, params);
+    EXPECT_EQ(params.GetStringParam(
+        std::string("ohos.extra.param.key.appInstance")), std::string("app_instance_3"));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

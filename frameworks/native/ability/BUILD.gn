@@ -84,6 +84,7 @@ ohos_shared_library("ability_context_native") {
     "access_token:libtoken_callback_sdk",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
     "faultloggerd:libdfx_dumpcatcher",
     "hilog:libhilog",
     "hitrace:hitrace_meter",

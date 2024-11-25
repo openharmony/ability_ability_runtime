@@ -14,7 +14,6 @@
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 abilityms_files = [
-  "src/preload_uiext_state_observer.cpp",
   "src/ability_background_connection.cpp",
   "src/ability_cache_manager.cpp",
   "src/ability_connect_manager.cpp",
@@ -28,7 +27,6 @@ abilityms_files = [
   "src/ability_manager_xcollie.cpp",
   "src/ability_scheduler_proxy.cpp",
   "src/ability_token_stub.cpp",
-  "src/app_exception_handler.cpp",
   "src/app_scheduler.cpp",
   "src/app_exit_reason_helper.cpp",
   "src/assert_fault_callback_death_mgr.cpp",
@@ -44,6 +42,9 @@ abilityms_files = [
   "src/ecological_rule/ability_ecological_rule_mgr_service.cpp",
   "src/extension_config.cpp",
   "src/extension_running_info.cpp",
+  "src/extension_record/extension_record_manager.cpp",
+  "src/extension_record/extension_record.cpp",
+  "src/extension_record/extension_record_factory.cpp",
   "src/caller_info.cpp",
   "src/sub_managers_helper.cpp",
   "src/pending_want_record.cpp",
@@ -52,7 +53,6 @@ abilityms_files = [
   "src/pending_want_common_event.cpp",
   "src/restart_app_manager.cpp",
   "src/ams_configuration_parameter.cpp",
-  "src/insight_intent_profile.cpp",
   "src/recovery_info_timer.cpp",
   "src/modal_system_dialog/modal_system_dialog_ui_extension.cpp",
   "src/interceptor/ability_interceptor_executer.cpp",
@@ -66,17 +66,16 @@ abilityms_files = [
   "src/interceptor/screen_unlock_interceptor.cpp",
   "src/interceptor/start_other_app_interceptor.cpp",
   "src/window_focus_changed_listener.cpp",
+  "src/window_visibility_changed_listener.cpp",
 
   # start ability handler
   "src/start_ability_handler.cpp",
   "src/start_ability_handler/start_ability_sandbox_savefile.cpp",
 
   # new ability manager service here
-  "src/extension_record_manager.cpp",
-  "src/extension_record.cpp",
-  "src/extension_record_factory.cpp",
-  "src/ui_extension_record.cpp",
-  "src/ui_extension_record_factory.cpp",
+  "src/ui_extension/preload_uiext_state_observer.cpp",
+  "src/ui_extension_record/ui_extension_record.cpp",
+  "src/ui_extension_record/ui_extension_record_factory.cpp",
   "src/screen_lock/unlock_screen_manager.cpp",
   "src/start_options.cpp",
   "src/user_callback_proxy.cpp",
@@ -122,8 +121,15 @@ abilityms_files = [
   "src/ability_auto_startup_data_manager.cpp",
   "src/ability_auto_startup_service.cpp",
   "src/auto_startup_info.cpp",
-  "src/insight_intent_execute_manager.cpp",
-  "src/insight_intent_execute_result.cpp",
+  "src/insight_intent/insight_intent_execute_manager.cpp",
+  "src/insight_intent/insight_intent_execute_result.cpp",
+  "src/insight_intent/insight_intent_profile.cpp",
+  "src/insight_intent/insight_intent_utils.cpp",
+
+  # keep alive
+  "src/keep_alive/ability_keep_alive_data_manager.cpp",
+  "src/keep_alive/ability_keep_alive_service.cpp",
+  "src/keep_alive/keep_alive_process_manager.cpp",
 
   "src/ability_manager_event_subscriber.cpp",
 
@@ -133,12 +139,13 @@ abilityms_files = [
   "src/utils/app_mgr_util.cpp",
   "src/utils/dump_utils.cpp",
   "src/utils/extension_permissions_util.cpp",
-  "src/utils/insight_intent_utils.cpp",
+  "src/utils/keep_alive_utils.cpp",
   "src/utils/main_element_utils.cpp",
   "src/utils/modal_system_dialog_util.cpp",
   "src/utils/multi_app_utils.cpp",
   "src/utils/multi_instance_utils.cpp",
   "src/utils/start_ability_utils.cpp",
+  "src/utils/hidden_start_utils.cpp",
   "src/utils/state_utils.cpp",
   "src/utils/update_caller_info_util.cpp",
   "src/utils/uri_utils.cpp",

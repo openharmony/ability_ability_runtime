@@ -78,7 +78,6 @@ private:
     std::string processName_;
     std::string srcEntry_;
     std::string entryFunc_;
-    std::map<std::string, int32_t> fds_;
     std::weak_ptr<AppRunningRecord> hostRecord_;
     sptr<IChildScheduler> scheduler_ = nullptr;
     sptr<AppDeathRecipient> deathRecipient_ = nullptr;

@@ -82,7 +82,8 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetBundleStats(std::string pkgName, BundleStats &bundleStats, int32_t) override
+    virtual int32_t GetBundleStats(std::string pkgName, BundleStats &bundleStats,
+        int32_t index, uint32_t statFlag) override
     {
         return E_OK;
     }
@@ -112,7 +113,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetCurrentBundleStats(BundleStats &bundleStats) override
+    virtual int32_t GetCurrentBundleStats(BundleStats &bundleStats, uint32_t statFlag) override
     {
         return E_OK;
     }
@@ -327,6 +328,16 @@ public:
     virtual int32_t GetBundleStatsForIncrease(uint32_t userId, const std::vector<std::string> &bundleNames,
         const std::vector<int64_t> &incrementalBackTimes, std::vector<int64_t> &pkgFileSizes,
         std::vector<int64_t> &incPkgFileSizes) override
+    {
+        return E_OK;
+    }
+        
+    virtual int32_t MountMediaFuse(int32_t userId, int32_t &devFd) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t UMountMediaFuse(int32_t userId) override
     {
         return E_OK;
     }

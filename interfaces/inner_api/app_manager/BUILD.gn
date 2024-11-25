@@ -61,9 +61,6 @@ ohos_shared_library("app_manager") {
     "src/appmgr/app_debug_info.cpp",
     "src/appmgr/app_debug_listener_proxy.cpp",
     "src/appmgr/app_debug_listener_stub.cpp",
-    "src/appmgr/app_exception_callback_proxy.cpp",
-    "src/appmgr/app_exception_callback_stub.cpp",
-    "src/appmgr/app_exception_manager.cpp",
     "src/appmgr/app_foreground_state_observer_proxy.cpp",
     "src/appmgr/app_foreground_state_observer_stub.cpp",
     "src/appmgr/app_jsheap_mem_info.cpp",
@@ -154,7 +151,6 @@ ohos_shared_library("app_manager") {
     "bundle_framework:appexecfwk_base",
     "image_framework:image_native",
     "relational_store:native_rdb",
-    "skia:skia_canvaskit",
   ]
 
   if (background_task_mgr_continuous_task_enable) {

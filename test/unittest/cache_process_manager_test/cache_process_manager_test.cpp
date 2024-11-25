@@ -70,6 +70,7 @@ std::shared_ptr<AppRunningRecord> CacheProcessManagerTest::MockAppRecord(int api
     appRecord->SetState(ApplicationState::APP_STATE_CREATE);
     appRecord->SetContinuousTaskAppState(false);
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetRequestProcCode(1);
     appRecord->isFocused_ = false;
@@ -131,6 +132,7 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_PenddingCacheProcess_0100,
     auto appRecord = MockAppRecord();
     EXPECT_NE(appRecord, nullptr);
     appRecord->SetKeepAliveEnableState(true);
+    appRecord->SetKeepAliveDkv(true);
     appRecord->SetSingleton(true);
     appRecord->SetEmptyKeepAliveAppState(true);
     appRecord->SetKeepAliveBundle(true);

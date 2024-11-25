@@ -42,10 +42,10 @@ constexpr const char* PERMISSION_WRITE_IMAGEVIDEO = "ohos.permission.WRITE_IMAGE
 constexpr const char* PERMISSION_READ_IMAGEVIDEO = "ohos.permission.READ_IMAGEVIDEO";
 constexpr const char* PERMISSION_WRITE_AUDIO = "ohos.permission.WRITE_AUDIO";
 constexpr const char* PERMISSION_READ_AUDIO = "ohos.permission.READ_AUDIO";
+constexpr const char* PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED = "ohos.permission.GRANT_URI_PERMISSION_PRIVILEGED";
 constexpr const char* PERMISSION_READ_WRITE_DOWNLOAD = "ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY";
 constexpr const char* PERMISSION_READ_WRITE_DESKTON = "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY";
 constexpr const char* PERMISSION_READ_WRITE_DOCUMENTS = "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY";
-constexpr const char* PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED = "ohos.permission.GRANT_URI_PERMISSION_PRIVILEGED";
 constexpr const char* PERMISSION_EXEMPT_AS_CALLER = "ohos.permission.EXEMPT_AS_CALLER";
 constexpr const char* PERMISSION_EXEMPT_AS_TARGET = "ohos.permission.EXEMPT_AS_TARGET";
 constexpr const char* PERMISSION_PREPARE_TERMINATE = "ohos.permission.PREPARE_APP_TERMINATE";
@@ -59,14 +59,16 @@ constexpr const char* PERMISSION_START_SHORTCUT = "ohos.permission.START_SHORTCU
 constexpr const char* PERMISSION_PRELOAD_APPLICATION = "ohos.permission.PRELOAD_APPLICATION";
 constexpr const char* PERMISSION_SET_PROCESS_CACHE_STATE = "ohos.permission.SET_PROCESS_CACHE_STATE";
 constexpr const char* PERMISSION_PRELOAD_UI_EXTENSION_ABILITY = "ohos.permission.PRELOAD_UI_EXTENSION_ABILITY";
-constexpr const char* PERMISSION_PRE_START_ATOMIC_SERVICE = "ohos.permission.PRE_START_ATOMIC_SERVICE";
 constexpr const char* PERMISSION_KILL_APP_PROCESSES = "ohos.permission.KILL_APP_PROCESSES";
 constexpr const char* PERMISSION_KILL_PROCESS_DEPENDED_ON_WEB = "ohos.permission.KILL_PROCESS_DEPENDED_ON_ARKWEB";
+constexpr const char* PERMISSION_PRE_START_ATOMIC_SERVICE = "ohos.permission.PRE_START_ATOMIC_SERVICE";
 constexpr const char* PERMISSION_START_NATIVE_CHILD_PROCESS = "ohos.permission.START_NATIVE_CHILD_PROCESS";
 constexpr const char* PERMISSION_BLOCK_ALL_APP_START = "ohos.permission.BLOCK_ALL_APP_START";
 constexpr const char* PERMISSION_START_UIABILITY_TO_HIDDEN = "ohos.permission.START_UIABILITY_TO_HIDDEN";
 constexpr const char* PERMISSION_SUPERVISE_KIA_SERVICE = "ohos.permission.SUPERVISE_KIA_SERVICE";
 constexpr const char* PERMISSION_GET_TELEPHONY_STATE = "ohos.permission.GET_TELEPHONY_STATE";
+constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE = "ohos.permission.MANAGE_APP_KEEP_ALIVE";
+constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE_INTERNAL = "ohos.permission.MANAGE_APP_KEEP_ALIVE_INTERNAL";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS

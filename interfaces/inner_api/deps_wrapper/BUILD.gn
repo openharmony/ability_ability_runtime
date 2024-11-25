@@ -44,8 +44,10 @@ ohos_shared_library("ability_deps_wrapper") {
 
   external_deps = [
     "ability_base:base",
+    "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
 

@@ -37,6 +37,8 @@ enum class LoadingStage : int32_t {
     FOREGROUND_END,
     CONNECT_BEGIN,
     CONNECT_END,
+    DESTROY_BEGIN = 8,
+    DESTROY_END = 9,
 };
 
 class ResSchedUtil final {
@@ -50,7 +52,9 @@ public:
     std::string GetThawReasonByAbilityType(const AbilityInfo &abilityInfo);
     void GetAllFrozenPidsFromRSS(std::unordered_set<int32_t> &frozenPids);
     bool CheckShouldForceKillProcess(int32_t pid);
-    void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid, int64_t timeDuration = 0);
+    void ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
+        int64_t timeDuration = 0, int64_t abilityRecordId = -1);
+    std::unordered_set<std::string> GetNWebPreloadSet() const;
 private:
     ResSchedUtil() = default;
     ~ResSchedUtil() = default;

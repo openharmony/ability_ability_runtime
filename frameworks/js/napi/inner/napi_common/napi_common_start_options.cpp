@@ -15,6 +15,7 @@
 
 #include "napi_common_start_options.h"
 
+#include "ability_info.h"
 #include "hilog_tag_wrapper.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
@@ -134,6 +135,33 @@ bool UnwrapStartOptionsWithProcessOption(napi_env env, napi_value param, AAFwk::
     return true;
 }
 
+void UnwrapStartOptionsWindowOptions(napi_env env, napi_value param, AAFwk::StartOptions &startOptions)
+{
+    int32_t windowLeft = 0;
+    if (UnwrapInt32ByPropertyName(env, param, "windowLeft", windowLeft)) {
+        startOptions.SetWindowLeft(windowLeft);
+        startOptions.windowLeftUsed_ = true;
+    }
+
+    int32_t windowTop = 0;
+    if (UnwrapInt32ByPropertyName(env, param, "windowTop", windowTop)) {
+        startOptions.SetWindowTop(windowTop);
+        startOptions.windowTopUsed_ = true;
+    }
+
+    int32_t windowWidth = 0;
+    if (UnwrapInt32ByPropertyName(env, param, "windowWidth", windowWidth)) {
+        startOptions.SetWindowWidth(windowWidth);
+        startOptions.windowWidthUsed_ = true;
+    }
+
+    int32_t windowHeight = 0;
+    if (UnwrapInt32ByPropertyName(env, param, "windowHeight", windowHeight)) {
+        startOptions.SetWindowHeight(windowHeight);
+        startOptions.windowHeightUsed_ = true;
+    }
+}
+
 bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &startOptions)
 {
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
@@ -159,33 +187,18 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
         startOptions.SetWithAnimation(withAnimation);
     }
 
-    int32_t windowLeft = 0;
-    if (UnwrapInt32ByPropertyName(env, param, "windowLeft", windowLeft)) {
-        startOptions.SetWindowLeft(windowLeft);
-        startOptions.windowLeftUsed_ = true;
-    }
-
-    int32_t windowTop = 0;
-    if (UnwrapInt32ByPropertyName(env, param, "windowTop", windowTop)) {
-        startOptions.SetWindowTop(windowTop);
-        startOptions.windowTopUsed_ = true;
-    }
-
-    int32_t windowWidth = 0;
-    if (UnwrapInt32ByPropertyName(env, param, "windowWidth", windowWidth)) {
-        startOptions.SetWindowWidth(windowWidth);
-        startOptions.windowWidthUsed_ = true;
-    }
-
-    int32_t windowHeight = 0;
-    if (UnwrapInt32ByPropertyName(env, param, "windowHeight", windowHeight)) {
-        startOptions.SetWindowHeight(windowHeight);
-        startOptions.windowHeightUsed_ = true;
-    }
+    UnwrapStartOptionsWindowOptions(env, param, startOptions);
 
     bool windowFocused = true;
     if (UnwrapBooleanByPropertyName(env, param, "windowFocused", windowFocused)) {
         startOptions.SetWindowFocused(windowFocused);
+    }
+
+    std::vector<int32_t> supportWindowModes;
+    if (UnwrapInt32ArrayByPropertyName(env, param, "supportWindowModes", supportWindowModes)) {
+        for (int32_t mode : supportWindowModes) {
+            startOptions.supportWindowModes_.emplace_back(AppExecFwk::SupportWindowMode(mode));
+        }
     }
 
     return true;
