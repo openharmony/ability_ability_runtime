@@ -33,7 +33,7 @@ namespace {
 const std::string PARAMS_URI = "ability.verify.uri";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 const int32_t MAX_URI_COUNT = 500;
-constexpr int32_t API13 = 13;
+constexpr int32_t API14 = 14;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr uint32_t TOKEN_ID_BIT_SIZE = 32;
 }
@@ -136,7 +136,10 @@ int32_t UriUtils::CheckNonImplicitShareFileUri(const Want &want, int32_t userId,
     }
     // SA and system app support
     auto callerTokenId = specifyTokenId > 0 ? specifyTokenId : IPCSkeleton::GetCallingTokenID();
-    return CheckNonImplicitShareFileUriInner(callerTokenId, element.GetBundleName(), userId);
+    if (CheckNonImplicitShareFileUriInner(callerTokenId, element.GetBundleName(), userId) != ERR_OK) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "share file uri non-implicitly will not support");
+    }
+    return ERR_OK;
 }
 
 int32_t UriUtils::CheckNonImplicitShareFileUriInner(uint32_t callerTokenId, const std::string &targetBundleName,
@@ -157,8 +160,8 @@ int32_t UriUtils::CheckNonImplicitShareFileUriInner(uint32_t callerTokenId, cons
         // check api version
         TAG_LOGD(AAFwkTag::ABILITYMGR, "CallerBundleName:%{public}s, API:%{public}d",
             hapInfo.bundleName.c_str(), hapInfo.apiVersion);
-        if ((hapInfo.apiVersion % API_VERSION_MOD) < API13) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "api version lower than 13");
+        if ((hapInfo.apiVersion % API_VERSION_MOD) <= API14) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "api version lower than 14");
             return ERR_OK;
         }
         // check system app
@@ -173,7 +176,6 @@ int32_t UriUtils::CheckNonImplicitShareFileUriInner(uint32_t callerTokenId, cons
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target is system app");
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Not allowed to share file uri non-implicitly");
     return CHECK_PERMISSION_FAILED;
 }
 
