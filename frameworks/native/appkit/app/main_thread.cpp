@@ -1960,7 +1960,7 @@ void MainThread::LoadNativeLibrary(const BundleInfo &bundleInfo, std::string &na
                 TAG_LOGD(AAFwkTag::APPKIT, "Load libformrender.z.so from native lib path.");
                 handleAbilityLib = dlopen(FORM_RENDER_LIB_PATH, RTLD_NOW | RTLD_GLOBAL);
                 if (handleAbilityLib == nullptr) {
-                    TAG_LOGE(AAFwkTag::APPKIT, " dlopen %{public}s, [%{public}s] failed",
+                    TAG_LOGE(AAFwkTag::APPKIT, "dlopen %{public}s, [%{public}s] failed",
                         FORM_RENDER_LIB_PATH, dlerror());
                     exit(-1);
                 }
