@@ -82,6 +82,7 @@ ohos_shared_library("napi_common") {
       "form_fwk:form_manager",
       "graphic_2d:EGL",
       "window_manager:libdm",
+      "window_manager:libwm_lite",
     ]
   }
 
