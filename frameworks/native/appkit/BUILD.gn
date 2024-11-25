@@ -200,6 +200,7 @@ ohos_shared_library("appkit_native") {
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "json:nlohmann_json_static",
+    "libxml2:libxml2",
     "napi:ace_napi",
     "preferences:native_preferences",
     "resource_management:global_resmgr",

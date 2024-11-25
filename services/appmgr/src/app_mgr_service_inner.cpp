@@ -3910,7 +3910,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
 
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo != nullptr && !appRunningManager_->IsAppExist(appInfo->accessTokenId)) {
-        appRunningManager_->UnSetPolicy(appRecord);
+        appRecord->UnSetPolicy();
         TAG_LOGW(AAFwkTag::APPMGR, "before OnAppStopped");
         OnAppStopped(appRecord);
     }
@@ -4988,14 +4988,7 @@ void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunnin
     }
 
     auto pid = appRecord->GetPid();
-    appRecord->SetTerminating();
-    if (!appRunningManager_) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
-        return;
-    }
-    if (appRunningManager_->CheckAppRunningRecordIsLast(appRecord)) {
-        appRunningManager_->UnSetPolicy(appRecord);
-    }
+    appRecord->SetTerminating(appRunningManager_);
     appRecord->ScheduleProcessSecurityExit();
 
     auto startTime = SystemTimeMillisecond();
