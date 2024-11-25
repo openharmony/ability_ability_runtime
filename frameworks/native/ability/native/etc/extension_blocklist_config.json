@@ -167,7 +167,8 @@
             "prompt",
             "promptAction",
             "window",
-            "core.liveview.liveViewManager"
+            "core.liveview.liveViewManager",
+            "telephony.voipCall"
         ],
         "DriverExtension": [
             "abilityAccessCtrl",
@@ -284,7 +285,8 @@
             "prompt",
             "promptAction",
             "window",
-            "core.liveview.liveViewManager"
+            "core.liveview.liveViewManager",
+            "telephony.voipCall"
         ],
         "RemoteLocationExtension": [
             "notification",
@@ -297,7 +299,8 @@
             "application.formBindingData",
             "application.formHost",
             "application.formInfo",
-            "application.formProvider"
+            "application.formProvider",
+            "telephony.voipCall"
         ],
         "VoIPExtension": [
             "app.form.formProvider",

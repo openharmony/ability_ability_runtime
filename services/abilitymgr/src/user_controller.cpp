@@ -306,7 +306,7 @@ void UserController::UserBootDone(std::shared_ptr<UserItem> &item)
 
     std::lock_guard<ffrt::mutex> guard(userLock_);
     auto it = userItems_.find(userId);
-    if (it != userItems_.end()) {
+    if (it == userItems_.end()) {
         return;
     }
 

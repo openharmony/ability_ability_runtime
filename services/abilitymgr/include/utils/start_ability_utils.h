@@ -45,6 +45,7 @@ struct StartAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
     int32_t status = ERR_OK;
+    std::string customProcess;
 };
 
 struct StartAbilityUtils {

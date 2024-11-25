@@ -40,8 +40,9 @@ public:
     MOCK_METHOD2(Uninstall, bool(const AppExecFwk::UninstallParam &, const sptr<AppExecFwk::IStatusReceiver> &));
     MOCK_METHOD4(InstallSandboxApp, ErrCode(const std::string &, int32_t, int32_t, int32_t &));
     MOCK_METHOD3(UninstallSandboxApp, ErrCode(const std::string &, int32_t, int32_t));
-    MOCK_METHOD2(CreateStreamInstaller, sptr<AppExecFwk::IBundleStreamInstaller>(const AppExecFwk::InstallParam &,
-                                            const sptr<AppExecFwk::IStatusReceiver> &));
+    MOCK_METHOD3(CreateStreamInstaller, sptr<AppExecFwk::IBundleStreamInstaller>(const AppExecFwk::InstallParam &,
+                                            const sptr<AppExecFwk::IStatusReceiver> &,
+                                            const std::vector<std::string> &));
     MOCK_METHOD1(DestoryBundleStreamInstaller, bool(uint32_t));
     MOCK_METHOD3(StreamInstall, ErrCode(const std::vector<std::string> &, const AppExecFwk::InstallParam &,
                                     const sptr<AppExecFwk::IStatusReceiver> &));

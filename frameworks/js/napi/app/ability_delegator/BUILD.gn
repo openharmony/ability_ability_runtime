@@ -50,10 +50,13 @@ template("delegator") {
 
     external_deps = [
       "ability_base:want",
+      "bundle_framework:appexecfwk_base",
       "c_utils:utils",
       "common_event_service:cesfwk_innerkits",
+      "eventhandler:libeventhandler",
       "hilog:libhilog",
       "hitrace:hitrace_meter",
+      "ipc:ipc_napi",
       "napi:ace_napi",
     ]
 

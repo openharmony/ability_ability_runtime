@@ -36,7 +36,7 @@ public:
     MOCK_METHOD2(UpdateAbilityState, AppMgrResultCode(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD1(RegisterAppStateCallback, AppMgrResultCode(const sptr<IAppStateCallback>& callback));
     MOCK_METHOD0(ConnectAppMgrService, AppMgrResultCode());
-    MOCK_METHOD2(KillApplication, AppMgrResultCode(const std::string&, const bool clearPageStack));
+    MOCK_METHOD3(KillApplication, AppMgrResultCode(const std::string&, const bool clearPageStack, int32_t));
     MOCK_METHOD1(KillProcessByAbilityToken, AppMgrResultCode(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(KillProcessesByUserId, AppMgrResultCode(int32_t userId));
 };

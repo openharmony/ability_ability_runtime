@@ -28,7 +28,6 @@ using namespace OHOS::AbilityRuntime;
 
 namespace OHOS {
 namespace {
-constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 }
 class AbilityLifecycleCallbackFuzz : public AbilityLifecycleCallback {
@@ -51,6 +50,7 @@ public:
 };
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
+    (void)data;
     auto context = ApplicationContext::GetInstance();
     if (!context) {
         return false;
@@ -73,7 +73,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (size < OHOS::U32_AT_SIZE) {
         return 0;
     }
 

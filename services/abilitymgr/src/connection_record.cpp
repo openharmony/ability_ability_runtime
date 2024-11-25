@@ -136,6 +136,7 @@ int ConnectionRecord::DisconnectAbility()
 void ConnectionRecord::CompleteConnect(int resultCode)
 {
     CHECK_POINTER(targetService_);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CompleteConnect,%{public}s", targetService_->GetAbilityInfo().name.c_str());
     if (resultCode == ERR_OK) {
         SetConnectState(ConnectionState::CONNECTED);
         targetService_->SetAbilityState(AbilityState::ACTIVE);
@@ -175,7 +176,7 @@ void ConnectionRecord::CompleteDisconnect(int resultCode, bool isCallerDied, boo
     }
     CHECK_POINTER(targetService_);
     const AppExecFwk::AbilityInfo &abilityInfo = targetService_->GetAbilityInfo();
-    AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName,
+    AppExecFwk::ElementName element(targetService_->GetWant().GetDeviceId(), abilityInfo.bundleName,
         abilityInfo.name, abilityInfo.moduleName);
     auto code = isTargetDied ? (resultCode - 1) : resultCode;
     auto onDisconnectDoneTask = [connCallback = GetAbilityConnectCallback(), element, code]() {

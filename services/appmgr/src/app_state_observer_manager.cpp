@@ -612,6 +612,7 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
     }
     ProcessData data = WrapProcessData(appRecord);
     data.isPreload = isPreload;
+    data.isPreloadModule = appRecord->GetNeedPreloadModule();
     if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
@@ -815,7 +816,7 @@ ProcessData AppStateObserverManager::WrapProcessData(const std::shared_ptr<AppRu
 {
     ProcessData processData;
     processData.bundleName = appRecord->GetBundleName();
-    processData.pid = appRecord->GetPriorityObject()->GetPid();
+    processData.pid = appRecord->GetPid();
     processData.uid = appRecord->GetUid();
     auto applicationInfo = appRecord->GetApplicationInfo();
     if (applicationInfo) {
@@ -1024,11 +1025,12 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
     const ApplicationState state)
 {
     AppStateData appStateData;
-    appStateData.pid = appRecord->GetPriorityObject()->GetPid();
+    appStateData.pid = appRecord->GetPid();
     appStateData.bundleName = appRecord->GetBundleName();
     appStateData.state = static_cast<int32_t>(state);
     appStateData.uid = appRecord->GetUid();
     appStateData.extensionType = appRecord->GetExtensionType();
+    appStateData.isPreloadModule = appRecord->GetNeedPreloadModule();
     if (appRecord->GetApplicationInfo() != nullptr) {
         appStateData.accessTokenId = static_cast<uint32_t>(appRecord->GetApplicationInfo()->accessTokenId);
     }

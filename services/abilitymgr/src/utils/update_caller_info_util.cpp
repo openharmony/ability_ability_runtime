@@ -41,6 +41,7 @@ constexpr const char* PARAM_RESV_ANCO_CALLER_UID = "ohos.anco.param.callerUid";
 constexpr const char* PARAM_RESV_ANCO_CALLER_BUNDLENAME = "ohos.anco.param.callerBundleName";
 constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
+constexpr const char* IS_SHELL_CALL = "isShellCall";
 }
 
 UpdateCallerInfoUtil &UpdateCallerInfoUtil::GetInstance()
@@ -67,6 +68,8 @@ void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject
     want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
     want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
+    want.RemoveParam(IS_SHELL_CALL);
+    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!abilityRecord) {
@@ -85,18 +88,16 @@ void UpdateCallerInfoUtil::UpdateCallerInfo(Want& want, const sptr<IRemoteObject
             want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
             want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, nativeName);
         }
-        want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-        want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, bundleName);
-        want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
-        want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, std::string(""));
+        UpdateCallerBundleName(want, bundleName);
+        UpdateCallerAbilityName(want, "");
+        UpdateCallerAppCloneIndex(want, 0);
         return;
     }
     std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
-    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
-    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    UpdateCallerBundleName(want, callerBundleName);
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
-    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
-    want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateCallerAbilityName(want, callerAbilityName);
+    UpdateCallerAppCloneIndex(want, abilityRecord->GetAppIndex());
     UpdateSignatureInfo(callerBundleName, want);
 }
 
@@ -163,6 +164,7 @@ void UpdateCallerInfoUtil::UpdateAsCallerInfoFromToken(Want& want, sptr<IRemoteO
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateCallerAppCloneIndex(want, abilityRecord->GetAppIndex());
     UpdateSignatureInfo(callerBundleName, want);
 }
 
@@ -178,6 +180,7 @@ void UpdateCallerInfoUtil::UpdateAsCallerInfoFromCallerRecord(Want& want, sptr<I
     want.SetParam(Want::PARAM_RESV_CALLER_PID, sourceInfo->callerPid);
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, sourceInfo->callerAbilityName);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, sourceInfo->callerAppCloneIndex);
     if (callerBundleName == "") {
         want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, sourceInfo->callerNativeName);
         return;
@@ -199,11 +202,13 @@ bool UpdateCallerInfoUtil::UpdateAsCallerInfoFromDialog(Want& want)
     int32_t pid = dialogCallerWant.GetIntParam(Want::PARAM_RESV_CALLER_PID, 0);
     std::string callerBundleName = dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     std::string callerAbilityName = dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    int32_t callerAppCloneIndex = dialogCallerWant.GetIntParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, 0);
     want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
     want.SetParam(Want::PARAM_RESV_CALLER_UID, uid);
     want.SetParam(Want::PARAM_RESV_CALLER_PID, pid);
     want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, callerAppCloneIndex);
     if (callerBundleName == "") {
         want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME,
             dialogCallerWant.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME));
@@ -231,6 +236,8 @@ void UpdateCallerInfoUtil::UpdateCallerInfoFromToken(Want& want, const sptr<IRem
     want.RemoveParam(Want::PARAM_RESV_CALLER_PID);
     want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
+    want.RemoveParam(IS_SHELL_CALL);
+    want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
 
     std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
     want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
@@ -238,6 +245,7 @@ void UpdateCallerInfoUtil::UpdateCallerInfoFromToken(Want& want, const sptr<IRem
     std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
     want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
     want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
+    UpdateCallerAppCloneIndex(want, abilityRecord->GetAppIndex());
     UpdateSignatureInfo(callerBundleName, want);
 }
 
@@ -298,6 +306,24 @@ void UpdateCallerInfoUtil::UpdateDmsCallerInfo(Want& want, const sptr<IRemoteObj
     want.RemoveParam(DMS_CALLER_ABILITY_NAME);
     want.SetParam(DMS_CALLER_ABILITY_NAME, callerAbilityName);
     UpdateSignatureInfo(callerBundleName, want, true);
+}
+
+void UpdateCallerInfoUtil::UpdateCallerBundleName(Want& want, const std::string &bundleName)
+{
+    want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, bundleName);
+}
+
+void UpdateCallerInfoUtil::UpdateCallerAbilityName(Want& want, const std::string &abilityName)
+{
+    want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+    want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, abilityName);
+}
+
+void UpdateCallerInfoUtil::UpdateCallerAppCloneIndex(Want& want, int32_t appIndex)
+{
+    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
+    want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, appIndex);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

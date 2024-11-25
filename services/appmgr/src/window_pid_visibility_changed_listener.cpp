@@ -30,12 +30,13 @@ WindowPidVisibilityChangedListener::WindowPidVisibilityChangedListener(
 void WindowPidVisibilityChangedListener::NotifyWindowPidVisibilityChanged(
     const sptr<WindowPidVisibilityInfo>& windowPidVisibilityInfo)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "NotifyWindowPidVisibilityChanged called, pid:%{public}d, visibilityState:%{public}d.",
-        windowPidVisibilityInfo->pid_, static_cast<uint32_t>(windowPidVisibilityInfo->visibilityState_));
     if (!windowPidVisibilityInfo) {
         TAG_LOGW(AAFwkTag::APPMGR, "Window pid visibility info is empty.");
         return;
     }
+
+    TAG_LOGI(AAFwkTag::APPMGR, "NotifyWindowPidVisibilityChanged called, pid:%{public}d, visibilityState:%{public}d.",
+        windowPidVisibilityInfo->pid_, static_cast<uint32_t>(windowPidVisibilityInfo->visibilityState_));
 
     if (taskHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "Task handler is nullptr.");
@@ -50,7 +51,7 @@ void WindowPidVisibilityChangedListener::NotifyWindowPidVisibilityChanged(
         }
         serviceInner->HandleWindowPidVisibilityChanged(windowPidVisibilityInfo);
     };
-    taskHandler_->SubmitTask(task);
+    taskHandler_->SubmitTask(task, "NotifyWindowPidVisibilityChanged");
 }
 #endif // SUPPORT_SCREEN
 } // namespace AppExecFwk

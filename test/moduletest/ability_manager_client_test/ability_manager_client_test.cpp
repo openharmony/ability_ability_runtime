@@ -23,7 +23,7 @@
 #include "ipc_object_stub.h"
 #include "start_options.h"
 #include "status_bar_delegate_proxy.h"
-#include "ui_extension_session_info.h"
+#include "ui_extension/ui_extension_session_info.h"
 #include "want.h"
 
 using namespace testing;

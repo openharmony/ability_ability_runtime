@@ -33,6 +33,11 @@ public:
     {
         return taskHandle_;
     }
+
+    uint64_t GetId()
+    {
+        return taskHandle_.get_id();
+    }
 private:
     ffrt::task_handle taskHandle_;
 };

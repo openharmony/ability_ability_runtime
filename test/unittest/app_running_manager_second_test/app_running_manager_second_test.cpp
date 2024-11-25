@@ -292,6 +292,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_ProcessExitByBundleName_
     record1->SetUid(BASE_USER_RANGE);
     record1->SetKeepAliveBundle(true);
     record1->SetKeepAliveEnableState(true);
+    record1->SetKeepAliveDkv(true);
     record1->SetMainProcess(true);
     record1->GetPriorityObject()->SetPid(10000); // 10000 means valid process id
     ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent(); // marked mem insufficient
@@ -514,7 +515,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_GetAppRunningRecordByRen
     appInfo_->bundleName = BUNDLE_NAME;
     auto record1 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
     auto record2 = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
-    auto renderRecord = std::make_shared<RenderRecord>(0, "", -1, -1, -1, record2);
+    auto renderRecord = std::make_shared<RenderRecord>(0, "", FdGuard(-1), FdGuard(-1), FdGuard(-1), record2);
     record2->AddRenderRecord(renderRecord);
     auto ret = appRunningManager->GetAppRunningRecordByRenderPid(1);
 
@@ -1545,7 +1546,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0100,
      * @tc.steps: step2. Initialize AppRunningManager instance
      * @tc.expected: expect step1 first focused true
      */
-    auto ret = appRunningManager->SignRestartAppFlag(0);
+    auto ret = appRunningManager->SignRestartAppFlag(0, "");
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_SignRestartAppFlag_0100 end");
 }
@@ -1572,8 +1573,8 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0200,
      * @tc.steps: step2. Initialize AppRunningManager instance
      * @tc.expected: expect step1 different bundle unfocused true
      */
-    auto ret = appRunningManager->SignRestartAppFlag(0);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    auto ret = appRunningManager->SignRestartAppFlag(0, "");
+    EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_SignRestartAppFlag_0200 end");
 }
 
@@ -1600,7 +1601,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0300,
      * @tc.steps: step2. Initialize AppRunningManager instance
      * @tc.expected: expect step2 focused false
      */
-    auto ret = appRunningManager->SignRestartAppFlag(0);
+    auto ret = appRunningManager->SignRestartAppFlag(0, "");
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_TRUE(record->GetRestartAppFlag());
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_SignRestartAppFlag_0300 end");

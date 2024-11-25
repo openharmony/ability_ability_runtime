@@ -76,6 +76,7 @@ config("demo_ui_extension_module_config") {
     "include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
     "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
   ]

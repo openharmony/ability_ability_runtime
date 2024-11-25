@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef OHOS_ABILITY_RUNTIME_CJ_MACRO_H
 #define OHOS_ABILITY_RUNTIME_CJ_MACRO_H
 
@@ -23,5 +23,5 @@
 #else
 #define CJ_EXPORT __attribute__((visibility("default")))
 #endif
- 
+
 #endif // OHOS_ABILITY_RUNTIME_CJ_MACRO_H

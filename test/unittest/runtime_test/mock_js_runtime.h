@@ -71,6 +71,16 @@ public:
     {
         GTEST_LOG_(INFO) << "MockJsRuntime::PreloadSystemModule called";
     }
+    void PreloadMainAbility(const std::string& moduleName, const std::string& srcPath,
+        const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) override
+    {
+        GTEST_LOG_(INFO) << "MockJsRuntime::PreloadMainAbility called";
+    }
+    void PreloadModule(const std::string& moduleName, const std::string& srcPath,
+        const std::string& hapPath, bool isEsMode, bool useCommonTrunk)override
+    {
+        GTEST_LOG_(INFO) << "MockJsRuntime::PreloadModule called";
+    }
     std::unique_ptr<NativeReference> LoadModule(
         const std::string& moduleName, const std::string& modulePath, const std::string& hapPath, bool esmodule = false)
     {

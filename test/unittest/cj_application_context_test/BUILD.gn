@@ -33,11 +33,15 @@ ohos_unittest("cj_application_context_test") {
   ]
 
   sources = [
-    "${ability_runtime_path}/frameworks/cj/ffi/cj_application_context.cpp",
+    "${ability_runtime_path}/frameworks/cj/ffi/application_context/src/cj_application_context.cpp",
+    "${ability_runtime_path}/frameworks/cj/ffi/cj_application_context_ffi.cpp",
     "cj_application_context_test.cpp",
   ]
 
-  configs = [ "${c_utils_base_path}:utils_config" ]
+  configs = [
+    "${c_utils_base_path}:utils_config",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_public_config",
+  ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -46,6 +50,7 @@ ohos_unittest("cj_application_context_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/ability_manager:mission_info",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_thread",

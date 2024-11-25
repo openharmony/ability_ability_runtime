@@ -114,7 +114,8 @@ private:
     int32_t GetTriggerInfo(napi_env env, napi_value param, TriggerInfo &triggerInfo);
     int32_t GetWantAgentParam(napi_env env, napi_callback_info info, WantAgentWantsParas &paras);
     void SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgent,
-        AbilityRuntime::NapiAsyncTask::CompleteCallback &complete);
+        AbilityRuntime::NapiAsyncTask::CompleteCallback &complete,
+        AbilityRuntime::NapiAsyncTask::ExecuteCallback &execute);
     void SetOnGetUidCallback(std::shared_ptr<WantAgent> wantAgent,
         AbilityRuntime::NapiAsyncTask::CompleteCallback &complete);
     void SetOnCancelCallback(std::shared_ptr<WantAgent> wantAgent,

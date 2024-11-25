@@ -36,9 +36,12 @@ public:
     /**
      * @brief Prompt user that developer mode has not been turned on.
      * @param bundleName. The bundleName of the blocked hap.
-     * @param abilityName. The abilityName of the blocked hap.
+     * @param moduleName. The moduleName of the blocked hap.
+     * @param labelId. The labelId of the blocked hap.
+     * @param userId. User id.
      */
-    static void ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName);
+    static void ShowDeveloperModeDialog(
+        const std::string &bundleName, const std::string &moduleName, uint32_t labelId, int32_t userId);
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
