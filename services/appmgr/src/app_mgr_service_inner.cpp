@@ -4256,12 +4256,13 @@ void AppMgrServiceInner::RestartKeepAliveProcess(std::shared_ptr<AppRunningRecor
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     BundleInfo bundleInfo;
     auto userId = GetUserIdByUid(appRecord->GetUid());
-    auto flags = BundleFlag::GET_BUNDLE_DEFAULT | BundleFlag::GET_BUNDLE_WITH_REQUESTED_PERMISSION;
-    if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(
-        appRecord->GetBundleName(),
-        static_cast<BundleFlag>(flags),
-        bundleInfo, userId))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "getBundleInfo fail");
+    auto flags = static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)
+        | static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)
+        | static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY)
+        | static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY);
+    if (IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(appRecord->GetBundleName(), flags,
+        appRecord->GetAppIndex(), bundleInfo, userId)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "getCloneBundleInfo fail");
         return;
     }
     std::vector<BundleInfo> infos;

@@ -54,6 +54,7 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
     int32_t userId)
 {
     if (!IsKeepAliveBundle(bundleInfo.name, userId)) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "bundle is not set keep-alive");
         return;
     }
 
@@ -62,9 +63,17 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "bundle has no main uiability");
         return;
     }
-    auto ret = StartAbility(bundleInfo.name, bundleInfo.entryModuleName, mainElementName, userId);
+    KeepAliveAbilityInfo info = {
+        .bundleName = bundleInfo.name,
+        .moduleName = bundleInfo.entryModuleName,
+        .abilityName = mainElementName,
+        .userId = userId,
+        .appCloneIndex = bundleInfo.appIndex,
+    };
+    auto ret = StartAbility(info);
     if (ret != ERR_OK) {
-        AddFailedKeepAliveAbility(bundleInfo.name, bundleInfo.entryModuleName, mainElementName, userId);
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "startAbility failed:%{public}d, add to list", ret);
+        AddFailedKeepAliveAbility(info);
         return;
     }
 
@@ -73,20 +82,21 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
     });
 }
 
-int32_t KeepAliveProcessManager::StartAbility(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, int32_t userId)
+int32_t KeepAliveProcessManager::StartAbility(const KeepAliveAbilityInfo &info)
 {
     Want want;
-    want.SetElementName(bundleName, abilityName);
-    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "call, bundleName: %{public}s, mainElement: %{public}s",
-        bundleName.c_str(), abilityName.c_str());
+    want.SetElementName(info.bundleName, info.abilityName);
+    want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, info.appCloneIndex);
+    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "call, bundleName: %{public}s, moduleName: %{public}s, mainElement: %{public}s"
+        " appCloneIndex: %{public}d", info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(),
+        info.appCloneIndex);
     StartOptions options;
     options.processOptions = std::make_shared<ProcessOptions>();
     options.processOptions->isRestartKeepAlive = true;
     options.processOptions->startupVisibility = StartupVisibility::STARTUP_HIDE;
     auto ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(want,
-        options, nullptr, userId, DEFAULT_INVAL_VALUE));
-    MainElementUtils::UpdateMainElement(bundleName, moduleName, abilityName, true, userId);
+        options, nullptr, info.userId, DEFAULT_INVAL_VALUE));
+    MainElementUtils::UpdateMainElement(info.bundleName, info.moduleName, info.abilityName, true, info.userId);
     return ret;
 }
 
@@ -293,6 +303,9 @@ bool KeepAliveProcessManager::GetKeepAliveBundleInfosForUser(std::vector<AppExec
 
 void KeepAliveProcessManager::StartFailedKeepAliveAbilities()
 {
+    if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
+        return;
+    }
     unlockedAfterBoot_ = true;
     std::list<KeepAliveAbilityInfo> tmpList;
     {
@@ -303,28 +316,24 @@ void KeepAliveProcessManager::StartFailedKeepAliveAbilities()
         }
         tmpList = std::move(failedKeepAliveAbilityInfos_);
     }
-    for (const auto &item: tmpList) {
-        (void)StartAbility(item.bundleName, item.moduleName, item.abilityName, item.userId);
+    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "start failed keep-alive %{public}zu abilities", tmpList.size());
+    for (const auto &info: tmpList) {
+        (void)StartAbility(info);
     }
 }
 
-void KeepAliveProcessManager::AddFailedKeepAliveAbility(const std::string &bundleName,
-    const std::string &moduleName, const std::string &abilityName, int32_t userId)
+void KeepAliveProcessManager::AddFailedKeepAliveAbility(const KeepAliveAbilityInfo &info)
 {
-    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "failed bundleName: %{public}s, mainElement: %{public}s",
-        bundleName.c_str(), abilityName.c_str());
+    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "failed bundleName: %{public}s, moduleName: %{public}s, mainElement: %{public}s"
+        " appCloneIndex: %{public}d", info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(),
+        info.appCloneIndex);
     if (unlockedAfterBoot_) {
         TAG_LOGI(AAFwkTag::KEEP_ALIVE, "already unlocked");
         return;
     }
 
     std::lock_guard lock(failedKeepAliveAbilityInfoMutex_);
-    failedKeepAliveAbilityInfos_.push_back(KeepAliveAbilityInfo {
-        .bundleName = bundleName,
-        .moduleName = moduleName,
-        .abilityName = abilityName,
-        .userId = userId,
-    });
+    failedKeepAliveAbilityInfos_.push_back(info);
 }
 
 int32_t KeepAliveProcessManager::QueryKeepAliveApplications(int32_t appType, int32_t userId,
