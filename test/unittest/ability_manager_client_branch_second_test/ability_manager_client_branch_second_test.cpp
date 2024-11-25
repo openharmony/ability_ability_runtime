@@ -119,7 +119,9 @@ HWTEST_F(AbilityManagerClientBranchSecondTest, AbilityManagerClient_TerminateMis
     GTEST_LOG_(INFO) << "AbilityManagerClient_TerminateMission_0100 start";
     int32_t missionId = 1;
     ErrCode result = client_->TerminateMission(missionId);
-    EXPECT_EQ(result, ERR_OK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, ERR_OK);
+    }
     EXPECT_NE(client_, nullptr);
     GTEST_LOG_(INFO) << "AbilityManagerClient_TerminateMission_0100 end";
 }

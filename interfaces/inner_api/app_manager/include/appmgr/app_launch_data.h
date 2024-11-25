@@ -238,6 +238,13 @@ public:
     virtual bool Marshalling(Parcel &parcel) const override;
 
     /**
+     * @brief to solve cyclomatic of Marshalling
+     *
+     * @param outParcel Indicates the Parcel object to which the Sequenceable object will be marshaled.
+     */
+    bool MarshallingExtend(Parcel &parcel) const;
+
+    /**
      * @brief Unmarshals this Sequenceable object from a Parcel.
      *
      * @param inParcel Indicates the Parcel object into which the Sequenceable object has been marshaled.
@@ -256,6 +263,32 @@ public:
      */
     bool isNativeStart() const;
 
+    /**
+     * @brief Setting is need preload module.
+     *
+     * @param isNeedPreloadModule, is need preload module.
+     */
+    void SetIsNeedPreloadModule(bool isNeedPreloadModule);
+    /**
+     * @brief Obtains  is need preload module..
+     *
+     * @return Returns  is need preload module..
+     */
+    bool IsNeedPreloadModule() const;
+
+    /**
+     * @brief Setting if allow nweb preload.
+     *
+     * @param isAllowedNWebPreload, if allow nweb preload.
+     */
+    void SetNWebPreload(const bool isAllowedNWebPreload);
+    /**
+     * @brief Get if allow nweb preload.
+     *
+     * @return Returns if allow nweb preload.
+     */
+    bool IsAllowedNWebPreload() const;
+
 private:
     ApplicationInfo applicationInfo_;
     Profile profile_;
@@ -272,6 +305,8 @@ private:
     bool isErrorInfoEnhance_ = false;
     std::string appRunningUniqueId_;
     std::string instanceKey_;
+    bool isNeedPreloadModule_ = false;
+    bool isAllowedNWebPreload_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

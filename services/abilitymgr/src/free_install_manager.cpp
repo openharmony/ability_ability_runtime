@@ -607,16 +607,6 @@ void FreeInstallManager::RemoveFreeInstallInfo(const std::string &bundleName, co
     }
 }
 
-int32_t FreeInstallManager::GetRecordIdByToken(const sptr<IRemoteObject> &callerToken)
-{
-    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    int recordId = -1;
-    if (abilityRecord != nullptr) {
-        recordId = abilityRecord->GetRecordId();
-    }
-    return recordId;
-}
-
 bool FreeInstallManager::VerifyStartFreeInstallPermission(const sptr<IRemoteObject> &callerToken)
 {
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
@@ -630,6 +620,16 @@ bool FreeInstallManager::VerifyStartFreeInstallPermission(const sptr<IRemoteObje
     }
 
     return false;
+}
+
+int32_t FreeInstallManager::GetRecordIdByToken(const sptr<IRemoteObject> &callerToken)
+{
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    int recordId = -1;
+    if (abilityRecord != nullptr) {
+        recordId = abilityRecord->GetRecordId();
+    }
+    return recordId;
 }
 
 int FreeInstallManager::SetAppRunningState(Want &want)

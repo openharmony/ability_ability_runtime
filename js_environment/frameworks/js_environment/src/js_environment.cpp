@@ -15,12 +15,12 @@
 
 #include "js_environment.h"
 
+#include "console.h"
 #include "ffrt.h"
 #include "hilog_tag_wrapper.h"
 #include "js_environment_impl.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "uncaught_exception_callback.h"
-#include "commonlibrary/ets_utils/js_sys_module/console/console.h"
 
 namespace OHOS {
 namespace JsEnv {

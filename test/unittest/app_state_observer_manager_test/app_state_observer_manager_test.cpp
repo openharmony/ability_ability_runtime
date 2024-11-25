@@ -109,6 +109,7 @@ std::shared_ptr<AppRunningRecord> AppSpawnSocketTest::MockAppRecord()
     appRecord->SetState(ApplicationState::APP_STATE_CREATE);
     appRecord->SetContinuousTaskAppState(false);
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetRequestProcCode(1);
     appRecord->isFocused_ = false;
@@ -923,7 +924,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessCreated_001, TestSize.Level0)
     manager->HandleOnRenderProcessCreated(nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::shared_ptr<RenderRecord> renderRecord =
-        std::make_shared<RenderRecord>(1, "param", 1, 1, 1, appRecord);
+        std::make_shared<RenderRecord>(1, "param", FdGuard(1), FdGuard(1), FdGuard(1), appRecord);
     renderRecord->SetPid(1);
     manager->HandleOnRenderProcessCreated(renderRecord);
 }
@@ -1142,7 +1143,7 @@ HWTEST_F(AppSpawnSocketTest, HandleOnRenderProcessDied_001, TestSize.Level0)
     ASSERT_NE(manager, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
     std::shared_ptr<RenderRecord> renderRecord =
-        std::make_shared<RenderRecord>(1, "param", 1, 1, 1, appRecord);
+        std::make_shared<RenderRecord>(1, "param", FdGuard(1), FdGuard(1), FdGuard(1), appRecord);
     renderRecord->SetPid(1);
     manager->HandleOnRenderProcessDied(nullptr);
     manager->HandleOnRenderProcessDied(renderRecord);

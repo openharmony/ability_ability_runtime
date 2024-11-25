@@ -228,7 +228,7 @@ bool ContinuationManagerStage::GetContentInfo(WantParams &wantParams)
         TAG_LOGE(AAFwkTag::CONTINUATION, "GetContentInfo failed");
         return false;
     }
-    TAG_LOGD(AAFwkTag::CONTINUATION, "pageStack: %{public}s.", pageStack.c_str());
+    TAG_LOGD(AAFwkTag::CONTINUATION, "pageStack: %{public}s", pageStack.c_str());
     wantParams.SetParam(PAGE_STACK_PROPERTY_NAME, String::Box(pageStack));
     return true;
 }

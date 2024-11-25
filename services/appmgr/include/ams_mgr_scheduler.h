@@ -130,8 +130,17 @@ public:
      * @param accountId, account ID.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillProcessWithAccount(
-        const std::string &bundleName, const int accountId, const bool clearPageStack = false) override;
+    virtual int32_t KillProcessWithAccount(const std::string &bundleName, const int accountId,
+        const bool clearPageStack = false, int32_t appIndex = 0) override;
+
+    /**
+     * KillProcessesInBatch, kill processes in batch, call KillProcessesInBatch() through proxy object;
+     * the killed bundle won't be started by the watcher.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t KillProcessesInBatch(const std::vector<int32_t> &pids) override;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
@@ -149,7 +158,8 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName,  const bool clearPageStack = false) override;
+    virtual int32_t KillApplication(const std::string &bundleName, bool clearPageStack = false,
+        int32_t appIndex = 0) override;
 
     /**
      * ForceKillApplication, force kill the application.
@@ -370,6 +380,14 @@ public:
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid) override;
 
     /**
+     * @brief Set non-resident keep-alive process status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
+     */
+    void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid) override;
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
@@ -392,20 +410,20 @@ public:
     virtual void BlockProcessCacheByPids(const std::vector<int32_t> &pids) override;
 
     /**
-     * Request to clean uiability from user.
-     *
-     * @param token the token of ability.
-     * @return Returns true if clean success, others return false.
-     */
-    virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
-
-    /**
      * whether killed for upgrade web.
      *
      * @param bundleName the bundle name is killed for upgrade web.
      * @return Returns true is killed for upgrade web, others return false.
      */
     virtual bool IsKilledForUpgradeWeb(const std::string &bundleName) override;
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    virtual bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token) override;
 
     /**
      * whether the abilities of process specified by pid type only UIAbility.
@@ -418,9 +436,7 @@ public:
      */
     virtual bool IsProcessAttached(sptr<IRemoteObject> token) override;
 
-    virtual bool IsAppKilling(sptr<IRemoteObject> token) override;
-
-    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) override;
+    virtual bool IsCallerKilling(const std::string& callerKey) override;
 
 private:
     /**

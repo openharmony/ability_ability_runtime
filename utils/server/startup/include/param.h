@@ -43,6 +43,9 @@ struct LoadParam : public Parcelable {
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> preToken = nullptr;
     std::string instanceKey = "";
+    bool isKeepAlive = false;
+    bool isCallerSetProcess = false;
+    std::string customProcessFlag = "";
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

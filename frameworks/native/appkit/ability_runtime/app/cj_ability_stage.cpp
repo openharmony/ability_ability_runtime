@@ -14,7 +14,6 @@
  */
 
 #include "cj_ability_stage.h"
-#include "cj_ability_stage_context.h"
 #include "cj_runtime.h"
 #include "context_impl.h"
 #include "hilog_tag_wrapper.h"
@@ -22,28 +21,18 @@
 
 using namespace OHOS::AbilityRuntime;
 
-namespace {
-char* CreateCStringFromString(const std::string& source)
+extern "C" {
+CJ_EXPORT RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id)
 {
-    if (source.size() == 0) {
-        return nullptr;
+    auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
+    if (abilityStageContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get abilityStageContext failed. ");
+        return RetHapModuleInfo();
     }
-    size_t length = source.size() + 1;
-    auto res = static_cast<char*>(malloc(length));
-    if (res == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "fail to mallc string.");
-        return nullptr;
-    }
-    if (strcpy_s(res, length, source.c_str()) != 0) {
-        free(res);
-        TAG_LOGE(AAFwkTag::APPKIT, "fail to strcpy source.");
-        return nullptr;
-    }
-    return res;
-}
+
+    return abilityStageContext->GetRetHapModuleInfo();
 }
 
-extern "C" {
 CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id)
 {
     auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
@@ -54,14 +43,14 @@ CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id)
 
     auto hapInfo = abilityStageContext->GetHapModuleInfo();
     if (hapInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "CurrentHapMoudleInfo is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "CurrentHapModuleInfo is nullptr.");
         return nullptr;
     }
 
     CurrentHapModuleInfo* buffer = static_cast<CurrentHapModuleInfo*>(malloc(sizeof(CurrentHapModuleInfo)));
- 
+
     if (buffer == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Create CurrentHapMoudleInfo failed, CurrentHapMoudleInfo is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "Create CurrentHapModuleInfo failed, CurrentHapModuleInfo is nullptr.");
         return nullptr;
     }
 
@@ -79,9 +68,24 @@ CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id)
     return buffer;
 }
 
+CJ_EXPORT CConfiguration FFICJGetConfiguration(int64_t id)
+{
+    auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
+    if (abilityStageContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Get abilityStageContext failed. ");
+        return CConfiguration();
+    }
+
+    return abilityStageContext->GetConfiguration();
+}
+
 CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilityStageHandle)
 {
     auto ability = static_cast<CJAbilityStage*>(abilityStageHandle);
+    if (ability == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetAbilityStageContext failed, abilityStage is nullptr.");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
     auto context = ability->GetContext();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "GetAbilityStageContext failed, abilityContext is nullptr.");
@@ -152,6 +156,16 @@ std::string CJAbilityStage::OnAcceptWant(const AAFwk::Want& want)
     return cjAbilityStageObject_->OnAcceptWant(want);
 }
 
+std::string CJAbilityStage::OnNewProcessRequest(const AAFwk::Want& want)
+{
+    AbilityStage::OnNewProcessRequest(want);
+    if (!cjAbilityStageObject_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CJAbilityStage is not loaded.");
+        return "";
+    }
+    return cjAbilityStageObject_->OnNewProcessRequest(want);
+}
+
 void CJAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
     AbilityStage::OnConfigurationUpdated(configuration);
@@ -176,4 +190,14 @@ void CJAbilityStage::OnMemoryLevel(int level)
         return;
     }
     cjAbilityStageObject_->OnMemoryLevel(level);
+}
+
+void CJAbilityStage::OnDestroy() const
+{
+    AbilityStage::OnDestroy();
+    if (!cjAbilityStageObject_) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CJAbilityStage is not loaded.");
+        return;
+    }
+    cjAbilityStageObject_->OnDestroy();
 }

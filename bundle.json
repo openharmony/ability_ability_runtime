@@ -56,6 +56,7 @@
             "dlp_permission_service",
             "dsoftbus",
             "eventhandler",
+            "ets_frontend",
             "ets_runtime",
             "ets_utils",
             "faultloggerd",
@@ -83,8 +84,11 @@
             "memory_utils",
             "napi",
             "netmanager_base",
+            "node",
             "os_account",
             "power_manager",
+            "preferences",
+            "previewer",
             "qos_manager",
             "relational_store",
             "resource_management",
@@ -155,6 +159,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/interfaces/inner_api/wantagent:wantagent_innerkits"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/want_agent/include",
+              "header_files": [
+                "cj_want_agent_ffi.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi/want_agent:cj_want_agent_ffi"
           },
           {
             "header": {
@@ -433,7 +446,7 @@
           },
           {
             "header": {
-              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/ui_extension_ability",
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/ui_extension_base",
               "header_files": [
                 "ui_extension_context.h"
               ]
@@ -502,6 +515,16 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:start_window_option"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/cj/ffi/application_context/include",
+              "header_files": [
+                "cj_ability_lifecycle_callback.h",
+                "cj_application_context.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi:cj_ability_ffi"
           }
         ],
         "test": [

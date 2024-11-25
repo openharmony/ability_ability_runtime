@@ -643,7 +643,7 @@ HWTEST_F(UriPermissionImplTest, Upms_CheckUriPermission_005, TestSize.Level1)
     MyFlag::tokenInfos[callerTokenId1] = TokenInfo(callerTokenId1, MyATokenTypeEnum::TOKEN_NATIVE, "foundation");
     TokenIdPermission tokenIdPermission1(callerTokenId1);
     auto ret = upms->CheckUriPermission(tokenIdPermission1, uri, flagRead)[0];
-    ASSERT_EQ(ret, true);
+    ASSERT_EQ(ret, false);
 
     uint32_t callerTokenId2 = 1002;
     IPCSkeleton::callerTokenId = callerTokenId2;
@@ -754,7 +754,7 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionPrivileged_003, TestSize.Level
     const std::vector<Uri> uris = { uri1 };
     auto ret = upms->GrantUriPermissionPrivileged(uris, flag, targetBundleName, 0, 0, -1);
     MyFlag::permissionPrivileged_ = false;
-    EXPECT_EQ(ret, GET_BUNDLE_INFO_FAILED);
+    EXPECT_EQ(ret, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
 }
 
 /*

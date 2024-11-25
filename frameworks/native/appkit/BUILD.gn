@@ -186,6 +186,10 @@ ohos_shared_library("appkit_native") {
     "faultloggerd:libdfx_procinfo",
     "faultloggerd:libfaultloggerd",
     "ffrt:libffrt",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:EGL",
+    "graphic_2d:libcomposer",
+    "graphic_2d:librender_service_base",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -193,14 +197,18 @@ ohos_shared_library("appkit_native") {
     "i18n:preferred_language",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "preferences:native_preferences",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
   public_external_deps = [ "ability_base:configuration" ]
 
+  defines = []
   if (ability_runtime_graphics) {
     external_deps += [
       "ace_engine:ace_forward_compatibility",
@@ -209,9 +217,10 @@ ohos_shared_library("appkit_native") {
       "icu:shared_icuuc",
       "window_manager:libwm",
     ]
+
+    defines += [ "NWEB_GRAPHIC" ]
   }
 
-  defines = []
   if (is_asan || asan_detector) {
     defines += [ "SUPPORT_ASAN" ]
   }
@@ -241,12 +250,16 @@ ohos_shared_library("appkit_native") {
     include_dirs += [
       "${ability_runtime_path}/cj_environment/interfaces/inner_api",
       "${ability_runtime_path}/frameworks/cj/ffi",
+      "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     ]
 
     defines += [ "CJ_FRONTEND" ]
 
+    deps += [ "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi" ]
+
     external_deps += [
       "bundle_framework:appexecfwk_base",
+      "bundle_framework:cj_bundle_manager_ffi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
     ]
@@ -312,6 +325,7 @@ ohos_shared_library("app_context") {
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -383,6 +397,7 @@ ohos_shared_library("app_context_utils") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -453,9 +468,11 @@ ohos_shared_library("appkit_delegator") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   public_external_deps = [ "ability_base:configuration" ]
@@ -544,7 +561,6 @@ ohos_shared_library("application_context_manager") {
   }
 
   external_deps = [
-    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "napi:ace_napi",
   ]

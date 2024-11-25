@@ -632,7 +632,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteForegroundSuccess_003, TestSize.
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToForeground(true);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     mgr->CompleteForegroundSuccess(abilityRecord);
     EXPECT_NE(mgr, nullptr);
 }
@@ -650,7 +650,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteForegroundSuccess_004, TestSize.
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToForeground(true);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     abilityRecord->SetSessionInfo(new SessionInfo());
     mgr->CompleteForegroundSuccess(abilityRecord);
     EXPECT_NE(mgr, nullptr);
@@ -949,7 +949,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_005, TestSize.Level1)
     abilityRecord->currentState_ = AbilityState::BACKGROUNDING;
     abilityRecord->SetStartedByCall(true);
     abilityRecord->SetStartToBackground(true);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
     mgr->CompleteBackground(abilityRecord);
     EXPECT_NE(mgr, nullptr);
 }
@@ -1905,7 +1905,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallAbilityLocked_001, TestSize.Level1)
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SINGLETON;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
-    abilityRecord->SetLoadState(AbilityLoadState::LOADED);
+    abilityRecord->isReady_ = true;
 
     uiAbilityLifecycleManager->CallAbilityLocked(abilityRequest);
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
@@ -2495,7 +2495,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartAbilityBySpecifed_001, TestSize.Lev
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     AbilityRequest request;
     std::shared_ptr<AbilityRecord> callerAbility = nullptr;
-    uiAbilityLifecycleManager->StartAbilityBySpecifed(request, callerAbility);
+    uiAbilityLifecycleManager->StartAbilityBySpecifed(request, callerAbility, 0);
     uiAbilityLifecycleManager.reset();
 }
 
@@ -2932,6 +2932,436 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsAbilityStarted_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_TryPrepareTerminateByPids_0100
+ * @tc.desc: TryPrepareTerminateByPids
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, TryPrepareTerminateByPids_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    std::vector<int32_t> pids;
+    EXPECT_EQ(uiAbilityLifecycleManager->TryPrepareTerminateByPids(pids), ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0200
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    sptr<IRemoteObject> token = nullptr;
+    bool isShow = false;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0300
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = 100;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
+    bool isShow = true;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_NATIVE_NOT_SELF_APPLICATION);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0400
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_004, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    abilityRequest.sessionInfo = nullptr;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
+    bool isShow = true;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0500
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_005, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->processOptions = nullptr;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
+    bool isShow = true;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0600
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_006, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
+    bool isShow = true;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0700
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_007, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = nullptr;
+    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+    sessionInfo->processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
+    bool isShow = true;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0800
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_008, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+    sessionInfo->processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
+    bool isShow = true;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0900
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_009, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+    sessionInfo->processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
+    bool isShow = false;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0200
+ * @tc.desc: ChangeUIAbilityVisibilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    sptr<SessionInfo> sessionInfo = nullptr;
+    bool isShow = false;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0300
+ * @tc.desc: ChangeUIAbilityVisibilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->persistentId = 100;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    bool isShow = false;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow),
+        ERR_NATIVE_ABILITY_NOT_FOUND);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0400
+ * @tc.desc: ChangeUIAbilityVisibilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_004, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->persistentId = 100;
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, nullptr);
+    bool isShow = false;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow),
+        ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0500
+ * @tc.desc: ChangeUIAbilityVisibilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_005, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->persistentId = 100;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::INITIAL);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    bool isShow = false;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0600
+ * @tc.desc: ChangeUIAbilityVisibilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_006, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->persistentId = 100;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::UNSPECIFIED);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    bool isShow = false;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0700
+ * @tc.desc: ChangeUIAbilityVisibilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_007, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->persistentId = 100;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_SHOW);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    bool isShow = true;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0800
+ * @tc.desc: ChangeUIAbilityVisibilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_008, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->persistentId = 100;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_HIDE);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    bool isShow = false;
+    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByName_0100
+ * @tc.desc: GetAbilityRecordsByName
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.deviceId = "100";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
+    AppExecFwk::ElementName element;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
+    EXPECT_EQ(ret.empty(), true);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByName_0200
+ * @tc.desc: GetAbilityRecordsByName
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = "100";
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
+    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility");
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
+    EXPECT_EQ(ret.empty(), false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByName_0300
+ * @tc.desc: GetAbilityRecordsByName
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = "100";
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.moduleName = "entry";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
+    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
+    EXPECT_EQ(ret.empty(), false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByNameInner_0100
+ * @tc.desc: GetAbilityRecordsByNameInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_001, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.deviceId = "100";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
+    AppExecFwk::ElementName element;
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
+    EXPECT_EQ(ret.empty(), true);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByNameInner_0200
+ * @tc.desc: GetAbilityRecordsByNameInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = "100";
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
+    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility");
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
+    EXPECT_EQ(ret.empty(), false);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByNameInner_0300
+ * @tc.desc: GetAbilityRecordsByNameInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_003, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.deviceId = "100";
+    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.moduleName = "entry";
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
+    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
+    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
+    EXPECT_EQ(ret.empty(), false);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_PrepareTerminateAbility_0100
  * @tc.desc: PrepareTerminateAbility
  * @tc.type: FUNC
@@ -3310,438 +3740,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MoveMissionToFront_004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_TryPrepareTerminateByPids_0100
- * @tc.desc: TryPrepareTerminateByPids
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, TryPrepareTerminateByPids_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
-    std::vector<int32_t> pids;
-    EXPECT_EQ(uiAbilityLifecycleManager->TryPrepareTerminateByPids(pids), ERR_OK);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0200
- * @tc.desc: ChangeAbilityVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_002, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    sptr<IRemoteObject> token = nullptr;
-    bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0300
- * @tc.desc: ChangeAbilityVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_003, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.accessTokenId = 100;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
-    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
-    bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_NATIVE_NOT_SELF_APPLICATION);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0400
- * @tc.desc: ChangeAbilityVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_004, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
-    abilityRequest.sessionInfo = nullptr;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
-    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
-    bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0500
- * @tc.desc: ChangeAbilityVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_005, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->processOptions = nullptr;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
-    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
-    bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0600
- * @tc.desc: ChangeAbilityVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_006, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
-    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
-    bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_START_OPTIONS_CHECK_FAILED);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0700
- * @tc.desc: ChangeAbilityVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_007, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->sessionToken = nullptr;
-    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
-    sessionInfo->processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
-    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
-    bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0800
- * @tc.desc: ChangeAbilityVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_008, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
-    Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->sessionToken = new Rosen::Session(info);
-    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
-    sessionInfo->processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
-    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
-    bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_OK);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeAbilityVisibility_0900
- * @tc.desc: ChangeAbilityVisibility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_009, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
-    Rosen::SessionInfo info;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->sessionToken = new Rosen::Session(info);
-    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
-    sessionInfo->processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
-    sptr<IRemoteObject> token = abilityRecord->GetToken()->AsObject();
-    bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeAbilityVisibility(token, isShow), ERR_OK);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0200
- * @tc.desc: ChangeUIAbilityVisibilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_002, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    sptr<SessionInfo> sessionInfo = nullptr;
-    bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0300
- * @tc.desc: ChangeUIAbilityVisibilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_003, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->persistentId = 100;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
-    bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow),
-        ERR_NATIVE_ABILITY_NOT_FOUND);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0400
- * @tc.desc: ChangeUIAbilityVisibilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_004, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->persistentId = 100;
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, nullptr);
-    bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow),
-        ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0500
- * @tc.desc: ChangeUIAbilityVisibilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_005, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->persistentId = 100;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::INITIAL);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
-    bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow),
-        ERR_NATIVE_ABILITY_STATE_CHECK_FAILED);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0600
- * @tc.desc: ChangeUIAbilityVisibilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_006, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->persistentId = 100;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::UNSPECIFIED);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
-    bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow),
-        ERR_NATIVE_ABILITY_STATE_CHECK_FAILED);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0700
- * @tc.desc: ChangeUIAbilityVisibilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_007, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->persistentId = 100;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_SHOW);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
-    bool isShow = true;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_OK);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0800
- * @tc.desc: ChangeUIAbilityVisibilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_008, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    sptr<SessionInfo> sessionInfo(new SessionInfo());
-    sessionInfo->persistentId = 100;
-    abilityRequest.sessionInfo = sessionInfo;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_HIDE);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
-    bool isShow = false;
-    EXPECT_EQ(uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow), ERR_OK);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByName_0100
- * @tc.desc: GetAbilityRecordsByName
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.deviceId = "100";
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
-    AppExecFwk::ElementName element;
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
-    EXPECT_EQ(ret.empty(), true);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByName_0200
- * @tc.desc: GetAbilityRecordsByName
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_002, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.abilityInfo.deviceId = "100";
-    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
-    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility");
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
-    EXPECT_EQ(ret.empty(), false);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByName_0300
- * @tc.desc: GetAbilityRecordsByName
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByName_003, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.abilityInfo.deviceId = "100";
-    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.moduleName = "entry";
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
-    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByName(element);
-    EXPECT_EQ(ret.empty(), false);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByNameInner_0100
- * @tc.desc: GetAbilityRecordsByNameInner
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.deviceId = "100";
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
-    AppExecFwk::ElementName element;
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
-    EXPECT_EQ(ret.empty(), true);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByNameInner_0200
- * @tc.desc: GetAbilityRecordsByNameInner
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_002, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.abilityInfo.deviceId = "100";
-    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
-    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility");
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
-    EXPECT_EQ(ret.empty(), false);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_GetAbilityRecordsByNameInner_0300
- * @tc.desc: GetAbilityRecordsByNameInner
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, GetAbilityRecordsByNameInner_003, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest abilityRequest;
-    abilityRequest.abilityInfo.deviceId = "100";
-    abilityRequest.abilityInfo.bundleName = "com.example.unittest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.moduleName = "entry";
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
-    AppExecFwk::ElementName element("100", "com.example.unittest", "MainAbility", "entry");
-    auto ret = uiAbilityLifecycleManager->GetAbilityRecordsByNameInner(element);
-    EXPECT_EQ(ret.empty(), false);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_GetReusedCollaboratorPersistentId_0100
  * @tc.desc: GetReusedCollaboratorPersistentId
  * @tc.type: FUNC
@@ -4016,7 +4014,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ResolveAbility_004, TestSize.Level1)
     abilityRequest.connect = new UIAbilityLifcecycleManagerTestStub();
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     auto targetAbility = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    targetAbility->SetLoadState(AbilityLoadState::LOADED);
+    targetAbility->isReady_ = true;
     EXPECT_EQ(uiAbilityLifecycleManager->ResolveAbility(targetAbility, abilityRequest),
         ResolveResultType::OK_HAS_REMOTE_OBJ);
 }
@@ -4246,7 +4244,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_001, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4268,7 +4266,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_002, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4290,7 +4288,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_003, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4322,7 +4320,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_004, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4353,7 +4351,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_005, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4361,7 +4359,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_005, TestS
     int32_t pid = 1;
     bool backFlag = true;
     int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
-
+    
     std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
     callerAbilityRecord->pid_ = pid;
     auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);
@@ -4388,7 +4386,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_006, TestS
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want resultWant;
     int32_t resultCode = 100;
@@ -4396,7 +4394,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, BackToCallerAbilityWithResult_006, TestS
     int32_t pid = 1;
     bool backFlag = true;
     int64_t callerRequestCode = AbilityRuntime::StartupUtil::GenerateFullRequestCode(pid, backFlag, requestCode);
-
+    
     std::shared_ptr<AbilityRecord> callerAbilityRecord = InitAbilityRecord();
     callerAbilityRecord->pid_ = pid;
     auto newCallerRecord = std::make_shared<CallerRecord>(requestCode, callerAbilityRecord);

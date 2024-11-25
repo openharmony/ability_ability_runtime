@@ -591,7 +591,12 @@ EXPORT napi_value FFICreateNapiValue(void *env, void *context)
     };
     auto tmpContext = reinterpret_cast<AbilityContext*>(context);
     auto weakContext = new std::weak_ptr<Context>(tmpContext->weak_from_this());
-    napi_wrap((napi_env)env, result, weakContext, nativeFinalize, nullptr, nullptr);
+    napi_status status = napi_wrap((napi_env)env, result, weakContext, nativeFinalize, nullptr, nullptr);
+    if (status != napi_ok && weakContext != nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "napi_wrap Failed: %{public}d", status);
+        delete weakContext;
+        return nullptr;
+    }
     napi_value value = nullptr;
     napi_get_boolean((napi_env)env, true, &value);
     napi_set_named_property((napi_env)env, result, "stageMode", value);

@@ -14,9 +14,9 @@
  */
 
 #include "ability_window_configuration.h"
-#include "app_exception_manager.h"
 #include "app_running_record.h"
 #include "app_mgr_service_inner.h"
+#include "error_msg_util.h"
 #include "event_report.h"
 #include "exit_resident_process_manager.h"
 #include "freeze_util.h"
@@ -48,30 +48,26 @@ constexpr const char *EVENT_KEY_SUPPORT_STATE = "SUPPORT_STATE";
 int64_t AppRunningRecord::appEventId_ = 0;
 
 RenderRecord::RenderRecord(pid_t hostPid, const std::string &renderParam,
-                           int32_t ipcFd, int32_t sharedFd, int32_t crashFd,
+                           FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
                            const std::shared_ptr<AppRunningRecord> &host)
-    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(ipcFd),
-      sharedFd_(sharedFd), crashFd_(crashFd), host_(host) {}
+    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(std::move(ipcFd)),
+      sharedFd_(std::move(sharedFd)), crashFd_(std::move(crashFd)), host_(host) {}
 
 RenderRecord::~RenderRecord()
-{
-    close(sharedFd_);
-    close(ipcFd_);
-    close(crashFd_);
-}
+{}
 
 std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(
-    pid_t hostPid, const std::string &renderParam, int32_t ipcFd,
-    int32_t sharedFd, int32_t crashFd,
+    pid_t hostPid, const std::string &renderParam,
+    FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
     const std::shared_ptr<AppRunningRecord> &host)
 {
-    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 ||
-        crashFd <= 0 || !host) {
+    if (hostPid <= 0 || renderParam.empty() || ipcFd.Get() <= 0 || sharedFd.Get() <= 0 ||
+        crashFd.Get() <= 0 || !host) {
         return nullptr;
     }
 
     auto renderRecord = std::make_shared<RenderRecord>(
-        hostPid, renderParam, ipcFd, sharedFd, crashFd, host);
+        hostPid, renderParam, std::move(ipcFd), std::move(sharedFd), std::move(crashFd), host);
     renderRecord->SetHostUid(host->GetUid());
     renderRecord->SetHostBundleName(host->GetBundleName());
     renderRecord->SetProcessName(host->GetProcessName());
@@ -140,17 +136,17 @@ std::string RenderRecord::GetRenderParam() const
 
 int32_t RenderRecord::GetIpcFd() const
 {
-    return ipcFd_;
+    return ipcFd_.Get();
 }
 
 int32_t RenderRecord::GetSharedFd() const
 {
-    return sharedFd_;
+    return sharedFd_.Get();
 }
 
 int32_t RenderRecord::GetCrashFd() const
 {
-    return crashFd_;
+    return crashFd_.Get();
 }
 
 ProcessType RenderRecord::GetProcessType() const
@@ -346,6 +342,15 @@ const std::string &AppRunningRecord::GetSpecifiedProcessFlag() const
 {
     return specifiedProcessFlag_;
 }
+void AppRunningRecord::SetCustomProcessFlag(const std::string &flag)
+{
+    customProcessFlag_ = flag;
+}
+
+const std::string &AppRunningRecord::GetCustomProcessFlag() const
+{
+    return customProcessFlag_;
+}
 
 int32_t AppRunningRecord::GetUid() const
 {
@@ -355,6 +360,11 @@ int32_t AppRunningRecord::GetUid() const
 void AppRunningRecord::SetUid(const int32_t uid)
 {
     mainUid_ = uid;
+}
+
+int32_t AppRunningRecord::GetUserId() const
+{
+    return mainUid_ / BASE_USER_RANGE;
 }
 
 ApplicationState AppRunningRecord::GetState() const
@@ -468,8 +478,10 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
         TAG_LOGE(AAFwkTag::APPMGR, "null appLifeCycleDeal_");
         return;
     }
-    if (!appLifeCycleDeal_->GetApplicationClient()) {
+    auto scheduler = appLifeCycleDeal_->GetApplicationClient();
+    if (!scheduler) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appThread");
+        AddAppLifecycleEvent("AppRunningRecord::LaunchApplication; null scheduler");
         return;
     }
     AppLaunchData launchData;
@@ -480,7 +492,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
             launchData.SetApplicationInfo(*(moduleRecords->second));
         }
     }
-    ProcessInfo processInfo(processName_, GetPriorityObject()->GetPid());
+    ProcessInfo processInfo(processName_, GetPid());
     processInfo.SetProcessType(processType_);
     launchData.SetProcessInfo(processInfo);
     launchData.SetRecordId(appRecordId_);
@@ -495,9 +507,13 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetJITEnabled(jitEnabled_);
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
+    launchData.SetIsNeedPreloadModule(isNeedPreloadModule_);
+    launchData.SetNWebPreload(isAllowedNWebPreload_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
+    AbilityRuntime::ErrorMsgGuard errorMsgGuard(GetPid(), reinterpret_cast<uintptr_t>(scheduler.GetRefPtr()),
+        "LaunchApplication");
     appLifeCycleDeal_->LaunchApplication(launchData, config);
 }
 
@@ -664,6 +680,13 @@ bool AppRunningRecord::ScheduleForegroundRunning()
     SetApplicationScheduleState(ApplicationScheduleState::SCHEDULE_FOREGROUNDING);
     if (appLifeCycleDeal_) {
         AddAppLifecycleEvent("AppRunningRecord::ScheduleForegroundRunning");
+        auto scheduler = appLifeCycleDeal_->GetApplicationClient();
+        if (!scheduler) {
+            AddAppLifecycleEvent("AppRunningRecord::ScheduleForegroundRunning; null scheduler");
+            return false;
+        }
+        AbilityRuntime::ErrorMsgGuard errorMsgGuard(GetPid(), reinterpret_cast<uintptr_t>(scheduler.GetRefPtr()),
+            "ScheduleForegroundRunning");
         return appLifeCycleDeal_->ScheduleForegroundRunning();
     }
     return false;
@@ -842,7 +865,7 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
     abilityStateData.bundleName = abilityInfo->applicationInfo.bundleName;
     abilityStateData.moduleName = abilityInfo->moduleName;
     abilityStateData.abilityName = ability->GetName();
-    abilityStateData.pid = GetPriorityObject()->GetPid();
+    abilityStateData.pid = GetPid();
     abilityStateData.abilityState = state;
     abilityStateData.uid = abilityInfo->applicationInfo.uid;
     abilityStateData.token = ability->GetToken();
@@ -1017,10 +1040,9 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         if (pendingState == ApplicationPendingState::READY) {
             if (!ScheduleForegroundRunning()) {
-                AppExceptionManager::GetInstance().ForegroundAppFailed(ability->GetToken(), "schedule failed");
+                AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(ability->GetToken(),
+                    "ScheduleForegroundRunning fail");
             }
-        } else {
-            AppExceptionManager::GetInstance().ForegroundAppWait(ability->GetToken(), "pendingState not ready");
         }
         foregroundingAbilityTokens_.insert(ability->GetToken());
         TAG_LOGD(AAFwkTag::APPMGR, "foregroundingAbility size: %{public}d",
@@ -1070,7 +1092,7 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
         }
 
         // Then schedule application background when all ability is not foreground.
-        if (foregroundSize == 0 && mainBundleName_ != LAUNCHER_NAME && windowIds_.empty()) {
+        if (foregroundSize == 0 && mainBundleName_ != LAUNCHER_NAME && IsWindowIdsEmpty()) {
             auto pendingState = pendingState_;
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
             if (pendingState == ApplicationPendingState::READY) {
@@ -1176,6 +1198,9 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
     }
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
+    if (abilityRecord) {
+        TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
+    }
     if (!isTimeout) {
         StateChangedNotifyObserver(
             abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
@@ -1319,7 +1344,7 @@ void AppRunningRecord::SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunn
     if (GetPriorityObject() == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
     } else {
-        eventInfo.pid = GetPriorityObject()->GetPid();
+        eventInfo.pid = GetPid();
     }
     eventInfo.startType = static_cast<int32_t>(startType);
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
@@ -1452,9 +1477,19 @@ bool AppRunningRecord::IsKeepAliveApp() const
     return true;
 }
 
+bool AppRunningRecord::IsKeepAliveDkv() const
+{
+    return isKeepAliveDkv_;
+}
+
 void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 {
     isKeepAliveRdb_ = isKeepAliveEnable;
+}
+
+void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
+{
+    isKeepAliveDkv_ = isKeepAliveDkv;
 }
 
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)
@@ -1655,7 +1690,7 @@ void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 void AppRunningRecord::ScheduleAcceptWantDone()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
-
+    RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG);
 }
 
@@ -1674,7 +1709,7 @@ void AppRunningRecord::ScheduleNewProcessRequest(const AAFwk::Want &want, const 
 void AppRunningRecord::ScheduleNewProcessRequestDone()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
-
+    RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_PROCESS_TIMEOUT_MSG);
 }
 
@@ -1682,6 +1717,7 @@ void AppRunningRecord::ApplicationTerminated()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Application terminated bundle %{public}s", mainBundleName_.c_str());
 
+    RemoveEvent(AMSEventHandler::TERMINATE_APPLICATION_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG);
 }
 
@@ -1988,11 +2024,12 @@ void AppRunningRecord::ChangeWindowVisibility(const sptr<OHOS::Rosen::WindowVisi
         TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
         return;
     } else {
-        if (info->pid_ != GetPriorityObject()->GetPid()) {
+        if (info->pid_ != GetPid()) {
             return;
         }
     }
 
+    std::lock_guard windowIdsLock(windowIdsLock_);
     auto iter = windowIds_.find(info->windowId_);
     if (iter != windowIds_.end() &&
         info->visibilityState_ == OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
@@ -2021,9 +2058,10 @@ void AppRunningRecord::OnWindowVisibilityChanged(
             TAG_LOGE(AAFwkTag::APPMGR, "null info");
             continue;
         }
-        if (info->pid_ != GetPriorityObject()->GetPid()) {
+        if (info->pid_ != GetPid()) {
             continue;
         }
+        std::lock_guard windowIdsLock(windowIdsLock_);
         auto iter = windowIds_.find(info->windowId_);
         if (iter != windowIds_.end() &&
             info->visibilityState_ == OHOS::Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
@@ -2037,26 +2075,32 @@ void AppRunningRecord::OnWindowVisibilityChanged(
     }
 
     TAG_LOGI(AAFwkTag::APPMGR, "window id empty: %{public}d, pState: %{public}d, cState: %{public}d",
-        windowIds_.empty(), pendingState_, curState_);
+        IsWindowIdsEmpty(), pendingState_, curState_);
     if (pendingState_ == ApplicationPendingState::READY) {
-        if (!windowIds_.empty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
+        if (!IsWindowIdsEmpty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
             ScheduleForegroundRunning();
         }
-        if (windowIds_.empty() && IsAbilitiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
+        if (IsWindowIdsEmpty() && IsAbilitiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
             ScheduleBackgroundRunning();
         }
     } else {
-        if (!windowIds_.empty()) {
+        if (!IsWindowIdsEmpty()) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         }
-        if (windowIds_.empty() && IsAbilitiesBackground() && foregroundingAbilityTokens_.empty()) {
+        if (IsWindowIdsEmpty() && IsAbilitiesBackground() && foregroundingAbilityTokens_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
         }
     }
 }
 #endif //SUPPORT_SCREEN
+
+bool AppRunningRecord::IsWindowIdsEmpty()
+{
+    std::lock_guard windowIdsLock(windowIdsLock_);
+    return windowIds_.empty();
+}
 
 bool AppRunningRecord::IsContinuousTask()
 {
@@ -2245,6 +2289,16 @@ void AppRunningRecord::SetJITEnabled(const bool jitEnabled)
 bool AppRunningRecord::IsJITEnabled() const
 {
     return jitEnabled_;
+}
+
+void AppRunningRecord::SetPreloadMode(PreloadMode mode)
+{
+    preloadMode_ = mode;
+}
+
+PreloadMode AppRunningRecord::GetPreloadMode()
+{
+    return preloadMode_;
 }
 
 void AppRunningRecord::SetPreloadState(PreloadState state)
@@ -2452,6 +2506,15 @@ pid_t AppRunningRecord::GetGPUPid()
     return gpuPid_;
 }
 
+pid_t AppRunningRecord::GetPid()
+{
+    auto prioObj = GetPriorityObject();
+    if (prioObj) {
+        return prioObj->GetPid();
+    }
+    return 0;
+}
+
 void AppRunningRecord::SetAttachedToStatusBar(bool isAttached)
 {
     isAttachedToStatusBar = isAttached;
@@ -2533,6 +2596,31 @@ void AppRunningRecord::AddAppLifecycleEvent(const std::string &msg)
     if (prioObject && prioObject->GetPid() != 0) {
         AbilityRuntime::FreezeUtil::GetInstance().AddAppLifecycleEvent(prioObject->GetPid(), msg);
     }
+}
+
+void AppRunningRecord::SetNeedPreloadModule(bool isNeedPreloadModule)
+{
+    isNeedPreloadModule_ = isNeedPreloadModule;
+}
+
+bool AppRunningRecord::GetNeedPreloadModule()
+{
+    return isNeedPreloadModule_;
+}
+
+void AppRunningRecord::SetNWebPreload(const bool isAllowedNWebPreload)
+{
+    isAllowedNWebPreload_ = isAllowedNWebPreload;
+}
+
+void AppRunningRecord::SetIsUnSetPermission(bool isUnSetPermission)
+{
+    isUnSetPermission_ = isUnSetPermission;
+}
+
+bool AppRunningRecord::IsUnSetPermission()
+{
+    return isUnSetPermission_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -35,6 +35,19 @@ AbilityRuntime_ErrorCode WriteStringToBuffer(
     *writeLength = srcLength;
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
+
+AbilityRuntime_ErrorCode CheckParameters(char* buffer, int32_t* writeLength)
+{
+    if (buffer == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "buffer is null");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    if (writeLength == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "writeLength is null");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+}
 }
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetCacheDir(
@@ -105,4 +118,172 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetBundleName(
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
     return WriteStringToBuffer(bundleName, buffer, bufferSize, writeLength);
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetTempDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getTempDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string tempDir = appContext->GetTempDir();
+    if (tempDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "tempDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(tempDir, buffer, bufferSize, writeLength);
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getResourceDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string resourceDir = appContext->GetResourceDir();
+    if (resourceDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "resourceDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(resourceDir, buffer, bufferSize, writeLength);
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetFilesDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getFilesDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string filesDir = appContext->GetFilesDir();
+    if (filesDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "filesDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(filesDir, buffer, bufferSize, writeLength);
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetDatabaseDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getDatabaseDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string databaseDir = appContext->GetDatabaseDir();
+    if (databaseDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "databaseDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(databaseDir, buffer, bufferSize, writeLength);
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetPreferencesDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getPreferencesDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string preferencesDir = appContext->GetPreferencesDir();
+    if (preferencesDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "preferencesDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(preferencesDir, buffer, bufferSize, writeLength);
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetBundleCodeDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getBundleCodeDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string bundleCodeDir = appContext->GetBundleCodeDir();
+    if (bundleCodeDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "bundleCodeDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(bundleCodeDir, buffer, bufferSize, writeLength);
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetDistributedFilesDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getDistributedFilesDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string distributedFilesDir = appContext->GetDistributedFilesDir();
+    if (distributedFilesDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "distributedFilesDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(distributedFilesDir, buffer, bufferSize, writeLength);
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetCloudFileDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getCloudFileDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string cloudFileDir = appContext->GetCloudFileDir();
+    if (cloudFileDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "cloudFileDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(cloudFileDir, buffer, bufferSize, writeLength);
 }

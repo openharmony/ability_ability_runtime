@@ -171,7 +171,8 @@ bool ResSchedUtil::CheckShouldForceKillProcess(int32_t pid)
 #endif
 }
 
-void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid, int64_t timeDuration)
+void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int32_t uid,
+    int64_t timeDuration, int64_t abilityRecordId)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_KEY_PERF_SCENE;
@@ -183,10 +184,28 @@ void ResSchedUtil::ReportLoadingEventToRss(LoadingStage stage, int32_t pid, int3
     if (timeDuration > 0) { // millisecond
         eventParams.emplace("timeoutDuration", std::to_string(timeDuration));
     }
+    if (abilityRecordId > 0) {
+        eventParams.emplace("abilityRecordId", std::to_string(abilityRecordId));
+    }
+
     int64_t type = static_cast<int64_t>(stage);
     TAG_LOGD(AAFwkTag::DEFAULT, "call");
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, type, eventParams);
 #endif
+}
+
+std::unordered_set<std::string> ResSchedUtil::GetNWebPreloadSet() const
+{
+    uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_GET_NWEB_PRELOAD_SET;
+    nlohmann::json payload;
+    nlohmann::json reply;
+    ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    if (!reply.contains("NWebPreloadSet")) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "does not get preload process set");
+        return {};
+    }
+    auto jsonObj = reply["NWebPreloadSet"];
+    return { jsonObj.begin(), jsonObj.end() };
 }
 } // namespace AAFwk
 } // namespace OHOS

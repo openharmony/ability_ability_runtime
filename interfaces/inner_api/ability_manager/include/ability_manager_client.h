@@ -417,6 +417,14 @@ public:
         int resultCode = DEFAULT_INVAL_VALUE, const Want *resultWant = nullptr);
 
     /**
+     * CloseUIExtensionAbilityBySCB, terminate the specified ui extension ability by SCB.
+     *
+     * @param token the ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject> token);
+
+    /**
      *  CloseUIAbilityBySCB, close the special ability by scb.
      *
      * @param sessionInfo the session info of the ability to terminate.
@@ -622,7 +630,7 @@ public:
      * @param clearPageStack.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode KillProcess(const std::string &bundleName, const bool clearPageStack = false);
+    ErrCode KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0);
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**

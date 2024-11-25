@@ -17,6 +17,7 @@
 
 #include "ability_manager_client.h"
 #include "accesstoken_kit.h"
+#include "app_utils.h"
 #include "authorization_result.h"
 #include "bundle_constants.h"
 #include "hilog_tag_wrapper.h"
@@ -87,7 +88,7 @@ ErrCode AbilityContext::TerminateAbility()
     ErrCode err = ERR_OK;
     switch (info->type) {
         case AppExecFwk::AbilityType::PAGE:
-            TAG_LOGD(AAFwkTag::CONTEXT, "page type, ability: %{public}s", info->name.c_str());
+            TAG_LOGD(AAFwkTag::CONTEXT, "type:page, ability: %{public}s", info->name.c_str());
 #ifdef SUPPORT_SCREEN
             if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
                 auto sessionToken = GetSessionToken();
@@ -290,8 +291,15 @@ void AbilityContext::RequestPermissionsFromUser(std::vector<std::string> &permis
         return;
     }
 
+    AccessTokenServiceConfig value;
+    if (!AppUtils::GetInstance().IsAccessTokenConfig(value)) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "default");
+        value.grantBundleName = GRANT_ABILITY_BUNDLE_NAME;
+        value.grantAbilityName = GRANT_ABILITY_ABILITY_NAME;
+    }
+
     AAFwk::Want want;
-    want.SetElementName(GRANT_ABILITY_BUNDLE_NAME, GRANT_ABILITY_ABILITY_NAME);
+    want.SetElementName(value.grantBundleName, value.grantAbilityName);
     want.SetParam(PERMISSION_KEY, permissions);
     want.SetParam(STATE_KEY, permissionsState);
     want.SetParam(TOKEN_KEY, token_);

@@ -18,10 +18,12 @@
 #include "hilog_tag_wrapper.h"
 #include "pending_want_manager.h"
 #include "int_wrapper.h"
+#include "multi_app_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
 std::string APP_MULTI_INSTANCE{ "ohos.extra.param.key.appInstance" };
+constexpr int32_t INVALID_UID = -1;
 
 PendingWantRecord::PendingWantRecord()
 {}
@@ -79,6 +81,7 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
         return ERR_INVALID_VALUE;
     }
 
+    TAG_LOGI(AAFwkTag::WANTAGENT, "before CancelWantSenderLocked");
     if (((uint32_t)key_->GetFlags() & (uint32_t)Flags::ONE_TIME_FLAG) != 0) {
         pendingWantManager->CancelWantSenderLocked(*this, true);
     }
@@ -148,8 +151,12 @@ void PendingWantRecord::BuildSendWant(SenderInfo &senderInfo, Want &want)
         }
     }
 
-    if (!wantParams.HasParam("ohos.extra.param.key.appCloneIndex")) {
-        wantParams.SetParam("ohos.extra.param.key.appCloneIndex", Integer::Box(key_->GetAppIndex()));
+    if (!wantParams.HasParam(Want::PARAM_APP_CLONE_INDEX_KEY)) {
+        int32_t appIndex = key_->GetAppIndex();
+        if (GetUid() != INVALID_UID && !want.GetBundle().empty()) {
+            MultiAppUtils::GetRunningMultiAppIndex(want.GetBundle(), GetUid(), appIndex);
+        }
+        wantParams.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, Integer::Box(appIndex));
     }
     CheckAppInstanceKey(want.GetBundle(), wantParams);
     want.SetParams(wantParams);

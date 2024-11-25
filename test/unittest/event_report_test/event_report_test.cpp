@@ -614,6 +614,20 @@ HWTEST_F(EventReportTest, SendProcessExitEvent_0100, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SendProcessExitEvent_0200
+ * @tc.desc: Check SendProcessExitEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventReportTest, SendProcessExitEvent_0200, TestSize.Level1)
+{
+    EventInfo eventInfo;
+    EventName eventName = EventName::PROCESS_EXIT;
+    eventInfo.exitReason = 0;
+    EventReport::SendProcessExitEvent(eventName, eventInfo);
+    EXPECT_EQ(EventReport::ConvertEventName(eventName), "PROCESS_EXIT");
+}
+
+/**
  * @tc.name: SendStartServiceEvent_0100
  * @tc.desc: Check SendStartServiceEvent Test
  * @tc.type: FUNC

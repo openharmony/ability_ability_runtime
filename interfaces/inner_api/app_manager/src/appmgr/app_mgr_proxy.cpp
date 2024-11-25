@@ -334,6 +334,21 @@ int32_t AppMgrProxy::JudgeSandboxByPid(pid_t pid, bool &isSandbox)
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::IsTerminatingByPid(pid_t pid, bool &isTerminating)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::IS_TERMINATING_BY_PID, data, reply, option);
+    isTerminating = reply.ReadBool();
+    return reply.ReadInt32();
+}
+
 int32_t AppMgrProxy::GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId)
 {
     MessageParcel data;
@@ -924,7 +939,8 @@ int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config, const int3
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name)
+int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+    int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationByBundleName");
     MessageParcel data;
@@ -937,6 +953,10 @@ int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config
     }
     if (!data.WriteString(name)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel name failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel appIndex failed");
         return ERR_INVALID_DATA;
     }
     MessageParcel reply;
@@ -1750,7 +1770,7 @@ int32_t AppMgrProxy::UpdateRenderState(pid_t renderPid, int32_t state)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::SignRestartAppFlag(int32_t uid)
+int32_t AppMgrProxy::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -1761,6 +1781,7 @@ int32_t AppMgrProxy::SignRestartAppFlag(int32_t uid)
         return IPC_PROXY_ERR;
     }
     PARCEL_UTIL_WRITE_RET_INT(data, Int32, uid);
+    PARCEL_UTIL_WRITE_RET_INT(data, String, instanceKey);
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::SIGN_RESTART_APP_FLAG, data, reply, option);
     return reply.ReadInt32();
@@ -2073,25 +2094,37 @@ int32_t AppMgrProxy::CheckIsKiaProcess(pid_t pid, bool &isKia)
     return ERR_OK;
 }
 
-int32_t AppMgrProxy::GetAppIndexByPid(pid_t pid, int32_t &appIndex)
+int32_t AppMgrProxy::KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
+    const std::string& reason)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
         return ERR_INVALID_VALUE;
     }
-    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    PARCEL_UTIL_WRITE_RET_INT(data, String, instanceKey);
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, clearPageStack);
+    PARCEL_UTIL_WRITE_RET_INT(data, String, reason);
 
-    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_APP_INDEX_BY_PID, data, reply, option);
-    int32_t ret = reply.ReadInt32();
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed,ret=%{public}d.", ret);
-        return ret;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::KILL_APP_SELF_WITH_INSTANCE_KEY, data, reply, option);
+    return reply.ReadInt32();
+}
+
+void AppMgrProxy::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return;
     }
-    appIndex = reply.ReadInt32();
-    return ERR_OK;
+    PARCEL_UTIL_WRITE_NORET(data, Int32, specifiedId);
+    PARCEL_UTIL_WRITE_NORET(data, String, instanceKey);
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
