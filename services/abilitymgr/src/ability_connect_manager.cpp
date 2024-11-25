@@ -726,7 +726,10 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             }
 
             result = DisconnectRecordNormal(list, connectRecord, callerDied);
-            if (result != ERR_OK && callerDied) {
+            if (result == ERR_OK) {
+                EventInfo eventInfo = BuildEventInfo(abilityRecord);
+                EventReport::SendDisconnectServiceEvent(EventName::DISCONNECT_SERVICE, eventInfo);
+            } else if (callerDied) {
                 DisconnectRecordForce(list, connectRecord);
                 result = ERR_OK;
             }
@@ -734,9 +737,6 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             if (result != ERR_OK) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "fail , ret = %{public}d", result);
                 break;
-            } else {
-                EventInfo eventInfo = BuildEventInfo(abilityRecord);
-                EventReport::SendDisconnectServiceEvent(EventName::DISCONNECT_SERVICE, eventInfo);
             }
         }
     }
