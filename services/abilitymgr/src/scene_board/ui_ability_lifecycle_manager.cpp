@@ -58,6 +58,8 @@ constexpr int KILL_TIMEOUT_MULTIPLE = 3;
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t MAX_FIND_UIEXTENSION_CALLER_TIMES = 10;
 constexpr int32_t START_UI_ABILITY_PER_SECOND_UPPER_LIMIT = 20;
+constexpr int32_t API14 = 14;
+constexpr int32_t API_VERSION_MOD = 100;
 
 FreezeUtil::TimeoutState MsgId2State(uint32_t msgId)
 {
@@ -477,7 +479,9 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         return ERR_OK;
     }
 
-    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON) {
+    auto callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON && (callerAbility == nullptr ||
+        callerAbility->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD >= API14)) {
         if (HasAbilityRequest(abilityRequest)) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "multi start request");
             return ERR_UI_ABILITY_IS_STARTING;
