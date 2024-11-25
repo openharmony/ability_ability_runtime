@@ -43,7 +43,7 @@ class WindowVisibilityInfo;
 }
 namespace AppExecFwk {
 
-class AppRunningManager {
+class AppRunningManager : public std::enable_shared_from_this<AppRunningManager> {
 public:
     AppRunningManager();
     virtual ~AppRunningManager();
@@ -356,8 +356,6 @@ public:
     int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
     bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
-
-    void UnSetPolicy(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
 
