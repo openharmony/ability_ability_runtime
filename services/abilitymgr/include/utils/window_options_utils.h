@@ -48,23 +48,6 @@ public:
      * @return The pair of the window mode result and the supported window mode.
      */
     static std::pair<bool, AppExecFwk::SupportWindowMode> WindowModeMap(int32_t windowMode);
-
-    /**
-     * UpdateWantToSetDisplayID, update want to set display id.
-     *
-     * @param want The want param.
-     * @param callerToken The caller token.
-     */
-    static void UpdateWantToSetDisplayID(Want &want, const sptr<IRemoteObject> &callerToken);
-
-    /**
-     * UpdateStartOptionsToSetDisplayID, update start options to set display id.
-     *
-     * @param startOptions The start options.
-     * @param callerToken The caller token.
-     */
-    static void UpdateStartOptionsToSetDisplayID(StartOptions &startOptions,
-        const sptr<IRemoteObject> &callerToken);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
