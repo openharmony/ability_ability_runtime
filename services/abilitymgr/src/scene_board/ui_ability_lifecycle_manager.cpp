@@ -25,6 +25,7 @@
 #include "hitrace_meter.h"
 #include "permission_constants.h"
 #include "process_options.h"
+#include "server_constant.h"
 #include "start_window_option.h"
 #include "scene_board/status_bar_delegate_manager.h"
 #include "session_manager_lite.h"
@@ -37,6 +38,7 @@
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
+using namespace AbilityRuntime::ServerConstant;
 namespace AAFwk {
 namespace {
 constexpr const char* SEPARATOR = ":";
@@ -73,6 +75,22 @@ auto g_deleteLifecycleEventTask = [](const sptr<Token> &token) {
     CHECK_POINTER_LOG(token, "token is nullptr.");
     FreezeUtil::GetInstance().DeleteLifecycleEvent(token->AsObject());
 };
+
+bool CompareTwoRequest(const AbilityRequest &left, const AbilityRequest &right)
+{
+    int32_t leftIndex = 0;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(left.want, leftIndex);
+    int32_t rightIndex = 0;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(right.want, rightIndex);
+
+    auto LeftInstanceKey = left.want.GetStringParam(Want::APP_INSTANCE_KEY);
+    auto RightInstanceKey = right.want.GetStringParam(Want::APP_INSTANCE_KEY);
+
+    return leftIndex == rightIndex && LeftInstanceKey == RightInstanceKey &&
+        left.abilityInfo.name == right.abilityInfo.name &&
+        left.abilityInfo.bundleName == right.abilityInfo.bundleName &&
+        left.abilityInfo.moduleName == right.abilityInfo.moduleName;
+}
 }
 
 UIAbilityLifecycleManager::UIAbilityLifecycleManager(int32_t userId): userId_(userId) {}
@@ -86,6 +104,11 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo invalid");
         return ERR_INVALID_VALUE;
     }
+    auto isCallBySCB = sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true);
+    if (!isCallBySCB) {
+        RemoveAbilityRequest(abilityRequest);
+    }
+    sessionInfo->want.RemoveParam(ServerConstant::IS_CALL_BY_SCB);
     abilityRequest.sessionInfo = sessionInfo;
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "session:%{public}d. bundle:%{public}s, ability:%{public}s, instanceKey:%{public}s",
@@ -96,7 +119,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     TAG_LOGD(AAFwkTag::ABILITYMGR, "StartUIAbility");
     uiAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
 
-    if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
+    if (isCallBySCB && uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
         return ERR_OK;
@@ -453,6 +476,20 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
         ++specifiedRequestId_;
         return ERR_OK;
     }
+
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON) {
+        if (HasAbilityRequest(abilityRequest)) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "multi start request");
+            return ERR_UI_ABILITY_IS_STARTING;
+        }
+        auto abilityRecord = FindRecordFromSessionMap(abilityRequest);
+        if (abilityRecord && abilityRecord->GetPendingState() == AbilityState::FOREGROUNDING) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "ability is starting");
+            return ERR_UI_ABILITY_IS_STARTING;
+        }
+        AddAbilityRequest(abilityRequest);
+    }
+
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
     auto isCreating = abilityRequest.want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
@@ -2890,6 +2927,63 @@ void UIAbilityLifecycleManager::EnableListForSCBRecovery()
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     isSCBRecovery_ = true;
     coldStartInSCBRecovery_.clear();
+}
+
+std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromSessionMap(
+    const AbilityRequest &abilityRequest)
+{
+    int32_t appIndex = 0;
+    (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
+    auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
+    for (const auto &[sessionId, abilityRecord] : sessionAbilityMap_) {
+        if (abilityRecord) {
+            const auto &info = abilityRecord->GetAbilityInfo();
+            if (info.name == abilityRequest.abilityInfo.name &&
+                info.bundleName == abilityRequest.abilityInfo.bundleName &&
+                info.moduleName == abilityRequest.abilityInfo.moduleName &&
+                appIndex == abilityRecord->GetAppIndex() && instanceKey == abilityRecord->GetInstanceKey()) {
+                return abilityRecord;
+            }
+        }
+    }
+    return nullptr;
+}
+
+bool UIAbilityLifecycleManager::HasAbilityRequest(const AbilityRequest &abilityRequest)
+{
+    for (const auto &item : startAbilityCheckList_) {
+        if (item && CompareTwoRequest(*item, abilityRequest)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void UIAbilityLifecycleManager::AddAbilityRequest(const AbilityRequest &abilityRequest)
+{
+    auto newRequest = std::make_shared<AbilityRequest>(abilityRequest);
+    startAbilityCheckList_.push_back(newRequest);
+    auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    CHECK_POINTER(taskHandler);
+    taskHandler->SubmitTask([wThis = weak_from_this(), wRequest = std::weak_ptr<AbilityRequest>(newRequest)]() {
+        auto pThis = wThis.lock();
+        auto request = wRequest.lock();
+        if (pThis && request) {
+            std::lock_guard guard(pThis->sessionLock_);
+            pThis->startAbilityCheckList_.remove(request);
+        }
+        }, GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE * GlobalConstant::TIMEOUT_UNIT_TIME);
+}
+
+void UIAbilityLifecycleManager::RemoveAbilityRequest(const AbilityRequest &abilityRequest)
+{
+    for (auto iter = startAbilityCheckList_.begin(); iter != startAbilityCheckList_.end(); ++iter) {
+        auto item = *iter;
+        if (item && CompareTwoRequest(*item, abilityRequest)) {
+            startAbilityCheckList_.erase(iter);
+            return;
+        }
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
