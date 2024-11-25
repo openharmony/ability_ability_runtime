@@ -30,6 +30,7 @@
 #include "hisysevent.h"
 #include "hitrace_meter.h"
 #include "parameter.h"
+#include "parameters.h"
 #include "singleton.h"
 
 #include "app_mgr_client.h"
@@ -56,6 +57,9 @@ static constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nan
 static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias second
 constexpr uint64_t SEC_TO_MILLISEC = 1000;
 const std::string LOG_FILE_PATH = "data/log/eventlog";
+static bool g_betaVersion = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
+static bool g_developMode = (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "enable") ||
+                            (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "true");
 }
 std::shared_ptr<AppfreezeManager> AppfreezeManager::instance_ = nullptr;
 ffrt::mutex AppfreezeManager::singletonMutex_;
@@ -486,6 +490,10 @@ bool AppfreezeManager::IsProcessDebug(int32_t pid, std::string bundleName)
     std::lock_guard<ffrt::mutex> lock(freezeFilterMutex_);
     auto it = appfreezeFilterMap_.find(bundleName);
     if (it != appfreezeFilterMap_.end() && it->second.pid == pid) {
+        if (g_betaVersion || g_developMode) {
+            TAG_LOGI(AAFwkTag::APPDFR, "filtration current device is beta or development do not report appfreeze");
+            return true;
+        }
         if (it->second.state == AppFreezeState::APPFREEZE_STATE_CANCELED) {
             TAG_LOGI(AAFwkTag::APPDFR, "filtration only once");
             return false;
