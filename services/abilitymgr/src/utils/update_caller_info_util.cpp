@@ -133,6 +133,7 @@ void UpdateCallerInfoUtil::UpdateAsCallerSourceInfo(Want& want, sptr<IRemoteObje
     want.RemoveParam(WANT_PARAMS_APP_RESTART_FLAG);
     want.RemoveParam(IS_SHELL_CALL);
     want.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
+    want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
 #ifdef SUPPORT_SCREEN
     if (UpdateAsCallerInfoFromDialog(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Update as caller source info from dialog.");
