@@ -33,7 +33,7 @@
 #include "extension_running_info.h"
 #include "connection_record.h"
 #include "element_name.h"
-#include "ui_extension_ability_connect_info.h"
+#include "ui_extension/ui_extension_ability_connect_info.h"
 #include "extension_record_manager.h"
 #include "want.h"
 #include "iremote_object.h"
@@ -325,13 +325,15 @@ public:
 
     void CloseAssertDialog(const std::string &assertSessionId);
 
-    void SignRestartAppFlag(int32_t uid);
+    void SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
     void UninstallApp(const std::string &bundleName);
 
     int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable);
+
+    void CompleteConnectTask(std::shared_ptr<ConnectionRecord> connectRecord);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t CONNECT_TIMEOUT_MSG = 1;

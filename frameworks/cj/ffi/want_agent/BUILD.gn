@@ -15,6 +15,28 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/ability/ability_runtime/cj_environment/cj_environment.gni")
 
+config("cj_want_agent_public_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "include" ]
+  visibility += [
+    "${ability_runtime_innerkits_path}/wantagent/*",
+    "${ability_runtime_napi_path}/inner/*",
+    "${ability_runtime_native_path}/ability/native/*",
+    "${distributed_notification_service_path}/*",
+  ]
+  include_dirs += [
+    "${ability_runtime_innerkits_path}/ability_manager/include",
+    "${ability_runtime_innerkits_path}/wantagent/include",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
+    "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
+    "${ability_runtime_path}/interfaces/kits/native/appkit",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+  ]
+}
+
 ohos_shared_library("cj_want_agent_ffi") {
   defines = [
     "AMS_LOG_TAG = \"CJ_ABILITY_FFI\"",
@@ -32,6 +54,8 @@ ohos_shared_library("cj_want_agent_ffi") {
     "${ability_runtime_services_path}/common/include",
   ]
 
+  public_configs = [ ":cj_want_agent_public_config" ]
+
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits",
@@ -47,7 +71,7 @@ ohos_shared_library("cj_want_agent_ffi") {
     "napi:cj_bind_native",
   ]
 
-  sources = [ "cj_want_agent_ffi.cpp" ]
+  sources = [ "src/cj_want_agent_ffi.cpp" ]
 
   cflags = [
     "-fstack-protector-all",

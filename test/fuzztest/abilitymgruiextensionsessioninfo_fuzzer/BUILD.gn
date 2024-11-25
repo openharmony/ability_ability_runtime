@@ -35,7 +35,7 @@ ohos_fuzztest("AbilitymgrUiExtensionSessionInfoFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/ui_extension_session_info.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ui_extension/ui_extension_session_info.cpp",
     "abilitymgruiextensionsessioninfo_fuzzer.cpp",
   ]
 

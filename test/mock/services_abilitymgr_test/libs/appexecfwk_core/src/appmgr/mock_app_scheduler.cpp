@@ -41,9 +41,8 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback>& callback)
     return true;
 }
 
-int AppScheduler::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
-    const AppExecFwk::AbilityInfo& abilityInfo, const AppExecFwk::ApplicationInfo& applicationInfo,
-    const AAFwk::Want& want, int32_t abilityRecordId, const std::string &instanceKey)
+int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const AppExecFwk::AbilityInfo& abilityInfo,
+    const AppExecFwk::ApplicationInfo& applicationInfo, const AAFwk::Want& want)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::LoadAbility()");
     if (applicationInfo.bundleName.find("com.ix.First.Test") != std::string::npos) {
@@ -103,7 +102,7 @@ void AppScheduler::OnAbilityRequestDone(const sptr<IRemoteObject>& token, const 
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAbilityRequestDone()");
 }
 
-int AppScheduler::KillApplication(const std::string& bundleName, const bool clearPageStack)
+int AppScheduler::KillApplication(const std::string& bundleName, bool clearPageStack, int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::KillApplication()");
     return ERR_OK;
@@ -132,6 +131,11 @@ void AppScheduler::NotifyConfigurationChange(const AppExecFwk::Configuration &co
 void AppScheduler::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyStartResidentProcess()");
+}
+
+void AppScheduler::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::NotifyStartKeepAliveProcess()");
 }
 
 void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)

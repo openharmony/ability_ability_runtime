@@ -18,7 +18,7 @@
 extern const char _binary_service_extension_ability_js_start[];
 extern const char _binary_service_extension_ability_js_end[];
 extern const char _binary_service_extension_ability_abc_start[];
-extern const char _binary_service_extension_ability_abc_end[];  //zhuhan
+extern const char _binary_service_extension_ability_abc_end[];
 
 #ifndef ENABLE_ERRCODE
 static napi_module _module = {

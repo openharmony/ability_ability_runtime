@@ -126,8 +126,17 @@ public:
      * @param accountId, account ID.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillProcessWithAccount(
-        const std::string &bundleName, const int accountId, const bool clearPageStack = false) = 0;
+    virtual int KillProcessWithAccount(const std::string &bundleName, const int accountId,
+        const bool clearPageStack = false, int32_t appIndex = 0) = 0;
+
+    /**
+     * KillProcessesInBatch, kill processes in batch, call KillProcessesInBatch() through proxy object;
+     * the killed bundle won't be started by the watcher.
+     *
+     * @param pids, the pid list of processes are going to be killed.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t KillProcessesInBatch(const std::vector<int32_t> &pids) = 0;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
@@ -145,7 +154,7 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplication(const std::string &bundleName, const bool clearPageStack = false) = 0;
+    virtual int KillApplication(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0) = 0;
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
@@ -376,6 +385,14 @@ public:
     virtual void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid) {};
 
     /**
+     * @brief Set non-resident keep-alive process status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
+     */
+    virtual void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid) {};
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
@@ -441,12 +458,10 @@ public:
         return false;
     }
 
-    virtual bool IsAppKilling(sptr<IRemoteObject> token)
+    virtual bool IsCallerKilling(const std::string& callerKey)
     {
         return false;
     }
-
-    virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) {}
 
     enum class Message {
         LOAD_ABILITY = 0,
@@ -470,7 +485,6 @@ public:
         KILL_APPLICATION_SELF,
         UPDATE_APPLICATION_INFO_INSTALLED,
         SET_CURRENT_USER_ID,
-        ENABLE_START_PROCESS_FLAG_BY_USER_ID,
         Get_BUNDLE_NAME_BY_PID,
         SET_ABILITY_FOREGROUNDING_FLAG,
         REGISTER_APP_DEBUG_LISTENER,
@@ -500,8 +514,10 @@ public:
         CLEAN_UIABILITY_BY_USER_REQUEST,
         FORCE_KILL_APPLICATION_BY_ACCESS_TOKEN_ID = 49,
         IS_PROCESS_ATTACHED,
-        IS_APP_KILLING,
-        SET_APP_EXCEPTION_CALLBACK,
+        IS_CALLER_KILLING,
+        ENABLE_START_PROCESS_FLAG_BY_USER_ID,
+        SET_KEEP_ALIVE_DKV,
+        KILL_PROCESSES_IN_BATCH,
         // Add enumeration values above
         END
     };

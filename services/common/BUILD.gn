@@ -91,6 +91,7 @@ ohos_shared_library("event_report") {
   sources = [ "src/event_report.cpp" ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -136,6 +137,7 @@ ohos_shared_library("app_util") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "config_policy:configpolicy_util",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -170,7 +172,10 @@ ohos_shared_library("res_sched_util") {
 
   external_deps = [
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 
   if (resource_schedule_service_enable) {

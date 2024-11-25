@@ -32,6 +32,7 @@
 #include "bundle_info.h"
 #include "configuration.h"
 #include "iremote_object.h"
+#include "kill_process_config.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "running_process_info.h"
@@ -42,7 +43,7 @@ class WindowVisibilityInfo;
 }
 namespace AppExecFwk {
 
-class AppRunningManager {
+class AppRunningManager : public std::enable_shared_from_this<AppRunningManager> {
 public:
     AppRunningManager();
     virtual ~AppRunningManager();
@@ -72,7 +73,8 @@ public:
      */
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordIsExist(const std::string &appName,
         const std::string &processName, const int uid, const BundleInfo &bundleInfo,
-        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "");
+        const std::string &specifiedProcessFlag = "", bool *isProCache = nullptr, const std::string &instanceKey = "",
+        const std::string &customProcessFlag = "");
 
 #ifdef APP_NO_RESPONSE_DIALOG
     /**
@@ -87,13 +89,12 @@ public:
 #endif
 
     /**
-     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     * Check whether the process of the application exists.
      *
-     * @param bundleName, the bundle name.
-     *
+     * @param accessTokenId, the accessTokenId.
      * @return, Return true if exist.
      */
-    bool CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName);
+    bool IsAppExist(uint32_t accessTokenId);
 
     /**
      * CheckAppRunningRecordIsExistByUid, check app exist when concurrent.
@@ -104,10 +105,10 @@ public:
     bool CheckAppRunningRecordIsExistByUid(int32_t uid);
 
     /**
-     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     * Check whether the process of the application exists.
      *
      * @param bundleName Indicates the bundle name of the bundle.
-     * @param appCloneIndex the appindex of the bundle.
+     * @param appCloneIndex the app index of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
      * @return, Return ERR_OK if success, others fail.
      */
@@ -193,7 +194,7 @@ public:
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
+    int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
 
     /*
     *  Notify application background of current memory level.
@@ -253,7 +254,11 @@ public:
     int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
 
     bool ProcessExitByBundleNameAndUid(
-        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack = false);
+        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const KillProcessConfig &config = {});
+    bool ProcessExitByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::list<pid_t> &pids,
+        bool clearPageStack);
+    bool ProcessExitByTokenIdAndInstance(uint32_t accessTokenId, const std::string &instanceKey, std::list<pid_t> &pids,
+        bool clearPageStack);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
 
     void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
@@ -310,7 +315,7 @@ public:
      */
     int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
 
-    int32_t SignRestartAppFlag(int32_t uid);
+    int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -349,6 +354,10 @@ public:
     void SetMultiUserConfigurationMgr(const std::shared_ptr<MultiUserConfigurationMgr>& multiUserConfigurationMgr);
 
     int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
+
+    bool CheckAppRunningRecordIsLast(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
 
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);

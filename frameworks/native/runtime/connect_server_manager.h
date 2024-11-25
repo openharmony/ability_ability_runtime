@@ -22,6 +22,7 @@
 using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 using DebuggerInfo = std::unordered_map<int, std::pair<void*, const DebuggerPostTask>>;
 using InstanceMap = std::unordered_map<int32_t, std::string>;
+using ServerConnectCallback = void(*)(void);
 #ifdef APP_USE_ARM
 constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
 #elif defined(APP_USE_X86_64)
@@ -58,6 +59,7 @@ public:
     bool SetRecordCallback(const std::function<void(void)> &startRecordFunc,
         const std::function<void(void)> &stopRecordFunc);
     void SetRecordResults(const std::string &jsonArrayStr);
+    void RegistConnectServerCallback(const ServerConnectCallback &connectServerCallback);
 
 private:
     ConnectServerManager() = default;
@@ -68,11 +70,13 @@ private:
 
     std::mutex mutex_;
     static std::mutex instanceMutex_;
+    static std::mutex callbackMutex_;
     std::atomic<bool> isConnected_ = false;
     std::unordered_map<int32_t, std::pair<std::string, int32_t>> instanceMap_;
     std::function<void(int32_t)> createLayoutInfo_;
     std::function<void(int32_t)> setStatus_;
     std::function<void(int32_t)> setArkUIStateProfilerStatus_;
+    std::vector<ServerConnectCallback> connectServerCallbacks_;
     ConnectServerManager(const ConnectServerManager&) = delete;
     ConnectServerManager(ConnectServerManager&&) = delete;
     ConnectServerManager& operator=(const ConnectServerManager&) = delete;

@@ -89,10 +89,9 @@ FreezeUtil::TimeoutState MsgId2State(uint32_t msgId)
     return FreezeUtil::TimeoutState::UNKNOWN;
 }
 
-auto g_deleteLifecycleEventTask = [](const sptr<Token> &token, FreezeUtil::TimeoutState state) {
+auto g_deleteLifecycleEventTask = [](const sptr<Token> &token) {
     CHECK_POINTER_LOG(token, "token is nullptr.");
-    FreezeUtil::LifecycleFlow flow = { token->AsObject(), state };
-    FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(token->AsObject());
 };
 } // namespace
 
@@ -1015,8 +1014,7 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     abilityRecord->RemoveLoadTimeoutTask();
     abilityRecord->SetLoading(false);
-    FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
-    FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
 
     abilityRecord->SetScheduler(scheduler);
 
@@ -1074,8 +1072,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityRecord null");
                 continue;
             }
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -1092,8 +1090,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                     continue;
                 }
                 auto abilityRecord = missionInfo->GetAbilityRecord();
-                if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                    info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+                if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                     abilityRecord->SetAppState(info.state);
                 }
             }
@@ -1105,8 +1103,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 continue;
             }
             auto abilityRecord = missionInfo->GetAbilityRecord();
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -1117,8 +1115,8 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
                 continue;
             }
             auto abilityRecord = missionInfo->GetAbilityRecord();
-            if (info.processName == abilityRecord->GetAbilityInfo().process ||
-                info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
                 abilityRecord->SetAppState(info.state);
             }
         }
@@ -1256,7 +1254,7 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
     auto eventHandler = AbilityManagerService::GetPubInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     abilityRecord->RemoveForegroundTimeoutTask();
-    g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::FOREGROUND);
+    g_deleteLifecycleEventTask(abilityRecord->GetToken());
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     auto self(weak_from_this());
     auto taskHandler = AbilityManagerService::GetPubInstance()->GetTaskHandler();
@@ -1394,7 +1392,7 @@ int MissionListManager::DispatchBackground(const std::shared_ptr<AbilityRecord> 
 
     // remove background timeout task.
     handler->CancelTask("background_" + std::to_string(abilityRecord->GetAbilityRecordId()));
-    g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::BACKGROUND);
+    g_deleteLifecycleEventTask(abilityRecord->GetToken());
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     auto self(shared_from_this());
     auto task = [self, abilityRecord]() { self->CompleteBackground(abilityRecord); };
@@ -2249,20 +2247,17 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
             flow.token = ability->GetToken()->AsObject();
             flow.state = state;
         }
-        info.msg = msgContent + "\nserver:\n" + FreezeUtil::GetInstance().GetLifecycleEvent(flow)
-            + "\nserver app:\n" + FreezeUtil::GetInstance().GetAppLifecycleEvent(processInfo.pid_);
+        info.msg = msgContent + "\nserver actions for ability:\n" +
+            FreezeUtil::GetInstance().GetLifecycleEvent(flow.token) +
+            "\nserver actions for app:\n" + FreezeUtil::GetInstance().GetAppLifecycleEvent(processInfo.pid_);
         if (!isHalf) {
-            FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+            FreezeUtil::GetInstance().DeleteLifecycleEvent(flow.token);
             FreezeUtil::GetInstance().DeleteAppLifecycleEvent(ability->GetPid());
         }
     } else {
         info.msg = msgContent;
     }
-    if (ability->GetFreezeStrategy() == FreezeStrategy::NOTIFY_FREEZE_MGR) {
-        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
-    } else {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s", info.msg.c_str());
-    }
+    AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
 }
 
 bool MissionListManager::GetContentAndTypeId(uint32_t msgId, std::string &msgContent, int &typeId) const
@@ -2355,7 +2350,6 @@ void MissionListManager::HandleLoadTimeout(const std::shared_ptr<AbilityRecord> 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ability null");
         return;
     }
-    ability->SetLoadState(AbilityLoadState::FAILED);
     // root launcher load timeout, notify appMs force terminate the ability and restart immediately.
     if (ability->IsLauncherAbility() && ability->IsLauncherRoot()) {
         ability->SetRestarting(true);
@@ -3355,7 +3349,8 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     // new version started by call type
     auto ret = ResolveAbility(targetAbilityRecord, abilityRequest);
     bool isStartToForeground = targetAbilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false);
-    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ) {
+    if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ || (ret == ResolveResultType::OK_NO_REMOTE_OBJ &&
+        targetAbilityRecord->GetStartTime() > 0)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability has been resolved.");
         if (isStartToForeground) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "target ability needs to be switched to foreground.");
@@ -3446,9 +3441,6 @@ int MissionListManager::ResolveAbility(
     if (targetAbility->IsReady()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "targetAbility is ready, directly scheduler call request.");
         targetAbility->CallRequest();
-        return ResolveResultType::OK_HAS_REMOTE_OBJ;
-    } else if (targetAbility->GetLoadState() == AbilityLoadState::LOADING) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "targetAbility is loading.");
         return ResolveResultType::OK_HAS_REMOTE_OBJ;
     }
 
@@ -3844,7 +3836,7 @@ void MissionListManager::AddUninstallTags(const std::string &bundleName, int32_t
         if (missionList) {
             missionList->HandleUnInstallApp(bundleName, uid); // add tag here.
             if (missionList->IsEmpty()) {
-                currentMissionLists_.erase(it++);
+                it = currentMissionLists_.erase(it);
                 continue;
             }
         }
@@ -4272,20 +4264,20 @@ void MissionListManager::SendKeyEvent(const AbilityRequest &abilityRequest)
     EventReport::SendKeyEvent(EventName::START_PRIVATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
-void MissionListManager::SignRestartAppFlag(int32_t uid)
+void MissionListManager::SignRestartAppFlag(int32_t uid, const std::string &instanceKey)
 {
     std::lock_guard guard(managerLock_);
     for (const auto& missionList : currentMissionLists_) {
         if (!missionList) {
             continue;
         }
-        missionList->SignRestartAppFlag(uid);
+        missionList->SignRestartAppFlag(uid, instanceKey);
     }
     if (defaultStandardList_) {
-        defaultStandardList_->SignRestartAppFlag(uid);
+        defaultStandardList_->SignRestartAppFlag(uid, instanceKey);
     }
     if (defaultSingleList_) {
-        defaultSingleList_->SignRestartAppFlag(uid);
+        defaultSingleList_->SignRestartAppFlag(uid, instanceKey);
     }
 }
 

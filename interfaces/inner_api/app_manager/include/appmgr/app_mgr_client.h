@@ -158,7 +158,8 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearPageStack = false);
+    virtual AppMgrResultCode KillApplication(const std::string &bundleName, bool clearPageStack = false,
+        int32_t appIndex = 0);
 
     /**
      * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
@@ -390,7 +391,8 @@ public:
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual AppMgrResultCode UpdateConfigurationByBundleName(const Configuration &config, const std::string &name);
+    virtual AppMgrResultCode UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+        int32_t appIndex = 0);
 
     /**
      * Register configuration observer.
@@ -674,6 +676,14 @@ public:
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable, int32_t uid);
 
     /**
+     * @brief Set non-resident keep-alive process status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user, 0 for all users
+     */
+    void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid);
+
+    /**
      * Register application or process state observer.
      * @param observer, ability token.
      * @param bundleNameList, the list of bundle names.
@@ -863,20 +873,20 @@ public:
     virtual AppMgrResultCode BlockProcessCacheByPids(const std::vector<int32_t> &pids);
 
     /**
-     * Request to clean uiability from user.
-     *
-     * @param token the token of ability.
-     * @return Returns true if clean success, others return false.
-     */
-    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
-
-    /**
      * whether killed for upgrade web.
      *
      * @param bundleName the bundle name is killed for upgrade web.
      * @return Returns true is killed for upgrade web, others return false.
      */
     bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
+    /**
+     * Request to clean uiability from user.
+     *
+     * @param token the token of ability.
+     * @return Returns true if clean success, others return false.
+     */
+    bool CleanAbilityByUserRequest(const sptr<IRemoteObject> &token);
 
     /**
      * whether the abilities of process specified by pid type only UIAbility.
@@ -889,7 +899,18 @@ public:
      */
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
-    bool IsAppKilling(sptr<IRemoteObject> token) const;
+    bool IsCallerKilling(const std::string& callerKey) const;
+
+    /**
+     * Check whether the bundle is running.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param appCloneIndex the appindex of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return Return ERR_OK if success, others fail.
+     */
+    virtual AppMgrResultCode IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+        bool &isRunning);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

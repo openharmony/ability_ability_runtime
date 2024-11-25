@@ -90,6 +90,7 @@ enum class AAFwkLogTag : uint32_t {
     CONTINUATION,
     DISTRIBUTED,
     FREE_INSTALL,
+    KEEP_ALIVE,
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
 
@@ -158,7 +159,7 @@ inline const char* GetDomainName5(AAFwkLogTag tag)
 {
     const char* tagNames[] = { "WantAgent", "AutoFillMgr", "ExtMgr", "ServiceRouter",
         "AutoStartup", "Startup", "Recovery", "ProcessMgr", "Continuation",
-        "Distributed", "FreeInstall" };
+        "Distributed", "FreeInstall", "KeepAlive" };
     uint32_t offset = GetOffset(tag, AAFwkLogTag::WANTAGENT);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";

@@ -221,6 +221,16 @@ public:
     virtual int32_t JudgeSandboxByPid(pid_t pid, bool &isSandbox) override;
 
     /**
+     * IsTerminatingByPid, call IsTerminatingByPid() through proxy project.
+     * Obtains information about application processes that are running on the device.
+     *
+     * @param pid, the pid of current app running record.
+     * @param isTerminating, current app is or not terminating.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t IsTerminatingByPid(pid_t pid, bool &isTerminating) override;
+
+    /**
      * GetProcessRunningInfosByUserId, call GetProcessRunningInfosByUserId() through proxy project.
      * Obtains information about application processes that are running on the device.
      *
@@ -423,7 +433,8 @@ public:
      * @param name Application bundle name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) override;
+    virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+        int32_t appIndex = 0) override;
 
     /**
      * @brief register a configuration observer which will receive notifies when updated.
@@ -683,10 +694,11 @@ public:
     /**
      * @brief mark a process which is going restart.
      * @param uid the uid of the process.
+     * @param instanceKey the instance key of the process.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t SignRestartAppFlag(int32_t uid) override;
+    int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey) override;
 
     /**
      * Get appRunningUniqueId by pid.
@@ -772,7 +784,10 @@ public:
      */
     virtual void RestartResidentProcessDependedOnWeb() override;
 
-    int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) override;
+    virtual int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
+        const std::string& reason) override;
+
+    virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) override;
 private:
     /**
      * Init, Initialize application services.

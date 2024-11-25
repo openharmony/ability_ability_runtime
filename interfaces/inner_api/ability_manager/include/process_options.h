@@ -25,6 +25,7 @@ enum class ProcessMode {
     NEW_PROCESS_ATTACH_TO_PARENT = 1,
     NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM = 2,
     ATTACH_TO_STATUS_BAR_ITEM = 3,
+    NEW_HIDDEN_PROCESS = 4,
     NO_ATTACHMENT = 99,
     END
 };
@@ -56,6 +57,7 @@ public:
     ProcessMode processMode = ProcessMode::UNSPECIFIED;
     StartupVisibility startupVisibility = StartupVisibility::UNSPECIFIED;
     std::string processName;
+    bool isRestartKeepAlive = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

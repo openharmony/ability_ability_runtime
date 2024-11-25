@@ -35,7 +35,7 @@ BundleMgrHelper::~BundleMgrHelper()
 
 void BundleMgrHelper::PreConnect()
 {
-    Connect();
+    Connect(false);
 }
 
 ErrCode BundleMgrHelper::GetNameForUid(const int32_t uid, std::string &name)
@@ -216,7 +216,7 @@ std::string BundleMgrHelper::GetAppIdByBundleName(const std::string &bundleName,
 
 void BundleMgrHelper::ConnectTillSuccess()
 {
-    while (Connect() == nullptr) {
+    while (Connect(false) == nullptr) {
         TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "connect failed, now retry");
         usleep(REPOLL_TIME_MICRO_SECONDS);
     }
@@ -224,10 +224,19 @@ void BundleMgrHelper::ConnectTillSuccess()
 
 sptr<IBundleMgr> BundleMgrHelper::Connect()
 {
+    return Connect(true);
+}
+
+sptr<IBundleMgr> BundleMgrHelper::Connect(bool checkBmsReady)
+{
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
     std::lock_guard<std::mutex> lock(mutex_);
     if (bundleMgr_ == nullptr) {
+        if (checkBmsReady && !bmsReady_) {
+            TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Bms not ready");
+            return nullptr;
+        }
         sptr<ISystemAbilityManager> systemAbilityManager =
             SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (systemAbilityManager == nullptr) {
@@ -240,6 +249,7 @@ sptr<IBundleMgr> BundleMgrHelper::Connect()
             TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to get bundle mgr service remote object");
             return nullptr;
         }
+        bmsReady_ = true;
         std::weak_ptr<BundleMgrHelper> weakPtr = shared_from_this();
         auto deathCallback = [weakPtr](const wptr<IRemoteObject>& object) {
             auto sharedPtr = weakPtr.lock();
@@ -260,6 +270,13 @@ sptr<IBundleMgr> BundleMgrHelper::Connect()
     }
 
     return bundleMgr_;
+}
+
+void BundleMgrHelper::SetBmsReady(bool bmsReady)
+{
+    TAG_LOGI(AAFwkTag::BUNDLEMGRHELPER, "SetBmsReady:%{public}d", bmsReady);
+    std::lock_guard<std::mutex> lock(mutex_);
+    bmsReady_ = bmsReady;
 }
 
 sptr<IBundleInstaller> BundleMgrHelper::ConnectBundleInstaller()
@@ -930,6 +947,20 @@ ErrCode BundleMgrHelper::GetSignatureInfoByBundleName(const std::string &bundleN
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetSignatureInfoByBundleName(bundleName, signatureInfo);
+}
+
+std::string BundleMgrHelper::GetStringById(
+    const std::string &bundleName, const std::string &moduleName, uint32_t resId, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect");
+        return "";
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetStringById(bundleName, moduleName, resId, userId);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

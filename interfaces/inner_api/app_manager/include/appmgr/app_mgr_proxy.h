@@ -196,6 +196,16 @@ public:
     virtual int32_t JudgeSandboxByPid(pid_t pid, bool &isSandbox) override;
 
     /**
+     * IsTerminatingByPid, call IsTerminatingByPid() through proxy project.
+     * Obtains information about application processes that are running on the device.
+     *
+     * @param pid, the pid of current app running record.
+     * @param isTerminating, current app is or not terminating.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t IsTerminatingByPid(pid_t pid, bool &isTerminating) override;
+
+    /**
      * GetProcessRunningInfosByUserId, call GetProcessRunningInfosByUserId() through proxy project.
      * Obtains information about application processes that are running on the device.
      *
@@ -407,7 +417,8 @@ public:
 
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override;
 
-    virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name) override;
+    virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
+        int32_t appIndex = 0) override;
 
     virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
@@ -641,10 +652,11 @@ public:
     /**
      * @brief mark a process which is going restart.
      * @param uid the uid of the process.
+     * @param instanceKey the instance key of the process.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t SignRestartAppFlag(int32_t uid) override;
+    int32_t SignRestartAppFlag(int32_t uid, const std::string &instanceKey) override;
 
     /**
      * Get appRunningUniqueId by pid.
@@ -740,7 +752,10 @@ public:
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName,
         std::vector<int32_t> &pidList) override;
 
-    virtual int32_t GetAppIndexByPid(pid_t pid, int32_t &appIndex) override;
+    virtual int32_t KillAppSelfWithInstanceKey(const std::string &instanceKey, bool clearPageStack,
+        const std::string& reason) override;
+
+    virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) override;
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);

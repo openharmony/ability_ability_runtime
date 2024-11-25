@@ -51,6 +51,9 @@ bool LoadParam::Marshalling(Parcel &parcel) const
             return false;
         }
     }
+    if (!parcel.WriteBool(isKeepAlive)) {
+        return false;
+    }
     return true;
 }
 
@@ -71,6 +74,7 @@ bool LoadParam::ReadFromParcel(Parcel &parcel)
             return false;
         }
     }
+    isKeepAlive = parcel.ReadBool();
     return true;
 }
 

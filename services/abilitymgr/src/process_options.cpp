@@ -24,6 +24,7 @@ bool ProcessOptions::ReadFromParcel(Parcel &parcel)
     processMode = static_cast<ProcessMode>(parcel.ReadInt32());
     startupVisibility = static_cast<StartupVisibility>(parcel.ReadInt32());
     processName = parcel.ReadString();
+    isRestartKeepAlive = parcel.ReadBool();
     return true;
 }
 
@@ -54,6 +55,10 @@ bool ProcessOptions::Marshalling(Parcel &parcel) const
     }
     if (!parcel.WriteString(processName)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ProcessName write failed");
+        return false;
+    }
+    if (!parcel.WriteBool(isRestartKeepAlive)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "isRestartKeepAlive write failed");
         return false;
     }
     return true;

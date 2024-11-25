@@ -34,8 +34,8 @@ public:
     virtual ~DistributedClient() = default;
     int32_t StartRemoteAbility(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
         uint32_t accessToken);
-    int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-        int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
+    int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
+        const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
     int32_t ContinueMission(AAFwk::ContinueMissionInfo continueMissionInfo, const sptr<IRemoteObject> &callBack);
     int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
         int32_t status, uint32_t accessToken);
@@ -43,9 +43,9 @@ public:
         const std::string &callerBundleName);
     int32_t ConnectRemoteAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect);
     int32_t DisconnectRemoteAbility(const sptr<IRemoteObject>& connect, int32_t callerUid, uint32_t accessToken);
-    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag);
-    int32_t StopSyncRemoteMissions(const std::string& devId);
-    int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj);
+    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag, int32_t callingUid);
+    int32_t StopSyncRemoteMissions(const std::string& devId, int32_t callingUid);
+    int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj, int32_t callingUid);
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid);
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid);
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj);
@@ -59,7 +59,7 @@ public:
         int32_t callerUid, int32_t requestCode, uint32_t accessToken, const sptr<IRemoteObject>& callback);
     int32_t StopRemoteExtensionAbility(const Want &want, int32_t callerUid,
         uint32_t accessToken, int32_t extensionType);
-    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state);
+    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state, int32_t callingUid);
     enum {
         START_REMOTE_ABILITY = 1,
         CONNECT_REMOTE_ABILITY = 6,
