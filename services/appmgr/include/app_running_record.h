@@ -854,7 +854,7 @@ public:
     bool IsCaching();
     void SetNeedPreloadModule(bool isNeedPreloadModule);
     bool GetNeedPreloadModule();
-    void SetNeedLimitPrio(bool isNeedLimitPrio)
+    void SetNeedLimitPrio(bool isNeedLimitPrio);
     bool GetNeedLimitPrio();
 
     /**
