@@ -2623,9 +2623,14 @@ bool AppRunningRecord::IsUnSetPermission()
     return isUnSetPermission_;
 }
 
-bool IsPreload()
+bool AppRunningRecord::GetNeedLimitPrio()
 {
-    return preloadMode_!= PreloadMode::PRESS_DOWN;
+    return isNeedLimitPrio_;
+}
+
+void AppRunningRecord::SetNeedLimitPrio(bool isNeedLimitPrio)
+{
+    isNeedLimitPrio_ = isNeedLimitPrio;
 }
 
 }  // namespace AppExecFwk
