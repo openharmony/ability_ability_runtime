@@ -104,6 +104,7 @@ using OHOS::Security::AccessToken::AccessTokenKit;
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
+using namespace AbilityRuntime::ServerConstant;
 namespace AAFwk {
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 using GetExtensionAbilityInfoFlag = AppExecFwk::GetExtensionAbilityInfoFlag;
@@ -252,7 +253,6 @@ constexpr const char* NEED_STARTINGWINDOW = "ohos.ability.NeedStartingWindow";
 constexpr const char* PERMISSIONMGR_BUNDLE_NAME = "com.ohos.permissionmanager";
 constexpr const char* PERMISSIONMGR_ABILITY_NAME = "com.ohos.permissionmanager.GrantAbility";
 constexpr const char* SCENEBOARD_BUNDLE_NAME = "com.ohos.sceneboard";
-constexpr const char* IS_CALL_BY_SCB = "isCallBySCB";
 constexpr const char* SPECIFY_TOKEN_ID = "specifyTokenId";
 constexpr const char* PROCESS_SUFFIX = "embeddable";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
@@ -1262,7 +1262,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         ReportEventToRSS(abilityInfo, abilityRequest.callerToken);
         abilityRequest.userId = oriValidUserId;
-        abilityRequest.want.SetParam(IS_CALL_BY_SCB, false);
+        abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
         // other sa or shell can not use continueSessionId and persistentId
         auto abilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
         if (abilityRecord == nullptr &&
@@ -1549,7 +1549,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
         abilityRequest.userId = oriValidUserId;
-        abilityRequest.want.SetParam(IS_CALL_BY_SCB, false);
+        abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         return uiAbilityManager->NotifySCBToStartUIAbility(abilityRequest);
@@ -1941,7 +1941,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     abilityRequest.want.RemoveParam(PARAM_SPECIFIED_PROCESS_FLAG);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         abilityRequest.userId = oriValidUserId;
-        abilityRequest.want.SetParam(IS_CALL_BY_SCB, false);
+        abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
         abilityRequest.processOptions = startOptions.processOptions;
         if (IPCSkeleton::GetCallingTokenID() == abilityRequest.appInfo.accessTokenId) {
             abilityRequest.startWindowOption = startOptions.startWindowOption;
@@ -2223,7 +2223,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId, appIndex, sessionInfo->callerToken);
-    if (sessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, true)) {
+    if (sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "interceptorExecuter_ called");
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(sessionInfo->want, requestCode,
@@ -2246,7 +2246,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
         return result;
     }
 
-    if (sessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, true)) {
+    if (sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true)) {
         if (sessionInfo->startSetting != nullptr) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Start by scb, last not.");
             sessionInfo->startSetting->AddProperty(AbilityStartSetting::IS_START_BY_SCB_KEY, "true");
@@ -2270,7 +2270,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
         return ERR_INVALID_VALUE;
     }
 
-    if (sessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, true)) {
+    if (sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "afterCheckExecuter_ called");
         if (sessionInfo->want.GetBoolParam("ohos.ability.params.isSkipErmsFromSCB", false)) {
             abilityRequest.want.RemoveParam("ohos.ability.params.isSkipErmsFromSCB");
@@ -2312,8 +2312,6 @@ int32_t AbilityManagerService::StartUIAbilityBySCBDefaultCommon(AbilityRequest &
     ReportAbilityAssociatedStartInfoToRSS(abilityInfo, RES_TYPE_SCB_START_ABILITY, sessionInfo->callerToken);
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-    // here we don't need want param "IS_CALL_BY_SCB" any more, remove it.
-    (sessionInfo->want).RemoveParam(IS_CALL_BY_SCB);
     return uiAbilityManager->StartUIAbility(abilityRequest, sessionInfo, sceneFlag, isColdStart);
 }
 
@@ -7508,7 +7506,7 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     }
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         ReportEventToRSS(abilityRequest.abilityInfo, callerToken);
-        abilityRequest.want.SetParam(IS_CALL_BY_SCB, false);
+        abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         return uiAbilityManager->ResolveLocked(abilityRequest);
@@ -12034,7 +12032,7 @@ int32_t AbilityManagerService::PreStartInner(const FreeInstallInfo& taskInfo)
 
     // sceneboard
     abilityRequest.userId = oriValidUserId;
-    abilityRequest.want.SetParam(IS_CALL_BY_SCB, false);
+    abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
     std::string sessionId = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
     abilityRequest.want.SetParam(KEY_SESSION_ID, sessionId);
