@@ -45,6 +45,7 @@ ohos_shared_library("cj_context_ffi") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:cj_bundle_manager_ffi",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
