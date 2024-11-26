@@ -16,6 +16,7 @@
 #include "dataobs_mgr_changeinfo.h"
 #include "dataobs_utils.h"
 #include "securec.h"
+#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
