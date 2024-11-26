@@ -628,6 +628,7 @@ int32_t ExtensionRecordManager::GetUIExtensionSessionInfo(
     uiExtensionSessionInfo.persistentId = sessionInfo->persistentId;
     uiExtensionSessionInfo.hostWindowId = sessionInfo->hostWindowId;
     uiExtensionSessionInfo.uiExtensionUsage = sessionInfo->uiExtensionUsage;
+    uiExtensionSessionInfo.elementName = abilityRecord->GetElementName();
     return ERR_OK;
 }
 
