@@ -145,7 +145,7 @@ int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessagePar
 {
     ChangeInfo changeInfo;
     if (!ChangeInfo::Unmarshalling(changeInfo, data)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "DataObsManagerStub::NotifyChangeExtInner: Failed to unmarshall changeInfo.");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to unmarshall changeInfo.");
         return IPC_STUB_INVALID_DATA_ERR;
     }
 
