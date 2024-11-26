@@ -256,7 +256,11 @@ void DataObsMgrClient::ReRegister()
     observers_.Clear();
     observers.ForEach([this](const auto &key, const auto &value) {
         for (const auto &uri : value) {
-            RegisterObserver(uri, key);
+            auto ret = RegisterObserver(uri, key);
+            if (ret != SUCCESS) {
+                TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserver failed, uri:%{public}s, ret:%{public}d",
+                    uri.ToString().c_str(), ret);
+            }
         }
         return false;
     });
@@ -265,7 +269,11 @@ void DataObsMgrClient::ReRegister()
     observerExts_.Clear();
     observerExts.ForEach([this](const auto &key, const auto &value) {
         for (const auto &param : value) {
-            RegisterObserverExt(param.uri, key, param.isDescendants);
+            auto ret = RegisterObserverExt(param.uri, key, param.isDescendants);
+            if (ret != SUCCESS) {
+                TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserverExt failed, uri:%{public}s, ret:%{public}d",
+                    uri.ToString().c_str(), ret);
+            }
         }
         return false;
     });
