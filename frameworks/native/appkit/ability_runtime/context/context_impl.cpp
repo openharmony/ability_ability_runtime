@@ -1511,6 +1511,7 @@ std::shared_ptr<Context> ContextImpl::CreateAreaModeContext(int areaMode)
         contextImpl->overlayMgrProxy_ = overlayMgrProxy_;
     }
     contextImpl->resetFlag_ = resetFlag_;
+    contextImpl->processName_ = processName_;
     contextImpl->SwitchArea(areaMode);
     return contextImpl;
 }
