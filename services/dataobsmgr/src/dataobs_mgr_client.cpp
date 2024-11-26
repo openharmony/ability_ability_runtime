@@ -271,7 +271,7 @@ void DataObsMgrClient::ReRegister()
         for (const auto &param : value) {
             auto ret = RegisterObserverExt(param.uri, key, param.isDescendants);
             if (ret != SUCCESS) {
-                TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserverExt failed, uri:%{public}s, ret:%{public}d",
+                TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d",
                     param.uri.ToString().c_str(), ret);
             }
         }
