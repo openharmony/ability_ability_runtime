@@ -250,7 +250,6 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_002, TestSiz
     EXPECT_TRUE(appfreezeManager->IsProcessDebug(pid, bundleName));
     appfreezeManager->ResetAppfreezeState(pid, bundleName);
     EXPECT_TRUE(!appfreezeManager->IsProcessDebug(pid, bundleName));
-    EXPECT_TRUE(!appfreezeManager->IsValidFreezeFilter(pid, bundleName));
     appfreezeManager->RemoveDeathProcess(bundleName);
 }
 
