@@ -15,8 +15,8 @@
 #include <limits>
 #include "dataobs_mgr_changeinfo.h"
 #include "dataobs_utils.h"
-#include "securec.h"
 #include "hilog_tag_wrapper.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -76,7 +76,7 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
     for (uint32_t i = 0; i < len; i++) {
         Uri uri = Uri(parcel.ReadString());
         if (uri.ToString().empty()) {
-            TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to read uri from parcel.");
+            TAG_LOGE(AAFwkTag::DBOBSMGR, "The count:%{public}d uri is empty.", i);
             return false;
         }
         uris.emplace_back(std::move(uri));
