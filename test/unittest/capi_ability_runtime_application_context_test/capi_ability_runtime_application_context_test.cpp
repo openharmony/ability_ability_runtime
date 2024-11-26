@@ -24,7 +24,6 @@ namespace {
 constexpr const char* DATA_STORAGE = "/data/storage/";
 constexpr const char* BASE_CACHE = "/base/cache";
 constexpr const char* BASE_TEMP = "/base/temp";
-constexpr const char* BASE_RESOURCES = "/base/resources";
 constexpr const char* BASE_FILES = "/base/files";
 constexpr const char* BASE_DATABASE = "/base/database";
 constexpr const char* BASE_PREFERENCES = "/base/preferences";
@@ -66,15 +65,6 @@ public:
         dir.append(DATA_STORAGE);
         dir.append(areaMode_);
         dir.append(BASE_TEMP);
-        return dir;
-    }
-
-    std::string GetResourceDir() override
-    {
-        std::string dir;
-        dir.append(DATA_STORAGE);
-        dir.append(areaMode_);
-        dir.append(BASE_RESOURCES);
         return dir;
     }
 
@@ -783,179 +773,6 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetTempDirTest_004, TestSize.
     tempDir = contextImpl->GetTempDir();
     ASSERT_EQ(writeLength, tempDir.length());
     ASSERT_STREQ(buffer, tempDir.c_str());
-}
-
-/**
- * @tc.number: GetResourceDirTest_001
- * @tc.desc: Function test with applicationContext is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_001, TestSize.Level0)
-{
-    char buffer[BUFFER_SIZE] = { 0 };
-    int32_t writeLength = 0;
-
-    AbilityRuntime_ErrorCode code = OH_AbilityRuntime_ApplicationContextGetResourceDir(NULL, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(nullptr, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, NULL);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, nullptr);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, -1, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, 0, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
-    ASSERT_EQ(writeLength, 0);
-}
-
-/**
- * @tc.number: GetResourceDirTest_002
- * @tc.desc: Function test with applicationContextImpl is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_002, TestSize.Level0)
-{
-    InitApplicationContext();
-    char buffer[BUFFER_SIZE] = { 0 };
-    int32_t writeLength = 0;
-
-    AbilityRuntime_ErrorCode code = OH_AbilityRuntime_ApplicationContextGetResourceDir(NULL, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(nullptr, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, NULL);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, nullptr);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, -1, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, 0, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
-    ASSERT_EQ(writeLength, 0);
-}
-
-/**
- * @tc.number: GetResourceDirTest_003
- * @tc.desc: Function test
- * @tc.type: FUNC
- */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_003, TestSize.Level0)
-{
-    char buffer[BUFFER_SIZE] = { 0 };
-    int32_t writeLength = 0;
-
-    const auto contextImpl = InitApplicationContextImpl(TEST_BUNDLE_NAME);
-    ASSERT_NE(contextImpl, nullptr);
-
-    AbilityRuntime_ErrorCode code = OH_AbilityRuntime_ApplicationContextGetResourceDir(NULL, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(nullptr, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, NULL);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, nullptr);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, -1, &writeLength);
-
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, 0, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    std::string resourceDir = contextImpl->GetResourceDir();
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, resourceDir.length(), &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-    ASSERT_EQ(writeLength, 0);
-
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir = contextImpl->GetResourceDir();
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-}
-
-/**
- * @tc.number: GetResourceDirTest_004
- * @tc.desc: Function test
- * @tc.type: FUNC
- */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetResourceDirTest_004, TestSize.Level0)
-{
-    char buffer[BUFFER_SIZE] = { 0 };
-    int32_t writeLength = 0;
-
-    const auto contextImpl = InitApplicationContextImpl(TEST_BUNDLE_NAME);
-    ASSERT_NE(contextImpl, nullptr);
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL1);
-    AbilityRuntime_ErrorCode code =
-        OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    std::string resourceDir = contextImpl->GetResourceDir();
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL2);
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir = contextImpl->GetResourceDir();
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL3);
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir = contextImpl->GetResourceDir();
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL4);
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir = contextImpl->GetResourceDir();
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
-
-    contextImpl->SwitchArea(ABILITY_RUNTIME_AREA_MODE_EL5);
-    code = OH_AbilityRuntime_ApplicationContextGetResourceDir(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    resourceDir = contextImpl->GetResourceDir();
-    ASSERT_EQ(writeLength, resourceDir.length());
-    ASSERT_STREQ(buffer, resourceDir.c_str());
 }
 
 /**
