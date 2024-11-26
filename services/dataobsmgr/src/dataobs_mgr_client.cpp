@@ -75,7 +75,7 @@ ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, sptr<IDataAbilityObse
 {
     auto [errCode, dataObsManger] = GetObsMgr();
     if (errCode != SUCCESS) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "DataObsMgrClient::RegisterObserver: errCode: %{public}d.", errCode);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to get ObsMgr, errCode: %{public}d.", errCode);
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     auto status = dataObsManger->RegisterObserver(uri, dataObserver);
