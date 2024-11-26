@@ -260,7 +260,7 @@ void DataObsMgrClient::ReRegister()
             auto ret = RegisterObserver(uri, key);
             if (ret != SUCCESS) {
                 TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserver failed, uri:%{public}s, ret:%{public}d",
-                    CommonUtils::Anoymous(uri.ToString().c_str()), ret);
+                    CommonUtils::Anonymous(uri.ToString().c_str()), ret);
             }
         }
         return false;
@@ -273,7 +273,7 @@ void DataObsMgrClient::ReRegister()
             auto ret = RegisterObserverExt(param.uri, key, param.isDescendants);
             if (ret != SUCCESS) {
                 TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d",
-                    CommonUtils::Anoymous(param.uri.ToString().c_str()), ret);
+                    CommonUtils::Anonymous(param.uri.ToString().c_str()), ret);
             }
         }
         return false;
