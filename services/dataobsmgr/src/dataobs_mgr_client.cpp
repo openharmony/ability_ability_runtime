@@ -272,7 +272,7 @@ void DataObsMgrClient::ReRegister()
             auto ret = RegisterObserverExt(param.uri, key, param.isDescendants);
             if (ret != SUCCESS) {
                 TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserverExt failed, uri:%{public}s, ret:%{public}d",
-                    uri.ToString().c_str(), ret);
+                    param.uri.ToString().c_str(), ret);
             }
         }
         return false;
