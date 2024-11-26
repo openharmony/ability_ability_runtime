@@ -16,6 +16,7 @@
 #include <thread>
 #include "dataobs_mgr_client.h"
 
+#include "common_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -259,7 +260,7 @@ void DataObsMgrClient::ReRegister()
             auto ret = RegisterObserver(uri, key);
             if (ret != SUCCESS) {
                 TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserver failed, uri:%{public}s, ret:%{public}d",
-                    uri.ToString().c_str(), ret);
+                    CommonUtils::Anoymous(uri.ToString().c_str()), ret);
             }
         }
         return false;
@@ -272,7 +273,7 @@ void DataObsMgrClient::ReRegister()
             auto ret = RegisterObserverExt(param.uri, key, param.isDescendants);
             if (ret != SUCCESS) {
                 TAG_LOGE(AAFwkTag::DBOBSMGR, "RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d",
-                    param.uri.ToString().c_str(), ret);
+                    CommonUtils::Anoymous(param.uri.ToString().c_str()), ret);
             }
         }
         return false;
