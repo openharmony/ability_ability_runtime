@@ -68,8 +68,7 @@ void ContinuationConnector::OnAbilityConnectDone(
     }
     remoteRegisterService_ = iface_cast<RemoteRegisterServiceProxy>(remoteObject);
     if (remoteRegisterService_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null remoteRegisterService_");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return;
     }
     isConnected_.store(true);
@@ -107,8 +106,7 @@ void ContinuationConnector::BindRemoteRegisterAbility(const std::shared_ptr<AppE
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     std::shared_ptr tmpcontext = context_.lock();
     if (tmpcontext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null tmpcontext");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null tmpcontext");
         return;
     }
     if (request == nullptr) {
@@ -186,8 +184,7 @@ bool ContinuationConnector::UpdateConnectStatus(int token, const std::string &de
 {
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (remoteRegisterService_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null remoteRegisterService_");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return false;
     }
 
@@ -205,8 +202,7 @@ bool ContinuationConnector::ShowDeviceList(int token, const AppExecFwk::ExtraPar
 {
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     if (remoteRegisterService_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null remoteRegisterService_");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteRegisterService_");
         return false;
     }
     return remoteRegisterService_->ShowDeviceList(token, parameter);
@@ -254,8 +250,7 @@ void ContinuationConnector::BindRemoteRegisterAbility()
     TAG_LOGI(AAFwkTag::CONTINUATION, "begin");
     std::shared_ptr tmpcontext = context_.lock();
     if (tmpcontext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null tmpcontext");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null tmpcontext");
         return;
     }
     Want want;

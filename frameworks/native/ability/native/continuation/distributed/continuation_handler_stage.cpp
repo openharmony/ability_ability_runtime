@@ -139,7 +139,7 @@ void ContinuationHandlerStage::HandleReceiveRemoteScheduler(const sptr<IRemoteOb
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");
     if (remoteReplica == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "null scheduler");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteReplica");
         return;
     }
 
@@ -160,7 +160,7 @@ void ContinuationHandlerStage::HandleReceiveRemoteScheduler(const sptr<IRemoteOb
     remoteReplicaProxy_ = iface_cast<IReverseContinuationSchedulerReplica>(remoteReplica);
     auto schedulerObject = remoteReplicaProxy_->AsObject();
     if (schedulerObject == nullptr || !schedulerObject->AddDeathRecipient(schedulerDeathRecipient_)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "AddDeathRcipient failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null schedulerObject");
     }
 
     remoteReplicaProxy_->PassPrimary(remotePrimaryStub_);
@@ -206,7 +206,7 @@ void ContinuationHandlerStage::OnReplicaDied(const wptr<IRemoteObject> &remote)
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "begin");
     if (remoteReplicaProxy_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteReplicaProxy_ ");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remoteReplicaProxy_");
         return;
     }
 

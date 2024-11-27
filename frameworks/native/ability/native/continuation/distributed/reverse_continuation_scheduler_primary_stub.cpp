@@ -43,8 +43,7 @@ int ReverseContinuationSchedulerPrimaryStub::OnRemoteRequest(
     std::u16string token = data.ReadInterfaceToken();
     std::u16string descriptor = Str8ToStr16(DESCRIPTOR);
     if (descriptor != token) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "DESCRIPTOR != token");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "descriptor != token");
         return -1;
     }
     switch (code) {
@@ -65,14 +64,12 @@ int ReverseContinuationSchedulerPrimaryStub::ContinuationBackInner(MessageParcel
 {
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null want");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null want");
         return -1;
     }
 
     if (!ContinuationBack(*want)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "ContinuationBack failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationBack failed");
         return -1;
     }
     return 0;

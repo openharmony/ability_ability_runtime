@@ -41,8 +41,7 @@ void AbilityPostEventTimeout::TimingBegin(int64_t delaytime)
 {
     TAG_LOGI(AAFwkTag::ABILITY, "call %{public}s", task_.c_str());
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null %{public}s handler_",
-            task_.c_str());
+        TAG_LOGE(AAFwkTag::ABILITY, "null %{public}s handler_", task_.c_str());
         return;
     }
 
@@ -74,7 +73,7 @@ void AbilityPostEventTimeout::TimeOutProc()
 {
     TAG_LOGI(AAFwkTag::ABILITY, "call %{public}s", task_.c_str());
     if (handler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null %{public}s handler_", task_.c_str());
+        TAG_LOGE(AAFwkTag::ABILITY, "null handler_");
         return;
     }
 
@@ -84,8 +83,7 @@ void AbilityPostEventTimeout::TimeOutProc()
         TAG_LOGW(AAFwkTag::ABILITY, "%{public}s TimeOut", task_.c_str());
         handler_->RemoveTask(task_);
     } else {
-        TAG_LOGW(AAFwkTag::ABILITY, "Failed,Event:%{public}s",
-            task_.c_str());
+        TAG_LOGW(AAFwkTag::ABILITY, "failed,Event:%{public}s", task_.c_str());
     }
 }
 }  // namespace AppExecFwk

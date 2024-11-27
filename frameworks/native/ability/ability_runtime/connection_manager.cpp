@@ -90,7 +90,7 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
         } else if (abilityConnection->GetConnectionState() == CONNECTION_STATE_CONNECTING) {
             return ERR_OK;
         } else {
-            TAG_LOGE(AAFwkTag::CONNECTION, "AbilityConnection disconnected");
+            TAG_LOGE(AAFwkTag::CONNECTION, "abilityConnection disconnected");
             abilityConnections_.erase(connectionIter);
             return CreateConnection(connectCaller, want, accountId, connectCallback, isUIService);
         }

@@ -35,7 +35,7 @@ int LocalCallContainer::StartAbilityByCallInner(const Want& want, std::shared_pt
         return ERR_INVALID_VALUE;
     }
     if (element.GetDeviceID().empty()) {
-        TAG_LOGD(AAFwkTag::LOCAL_CALL, "empty DeviceID");
+        TAG_LOGD(AAFwkTag::LOCAL_CALL, "element:DeviceID is empty");
     }
 
     int32_t oriValidUserId = GetValidUserId(accountId);
@@ -57,7 +57,7 @@ int LocalCallContainer::StartAbilityByCallInner(const Want& want, std::shared_pt
     }
     sptr<CallerConnection> connect = sptr<CallerConnection>::MakeSptr();
     if (connect == nullptr) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "connection failed");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null connect");
         return ERR_INVALID_VALUE;
     }
     connections_.emplace(connect);
@@ -97,7 +97,7 @@ int LocalCallContainer::ReleaseCall(const std::shared_ptr<CallerCallBack>& callb
     }
     auto connect = iface_cast<CallerConnection>(localCallRecord->GetConnection());
     if (connect == nullptr) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "connection conversion failed");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null connect");
         return ERR_INVALID_VALUE;
     }
     int32_t retval = ERR_OK;
@@ -138,7 +138,7 @@ void LocalCallContainer::ClearFailedCallConnection(const std::shared_ptr<CallerC
 
     auto connect = iface_cast<CallerConnection>(localCallRecord->GetConnection());
     if (connect == nullptr) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "connection conversion failed");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null connect");
         return;
     }
 
@@ -155,7 +155,7 @@ int32_t LocalCallContainer::RemoveSingletonCallLocalRecord(const std::shared_ptr
 
     auto iterRecord = callProxyRecords_.find(record->GetElementName().GetURI());
     if (iterRecord == callProxyRecords_.end()) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "not found release record");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "not found record");
         return ERR_INVALID_VALUE;
     }
 
@@ -177,7 +177,7 @@ int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(const std::shared_ptr<
     std::lock_guard<std::mutex> lock(multipleMutex_);
     auto iterRecord = multipleCallProxyRecords_.find(record->GetElementName().GetURI());
     if (iterRecord == multipleCallProxyRecords_.end()) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "not found release record");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "not found record");
         return ERR_INVALID_VALUE;
     }
 
@@ -356,7 +356,7 @@ void CallerConnection::OnAbilityConnectDone(
         "start %{public}s", element.GetURI().c_str());
     auto container = container_.lock();
     if (container == nullptr || localCallRecord_ == nullptr) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null container or localCallRecord_");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null container or record");
         return;
     }
 
@@ -385,7 +385,7 @@ void CallerConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &el
 void CallerConnection::OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState)
 {
     if (localCallRecord_ == nullptr) {
-        TAG_LOGD(AAFwkTag::LOCAL_CALL, "null localCallRecord_");
+        TAG_LOGD(AAFwkTag::LOCAL_CALL, "local call record is nullptr.");
         return;
     }
 

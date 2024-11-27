@@ -29,17 +29,17 @@ void DialogRequestCallbackProxy::SendResult(int32_t resultCode, const AAFwk::Wan
 
     TAG_LOGI(AAFwkTag::DIALOG, "send result");
     if (!data.WriteInterfaceToken(IDialogRequestCallback::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::DIALOG, "Write interface token failed.");
+        TAG_LOGE(AAFwkTag::DIALOG, "write interface token failed");
         return;
     }
 
     if (!data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::DIALOG, "Write resultCode error.");
+        TAG_LOGE(AAFwkTag::DIALOG, "write resultCode error");
         return;
     }
 
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::DIALOG, "want write failed.");
+        TAG_LOGE(AAFwkTag::DIALOG, "want write failed");
         return;
     }
 

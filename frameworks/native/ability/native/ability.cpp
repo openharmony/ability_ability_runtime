@@ -119,7 +119,7 @@ void Ability::Init(const std::shared_ptr<AbilityInfo> &abilityInfo, const std::s
             sptr<ReverseContinuationSchedulerPrimary> primary = sptr<ReverseContinuationSchedulerPrimary>(
                 new (std::nothrow) ReverseContinuationSchedulerPrimary(continuationHandler, handler_));
             if (primary == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITY, "create primary failed");
+                TAG_LOGE(AAFwkTag::ABILITY, "null primary");
             } else {
                 continuationHandler_->SetPrimaryStub(primary);
                 continuationHandler_->SetAbilityInfo(abilityInfo_);
@@ -1022,7 +1022,7 @@ int Ability::StartBackgroundRunning(const AbilityRuntime::WantAgent::WantAgent &
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "bundleMgrHelper failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "null bundleMgrHelper");
         return ERR_NULL_OBJECT;
     }
     if (abilityInfo_ == nullptr) {
@@ -1089,7 +1089,7 @@ std::vector<std::shared_ptr<DataAbilityResult>> Ability::ExecuteBatch(
     for (size_t i = 0; i < len; i++) {
         std::shared_ptr<DataAbilityOperation> operation = operations[i];
         if (operation == nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITY, "null operation");
+            TAG_LOGD(AAFwkTag::ABILITY, "null operation, create DataAbilityResult");
             results.push_back(std::make_shared<DataAbilityResult>(0));
             continue;
         }
@@ -1176,8 +1176,7 @@ std::shared_ptr<NativeRdb::DataAbilityPredicates> Ability::ParsePredictionArgsRe
     }
 
     if (strPredicatesList.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITY, "GetWhereArgs()"
-                "error strList empty");
+        TAG_LOGE(AAFwkTag::ABILITY, "strList empty");
     }
 
     for (auto iterMap : predicatesBackReferencesMap) {
@@ -1349,12 +1348,12 @@ bool Ability::CheckAssertQueryResult(std::shared_ptr<NativeRdb::AbsSharedResultS
     std::shared_ptr<NativeRdb::ValuesBucket> &&valuesBucket)
 {
     if (queryResult == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "intput queryResult");
+        TAG_LOGE(AAFwkTag::ABILITY, "null queryResult");
         return true;
     }
 
     if (valuesBucket == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "intput valuesBucket");
+        TAG_LOGE(AAFwkTag::ABILITY, "null valuesBucket");
         return true;
     }
 
@@ -2097,7 +2096,7 @@ int Ability::CreateModalUIExtension(const Want &want)
     TAG_LOGD(AAFwkTag::ABILITY, "call");
     auto abilityContextImpl = GetAbilityContext();
     if (abilityContextImpl == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "null abilitycontext");
+        TAG_LOGE(AAFwkTag::ABILITY, "null abilityContext");
         return ERR_INVALID_VALUE;
     }
     return abilityContextImpl->CreateModalUIExtensionWithApp(want);
@@ -2162,7 +2161,7 @@ bool Ability::UpdateResMgrAndConfiguration(int32_t displayId)
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (resConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "create resConfig failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "null resConfig");
         return false;
     }
     auto resourceManager = GetResourceManager();

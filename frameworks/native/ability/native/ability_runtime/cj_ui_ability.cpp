@@ -68,14 +68,14 @@ sptr<Rosen::CJWindowStageImpl> CreateCJWindowStage(std::shared_ptr<Rosen::Window
     if (handle == nullptr) {
         handle = dlopen(CJWINDOW_FFI_LIBNAME, RTLD_LAZY);
         if (handle == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "dlopen failed %{public}s, %{public}s", CJWINDOW_FFI_LIBNAME, dlerror());
+            TAG_LOGE(AAFwkTag::UIABILITY, "null handle");
             return nullptr;
         }
     }
     // get function
     auto func = reinterpret_cast<CFFICreateCJWindowStage>(dlsym(handle, FUNC_CREATE_CJWINDOWSTAGE));
     if (func == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", FUNC_CREATE_CJWINDOWSTAGE, dlerror());
+        TAG_LOGE(AAFwkTag::UIABILITY, "null func");
         dlclose(handle);
         handle = nullptr;
         return nullptr;
@@ -109,7 +109,7 @@ void CJUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null local record");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null record");
         return;
     }
     auto abilityInfo = record->GetAbilityInfo();
@@ -137,7 +137,7 @@ void CJUIAbility::SetAbilityContext(
     }
     cjAbilityObj_ = CJAbilityObject::LoadModule(abilityInfo->name);
     if (!cjAbilityObj_) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "get CJAbility object failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjAbilityObj_");
         return;
     }
     cjAbilityObj_->Init(this);
@@ -291,7 +291,7 @@ void CJUIAbility::OnSceneCreated()
     }
     cjWindowStage_ = CreateCJWindowStage(GetScene());
     if (!cjWindowStage_) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "create CJWindowStage object failed");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjWindowStage");
         return;
     }
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -339,7 +339,7 @@ void CJUIAbility::OnSceneRestored()
     if (!cjWindowStage_) {
         cjWindowStage_ = CreateCJWindowStage(scene_);
         if (!cjWindowStage_) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "create CJWindowStage failed");
+            TAG_LOGE(AAFwkTag::UIABILITY, "null cjWindowStage");
             return;
         }
     }
@@ -376,7 +376,7 @@ void CJUIAbility::OnSceneWillDestroy()
         return;
     }
     if (!cjWindowStage_) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null CJWindowStage object");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null cjWindowStage");
         return;
     }
     cjAbilityObj_->OnSceneWillDestroy(cjWindowStage_.GetRefPtr());
@@ -601,7 +601,7 @@ void CJUIAbility::DoOnForeground(const Want &want)
     } else {
         auto window = scene_->GetMainWindow();
         if (window  == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null MainWindow");
+            TAG_LOGE(AAFwkTag::UIABILITY, "null window");
             return;
         }
         if (want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
@@ -848,7 +848,7 @@ void CJUIAbility::OnConfigurationUpdated(const Configuration &configuration)
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto fullConfig = GetAbilityContext()->GetConfiguration();
     if (!fullConfig) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null configuration");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null fullConfig");
         return;
     }
 
@@ -975,7 +975,7 @@ bool CJUIAbility::CheckSatisfyTargetAPIVersion(int32_t version)
 {
     auto applicationInfo = GetApplicationInfo();
     if (!applicationInfo) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null targetAPIVersion");
+        TAG_LOGE(AAFwkTag::UIABILITY, "null applicationInfo");
         return false;
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "targetAPIVersion: %{public}d", applicationInfo->apiTargetVersion);

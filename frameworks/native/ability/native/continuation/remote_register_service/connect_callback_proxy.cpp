@@ -56,7 +56,7 @@ void ConnectCallbackProxy::RemoteRequest(MessageParcel &data, int commandDisconn
     MessageOption option;
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "null object");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return;
     }
     remote->SendRequest(commandDisconnect, data, reply, option);

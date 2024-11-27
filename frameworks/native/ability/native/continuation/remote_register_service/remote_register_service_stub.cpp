@@ -54,7 +54,7 @@ int RemoteRegisterServiceStub::RegisterInner(MessageParcel &data, MessageParcel 
     }
     if (pExtras == nullptr) {
         reply.WriteInt32(ERR_INVALID_DATA);
-        TAG_LOGE(AAFwkTag::CONTINUATION, "read ExtraParams error");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null pExtras");
         return ERR_INVALID_DATA;
     }
 
@@ -63,7 +63,7 @@ int RemoteRegisterServiceStub::RegisterInner(MessageParcel &data, MessageParcel 
         delete pExtras;
         pExtras = nullptr;
         reply.WriteInt32(ERR_NULL_OBJECT);
-        TAG_LOGE(AAFwkTag::CONTINUATION, "read IConnectCallback failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null object");
         return ERR_NULL_OBJECT;
     }
 
@@ -103,7 +103,7 @@ int RemoteRegisterServiceStub::ShowDeviceListInner(MessageParcel &data, MessageP
     }
     if (pExtras == nullptr) {
         reply.WriteInt32(ERR_INVALID_DATA);
-        TAG_LOGE(AAFwkTag::CONTINUATION, "read ExtraParams failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null pExtras");
         return ERR_INVALID_DATA;
     }
 

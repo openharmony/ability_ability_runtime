@@ -326,7 +326,7 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
         TAG_LOGI(AAFwkTag::CONTEXT, "scb call, TerminateAbilityWithResult");
         ErrCode ret = static_cast<int32_t>(ifaceSessionToken->TerminateSession(info));
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "err:%{public}d", ret);
+            TAG_LOGE(AAFwkTag::CONTEXT, "scb call, TerminateAbilityWithResult err: %{public}d", ret);
         }
         return ret;
     } else {
@@ -401,8 +401,7 @@ void AbilityContextImpl::OnAbilityResultInner(int requestCode, int resultCode, c
 ErrCode AbilityContextImpl::ConnectAbility(const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::CONTEXT,
-        "ConnectAbility, caller:%{public}s, target:%{public}s",
+    TAG_LOGI(AAFwkTag::CONTEXT, "caller:%{public}s, target:%{public}s",
         abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode ret = ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
@@ -590,7 +589,7 @@ ErrCode AbilityContextImpl::TerminateSelf()
         auto ifaceSessionToken = iface_cast<Rosen::ISession>(sessionToken);
         ErrCode ret = static_cast<int32_t>(ifaceSessionToken->TerminateSession(info));
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "err:%{public}d", ret);
+            TAG_LOGE(AAFwkTag::CONTEXT, "scb call, TerminateSelf err: %{public}d", ret);
         }
         return ret;
     } else {
@@ -710,7 +709,7 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
         uv_loop_s* loop = nullptr;
         napi_get_uv_event_loop(env, &loop);
         if (loop == nullptr) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "null uv loop");
+            TAG_LOGE(AAFwkTag::CONTEXT, "null loop");
             return;
         }
         auto work = new (std::nothrow) uv_work_t;

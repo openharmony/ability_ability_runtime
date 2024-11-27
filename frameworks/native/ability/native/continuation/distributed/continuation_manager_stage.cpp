@@ -60,7 +60,7 @@ bool ContinuationManagerStage::Init(const std::shared_ptr<AbilityRuntime::UIAbil
     std::shared_ptr<AbilityRuntime::UIAbility> abilityTmp = nullptr;
     abilityTmp = ability_.lock();
     if (abilityTmp == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "null ability");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null abilityTmp");
         return false;
     }
 
@@ -238,7 +238,7 @@ void ContinuationManagerStage::ContinueAbility(bool reversible, const std::strin
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");
     if (CheckContinuationIllegal()) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "not available to continueAbility");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "Ability not available to continueAbility");
         return;
     }
 
@@ -262,12 +262,12 @@ bool ContinuationManagerStage::ReverseContinueAbility()
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "begin");
     if (progressState_ != ProgressState::INITIAL) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed progressState_ is %{public}d", progressState_);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "progressState_: %{public}d", progressState_);
         return false;
     }
 
     if (continuationState_ != ContinuationState::REMOTE_RUNNING) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Failed continuationState_ is %{public}d", continuationState_);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "continuation state: %{public}d", continuationState_);
         return false;
     }
 

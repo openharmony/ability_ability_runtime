@@ -32,7 +32,7 @@ sptr<IRemoteObject> DistributedClient::GetDmsProxy()
 {
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
-        TAG_LOGE(AAFwkTag::DISTRIBUTED, "get samgr failed");
+        TAG_LOGE(AAFwkTag::DISTRIBUTED, "null samgrProxy");
         return nullptr;
     }
     return samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);

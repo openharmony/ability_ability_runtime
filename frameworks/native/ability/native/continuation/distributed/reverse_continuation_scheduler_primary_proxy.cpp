@@ -33,20 +33,17 @@ void ReverseContinuationSchedulerPrimaryProxy::NotifyReplicaTerminated()
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(ReverseContinuationSchedulerPrimaryProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "write interface token failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write interface token failed");
         return;
     }
     sptr<IRemoteObject> remoteObject = Remote();
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null Remote");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return;
     }
     if (!remoteObject->SendRequest(
         IReverseContinuationSchedulerPrimary::NOTIFY_REPLICA_TERMINATED, data, reply, option)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "SendRequest failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "SendRequest failed");
         return;
     }
 }
@@ -63,24 +60,20 @@ bool ReverseContinuationSchedulerPrimaryProxy::ContinuationBack(const AAFwk::Wan
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(ReverseContinuationSchedulerPrimaryProxy::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "write interface token failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write interface token failed");
         return false;
     }
     if (!data.WriteParcelable(&want)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "write want failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "write want failed");
         return false;
     }
     sptr<IRemoteObject> remoteObject = Remote();
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null remote");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null remote");
         return false;
     }
     if (!remoteObject->SendRequest(IReverseContinuationSchedulerPrimary::CONTINUATION_BACK, data, reply, option)) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "SendRequest failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "SendRequest failed");
         return false;
     }
     return true;

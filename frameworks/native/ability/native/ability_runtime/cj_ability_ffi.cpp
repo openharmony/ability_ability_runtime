@@ -32,7 +32,7 @@ int64_t FFIAbilityGetAbilityContext(AbilityHandle abilityHandle)
     auto ability = static_cast<CJUIAbility*>(abilityHandle);
     auto context = ability->GetAbilityContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null Context");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return ERR_INVALID_INSTANCE_CODE;
     }
     auto cjContext = FFI::FFIData::Create<CJAbilityContext>(context);

@@ -253,7 +253,7 @@ bool JSUIServiceExtAbilityConnection::IsJsCallbackObjectEquals(napi_env env,
     }
     auto object = callback->GetNapiValue();
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "get object failed");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null object");
         return false;
     }
     bool result = false;

@@ -48,7 +48,7 @@ bool JsChildProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &info)
         return false;
     }
     if (info->srcEntry.empty()) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "info srcEntry empty");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "Empty info srcEntry");
         return false;
     }
     std::string srcPath = info->srcEntry;
