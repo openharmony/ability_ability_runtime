@@ -21,6 +21,7 @@
 #include "insight_intent_utils.h"
 #include "permission_verification.h"
 #include "want_params_wrapper.h"
+#include "time_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -279,6 +280,26 @@ int32_t InsightIntentExecuteManager::CheckCallerPermission()
         return ERR_PERMISSION_DENIED;
     }
     return ERR_OK;
+}
+
+void InsightIntentExecuteManager::SetIntentExemptionInfo(int32_t uid)
+{
+    std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
+    std::map<int32_t, int64_t>::iterator iter = intentExemptionDeadlineTime_.find(uid);
+    if (iter == intentExemptionDeadlineTime_.end()) {
+        intentExemptionDeadlineTime_[uid] = AbilityRuntime::TimeUtil::CurrentTimeMillis();
+    }
+}
+
+std::map<int32_t, int64_t> InsightIntentExecuteManager::GetIntentExemptionInfo()
+{
+    return intentExemptionDeadlineTime_;
+}
+
+void InsightIntentExecuteManager::RemoveIntentExemptionInfo(int32_t uid)
+{
+    std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
+    intentExemptionDeadlineTime_.erase(uid);
 }
 } // namespace AAFwk
 } // namespace OHOS
