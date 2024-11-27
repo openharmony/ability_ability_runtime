@@ -105,12 +105,6 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     want.SetElement(launchWant.GetElement());
 
     int32_t appIndex = 0;
-    StartAbilityUtils::startAbilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want,
-        userId, appIndex);
-    if (StartAbilityUtils::startAbilityInfo->status != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "Get targetApplicationInfo failed");
-        return false;
-    }
 
     ErmsCallerInfo callerInfo;
     InitErmsCallerInfo(want, nullptr, callerInfo, userId);
