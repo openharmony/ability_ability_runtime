@@ -56,7 +56,7 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
     }
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<PhotoEditorExtensionContext>(ptr);
-    napi_wrap(
+    napi_status status = napi_wrap(
         env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
@@ -67,6 +67,12 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
             delete static_cast<std::weak_ptr<PhotoEditorExtensionContext> *>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
     return contextObj;
 }
 
@@ -116,7 +122,7 @@ void JsPhotoEditorExtensionImpl::BindContext()
                                          nullptr);
     context_->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
-    napi_wrap(env, contextObj, workContext,
+    napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
             if (data == nullptr) {
@@ -126,6 +132,12 @@ void JsPhotoEditorExtensionImpl::BindContext()
             delete static_cast<std::weak_ptr<PhotoEditorExtensionContext> *>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok && workContext != nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "napi_wrap Failed: %{public}d", status);
+        delete workContext;
+        return;
+    }
+
     TAG_LOGD(AAFwkTag::UI_EXT, "Bind context end");
 }
 

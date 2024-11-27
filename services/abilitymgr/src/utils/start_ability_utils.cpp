@@ -46,7 +46,7 @@ bool StartAbilityUtils::GetAppIndex(const Want &want, sptr<IRemoteObject> caller
         appIndex = abilityRecord->GetAppIndex();
         return true;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d", want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0));
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d", want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1));
     return AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
 }
 
@@ -92,6 +92,15 @@ bool StartAbilityUtils::GetCallerAbilityInfo(const sptr<IRemoteObject> &callerTo
     return true;
 }
 
+std::vector<int32_t> StartAbilityUtils::GetCloneAppIndexes(const std::string &bundleName, int32_t userId)
+{
+    std::vector<int32_t> appIndexes;
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bms, appIndexes);
+    IN_PROCESS_CALL_WITHOUT_RET(bms->GetCloneAppIndexes(bundleName, appIndexes, userId));
+    return appIndexes;
+}
+
 int32_t StartAbilityUtils::CheckAppProvisionMode(const std::string& bundleName, int32_t userId)
 {
     AppExecFwk::ApplicationInfo appInfo;
@@ -127,15 +136,6 @@ int32_t StartAbilityUtils::CheckAppProvisionMode(const Want& want, int32_t userI
         return ERR_NOT_IN_APP_PROVISION_MODE;
     }
     return ERR_OK;
-}
-
-std::vector<int32_t> StartAbilityUtils::GetCloneAppIndexes(const std::string &bundleName, int32_t userId)
-{
-    std::vector<int32_t> appIndexes;
-    auto bms = AbilityUtil::GetBundleManagerHelper();
-    CHECK_POINTER_AND_RETURN(bms, appIndexes);
-    IN_PROCESS_CALL_WITHOUT_RET(bms->GetCloneAppIndexes(bundleName, appIndexes, userId));
-    return appIndexes;
 }
 
 StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId, int32_t appIndex,
@@ -180,6 +180,16 @@ StartAbilityInfoWrap::StartAbilityInfoWrap(const Want &want, int32_t validUserId
         StartAbilityUtils::isWantWithAppCloneIndex = true;
     }
 }
+StartAbilityInfoWrap::StartAbilityInfoWrap()
+{
+    StartAbilityUtils::startAbilityInfo.reset();
+    StartAbilityUtils::callerAbilityInfo.reset();
+    StartAbilityUtils::skipCrowTest = false;
+    StartAbilityUtils::skipStartOther = false;
+    StartAbilityUtils::skipErms = false;
+    StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
+    StartAbilityUtils::isWantWithAppCloneIndex = false;
+}
 
 StartAbilityInfoWrap::~StartAbilityInfoWrap()
 {
@@ -190,6 +200,15 @@ StartAbilityInfoWrap::~StartAbilityInfoWrap()
     StartAbilityUtils::skipErms = false;
     StartAbilityUtils::ermsResultCode = ERMS_ISALLOW_RESULTCODE;
     StartAbilityUtils::isWantWithAppCloneIndex = false;
+}
+
+void StartAbilityInfoWrap::SetStartAbilityInfo(const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    if (StartAbilityUtils::startAbilityInfo != nullptr) {
+        return;
+    }
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::startAbilityInfo->abilityInfo = abilityInfo;
 }
 
 std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const Want &want, int32_t userId,
@@ -215,6 +234,8 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartAbilityInfo(const
         IN_PROCESS_CALL_WITHOUT_RET(bms->GetSandboxAbilityInfo(want, appIndex,
             abilityInfoFlag, userId, request->abilityInfo));
     }
+    request->customProcess = request->abilityInfo.process;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "abilityInfo customProcess: %{public}s", request->customProcess.c_str());
     if (request->abilityInfo.name.empty() || request->abilityInfo.bundleName.empty()) {
         // try to find extension
         std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
@@ -278,6 +299,7 @@ std::shared_ptr<StartAbilityInfo> StartAbilityInfo::CreateStartExtensionInfo(con
         return abilityInfo;
     }
     abilityInfo->extensionProcessMode = extensionInfo.extensionProcessMode;
+    abilityInfo->customProcess = extensionInfo.customProcess;
     // For compatibility translates to AbilityInfo
     AbilityRuntime::StartupUtil::InitAbilityInfoFromExtension(extensionInfo, abilityInfo->abilityInfo);
 

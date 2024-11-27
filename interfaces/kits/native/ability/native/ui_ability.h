@@ -265,7 +265,7 @@ public:
      /**
      * @brief The async callback of OnContinue.
      */
-    virtual int32_t OnContinueAsyncCB(napi_value jsWantParams, int32_t status,
+    virtual int32_t OnContinueAsyncCB(napi_ref jsWantParams, int32_t status,
         const AppExecFwk::AbilityInfo &abilityInfo);
 
     /**

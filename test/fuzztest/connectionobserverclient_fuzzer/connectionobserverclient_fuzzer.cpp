@@ -34,7 +34,6 @@ using namespace OHOS::AbilityRuntime;
 
 namespace OHOS {
 namespace {
-constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 
 class MyConnectionObserver : public ConnectionObserver {
@@ -82,6 +81,7 @@ uint32_t GetU32Data(const char* ptr)
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
+    (void)data;
     std::shared_ptr<ConnectionObserver> observer = std::make_shared<MyConnectionObserver>();
     // fuzz for connectionObserverClient
     auto connectionObserverClient = std::make_shared<ConnectionObserverClient>();
@@ -104,7 +104,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
+    if (size < OHOS::U32_AT_SIZE) {
         return 0;
     }
 

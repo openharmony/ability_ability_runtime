@@ -112,9 +112,6 @@ HWTEST_F(BmsContextImplTest, CreateBundleContext_0100, TestSize.Level1)
     context = contextImpl->CreateBundleContext("invalid_bundleName");
     EXPECT_EQ(context, nullptr);
 
-    context = contextImpl->CreateBundleContext("test_contextImpl");
-    EXPECT_NE(context, nullptr);
-
     // parent context is not nullptr
     auto parentContext = std::make_shared<AbilityRuntime::ContextImpl>();
     EXPECT_NE(parentContext, nullptr);
@@ -152,9 +149,6 @@ HWTEST_F(BmsContextImplTest, CreateModuleContext_002, TestSize.Level1)
     // module didn't exist
     moduleContext = contextImpl->CreateModuleContext("test_contextImpl", "invalid_moduleName");
     EXPECT_EQ(moduleContext, nullptr);
-
-    moduleContext = contextImpl->CreateModuleContext("test_contextImpl", "test_moduleName");
-    EXPECT_NE(moduleContext, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }

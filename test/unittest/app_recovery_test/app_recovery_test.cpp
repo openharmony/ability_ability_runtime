@@ -209,6 +209,18 @@ HWTEST_F(AppRecoveryUnitTest, AddAbility_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name:  AddAbility_004
+ * @tc.desc: add testcase.
+ * @tc.type: FUNC
+ * @tc.require: I5UL6H
+ */
+HWTEST_F(AppRecoveryUnitTest, AddAbility_004, TestSize.Level1)
+{
+    bool ret = AppRecovery::GetInstance().AddAbility(ability_, nullptr, token_);
+    EXPECT_TRUE(!ret);
+}
+
+/**
  * @tc.name:  RemoveAbility_001
  * @tc.desc: RemoveAbility check the ret as expected.
  * @tc.type: FUNC
@@ -232,6 +244,31 @@ HWTEST_F(AppRecoveryUnitTest, RemoveAbility_002, TestSize.Level1)
     AppRecovery::GetInstance().isEnable_ = false;
     bool ret = AppRecovery::GetInstance().RemoveAbility(token_);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name:  RemoveAbility_003
+ * @tc.desc: RemoveAbility failed when token_ is null.
+ * @tc.type: FUNC
+ * @tc.require: I5UL6H
+ */
+HWTEST_F(AppRecoveryUnitTest, RemoveAbility_003, TestSize.Level1)
+{
+    bool ret = AppRecovery::GetInstance().RemoveAbility(nullptr);
+    EXPECT_TRUE(!ret);
+}
+
+/**
+ * @tc.name: DoRecoverApp_001
+ * @tc.desc: add testcase.
+ * @tc.type: FUNC
+ * @tc.require: I5UL6H
+ */
+HWTEST_F(AppRecoveryUnitTest, DoRecoverApp_001, TestSize.Level1)
+{
+    AppRecovery::GetInstance().abilityRecoverys_.clear();
+    AppRecovery::GetInstance().DoRecoverApp(StateReason::DEVELOPER_REQUEST);
+    EXPECT_TRUE(AppRecovery::GetInstance().abilityRecoverys_.empty());
 }
 
 /**

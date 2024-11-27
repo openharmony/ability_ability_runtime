@@ -23,7 +23,6 @@
 #undef protected
 
 namespace OHOS {
-
 class MockSingleKvStore : public DistributedKv::SingleKvStore {
 public:
     MockSingleKvStore(){};

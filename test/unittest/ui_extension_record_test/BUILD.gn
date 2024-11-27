@@ -28,8 +28,8 @@ ohos_unittest("ui_extension_record_test") {
   include_dirs = [ "${ability_runtime_abilitymgr_path}/include" ]
 
   sources = [
-    "${ability_runtime_abilitymgr_path}/src/extension_record.cpp",
-    "${ability_runtime_abilitymgr_path}/src/ui_extension_record.cpp",
+    "${ability_runtime_abilitymgr_path}/src/extension_record/extension_record.cpp",
+    "${ability_runtime_abilitymgr_path}/src/ui_extension_record/ui_extension_record.cpp",
     "ui_extension_record_test.cpp",
   ]
 

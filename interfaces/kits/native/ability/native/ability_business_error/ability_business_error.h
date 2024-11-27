@@ -177,6 +177,12 @@ enum class AbilityErrorCode {
     // Not support to create a new instance.
     ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT = 16000080,
 
+    // Target application not found.
+    ERROR_CODE_GET_BUNFLE_INFO_FAILED = 16000081,
+
+    // UIAbility is in starting state.
+    ERROR_CODE_UI_ABILITY_IS_STARTING = 16000082,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 
@@ -200,6 +206,15 @@ enum class AbilityErrorCode {
 
     // target free install task does not exist.
     ERROR_CODE_FREE_INSTALL_TASK_NOT_EXIST = 16300007,
+
+    // target bundle has no main ability.
+    ERROR_CODE_NO_MAIN_ABILITY = 16300008,
+
+    // target application has no status-bar ability.
+    ERROR_CODE_NO_STATUS_BAR_ABILITY = 16300009,
+
+    // target application is not attached to a status bar.
+    ERROR_CODE_NOT_ATTACHED_TO_STATUS_BAR = 16300010,
 
     ERROR_CODE_BUNDLE_NAME_INVALID = 18500001,
 };

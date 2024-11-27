@@ -25,8 +25,7 @@
 #include "ability_context.h"
 #include "ability_stage_context.h"
 #include "bundle_container.h"
-#include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
-#include "commonlibrary/ets_utils/js_sys_module/console/console.h"
+#include "console.h"
 #include "declarative_module_preloader.h"
 #include "hilog_tag_wrapper.h"
 #include "js_ability_context.h"
@@ -39,13 +38,13 @@
 #include "js_timer.h"
 #include "js_window_stage.h"
 #include "json_serializer.h"
+#include "JsMockUtil.h"
 #include "launch_param.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "resource_manager.h"
 #include "window_scene.h"
+#include "sys_timer.h"
 
-extern const char _binary_jsMockSystemPlugin_abc_start[];
-extern const char _binary_jsMockSystemPlugin_abc_end[];
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -806,10 +805,9 @@ bool SimulatorImpl::LoadRuntimeEnv(napi_env env, napi_value globalObj)
     napi_create_object(env, &object);
     napi_set_named_property(env, globalObj, "group", object);
 
-    uintptr_t bufferStart = reinterpret_cast<uintptr_t>(_binary_jsMockSystemPlugin_abc_start);
-    uintptr_t bufferEnd = reinterpret_cast<uintptr_t>(_binary_jsMockSystemPlugin_abc_end);
-    const uint8_t *buffer = reinterpret_cast<const uint8_t*>(bufferStart);
-    size_t size = bufferEnd - bufferStart;
+    const OHOS::Ide::JsMockUtil::AbcInfo info = OHOS::Ide::JsMockUtil::GetAbcBufferInfo();
+    const uint8_t *buffer = info.buffer;
+    std::size_t size = info.bufferSize;
     panda::JSNApi::Execute(vm_, buffer, size, "_GLOBAL::func_main_0");
 
     napi_value mockRequireNapi = nullptr;

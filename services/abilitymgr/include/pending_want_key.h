@@ -56,6 +56,7 @@ public:
     int32_t GetUserId();
     bool IsEqualsRequestWant(const Want &otherWant);
     int32_t GetAppIndex();
+    void GetAllBundleNames(std::vector<std::string> &bundleNames);
 
 private:
     int32_t type_ = {};

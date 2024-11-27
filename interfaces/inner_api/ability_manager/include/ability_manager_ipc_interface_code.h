@@ -412,7 +412,10 @@ enum class AbilityManagerInterfaceCode {
 
     //terminate UIServiceExtensionAbility
     TERMINATE_UI_SERVICE_EXTENSION_ABILITY = 1068,
-    
+
+    // ipc id for close ui extension ability by scb
+    CLOSE_UI_EXTENSION_ABILITY_BY_SCB = 1069,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
@@ -561,6 +564,18 @@ enum class AbilityManagerInterfaceCode {
 
     // update associate config list
     UPDATE_ASSOCIATE_CONFIG_LIST = 6120,
+
+    // set application keep alive
+    SET_APPLICATION_KEEP_ALLIVE = 6121,
+
+    // get keep-alive applications
+    GET_APPLICATIONS_KEEP_ALIVE = 6122,
+
+    // set application keep alive by EDM
+    SET_APPLICATION_KEEP_ALLIVE_BY_EDM = 6123,
+
+    // get keep-alive applications by EDM
+    GET_APPLICATIONS_KEEP_ALIVE_BY_EDM = 6124,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

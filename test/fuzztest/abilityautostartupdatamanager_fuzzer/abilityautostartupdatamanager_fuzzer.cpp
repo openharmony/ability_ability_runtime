@@ -33,7 +33,6 @@ namespace {
 constexpr int INPUT_ZERO = 0;
 constexpr int INPUT_ONE = 1;
 constexpr int INPUT_THREE = 3;
-constexpr size_t FOO_MAX_LEN = 1024;
 constexpr uint8_t ENABLE = 2;
 constexpr size_t U32_AT_SIZE = 4;
 constexpr size_t OFFSET_ZERO = 24;
@@ -73,8 +72,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string keys(data, size);
     std::string values(data, size);
     bool checkEmpty = *data % ENABLE;
-    abilityAutoStartupDataManager->IsEqual(jsonObject, keys, values, checkEmpty);
-    abilityAutoStartupDataManager->IsEqual(jsonObject, keys, values);
     abilityAutoStartupDataManager->IsEqual(key, info);
     abilityAutoStartupDataManager->IsEqual(key, strParam);
     abilityAutoStartupDataManager->IsEqual(key, in32Param);
@@ -95,7 +92,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (size < OHOS::U32_AT_SIZE) {
         return 0;
     }
 

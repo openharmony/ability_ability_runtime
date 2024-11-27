@@ -288,7 +288,7 @@ std::string ContextImpl::GetResourceDir()
         return "";
     }
     std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR +
-                      hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
+        hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
     if (OHOS::FileExists(dir)) {
         return dir;
     }
@@ -343,7 +343,7 @@ std::string ContextImpl::GetDistributedFilesDir()
             CONTEXT_DISTRIBUTEDFILES_BASE_MIDDLE + GetBundleName();
     } else {
         if (currArea_ == CONTEXT_ELS[1] || currArea_ == CONTEXT_ELS[AREA2] || currArea_ == CONTEXT_ELS[AREA3] ||
-	    currArea_ == CONTEXT_ELS[AREA4]) {
+            currArea_ == CONTEXT_ELS[AREA4]) {
             // when areamode swith to el3/el4/el5, the distributedfiles dir should be always el2's
             // distributedfilesdir dir
             dir = CONTEXT_DATA_STORAGE + CONTEXT_ELS[1] + CONTEXT_FILE_SEPARATOR + CONTEXT_DISTRIBUTEDFILES;
@@ -798,7 +798,6 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         TAG_LOGE(AAFwkTag::APPKIT, "InitResourceManager appContext is nullptr");
         return;
     }
-
     if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE) ||
         bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager = InitOthersResourceManagerInner(
@@ -955,6 +954,7 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
     const std::string &name, const std::string &hapModuleName, std::string &loadPath,
     std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos)
 {
+    std::lock_guard<std::mutex> lock(overlaySubscriberMutex_);
     if (overlaySubscriber_ != nullptr) {
         return;
     }
@@ -976,6 +976,7 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
 
 void ContextImpl::UnsubscribeToOverlayEvents()
 {
+    std::lock_guard<std::mutex> lock(overlaySubscriberMutex_);
     if (overlaySubscriber_ != nullptr) {
         EventFwk::CommonEventManager::UnSubscribeCommonEvent(overlaySubscriber_);
         overlaySubscriber_ = nullptr;
@@ -1222,7 +1223,7 @@ void ContextImpl::AppHasDarkRes(bool &darkRes)
 
 void ContextImpl::KillProcessBySelf(const bool clearPageStack)
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "killProcessBySelf called clearPageStack is %{public}d", clearPageStack);
+    TAG_LOGI(AAFwkTag::APPKIT, "call");
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     appMgrClient->KillApplicationSelf(clearPageStack);
 }

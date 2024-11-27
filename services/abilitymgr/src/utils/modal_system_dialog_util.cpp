@@ -38,11 +38,12 @@ bool ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(const AppExecFwk::Ap
     return false;
 }
 
-void ModalSystemDialogUtil::ShowDeveloperModeDialog(const std::string &bundleName, const std::string &abilityName)
+void ModalSystemDialogUtil::ShowDeveloperModeDialog(
+    const std::string &bundleName, const std::string &moduleName, uint32_t labelId, int32_t userId)
 {
     auto bms = AAFwk::AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER(bms);
-    std::string labelString = bms->GetAbilityLabel(bundleName, abilityName);
+    std::string labelString = IN_PROCESS_CALL(bms->GetStringById(bundleName, moduleName, labelId, userId));
 
     nlohmann::json infoObject;
     infoObject["appName"] = labelString.c_str();

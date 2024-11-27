@@ -50,6 +50,21 @@ bool StatusBarDelegateManager::IsCallerInStatusBar()
     return isExist;
 }
 
+bool StatusBarDelegateManager::IsInStatusBar(uint32_t accessTokenId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto statusBarDelegate = GetStatusBarDelegate();
+    CHECK_POINTER_AND_RETURN(statusBarDelegate, false);
+    bool isExist = false;
+    auto ret = statusBarDelegate->CheckIfStatusBarItemExists(accessTokenId, isExist);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret: %{public}d", ret);
+        return false;
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "isExist: %{public}d", isExist);
+    return isExist;
+}
+
 int32_t StatusBarDelegateManager::DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

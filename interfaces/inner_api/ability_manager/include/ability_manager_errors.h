@@ -651,6 +651,16 @@ enum {
      */
     ERR_INSIGHT_INTENT_EXECUTE_REPLY_FAILED = 2097278,
 
+    /*
+     * Result (2097279) for get target bundle info failed.
+     */
+    ERR_GET_TARGET_BUNDLE_INFO_FAILED = 2097279,
+
+    /*
+     * Result (2097280) for UIAbility in starting state.
+     */
+    ERR_UI_ABILITY_IS_STARTING = 2097280,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
@@ -801,6 +811,21 @@ enum NativeFreeInstallError {
      * Result(29360131) for remote invalid parameters.
      */
     INVALID_REMOTE_PARAMETERS_ERR = 29360131,
+
+    /**
+     * Native error(29360135) for target bundle has no main ability.
+     */
+    ERR_NO_MAIN_ABILITY = 29360135,
+
+    /**
+     * Native error(29360136) for target app has no status-bar ability.
+     */
+    ERR_NO_STATUS_BAR_ABILITY = 29360136,
+
+    /**
+     * Native error(29360137) for target app is not attached to a status bar.
+     */
+    ERR_NOT_ATTACHED_TO_STATUS_BAR = 29360137,
 
     /*
      * Result(29360205) for continue freeinstall failed.

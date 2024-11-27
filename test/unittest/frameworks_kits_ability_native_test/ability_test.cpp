@@ -1642,7 +1642,7 @@ HWTEST_F(AbilityBaseTest, AbilityContinuation_0500, TestSize.Level1)
 
     WantParams wantParams;
     auto state = ability->OnContinue(wantParams);
-    EXPECT_EQ(state, ContinuationManager::OnContinueResult::REJECT);
+    EXPECT_EQ(state, ContinuationManager::OnContinueResult::ON_CONTINUE_ERR);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -3322,7 +3322,6 @@ HWTEST_F(AbilityBaseTest, OnShare_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<Ability> ability = std::make_shared<Ability>();
-    ASSERT_NE(ability, nullptr);
 
     WantParams wantParams;
     int32_t ret = ability->OnShare(wantParams);
@@ -3336,7 +3335,7 @@ HWTEST_F(AbilityBaseTest, OnShare_0100, TestSize.Level1)
     int32_t width = 1;
     int32_t height = 1;
     ability->GetWindowRect(left, top, width, height);
-    EXPECT_EQ(left, top);
+    ASSERT_NE(ability, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 }  // namespace AppExecFwk

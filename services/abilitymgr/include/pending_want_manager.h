@@ -31,6 +31,7 @@
 #include "pending_want_record.h"
 #include "pending_want_common_event.h"
 #include "sender_info.h"
+#include "task_handler_wrap.h"
 #include "want_sender_info.h"
 
 namespace OHOS {
@@ -139,7 +140,7 @@ public:
     sptr<IWantSender> GetWantSender(int32_t callingUid, int32_t uid, const bool isSystemApp,
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t appIndex = 0);
     int32_t SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo);
-    void CancelWantSender(const bool isSystemApp, const sptr<IWantSender> &sender);
+    void CancelWantSender(const bool isSystemAppCall, const sptr<IWantSender> &sender);
 
     int32_t GetPendingWantUid(const sptr<IWantSender> &target);
     int32_t GetPendingWantUserId(const sptr<IWantSender> &target);
@@ -184,17 +185,10 @@ private:
 
     bool CheckWindowState(int32_t pid);
 
-    void EraseBundleRecord(const std::vector<WantsInfo> &wantsInfos, std::shared_ptr<PendingWantKey> key);
-
-    void InsertBundleRecord(const std::vector<WantsInfo> &wantsInfos, std::shared_ptr<PendingWantKey> key);
-
-    bool QueryRecordByBundle(const std::string &bundleName);
-
 private:
+    std::shared_ptr<TaskHandlerWrap> taskHandler_;
     std::map<std::shared_ptr<PendingWantKey>, sptr<PendingWantRecord>> wantRecords_;
-    std::map<std::string, std::vector<std::shared_ptr<PendingWantKey>>> bundleRecords_;
     ffrt::mutex mutex_;
-    ffrt::mutex bundleRecordsMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

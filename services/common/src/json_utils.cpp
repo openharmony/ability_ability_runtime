@@ -91,5 +91,28 @@ bool JsonUtils::ReadFileInfoJson(const std::string &filePath, nlohmann::json &js
 
     return true;
 }
+
+bool JsonUtils::IsEqual(nlohmann::json &jsonObject, const std::string &key, const std::string &value, bool checkEmpty)
+{
+    if (jsonObject.contains(key) && jsonObject[key].is_string()) {
+        std::string  jsonValue = jsonObject.at(key).get<std::string>();
+        if (checkEmpty && !jsonValue.empty() && jsonValue != value) {
+            return false;
+        } else if (value != jsonValue) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool JsonUtils::IsEqual(nlohmann::json &jsonObject, const std::string &key, int32_t value)
+{
+    if (jsonObject.contains(key) && jsonObject[key].is_number()) {
+        if (value != jsonObject.at(key).get<int32_t>()) {
+            return false;
+        }
+    }
+    return true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

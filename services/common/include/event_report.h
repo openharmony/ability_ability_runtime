@@ -56,6 +56,8 @@ struct EventInfo {
     int32_t reason = -1;
     int32_t subReason = -1;
     int32_t exitReason = -1;
+    bool isPreload = false;
+    int32_t preloadMode = 0;
 };
 
 enum class EventName {

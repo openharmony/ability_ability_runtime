@@ -104,7 +104,7 @@ HWTEST_F(AppMgrEventTest, SendCreateAtomicServiceProcessEvent_0300, TestSize.Lev
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     EXPECT_NE(appRecord, nullptr);
     appRecord->SetCallerUid(-1);
-    
+
     auto callerAppInfo = std::make_shared<ApplicationInfo>();
     EXPECT_NE(callerAppInfo, nullptr);
     callerAppInfo->bundleName = "testCallerBundleName";
@@ -179,7 +179,7 @@ HWTEST_F(AppMgrEventTest, SendProcessStartEvent_0300, TestSize.Level1)
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     EXPECT_NE(appRecord, nullptr);
     appRecord->SetCallerUid(-1);
-    
+
     auto callerAppInfo = std::make_shared<ApplicationInfo>();
     EXPECT_NE(callerAppInfo, nullptr);
     callerAppInfo->bundleName = "testCallerBundleName";
@@ -188,7 +188,7 @@ HWTEST_F(AppMgrEventTest, SendProcessStartEvent_0300, TestSize.Level1)
     int32_t callerRecordId = 2;
     auto callerAppRecord = std::make_shared<AppRunningRecord>(callerAppInfo, callerRecordId, callerProcessName);
     EXPECT_NE(callerAppRecord, nullptr);
-    
+
     AAFwk::EventInfo eventInfo;
     bool ret = AppMgrEventUtil::SendProcessStartEvent(callerAppRecord, appRecord, eventInfo);
     EXPECT_EQ(ret, true);
@@ -252,7 +252,7 @@ HWTEST_F(AppMgrEventTest, SendProcessStartFailedEvent_0300, TestSize.Level1)
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     EXPECT_NE(appRecord, nullptr);
     appRecord->SetCallerUid(-1);
-    
+
     auto callerAppInfo = std::make_shared<ApplicationInfo>();
     EXPECT_NE(callerAppInfo, nullptr);
     callerAppInfo->bundleName = "testCallerBundleName";
@@ -261,7 +261,7 @@ HWTEST_F(AppMgrEventTest, SendProcessStartFailedEvent_0300, TestSize.Level1)
     int32_t callerRecordId = 2;
     auto callerAppRecord = std::make_shared<AppRunningRecord>(callerAppInfo, callerRecordId, callerProcessName);
     EXPECT_NE(callerAppRecord, nullptr);
-    
+
     AAFwk::EventInfo eventInfo;
     bool ret = AppMgrEventUtil::SendProcessStartFailedEvent(callerAppRecord, appRecord, eventInfo);
     EXPECT_EQ(ret, true);
@@ -291,8 +291,8 @@ HWTEST_F(AppMgrEventTest, SendRenderProcessStartFailedEvent_0100, TestSize.Level
     int32_t ipcFd = 1;
     int32_t sharedFd = 1;
     int32_t crashFd = 1;
-    std::shared_ptr<RenderRecord> renderRecord =
-        RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, hostRecord);
+    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+        FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), hostRecord);
 
     bool ret = AppMgrEventUtil::SendRenderProcessStartFailedEvent(renderRecord,
         ProcessStartFailedReason::APPSPAWN_FAILED, 123);

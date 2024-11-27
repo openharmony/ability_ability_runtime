@@ -144,7 +144,7 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
     };
     std::string taskName = "DELAY_CACHED_STATE_NOTIFY";
     if (appRecord->GetPriorityObject()) {
-        taskName += std::to_string(appRecord->GetPriorityObject()->GetPid());
+        taskName += std::to_string(appRecord->GetPid());
     }
     auto res = appRecord->CancelTask(taskName);
     if (res) {
@@ -281,11 +281,6 @@ bool CacheProcessManager::IsProcessSupportHotStart(const std::shared_ptr<AppRunn
             appRecord->GetName().c_str(), actualVer);
         return false;
     }
-    if (IsAppContainsSrvExt(appRecord)) {
-        TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s is service, not support cache",
-            appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
-        return false;
-    }
     if (!appRecord->HasUIAbilityLaunched()) {
         TAG_LOGD(AAFwkTag::APPMGR, "%{public}s of %{public}s has not created uiability before.",
             appRecord->GetProcessName().c_str(), appRecord->GetBundleName().c_str());
@@ -306,7 +301,7 @@ void CacheProcessManager::CheckAndSetProcessCacheEnable(const std::shared_ptr<Ap
         return;
     }
     bool forceKillProcess =
-        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPriorityObject()->GetPid());
+        AAFwk::ResSchedUtil::GetInstance().CheckShouldForceKillProcess(appRecord->GetPid());
     if (forceKillProcess) {
         appRecord->SetProcessCacheBlocked(true);
         return;

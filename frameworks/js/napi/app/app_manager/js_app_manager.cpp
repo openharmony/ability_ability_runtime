@@ -315,14 +315,13 @@ private:
         TAG_LOGD(AAFwkTag::APPMGR, "called");
         int32_t errCode = 0;
         std::string bundleName;
-
         // only support 1 or 2 params
         if (argc != ARGC_ONE && argc != ARGC_TWO) {
             TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             errCode = ERR_NOT_OK;
         } else {
             if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "convert bundleName failed");
+                TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed");
                 errCode = ERR_NOT_OK;
             }
         }
@@ -413,11 +412,11 @@ private:
             errCode = ERR_NOT_OK;
         } else {
             if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "convert bundleName failed");
+                TAG_LOGE(AAFwkTag::APPMGR, "Parse bundleName failed");
                 errCode = ERR_NOT_OK;
             }
             if (!ConvertFromJsValue(env, argv[INDEX_ONE], accountId)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "convert userId failed");
+                TAG_LOGE(AAFwkTag::APPMGR, "Parse userId failed");
                 errCode = ERR_NOT_OK;
             }
         }
@@ -437,6 +436,7 @@ private:
                     task.Reject(env, CreateJsError(env, ret, "Kill processes failed."));
                 }
             };
+
         napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessWithAccount",
@@ -453,7 +453,6 @@ private:
             TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             errCode = ERR_NOT_OK;
         }
-
         NapiAsyncTask::CompleteCallback complete =
             [abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (errCode != 0) {
@@ -486,7 +485,6 @@ private:
             TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
             errCode = ERR_NOT_OK;
         }
-
         NapiAsyncTask::CompleteCallback complete =
             [abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (errCode != 0) {

@@ -617,9 +617,8 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
         TAG_LOGE(AAFwkTag::ABILITY, "null stage mode ability/abilityImpl");
         return;
     }
-    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle";
-    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterForeground";
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
 
     bool needNotifyAMS = false;
     {
@@ -639,7 +638,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
         auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
             AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW, restoreData);
         if (ret == ERR_OK) {
-            FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+            FreezeUtil::GetInstance().DeleteLifecycleEvent(token_);
             FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
         }
     }
@@ -653,16 +652,15 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         TAG_LOGW(AAFwkTag::ABILITY, "not stage");
         return;
     }
-    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
-    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle";
-    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+    std::string entry = "AbilityImpl::WindowLifeCycleImpl::AfterBackground";
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
 
     TAG_LOGI(AAFwkTag::ABILITY, "window after background");
     PacMap restoreData;
     auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
         AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);
     if (ret == ERR_OK) {
-        FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(token_);
         FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
     }
 }

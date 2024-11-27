@@ -313,12 +313,12 @@ ErrCode AbilityContextImpl::StopServiceExtensionAbility(const AAFwk::Want& want,
 ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, int resultCode)
 {
     isTerminating_.store(true);
+    auto sessionToken = GetSessionToken();
+    if (sessionToken == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "withResult null sessionToken");
+    }
 #ifdef SUPPORT_SCREEN
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto sessionToken = GetSessionToken();
-        if (sessionToken == nullptr) {
-            return ERR_INVALID_VALUE;
-        }
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
         sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
         info->want = want;
         info->resultCode = resultCode;
