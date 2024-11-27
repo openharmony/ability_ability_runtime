@@ -11039,6 +11039,11 @@ void AbilityManagerService::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::
         }
     }
 
+    if (bundleInfos.size() == 0) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "no app to restart");
+        return;
+    }
+
     KeepAliveProcessManager::GetInstance().StartKeepAliveProcessWithMainElement(bundleInfosForCurrentUser, userId);
 }
 
