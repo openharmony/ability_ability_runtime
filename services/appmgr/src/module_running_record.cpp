@@ -109,7 +109,8 @@ int32_t ModuleRunningRecord::GetPageAbilitySize()
     for (auto it : abilities_) {
         std::shared_ptr<AbilityRunningRecord> abilityRunningRecord = it.second;
         std::shared_ptr<AbilityInfo> abilityInfo = abilityRunningRecord->GetAbilityInfo();
-        if (abilityInfo && abilityInfo->type == AbilityType::PAGE) {
+        if (abilityInfo && (abilityInfo->type == AbilityType::PAGE ||
+            abilityInfo->extensionType == ExtensionAbilityType::EMBEDDED_UI)) {
             pageAbilitySize++;
         }
     }
