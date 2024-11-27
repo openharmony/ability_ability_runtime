@@ -31,7 +31,7 @@ namespace AAFwk {
 namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t API_VERSION_MOD = 100;
-constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
+constexpr int32_t FOUNDATION_UID = 5523;
 constexpr const char* NET_WORK_ID_MARK = "?networkid=";
 }
 
@@ -62,19 +62,20 @@ bool UPMSUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t ta
 }
 
 bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
-    const std::vector<std::string> &uriVec, const std::vector<int32_t> &resVec)
+    const std::vector<Uri> &uriVec, const std::vector<bool> &resVec)
 {
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "send grant uri permission event start.");
     EventInfo eventInfo;
     if (!CheckAndCreateEventInfo(callerTokenId, targetTokenId, eventInfo)) {
         return false;
     }
     for (size_t i = 0; i < resVec.size(); i++) {
-        if (resVec[i] == 0 || resVec[i] == -EEXIST) {
-            eventInfo.uri = uriVec[i];
+        if (resVec[i]) {
+            eventInfo.uri = uriVec[i].ToString();
             EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
         }
     }
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "Send GRANT_URI_PERMISSION Event");
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "send grant uri permission event end.");
     return true;
 }
 
@@ -122,21 +123,7 @@ int32_t UPMSUtils::GetCurrentAccountId()
 
 bool UPMSUtils::IsFoundationCall()
 {
-    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "callerTokenId is %{public}u", callerTokenId);
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
-    if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "not native call");
-        return false;
-    }
-    Security::AccessToken::NativeTokenInfo nativeInfo;
-    auto result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "GetNativeTokenInfo failed, callerTokenId:%{public}u", callerTokenId);
-        return false;
-    }
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "Caller processName:%{public}s", nativeInfo.processName.c_str());
-    return nativeInfo.processName == FOUNDATION_PROCESS_NAME;
+    return IPCSkeleton::GetCallingUid() == FOUNDATION_UID;
 }
 
 bool UPMSUtils::IsSAOrSystemAppCall()
@@ -145,11 +132,8 @@ bool UPMSUtils::IsSAOrSystemAppCall()
         PermissionVerification::GetInstance()->IsSACall();
 }
 
-bool UPMSUtils::IsSystemAppCall(uint32_t tokenId)
+bool UPMSUtils::IsSystemAppCall()
 {
-    if (UPMSUtils::IsFoundationCall()) {
-        return UPMSUtils::CheckIsSystemAppByTokenId(tokenId);
-    }
     return PermissionVerification::GetInstance()->IsSystemAppCall();
 }
 
@@ -301,7 +285,7 @@ bool UPMSUtils::CheckUriTypeIsValid(Uri &uri)
 {
     auto &&scheme = uri.GetScheme();
     if (scheme != "file" && scheme != "content") {
-        TAG_LOGW(AAFwkTag::URIPERMMGR, "Type of uri is invalid, Scheme is %{public}s", scheme.c_str());
+        TAG_LOGW(AAFwkTag::URIPERMMGR, "uri invalid: %{public}s-%{private}s", scheme.c_str(), uri.ToString().c_str());
         return false;
     }
     return true;
