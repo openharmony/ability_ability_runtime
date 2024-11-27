@@ -87,10 +87,17 @@ public:
 
     static int32_t GenerateWant(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param, Want &want);
 
+    void SetIntentExemptionInfo(int32_t uid);
+
+    std::map<int32_t, int64_t> GetIntentExemptionInfo();
+
+    void RemoveIntentExemptionInfo(int32_t uid);
 private:
     mutable ffrt::mutex mutex_;
+    mutable ffrt::mutex intentExemptionLock_;
     uint64_t intentIdCount_ = 0;
     std::map<uint64_t, std::shared_ptr<InsightIntentExecuteRecord>> records_;
+    std::map<int32_t, int64_t> intentExemptionDeadlineTime_;
 
     int32_t AddRecord(uint64_t key, const sptr<IRemoteObject> &callerToken, const std::string &bundleName,
         uint64_t &intentId);

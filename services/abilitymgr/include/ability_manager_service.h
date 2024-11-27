@@ -1979,7 +1979,7 @@ private:
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
     void InitWindowVisibilityChangedListener();
     void FreeWindowVisibilityChangedListener();
-    bool CheckProcessIsBackground(int32_t pid, AbilityState currentState);
+    bool CheckProcessIsBackground(int32_t uid, int32_t pid, AbilityState currentState);
 
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
