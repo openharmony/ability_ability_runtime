@@ -72,7 +72,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
             HandleRestartResidentProcessDependedOnWeb();
         }
         HandleUpdatedModuleInfo(bundleName, uid);
-        HandleAppUpgradeCompleted(bundleName, uid);
+        HandleAppUpgradeCompleted(uid);
         if (abilityAutoStartupService_ == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "OnReceiveEvent failed, abilityAutoStartupService is nullptr");
             return;
@@ -104,10 +104,10 @@ void AbilityBundleEventCallback::HandleUpdatedModuleInfo(const std::string &bund
     taskHandler_->SubmitTask(task);
 }
 
-void AbilityBundleEventCallback::HandleAppUpgradeCompleted(const std::string &bundleName, int32_t uid)
+void AbilityBundleEventCallback::HandleAppUpgradeCompleted(int32_t uid)
 {
     wptr<AbilityBundleEventCallback> weakThis = this;
-    auto task = [weakThis, bundleName, uid]() {
+    auto task = [weakThis, uid]() {
         sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
         if (sharedThis == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "sharedThis is nullptr.");
@@ -119,7 +119,7 @@ void AbilityBundleEventCallback::HandleAppUpgradeCompleted(const std::string &bu
             TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr is nullptr.");
             return;
         }
-        abilityMgr->AppUpgradeCompleted(bundleName, uid);
+        abilityMgr->AppUpgradeCompleted(uid);
     };
     taskHandler_->SubmitTask(task);
 }
