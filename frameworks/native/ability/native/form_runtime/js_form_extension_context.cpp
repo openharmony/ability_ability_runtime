@@ -135,7 +135,7 @@ private:
             [weak = context_, formId, formProviderData](napi_env env, NapiAsyncTask& task, int32_t status) {
                 auto context = weak.lock();
                 if (!context) {
-                    TAG_LOGW(AAFwkTag::FORM_EXT, "Context released");
+                    TAG_LOGW(AAFwkTag::FORM_EXT, "null context");
                     task.Reject(env, CreateJsError(env, 1, "Context is released"));
                     return;
                 }
@@ -281,12 +281,12 @@ private:
                 napi_env env, NapiAsyncTask& task, int32_t status) {
                 auto context = weak.lock();
                 if (!context) {
-                    TAG_LOGW(AAFwkTag::FORM_EXT, "Release context");
+                    TAG_LOGW(AAFwkTag::FORM_EXT, "null context");
                     task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
                     return;
                 }
                 if (connection == nullptr) {
-                    TAG_LOGW(AAFwkTag::FORM_EXT, "null Connection");
+                    TAG_LOGW(AAFwkTag::FORM_EXT, "null connection");
                     task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                     return;
                 }
@@ -464,7 +464,7 @@ void JSFormExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::Ele
     napi_value methodOnConnect = nullptr;
     napi_get_named_property(env_, obj, "onConnect", &methodOnConnect);
     if (methodOnConnect == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "get onConnect error");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "get methodOnConnect");
         return;
     }
     napi_call_function(env_, obj, methodOnConnect, ARGC_TWO, argv, nullptr);
@@ -508,7 +508,7 @@ void JSFormExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::
     napi_value method = nullptr;
     napi_get_named_property(env_, obj, "onDisconnect", &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "get onDisconnect error");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "get method");
         return;
     }
 
@@ -560,7 +560,7 @@ void JSFormExtensionConnection::CallJsFailed(int32_t errorCode)
     napi_value method = nullptr;
     napi_get_named_property(env_, obj, "onFailed", &method);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "get onFailed error");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null method");
         return;
     }
     napi_value argv[] = {CreateJsValue(env_, errorCode)};

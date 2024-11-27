@@ -200,7 +200,7 @@ bool JsInsightIntentExecutor::CallJsFunctionWithResult(
         funcName,
         napi_valuetype::napi_function);
     if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "CallJsFunctionWithResult error");
+        TAG_LOGE(AAFwkTag::INTENT, "null method");
         return false;
     }
     napi_call_function(
@@ -358,7 +358,7 @@ bool JsInsightIntentExecutor::HandleResultReturnedFromJsFunc(napi_value resultJs
         TAG_LOGI(AAFwkTag::INTENT, "Not promise");
         auto resultCpp = JsInsightIntentExecutor::GetResultFromJs(env, resultJs);
         if (resultCpp == nullptr) {
-            TAG_LOGE(AAFwkTag::INTENT, "Result invalid");
+            TAG_LOGE(AAFwkTag::INTENT, "null resultCpp");
             ReplyFailedInner();
             STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
         }

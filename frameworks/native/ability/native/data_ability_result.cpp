@@ -157,7 +157,7 @@ bool DataAbilityResult::ReadFromParcel(Parcel &parcel)
     int32_t empty = VALUE_NULL;
     if (!parcel.ReadInt32(empty)) {
         return false;
-        TAG_LOGD(AAFwkTag::DATA_ABILITY, "read parcel failed");
+        TAG_LOGD(AAFwkTag::DATA_ABILITY, "Failed to read parcel");
     }
 
     if (empty == VALUE_OBJECT) {
@@ -168,7 +168,7 @@ bool DataAbilityResult::ReadFromParcel(Parcel &parcel)
             uri = nullptr;
         } else {
             return false;
-            TAG_LOGD(AAFwkTag::DATA_ABILITY, "read parcel failed");
+            TAG_LOGD(AAFwkTag::DATA_ABILITY, "Failed to read parcel");
         }
     }
 

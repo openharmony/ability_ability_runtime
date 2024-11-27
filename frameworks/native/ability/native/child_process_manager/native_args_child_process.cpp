@@ -90,7 +90,7 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
 
         NativeChildProcess_Fd *node = new(std::nothrow) NativeChildProcess_Fd;
         if (!node) {
-            TAG_LOGE(AAFwkTag::PROCESSMGR, "null fd node");
+            TAG_LOGE(AAFwkTag::PROCESSMGR, "null node");
             return args;
         }
         node->next = nullptr;
@@ -118,7 +118,7 @@ NativeChildProcess_Args NativeArgsChildProcess::ParseToNativeArgs(const std::str
 bool NativeArgsChildProcess::LoadNativeLib(const std::shared_ptr<ChildProcessStartInfo> &info)
 {
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "null info ");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null info");
         return false;
     }
     TAG_LOGI(AAFwkTag::PROCESSMGR, "LoadNativeLib, moduleName:%{public}s, srcEntry:%{public}s, entryFunc:%{public}s",
@@ -151,7 +151,7 @@ bool NativeArgsChildProcess::LoadNativeLib(const std::shared_ptr<ChildProcessSta
 
     auto entryFunc = reinterpret_cast<NativeArgsChildProcess_EntryFunc>(dlsym(libHandle, info->entryFunc.c_str()));
     if (entryFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Get entryFunc address failed, err %{public}s", dlerror());
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null entryFunc, err %{public}s", dlerror());
         dlclose(libHandle);
         return false;
     }

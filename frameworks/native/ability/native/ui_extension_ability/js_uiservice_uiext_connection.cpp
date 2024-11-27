@@ -131,7 +131,7 @@ void JSUIServiceUIExtConnection::HandleOnAbilityConnectDone(
 
         ResolveDuplicatedPendingTask(env_, proxy);
     } else {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "HandleOnAbilityConnectDone, napiAsyncTask_ null");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null napiAsyncTask_");
     }
     napiAsyncTask_.reset();
 }
@@ -210,7 +210,7 @@ int32_t JSUIServiceUIExtConnection::OnSendData(OHOS::AAFwk::WantParams &data)
         ([connection, wantParams = data](napi_env env, NapiAsyncTask &task, int32_t status) {
             sptr<JSUIServiceUIExtConnection> connectionSptr = connection.promote();
             if (!connectionSptr) {
-                TAG_LOGE(AAFwkTag::UISERVC_EXT, "connectionSptr nullptr");
+                TAG_LOGE(AAFwkTag::UISERVC_EXT, "null connectionSptr");
                 return;
             }
             connectionSptr->HandleOnSendData(wantParams);
@@ -249,7 +249,7 @@ bool JSUIServiceUIExtConnection::IsJsCallbackObjectEquals(napi_env env,
     }
     bool result = false;
     if (napi_strict_equals(env, object, value, &result) != napi_ok) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "not match Object and value");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "object does not match value");
         return false;
     }
     return result;

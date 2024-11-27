@@ -116,7 +116,7 @@ bool AppRecovery::AddAbility(std::shared_ptr<AbilityRuntime::UIAbility> ability,
     const std::shared_ptr<AbilityInfo>& abilityInfo, const sptr<IRemoteObject>& token)
 {
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AbilityInfo invalid");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null abilityInfo");
         return false;
     }
 
@@ -473,13 +473,13 @@ bool AppRecovery::GetMissionIds(std::string path, std::vector<int32_t> &missionI
 {
     DIR *dir = opendir(path.c_str());
     if (dir == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "open dir error.");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null dir");
         return false;
     }
     struct dirent *ptr;
     while ((ptr = readdir(dir)) != nullptr) {
         if (ptr == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "read dir error.");
+            TAG_LOGE(AAFwkTag::RECOVERY, "null ptr");
             return false;
         }
         if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {

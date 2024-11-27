@@ -275,7 +275,7 @@ napi_value JsUIExtensionContentSession::OnGetUIExtensionHostWindowProxy(napi_env
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     CHECK_IS_SYSTEM_APP;
     if (sessionInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid session info");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
@@ -283,7 +283,7 @@ napi_value JsUIExtensionContentSession::OnGetUIExtensionHostWindowProxy(napi_env
     napi_value jsExtensionWindow =
         Rosen::JsExtensionWindow::CreateJsExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
     if (jsExtensionWindow == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "create jsExtensionWindow object failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsExtensionWindow");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
@@ -299,7 +299,7 @@ napi_value JsUIExtensionContentSession::OnGetUIExtensionWindowProxy(napi_env env
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     if (sessionInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid session info");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
@@ -307,7 +307,7 @@ napi_value JsUIExtensionContentSession::OnGetUIExtensionWindowProxy(napi_env env
     napi_value jsExtensionWindow =
         Rosen::JsExtensionWindow::CreateJsExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
     if (jsExtensionWindow == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "create jsExtensionWindow object failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsExtensionWindow");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
@@ -460,7 +460,7 @@ napi_value JsUIExtensionContentSession::OnStartAbilityForResult(napi_env env, Na
         return CreateJsUndefined(env);
     }
     if (listener_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null listener_ ");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null listener_");
         return CreateJsUndefined(env);
     }
     StartAbilityForResultRuntimeTask(env, want, asyncTask, unwrapArgc, startOptions);
@@ -483,7 +483,7 @@ void JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(napi_env env,
         std::string abilityName = element.GetAbilityName();
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
-            TAG_LOGW(AAFwkTag::UI_EXT, "wrap abilityResult wrong");
+            TAG_LOGW(AAFwkTag::UI_EXT, "null abilityResult");
             isInner = true;
             resultCode = ERR_INVALID_VALUE;
         }
@@ -556,7 +556,7 @@ napi_value JsUIExtensionContentSession::OnTerminateSelfWithResult(napi_env env, 
     int resultCode = 0;
     AAFwk::Want want;
     if (!AppExecFwk::UnWrapAbilityResult(env, info.argv[INDEX_ZERO], resultCode, want)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "OnTerminateSelfWithResult parse ability result failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "parse ability result failed");
         ThrowInvalidParamError(env, "Parameter error: Failed to parse parameter! Parameter must be a AbilityResult.");
         return CreateJsUndefined(env);
     }
@@ -582,7 +582,7 @@ napi_value JsUIExtensionContentSession::OnSendData(napi_env env, NapiCallbackInf
     }
     AAFwk::WantParams params;
     if (!AppExecFwk::UnwrapWantParams(env, info.argv[INDEX_ZERO], params)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "OnSendData parse param failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "parse param failed");
         ThrowInvalidParamError(env, "OnSendData Failed to parse param! Data must be a Record<string, Object>.");
         return CreateJsUndefined(env);
     }
@@ -641,7 +641,7 @@ napi_value JsUIExtensionContentSession::OnSetReceiveDataCallback(napi_env env, N
 
     napi_value callback = info.argv[INDEX_ZERO];
     if (receiveDataCallback_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow_");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null receiveDataCallback_");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }

@@ -54,7 +54,7 @@ napi_value JsPhotoEditorExtensionContext::CreateJsPhotoEditorExtensionContext(
     std::unique_ptr<JsPhotoEditorExtensionContext> jsContext = std::make_unique<JsPhotoEditorExtensionContext>(context);
     napi_status status = napi_wrap(env, objValue, jsContext.release(), Finalizer, nullptr, nullptr);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "do napi wrap failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "napi wrap failed");
     }
 
     const char *moduleName = "JsPhotoEditorExtensionContext";
@@ -91,7 +91,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
 
     auto context = context_.lock();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Context is released");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
         ThrowError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR), ERR_MSG_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }

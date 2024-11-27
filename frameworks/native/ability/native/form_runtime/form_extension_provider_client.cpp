@@ -436,7 +436,7 @@ std::pair<ErrCode, ErrCode> FormExtensionProviderClient::CheckParam(const Want &
     }
     sptr<IFormSupply> formSupplyClient = iface_cast<IFormSupply>(callerToken);
     if (formSupplyClient == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "null IFormSupply");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null formSupplyClient");
         return std::pair<ErrCode, ErrCode>(ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED,
             ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED);
     }
@@ -462,7 +462,7 @@ int32_t FormExtensionProviderClient::AcquireShareFormData(int64_t formId, const 
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
     auto formCall = iface_cast<IFormSupply>(formSupplyCallback);
     if (formCall == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "null IFormSupply");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null formCall");
         return ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     }
 
@@ -503,7 +503,7 @@ int32_t FormExtensionProviderClient::AcquireFormData(int64_t formId, const sptr<
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
     auto formCall = iface_cast<IFormSupply>(formSupplyCallback);
     if (formCall == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "null callback");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null formCall");
         return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
 

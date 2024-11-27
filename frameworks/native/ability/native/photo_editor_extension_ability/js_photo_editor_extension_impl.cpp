@@ -33,25 +33,25 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     if (value == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid param value");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null value");
         return nullptr;
     }
 
     auto ptr = reinterpret_cast<std::weak_ptr<PhotoEditorExtensionContext> *>(value)->lock();
     if (ptr == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid context");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null ptr");
         return nullptr;
     }
     napi_value object = JsPhotoEditorExtensionContext::CreateJsPhotoEditorExtensionContext(env, ptr);
     auto contextRef =
         JsRuntime::LoadSystemModuleByEngine(env, "application.PhotoEditorExtensionContext", &object, ARGC_ONE);
     if (contextRef == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "load module failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null contextRef");
         return nullptr;
     }
     auto contextObj = contextRef->GetNapiValue();
     if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Load context error");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null contextObj");
         return nullptr;
     }
     napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, value, nullptr);
@@ -61,7 +61,7 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
             if (data == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "null weak_ptr finalizer");
+                TAG_LOGE(AAFwkTag::UI_EXT, "null data");
                 return;
             }
             delete static_cast<std::weak_ptr<PhotoEditorExtensionContext> *>(data);
@@ -78,7 +78,7 @@ void JsPhotoEditorExtensionImpl::BindContext()
 {
     HandleScope handleScope(jsRuntime_);
     if (jsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null jsobj_");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsObj_");
         return;
     }
 
@@ -95,14 +95,14 @@ void JsPhotoEditorExtensionImpl::BindContext()
     TAG_LOGD(AAFwkTag::UI_EXT, "BindContext CreateJsPhotoEditorExtensionContext");
     napi_value contextObj = JsPhotoEditorExtensionContext::CreateJsPhotoEditorExtensionContext(env, context_);
     if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Create js ui extension context error");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null contextObj");
         return;
     }
 
     shellContextRef_ =
         JsRuntime::LoadSystemModuleByEngine(env, "application.PhotoEditorExtensionContext", &contextObj, ARGC_ONE);
     if (shellContextRef_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "get loadSystemModuleByEngine failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null shellContextRef");
         return;
     }
     contextObj = shellContextRef_->GetNapiValue();
@@ -120,7 +120,7 @@ void JsPhotoEditorExtensionImpl::BindContext()
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer called");
             if (data == nullptr) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "null weak_ptr finalizer");
+                TAG_LOGE(AAFwkTag::UI_EXT, "null data");
                 return;
             }
             delete static_cast<std::weak_ptr<PhotoEditorExtensionContext> *>(data);
@@ -165,7 +165,7 @@ void JsPhotoEditorExtensionImpl::OnStartContentEditing(const AAFwk::Want &want,
     }
     napi_value jsWant = AppExecFwk::WrapWant(env, want);
     if (jsWant == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "get want failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null jsWant");
         return;
     }
     napi_value jsImageUri;

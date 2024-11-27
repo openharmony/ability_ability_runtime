@@ -1191,7 +1191,7 @@ bool FAAbilityThread::HandleRegisterObserver(const Uri &uri, const sptr<AAFwk::I
 {
     auto obsMgrClient = DataObsMgrClient::GetInstance();
     if (obsMgrClient == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "obsMgrClient is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "null obsMgrClient");
         return false;
     }
 

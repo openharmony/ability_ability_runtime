@@ -34,7 +34,7 @@ ContinuationRequestRegister::ContinuationRequestRegister(const std::string &bund
 void ContinuationRequestRegister::Execute(void)
 {
     if (continuatinConnector_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuatinConnector");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationConnector");
         return;
     }
 
@@ -54,7 +54,7 @@ ContinuationRequestUnRegister::ContinuationRequestUnRegister(int token)
 void ContinuationRequestUnRegister::Execute(void)
 {
     if (continuatinConnector_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuatinConnector");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationConnector");
         return;
     }
 
@@ -77,7 +77,7 @@ ContinuationRequestUpdateConnectStatus::ContinuationRequestUpdateConnectStatus(
 void ContinuationRequestUpdateConnectStatus::Execute(void)
 {
     if (continuatinConnector_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuatinConnector");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationConnector");
         return;
     }
 
@@ -98,7 +98,7 @@ ContinuationRequestShowDeviceList::ContinuationRequestShowDeviceList(int token, 
 void ContinuationRequestShowDeviceList::Execute(void)
 {
     if (continuatinConnector_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuatinConnector");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationConnector");
         return;
     }
 

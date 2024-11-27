@@ -109,7 +109,7 @@ bool AbilityRecovery::SaveAbilityState()
     auto ability = ability_.lock();
     auto abilityInfo = abilityInfo_.lock();
     if (ability == nullptr || abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "null ability or abilityInfo");
+        TAG_LOGE(AAFwkTag::RECOVERY, "null ability");
         return false;
     }
 
@@ -269,7 +269,7 @@ bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
 
         std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
         if (abilityMgr == nullptr) {
-            TAG_LOGE(AAFwkTag::RECOVERY, "not exist abilityMgr client");
+            TAG_LOGE(AAFwkTag::RECOVERY, "null abilityMgr");
             return false;
         }
         abilityMgr->EnableRecoverAbility(token);

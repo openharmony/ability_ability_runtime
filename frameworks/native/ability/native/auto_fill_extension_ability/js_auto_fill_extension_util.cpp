@@ -181,7 +181,7 @@ void JsAutoFillExtensionUtil::UnwrapViewData(
     TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "called");
     napi_value jsViewData = GetPropertyValueByPropertyName(env, value, VIEW_DATA_VIEW_DATA, napi_object);
     if (jsViewData == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Get ViewData from JS failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null jsViewData");
         return;
     }
 
@@ -260,7 +260,7 @@ napi_value JsAutoFillExtensionUtil::WrapFillRequest(const AAFwk::Want &want, con
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     if (jsObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "create jsObject failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null jsObject");
         return nullptr;
     }
 
@@ -316,7 +316,7 @@ napi_value JsAutoFillExtensionUtil::WrapUpdateRequest(const AAFwk::WantParams &w
     napi_value jsObject = nullptr;
     NAPI_CALL(env, napi_create_object(env, &jsObject));
     if (jsObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "create Object failed");
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null jsObject");
         return nullptr;
     }
 

@@ -50,7 +50,7 @@ void CJAbilityConnectCallback::OnAbilityConnectDone(
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called, resultCode:%{public}d", resultCode);
     if (g_cjAbilityConnectCallbackFuncs == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "not registered");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null g_cjAbilityConnectCallbackFuncs");
         return;
     }
 

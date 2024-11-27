@@ -398,14 +398,14 @@ int32_t FFIAbilityContextRequestPermissionsFromUser(
 
     auto context = FFIData::GetData<CJAbilityContext>(id);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null Context");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         cjTask(ERR_INVALID_INSTANCE_CODE, nullptr);
         return ERR_INVALID_INSTANCE_CODE;
     }
 
     auto actualPermissions = reinterpret_cast<std::vector<std::string>*>(permissions);
     if (actualPermissions->empty()) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "empty actualPermissions");
+        TAG_LOGE(AAFwkTag::CONTEXT, "empty permissions");
         cjTask(ERR_INVALID_INSTANCE_CODE, nullptr);
         return ERR_INVALID_INSTANCE_CODE;
     }
@@ -417,7 +417,7 @@ int32_t FFIAbilityContextSetMissionLabel(int64_t id, const char* label)
 {
     auto context = FFIData::GetData<CJAbilityContext>(id);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null Context");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return ERR_INVALID_INSTANCE_CODE;
     }
     return context->SetMissionLabel(label);
@@ -438,7 +438,7 @@ int32_t FFIAbilityContextRequestDialogService(int64_t id, WantHandle want, int64
 {
     auto context = FFIData::GetData<CJAbilityContext>(id);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null Context");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return ERR_INVALID_INSTANCE_CODE;
     }
     RequestDialogResultTask task = [lambdaId](int32_t resultCode, const AAFwk::Want &resultWant) {

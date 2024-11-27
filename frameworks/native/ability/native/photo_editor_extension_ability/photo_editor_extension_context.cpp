@@ -86,7 +86,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::SaveEditedContent(const std::s
     }
 
     if (packedSize > static_cast<int64_t>(MAX_IMAGE_SIZE)) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Image is bigger than 50M");
+        TAG_LOGE(AAFwkTag::UI_EXT, "image is bigger than 50M");
         panelFile.close();
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_TOO_BIG_ERROR;
     }
@@ -114,7 +114,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
 
     char imagePath[PATH_MAX] = {0};
     if (realpath(imageUri.c_str(), imagePath) == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Realpath error: %{public}d.", errno);
+        TAG_LOGE(AAFwkTag::UI_EXT, "realpath error: %{public}d.", errno);
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_INPUT_ERROR;
     }
 
@@ -129,7 +129,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
     sourceFile.seekg(0, sourceFile.end);
     std::streampos imageSize = sourceFile.tellg();
     if (static_cast<uint64_t>(imageSize) > MAX_IMAGE_SIZE) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Image is bigger than 50M");
+        TAG_LOGE(AAFwkTag::UI_EXT, "image is bigger than 50M");
         sourceFile.close();
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_TOO_BIG_ERROR;
     }

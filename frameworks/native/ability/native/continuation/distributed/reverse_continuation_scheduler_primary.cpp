@@ -35,15 +35,13 @@ void ReverseContinuationSchedulerPrimary::NotifyReplicaTerminated()
     };
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null mainHandler_");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null mainHandler_");
         return;
     }
 
     bool ret = mainHandler_->PostTask(task);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "PostTask error");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "PostTask error");
         return;
     }
 }
@@ -61,15 +59,13 @@ bool ReverseContinuationSchedulerPrimary::ContinuationBack(const AAFwk::Want &wa
     };
 
     if (mainHandler_ == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null mainHandler_");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null mainHandler_");
         return false;
     }
 
     bool ret = mainHandler_->PostTask(task);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "PostTask error");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "PostTask error");
         return false;
     }
     return true;
@@ -80,8 +76,7 @@ void ReverseContinuationSchedulerPrimary::HandlerNotifyReplicaTerminated()
     std::shared_ptr<IReverseContinuationSchedulerPrimaryHandler> continuationHandler = nullptr;
     continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null continuationHandler");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationHandler");
         return;
     }
     continuationHandler->NotifyReplicaTerminated();
@@ -92,8 +87,7 @@ void ReverseContinuationSchedulerPrimary::HandlerContinuationBack(const AAFwk::W
     std::shared_ptr<IReverseContinuationSchedulerPrimaryHandler> continuationHandler = nullptr;
     continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null continuationHandler");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationHandler");
         return;
     }
     continuationHandler->ContinuationBack(want);

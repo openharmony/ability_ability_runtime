@@ -227,22 +227,17 @@ bool ContinuationManager::GetContentInfo(WantParams &wantParams)
 void ContinuationManager::ContinueAbility(bool reversible, const std::string &deviceId)
 {
     if (CheckContinuationIllegal()) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "Ability not available to continueAbility");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ability not available to continueAbility");
         return;
     }
 
     if (progressState_ != ProgressState::INITIAL) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "progressState_: %{public}d",
-            progressState_);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "progressState_: %{public}d", progressState_);
         return;
     }
 
     if (continuationState_ != ContinuationState::LOCAL_RUNNING) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "Current state is %{public}d",
-            continuationState_);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "current state: %{public}d", continuationState_);
         return;
     }
 
@@ -255,22 +250,18 @@ void ContinuationManager::ContinueAbility(bool reversible, const std::string &de
 bool ContinuationManager::ReverseContinueAbility()
 {
     if (progressState_ != ProgressState::INITIAL) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "progressState_ is %{public}d", progressState_);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "progressState_: %{public}d", progressState_);
         return false;
     }
 
     if (continuationState_ != ContinuationState::REMOTE_RUNNING) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "continuationState_ is %{public}d",
-            continuationState_);
+        TAG_LOGE(AAFwkTag::CONTINUATION, "continuation state: %{public}d", continuationState_);
         return false;
     }
 
     std::shared_ptr<ContinuationHandler> continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null continuationHandler_");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationHandler_");
         return false;
     }
 
@@ -326,8 +317,7 @@ void ContinuationManager::NotifyCompleteContinuation(
 void ContinuationManager::CompleteContinuation(int result)
 {
     if (CheckContinuationIllegal()) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "Ability not available to complete continuation");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ability not available to complete continuation");
         return;
     }
 
@@ -391,9 +381,7 @@ bool ContinuationManager::CheckContinuationIllegal()
     }
 
     if (ability->GetState() >= AbilityLifecycleExecutor::LifecycleState::UNINITIALIZED) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "state wrong: %{public}d",
-            ability->GetState());
+        TAG_LOGE(AAFwkTag::CONTINUATION, "state wrong: %{public}d", ability->GetState());
         return true;
     }
     return false;
@@ -409,8 +397,7 @@ bool ContinuationManager::HandleContinueAbility(bool reversible, const std::stri
     sptr<IRemoteObject> continueToken = continueToken_;
     std::shared_ptr<ContinuationHandler> continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "null continuationHandler");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "null continuationHandler");
         return false;
     }
     continuationHandler->SetReversible(reversible);
@@ -451,10 +438,8 @@ void ContinuationManager::RestoreStateWhenTimeout(long timeoutInMs, const Progre
     InitMainHandlerIfNeed();
 
     auto timeoutTask = [continuationManager = shared_from_this(), preState]() {
-        TAG_LOGI(AAFwkTag::CONTINUATION,
-            "preState = %{public}d, currentState = %{public}d",
-            preState,
-            continuationManager->GetProcessState());
+        TAG_LOGI(AAFwkTag::CONTINUATION, "preState = %{public}d, currentState = %{public}d",
+            preState, continuationManager->GetProcessState());
         if (preState == continuationManager->GetProcessState()) {
             continuationManager->ChangeProcessState(ProgressState::INITIAL);
         }
@@ -465,7 +450,7 @@ void ContinuationManager::RestoreStateWhenTimeout(long timeoutInMs, const Progre
 void ContinuationManager::InitMainHandlerIfNeed()
 {
     if (mainHandler_ == nullptr) {
-        TAG_LOGW(AAFwkTag::CONTINUATION, "Try to init main handler");
+        TAG_LOGW(AAFwkTag::CONTINUATION, "null mainHandler");
         std::lock_guard<std::mutex> lock_l(lock_);
         if ((mainHandler_ == nullptr) && (EventRunner::GetMainEventRunner() != nullptr)) {
             mainHandler_ = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
@@ -489,8 +474,7 @@ void ContinuationManager::CheckDmsInterfaceResult(int result, const std::string 
 bool ContinuationManager::DoScheduleStartContinuation()
 {
     if (CheckContinuationIllegal()) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "Ability not available to startContinuation");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ability not available to startContinuation");
         return false;
     }
 
@@ -554,8 +538,7 @@ bool ContinuationManager::DoScheduleRestoreData(const WantParams &restoreData)
 
     bool ret = ability->OnRestoreData(abilityRestoreData);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "Ability restore data failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ability restore data failed");
     }
     return ret;
 }
@@ -576,8 +559,7 @@ bool ContinuationManager::DoRestoreFromRemote(const WantParams &restoreData)
 
     bool ret = ability->OnRestoreData(abilityRestoreData);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::CONTINUATION,
-            "Ability restore data failed");
+        TAG_LOGE(AAFwkTag::CONTINUATION, "ability restore data failed");
     }
     return ret;
 }

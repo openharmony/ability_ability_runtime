@@ -52,7 +52,7 @@ void LocalCallRecord::ClearData()
 void LocalCallRecord::SetRemoteObject(const sptr<IRemoteObject>& call)
 {
     if (call == nullptr) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null object");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null call");
         return;
     }
 
@@ -76,7 +76,7 @@ void LocalCallRecord::SetRemoteObject(const sptr<IRemoteObject>& call,
     sptr<IRemoteObject::DeathRecipient> callRecipient)
 {
     if (call == nullptr) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null object");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null call");
         return;
     }
 
@@ -111,7 +111,7 @@ bool LocalCallRecord::RemoveCaller(const std::shared_ptr<CallerCallBack>& callba
         return true;
     }
 
-    TAG_LOGE(AAFwkTag::LOCAL_CALL, "not find callback");
+    TAG_LOGE(AAFwkTag::LOCAL_CALL, "callback not find");
     return false;
 }
 
@@ -120,7 +120,7 @@ void LocalCallRecord::OnCallStubDied(const wptr<IRemoteObject>& remote)
     TAG_LOGD(AAFwkTag::LOCAL_CALL, "call");
     for (auto& callBack : callers_) {
         if (callBack != nullptr) {
-            TAG_LOGE(AAFwkTag::LOCAL_CALL, "null callBack");
+            TAG_LOGE(AAFwkTag::LOCAL_CALL, "callBack not null");
             callBack->InvokeOnRelease(ON_DIED);
         }
     }
@@ -129,7 +129,7 @@ void LocalCallRecord::OnCallStubDied(const wptr<IRemoteObject>& remote)
 void LocalCallRecord::InvokeCallBack() const
 {
     if (remoteObject_ == nullptr) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null remoteObject_");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null object");
         return;
     }
 
@@ -143,7 +143,7 @@ void LocalCallRecord::InvokeCallBack() const
 void LocalCallRecord::NotifyRemoteStateChanged(int32_t abilityState)
 {
     if (remoteObject_ == nullptr) {
-        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null remoteObject_");
+        TAG_LOGE(AAFwkTag::LOCAL_CALL, "null object");
         return;
     }
     std::string state = "";
