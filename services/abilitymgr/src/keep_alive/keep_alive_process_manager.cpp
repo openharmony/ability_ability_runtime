@@ -103,20 +103,14 @@ int32_t KeepAliveProcessManager::StartAbility(const KeepAliveAbilityInfo &info)
 void KeepAliveProcessManager::AfterStartKeepAliveApp(const AppExecFwk::BundleInfo &bundleInfo,
     const std::string &mainElementName, int32_t userId)
 {
-    uint32_t accessTokenId = 0;
-    MainElementUtils::GetMainUIAbilityAccessTokenId(bundleInfo, mainElementName, accessTokenId);
-    if (accessTokenId == 0) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "invalid accessTokenId, unsetting keep-alive");
-        (void)SetApplicationKeepAlive(bundleInfo.name, userId, false, true);
-        return;
-    }
     bool isCreated = false;
     std::shared_ptr<bool> isCanceled = std::make_shared<bool>(false);
     ffrt::condition_variable taskCv;
     ffrt::mutex taskMutex;
-    ffrt::submit([&isCreated, &taskCv, &taskMutex, isCanceled, accessTokenId,
-        abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance()]() {
-        while (!abilityMgr || !abilityMgr->IsInStatusBar(accessTokenId)) {
+    ffrt::submit([&isCreated, &taskCv, &taskMutex, isCanceled,
+        accessTokenId = bundleInfo.applicationInfo.accessTokenId,
+        uid = bundleInfo.uid, abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance()]() {
+        while (!abilityMgr || !abilityMgr->IsInStatusBar(accessTokenId, uid)) {
             if (!isCanceled || *isCanceled) {
                 TAG_LOGE(AAFwkTag::KEEP_ALIVE, "canceled in the middle");
                 return;
@@ -215,13 +209,7 @@ bool KeepAliveProcessManager::IsRunningAppInStatusBar(std::shared_ptr<AbilityMan
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "bundle has no main uiability");
         return false;
     }
-    uint32_t accessTokenId = 0;
-    MainElementUtils::GetMainUIAbilityAccessTokenId(bundleInfo, mainElementName, accessTokenId);
-    if (accessTokenId == 0) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "cannot get accessTokenId");
-        return false;
-    }
-    return abilityMgr->IsInStatusBar(accessTokenId);
+    return abilityMgr->IsInStatusBar(bundleInfo.applicationInfo.accessTokenId, bundleInfo.uid);
 }
 
 void KeepAliveProcessManager::OnAppStateChanged(const AppInfo &info)

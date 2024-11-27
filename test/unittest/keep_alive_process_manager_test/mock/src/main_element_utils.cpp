@@ -22,7 +22,6 @@ namespace OHOS {
 namespace AAFwk {
 bool MainElementUtils::checkMainUIAbilityResult = false;
 bool MainElementUtils::checkStatusBarAbilityResult = false;
-uint32_t MainElementUtils::accessTokenId_ = 0;
 
 void MainElementUtils::UpdateMainElement(const std::string &bundleName, const std::string &moduleName,
     const std::string &mainElement, bool updateEnable, int32_t userId) {}
@@ -35,12 +34,6 @@ bool MainElementUtils::CheckMainUIAbility(const AppExecFwk::BundleInfo &bundleIn
 bool MainElementUtils::CheckStatusBarAbility(const AppExecFwk::BundleInfo &bundleInfo)
 {
     return checkStatusBarAbilityResult;
-}
-
-void MainElementUtils::GetMainUIAbilityAccessTokenId(const AppExecFwk::BundleInfo &bundleInfo,
-    const std::string &mainElementName, uint32_t &accessTokenId)
-{
-    accessTokenId = accessTokenId_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

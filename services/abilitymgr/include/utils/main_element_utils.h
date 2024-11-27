@@ -69,16 +69,6 @@ public:
      * @return Whether or not the bundle has a status bar ability.
      */
     static bool CheckStatusBarAbility(const AppExecFwk::BundleInfo &bundleInfo);
-
-    /**
-     * GetMainUIAbilityAccessTokenId, get the access token id of the main uiability.
-     *
-     * @param bundleInfo The bundle info.
-     * @param mainElementName The main element name.
-     * @param accessTokenId The returned access token id.
-     */
-    static void GetMainUIAbilityAccessTokenId(const AppExecFwk::BundleInfo &bundleInfo,
-        const std::string &mainElementName, uint32_t &accessTokenId);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -1828,7 +1828,7 @@ public:
     int32_t UpdateKeepAliveEnableState(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable, int32_t userId);
 
-    bool IsInStatusBar(uint32_t accessTokenId);
+    bool IsInStatusBar(uint32_t accessTokenId, int32_t uid);
 
     /**
      * Set keep-alive flag for application under a specific user.
