@@ -1888,7 +1888,6 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
     CHECK_POINTER(abilityRecord);
     for (auto it : terminateAbilityList_) {
         if (it == abilityRecord) {
-            abilityRecord->RevokeUriPermission();
             terminateAbilityList_.remove(it);
             // update inner mission info time
             bool excludeFromMissions = abilityRecord->GetAbilityInfo().excludeFromMissions;
@@ -2316,7 +2315,6 @@ void MissionListManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordId, bool
         return;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability timeout, name:%{public}s", abilityRecord->GetAbilityInfo().name.c_str());
-    abilityRecord->RevokeUriPermission();
 
 #ifdef SUPPORT_SCREEN
     if (abilityRecord->IsStartingWindow()) {

@@ -598,10 +598,6 @@ public:
     void SetColdStartFlag(bool isColdStart);
 #endif
 
-    bool GrantUriPermissionForServiceExtension();
-
-    bool GrantUriPermissionForUIExtension();
-
     /**
      * check whether the ability is launcher.
      *
@@ -1047,7 +1043,6 @@ public:
     void SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack);
     std::shared_ptr<AbilityRecord> GetOtherMissionStackAbilityRecord() const;
     void SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void RevokeUriPermission();
     void RemoveAbilityDeathRecipient() const;
     bool IsExistConnection(const sptr<IAbilityConnection> &connect);
 
@@ -1150,8 +1145,6 @@ private:
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
     void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
-    void GrantDmsUriPermission(Want &want, std::string targetBundleName);
-    bool IsDmsCall(Want &want);
     int32_t GetCurrentAccountId() const;
 
     /**
@@ -1176,13 +1169,6 @@ private:
         callerAccessTokenId_ = callerAccessTokenId;
     }
 
-    bool GrantPermissionToShell(const std::vector<std::string> &uriVec, uint32_t flag, std::string targetPkg);
-
-    void GrantUriPermissionInner(Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName,
-         uint32_t tokenId);
-    void GrantUriPermissionFor2In1Inner(
-        Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName, uint32_t tokenId);
-
     LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
 
     void NotifyMissionBindPid();
@@ -1190,8 +1176,6 @@ private:
     void DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const;
 
     void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
-
-    void PublishFileOpenEvent(const Want &want);
 
     void SetDebugAppByWaitingDebugFlag();
     void AfterLoaded();
@@ -1339,7 +1323,6 @@ private:
     bool coldStart_ = false;
 #endif
 
-    bool isGrantedUriPermission_ = false;
     uint32_t callerAccessTokenId_ = -1;
     bool isNeedBackToOtherMissionStack_ = false;
     std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA
