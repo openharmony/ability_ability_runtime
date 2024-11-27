@@ -2370,7 +2370,7 @@ bool AbilityManagerService::IsDmsAlive() const
     return g_isDmsAlive.load();
 }
 
-void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, int32_t uid)
+void AbilityManagerService::AppUpgradeCompleted(int32_t uid)
 {
     if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not sa call");
@@ -2386,9 +2386,9 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
     }
 
     AppExecFwk::BundleInfo bundleInfo;
-    std::string _bundleName;
+    std::string bundleName;
     int32_t appIndex;
-    if (IN_PROCESS_CALL(bms->GetNameAndIndexForUid(uid, _bundleName, appIndex)) != ERR_OK) {
+    if (IN_PROCESS_CALL(bms->GetNameAndIndexForUid(uid, bundleName, appIndex)) != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed get appIndex for %{public}s", bundleName.c_str());
         return;
     }
@@ -7211,7 +7211,6 @@ void AbilityManagerService::SubscribeScreenUnlockedEvent()
             abilityMgr->RemoveScreenUnlockInterceptor();
             abilityMgr->UnSubscribeScreenUnlockedEvent();
             DelayedSingleton<ResidentProcessManager>::GetInstance()->StartFailedResidentAbilities();
-            KeepAliveProcessManager::GetInstance().StartFailedKeepAliveAbilities();
         };
         taskHandler->SubmitTask(screenUnlockTask, "ScreenUnlockTask");
         auto delayStartAutoStartupAppTask = [abilityManager]() {
