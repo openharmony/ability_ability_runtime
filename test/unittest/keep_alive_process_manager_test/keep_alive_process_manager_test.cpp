@@ -266,7 +266,6 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_008, TestSize.Leve
     MainElementUtils::checkStatusBarAbilityResult = true;
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = true;
-    MainElementUtils::accessTokenId_ = 0;
     auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_NOT_ATTACHED_TO_STATUS_BAR);
     GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetApplicationKeepAlive_008 end";
@@ -298,7 +297,6 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_009, TestSize.Leve
     MainElementUtils::checkStatusBarAbilityResult = true;
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = true;
-    MainElementUtils::accessTokenId_ = 100;
     AbilityManagerService::isInStatusBarResult = false;
     auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
     EXPECT_EQ(result, ERR_NOT_ATTACHED_TO_STATUS_BAR);
@@ -331,7 +329,6 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_010, TestSize.Leve
     MainElementUtils::checkStatusBarAbilityResult = true;
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = true;
-    MainElementUtils::accessTokenId_ = 100;
     AbilityManagerService::isInStatusBarResult = true;
     AbilityKeepAliveService::callSetResult = INNER_ERR;
     auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
@@ -365,7 +362,6 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_011, TestSize.Leve
     MainElementUtils::checkStatusBarAbilityResult = true;
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = true;
-    MainElementUtils::accessTokenId_ = 100;
     AbilityManagerService::isInStatusBarResult = true;
     AbilityKeepAliveService::callSetResult = ERR_OK;
     auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
@@ -454,7 +450,6 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_014, TestSize.Leve
     MainElementUtils::checkStatusBarAbilityResult = true;
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = true;
-    MainElementUtils::accessTokenId_ = 100;
     AbilityManagerService::isInStatusBarResult = true;
     AbilityKeepAliveService::callSetResult = ERR_OK;
     auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
@@ -542,7 +537,6 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_017, TestSize.Leve
     MainElementUtils::checkStatusBarAbilityResult = true;
     AppMgrClient::isAppRunningReturnCode = ERR_OK;
     AppMgrClient::isAppRunningReturnValue = true;
-    MainElementUtils::accessTokenId_ = 100;
     AbilityManagerService::isInStatusBarResult = true;
     AbilityKeepAliveService::callSetResult = ERR_OK;
     auto result = KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, updataEnable, isByEDM);
