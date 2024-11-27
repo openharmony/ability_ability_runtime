@@ -1306,6 +1306,8 @@ int AbilityRecord::TerminateAbility()
             DeleteAbilityRecoverInfo(GetAbilityInfo().applicationInfo.accessTokenId, GetAbilityInfo().moduleName,
             GetAbilityInfo().name);
     }
+    ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::DESTROY_END, GetPid(), GetUid(),
+        0, GetRecordId());
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     eventInfo.errCode = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
     if (eventInfo.errCode != ERR_OK) {
@@ -1635,15 +1637,15 @@ void AbilityRecord::Terminate(const Closure &task)
     if (!IsDebug()) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (handler && task) {
-            if (applicationInfo_.asanEnabled) {
-                int terminateTimeout =
+            int terminateTimeout =
+                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_MULTIPLE;
+            if (abilityInfo_.applicationInfo.asanEnabled) {
+                terminateTimeout =
                     AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_ASANENABLED;
-                handler->SubmitTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
-            } else {
-                int terminateTimeout =
-                    AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_MULTIPLE;
-                handler->SubmitTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
             }
+            handler->SubmitTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
+            ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::DESTROY_BEGIN, GetPid(), GetUid(),
+                terminateTimeout, GetRecordId());
         }
     } else {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Is debug mode, no need to handle time out.");
