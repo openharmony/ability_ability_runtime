@@ -205,7 +205,7 @@ bool UPMSUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int
         TAG_LOGE(AAFwkTag::URIPERMMGR, "bundleMgrClient is nullptr.");
         return false;
     }
-    auto bmsRet = bmsClient->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dirName);
+    auto bmsRet = IN_PROCESS_CALL(bmsClient->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dirName));
     if (bmsRet != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "GetDirByBundleNameAndAppIndex failed, ret:%{public}d", bmsRet);
         return false;
@@ -275,7 +275,7 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
         auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
         if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, bundleInfo, userId))) {
             TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed GetBundleInfo");
-            return GET_BUNDLE_INFO_FAILED;
+            return ERR_GET_TARGET_BUNDLE_INFO_FAILED;
         }
         tokenId = bundleInfo.applicationInfo.accessTokenId;
         return ERR_OK;
@@ -284,14 +284,14 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
         auto bundleFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
         if (IN_PROCESS_CALL(bms->GetCloneBundleInfo(bundleName, bundleFlag, appIndex, bundleInfo, userId)) != ERR_OK) {
             TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed GetCloneBundleInfo");
-            return GET_BUNDLE_INFO_FAILED;
+            return ERR_GET_TARGET_BUNDLE_INFO_FAILED;
         }
         tokenId = bundleInfo.applicationInfo.accessTokenId;
         return ERR_OK;
     }
     if (IN_PROCESS_CALL(bms->GetSandboxBundleInfo(bundleName, appIndex, userId, bundleInfo) != ERR_OK)) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "Failed GetSandboxBundleInfo");
-        return GET_BUNDLE_INFO_FAILED;
+        return ERR_GET_TARGET_BUNDLE_INFO_FAILED;
     }
     tokenId = bundleInfo.applicationInfo.accessTokenId;
     return ERR_OK;

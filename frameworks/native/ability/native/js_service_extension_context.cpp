@@ -233,11 +233,6 @@ private:
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "StartAbility");
-        if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
 
         size_t unwrapArgc = 0;
         AAFwk::Want want;
@@ -397,11 +392,6 @@ private:
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StartAbilityAsCaller");
-        if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
 
         size_t unwrapArgc = 0;
         AAFwk::Want want;
@@ -443,6 +433,7 @@ private:
         AAFwk::Want& want, AAFwk::StartOptions& startOptions, size_t& unwrapArgc) const
     {
         if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return false;
         }
@@ -464,11 +455,6 @@ private:
     napi_value OnStartAbilityByCall(napi_env env, NapiCallbackInfo& info)
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StartAbilityByCall");
-        if (info.argc < ARGC_ONE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
         AAFwk::Want want;
         int32_t accountId = DEFAULT_INVAL_VALUE;
         if (!CheckStartAbilityByCallInputParam(env, info, want, accountId)) {
@@ -510,12 +496,18 @@ private:
     bool CheckStartAbilityByCallInputParam(
         napi_env env, NapiCallbackInfo& info, AAFwk::Want& want, int32_t& accountId)
     {
+        if (info.argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return false;
+        }
+
         if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
             ThrowInvalidParamError(env, "Parse param want failed, must be a Want.");
             return false;
         }
 
-        if (info.argc > static_cast<size_t>(INDEX_ONE)) {
+        if (info.argc > ARGC_ONE) {
             if (CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_number)) {
                 if (!ConvertFromJsValue(env, info.argv[1], accountId)) {
                     TAG_LOGE(AAFwkTag::SERVICE_EXT, "check param accountId failed");
@@ -614,12 +606,8 @@ private:
 
     napi_value OnStartAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "StartAbilityWithAccount");
-        if (info.argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
 
         size_t unwrapArgc = 0;
         AAFwk::Want want;
@@ -662,6 +650,7 @@ private:
         AAFwk::Want& want, int32_t& accountId, size_t& unwrapArgc) const
     {
         if (info.argc < ARGC_TWO) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
             ThrowTooFewParametersError(env);
             return false;
         }
@@ -680,8 +669,34 @@ private:
         return true;
     }
 
+    bool CheckConnectAbilityWithAccountInputParam(
+        napi_env env, NapiCallbackInfo& info,
+        AAFwk::Want& want, int32_t& accountId, sptr<JSServiceExtensionConnection>& connection) const
+    {
+        if (info.argc < ARGC_THREE) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
+            ThrowTooFewParametersError(env);
+            return false;
+        }
+        // Check input want
+        if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
+            ThrowInvalidParamError(env, "Parse param want failed, must be a Want.");
+            return false;
+        }
+        if (!AppExecFwk::UnwrapInt32FromJS2(env, info.argv[INDEX_ONE], accountId)) {
+            ThrowInvalidParamError(env, "Parse param accountId failed, must be a number.");
+            return false;
+        }
+        if (!CheckConnectionParam(env, info.argv[INDEX_TWO], connection, want, accountId)) {
+            ThrowInvalidParamError(env, "Parse param options failed, must be a ConnectOptions.");
+            return false;
+        }
+        return true;
+    }
+
     napi_value OnTerminateAbility(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "TerminateAbility");
         auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
         NapiAsyncTask::ExecuteCallback execute = [weak = context_, innerErrCode]() {
@@ -713,6 +728,7 @@ private:
 
     napi_value OnConnectAbility(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
         // Check params count
         if (info.argc < ARGC_TWO) {
@@ -757,23 +773,13 @@ private:
 
     napi_value OnConnectAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "ConnectAbilityWithAccount");
-        // Check params count
-        if (info.argc < ARGC_THREE) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
         // Unwrap want, accountId and connection
         AAFwk::Want want;
         int32_t accountId = 0;
         sptr<JSServiceExtensionConnection> connection = new JSServiceExtensionConnection(env);
-        size_t unwrapArgc = 0;
-        if (!CheckStartAbilityWithAccountInputParam(env, info, want, accountId, unwrapArgc)) {
-            return CreateJsUndefined(env);
-        }
-        if (!CheckConnectionParam(env, info.argv[INDEX_TWO], connection, want, accountId)) {
-            ThrowInvalidParamError(env, "Parse param options failed, must be a ConnectOptions.");
+        if (!CheckConnectAbilityWithAccountInputParam(env, info, want, accountId, connection)) {
             return CreateJsUndefined(env);
         }
         int64_t connectId = connection->GetConnectionId();
@@ -837,6 +843,7 @@ private:
 
     napi_value OnDisconnectAbility(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
@@ -911,6 +918,7 @@ private:
 
     napi_value OnStartExtensionAbility(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "called");
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
@@ -995,12 +1003,8 @@ private:
 
     napi_value OnStartExtensionAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "called");
-        if (info.argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
         AAFwk::Want want;
         int32_t accountId = -1;
         size_t unwrapArgc = 0;
@@ -1037,6 +1041,7 @@ private:
 
     napi_value OnStopExtensionAbility(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "called");
         if (info.argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
@@ -1078,12 +1083,8 @@ private:
 
     napi_value OnStopExtensionAbilityWithAccount(napi_env env, NapiCallbackInfo& info)
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "called");
-        if (info.argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "invalid argc");
-            ThrowTooFewParametersError(env);
-            return CreateJsUndefined(env);
-        }
         AAFwk::Want want;
         int32_t accountId = -1;
         size_t unwrapArgc = 0;

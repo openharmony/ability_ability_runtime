@@ -24,6 +24,7 @@ namespace AAFwk {
 class FfrtTaskHandlerWrap : public TaskHandlerWrap {
 public:
     virtual ~FfrtTaskHandlerWrap() = default;
+    FfrtTaskHandlerWrap() : TaskHandlerWrap("ffrt") {}
 
 protected:
     std::shared_ptr<InnerTaskHandle> SubmitTaskInner(std::function<void()> &&task,

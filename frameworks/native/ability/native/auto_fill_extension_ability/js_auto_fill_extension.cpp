@@ -83,12 +83,17 @@ napi_value AttachAutoFillExtensionContext(napi_env env, void *value, void *)
 
     auto workContext = new (std::nothrow) std::weak_ptr<AutoFillExtensionContext>(ptr);
     if (workContext != nullptr) {
-        napi_wrap(env, contextObj, workContext,
+        auto status = napi_wrap(env, contextObj, workContext,
             [](napi_env, void *data, void *) {
               TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "Finalizer for weak_ptr ui extension context is called");
               delete static_cast<std::weak_ptr<AutoFillExtensionContext> *>(data);
             },
             nullptr, nullptr);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "wrap ui extension context failed: %{public}d", status);
+            delete workContext;
+            return nullptr;
+        }
     }
 
     return contextObj;
@@ -201,12 +206,16 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
         env, contextObj, DetachCallbackFunc, AttachAutoFillExtensionContext, workContext, nullptr);
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
-    napi_wrap(env, contextObj, workContext,
+    auto status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "Finalizer for weak_ptr ui extension context is called");
             delete static_cast<std::weak_ptr<AutoFillExtensionContext>*>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "wrap ui extension context failed: %{public}d", status);
+        delete workContext;
+    }
 }
 
 void JsAutoFillExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)

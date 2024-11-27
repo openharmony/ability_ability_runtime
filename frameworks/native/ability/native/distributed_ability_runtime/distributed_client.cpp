@@ -213,7 +213,8 @@ ErrCode DistributedClient::NotifyCompleteContinuation(
     return ERR_OK;
 }
 
-int32_t DistributedClient::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag)
+int32_t DistributedClient::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+    int32_t callingUid)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -229,10 +230,11 @@ int32_t DistributedClient::StartSyncRemoteMissions(const std::string& devId, boo
     PARCEL_WRITE_HELPER(data, String16, Str8ToStr16(devId));
     PARCEL_WRITE_HELPER(data, Bool, fixConflict);
     PARCEL_WRITE_HELPER(data, Int64, tag);
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, START_SYNC_MISSIONS, data, reply);
 }
 
-int32_t DistributedClient::StopSyncRemoteMissions(const std::string& devId)
+int32_t DistributedClient::StopSyncRemoteMissions(const std::string& devId, int32_t callingUid)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -245,11 +247,12 @@ int32_t DistributedClient::StopSyncRemoteMissions(const std::string& devId)
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, String16, Str8ToStr16(devId));
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, STOP_SYNC_MISSIONS, data, reply);
 }
 
 int32_t DistributedClient::RegisterMissionListener(const std::u16string& devId,
-    const sptr<IRemoteObject>& obj)
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -263,6 +266,7 @@ int32_t DistributedClient::RegisterMissionListener(const std::u16string& devId,
     }
     PARCEL_WRITE_HELPER(data, String16, devId);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj);
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, REGISTER_MISSION_LISTENER, data, reply);
 }
 
@@ -521,7 +525,8 @@ int32_t DistributedClient::StopRemoteExtensionAbility(const Want &want, int32_t 
     PARCEL_TRANSACT_SYNC_RET_INT(remote, STOP_REMOTE_EXTERNSION_ABILITY, data, reply);
 }
 
-int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state,
+    int32_t callingUid)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -535,6 +540,7 @@ int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFw
     }
     PARCEL_WRITE_HELPER(data, Int32, missionId);
     PARCEL_WRITE_HELPER(data, Int32, static_cast<int32_t>(state));
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, SET_MISSION_CONTINUE_STATE, data, reply);
 }
 }  // namespace AAFwk

@@ -144,45 +144,10 @@ bool AbilityCallerInfo::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteInt32(embedded)) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write embedded failed");
+    if (!DoMarshallingTwo(parcel)) {
         return false;
     }
 
-    if (!parcel.WriteString(callerAppProvisionType)) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write callerAppProvisionType failed");
-        return false;
-    }
-
-    if (!parcel.WriteString(targetAppProvisionType)) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetAppProvisionType failed");
-        return false;
-    }
-
-    if (!parcel.WriteInt32(static_cast<int32_t>(callerExtensionAbilityType))) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write callerExtensionAbilityType failed");
-        return false;
-    }
-
-    if (!parcel.WriteInt32(static_cast<int32_t>(targetAbilityType))) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetAbilityType failed");
-        return false;
-    }
-
-    if (!parcel.WriteInt32(static_cast<int32_t>(targetExtensionAbilityType))) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetExtensionAbilityType failed");
-        return false;
-    }
-
-    if (!parcel.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write userId failed");
-        return false;
-    }
-
-    if (!parcel.WriteInt32(targetApplicationReservedFlag)) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetApplicationReservedFlag failed");
-        return false;
-    }
     return true;
 }
 
@@ -241,6 +206,56 @@ bool AbilityCallerInfo::DoMarshallingOne(Parcel &parcel) const
     return true;
 }
 
+bool AbilityCallerInfo::DoMarshallingTwo(Parcel &parcel) const
+{
+    if (!parcel.WriteInt32(embedded)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write embedded failed");
+        return false;
+    }
+
+    if (!parcel.WriteString(callerAppProvisionType)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write callerAppProvisionType failed");
+        return false;
+    }
+
+    if (!parcel.WriteString(targetAppProvisionType)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetAppProvisionType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(callerExtensionAbilityType))) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write callerExtensionAbilityType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(targetAbilityType))) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetAbilityType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(targetExtensionAbilityType))) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetExtensionAbilityType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write userId failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(targetApplicationReservedFlag)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetApplicationReservedFlag failed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(isAsCaller)) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write isAsCaller failed");
+        return false;
+    }
+
+    return true;
+}
+
 std::string AbilityCallerInfo::ToString() const
 {
     std::string str = "CallerInfo{packageName:" + packageName + ",uid:" + std::to_string(uid) +
@@ -253,7 +268,8 @@ std::string AbilityCallerInfo::ToString() const
         std::to_string(embedded) + ",callerAppProvisionType:" + callerAppProvisionType + ",targetAppProvisionType:" +
         targetAppProvisionType + ",targetAbilityType:" +
         std::to_string(static_cast<int32_t>(targetAbilityType)) + ",targetExtensionAbilityType:" +
-        std::to_string(static_cast<int32_t>(targetExtensionAbilityType)) + "}";
+        std::to_string(static_cast<int32_t>(targetExtensionAbilityType)) + ",isAsCaller:" +
+        std::to_string(static_cast<int32_t>(isAsCaller)) + "}";
     return str;
 }
 } // namespace EcologicalRuleMgrService

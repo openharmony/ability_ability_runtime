@@ -52,8 +52,9 @@ constexpr const char* ERROR_MSG_FREE_INSTALL_TIMEOUT = "Installation-free timed 
 constexpr const char* ERROR_MSG_FREE_INSTALL_OTHERS = "Installation-free is not allowed for other applications.";
 constexpr const char* ERROR_MSG_FREE_INSTALL_CROSS_DEVICE = "Cross-device installation-free is not supported.";
 constexpr const char* ERROR_MSG_INVALID_URI_FLAG = "Invalid URI flag.";
-constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Invalid URI type, only support file Uri.";
+constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Only support file URI.";
 constexpr const char* ERROR_MSG_GRANT_URI_PERMISSION = "A sandbox application cannot grant URI permission.";
+constexpr const char* ERROR_MSG_GET_BUNDLE_INFO_FAILED = "Get target application info failed.";
 constexpr const char* ERROR_MSG_OPERATION_NOT_SUPPORTED = "Operation not supported.";
 constexpr const char* ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND =
     "The number of child processes exceeds the upper limit.";
@@ -76,6 +77,9 @@ constexpr const char* ERROR_MSG_NOT_SUPPORT_CROSS_APP_START =
     "Redirection to a third-party application is not allowed in API version 11 or later.";
 constexpr const char* ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT = "No matching ability is found.";
 constexpr const char* ERROR_MSG_TARGET_BUNDLE_NOT_EXIST = "The bundle does not exist or no patch has been applied.";
+constexpr const char* ERROR_MSG_NO_MAIN_ABILITY = "The target bundle has no main ability.";
+constexpr const char* ERROR_MSG_NO_STATUS_BAR_ABILITY = "The target app has no status-bar ability.";
+constexpr const char* ERROR_MSG_NOT_ATTACHED_TO_STATUS_BAR = "The target app is not attached to a status bar.";
 constexpr const char* ERROR_MSG_NO_RESIDENT_PERMISSION =
     "The caller application can only set the resident status of the configured process.";
 constexpr const char* ERROR_MSG_MULTI_APP_NOT_SUPPORTED = "App clone or multi-instance is not supported.";
@@ -95,6 +99,7 @@ constexpr const char* ERROR_MSG_INVALID_APP_INSTANCE_KEY = "The app instance key
 constexpr const char* ERROR_MSG_UPPER_LIMIT = "The number of app instances reaches the limit.";
 constexpr const char* ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT = "The APP_INSTANCE_KEY cannot be specified.";
 constexpr const char* ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT = "Creating a new instance is not supported.";
+constexpr const char* ERROR_MSG_UI_ABILITY_IS_STARTING = "The UIAbility is in starting state.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -129,6 +134,7 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG, ERROR_MSG_INVALID_URI_FLAG },
     { AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE, ERROR_MSG_INVALID_URI_TYPE },
     { AbilityErrorCode::ERROR_CODE_GRANT_URI_PERMISSION, ERROR_MSG_GRANT_URI_PERMISSION },
+    { AbilityErrorCode::ERROR_CODE_GET_BUNFLE_INFO_FAILED, ERROR_MSG_GET_BUNDLE_INFO_FAILED},
     { AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED, ERROR_MSG_OPERATION_NOT_SUPPORTED },
     { AbilityErrorCode::ERROR_CODE_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND,
         ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND },
@@ -146,6 +152,9 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_CROSS_APP_START, ERROR_MSG_NOT_SUPPORT_CROSS_APP_START },
     { AbilityErrorCode::ERROR_CODE_CANNOT_MATCH_ANY_COMPONENT, ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT },
     { AbilityErrorCode::ERROR_CODE_TARGET_BUNDLE_NOT_EXIST, ERROR_MSG_TARGET_BUNDLE_NOT_EXIST },
+    { AbilityErrorCode::ERROR_CODE_NO_MAIN_ABILITY, ERROR_MSG_NO_MAIN_ABILITY },
+    { AbilityErrorCode::ERROR_CODE_NO_STATUS_BAR_ABILITY, ERROR_MSG_NO_STATUS_BAR_ABILITY },
+    { AbilityErrorCode::ERROR_CODE_NOT_ATTACHED_TO_STATUS_BAR, ERROR_MSG_NOT_ATTACHED_TO_STATUS_BAR },
     { AbilityErrorCode::ERROR_CODE_NO_RESIDENT_PERMISSION, ERROR_MSG_NO_RESIDENT_PERMISSION },
     { AbilityErrorCode::ERROR_CODE_MULTI_APP_NOT_SUPPORTED, ERROR_MSG_MULTI_APP_NOT_SUPPORTED },
     { AbilityErrorCode::ERROR_NOT_APP_CLONE, ERROR_MSG_NOT_APP_CLONE },
@@ -162,6 +171,7 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_UPPER_LIMIT, ERROR_MSG_UPPER_LIMIT },
     { AbilityErrorCode::ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT, ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT },
     { AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT, ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT },
+    { AbilityErrorCode::ERROR_CODE_UI_ABILITY_IS_STARTING, ERROR_MSG_UI_ABILITY_IS_STARTING},
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -183,6 +193,7 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_CODE_INVALID_URI_FLAG, AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG},
     {ERR_CODE_INVALID_URI_TYPE, AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE},
     {ERR_CODE_GRANT_URI_PERMISSION, AbilityErrorCode::ERROR_CODE_GRANT_URI_PERMISSION},
+    {ERR_GET_TARGET_BUNDLE_INFO_FAILED, AbilityErrorCode::ERROR_CODE_GET_BUNFLE_INFO_FAILED},
     {ERR_NOT_SELF_APPLICATION, AbilityErrorCode::ERROR_NOT_SELF_APPLICATION},
     // Installation-free error code transfer
     {HAP_PACKAGE_DOWNLOAD_TIMED_OUT, AbilityErrorCode::ERROR_CODE_NETWORK_ABNORMAL},
@@ -216,6 +227,9 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_INVALID_ID},
     {ERR_START_OTHER_APP_FAILED, AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_CROSS_APP_START},
     {ERR_TARGET_BUNDLE_NOT_EXIST, AbilityErrorCode::ERROR_CODE_TARGET_BUNDLE_NOT_EXIST},
+    {ERR_NO_MAIN_ABILITY, AbilityErrorCode::ERROR_CODE_NO_MAIN_ABILITY},
+    {ERR_NO_STATUS_BAR_ABILITY, AbilityErrorCode::ERROR_CODE_NO_STATUS_BAR_ABILITY},
+    {ERR_NOT_ATTACHED_TO_STATUS_BAR, AbilityErrorCode::ERROR_CODE_NOT_ATTACHED_TO_STATUS_BAR},
     {ERR_NO_RESIDENT_PERMISSION, AbilityErrorCode::ERROR_CODE_NO_RESIDENT_PERMISSION},
     {ERR_MULTI_APP_NOT_SUPPORTED, AbilityErrorCode::ERROR_CODE_MULTI_APP_NOT_SUPPORTED},
     {ERR_APP_CLONE_INDEX_INVALID, AbilityErrorCode::ERROR_APP_CLONE_INDEX_INVALID},
@@ -232,6 +246,7 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_UPPER_LIMIT, AbilityErrorCode::ERROR_CODE_UPPER_LIMIT},
     {ERR_APP_INSTANCE_KEY_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORT},
     {ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT, AbilityErrorCode::ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT},
+    {ERR_UI_ABILITY_IS_STARTING, AbilityErrorCode::ERROR_CODE_UI_ABILITY_IS_STARTING},
 };
 }
 

@@ -61,6 +61,7 @@ ohos_unittest("ability_manager_service_third_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:perm_verification",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -91,6 +92,10 @@ ohos_unittest("ability_manager_service_third_test") {
       "window_manager:libwsutils",
       "window_manager:scene_session",
     ]
+  }
+  if (ability_runtime_feature_sandboxmanager) {
+    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
   cflags_cc = []
   if (os_dlp_part_enabled) {

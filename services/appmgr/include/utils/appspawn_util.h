@@ -19,12 +19,17 @@
 #include "ability_info.h"
 #include "app_spawn_client.h"
 #include "global_constant.h"
+#include "hitrace_meter.h"
 #include "want.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 namespace AppspawnUtil {
 constexpr const char* DLP_PARAMS_INDEX = "ohos.dlp.params.index";
+constexpr const char*
+    JIT_PERMISSION_ALLOW_WRITABLE_CODE_MEMORY = "ohos.permission.kernel.ALLOW_WRITABLE_CODE_MEMORY";
+constexpr const char*
+    JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION = "ohos.permission.kernel.DISABLE_CODE_MEMORY_PROTECTION";
 
 static uint32_t BuildStartFlags(const AAFwk::Want &want, const ApplicationInfo &applicationInfo)
 {
@@ -83,6 +88,23 @@ static uint32_t BuildStartFlags(const AAFwk::Want &want, const AbilityInfo &abil
     }
 
     return startFlags;
+}
+
+static void SetJITPermissions(uint32_t accessTokenId, JITPermissionsList &jitPermissionsList)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        accessTokenId,
+        JIT_PERMISSION_ALLOW_WRITABLE_CODE_MEMORY,
+        false) == Security::AccessToken::PERMISSION_GRANTED) {
+        jitPermissionsList.emplace_back(JIT_PERMISSION_ALLOW_WRITABLE_CODE_MEMORY);
+    }
+    if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        accessTokenId,
+        JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION,
+        false) == Security::AccessToken::PERMISSION_GRANTED) {
+        jitPermissionsList.emplace_back(JIT_PERMISSION_DISABLE_CODE_MEMORY_PROTECTION);
+    }
 }
 }  // namespace AppspawnUtil
 }  // namespace AppExecFwk

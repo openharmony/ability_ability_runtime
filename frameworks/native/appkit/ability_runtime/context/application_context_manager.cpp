@@ -57,6 +57,7 @@ void ApplicationContextManager::AddGlobalObject(napi_env env,
     auto ret = napi_add_env_cleanup_hook(env, HandleClean, static_cast<void*>(envData));
     if (ret != napi_status::napi_ok) {
         TAG_LOGE(AAFwkTag::APPKIT, "add hook err");
+        return;
     }
     std::lock_guard<std::mutex> lock(applicationContextMutex_);
     auto iter = applicationContextMap_.find(env);

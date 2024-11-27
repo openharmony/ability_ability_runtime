@@ -19,6 +19,7 @@
 namespace OHOS::AbilityRuntime {
 namespace ServerConstant {
 constexpr const char* DLP_INDEX = "ohos.dlp.params.index";
+constexpr const char* IS_CALL_BY_SCB = "isCallBySCB";
 }  // namespace ServerConstant
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_SERVER_CONSTANT_H

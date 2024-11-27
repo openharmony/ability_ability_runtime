@@ -978,10 +978,9 @@ HWTEST_F(ApplicationContextTest, SetApplicationInfo_0100, TestSize.Level1)
 HWTEST_F(ApplicationContextTest, SetColorMode_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SetColorMode_0100 start";
-    EXPECT_NE(context_, nullptr);
     int32_t colorMode = 1;
     context_->SetColorMode(colorMode);
-    EXPECT_EQ(colorMode, 1);
+    EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "SetColorMode_0100 end";
 }
 

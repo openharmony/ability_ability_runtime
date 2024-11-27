@@ -33,6 +33,7 @@ constexpr const char* UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
 constexpr const char* SUPPORT_CLOSE_ON_BLUR = "supportCloseOnBlur";
 constexpr const char* DIALOG_SESSION_ID = "dialogSessionId";
+constexpr const char* PICKER_ERMS_POLICY = "ability.params.picker.erms.policy";
 }
 
 DialogSessionManager &DialogSessionManager::GetInstance()
@@ -220,6 +221,10 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
     if (want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
         int32_t appIndex = want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
         targetWant.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+    }
+    targetWant.RemoveParam(PICKER_ERMS_POLICY);
+    if (want.HasParameter(PICKER_ERMS_POLICY)) {
+        targetWant.SetParam(PICKER_ERMS_POLICY, want.GetParams().GetIntParam(PICKER_ERMS_POLICY, 1));
     }
     if (!targetWant.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
         targetWant.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);

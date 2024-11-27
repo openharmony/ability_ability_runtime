@@ -38,6 +38,10 @@ constexpr const char* VERSION_PREFIX = "v";
 constexpr const char* APPSPAWN_CLIENT_USER_NAME = "APP_MANAGER_SERVICE";
 constexpr int32_t RIGHT_SHIFT_STEP = 1;
 constexpr int32_t START_FLAG_TEST_NUM = 1;
+constexpr const char* JITPERMISSIONSLIST_NAME = "name";
+constexpr const char* JITPERMISSIONSLIST_NAME_VALUE = "JITPermissions";
+constexpr const char* JITPERMISSIONSLIST_COUNT = "ohos.encaps.count";
+constexpr const char* JITPERMISSIONSLIST_PERMISSIONS_NAME = "permissions";
 }
 AppSpawnClient::AppSpawnClient(bool isNWebSpawn)
 {
@@ -154,13 +158,15 @@ static std::string DumpAppEnvToJson(const std::map<std::string, std::string> &ap
     return appEnvJson.dump();
 }
 
-static std::string DumpExtensionSandboxDirsToJson(const std::map<std::string, std::string> &extensionSandboxDirs)
+static std::string DumpJITPermissionListToJson(const JITPermissionsList &jitPermissionsList)
 {
-    nlohmann::json extensionSandboxDirsJson;
-    for (auto &[userId, sandboxDir] : extensionSandboxDirs) {
-        extensionSandboxDirsJson[userId] = sandboxDir;
+    nlohmann::json jitPermissionsListJson;
+    jitPermissionsListJson[JITPERMISSIONSLIST_NAME] = JITPERMISSIONSLIST_NAME_VALUE;
+    jitPermissionsListJson[JITPERMISSIONSLIST_COUNT] = jitPermissionsList.size();
+    for (auto& jitPermission : jitPermissionsList) {
+        jitPermissionsListJson[JITPERMISSIONSLIST_PERMISSIONS_NAME].emplace_back(jitPermission);
     }
-    return extensionSandboxDirsJson.dump();
+    return jitPermissionsListJson.dump();
 }
 
 int32_t AppSpawnClient::SetDacInfo(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle)
@@ -348,6 +354,16 @@ int32_t AppSpawnClient::AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, 
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
         }
+    }
+
+    if (!startMsg.jitPermissionsList.empty()) {
+        std::string jitPermissionsStr = DumpJITPermissionListToJson(startMsg.jitPermissionsList);
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_JIT_PERMISSIONS, jitPermissionsStr.c_str());
+        if (ret) {
+            TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
+            return ret;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "Send JIT Permission: %{public}s", jitPermissionsStr.c_str());
     }
 
     return ret;

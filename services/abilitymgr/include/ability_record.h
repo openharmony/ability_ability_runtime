@@ -162,6 +162,7 @@ public:
     int32_t callerUid = 0;
     int32_t callerPid = 0;
     std::string callerNativeName;
+    int32_t callerAppCloneIndex = 0;
 };
 
 /**
@@ -261,6 +262,7 @@ struct AbilityRequest {
     uint32_t callerAccessTokenId = -1;
     sptr<IAbilityConnection> connect = nullptr;
 
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
     std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<ProcessOptions> processOptions = nullptr;
     std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
@@ -271,12 +273,14 @@ struct AbilityRequest {
 
     AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
     AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
+    std::string customProcess;
 
     sptr<SessionInfo> sessionInfo;
     uint32_t specifyTokenId = 0;
     bool uriReservedFlag = false;
     std::string reservedBundleName;
     bool isFromIcon = false;
+    bool isShellCall = false;
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -400,7 +404,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int LoadAbility();
+    int LoadAbility(bool isShellCall = false);
 
     /**
      * foreground the ability.
@@ -413,7 +417,7 @@ public:
      * process request of foregrounding the ability.
      *
      */
-    void ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag = 0);
+    void ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false);
 
      /**
      * post foreground timeout task for ui ability.
@@ -549,8 +553,6 @@ public:
      * @return true : ready ,false: not ready
      */
     bool IsReady() const;
-    void SetLoadState(AbilityLoadState loadState);
-    AbilityLoadState GetLoadState() const;
 
     void UpdateRecoveryInfo(bool hasRecoverInfo);
 
@@ -833,6 +835,10 @@ public:
      */
     bool IsConnectListEmpty();
 
+    size_t GetConnectedListSize();
+
+    size_t GetConnectingListSize();
+
     void RemoveCallerRequestCode(std::shared_ptr<AbilityRecord> callerAbilityRecord, int32_t requestCode);
 
     /**
@@ -974,6 +980,8 @@ public:
     void SetRestartTime(const int64_t restartTime);
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
+    void SetWantAppIndex(const int32_t appIndex);
+    int32_t GetWantAppIndex() const;
     bool IsRestarting() const;
     void SetAppState(const AppState &state);
     AppState GetAppState() const;
@@ -1006,6 +1014,8 @@ public:
     void SetStartToBackground(const bool flag);
     bool IsStartToForeground() const;
     void SetStartToForeground(const bool flag);
+    bool IsCallerSetProcess() const;
+    void SetCallerSetProcess(const bool flag);
     void SetSessionInfo(sptr<SessionInfo> sessionInfo);
     void UpdateSessionInfo(sptr<IRemoteObject> sessionToken);
     void SetMinimizeReason(bool fromUser);
@@ -1075,6 +1085,10 @@ public:
 
     std::string GetProcessName() const;
 
+    void SetCustomProcessFlag(const std::string &process);
+
+    std::string GetCustomProcessFlag() const;
+
     void SetURI(const std::string &uri);
     std::string GetURI() const;
 
@@ -1098,6 +1112,8 @@ public:
 
     void UpdateDmsCallerInfo(Want &want);
 
+    void SetDebugUIExtension();
+
     inline std::string GetInstanceKey() const
     {
         return instanceKey_;
@@ -1116,16 +1132,6 @@ public:
     bool GetSecurityFlag() const
     {
         return securityFlag_;
-    }
-
-    FreezeStrategy GetFreezeStrategy() const
-    {
-        return freezeStrategy_;
-    }
-
-    void SetFreezeStrategy(FreezeStrategy value)
-    {
-        freezeStrategy_ = value;
     }
 
 protected:
@@ -1240,7 +1246,7 @@ private:
     std::weak_ptr<AbilityRecord> nextAbilityRecord_ = {};  // ability that started by this ability
     int64_t startTime_ = 0;                           // records first time of ability start
     int64_t restartTime_ = 0;                         // the time of last trying restart
-    std::atomic<AbilityLoadState> loadState_ = AbilityLoadState::INIT;  // ability thread attach state
+    bool isReady_ = false;                            // is ability thread attached?
     bool isWindowStarted_ = false;                     // is window hotstart or coldstart?
     bool isWindowAttached_ = false;                   // Is window of this ability attached?
     bool isLauncherAbility_ = false;                  // is launcher?
@@ -1297,6 +1303,8 @@ private:
     bool isStartedByCall_ = false;
     bool isStartToBackground_ = false;
     bool isStartToForeground_ = false;
+    std::atomic_bool isCallerSetProcess_ = false;
+    std::string customProcessFlag_ = "";
     int32_t appIndex_ = 0;
     bool minimizeReason_ = false;
 
@@ -1354,7 +1362,6 @@ private:
     LaunchDebugInfo launchDebugInfo_;
     std::string instanceKey_ = "";
     bool securityFlag_ = false;
-    std::atomic<FreezeStrategy> freezeStrategy_{FreezeStrategy::NOTIFY_FREEZE_MGR};
 };
 }  // namespace AAFwk
 }  // namespace OHOS

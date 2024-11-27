@@ -37,6 +37,7 @@
 #include "app_record_id.h"
 #include "child_process_record.h"
 #include "fault_data.h"
+#include "fd_guard.h"
 #include "profile.h"
 #include "priority_object.h"
 #include "app_lifecycle_deal.h"
@@ -50,9 +51,11 @@ namespace Rosen {
 class WindowVisibilityInfo;
 }
 namespace AppExecFwk {
+using AAFwk::FdGuard;
 class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
+class AppRunningManager;
 
 class MultiUserConfigurationMgr {
 public:
@@ -71,15 +74,15 @@ private:
  */
 class RenderRecord {
 public:
-    RenderRecord(pid_t hostPid, const std::string &renderParam, int32_t ipcFd,
-                 int32_t sharedFd, int32_t crashFd,
+    RenderRecord(pid_t hostPid, const std::string &renderParam,
+                 FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
                  const std::shared_ptr<AppRunningRecord> &host);
 
     virtual ~RenderRecord();
 
     static std::shared_ptr<RenderRecord>
     CreateRenderRecord(pid_t hostPid, const std::string &renderParam,
-                       int32_t ipcFd, int32_t sharedFd, int32_t crashFd,
+                       FdGuard &&ipcFd, FdGuard &&sharedFd, FdGuard &&crashFd,
                        const std::shared_ptr<AppRunningRecord> &host);
 
     void SetPid(pid_t pid);
@@ -116,9 +119,9 @@ private:
     std::string hostBundleName_;
     std::string renderParam_;
     std::string processName_;
-    int32_t ipcFd_ = 0;
-    int32_t sharedFd_ = 0;
-    int32_t crashFd_ = 0;
+    FdGuard ipcFd_;
+    FdGuard sharedFd_;
+    FdGuard crashFd_;
     int32_t state_ = 0;
     ProcessType processType_ = ProcessType::RENDER;
     std::weak_ptr<AppRunningRecord> host_; // nweb host
@@ -226,6 +229,20 @@ public:
     void SetSpecifiedProcessFlag(const std::string &flag);
 
     /**
+     * @brief Obtains the the flag of custom process.
+     *
+     * @return Returns the the flag of custom process.
+     */
+    const std::string &GetCustomProcessFlag() const;
+
+    /**
+     * @brief Setting the the flag of custom process.
+     *
+     * @param flag, the the flag of custom process.
+     */
+    void SetCustomProcessFlag(const std::string &flag);
+
+    /**
      * @brief Obtains the sign code.
      *
      * @return Returns the sign code.
@@ -266,6 +283,13 @@ public:
      * @param state, the application uid.
      */
     void SetUid(const int32_t uid);
+
+    /**
+     * @brief Obtains the application userid.
+     *
+     * @return Returns the application userid.
+     */
+    int32_t GetUserId() const;
 
     // Get current state for this process
 
@@ -568,7 +592,7 @@ public:
      * @brief indicates one process will go dying.
      * Then the process won't be reused.
      */
-    void SetTerminating();
+    void SetTerminating(std::shared_ptr<AppRunningManager> appRunningMgr);
 
     /**
      * @brief Whether the process is dying.
@@ -579,6 +603,11 @@ public:
      * @brief Whether the process should keep alive.
      */
     bool IsKeepAliveApp() const;
+
+    /**
+     * @brief Whether the process is non-resident keep-alive.
+     */
+    bool IsKeepAliveDkv() const;
 
     /**
      * @brief Whether the process can keep empty alive.
@@ -605,6 +634,14 @@ public:
      * @param isKeepAliveEnable new value
      */
     void SetKeepAliveEnableState(bool isKeepAliveEnable);
+
+    /**
+     * @brief A process can be configured non-resident keep-alive.
+     * when one process started, this method will be called from ability mgr with data selected from db.
+     *
+     * @param isKeepAliveDkv new value
+     */
+    void SetKeepAliveDkv(bool isKeepAliveDkv);
 
     /**
      * @brief roughly considered as a value from the process's bundle info.
@@ -849,6 +886,10 @@ public:
 
     bool IsPreloaded() const;
 
+    void SetPreloadMode(PreloadMode mode);
+
+    PreloadMode GetPreloadMode();
+
     /**
      * @brief Obtains the app record assign tokenId.
      *
@@ -912,6 +953,7 @@ public:
     bool GetIsGPU();
     void SetGPUPid(pid_t gpuPid);
     pid_t GetGPUPid();
+    pid_t GetPid();
 
     inline void SetStrictMode(bool strictMode)
     {
@@ -939,6 +981,9 @@ public:
     void SetProcessCaching(bool isCaching);
     bool IsCaching();
     void SetNeedPreloadModule(bool isNeedPreloadModule);
+    bool GetNeedPreloadModule();
+    void SetNeedLimitPrio(bool isNeedLimitPrio);
+    bool GetNeedLimitPrio();
 
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
@@ -982,7 +1027,25 @@ public:
         return delayConfiguration_;
     }
 
+    inline void SetKillReason(std::string killReason)
+    {
+        killReason_ = killReason;
+    }
+
+    inline std::string GetKillReason() const
+    {
+        return killReason_;
+    }
+
     void AddAppLifecycleEvent(const std::string &msg);
+
+    void SetNWebPreload(const bool isAllowedNWebPreload);
+
+    void SetIsUnSetPermission(bool isUnSetPermission);
+
+    bool IsUnSetPermission();
+    
+    void UnSetPolicy();
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1027,10 +1090,12 @@ private:
             return reinterpret_cast<size_t>(remoteObj.GetRefPtr());
         }
     };
+    bool IsWindowIdsEmpty();
 
     bool isKeepAliveRdb_ = false;  // Only resident processes can be set to true, please choose carefully
     bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
+    bool isKeepAliveDkv_ = false; // Only non-resident keep-alive processes can be set to true, please choose carefully
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
     bool isStageBasedModel_ = false;
@@ -1048,6 +1113,7 @@ private:
     int32_t appRecordId_ = 0;
     std::string processName_;  // the name of this process
     std::string specifiedProcessFlag_; // the flag of specified Process
+    std::string customProcessFlag_; // the flag of custom process
     std::unordered_set<sptr<IRemoteObject>, RemoteObjHash> foregroundingAbilityTokens_;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
     sptr<AppDeathRecipient> appDeathRecipient_ = nullptr;
@@ -1085,6 +1151,7 @@ private:
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
     bool jitEnabled_ = false;
     PreloadState preloadState_ = PreloadState::NONE;
+    PreloadMode preloadMode_ = PreloadMode::PRESS_DOWN;
     int32_t exitReason_ = 0;
     std::string exitMsg_ = "";
 
@@ -1117,6 +1184,7 @@ private:
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
 
     std::set<uint32_t> windowIds_;
+    ffrt::mutex windowIdsLock_;
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
     ffrt::mutex childProcessRecordMapLock_;
 
@@ -1138,7 +1206,11 @@ private:
     bool hasUIAbilityLaunched_ = false;
     bool isKia_ = false;
     bool isNeedPreloadModule_ = false;
+    bool isNeedLimitPrio_ = false;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
+    bool isAllowedNWebPreload_ = false;
+    bool isUnSetPermission_ = false;
+    std::string killReason_ = "";
 };
 
 }  // namespace AppExecFwk

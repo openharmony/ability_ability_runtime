@@ -37,9 +37,10 @@
 #include "iability_controller.h"
 #include "iability_manager_collaborator.h"
 #include "iacquire_share_data_callback_interface.h"
-#include "insight_intent_execute_param.h"
-#include "insight_intent_execute_result.h"
+#include "insight_intent/insight_intent_execute_param.h"
+#include "insight_intent/insight_intent_execute_result.h"
 #include "iprepare_terminate_callback_interface.h"
+#include "keep_alive_info.h"
 #include "mission_info.h"
 #include "mission_listener_interface.h"
 #include "mission_snapshot.h"
@@ -51,9 +52,9 @@
 #include "start_options.h"
 #include "user_callback.h"
 #include "system_memory_attr.h"
-#include "ui_extension_ability_connect_info.h"
-#include "ui_extension_host_info.h"
-#include "ui_extension_session_info.h"
+#include "ui_extension/ui_extension_ability_connect_info.h"
+#include "ui_extension/ui_extension_host_info.h"
+#include "ui_extension/ui_extension_session_info.h"
 #include "ui_extension_window_command.h"
 #include "uri.h"
 #include "want.h"
@@ -73,6 +74,7 @@ class IStatusBarDelegate;
 }
 
 namespace AAFwk {
+using KeepAliveInfo = AbilityRuntime::KeepAliveInfo;
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
 using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
@@ -497,6 +499,17 @@ public:
     }
 
     /**
+     * CloseUIExtensionAbilityBySCB, terminate the specified ui extension ability by SCB.
+     *
+     * @param token the ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int CloseUIExtensionAbilityBySCB(const sptr<IRemoteObject> token)
+    {
+        return 0;
+    }
+
+    /**
      *  CloseUIAbilityBySCB, close the special ability by scb.
      *
      * @param sessionInfo the session info of the ability to terminate.
@@ -760,7 +773,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = false) = 0;
+    virtual int KillProcess(const std::string &bundleName, bool clearPageStack = false, int32_t appIndex = 0) = 0;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -1892,6 +1905,54 @@ public:
      */
     virtual int32_t UpdateAssociateConfigList(const std::map<std::string, std::list<std::string>>& configs,
         const std::list<std::string>& exportConfigs, int32_t flag)
+    {
+        return 0;
+    }
+
+    /**
+     * Set keep-alive flag for application under a specific user.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAlive(const std::string &bundleName, int32_t userId, bool flag)
+    {
+        return 0;
+    }
+
+    /**
+     * Get keep-alive applications.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplications(int32_t appType, int32_t userId, std::vector<KeepAliveInfo> &list)
+    {
+        return 0;
+    }
+
+    /**
+     * Set keep-alive flag for application under a specific user by EDM.
+     * @param bundleName Bundle name.
+     * @param userId User Id.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag)
+    {
+        return 0;
+    }
+
+    /**
+     * Get keep-alive applications by EDM.
+     * @param appType Application type.
+     * @param userId User Id.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveApplicationsByEDM(int32_t appType, int32_t userId, std::vector<KeepAliveInfo> &list)
     {
         return 0;
     }

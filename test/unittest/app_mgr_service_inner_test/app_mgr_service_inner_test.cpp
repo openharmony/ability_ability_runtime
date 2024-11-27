@@ -21,8 +21,10 @@
 #include "remote_client_manager.h"
 #undef private
 #include "ability_manager_errors.h"
+#include "accesstoken_kit.h"
 #include "app_scheduler.h"
 #include "appspawn_util.h"
+#include "app_spawn_client.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
@@ -469,10 +471,10 @@ HWTEST_F(AppMgrServiceInnerTest, MakeProcessName_001, TestSize.Level0)
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.moduleName = "module789";
     std::string processName = "test_processName";
-    appMgrServiceInner->MakeProcessName(nullptr, nullptr, hapModuleInfo, 1, "", processName);
-    appMgrServiceInner->MakeProcessName(nullptr, applicationInfo_, hapModuleInfo, 1, "", processName);
-    appMgrServiceInner->MakeProcessName(abilityInfo_, nullptr, hapModuleInfo, 1, "", processName);
-    appMgrServiceInner->MakeProcessName(abilityInfo_, applicationInfo_, hapModuleInfo, 1, "", processName);
+    appMgrServiceInner->MakeProcessName(nullptr, nullptr, hapModuleInfo, 1, "", processName, false);
+    appMgrServiceInner->MakeProcessName(nullptr, applicationInfo_, hapModuleInfo, 1, "", processName, false);
+    appMgrServiceInner->MakeProcessName(abilityInfo_, nullptr, hapModuleInfo, 1, "", processName, false);
+    appMgrServiceInner->MakeProcessName(abilityInfo_, applicationInfo_, hapModuleInfo, 1, "", processName, false);
 
     EXPECT_NE(appMgrServiceInner, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "MakeProcessName_001 end");
@@ -595,17 +597,21 @@ HWTEST_F(AppMgrServiceInnerTest, LaunchApplication_001, TestSize.Level0)
 
     appRecord->SetEmptyKeepAliveAppState(true);
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appMgrServiceInner->LaunchApplication(appRecord);
 
     appRecord->SetKeepAliveEnableState(true);
+    appRecord->SetKeepAliveDkv(true);
     appRecord->SetEmptyKeepAliveAppState(false);
     appMgrServiceInner->LaunchApplication(appRecord);
 
     appRecord->SetKeepAliveEnableState(true);
+    appRecord->SetKeepAliveDkv(true);
     appRecord->SetEmptyKeepAliveAppState(true);
     appMgrServiceInner->LaunchApplication(appRecord);
 
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appRecord->SetEmptyKeepAliveAppState(false);
     appMgrServiceInner->LaunchApplication(appRecord);
 
@@ -774,18 +780,22 @@ HWTEST_F(AppMgrServiceInnerTest, ApplicationTerminated_001, TestSize.Level0)
     appMgrServiceInner->ApplicationTerminated(recordId_);
 
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appRecord->SetEmptyKeepAliveAppState(true);
     appMgrServiceInner->ApplicationTerminated(recordId_);
 
     appRecord->SetKeepAliveEnableState(true);
+    appRecord->SetKeepAliveDkv(true);
     appRecord->SetEmptyKeepAliveAppState(false);
     appMgrServiceInner->ApplicationTerminated(recordId_);
 
     appRecord->SetKeepAliveEnableState(true);
+    appRecord->SetKeepAliveDkv(true);
     appRecord->SetEmptyKeepAliveAppState(true);
     appMgrServiceInner->ApplicationTerminated(recordId_);
 
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appRecord->SetEmptyKeepAliveAppState(false);
     appMgrServiceInner->ApplicationTerminated(recordId_);
 
@@ -1520,6 +1530,7 @@ HWTEST_F(AppMgrServiceInnerTest, KillProcessByAbilityToken_001, TestSize.Level0)
     appMgrServiceInner->KillProcessByAbilityToken(token);
 
     appRecord->SetKeepAliveEnableState(true);
+    appRecord->SetKeepAliveDkv(true);
     appRecord->SetEmptyKeepAliveAppState(true);
     appMgrServiceInner->KillProcessByAbilityToken(token);
 
@@ -1783,7 +1794,7 @@ HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_001, TestSize.Level0)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->ClearAppRunningData(nullptr, true);
+    appMgrServiceInner->ClearAppRunningData(nullptr);
     TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_001 end");
 }
 
@@ -1801,41 +1812,8 @@ HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_002, TestSize.Level0)
     std::string processName = "test_processName";
     std::shared_ptr<AppRunningRecord> appRecord =
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
-    appMgrServiceInner->ClearAppRunningData(appRecord, true);
+    appMgrServiceInner->ClearAppRunningData(appRecord);
     TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_002 end");
-}
-
-/**
- * @tc.name: ClearAppRunningData_003
- * @tc.desc: clear app running data.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_003, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_003 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-    BundleInfo info;
-    std::string processName = "test_processName";
-    std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
-    appMgrServiceInner->ClearAppRunningData(appRecord, false);
-    TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_003 end");
-}
-
-/**
- * @tc.name: ClearAppRunningData_004
- * @tc.desc: clear app running data.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_004, TestSize.Level0)
-{
-    TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_004 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-
-    appMgrServiceInner->ClearAppRunningData(nullptr, false);
-    TAG_LOGI(AAFwkTag::TEST, "ClearAppRunningData_004 end");
 }
 
 /**
@@ -2927,37 +2905,37 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_001, TestSize.Level0)
     pid_t hostPid = 0;
     std::string renderParam = "test_renderParam";
     pid_t renderPid = 0;
-    int ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 0, 0, renderPid);
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(0), FdGuard(0), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(0), FdGuard(0), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(0), FdGuard(1), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(0), FdGuard(1), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 0, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(1), FdGuard(0), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(1), FdGuard(0), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(1), FdGuard(1), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", FdGuard(1), FdGuard(1), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 0, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(1), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(1), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 0, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(1), FdGuard(0), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(1), FdGuard(0), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(1), FdGuard(1), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(1), FdGuard(1), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_001 end");
@@ -2978,40 +2956,40 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_002, TestSize.Level0)
     pid_t hostPid1 = 1;
     std::string renderParam = "test_renderParam";
     pid_t renderPid = 0;
-    int ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 0, 0, renderPid);
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(0), FdGuard(0), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(0), FdGuard(0), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(0), FdGuard(1), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(0), FdGuard(1), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 0, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(1), FdGuard(0), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(1), FdGuard(0), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(1), FdGuard(1), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", FdGuard(1), FdGuard(1), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 0, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(0), FdGuard(0), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 1, 0, renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(0), FdGuard(1), FdGuard(0), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 0, 0, renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 0, 1, renderPid);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(0), FdGuard(1), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(1), FdGuard(0), FdGuard(0), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(1), FdGuard(0), FdGuard(1), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(1), FdGuard(1), FdGuard(0), renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, FdGuard(1), FdGuard(1), FdGuard(1), renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_002 end");
 }
@@ -3442,10 +3420,11 @@ HWTEST_F(AppMgrServiceInnerTest, TimeoutNotifyApp_001, TestSize.Level1)
     int32_t pid = 0;
     int32_t uid = 0;
     std::string bundleName = "test_processName";
+    std::string processName = "test_processName";
     FaultData faultData;
     faultData.errorObject.name = "1234";
     faultData.faultType = FaultDataType::APP_FREEZE;
-    appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, faultData);
+    appMgrServiceInner->TimeoutNotifyApp(pid, uid, bundleName, processName, faultData);
     EXPECT_NE(taskHandler, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "TimeoutNotifyApp_001 end");
 }
@@ -3841,6 +3820,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendAppLaunchEvent_001, TestSize.Level0)
     recordId_ += 1;
     appRecord->SetState(ApplicationState::APP_STATE_CREATE);
     appRecord->SetKeepAliveEnableState(false);
+    appRecord->SetKeepAliveDkv(false);
     appRecord->SetEmptyKeepAliveAppState(false);
     Want want;
     appRecord->SetSpecifiedAbilityFlagAndWant(-1, want, "");
@@ -3914,7 +3894,6 @@ HWTEST_F(AppMgrServiceInnerTest, IsApplicationRunning_002, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_FALSE(isRunning);
 }
-
 
 /**
  * @tc.name: InitWindowVisibilityChangedListener_001
@@ -4132,7 +4111,6 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterRenderStateObserver_0100, TestSize.Leve
     auto res = appMgrServiceInner->RegisterRenderStateObserver(observer);
     EXPECT_EQ(ERR_INVALID_VALUE, res);
 }
-
 
 /**
  * @tc.name: RegisterStateStateObserver_0200
@@ -4789,5 +4767,21 @@ HWTEST_F(AppMgrServiceInnerTest, CheckIsKiaProcess_001, TestSize.Level0)
 
     TAG_LOGI(AAFwkTag::TEST, "CheckIsKiaProcess_001 end");
 }
+
+/**
+ * @tc.name: SetJITPermissions_001
+ * @tc.desc: set jit permissions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SetJITPermissions_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetJITPermissions_001 start");
+    uint32_t accessTokenId = 0;
+    AppSpawnStartMsg startMsg = {0};
+    AppspawnUtil::SetJITPermissions(accessTokenId, startMsg.jitPermissionsList);
+    EXPECT_EQ(startMsg.jitPermissionsList.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "SetJITPermissions_001 end");
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS

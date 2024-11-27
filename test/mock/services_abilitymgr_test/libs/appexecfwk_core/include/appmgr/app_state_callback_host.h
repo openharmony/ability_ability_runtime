@@ -57,6 +57,12 @@ public:
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
     /**
+     * @brief Notify abilityms start keep-alive process.
+     * @param bundleInfos resident process bundle infos.
+     */
+    virtual void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+
+    /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.
      * @param userId the user id.
@@ -67,6 +73,7 @@ private:
     int32_t HandleOnAppStateChanged(MessageParcel& data, MessageParcel& reply);
     int32_t HandleOnAbilityRequestDone(MessageParcel& data, MessageParcel& reply);
     int32_t HandleNotifyStartResidentProcess(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyStartKeepAliveProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyAppPreCache(MessageParcel &data, MessageParcel &reply);
 
     using AppStateCallbackFunc = int32_t(AppStateCallbackHost::*)(MessageParcel& data, MessageParcel& reply);

@@ -33,8 +33,8 @@ int32_t AppMgrEventUtil::GetCallerPid(const std::shared_ptr<AppRunningRecord> &c
         TAG_LOGW(AAFwkTag::APPMGR, "null priorityObject");
         return IPCSkeleton::GetCallingPid();
     }
-    
-    return callerAppRecord->GetPriorityObject()->GetPid();
+
+    return callerAppRecord->GetPid();
 }
 
 void AppMgrEventUtil::UpdateStartupType(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &abilityType,
@@ -97,6 +97,10 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "abilities failed");
     }
+#define START_UP_ABILITY_TYPE_PREMAKE 100
+    if (eventInfo.isPreload) {
+        eventInfo.abilityType = START_UP_ABILITY_TYPE_PREMAKE + eventInfo.preloadMode;
+    }
     if (!callerAppRecord) {
         Security::AccessToken::NativeTokenInfo nativeTokenInfo = {};
         auto token = appRecord->GetCallerTokenId() == -1 ?
@@ -121,7 +125,7 @@ bool AppMgrEventUtil::SendProcessStartEvent(const std::shared_ptr<AppRunningReco
     if (!appRecord->GetPriorityObject()) {
         TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
     } else {
-        eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
+        eventInfo.pid = appRecord->GetPid();
     }
     AAFwk::EventReport::SendProcessStartEvent(AAFwk::EventName::PROCESS_START, eventInfo);
     return true;
@@ -161,7 +165,7 @@ bool AppMgrEventUtil::SendProcessStartFailedEvent(std::shared_ptr<AppRunningReco
     if (!appRecord->GetPriorityObject()) {
         TAG_LOGE(AAFwkTag::APPMGR, "null priorityObject");
     } else {
-        eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
+        eventInfo.pid = appRecord->GetPid();
     }
     AAFwk::EventReport::SendProcessStartFailedEvent(AAFwk::EventName::PROCESS_START_FAILED, eventInfo);
     return true;
@@ -209,7 +213,7 @@ bool AppMgrEventUtil::SendChildProcessStartFailedEvent(std::shared_ptr<ChildProc
     }
     eventInfo.time = currentTime;
     eventInfo.callerUid = hostRecord->GetUid();
-    eventInfo.callerPid = hostRecord->GetPriorityObject() != nullptr ? hostRecord->GetPriorityObject()->GetPid() : -1;
+    eventInfo.callerPid = hostRecord->GetPriorityObject() != nullptr ? hostRecord->GetPid() : -1;
     eventInfo.callerBundleName = hostRecord->GetBundleName();
     eventInfo.callerProcessName = hostRecord->GetProcessName();
     eventInfo.bundleName = hostRecord->GetBundleName();
@@ -241,7 +245,7 @@ bool AppMgrEventUtil::SendRenderProcessStartFailedEvent(std::shared_ptr<RenderRe
     }
     eventInfo.time = currentTime;
     eventInfo.callerUid = hostRecord->GetUid();
-    eventInfo.callerPid = hostRecord->GetPriorityObject() != nullptr ? hostRecord->GetPriorityObject()->GetPid() : -1;
+    eventInfo.callerPid = hostRecord->GetPriorityObject() != nullptr ? hostRecord->GetPid() : -1;
     eventInfo.callerBundleName = hostRecord->GetBundleName();
     eventInfo.callerProcessName = hostRecord->GetProcessName();
     eventInfo.bundleName = hostRecord->GetBundleName();

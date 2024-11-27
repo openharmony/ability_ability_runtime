@@ -77,8 +77,7 @@ void NewAbilityImpl::AbilityTransactionCallback(const AbilityLifeCycleState &sta
     TAG_LOGI(AAFwkTag::ABILITY, "notify ams");
     auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, state, GetRestoreData());
     if (ret == ERR_OK && state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
-        FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
-        FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(token_);
         FreezeUtil::GetInstance().DeleteAppLifecycleEvent(0);
     }
 }

@@ -52,6 +52,7 @@ ohos_shared_library("sendablecontextmanager_napi") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "napi:ace_napi",
   ]

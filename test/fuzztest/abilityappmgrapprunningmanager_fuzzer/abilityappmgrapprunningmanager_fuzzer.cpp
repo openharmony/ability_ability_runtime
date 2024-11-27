@@ -26,6 +26,7 @@
 #undef private
 #include "securec.h"
 #include "ability_record.h"
+#include "kill_process_config.h"
 
 
 using namespace OHOS::AAFwk;
@@ -37,7 +38,6 @@ constexpr int INPUT_ZERO = 0;
 constexpr int INPUT_ONE = 1;
 constexpr int INPUT_TWO = 2;
 constexpr int INPUT_THREE = 3;
-constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 constexpr size_t OFFSET_ZERO = 24;
 constexpr size_t OFFSET_ONE = 16;
@@ -82,8 +82,9 @@ void DoSomethingInterestingWithMyAPIadda(const char* data, size_t size)
     ApplicationInfo appInfos;
     manager->ProcessUpdateApplicationInfoInstalled(appInfos);
     std::list<pid_t> pids;
-    bool clearPageStack = *data % ENABLE;
-    manager->ProcessExitByBundleNameAndUid(jsonStr, uid, pids, clearPageStack);
+    KillProcessConfig config;
+    config.clearPageStack = *data % ENABLE;
+    manager->ProcessExitByBundleNameAndUid(jsonStr, uid, pids, config);
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     manager->GetPidsByUserId(userId, pids);
     manager->PrepareTerminate(token, clearMissionFlag);
@@ -131,7 +132,7 @@ void DoSomethingInterestingWithMyAPIaddb(const char* data, size_t size)
     manager->OnChildProcessRemoteDied(remote);
     manager->GetAllAppRunningRecordCountByBundleName(jsonStr);
     auto uid = static_cast<int32_t>(GetU32Data(data));
-    manager->SignRestartAppFlag(uid);
+    manager->SignRestartAppFlag(uid, jsonStr);
     manager->GetAppRunningUniqueIdByPid(pidApps, jsonStr);
     std::vector<pid_t> hostPids;
     manager->GetAllUIExtensionRootHostPid(pidApps, hostPids);
@@ -178,7 +179,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     manager->CreateAppRunningRecord(appInfo, jsonStr, bundleInfo, "");
     int uid = static_cast<int>(GetU32Data(data));
     manager->CheckAppRunningRecordIsExist(jsonStr, jsonStr, uid, bundleInfo, jsonStr);
-    manager->CheckAppRunningRecordIsExistByBundleName(jsonStr);
+    auto accessTokenId = static_cast<uint32_t>(GetU32Data(data));
+    manager->IsAppExist(accessTokenId);
     int32_t appCloneIndex = static_cast<int32_t>(GetU32Data(data));
     bool isRunning = *data % ENABLE;
     manager->CheckAppCloneRunningRecordIsExistByBundleName(jsonStr, appCloneIndex, isRunning);
@@ -200,7 +202,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     manager->GetForegroundApplications(list);
     Configuration config;
     manager->UpdateConfiguration(config);
-    manager->UpdateConfigurationByBundleName(config, jsonStr);
+    manager->UpdateConfigurationByBundleName(config, jsonStr, appCloneIndex);
     int32_t level = static_cast<int32_t>(GetU32Data(data));
     manager->NotifyMemoryLevel(level);
     std::map<pid_t, MemoryLevel> procLevelMap;
@@ -227,7 +229,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (size < OHOS::U32_AT_SIZE) {
         return 0;
     }
 

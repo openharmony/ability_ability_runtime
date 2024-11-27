@@ -28,16 +28,11 @@ namespace {
 constexpr const char* ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE =
     "persist.sys.abilityms.support.ecologicalrulemgrservice";
 constexpr const char* BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
-constexpr const char* START_ABILITY_AS_CALLER_SKIP_ERMS = "ability.params.skipErms";
 constexpr int32_t ERMS_ISALLOW_RESULTCODE = 10;
 }
 ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (param.isStartAsCaller && param.want.GetBoolParam(START_ABILITY_AS_CALLER_SKIP_ERMS, false)) {
-        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "start as caller, skip erms");
-        return ERR_OK;
-    }
     if (StartAbilityUtils::skipErms) {
         StartAbilityUtils::skipErms = false;
         return ERR_OK;
@@ -51,6 +46,10 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     ExperienceRule rule;
     AAFwk::Want newWant = param.want;
     newWant.RemoveAllFd();
+    if (param.isStartAsCaller) {
+        TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "isAsCaller");
+        callerInfo.isAsCaller = true;
+    }
     InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken);
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
@@ -67,7 +66,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "allow ecological rule");
         return ERR_OK;
     }
-    
+
     std::string supportErms = OHOS::system::GetParameter(ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE, "true");
     if (supportErms == "false") {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "not support erms");
@@ -106,20 +105,12 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     want.SetElement(launchWant.GetElement());
 
     int32_t appIndex = 0;
-    StartAbilityUtils::startAbilityInfo = StartAbilityInfo::CreateStartAbilityInfo(want,
-        userId, appIndex);
-    if (StartAbilityUtils::startAbilityInfo->status != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "Get targetApplicationInfo failed");
-        return false;
-    }
 
     ErmsCallerInfo callerInfo;
     InitErmsCallerInfo(want, nullptr, callerInfo, userId);
 
     ExperienceRule rule;
-    AAFwk::Want newWant = want;
-    newWant.RemoveAllFd();
-    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
+    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,
         callerInfo, rule));
     if (ret != ERR_OK) {
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "check ecological rule failed");
@@ -189,7 +180,7 @@ void EcologicalRuleInterceptor::GetEcologicalCallerInfo(const Want &want, ErmsCa
             return;
         }
     }
-    
+
     callerInfo.callerAppProvisionType = callerAppInfo.appProvisionType;
     if (callerAppInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "atomic service caller type");
@@ -222,7 +213,7 @@ void EcologicalRuleInterceptor::InitErmsCallerInfo(const Want &want,
     callerInfo.pid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingPid());
     callerInfo.embedded = want.GetIntParam("send_to_erms_embedded", 0);
     callerInfo.userId = userId;
-    
+
     GetEcologicalTargetInfo(want, abilityInfo, callerInfo);
     GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
     TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "ERMS's %{public}s", callerInfo.ToString().c_str());

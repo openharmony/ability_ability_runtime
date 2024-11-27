@@ -58,6 +58,9 @@ struct AppProcessData : public Parcelable {
     std::vector<AppData> appDatas;
     bool isFocused = false;
     std::vector<int32_t> renderPids;
+    int32_t appIndex = 0;
+    std::string instanceKey = "";
+    std::string bundleName = "";
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

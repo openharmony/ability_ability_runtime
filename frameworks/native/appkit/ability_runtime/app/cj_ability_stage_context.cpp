@@ -22,6 +22,23 @@
 namespace OHOS {
 namespace AbilityRuntime {
 
+RetHapModuleInfo CJAbilityStageContext::GetRetHapModuleInfo()
+{
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null, getHapModuleInfo failed. ");
+        return RetHapModuleInfo();
+    }
+
+    auto hapInfo = context->GetHapModuleInfo();
+    if (hapInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CurrentHapMoudleInfo is nullptr.");
+        return RetHapModuleInfo();
+    }
+
+    return OHOS::CJSystemapi::BundleManager::Convert::ConvertHapModuleInfo(*hapInfo);
+}
+
 std::shared_ptr<AppExecFwk::HapModuleInfo> CJAbilityStageContext::GetHapModuleInfo()
 {
     auto context = GetContext();
@@ -30,6 +47,23 @@ std::shared_ptr<AppExecFwk::HapModuleInfo> CJAbilityStageContext::GetHapModuleIn
         return nullptr;
     }
     return context->GetHapModuleInfo();
+}
+
+CConfiguration CJAbilityStageContext::GetConfiguration()
+{
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "context is null, getConfiguration failed. ");
+        return CConfiguration();
+    }
+
+    auto configuration = context->GetConfiguration();
+    if (configuration == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CurrentConfiguration is nullptr.");
+        return CConfiguration();
+    }
+
+    return CreateCConfiguration(*configuration);
 }
 
 }

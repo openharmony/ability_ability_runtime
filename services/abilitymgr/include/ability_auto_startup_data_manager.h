@@ -56,9 +56,6 @@ private:
     DistributedKv::Key ConvertAutoStartupDataToKey(const AutoStartupInfo &info);
     AutoStartupInfo ConvertAutoStartupInfoFromKeyAndValue(
         const DistributedKv::Key &key, const DistributedKv::Value &value);
-    bool IsEqual(nlohmann::json &jsonObject, const std::string &key,
-        const std::string &value, bool checkEmpty = false);
-    bool IsEqual(nlohmann::json &jsonObject, const std::string &key, int32_t value);
     bool IsEqual(const DistributedKv::Key &key, const AutoStartupInfo &info);
     bool IsEqual(const DistributedKv::Key &key, const std::string &accessTokenId);
     bool IsEqual(const DistributedKv::Key &key, int32_t userId);

@@ -61,12 +61,17 @@ napi_value AttachFormExtensionContext(napi_env env, void* value, void*)
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachFormExtensionContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<FormExtensionContext>(ptr);
-    napi_wrap(env, contextObj, workContext,
+    auto status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void * data, void *) {
             TAG_LOGI(AAFwkTag::FORM_EXT, "Finalizer for weak_ptr form extension context is called");
             delete static_cast<std::weak_ptr<FormExtensionContext> *>(data);
         },
         nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap context failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
     return contextObj;
 }
 
@@ -151,13 +156,16 @@ void JsFormExtension::BindContext(napi_env env, napi_value obj)
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
 
-    napi_wrap(env, contextObj, workContext,
+    auto status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             TAG_LOGI(AAFwkTag::FORM_EXT, "Finalizer for weak_ptr form extension context is called");
             delete static_cast<std::weak_ptr<FormExtensionContext>*>(data);
         },
         nullptr, nullptr);
-
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap context failed: %{public}d", status);
+        delete workContext;
+    }
     TAG_LOGD(AAFwkTag::FORM_EXT, "ok");
 }
 

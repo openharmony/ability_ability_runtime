@@ -43,6 +43,10 @@ private:
     int HandleBatchGrantUriPermission(MessageParcel &data, MessageParcel &reply);
     int HandleRevokeUriPermissionManually(MessageParcel &data, MessageParcel &reply);
     int HandleVerifyUriPermission(MessageParcel &data, MessageParcel &reply);
+    int HandleClearPermissionTokenByMap(MessageParcel &data, MessageParcel &reply);
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+    int HandleActive(MessageParcel &data, MessageParcel &reply);
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 };
 }  // namespace AAFwk
 }  // namespace OHOS
