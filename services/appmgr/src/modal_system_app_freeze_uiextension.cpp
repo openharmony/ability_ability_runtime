@@ -16,6 +16,7 @@
 #ifdef APP_NO_RESPONSE_DIALOG
 #include "modal_system_app_freeze_uiextension.h"
 
+#include <chrono>
 #include <mutex>
 
 #include "hilog_tag_wrapper.h"
@@ -32,6 +33,8 @@ const std::string START_BUNDLE_NAME = "startBundleName";
 constexpr int32_t INVALID_USERID = -1;
 constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
 constexpr uint32_t COMMAND_START_DIALOG = 1;
+constexpr char INVALID_PID[] = "-1";
+constexpr uint64_t TIMEOUT_INTERVAL_MS = 8000;
 
 ModalSystemAppFreezeUIExtension &ModalSystemAppFreezeUIExtension::GetInstance()
 {
@@ -68,12 +71,26 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
     std::string name = faultData.errorObject.name;
     bool isAppFreezeDialog = name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::APP_INPUT_BLOCK ||
         name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
-    bool isPullUpBox = isAppFreezeDialog && (!isDialogExist || (isDialogExist && pid != lastFreezePid));
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s is %{public}s", bundleName.c_str(), focusFlag ? " focus" : " not focus");
+    uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::
+        now().time_since_epoch()).count();
+    bool timeout = now - lastFreezeTime > TIMEOUT_INTERVAL_MS;
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "%{public}s is %{public}s.pid:%{public}s lastFreezePid:%{public}s,timeout %{public}lu", bundleName.c_str(),
+        focusFlag ? "focus" : "not focus", pid.c_str(), lastFreezePid.c_str(), now - lastFreezeTime);
+    bool isPullUpBox =
+        isAppFreezeDialog && (pid != lastFreezePid || (pid == lastFreezePid && timeout && !isDialogExist));
+    bool updateTypeName = name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
+    if (pid == lastFreezePid && updateTypeName) {
+        lastFreezeTime = now;
+    }
     if (focusFlag && isPullUpBox) {
         CreateModalUIExtension(pid, bundleName);
     } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
         callback();
+    }
+    if (!isDialogExist && !focusFlag && lastFreezePid == pid) {
+        lastFreezePid = INVALID_PID;
+        lastFocusStatus = false;
     }
 }
 
@@ -107,6 +124,9 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
         return false;
     }
     lastFreezePid = pid;
+    lastFocusStatus = true;
+    lastFreezeTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "success, result = %{public}d", result);
     return true;
