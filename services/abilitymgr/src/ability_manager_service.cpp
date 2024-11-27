@@ -12541,9 +12541,9 @@ int32_t AbilityManagerService::UpdateKeepAliveEnableState(const std::string &bun
     return ret;
 }
 
-bool AbilityManagerService::IsInStatusBar(uint32_t accessTokenId)
+bool AbilityManagerService::IsInStatusBar(uint32_t accessTokenId, int32_t uid)
 {
-    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    auto uiAbilityManager = GetUIAbilityManagerByUid(uid);
     CHECK_POINTER_AND_RETURN(uiAbilityManager, false);
 
     return uiAbilityManager->IsInStatusBar(accessTokenId);
