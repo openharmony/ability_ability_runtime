@@ -199,7 +199,7 @@ void SourceMap::SetSourceMapData()
         }
         std::shared_ptr<SourceMapData> modularMap = std::make_shared<SourceMapData>();
         if (modularMap == nullptr) {
-            TAG_LOGE(AAFwkTag::JSENV, "New SourceMapData failed";
+            TAG_LOGE(AAFwkTag::JSENV, "New SourceMapData failed");
             continue;
         }
         modularMap->entryPackageInfo_.push_back(entryPackageInfo_[it->first]);
