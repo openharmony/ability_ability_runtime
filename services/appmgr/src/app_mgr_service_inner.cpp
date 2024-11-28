@@ -6053,7 +6053,7 @@ int AppMgrServiceInner::GetExceptionTimerId(const FaultData &faultData, const st
     int exceptionId = -1;
 #ifdef APP_MGR_SERVICE_HICOLLIE_ENABLE
     exceptionId = HiviewDFX::XCollie::GetInstance().SetTimer("DfxFault::Exception", timeout,
-        exceptionCallback, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
+        exceptionCallback, nullptr, HiviewDFX::XCOLLIE_FLAG_NOOP);
 #endif
     return exceptionId;
 }
@@ -6066,10 +6066,10 @@ int32_t AppMgrServiceInner::SubmitDfxFaultTask(const FaultData &faultData, const
     int exceptionId = GetExceptionTimerId(faultData, bundleName, appRecord, pid, callerUid);
     auto notifyAppTask = [appRecord, pid, callerUid, bundleName, processName, faultData, exceptionId,
         innerService = shared_from_this()]() {
-        innerService->ParseInfoToAppfreeze(faultData, pid, callerUid, bundleName, processName);
 #ifdef APP_MGR_SERVICE_HICOLLIE_ENABLE
         HiviewDFX::XCollie::GetInstance().CancelTimer(exceptionId);
 #endif
+        innerService->ParseInfoToAppfreeze(faultData, pid, callerUid, bundleName, processName);
     };
 
     if (!dfxTaskHandler_) {
