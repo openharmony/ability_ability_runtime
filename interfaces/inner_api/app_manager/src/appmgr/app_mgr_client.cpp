@@ -949,7 +949,7 @@ bool AppMgrClient::SetAppFreezeFilter(int32_t pid)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+        return false;
     }
     return service->SetAppFreezeFilter(pid);
 }
