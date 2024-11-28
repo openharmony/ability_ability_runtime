@@ -7158,7 +7158,7 @@ void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> inf
     Want want;
     want.SetElement(element);
     want.SetParam(Want::PARAM_APP_AUTO_STARTUP_LAUNCH_REASON, true);
-    if (info.appCloneIndex > 0 && info.appCloneIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+    if (info.appCloneIndex >= 0 && info.appCloneIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, info.appCloneIndex);
     }
     if (StartAbility(want) != ERR_OK && info.retryCount > 0) {
