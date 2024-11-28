@@ -677,5 +677,29 @@ HWTEST_F(ImplicitStartProcessorTest, FindAppClone_001, TestSize.Level1)
     EXPECT_EQ(res, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "FindAppClone_001 end");
 }
+/*
+ * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAG
+ * SubFunction: NA
+ * FunctionPoints:ImplicitStartProcessor ImplicitStartAG
+ * EnvConditions: NA
+ * CaseDescription: Verify ImplicitStartAG.
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAG_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAG start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    int32_t userId = 100;
+    AbilityRequest request;
+    std::vector<DialogAppInfo> dialogAppInfos;
+    GenerateRequestParam genReqParam;
+    genReqParam.isMoreHapList = false;
+    genReqParam.findDefaultApp = false;
+    genReqParam.isAppCloneSelector = false;
+    bool queryAGSuccess = true;
+    auto ret = processor->ImplicitStartAG(userId, request, dialogAppInfos, genReqParam, queryAGSuccess);
+    EXPECT_NE(ret, 0);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAG end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS
