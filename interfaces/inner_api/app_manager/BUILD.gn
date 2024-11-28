@@ -161,3 +161,40 @@ ohos_shared_library("app_manager") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
+
+ohos_shared_library("app_state_data") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  include_dirs = [
+    "include/appmgr",
+    "${ability_runtime_services_path}/common/include",
+  ]
+
+  sources = [ "src/appmgr/app_state_data.cpp" ]
+
+  defines = [ "AMS_LOG_TAG = \"AppexecfwkCore\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001306" ]
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
