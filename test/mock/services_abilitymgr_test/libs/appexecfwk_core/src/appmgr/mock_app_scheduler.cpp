@@ -236,5 +236,10 @@ int32_t AppScheduler::RegisterAbilityDebugResponse(const sptr<AppExecFwk::IAbili
 {
     return 0;
 }
+
+void AppScheduler::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::SendAppSpawnUninstallDebugHapMsg()");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

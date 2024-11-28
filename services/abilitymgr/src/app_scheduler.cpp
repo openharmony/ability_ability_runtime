@@ -664,6 +664,12 @@ bool AppScheduler::IsCallerKilling(const std::string& callerKey) const
     return appMgrClient_->IsCallerKilling(callerKey);
 }
 
+void AppScheduler::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
+{
+    CHECK_POINTER(appMgrClient_);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SendAppSpawnUninstallDebugHapMsg(userId));
+}
+
 void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
 {
     if (!appMgrClient_) {
