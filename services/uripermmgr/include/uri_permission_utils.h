@@ -27,11 +27,11 @@ class UPMSUtils {
 public:
     static bool SendShareUnPrivilegeUriEvent(uint32_t callTokenId, uint32_t targetTokenId);
     static bool SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
-        const std::vector<std::string> &uriVec, const std::vector<int32_t> &resVec);
+        const std::vector<Uri> &uriVec, const std::vector<bool> &resVec);
     static int32_t GetCurrentAccountId();
     static bool IsFoundationCall();
     static bool IsSAOrSystemAppCall();
-    static bool IsSystemAppCall(uint32_t tokenId);
+    static bool IsSystemAppCall();
     static bool CheckIsSystemAppByTokenId(uint32_t tokenId);
     static bool GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName);
     static bool GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName);

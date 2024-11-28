@@ -41,9 +41,6 @@ int UriPermissionManagerStub::OnRemoteRequest(
         case UriPermMgrCmd::ON_GRANT_URI_PERMISSION_PRIVILEGED : {
             return HandleGrantUriPermissionPrivileged(data, reply);
         }
-        case UriPermMgrCmd::ON_REVOKE_URI_PERMISSION : {
-            return HandleRevokeUriPermission(data, reply);
-        }
         case UriPermMgrCmd::ON_REVOKE_ALL_URI_PERMISSION : {
             return HandleRevokeAllUriPermission(data, reply);
         }
@@ -70,14 +67,6 @@ int UriPermissionManagerStub::OnRemoteRequest(
     return errCode;
 }
 
-int UriPermissionManagerStub::HandleRevokeUriPermission(MessageParcel &data, MessageParcel &reply)
-{
-    auto tokenId = data.ReadUint32();
-    auto abilityId = data.ReadInt32();
-    RevokeUriPermission(tokenId, abilityId);
-    return ERR_OK;
-}
-
 int UriPermissionManagerStub::HandleRevokeAllUriPermission(MessageParcel &data, MessageParcel &reply)
 {
     auto tokenId = data.ReadUint32();
@@ -97,8 +86,7 @@ int UriPermissionManagerStub::HandleGrantUriPermission(MessageParcel &data, Mess
     auto targetBundleName = data.ReadString();
     auto appIndex = data.ReadInt32();
     auto initiatorTokenId = data.ReadUint32();
-    auto abilityId = data.ReadInt32();
-    int result = GrantUriPermission(*uri, flag, targetBundleName, appIndex, initiatorTokenId, abilityId);
+    int result = GrantUriPermission(*uri, flag, targetBundleName, appIndex, initiatorTokenId);
     reply.WriteInt32(result);
     return ERR_OK;
 }
@@ -123,8 +111,7 @@ int UriPermissionManagerStub::HandleBatchGrantUriPermission(MessageParcel &data,
     auto targetBundleName = data.ReadString();
     auto appIndex = data.ReadInt32();
     auto initiatorTokenId = data.ReadUint32();
-    auto abilityId = data.ReadInt32();
-    int result = GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId, abilityId);
+    int result = GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId);
     reply.WriteInt32(result);
     return ERR_OK;
 }
@@ -149,9 +136,9 @@ int32_t UriPermissionManagerStub::HandleGrantUriPermissionPrivileged(MessageParc
     auto targetBundleName = data.ReadString();
     auto appIndex = data.ReadInt32();
     auto initiatorTokenId = data.ReadUint32();
-    auto abilityId = data.ReadInt32();
+    auto hideSensitiveType = data.ReadInt32();
     int32_t result = GrantUriPermissionPrivileged(uriVec, flag, targetBundleName, appIndex,
-        initiatorTokenId, abilityId);
+        initiatorTokenId, hideSensitiveType);
     reply.WriteInt32(result);
     return ERR_OK;
 }
