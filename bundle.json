@@ -527,6 +527,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/cj/ffi:cj_ability_ffi"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/app_manager/include",
+              "header_files": [
+                "appmgr/app_state_data.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/app_manager:app_state_data"
           }
         ],
         "test": [
