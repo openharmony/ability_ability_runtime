@@ -1813,9 +1813,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, IsDmsAlive_001, TestSize.Level1)
 HWTEST_F(AbilityManagerServiceThirdTest, AppUpgradeCompleted_001, TestSize.Level1)
 {
     auto abilityMs = std::make_shared<AbilityManagerService>();
-    std::string bundleName = "test";
     int32_t uid = 0;
-    abilityMs->AppUpgradeCompleted(bundleName, uid);
+    abilityMs->AppUpgradeCompleted(uid);
     EXPECT_TRUE(abilityMs != nullptr);
 }
 
@@ -1828,9 +1827,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, AppUpgradeCompleted_002, TestSize.Level
 {
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     auto abilityMs = std::make_shared<AbilityManagerService>();
-    std::string bundleName = "test";
     int32_t uid = 1;
-    abilityMs->AppUpgradeCompleted(bundleName, uid);
+    abilityMs->AppUpgradeCompleted(uid);
     EXPECT_TRUE(abilityMs != nullptr);
 }
 

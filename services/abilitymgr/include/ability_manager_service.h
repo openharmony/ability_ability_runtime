@@ -1430,10 +1430,9 @@ public:
 
     /**
      * Upgrade app completed event.
-     * @param bundleName.
      * @param uid.
      */
-    void AppUpgradeCompleted(const std::string &bundleName, int32_t uid);
+    void AppUpgradeCompleted(int32_t uid);
 
     /**
      * Record app exit reason.
