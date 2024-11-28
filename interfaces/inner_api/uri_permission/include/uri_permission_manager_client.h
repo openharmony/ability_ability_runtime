@@ -31,44 +31,35 @@ public:
 
     /**
      * @brief Authorize the uri permission of to targetBundleName.
-     *
-     * @param uri The file uri.
+     * @param uri The file uri, not support content uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetBundleName The user of uri.
      */
     int GrantUriPermission(const Uri &uri, unsigned int flag, const std::string targetBundleName, int32_t appIndex = 0,
-        uint32_t initiatorTokenId = 0, int32_t abilityId = -1);
+        uint32_t initiatorTokenId = 0);
 
     /**
      * @brief Authorize the uri permission of to targetBundleName.
-     *
      * @param uriVec The file uri list.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetBundleName The user of uri.
      */
     int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag, const std::string targetBundleName,
-        int32_t appIndex = 0, uint32_t initiatorTokenId = 0, int32_t abilityId = -1);
+        int32_t appIndex = 0, uint32_t initiatorTokenId = 0);
 
     /**
      * @brief Authorize the uri permission to targetBundleName.
-     *
      * @param uriVec The file urilist.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetBundleName The user of uri.
      * @param appIndex The index of application in sandbox.
+     * @param initiatorTokenId The initial caller tokenId, only for foundation.
+     * @param hideSensitiveType The hide sensitive type, only for foundation.
      * @return Returns ERR_OK if the authorization is successful, otherwise returns error code.
      */
     int32_t GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
         const std::string &targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0,
-        int32_t abilityId = -1);
-
-    /**
-     * @brief Clear user's uri authorization record with auto remove flag.
-     *
-     * @param tokenId A tokenId of an application.
-     * @param abilityId The abilityId of an ability record.
-     */
-    void RevokeUriPermission(const uint32_t tokenId, int32_t abilityId = -1);
+        int32_t hideSensitiveType = 0);
 
     /**
      * @brief Clear user's all uri authorization record with auto remove flag.
@@ -97,8 +88,7 @@ public:
 
     /**
      * @brief verify if tokenId have uri permission of flag.
-     *
-     * @param uri The file uri.
+     * @param uri The file uri, not support content uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param tokenId A tokenId of an application.
      */

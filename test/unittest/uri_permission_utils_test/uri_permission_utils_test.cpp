@@ -52,10 +52,10 @@ void UriPermissionUtilsTest::TearDown() {}
  */
 HWTEST_F(UriPermissionUtilsTest, Upms_SendSystemAppGrantUriPermissionEvent_001, TestSize.Level1)
 {
-    std::vector<std::string> uriVec = { "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt" };
-    const std::vector<int32_t> resVec = { ERR_OK };
+    std::vector<Uri> uriVec = { Uri("file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt") };
+    const std::vector<bool> resVec = { true };
     auto ret = UPMSUtils::SendSystemAppGrantUriPermissionEvent(1001, 1002, uriVec, resVec);
-    EXPECT_EQ(ret, false);
+    ASSERT_EQ(ret, false);
 }
 
 /*
@@ -114,8 +114,7 @@ HWTEST_F(UriPermissionUtilsTest, Upms_IsSAOrSystemAppCall_001, TestSize.Level1)
  */
 HWTEST_F(UriPermissionUtilsTest, Upms_IsSystemAppCall_001, TestSize.Level1)
 {
-    uint32_t tokenId = 1001;
-    auto testIsSystemAppCall = UPMSUtils::IsSystemAppCall(tokenId);
+    auto testIsSystemAppCall = UPMSUtils::IsSystemAppCall();
     EXPECT_EQ(testIsSystemAppCall, false);
 }
 
@@ -129,9 +128,6 @@ HWTEST_F(UriPermissionUtilsTest, Upms_CheckIsSystemAppByBundleName_001, TestSize
 {
     std::string bundleName = "";
     auto testIsSystemApp = UPMSUtils::CheckIsSystemAppByBundleName(bundleName);
-    EXPECT_EQ(testIsSystemApp, false);
-    bundleName = "com.example.test";
-    testIsSystemApp = UPMSUtils::CheckIsSystemAppByBundleName(bundleName);
     EXPECT_EQ(testIsSystemApp, false);
 }
 

@@ -2304,21 +2304,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermissionForServiceExtension_
     EXPECT_FALSE(ret);
 }
 
-/*
- * Feature: AbilityRecord
- * Function: RevokeUriPermission
- * SubFunction: RevokeUriPermission
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord RevokeUriPermission
- */
-HWTEST_F(AbilityRecordTest, AbilityRecord_RevokeUriPermission_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    EXPECT_NE(abilityRecord, nullptr);
-    abilityRecord->RevokeUriPermission();
-}
-
 #ifdef WITH_DLP
 /*
  * Feature: AbilityRecord
