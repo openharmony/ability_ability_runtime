@@ -911,6 +911,14 @@ public:
      */
     virtual AppMgrResultCode IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
         bool &isRunning);
+    
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     * @return Returns RESULT_OK on success, others on failure.
+     */
+    virtual AppMgrResultCode SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
