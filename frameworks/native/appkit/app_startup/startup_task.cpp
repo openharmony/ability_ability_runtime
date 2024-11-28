@@ -33,39 +33,9 @@ std::vector<std::string> StartupTask::GetDependencies() const
     return dependencies_;
 }
 
-bool StartupTask::GetCallCreateOnMainThread() const
-{
-    return callCreateOnMainThread_;
-}
-
-bool StartupTask::GetWaitOnMainThread() const
-{
-    return waitOnMainThread_;
-}
-
-bool StartupTask::GetIsExcludeFromAutoStart() const
-{
-    return isExcludeFromAutoStart_;
-}
-
 void StartupTask::SetDependencies(const std::vector<std::string> &dependencies)
 {
     dependencies_ = dependencies;
-}
-
-void StartupTask::SetCallCreateOnMainThread(bool callCreateOnMainThread)
-{
-    callCreateOnMainThread_ = callCreateOnMainThread;
-}
-
-void StartupTask::SetWaitOnMainThread(bool waitOnMainThread)
-{
-    waitOnMainThread_ = waitOnMainThread;
-}
-
-void StartupTask::SetIsExcludeFromAutoStart(bool excludeFromAutoStart)
-{
-    isExcludeFromAutoStart_ = excludeFromAutoStart;
 }
 
 void StartupTask::SaveResult(const std::shared_ptr<StartupTaskResult> &result)
@@ -123,9 +93,29 @@ std::string StartupTask::DumpDependencies() const
     return dumpResult;
 }
 
-uint32_t StartupTask::getDependenciesCount() const
+uint32_t StartupTask::GetDependenciesCount() const
 {
     return dependencies_.size();
+}
+
+bool StartupTask::GetWaitOnMainThread() const
+{
+    return waitOnMainThread_;
+}
+
+void StartupTask::SetWaitOnMainThread(bool waitOnMainThread)
+{
+    waitOnMainThread_ = waitOnMainThread;
+}
+
+bool StartupTask::GetCallCreateOnMainThread() const
+{
+    return callCreateOnMainThread_;
+}
+
+void StartupTask::SetCallCreateOnMainThread(bool callCreateOnMainThread)
+{
+    callCreateOnMainThread_ = callCreateOnMainThread;
 }
 
 int32_t StartupTask::AddExtraCallback(std::unique_ptr<StartupTaskResultCallback> callback)
@@ -147,6 +137,25 @@ void StartupTask::CallExtraCallback(const std::shared_ptr<StartupTaskResult> &re
         }
     }
     extraCallbacks_.clear();
+}
+
+int32_t StartupTask::RunTaskPreInit(std::unique_ptr<StartupTaskResultCallback>& callback)
+{
+    if (state_ != State::CREATED) {
+        TAG_LOGE(AAFwkTag::STARTUP, "%{public}s, state wrong %{public}d", name_.c_str(), static_cast<int32_t>(state_));
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
+    state_ = State::INITIALIZING;
+    callback->Push([weak = weak_from_this()](const std::shared_ptr<StartupTaskResult>& result) {
+        auto startupTask = weak.lock();
+        if (startupTask == nullptr) {
+            TAG_LOGE(AAFwkTag::STARTUP, "startupTask null");
+            return;
+        }
+        startupTask->SaveResult(result);
+        startupTask->CallExtraCallback(result);
+    });
+    return ERR_OK;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

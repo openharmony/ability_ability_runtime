@@ -16,11 +16,13 @@
 #ifndef OHOS_ABILITY_RUNTIME_STARTUP_TASK_DISPATCHER_H
 #define OHOS_ABILITY_RUNTIME_STARTUP_TASK_DISPATCHER_H
 
-#include <deque>
+#include <map>
+#include <atomic>
 
 #include "startup_sort_result.h"
 #include "startup_task_result.h"
 #include "startup_utils.h"
+#include "startup_task.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -34,6 +36,8 @@ public:
     int32_t Run(const std::shared_ptr<OnCompletedCallback> &completedCallback,
         const std::shared_ptr<OnCompletedCallback> &mainThreadAwaitCallback);
 
+    void TimeoutStop();
+
 private:
     const std::map<std::string, std::shared_ptr<StartupTask>> &tasks_;
     std::shared_ptr<StartupSortResult> sortResult_;
@@ -42,6 +46,7 @@ private:
     uint32_t tasksCount_ = 0;
     std::shared_ptr<OnCompletedCallback> completedCallback_;
     std::shared_ptr<OnCompletedCallback> mainThreadAwaitCallback_;
+    std::atomic<bool> isTimeoutStopped_ = false;
 
     void Dispatch(const std::string &name, const std::shared_ptr<StartupTaskResult> &result);
     int32_t NotifyChildren(const std::string &name, const std::shared_ptr<StartupTaskResult> &result);

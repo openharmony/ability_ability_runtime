@@ -512,6 +512,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
     launchData.SetIsNeedPreloadModule(isNeedPreloadModule_);
     launchData.SetNWebPreload(isAllowedNWebPreload_);
+    launchData.SetPreloadModuleName(preloadModuleName_);
 
     TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called,app is %{public}s.", __func__, GetName().c_str());
     AddAppLifecycleEvent("AppRunningRecord::LaunchApplication");
@@ -1617,6 +1618,7 @@ void AppRunningRecord::SetProcessAndExtensionType(
         return;
     }
     extensionType_ = abilityInfo->extensionAbilityType;
+    preloadModuleName_ = abilityInfo->moduleName;
     if (extensionType_ == ExtensionAbilityType::UNSPECIFIED) {
         //record Service Ability in FA model as Service Extension
         if (abilityInfo->type == AbilityType::SERVICE) {
@@ -2317,6 +2319,16 @@ void AppRunningRecord::SetPreloadMode(PreloadMode mode)
 PreloadMode AppRunningRecord::GetPreloadMode()
 {
     return preloadMode_;
+}
+
+void AppRunningRecord::SetPreloadModuleName(const std::string& preloadModuleName)
+{
+    preloadModuleName_ = preloadModuleName;
+}
+
+std::string AppRunningRecord::GetPreloadModuleName() const
+{
+    return preloadModuleName_;
 }
 
 void AppRunningRecord::SetPreloadState(PreloadState state)

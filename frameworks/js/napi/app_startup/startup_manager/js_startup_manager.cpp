@@ -133,8 +133,6 @@ napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
         return CreateJsUndefined(env);
     }
     if (result->GetResultType() != StartupTaskResult::ResultType::JS) {
-        TAG_LOGE(AAFwkTag::STARTUP, "error:%{public}s", startupTask.c_str());
-        ThrowInvalidParamError(env, "Parameter error: The result type is not js.");
         return CreateJsUndefined(env);
     }
     std::shared_ptr<JsStartupTaskResult> jsResult = std::static_pointer_cast<JsStartupTaskResult>(result);
@@ -290,7 +288,7 @@ int32_t JsStartupManager::RunStartupTask(napi_env env, NapiCallbackInfo &info,
         }
     }
 
-    int32_t result = DelayedSingleton<StartupManager>::GetInstance()->BuildStartupTaskManager(dependencies,
+    int32_t result = DelayedSingleton<StartupManager>::GetInstance()->BuildAppStartupTaskManager(dependencies,
         startupTaskManager);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::STARTUP, "build manager failed: %{public}d", result);

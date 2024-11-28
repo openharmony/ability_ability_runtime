@@ -79,7 +79,7 @@ int32_t StartupTopologySort::SortZeroDeque(const std::shared_ptr<StartupTask> &s
     std::shared_ptr<StartupSortResult> &startupSortResult)
 {
     std::string key = startup->GetName();
-    auto result = inDegreeMap.emplace(key, startup->getDependenciesCount());
+    auto result = inDegreeMap.emplace(key, startup->GetDependenciesCount());
     if (!result.second) {
         TAG_LOGE(AAFwkTag::STARTUP, "%{public}s, emplace to inDegreeMap failed", key.c_str());
         return ERR_STARTUP_INTERNAL_ERROR;

@@ -42,7 +42,7 @@ int32_t StartupTaskDispatcher::Run(const std::shared_ptr<OnCompletedCallback> &c
             TAG_LOGE(AAFwkTag::STARTUP, "startup task %{public}s null", iter.first.c_str());
             return ERR_STARTUP_INTERNAL_ERROR;
         }
-        inDegreeMap_.emplace(iter.first, iter.second->getDependenciesCount());
+        inDegreeMap_.emplace(iter.first, iter.second->GetDependenciesCount());
         if (iter.second->GetWaitOnMainThread()) {
             mainThreadAwaitCount_++;
         }
@@ -69,12 +69,21 @@ int32_t StartupTaskDispatcher::Run(const std::shared_ptr<OnCompletedCallback> &c
             TAG_LOGE(AAFwkTag::STARTUP, "startup task %{public}s null", iter.c_str());
             return ERR_STARTUP_INTERNAL_ERROR;
         }
+        if (isTimeoutStopped_) {
+            TAG_LOGD(AAFwkTag::STARTUP, "startup task dispatch timeout, stop running %{public}s", iter.c_str());
+            return ERR_STARTUP_TIMEOUT;
+        }
         int32_t result = RunTaskInit(iter, findResult->second);
         if (result != ERR_OK) {
             return result;
         }
     }
     return ERR_OK;
+}
+
+void StartupTaskDispatcher::TimeoutStop()
+{
+    isTimeoutStopped_ = true;
 }
 
 void StartupTaskDispatcher::Dispatch(const std::string &name, const std::shared_ptr<StartupTaskResult> &result)
@@ -149,6 +158,11 @@ int32_t StartupTaskDispatcher::NotifyChildren(const std::string &name, const std
         }
     }
     for (auto &iter : zeroInDegree) {
+        if (isTimeoutStopped_) {
+            TAG_LOGD(AAFwkTag::STARTUP, "startup task dispatch timeout, stop running %{public}s",
+                iter->GetName().c_str());
+            return ERR_STARTUP_TIMEOUT;
+        }
         int32_t runResult = RunTaskInit(iter->GetName(), iter);
         if (runResult != ERR_OK) {
             return runResult;
@@ -171,6 +185,10 @@ int32_t StartupTaskDispatcher::RunTaskInit(const std::string &name, const std::s
     });
     StartupTask::State state = task->GetState();
     if (state == StartupTask::State::CREATED) {
+        int32_t result = task->RunTaskPreInit(callback);
+        if (result != ERR_OK) {
+            return result;
+        }
         return task->RunTaskInit(std::move(callback));
     } else if (state == StartupTask::State::INITIALIZED) {
         callback->Call(task->GetResult());
