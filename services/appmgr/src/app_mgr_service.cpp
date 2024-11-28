@@ -1240,7 +1240,7 @@ bool AppMgrService::SetAppFreezeFilter(int32_t pid)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
-        return ERR_INVALID_OPERATION;
+        return false;
     }
 
     auto ret = appMgrServiceInner_->SetAppFreezeFilter(pid);
