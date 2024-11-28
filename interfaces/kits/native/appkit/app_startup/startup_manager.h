@@ -18,40 +18,63 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <vector>
 
+#include "app_startup_task.h"
+#include "bundle_info.h"
+#include "native_startup_task.h"
+#include "preload_so_startup_task.h"
 #include "singleton.h"
 #include "startup_config.h"
-#include "startup_task.h"
 #include "startup_task_manager.h"
-#include "startup_utils.h"
-#include "hap_module_info.h"
-#include "native_engine/native_value.h"
-#include "js_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+struct ModuleStartupConfigInfo {
+    std::string name_;
+    std::string startupConfig_;
+    std::string hapPath_;
+    AppExecFwk::ModuleType moduleType_ = AppExecFwk::ModuleType::UNKNOWN;
+    bool esModule_;
 
-struct AppPreloadHintStartupTask {
+    ModuleStartupConfigInfo(std::string name, std::string startupConfig, std::string hapPath,
+        const AppExecFwk::ModuleType& moduleType, bool esModule);
+};
+
+struct StartupTaskInfo {
     std::string name;
     std::string srcEntry;
+    std::string ohmUrl;
+    std::string moduleName;
+    std::string hapPath;
     std::vector<std::string> dependencies;
-    bool excludeFromAutoStart;
-    std::string runOnThread;
-    std::string ohmurl;
-    std::string moduleType;
-    std::string taskType;
+    bool excludeFromAutoStart = false;
+    bool callCreateOnMainThread = true;
+    bool waitOnMainThread = true;
+    bool esModule = true;
 };
 
 class StartupManager : public std::enable_shared_from_this<StartupManager> {
 DECLARE_DELAYED_SINGLETON(StartupManager)
 
 public:
-    int32_t RegisterStartupTask(const std::string &name, const std::shared_ptr<StartupTask> &startupTask);
+    int32_t PreloadAppHintStartup(const AppExecFwk::BundleInfo& bundleInfo,
+        const AppExecFwk::HapModuleInfo& entryInfo, const std::string &preloadModuleName);
 
-    int32_t BuildAutoStartupTaskManager(std::shared_ptr<StartupTaskManager> &startupTaskManager);
+    int32_t LoadAppStartupTaskConfig(bool &needRunAutoStartupTask);
 
-    int32_t BuildStartupTaskManager(const std::vector<std::string> &inputDependencies,
+    const std::vector<StartupTaskInfo> &GetStartupTaskInfos() const;
+
+    const std::string &GetPendingConfigEntry() const;
+
+    int32_t RegisterAppStartupTask(
+        const std::string &name, const std::shared_ptr<AppStartupTask> &startupTask);
+
+    int32_t BuildAutoAppStartupTaskManager(std::shared_ptr<StartupTaskManager> &startupTaskManager);
+
+    int32_t BuildAppStartupTaskManager(const std::vector<std::string> &inputDependencies,
         std::shared_ptr<StartupTaskManager> &startupTaskManager);
 
     int32_t OnStartupTaskManagerComplete(uint32_t id);
@@ -69,62 +92,69 @@ public:
     int32_t IsInitialized(const std::string &name, bool &isInitialized);
 
     int32_t PostMainThreadTask(const std::function<void()> &task);
-    
-    int32_t GetStartupConfigString(const AppExecFwk::HapModuleInfo &info, std::string &config);
 
-    bool AnalyzeStartupConfig(
-        const std::string &startupConfig,
-        AppExecFwk::ModuleType moduleType,
-        JsRuntime &jsRuntime,
-        std::unique_ptr<NativeReference> &startupJsRef,
-        std::shared_ptr<NativeReference> &shellContextRef);
-
-    bool LoadJsStartupConfig(const std::string &srcEntry);
-
-    void LoadJsSrcEntry(const std::string &srcEntry);
-    
-    void LoadJsByOhmurl(const std::string &srcEntry);
+    void StopAutoPreloadSoTask();
 
 private:
+    // read only after initialization
+    std::vector<ModuleStartupConfigInfo> moduleStartupConfigInfos_;
+    std::mutex appStartupConfigInitializationMutex_;
+    std::atomic<bool> isAppStartupConfigInited_ = false;
+
+    std::mutex startupTaskManagerMutex_;
     uint32_t startupTaskManagerId = 0;
     std::map<uint32_t, std::shared_ptr<StartupTaskManager>> startupTaskManagerMap_;
+
     // read only after initialization
-    std::map<std::string, std::shared_ptr<StartupTask>> startupTasks_;
-    std::map<std::string, std::shared_ptr<AppPreloadHintStartupTask>> appPreloadHintStartupTask_;
+    std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks_;
+    std::map<std::string, std::shared_ptr<AppStartupTask>> appStartupTasks_;
+    std::vector<StartupTaskInfo> pendingStartupTaskInfos_;
+    std::string pendingConfigEntry_;
+    std::weak_ptr<StartupTaskManager> autoPreloadSoTaskManager;
+
     std::shared_ptr<StartupConfig> defaultConfig_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
+    std::shared_ptr<AppExecFwk::EventHandler> preloadHandler_;
 
-    int32_t AddStartupTask(const std::string &name,
-        std::map<std::string, std::shared_ptr<StartupTask>> &taskMap);
+    static int32_t AddStartupTask(const std::string &name, std::map<std::string, std::shared_ptr<StartupTask>> &taskMap,
+        std::map<std::string, std::shared_ptr<AppStartupTask>> &allTasks);
+    int32_t RegisterPreloadSoStartupTask(
+        const std::string &name, const std::shared_ptr<PreloadSoStartupTask> &startupTask);
+    int32_t BuildStartupTaskManager(const std::map<std::string, std::shared_ptr<StartupTask>> &tasks,
+        std::shared_ptr<StartupTaskManager> &startupTaskManager);
+    int32_t AddAppPreloadSoTask(const std::vector<std::string> &preloadSoList,
+        std::map<std::string, std::shared_ptr<StartupTask>> &currentStartupTasks);
+    std::shared_ptr<NativeStartupTask> CreateAppPreloadSoTask(
+        const std::map<std::string, std::shared_ptr<StartupTask>> &currentPreloadSoTasks);
 
-    bool AddStartupTask(
-        nlohmann::json &startupConfigJson,
-        AppExecFwk::ModuleType moduleType,
-        JsRuntime &jsRuntime,
-        std::unique_ptr<NativeReference> &startupJsRef,
-        std::shared_ptr<NativeReference> &shellContextRef);
-    
-    bool AddPreloadHintStartupTask(nlohmann::json &startupConfigJson, AppExecFwk::ModuleType moduleType);
+    void PreloadAppHintStartupTask();
+    int32_t AddLoadAppStartupConfigTask(std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks);
+    int32_t RunLoadAppStartupConfigTask();
+    int32_t AddAppAutoPreloadSoTask(std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks);
+    int32_t RunAppAutoPreloadSoTask();
+    int32_t RunAppPreloadSoTask(const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks);
+    int32_t GetAppAutoPreloadSoTasks(std::map<std::string, std::shared_ptr<StartupTask>> &appAutoPreloadSoTasks);
+    int32_t RunAppPreloadSoTaskMainThread(const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks,
+        std::unique_ptr<StartupTaskResultCallback> callback);
 
-    std::shared_ptr<StartupTask> AnalyzeStartupTasks(
+    static int32_t GetStartupConfigString(const ModuleStartupConfigInfo& info, std::string& config);
+    static bool AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, const std::string& startupConfig,
+        std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks,
+        std::vector<StartupTaskInfo>& pendingStartupTaskInfos, std::string& pendingConfigEntry);
+    static bool AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
+        std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
+    static bool AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
+        std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
+    static bool AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& info,
         const nlohmann::json &startupTaskJson,
-        AppExecFwk::ModuleType moduleType,
-        JsRuntime &jsRuntime,
-        std::unique_ptr<NativeReference> &startupJsRef,
-        std::shared_ptr<NativeReference> &shellContextRef);
-
-    std::shared_ptr<AppPreloadHintStartupTask> AnalyzeAppPreloadHintStartupTasks(
-        const nlohmann::json &preloadStartupTaskJson, AppExecFwk::ModuleType moduleType);
-
-    void SetOptionalParameters(
-        const nlohmann::json &module,
-        std::shared_ptr<StartupTask> startupTask,
-        AppExecFwk::ModuleType moduleType);
-
-    void SetOptionalParameters(
-        const nlohmann::json &module,
-        std::shared_ptr<AppPreloadHintStartupTask> appPreloadHintStartupTask,
-        AppExecFwk::ModuleType moduleType);
+        std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
+    static bool AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigInfo& info,
+        const nlohmann::json &preloadStartupTaskJson,
+        std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
+    static void SetOptionalParameters(const nlohmann::json& module, AppExecFwk::ModuleType moduleType,
+        StartupTaskInfo& startupTaskInfo);
+    static void SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
+        std::shared_ptr<PreloadSoStartupTask> &task);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

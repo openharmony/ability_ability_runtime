@@ -126,6 +126,10 @@ bool AppLaunchData::MarshallingExtend(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteString(preloadModuleName_)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write preloadModuleName.");
+        return false;
+    }
     return true;
 }
 
@@ -175,6 +179,7 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
     instanceKey_ = parcel.ReadString();
     isNeedPreloadModule_ = parcel.ReadBool();
     isAllowedNWebPreload_ = parcel.ReadBool();
+    preloadModuleName_ = parcel.ReadString();
     return true;
 }
 

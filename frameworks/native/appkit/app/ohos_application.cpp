@@ -36,6 +36,7 @@
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "runtime.h"
+#include "startup_manager.h"
 #include "system_ability_definition.h"
 #include "syspara/parameter.h"
 #include "ui_ability.h"
@@ -818,6 +819,23 @@ void OHOSApplication::CleanEmptyAbilityStage()
     if (containsNonEmpty) {
         TAG_LOGI(AAFwkTag::APPKIT, "Application contains none empty abilityStage");
     }
+}
+
+void OHOSApplication::PreloadAppStartup(const BundleInfo &bundleInfo,
+    const HapModuleInfo &entryHapModuleInfo, const std::string &preloadModuleName)
+{
+    if (!IsMainProcess(bundleInfo.applicationInfo.name, bundleInfo.applicationInfo.process)) {
+        TAG_LOGD(AAFwkTag::STARTUP, "not main process");
+        return;
+    }
+
+    std::shared_ptr<AbilityRuntime::StartupManager> startupManager =
+        DelayedSingleton<AbilityRuntime::StartupManager>::GetInstance();
+    if (startupManager == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "failed to get startupManager");
+        return;
+    }
+    startupManager->PreloadAppHintStartup(bundleInfo, entryHapModuleInfo, preloadModuleName);
 }
 
 bool OHOSApplication::IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level)

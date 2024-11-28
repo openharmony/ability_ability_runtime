@@ -212,6 +212,16 @@ public:
         appRunningUniqueId_ = appRunningUniqueId;
     }
 
+    inline std::string GetPreloadModuleName() const
+    {
+        return preloadModuleName_;
+    }
+
+    inline void SetPreloadModuleName(const std::string& moduleName)
+    {
+        preloadModuleName_ = moduleName;
+    }
+
     inline std::string GetInstanceKey() const
     {
         return instanceKey_;
@@ -307,6 +317,7 @@ private:
     std::string instanceKey_;
     bool isNeedPreloadModule_ = false;
     bool isAllowedNWebPreload_ = false;
+    std::string preloadModuleName_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

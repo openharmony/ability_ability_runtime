@@ -18,10 +18,8 @@
 
 #include <deque>
 #include <map>
-#include <memory>
 #include <string>
-
-#include "startup_task.h"
+#include <vector>
 
 namespace OHOS {
 namespace AbilityRuntime {

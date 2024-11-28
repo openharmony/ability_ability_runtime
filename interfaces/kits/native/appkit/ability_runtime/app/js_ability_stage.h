@@ -67,27 +67,17 @@ private:
     std::string GetHapModuleProp(const std::string &propName) const;
 
     static bool UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleInfo);
+    
+    std::unique_ptr<NativeReference> LoadJsOhmUrl(const std::string &srcEntry, const std::string &ohmUrl,
+        const std::string &moduleName, const std::string &hapPath, bool esmodule);
 
-    int32_t RegisterStartupTaskFromProfile(std::vector<JsStartupTask> &jsStartupTasks);
-    
-    bool GetProfileInfoFromResourceManager(std::vector<std::string> &profileInfo);
-    
-    bool AnalyzeProfileInfoAndRegisterStartupTask(const std::vector<std::string> &profileInfo);
-
-    void SetOptionalParameters(const nlohmann::json &module, JsStartupTask &jsStartupTask);
-    
     std::unique_ptr<NativeReference> LoadJsSrcEntry(const std::string &srcEntry);
 
     bool LoadJsStartupConfig(const std::string &srcEntry);
-    
-    bool GetResFromResMgr(
-        const std::string &resName,
-        const std::shared_ptr<Global::Resource::ResourceManager> &resMgr,
-        bool isCompressed, std::vector<std::string> &profileInfo);
-        
-    bool IsFileExisted(const std::string &filePath);
-    
-    bool TransformFileToJsonString(const std::string &resPath, std::string &profile);
+
+    int32_t RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo);
+
+    static int32_t RunAutoStartupTaskInner(const std::function<void()> &callback, bool &isAsyncCallback);
     
     void SetJsAbilityStage(const std::shared_ptr<Context> &context);
 

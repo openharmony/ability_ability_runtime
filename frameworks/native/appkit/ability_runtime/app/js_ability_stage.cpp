@@ -341,25 +341,74 @@ int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback
         TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfo");
         return ERR_INVALID_VALUE;
     }
-    if (hapModuleInfo->moduleType != AppExecFwk::ModuleType::ENTRY || hapModuleInfo->appStartup.empty()) {
-        TAG_LOGD(AAFwkTag::APPKIT, "not entry module or appStartup not exist");
+    if (hapModuleInfo->moduleType != AppExecFwk::ModuleType::ENTRY) {
+        TAG_LOGD(AAFwkTag::APPKIT, "not entry module");
+        return ERR_INVALID_VALUE;
+    }
+    if (hapModuleInfo->appStartup.empty()) {
+        TAG_LOGD(AAFwkTag::APPKIT, "entry module no app startup config");
         return ERR_INVALID_VALUE;
     }
     if (!shellContextRef_) {
         SetJsAbilityStage(stageContext);
     }
-    std::vector<JsStartupTask> jsStartupTasks;
-    int32_t result = RegisterStartupTaskFromProfile(jsStartupTasks);
+    int32_t result = RegisterAppStartupTask(hapModuleInfo);
     if (result != ERR_OK) {
         return result;
     }
+    return RunAutoStartupTaskInner(callback, isAsyncCallback);
+}
+
+int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo)
+{
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    if (startupManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null startupManager");
+        return ERR_INVALID_VALUE;
+    }
+    bool needRunAutoStartupTask = false;
+    int32_t result = startupManager->LoadAppStartupTaskConfig(needRunAutoStartupTask);
+    if (result != ERR_OK) {
+        return result;
+    }
+    if (!needRunAutoStartupTask) {
+        return ERR_OK;
+    }
+    jsRuntime_.UpdateModuleNameAndAssetPath(hapModuleInfo->moduleName);
+
+    const std::string &configEntry = startupManager->GetPendingConfigEntry();
+    if (!LoadJsStartupConfig(configEntry)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "load js appStartup config failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    const std::vector<StartupTaskInfo> &startupTaskInfos = startupManager->GetStartupTaskInfos();
+    for (const auto& item : startupTaskInfos) {
+        std::unique_ptr<NativeReference> startupJsRef = LoadJsOhmUrl(
+            item.srcEntry, item.ohmUrl, item.moduleName, item.hapPath, item.esModule);
+        if (startupJsRef == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "load js appStartup tasks failed.");
+            continue;
+        }
+        auto jsStartupTask = std::make_shared<JsStartupTask>(item.name, jsRuntime_, startupJsRef, shellContextRef_);
+        jsStartupTask->SetDependencies(item.dependencies);
+        jsStartupTask->SetIsExcludeFromAutoStart(item.excludeFromAutoStart);
+        jsStartupTask->SetCallCreateOnMainThread(item.callCreateOnMainThread);
+        jsStartupTask->SetWaitOnMainThread(item.waitOnMainThread);
+        startupManager->RegisterAppStartupTask(item.name, jsStartupTask);
+    }
+    return ERR_OK;
+}
+
+int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &callback, bool &isAsyncCallback)
+{
     std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
     if (startupManager == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null startupManager");
         return ERR_INVALID_VALUE;
     }
     std::shared_ptr<StartupTaskManager> startupTaskManager = nullptr;
-    result = startupManager->BuildAutoStartupTaskManager(startupTaskManager);
+    int32_t result = startupManager->BuildAutoAppStartupTaskManager(startupTaskManager);
     if (result != ERR_OK) {
         return result;
     }
@@ -381,58 +430,26 @@ int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback
     return ERR_OK;
 }
 
-int32_t JsAbilityStage::RegisterStartupTaskFromProfile(std::vector<JsStartupTask> &jsStartupTasks)
+std::unique_ptr<NativeReference> JsAbilityStage::LoadJsOhmUrl(const std::string &srcEntry, const std::string &ohmUrl,
+    const std::string &moduleName, const std::string &hapPath, bool esmodule)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    std::vector<std::string> profileInfo;
-    if (!GetProfileInfoFromResourceManager(profileInfo)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appStartup config not exist");
-        return ERR_INVALID_VALUE;
+    TAG_LOGD(AAFwkTag::APPKIT, "call");
+    if (srcEntry.empty() && ohmUrl.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "srcEntry and ohmUrl empty");
+        return nullptr;
     }
 
-    if (!AnalyzeProfileInfoAndRegisterStartupTask(profileInfo)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appStartup config not exist");
-        return ERR_INVALID_VALUE;
+    std::string moduleNameWithStartupTask = moduleName + "::startupTask";
+    std::string srcPath(moduleName + "/" + srcEntry);
+    auto pos = srcPath.rfind('.');
+    if (pos == std::string::npos) {
+        return nullptr;
     }
-
-    return ERR_OK;
-}
-
-bool JsAbilityStage::GetProfileInfoFromResourceManager(std::vector<std::string> &profileInfo)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    auto context = GetContext();
-    if (!context) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        return false;
-    }
-
-    auto resMgr = context->GetResourceManager();
-    if (!resMgr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null resMgr");
-        return false;
-    }
-
-    auto hapModuleInfo = context->GetHapModuleInfo();
-    if (!hapModuleInfo) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfo");
-        return false;
-    }
-
-    jsRuntime_.UpdateModuleNameAndAssetPath(hapModuleInfo->moduleName);
-    bool isCompressed = !hapModuleInfo->hapPath.empty();
-    std::string appStartup = hapModuleInfo->appStartup;
-    if (appStartup.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appStartup invalid");
-        return false;
-    }
-
-    GetResFromResMgr(appStartup, resMgr, isCompressed, profileInfo);
-    if (profileInfo.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appStartup config not exist");
-        return false;
-    }
-    return true;
+    srcPath.erase(pos);
+    srcPath.append(".abc");
+    std::unique_ptr<NativeReference> jsCode(
+        jsRuntime_.LoadModule(moduleNameWithStartupTask, srcPath, hapPath, esmodule, false, ohmUrl));
+    return jsCode;
 }
 
 std::unique_ptr<NativeReference> JsAbilityStage::LoadJsSrcEntry(const std::string &srcEntry)
@@ -466,7 +483,6 @@ std::unique_ptr<NativeReference> JsAbilityStage::LoadJsSrcEntry(const std::strin
 
     std::unique_ptr<NativeReference> jsCode(
         jsRuntime_.LoadModule(moduleName, srcPath, hapModuleInfo->hapPath, esmodule));
-
     return jsCode;
 }
 
@@ -492,99 +508,6 @@ bool JsAbilityStage::LoadJsStartupConfig(const std::string &srcEntry)
         return false;
     }
     startupManager->SetDefaultConfig(startupConfig);
-    return true;
-}
-
-void JsAbilityStage::SetOptionalParameters(
-    const nlohmann::json &module,
-    JsStartupTask &jsStartupTask)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    if (module.contains(DEPENDENCIES) && module[DEPENDENCIES].is_array()) {
-        std::vector<std::string> dependencies;
-        for (const auto& dependency : module.at(DEPENDENCIES)) {
-            if (dependency.is_string()) {
-                dependencies.push_back(dependency.get<std::string>());
-            }
-        }
-        jsStartupTask.SetDependencies(dependencies);
-    }
-
-    if (module.contains(EXCLUDE_FROM_AUTO_START) && module[EXCLUDE_FROM_AUTO_START].is_boolean()) {
-        jsStartupTask.SetIsExcludeFromAutoStart(module.at(EXCLUDE_FROM_AUTO_START).get<bool>());
-    } else {
-        jsStartupTask.SetIsExcludeFromAutoStart(false);
-    }
-
-    if (module.contains(RUN_ON_THREAD) && module[RUN_ON_THREAD].is_string()) {
-        std::string profileName = module.at(RUN_ON_THREAD).get<std::string>();
-        if (profileName == TASKPOOL || profileName == TASKPOOL_LOWER) {
-            jsStartupTask.SetCallCreateOnMainThread(false);
-        } else {
-            jsStartupTask.SetCallCreateOnMainThread(true);
-        }
-    }
-
-    if (module.contains(WAIT_ON_MAIN_THREAD) && module[WAIT_ON_MAIN_THREAD].is_boolean()) {
-        jsStartupTask.SetWaitOnMainThread(module.at(WAIT_ON_MAIN_THREAD).get<bool>());
-    } else {
-        jsStartupTask.SetWaitOnMainThread(true);
-    }
-}
-
-bool JsAbilityStage::AnalyzeProfileInfoAndRegisterStartupTask(const std::vector<std::string> &profileInfo)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    std::string startupInfo;
-    for (const std::string& info: profileInfo) {
-        startupInfo.append(info);
-    }
-    if (startupInfo.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "empty startupInfo");
-        return false;
-    }
-
-    nlohmann::json startupInfoJson = nlohmann::json::parse(startupInfo, nullptr, false);
-    if (startupInfoJson.is_discarded()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "parse json string failed");
-        return false;
-    }
-
-    if (!(startupInfoJson.contains(CONFIG_ENTRY) && startupInfoJson[CONFIG_ENTRY].is_string())) {
-        TAG_LOGE(AAFwkTag::APPKIT, "no config entry");
-        return false;
-    }
-    if (!LoadJsStartupConfig(startupInfoJson.at(CONFIG_ENTRY).get<std::string>())) {
-        TAG_LOGE(AAFwkTag::APPKIT, "load config entry failed");
-        return false;
-    }
-
-    if (!(startupInfoJson.contains(STARTUP_TASKS) && startupInfoJson[STARTUP_TASKS].is_array())) {
-        TAG_LOGE(AAFwkTag::APPKIT, "startupTasks invalid");
-        return false;
-    }
-    std::vector<std::shared_ptr<JsStartupTask>> jsStartupTasks;
-    for (const auto& module : startupInfoJson.at(STARTUP_TASKS).get<nlohmann::json>()) {
-        if (!module.contains(SRC_ENTRY) || !module[SRC_ENTRY].is_string() ||
-        !module.contains(NAME) || !module[NAME].is_string()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "invalid module data");
-            return false;
-        }
-
-        std::unique_ptr<NativeReference> startupJsRef = LoadJsSrcEntry(module.at(SRC_ENTRY).get<std::string>());
-        if (startupJsRef == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null startupJsRef");
-            return false;
-        }
-
-        auto jsStartupTask = std::make_shared<JsStartupTask>(
-            module.at(NAME).get<std::string>(), jsRuntime_, startupJsRef, shellContextRef_);
-        SetOptionalParameters(module, *jsStartupTask);
-        jsStartupTasks.push_back(jsStartupTask);
-    }
-    for (auto &iter : jsStartupTasks) {
-        DelayedSingleton<StartupManager>::GetInstance()->RegisterStartupTask(iter->GetName(), iter);
-    }
     return true;
 }
 
@@ -647,105 +570,6 @@ std::string JsAbilityStage::GetHapModuleProp(const std::string &propName) const
     }
     TAG_LOGE(AAFwkTag::APPKIT, "name = %{public}s", propName.c_str());
     return std::string();
-}
-
-bool JsAbilityStage::IsFileExisted(const std::string &filePath)
-{
-    if (filePath.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "empty file path");
-        return false;
-    }
-
-    if (access(filePath.c_str(), F_OK) != 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "not access file: %{private}s, errno:%{public}d", filePath.c_str(), errno);
-        return false;
-    }
-    return true;
-}
-
-bool JsAbilityStage::TransformFileToJsonString(const std::string &resPath, std::string &profile)
-{
-    if (!IsFileExisted(resPath)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "file not exist");
-        return false;
-    }
-    std::fstream in;
-    in.open(resPath, std::ios_base::in | std::ios_base::binary);
-    if (!in.is_open()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "errno:%{public}d", errno);
-        return false;
-    }
-    in.seekg(0, std::ios::end);
-    int64_t size = in.tellg();
-    if (size <= 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "errno:%{public}d", errno);
-        in.close();
-        return false;
-    }
-    in.seekg(0, std::ios::beg);
-    nlohmann::json profileJson = nlohmann::json::parse(in, nullptr, false);
-    if (profileJson.is_discarded()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "bad profile file");
-        in.close();
-        return false;
-    }
-    profile = profileJson.dump();
-    in.close();
-    return true;
-}
-
-bool JsAbilityStage::GetResFromResMgr(
-    const std::string &resName,
-    const std::shared_ptr<Global::Resource::ResourceManager> &resMgr,
-    bool isCompressed, std::vector<std::string> &profileInfo)
-{
-    if (resName.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "res name empty");
-        return false;
-    }
-
-    size_t pos = resName.rfind(PROFILE_FILE_PREFIX);
-    if ((pos == std::string::npos) || (pos == resName.length() - strlen(PROFILE_FILE_PREFIX))) {
-        TAG_LOGE(AAFwkTag::APPKIT, "res name %{public}s invalid", resName.c_str());
-        return false;
-    }
-    std::string profileName = resName.substr(pos + strlen(PROFILE_FILE_PREFIX));
-        // hap is compressed status, get file content.
-    if (isCompressed) {
-        TAG_LOGD(AAFwkTag::APPKIT, "compressed status.");
-        std::unique_ptr<uint8_t[]> fileContentPtr = nullptr;
-        size_t len = 0;
-        if (resMgr->GetProfileDataByName(profileName.c_str(), len, fileContentPtr) != Global::Resource::SUCCESS) {
-            TAG_LOGE(AAFwkTag::APPKIT, "GetProfileDataByName failed");
-            return false;
-        }
-        if (fileContentPtr == nullptr || len == 0) {
-            TAG_LOGE(AAFwkTag::APPKIT, "invalid data");
-            return false;
-        }
-        std::string rawData(fileContentPtr.get(), fileContentPtr.get() + len);
-        nlohmann::json profileJson = nlohmann::json::parse(rawData, nullptr, false);
-        if (profileJson.is_discarded()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "bad profile file");
-            return false;
-        }
-        profileInfo.emplace_back(profileJson.dump());
-        return true;
-    }
-    // hap is decompressed status, get file path then read file.
-    std::string resPath;
-    if (resMgr->GetProfileByName(profileName.c_str(), resPath) != Global::Resource::SUCCESS) {
-        TAG_LOGD(AAFwkTag::APPKIT, "profileName cannot be found.");
-        return false;
-    }
-    TAG_LOGD(AAFwkTag::APPKIT, "resPath is %{private}s.", resPath.c_str());
-    std::string profile;
-    if (!TransformFileToJsonString(resPath, profile)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "TransformFileToJsonString filed");
-        return false;
-    }
-    profileInfo.emplace_back(profile);
-    return true;
 }
 
 void JsAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
