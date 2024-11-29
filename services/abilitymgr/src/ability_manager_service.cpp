@@ -6404,10 +6404,9 @@ int AbilityManagerService::GenerateAbilityRequest(const Want &want, int requestC
 
     request.want.SetModuleName(request.abilityInfo.moduleName);
 
-    if (want.GetBoolParam(Want::PARAM_RESV_START_RECENT, false) &&
-        AAFwk::PermissionVerification::GetInstance()->VerifyStartRecentAbilityPermission()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Set start recent.");
-        request.startRecent = true;
+    int32_t startRecent = AbilityPermissionUtil::GetInstance().CheckStartRecentAbility(want, request);
+    if (startRecent != ERR_OK) {
+        return startRecent;
     }
 
     if (ModalSystemDialogUtil::CheckDebugAppNotInDeveloperMode(request.abilityInfo.applicationInfo)) {

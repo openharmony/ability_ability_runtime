@@ -231,5 +231,22 @@ int32_t AbilityPermissionUtil::CheckMultiInstanceKeyForExtension(const AbilityRe
     }
     return ERR_OK;
 }
+
+int32_t AbilityPermissionUtil::CheckStartRecentAbility(const Want &want, AbilityRequest &request)
+{
+    bool startRecent = want.GetBoolParam(Want::PARAM_RESV_START_RECENT, false);
+    if (!startRecent) {
+        return ERR_OK;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller no system-app, can not use system-api");
+        return ERR_NOT_SYSTEM_APP;
+    }
+    if (AAFwk::PermissionVerification::GetInstance()->VerifyStartRecentAbilityPermission()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Set start recent.");
+        request.startRecent = true;
+    }
+    return ERR_OK;
+}
 } // AAFwk
 } // OHOS
