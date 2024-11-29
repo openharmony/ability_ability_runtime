@@ -233,7 +233,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->SetSecurityFlag(abilityRequest.want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
     abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
     abilityRecord->sessionInfo_ = abilityRequest.sessionInfo;
-    if (abilityRequest.abilityInfo.isStageBasedModel &&
+    if (AppUtils::GetInstance().IsMultiProcessModel() && abilityRequest.abilityInfo.isStageBasedModel &&
         abilityRequest.abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
         !abilityRequest.customProcess.empty()) {
             abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
