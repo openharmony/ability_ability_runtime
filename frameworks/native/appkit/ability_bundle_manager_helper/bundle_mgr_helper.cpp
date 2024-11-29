@@ -962,5 +962,20 @@ std::string BundleMgrHelper::GetStringById(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetStringById(bundleName, moduleName, resId, userId);
 }
+
+std::string BundleMgrHelper::GetDataDir(const std::string &bundleName, const int32_t appIndex)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "Failed to connect");
+        return "";
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::string dataDir;
+    bundleMgr->GetDirByBundleNameAndAppIndex(bundleName, appIndex, dataDir);
+    return dataDir;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
