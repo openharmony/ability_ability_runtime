@@ -418,6 +418,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     AbilityRuntime::ErrorMsgGuard errorMsgGuard(token_ ? token_->AsObject() : nullptr,
         reinterpret_cast<uintptr_t>(GetScheduler().GetRefPtr()), "ScheduleAbilityTransaction");
     lifecycleDeal_->ForegroundNew(want, lifeCycleStateInfo_, GetSessionInfo());
+    SetIsNewWant(false);
     lifeCycleStateInfo_.sceneFlag = 0;
     lifeCycleStateInfo_.sceneFlagBak = 0;
     {

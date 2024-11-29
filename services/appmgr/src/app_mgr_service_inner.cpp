@@ -2694,7 +2694,7 @@ void AppMgrServiceInner::UpdateAbilityState(const sptr<IRemoteObject> &token, co
         return;
     }
 
-    if (state == AbilityState::ABILITY_STATE_BACKGROUND) {
+    if (state == AbilityState::ABILITY_STATE_FOREGROUND) {
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token, "ServiceInner::UpdateAbilityState");
     }
     auto appRecord = GetAppRunningRecordByAbilityToken(token);
