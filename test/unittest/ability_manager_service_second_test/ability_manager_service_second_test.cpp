@@ -674,9 +674,25 @@ HWTEST_F(AbilityManagerServiceSecondTest, ConnectLocalAbility_001, TestSize.Leve
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ConnectLocalAbility_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
-    ExtensionAbilityType extensionType = ExtensionAbilityType::SERVICE;
+    ExtensionAbilityType extensionType = ExtensionAbilityType::FORM;
     EXPECT_EQ(abilityMs_->ConnectLocalAbility(want, 100, nullptr, nullptr, extensionType), ERR_CROSS_USER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ConnectLocalAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ConnectLocalAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectLocalAbility
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, ConnectLocalAbility_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ConnectLocalAbility_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    ExtensionAbilityType extensionType = ExtensionAbilityType::SERVICE;
+    EXPECT_EQ(abilityMs_->ConnectLocalAbility(want, 100, nullptr, nullptr, extensionType), ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ConnectLocalAbility_002 end");
 }
 
 /*
