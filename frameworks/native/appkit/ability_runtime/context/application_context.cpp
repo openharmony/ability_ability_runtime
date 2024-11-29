@@ -23,8 +23,7 @@
 #include "hitrace_meter.h"
 #include "running_process_info.h"
 #include "exit_reason.h"
-#include "bundle_mgr_client.h"
-#include "singleton.h"
+#include "ability_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -887,18 +886,12 @@ std::string ApplicationContext::GetDataDir()
 {
     std::lock_guard<std::mutex> lock(dataDirMutex_);
     if (dataDir_.empty()) {
-        auto bmsClient = DelayedSingleton<AppExecFwk::BundleMgrClient>::GetInstance();
-        if (bmsClient == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "bmsClient null");
-            return nullptr;
-        }
-        std::string dataDir;
-        bmsClient->GetDirByBundleNameAndAppIndex(GetBundleName(), appIndex_, dataDir);
-        if (dataDir.empty()) {
+        auto bundleManagerHelper = AAFwk::AbilityUtil::GetBundleManagerHelper();
+        dataDir_ = bundleManagerHelper->GetDataDir(GetBundleName(), appIndex_);
+        if (dataDir_.empty()) {
             TAG_LOGE(AAFwkTag::APPKIT, "dataDir is empty");
-            return nullptr;
+            return "";
         }
-        dataDir_ = dataDir;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "GetDataDir is %{public}s", dataDir_.c_str());
     return dataDir_;
