@@ -112,6 +112,7 @@ ohos_unittest("photo_editor_extension_a_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 }

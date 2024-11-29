@@ -18,7 +18,6 @@
 #define private public
 #define protected public
 #include "distributed_kv_data_manager.h"
-#include "foundation/distributeddatamgr/kv_store/kvstoremock/frameworks/innerkitsimpl/kvdb/include/store_manager.h"
 #include "kvstore.h"
 #include "distributed_kv_data_manager.h"
 #undef private

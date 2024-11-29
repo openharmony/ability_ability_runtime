@@ -93,6 +93,7 @@ ohos_unittest("ui_extension_record_factory_test") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "storage_service:storage_manager_sa_proxy",

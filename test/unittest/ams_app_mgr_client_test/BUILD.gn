@@ -62,12 +62,15 @@ ohos_unittest("AmsAppMgrClientTest") {
     "access_token:libtoken_setproc",
     "appspawn:appspawn_client",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "selinux_adapter:librestorecon",
   ]
 
   if (ability_runtime_graphics) {

@@ -62,6 +62,7 @@ ohos_unittest("js_ui_service_proxy_test") {
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -70,6 +71,7 @@ ohos_unittest("js_ui_service_proxy_test") {
     "ipc:rpc",
     "samgr:samgr_proxy",
     "window_manager:libwsutils",
+    "window_manager:windowstage_kit",
   ]
 }
 

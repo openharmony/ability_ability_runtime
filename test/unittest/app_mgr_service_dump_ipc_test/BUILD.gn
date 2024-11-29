@@ -60,6 +60,7 @@ ohos_unittest("app_mgr_service_dump_ipc_test") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
