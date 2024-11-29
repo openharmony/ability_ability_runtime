@@ -1039,11 +1039,9 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         || curState_ == ApplicationState::APP_STATE_FOREGROUND) {
         auto pendingState = pendingState_;
         SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
-        if (pendingState == ApplicationPendingState::READY) {
-            if (!ScheduleForegroundRunning()) {
-                AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(ability->GetToken(),
-                    "ScheduleForegroundRunning fail");
-            }
+        if (pendingState == ApplicationPendingState::READY && !ScheduleForegroundRunning()) {
+            AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(ability->GetToken(),
+                "ScheduleForegroundRunning fail");
         }
         foregroundingAbilityTokens_.insert(ability->GetToken());
         TAG_LOGD(AAFwkTag::APPMGR, "foregroundingAbility size: %{public}d",
