@@ -28,6 +28,7 @@ namespace AAFwk {
 namespace {
 constexpr size_t INSIGHT_INTENT_EXECUTE_RECORDS_MAX_SIZE = 256;
 constexpr char EXECUTE_INSIGHT_INTENT_PERMISSION[] = "ohos.permission.EXECUTE_INSIGHT_INTENT";
+constexpr int32_t OPERATION_DURATION = 10000;
 }
 using namespace AppExecFwk;
 
@@ -291,15 +292,19 @@ void InsightIntentExecuteManager::SetIntentExemptionInfo(int32_t uid)
     }
 }
 
-std::map<int32_t, int64_t> InsightIntentExecuteManager::GetIntentExemptionInfo()
-{
-    return intentExemptionDeadlineTime_;
-}
-
-void InsightIntentExecuteManager::RemoveIntentExemptionInfo(int32_t uid)
+bool InsightIntentExecuteManager::CheckIntentIsExemption(int32_t uid)
 {
     std::lock_guard<ffrt::mutex> guard(intentExemptionLock_);
-    intentExemptionDeadlineTime_.erase(uid);
+    if (intentExemptionDeadlineTime_.find(uid) != intentExemptionDeadlineTime_.end()) {
+        if (AbilityRuntime::TimeUtil::CurrentTimeMillis() - OPERATION_DURATION <= intentExemptionDeadlineTime_[uid]) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "exemption check uid:%{public}d", uid);
+            return true;
+        } else {
+            intentExemptionDeadlineTime_.erase(uid);
+            return false;
+        }
+    }
+    return false;
 }
 } // namespace AAFwk
 } // namespace OHOS
