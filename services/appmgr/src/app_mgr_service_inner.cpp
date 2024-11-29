@@ -4724,7 +4724,7 @@ void AppMgrServiceInner::RegisterStartSpecifiedAbilityResponse(const sptr<IStart
 void AppMgrServiceInner::ScheduleAcceptWantDone(
     const int32_t recordId, const AAFwk::Want &want, const std::string &flag)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Schedule accept want done, flag: %{public}s", flag.c_str());
+    TAG_LOGD(AAFwkTag::APPMGR, "ScheduleAcceptWantDone, flag: %{private}s", flag.c_str());
 
     auto appRecord = GetAppRunningRecordByAppRecordId(recordId);
     if (!appRecord) {

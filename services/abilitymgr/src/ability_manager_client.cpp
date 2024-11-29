@@ -363,8 +363,8 @@ ErrCode AbilityManagerClient::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo,
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, StartUIAbilityBySCB target: %{public}s.",
-        sessionInfo->want.GetElement().GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, StartUIAbilityBySCB target: %{public}s, persistentId: %{public}d.",
+        sessionInfo->want.GetElement().GetURI().c_str(), sessionInfo->persistentId);
     return abms->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
 }
 
@@ -478,7 +478,7 @@ ErrCode AbilityManagerClient::CloseUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CloseUIAbilityBySCB");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CloseUIAbilityBySCB persistentId: %{public}d", sessionInfo->persistentId);
     return abms->CloseUIAbilityBySCB(sessionInfo);
 }
 
@@ -512,8 +512,8 @@ ErrCode AbilityManagerClient::MinimizeUIAbilityBySCB(sptr<SessionInfo> sessionIn
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, MinimizeUIAbilityBySCB target: %{public}s",
-        sessionInfo->want.GetElement().GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, MinimizeUIAbilityBySCB target: %{public}s, persistentId: %{public}d",
+        sessionInfo->want.GetElement().GetURI().c_str(), sessionInfo->persistentId);
     return abms->MinimizeUIAbilityBySCB(sessionInfo, fromUser, sceneFlag);
 }
 
