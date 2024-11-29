@@ -89,9 +89,7 @@ public:
 
     void SetIntentExemptionInfo(int32_t uid);
 
-    std::map<int32_t, int64_t> GetIntentExemptionInfo();
-
-    void RemoveIntentExemptionInfo(int32_t uid);
+    bool CheckIntentIsExemption(int32_t uid);
 private:
     mutable ffrt::mutex mutex_;
     mutable ffrt::mutex intentExemptionLock_;

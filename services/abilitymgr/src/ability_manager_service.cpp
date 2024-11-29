@@ -98,7 +98,6 @@
 #include "wm_common.h"
 #endif
 #include "window_visibility_changed_listener.h"
-#include "time_util.h"
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -197,7 +196,6 @@ constexpr int32_t UPDATE_CONFIG_FLAG_COVER = 1;
 constexpr int32_t UPDATE_CONFIG_FLAG_APPEND = 2;
 constexpr int32_t START_AUTO_START_APP_DELAY_TIME = 200;
 constexpr int32_t START_AUTO_START_APP_RETRY_MAX_TIMES = 5;
-constexpr int32_t OPERATION_DURATION = 10000;
 
 const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
@@ -11593,21 +11591,9 @@ bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToke
     return erms->DoProcess(want, GetUserId());
 }
 
-bool AbilityManagerService::CheckProcessIsBackground(int32_t uid, int32_t pid, AbilityState currentState)
+bool AbilityManagerService::CheckProcessIsBackground(int32_t pid, AbilityState currentState)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "uid:%{public}d, pid:%{public}d, currentState:%{public}d",
-        uid, pid, currentState);
-    std::map<int32_t, int64_t> intentExemptionDeadlineTime =
-        DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->GetIntentExemptionInfo();
-    if (intentExemptionDeadlineTime.find(uid) != intentExemptionDeadlineTime.end()) {
-        if (AbilityRuntime::TimeUtil::CurrentTimeMillis() - OPERATION_DURATION <= intentExemptionDeadlineTime[uid]) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "exemption check uid:%{public}d", uid);
-            return false;
-        } else {
-            DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->RemoveIntentExemptionInfo(uid);
-        }
-    }
-
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "pid:%{public}d, currentState:%{public}d", pid, currentState);
     std::lock_guard<ffrt::mutex> myLockGuard(windowVisibleListLock_);
     if (currentState == AAFwk::AbilityState::BACKGROUND &&
         windowVisibleList_.find(pid) != windowVisibleList_.end()) {
@@ -11714,8 +11700,12 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
         return false;
     }
-    if (!CheckProcessIsBackground(abilityRecord->GetUid(),
-        abilityRecord->GetPid(), abilityRecord->GetAbilityState())) {
+    if (DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckIntentIsExemption(
+        abilityRecord->GetUid())) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Is Exemption Pass");
+        return false;
+    }
+    if (!CheckProcessIsBackground(abilityRecord->GetPid(), abilityRecord->GetAbilityState())) {
         return false;
     }
     if (continuousFlag) {
