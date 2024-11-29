@@ -637,7 +637,7 @@ sptr<Rosen::WindowOption> CreateWindowOption(const sptr<AAFwk::SessionInfo> &ses
 {
     auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
-        TAG_LOGE(UI_EXT, "make option failed");
+        TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
         return nullptr;
     }
 

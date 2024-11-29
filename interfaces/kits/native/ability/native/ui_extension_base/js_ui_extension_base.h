@@ -187,6 +187,7 @@ protected:
         const AppExecFwk::InsightIntentExecuteResult &result);
     void PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground);
+    sptr<Rosen::WindowOption> CreateWindowOption(const sptr<AAFwk::SessionInfo> &sessionInfo);
 
 protected:
     JsRuntime &jsRuntime_;
