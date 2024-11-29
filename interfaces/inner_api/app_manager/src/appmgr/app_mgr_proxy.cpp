@@ -1697,7 +1697,7 @@ bool AppMgrProxy::IsFinalAppProcess()
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
-        return ERR_INVALID_DATA;
+        return false;
     }
 
     MessageParcel reply;
