@@ -633,6 +633,27 @@ bool JsUIExtensionBase::CallJsOnSessionCreate(const AAFwk::Want &want, const spt
     return true;
 }
 
+sptr<Rosen::WindowOption> CreateWindowOption(const sptr<AAFwk::SessionInfo> &sessionInfo)
+{
+    auto option = sptr<Rosen::WindowOption>::MakeSptr();
+    if (option == nullptr) {
+        TAG_LOGE(UI_EXT, "make option failed");
+        return nullptr;
+    }
+
+    option->SetWindowName(context_->GetBundleName() + context_->GetAbilityInfo()->name);
+    option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
+    option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
+    option->SetParentId(sessionInfo->hostWindowId);
+    option->SetRealParentId(sessionInfo->realHostWindowId);
+    option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
+    option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+    option->SetDensity(sessionInfo->density);
+    option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
+
+    return option;
+}
+
 bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     if (sessionInfo == nullptr || sessionInfo->uiExtensionComponentId == 0) {
@@ -651,20 +672,10 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
             TAG_LOGE(AAFwkTag::UI_EXT, "Failed to get context");
             return false;
         }
-        auto option = sptr<Rosen::WindowOption>::MakeSptr();
+        auto option = CreateWindowOption(sessionInfo);
         if (option == nullptr) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "make option failed");
             return false;
         }
-        option->SetWindowName(context_->GetBundleName() + context_->GetAbilityInfo()->name);
-        option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
-        option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
-        option->SetParentId(sessionInfo->hostWindowId);
-        option->SetRealParentId(sessionInfo->realHostWindowId);
-        option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
-        option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
-        option->SetDensity(sessionInfo->density);
-        option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
         sptr<Rosen::Window> uiWindow;
         {
             HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
