@@ -87,7 +87,8 @@ int32_t StatusBarDelegateManager::DoProcessAttachment(std::shared_ptr<AbilityRec
         auto statusBarDelegate = GetStatusBarDelegate();
         CHECK_POINTER_AND_RETURN(statusBarDelegate, ERR_INVALID_VALUE);
         auto accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
-        auto ret = statusBarDelegate->AttachPidToStatusBarItem(accessTokenId, abilityRecord->GetPid());
+        auto ret = statusBarDelegate->AttachPidToStatusBarItem(accessTokenId, abilityRecord->GetPid(),
+            abilityRecord->GetInstanceKey());
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret: %{public}d", ret);
             return ret;
@@ -108,7 +109,8 @@ int32_t StatusBarDelegateManager::DoCallerProcessAttachment(std::shared_ptr<Abil
     auto statusBarDelegate = GetStatusBarDelegate();
     CHECK_POINTER_AND_RETURN(statusBarDelegate, ERR_INVALID_VALUE);
     auto accessTokenId = abilityRecord->GetApplicationInfo().accessTokenId;
-    auto ret = statusBarDelegate->AttachPidToStatusBarItem(accessTokenId, abilityRecord->GetPid());
+    auto ret = statusBarDelegate->AttachPidToStatusBarItem(accessTokenId, abilityRecord->GetPid(),
+        abilityRecord->GetInstanceKey());
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, ret: %{public}d", ret);
         return ret;
