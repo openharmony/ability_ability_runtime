@@ -440,6 +440,13 @@ public:
 
     virtual void SetAppExceptionCallback(sptr<IRemoteObject> callback) override;
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    virtual void SendAppSpawnUninstallDebugHapMsg(int32_t userId) override;
+
 private:
     /**
      * @brief Judge whether the application service is ready.

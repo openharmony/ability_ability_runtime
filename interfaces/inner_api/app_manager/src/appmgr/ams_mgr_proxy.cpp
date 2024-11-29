@@ -1417,5 +1417,25 @@ void AmsMgrProxy::SetAppExceptionCallback(sptr<IRemoteObject> callback)
         return;
     }
 }
+
+void AmsMgrProxy::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WriteInt32 failed");
+        return;
+    }
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IAmsMgr::Message::SEND_APP_SPAWN_UNINSTALL_DEBUG_HAP_MSG), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SendTransactCmd failed, errCode %{public}d", ret);
+    }
+}
 } // namespace AppExecFwk
 } // namespace OHOS

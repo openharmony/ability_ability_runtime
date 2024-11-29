@@ -4816,5 +4816,18 @@ HWTEST_F(AppMgrServiceInnerTest, SetJITPermissions_001, TestSize.Level0)
     TAG_LOGI(AAFwkTag::TEST, "SetJITPermissions_001 end");
 }
 
+/**
+ * @tc.name: SendAppSpawnUninstallDebugHapMsg_001
+ * @tc.desc: SendAppSpawnUninstallDebugHapMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendAppSpawnUninstallDebugHapMsg_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->SendAppSpawnUninstallDebugHapMsg(0);
+    TAG_LOGI(AAFwkTag::TEST, "SendAppSpawnUninstallDebugHapMsg_001 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
