@@ -73,6 +73,7 @@ ohos_unittest("status_bar_delegate_manager_test") {
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
     "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
     "hisysevent:libhisysevent",

@@ -32,7 +32,6 @@ ohos_unittest("cj_ui_ability_test") {
     "${ability_runtime_path}/cj_environment/interfaces/inner_api",
   ]
 
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -106,8 +105,6 @@ ohos_unittest("cj_ui_ability_test") {
       "window_manager:libwm",
     ]
   }
-
-  defines = [ "CONFIG_HILOG" ]
 }
 
 group("unittest") {

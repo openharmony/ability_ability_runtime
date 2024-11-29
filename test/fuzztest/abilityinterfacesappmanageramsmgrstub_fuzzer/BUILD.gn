@@ -58,6 +58,7 @@ ohos_fuzztest("AbilityInterfacesAppManagerAmsMgrStubFuzzTest") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "hisysevent:libhisysevent",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",

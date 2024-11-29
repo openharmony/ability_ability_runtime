@@ -24,7 +24,6 @@ ohos_unittest("cj_want_ffi_test") {
     "cj_want_ffi_test.cpp",
   ]
 
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

@@ -57,10 +57,7 @@ ohos_source_set("appmgr_test_source") {
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/running_process_info.cpp",
   ]
 
-  public_configs = [
-    ":appmgr_test_config",
-    "${c_utils_base_path}:utils_config",
-  ]
+  public_configs = [ ":appmgr_test_config" ]
 
   public_deps = [
     "${c_utils_base_path}:utils",
@@ -96,6 +93,8 @@ ohos_source_set("appmgr_test_source") {
     "json:nlohmann_json_static",
     "kv_store:distributeddata_mgr",
   ]
+
+  public_external_deps = [ "c_utils:utils" ]
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
