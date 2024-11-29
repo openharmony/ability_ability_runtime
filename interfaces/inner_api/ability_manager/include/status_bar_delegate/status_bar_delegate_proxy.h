@@ -27,7 +27,7 @@ public:
     virtual ~StatusBarDelegateProxy() = default;
 
     virtual int32_t CheckIfStatusBarItemExists(uint32_t accessTokenId, bool& isExist);
-    virtual int32_t AttachPidToStatusBarItem(uint32_t accessTokenId, int32_t pid);
+    virtual int32_t AttachPidToStatusBarItem(uint32_t accessTokenId, int32_t pid, const std::string &instanceKey);
 
 private:
     int32_t SendRequest(StatusBarDelegateCmd code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
