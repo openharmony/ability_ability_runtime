@@ -633,7 +633,7 @@ bool JsUIExtensionBase::CallJsOnSessionCreate(const AAFwk::Want &want, const spt
     return true;
 }
 
-sptr<Rosen::WindowOption> CreateWindowOption(const sptr<AAFwk::SessionInfo> &sessionInfo)
+sptr<Rosen::WindowOption> JsUIExtensionBase::CreateWindowOption(const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
