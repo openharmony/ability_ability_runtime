@@ -42,6 +42,7 @@ constexpr const char* JITPERMISSIONSLIST_NAME = "name";
 constexpr const char* JITPERMISSIONSLIST_NAME_VALUE = "JITPermissions";
 constexpr const char* JITPERMISSIONSLIST_COUNT = "ohos.encaps.count";
 constexpr const char* JITPERMISSIONSLIST_PERMISSIONS_NAME = "permissions";
+constexpr const char* UNINSTALL_BUNDLE_NAME = "uninstallDebugHapMsg";
 }
 AppSpawnClient::AppSpawnClient(bool isNWebSpawn)
 {
@@ -529,6 +530,36 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
     }
     TAG_LOGI(AAFwkTag::APPMGR, "pid = [%{public}d]", pid);
     return result.result;
+}
+
+int32_t AppSpawnClient::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    AppSpawnReqMsgHandle reqHandle = nullptr;
+    int32_t ret = OpenConnection();
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OpenConnection failed");
+        return ret;
+    }
+    ret = AppSpawnReqMsgCreate(MSG_UNINSTALL_DEBUG_HAP, UNINSTALL_BUNDLE_NAME, &reqHandle);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppSpawnReqMsgCreate failed");
+        return ret;
+    }
+    auto msg = std::to_string(userId);
+    ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_USERID, msg.c_str());
+    if (ret != ERR_OK) {
+        AppSpawnReqMsgFree(reqHandle);
+        TAG_LOGE(AAFwkTag::APPMGR, "AppSpawnReqMsgAddStringInfo failed");
+        return ret;
+    }
+    AppSpawnResult result = { 0 };
+    ret = AppSpawnClientSendMsg(handle_, reqHandle, &result);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppSpawnClientSendMsg failed");
+        return ret;
+    }
+    return ret;
 }
 
 int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg &startMsg, int &status)

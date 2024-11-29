@@ -438,6 +438,13 @@ public:
 
     virtual bool IsCallerKilling(const std::string& callerKey) override;
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    virtual void SendAppSpawnUninstallDebugHapMsg(int32_t userId) override;
+
 private:
     /**
      * @brief Judge whether the application service is ready.
