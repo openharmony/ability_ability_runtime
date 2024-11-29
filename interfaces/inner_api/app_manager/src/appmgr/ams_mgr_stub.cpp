@@ -219,6 +219,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleSetKeepAliveDkv(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_IN_BATCH):
             return HandleKillProcessesInBatch(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::SEND_APP_SPAWN_UNINSTALL_DEBUG_HAP_MSG):
+            return HandleSendAppSpawnUninstallDebugHapMsg(data);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -906,6 +908,14 @@ int32_t AmsMgrStub::HandleSetAppExceptionCallback(MessageParcel &data, MessagePa
 {
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     SetAppExceptionCallback(callback);
+    return NO_ERROR;
+}
+
+ErrCode AmsMgrStub::HandleSendAppSpawnUninstallDebugHapMsg(MessageParcel &data)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    auto userId = data.ReadInt32();
+    SendAppSpawnUninstallDebugHapMsg(userId);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

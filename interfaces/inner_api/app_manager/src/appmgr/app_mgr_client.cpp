@@ -1421,5 +1421,25 @@ AppMgrResultCode AppMgrClient::IsAppRunning(const std::string &bundleName, int32
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
+
+AppMgrResultCode AppMgrClient::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
+{
+    if (mgrHolder_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null mgrHolder_");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null service");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null amsService");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    amsService->SendAppSpawnUninstallDebugHapMsg(userId);
+    return AppMgrResultCode::RESULT_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
