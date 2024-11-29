@@ -1697,7 +1697,7 @@ void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 
 void AppRunningRecord::ScheduleAcceptWantDone()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundle %{public}s", mainBundleName_.c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "ScheduleAcceptWantDone, bundle %{public}s", mainBundleName_.c_str());
     RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_HALF_TIMEOUT_MSG);
     RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG);
 }
@@ -2082,8 +2082,8 @@ void AppRunningRecord::OnWindowVisibilityChanged(
         }
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "window id empty: %{public}d, pState: %{public}d, cState: %{public}d",
-        IsWindowIdsEmpty(), pendingState_, curState_);
+    TAG_LOGI(AAFwkTag::APPMGR, "wnd call, %{public}s_%{public}d, isEmpty_%{public}d, c_%{public}d -> p_%{public}d",
+        GetBundleName().c_str(), GetPid(), IsWindowIdsEmpty(), curState_, pendingState_);
     if (pendingState_ == ApplicationPendingState::READY) {
         if (!IsWindowIdsEmpty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
             SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
