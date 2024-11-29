@@ -52,9 +52,6 @@ group("napi_packages") {
     "${ability_runtime_napi_path}/app_startup/startup_task:startuptask_napi",
     "${ability_runtime_napi_path}/application:application_napi",
     "${ability_runtime_napi_path}/application_context_constant:contextconstant_napi",
-    "${ability_runtime_napi_path}/auto_fill_extension_ability:autofillextensionability_napi",
-    "${ability_runtime_napi_path}/auto_fill_extension_context:autofillextensioncontext_napi",
-    "${ability_runtime_napi_path}/auto_fill_manager:autofillmanager_napi",
     "${ability_runtime_napi_path}/callee:callee_napi",
     "${ability_runtime_napi_path}/caller:caller_napi",
     "${ability_runtime_napi_path}/configuration_constant:configurationconstant",
@@ -99,4 +96,11 @@ group("napi_packages") {
     "${ability_runtime_napi_path}/wantagent:napi_wantAgent",
     "${ability_runtime_napi_path}/wantagent:wantagent",
   ]
+  if (ability_runtime_auto_fill) {
+    deps += [
+      "${ability_runtime_napi_path}/auto_fill_extension_ability:autofillextensionability_napi",
+      "${ability_runtime_napi_path}/auto_fill_extension_context:autofillextensioncontext_napi",
+      "${ability_runtime_napi_path}/auto_fill_manager:autofillmanager_napi",
+    ]
+  }
 }
