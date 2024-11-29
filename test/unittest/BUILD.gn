@@ -442,9 +442,6 @@ group("unittest") {
       "atomic_service_status_callback_proxy_test:unittest",
       "atomic_service_status_callback_stub_test:unittest",
       "authorization_result_test:unittest",
-      "auto_fill_extension_context_test:unittest",
-      "auto_fill_manager_test:unittest",
-      "auto_fill_manager_util_test:unittest",
       "auto_startup_callback_proxy_test:unittest",
       "auto_startup_callback_stub_test:unittest",
       "auto_startup_info_test:unittest",
@@ -525,7 +522,6 @@ group("unittest") {
       "insight_intent:unittest",
       "insight_intent_profile_test:unittest",
       "js_ability_context_test:unittest",
-      "js_auto_fill_extension_test:unittest",
       "js_photo_editor_extension_context_test:unittest",
       "js_photo_editor_extension_impl_test:unittest",
       "js_service_extension_test:unittest",
@@ -624,6 +620,15 @@ group("unittest") {
       "window_options_utils_test:unittest",
       "window_visibility_changed_listener_test:unittest",
     ]
+
+    if (ability_runtime_auto_fill) {
+      deps += [
+        "auto_fill_extension_context_test:unittest",
+        "auto_fill_manager_test:unittest",
+        "auto_fill_manager_util_test:unittest",
+        "js_auto_fill_extension_test:unittest",
+      ]
+    }
 
     if (ability_runtime_feature_sandboxmanager) {
       deps += [ "uri_permission_impl_test:unittest" ]

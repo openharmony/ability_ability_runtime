@@ -1167,7 +1167,7 @@ bool AppMgrService::JudgeAppSelfCalled(int32_t recordId)
 bool AppMgrService::IsSharedBundleRunning(const std::string &bundleName, uint32_t versionCode)
 {
     if (!IsReady()) {
-        return ERR_INVALID_OPERATION;
+        return false;
     }
     return appMgrServiceInner_->IsSharedBundleRunning(bundleName, versionCode);
 }

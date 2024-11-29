@@ -208,6 +208,10 @@ ohos_shared_library("abilityms") {
 
   defines = []
 
+  if (ability_runtime_auto_fill) {
+    defines += [ "SUPPORT_AUTO_FILL" ]
+  }
+
   if (ability_runtime_graphics) {
     defines += [ "SUPPORT_GRAPHICS" ]
     external_deps += [
