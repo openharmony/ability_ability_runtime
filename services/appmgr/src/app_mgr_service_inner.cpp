@@ -6316,7 +6316,7 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     FaultData newfaultData;
     newfaultData.faultType = faultData.faultType;
     newfaultData.errorObject.message =
-        "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+        "\nTimestamp: " + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
     newfaultData.errorObject.message += faultData.errorObject.message;
     newfaultData.errorObject.name = faultData.errorObject.name;
     newfaultData.errorObject.stack = faultData.errorObject.stack;
