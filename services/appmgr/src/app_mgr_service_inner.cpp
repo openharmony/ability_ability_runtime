@@ -494,15 +494,21 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
         hapModuleInfo, want, appExistFlag, true, request.preloadMode);
     appRecord->SetNeedLimitPrio(false);
     if (request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE) {
-        auto reportLoadTask = [appRecord]() {
-            auto priorityObj = appRecord->GetPriorityObject();
-            if (priorityObj) {
-                AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PRELOAD_BEGIN,
+            reportpreLoadTask(appRecord);
+        }
+    }
+}
+
+void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord){
+    auto reportLoadTask = [appRecord]() {
+        auto priorityObj = appRecord->GetPriorityObject();
+        if (priorityObj) {
+            AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PRELOAD_BEGIN,
                     priorityObj->GetPid(), appRecord->GetUid(), PRELOAD_FREEZE_TIMEOUT, 0);
-            }
-        };
-        if (taskHandler_) {
-            taskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
+        }
+    };
+    if (taskHandler_) {
+        taskHandler_->SubmitTask(reportLoadTask, "reportpreLoadTask");
         }
     }
 }
