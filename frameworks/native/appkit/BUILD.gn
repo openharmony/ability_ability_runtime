@@ -217,6 +217,7 @@ ohos_shared_library("appkit_native") {
       "i18n:intl_util",
       "icu:shared_icuuc",
       "window_manager:libwm",
+      "window_manager:libwsutils",
     ]
 
     defines += [ "NWEB_GRAPHIC" ]

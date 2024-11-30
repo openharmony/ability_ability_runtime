@@ -45,6 +45,7 @@
 #include "global_constant.h"
 #include "context_deal.h"
 #include "context_impl.h"
+#include "display_util.h"
 #include "dump_ffrt_helper.h"
 #include "dump_ipc_helper.h"
 #include "dump_runtime_helper.h"
@@ -2197,7 +2198,8 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
 #endif
     };
 #ifdef SUPPORT_SCREEN
-    Rosen::DisplayId defaultDisplayId = Rosen::DisplayManager::GetInstance().GetDefaultDisplayId();
+    Rosen::DisplayId defaultDisplayId = static_cast<Rosen::DisplayId>(
+        AAFwk::DisplayUtil::GetDefaultDisplayId());
     Rosen::DisplayId displayId = defaultDisplayId;
     if (abilityRecord->GetWant() != nullptr) {
         displayId = static_cast<uint64_t>(abilityRecord->GetWant()->GetIntParam(
