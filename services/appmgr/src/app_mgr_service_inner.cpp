@@ -163,6 +163,7 @@ constexpr const char* PERMISSION_TEMP_JIT_ALLOW = "TEMPJITALLOW";
 constexpr const char* TARGET_UID_KEY = "ohos.aafwk.param.targetUid";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
+constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 11000;
 
 #ifdef WITH_DLP
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
@@ -492,6 +493,18 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
         hapModuleInfo, want, appExistFlag, true, request.preloadMode);
     appRecord->SetNeedLimitPrio(false);
+    if (request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE) {
+        auto reportLoadTask = [appRecord]() {
+            auto priorityObj = appRecord->GetPriorityObject();
+            if (priorityObj) {
+                AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PRELOAD_BEGIN,
+                    priorityObj->GetPid(), appRecord->GetUid(), PRELOAD_FREEZE_TIMEOUT, 0);
+            }
+        };
+        if (taskHandler_) {
+            taskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
+        }
+    }
 }
 
 void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
