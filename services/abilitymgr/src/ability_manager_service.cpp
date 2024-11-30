@@ -30,6 +30,7 @@
 #include "concurrent_task_client.h"
 #include "connection_state_manager.h"
 #include "display_manager.h"
+#include "display_util.h"
 #include "distributed_client.h"
 #ifdef WITH_DLP
 #include "dlp_utils.h"
@@ -1785,7 +1786,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         }
         if (startOptions.GetDisplayID() == 0) {
             abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID,
-                static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId()));
+                DisplayUtil::GetDefaultDisplayId());
         } else {
             abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
         }
@@ -1887,7 +1888,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
 #endif
     if (startOptions.GetDisplayID() == 0) {
         abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID,
-            static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId()));
+            DisplayUtil::GetDefaultDisplayId());
     } else {
         abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
     }
