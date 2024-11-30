@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace AAFwk {
 using Uri = OHOS::Uri;
+const uint32_t DATASHARE = 1651;
 
 const DataObsManagerStub::RequestFuncType DataObsManagerStub::HANDLES[TRANS_BUTT] = {
     &DataObsManagerStub::RegisterObserverInner,
@@ -145,7 +146,7 @@ int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessagePar
 {
     ChangeInfo changeInfo;
     if (!ChangeInfo::Unmarshalling(changeInfo, data)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to unmarshall changeInfo.");
+        TAG_LOGE(DATASHARE, "Failed to unmarshall changeInfo.");
         return IPC_STUB_INVALID_DATA_ERR;
     }
 
