@@ -350,11 +350,11 @@ std::map<int, std::set<int>> AppfreezeManager::BinderParser(std::ifstream& fin, 
     int asyncBinderSize = asyncBinderPairs.size();
     int individualMaxSize = 2;
     for (int i = 0; i < individualMaxSize; i++) {
-        if (freeAsyncSpaceSize > 0) {
-            asyncPids.insert(freeAsyncSpacePairs[std::min(freeAsyncSpaceSize, i)].first);
+        if (freeAsyncSpaceSize > 0 && i < freeAsyncSpaceSize) {
+            asyncPids.insert(freeAsyncSpacePairs[i].first);
         }
-        if (asyncBinderSize > 0) {
-            asyncPids.insert(asyncBinderPairs[std::min(asyncBinderSize, i)].first);
+        if (asyncBinderSize > 0 && i < asyncBinderSize) {
+            asyncPids.insert(asyncBinderPairs[i].first);
         }
     }
 
