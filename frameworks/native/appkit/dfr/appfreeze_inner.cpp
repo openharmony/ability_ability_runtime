@@ -39,6 +39,7 @@ constexpr char EVENT_MESSAGE[] = "MSG";
 constexpr char EVENT_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_PROCESS_NAME[] = "PROCESS_NAME";
 constexpr char EVENT_STACK[] = "STACK";
+constexpr char EVENT_FAULT_TIME[] = "\nTimestamp: ";
 }
 std::weak_ptr<EventHandler> AppfreezeInner::appMainHandler_;
 std::shared_ptr<AppfreezeInner> AppfreezeInner::instance_ = nullptr;
@@ -122,7 +123,7 @@ void AppfreezeInner::AppfreezeHandleOverReportCount(bool isSixSecondEvent)
 {
     FaultData faultData;
     faultData.errorObject.message =
-        "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+        EVENT_FAULT_TIME + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
     faultData.errorObject.message += "App main thread is not response!";
     faultData.faultType = FaultDataType::APP_FREEZE;
     faultData.timeoutMarkers = "";
@@ -206,7 +207,7 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
 {
     FaultData faultData;
     faultData.errorObject.message =
-        "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+        EVENT_FAULT_TIME + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
     faultData.errorObject.message += "App main thread is not response!";
     faultData.faultType = FaultDataType::APP_FREEZE;
     bool onlyMainThread = false;
