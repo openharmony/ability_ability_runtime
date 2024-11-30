@@ -208,10 +208,6 @@ void SourceMap::SetSourceMapData()
         modularMap->sources_.push_back(it->second);
         sourceMaps_[it->first] = modularMap;
     }
-    mappings_.clear();
-    sources_.clear();
-    entryPackageInfo_.clear();
-    packageInfo_.clear();
 }
 
 void SourceMap::SplitSourceMap(const std::string& sourceMapData)
@@ -258,6 +254,10 @@ void SourceMap::SplitSourceMap(const std::string& sourceMapData)
         }
     }
     SetSourceMapData();
+    mappings_.clear();
+    sources_.clear();
+    entryPackageInfo_.clear();
+    packageInfo_.clear();
 }
 
 void SourceMap::ExtractStackInfo(const std::string& stackStr, std::vector<std::string>& res)
@@ -498,11 +498,24 @@ std::string SourceMap::GetSourceInfo(const std::string& line, const std::string&
     std::string sources = isModular_ ? mapInfo.sources : GetRelativePath(mapInfo.sources);
     std::string entryPackageInfo = targetMap.entryPackageInfo_[0];
     std::string packageInfo = targetMap.packageInfo_[0];
-    std::string packageName = packageInfo.empty() ? entryPackageInfo.substr(FLAG_ENTRY_PACKAGE_INFO_SIZE,
-        entryPackageInfo.rfind('|') - FLAG_ENTRY_PACKAGE_INFO_SIZE) : packageInfo.substr(FLAG_PACKAGE_INFO_SIZE,
-        packageInfo.rfind('|') - FLAG_PACKAGE_INFO_SIZE);
-    sourceInfo = packageName + " (" + sources + ":" + std::to_string(mapInfo.row) + ":" +
-        std::to_string(mapInfo.col) + ")";
+    if (!packageInfo.empty()) {
+        auto last = packageInfo.rfind('|');
+        if (last != std::string::npos) {
+            sourceInfo = packageInfo.substr(FLAG_PACKAGE_INFO_SIZE, packageInfo.rfind('|') - FLAG_PACKAGE_INFO_SIZE);
+            return sourceInfo.append(" (" + sources + ":" + std::to_string(mapInfo.row) + ":" +
+                std::to_string(mapInfo.col) + ")");
+        }
+    }
+    if (!entryPackageInfo.empty()) {
+        auto last = entryPackageInfo.rfind('|');
+        if (last != std::string::npos) {
+            sourceInfo = entryPackageInfo.substr(FLAG_ENTRY_PACKAGE_INFO_SIZE,
+                entryPackageInfo.rfind('|') - FLAG_ENTRY_PACKAGE_INFO_SIZE);
+            return sourceInfo.append(" (" + sources + ":" + std::to_string(mapInfo.row) + ":" +
+                std::to_string(mapInfo.col) + ")");
+        }
+    }
+    sourceInfo = "(" + sources + ":" + std::to_string(mapInfo.row) + ":" + std::to_string(mapInfo.col) + ")";
     return sourceInfo;
 }
 
