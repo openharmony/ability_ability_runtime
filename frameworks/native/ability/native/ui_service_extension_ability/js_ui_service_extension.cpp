@@ -23,6 +23,7 @@
 #include "ability.h"
 #include "ability_manager_client.h"
 #include "configuration_utils.h"
+#include "display_util.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "js_extension_common.h"
@@ -243,7 +244,7 @@ void JsUIServiceExtension::OnStart(const AAFwk::Want &want)
 
     auto context = GetContext();
     if (context != nullptr) {
-        int32_t  displayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+        int32_t displayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
         displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, displayId);
         TAG_LOGD(AAFwkTag::UISERVC_EXT, "displayId %{public}d", displayId);
         auto configUtils = std::make_shared<ConfigurationUtils>();
