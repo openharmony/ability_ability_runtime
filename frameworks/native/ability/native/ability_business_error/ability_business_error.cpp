@@ -99,7 +99,7 @@ constexpr const char* ERROR_MSG_INVALID_APP_INSTANCE_KEY = "The app instance key
 constexpr const char* ERROR_MSG_UPPER_LIMIT = "The number of app instances reaches the limit.";
 constexpr const char* ERROR_MSG_APP_INSTANCE_KEY_NOT_SUPPORT = "The APP_INSTANCE_KEY cannot be specified.";
 constexpr const char* ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT = "Creating a new instance is not supported.";
-constexpr const char* ERROR_MSG_UI_ABILITY_IS_STARTING = "The UIAbility is in starting state.";
+constexpr const char* ERROR_MSG_UI_ABILITY_IS_STARTING = "The UIAbility is being started.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;

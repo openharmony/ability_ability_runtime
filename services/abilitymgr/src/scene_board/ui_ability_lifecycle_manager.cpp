@@ -121,7 +121,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     TAG_LOGD(AAFwkTag::ABILITYMGR, "StartUIAbility");
     uiAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
 
-    if (isCallBySCB && uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
+    if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
         return ERR_OK;
@@ -719,7 +719,10 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         abilityRecord->SetStartToForeground(false);
     }
 
-    if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
+    if (abilityRecord->IsNewWant()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "has new want");
+        abilityRecord->ForegroundAbility();
+    } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
         abilityRecord->SetMinimizeReason(true);
         MoveToBackground(abilityRecord);
     } else if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
