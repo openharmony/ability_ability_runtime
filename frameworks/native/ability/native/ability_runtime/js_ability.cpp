@@ -24,6 +24,7 @@
 #include "ability_runtime/js_ability_context.h"
 #include "ability_start_setting.h"
 #include "connection_manager.h"
+#include "display_util.h"
 #include "hilog_tag_wrapper.h"
 #include "js_data_struct_converter.h"
 #include "js_runtime.h"
@@ -679,7 +680,7 @@ bool JsAbility::InitWindowScene(const Want &want)
         return false;
     }
     scene_ = std::make_shared<Rosen::WindowScene>();
-    int32_t displayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+    int32_t displayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
     if (setting_ != nullptr) {
         std::string strDisplayId =
             setting_->GetProperty(OHOS::AppExecFwk::AbilityStartSetting::WINDOW_DISPLAY_ID_KEY);
