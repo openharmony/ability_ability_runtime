@@ -508,6 +508,8 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
         option->SetRealParentId(sessionInfo->realHostWindowId);
         option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
         option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+        option->SetDensity(sessionInfo->density);
+        option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
         sptr<Rosen::Window> uiWindow;
         {
             HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
