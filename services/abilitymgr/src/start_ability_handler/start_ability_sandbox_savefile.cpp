@@ -19,6 +19,7 @@
 #include "ability_util.h"
 #include "ability_manager_service.h"
 #include "display_manager.h"
+#include "display_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -110,7 +111,7 @@ int StartAbilitySandboxSavefile::StartAbility(StartAbilityParams &params, int re
     if (params.startOptions) {
         if (params.startOptions->GetDisplayID() == 0) {
             abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID,
-                static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId()));
+                DisplayUtil::GetDefaultDisplayId());
         } else {
             abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, params.startOptions->GetDisplayID());
         }
