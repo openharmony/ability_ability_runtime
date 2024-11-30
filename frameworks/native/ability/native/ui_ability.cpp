@@ -18,6 +18,7 @@
 #include "ability_lifecycle.h"
 #include "ability_recovery.h"
 #include "configuration_convertor.h"
+#include "display_util.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -1049,7 +1050,7 @@ void UIAbility::ContinuationRestore(const AAFwk::Want &want)
 void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
 {
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        int32_t defualtDisplayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+        int32_t defualtDisplayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
         int32_t displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         TAG_LOGD(AAFwkTag::UIABILITY, "abilityName: %{public}s, displayId: %{public}d",
             abilityInfo_->name.c_str(), displayId);
