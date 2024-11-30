@@ -23,6 +23,7 @@ namespace AAFwk {
 using Value = std::variant<std::monostate, int64_t, double, std::string, bool, std::vector<uint8_t>>;
 using VBucket = std::map<std::string, Value>;
 using VBuckets = std::vector<VBucket>;
+const uint32_t DATASHARE = 1651;
 bool ChangeInfo::Marshalling(const ChangeInfo &input, MessageParcel &parcel)
 {
     if (!parcel.WriteUint32(static_cast<uint32_t>(input.changeType_))) {
@@ -58,17 +59,17 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
 {
     uint32_t changeType;
     if (!parcel.ReadUint32(changeType)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to read changeType from parcel.");
+        TAG_LOGE(DATASHARE, "Failed to read changeType from parcel.");
         return false;
     }
 
     uint32_t len = 0;
     if (!parcel.ReadUint32(len)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to read uris size from parcel.");
+        TAG_LOGE(DATASHARE, "Failed to read uris size from parcel.");
         return false;
     }
     if (len > LIST_MAX_COUNT) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Uris size exceeds LIST_MAX_COUNT.");
+        TAG_LOGE(DATASHARE, "Uris size exceeds LIST_MAX_COUNT.");
         return false;
     }
 
@@ -76,7 +77,7 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
     for (uint32_t i = 0; i < len; i++) {
         Uri uri = Uri(parcel.ReadString());
         if (uri.ToString().empty()) {
-            TAG_LOGE(AAFwkTag::DBOBSMGR, "The count:%{public}d uri is empty.", i);
+            TAG_LOGE(DATASHARE, "The count:%{public}d uri is empty.", i);
             return false;
         }
         uris.emplace_back(std::move(uri));
@@ -84,18 +85,18 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
 
     uint32_t size = 0;
     if (!parcel.ReadUint32(size)) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to read size from parcel.");
+        TAG_LOGE(DATASHARE, "Failed to read size from parcel.");
         return false;
     }
 
     const uint8_t *data = size > 0 ? parcel.ReadBuffer(size) : nullptr;
     if (size > 0 && data == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to read buffer from parcel.");
+        TAG_LOGE(DATASHARE, "Failed to read buffer from parcel.");
         return false;
     }
     VBuckets buckets;
     if (!(DataObsUtils::Unmarshal(parcel, buckets))) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to unmarshall valueBuckets from parcel.");
+        TAG_LOGE(DATASHARE, "Failed to unmarshall valueBuckets from parcel.");
         return false;
     }
     output.changeType_ = static_cast<ChangeType>(changeType);
