@@ -562,12 +562,12 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     }
 }
 
-void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord){
+void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord) {
     auto reportLoadTask = [appRecord]() {
         auto priorityObj = appRecord->GetPriorityObject();
         if (priorityObj) {
             AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PRELOAD_BEGIN,
-                    priorityObj->GetPid(), appRecord->GetUid(), PRELOAD_FREEZE_TIMEOUT, 0);
+                priorityObj->GetPid(), appRecord->GetUid(), PRELOAD_FREEZE_TIMEOUT, 0);
         }
     };
     if (taskHandler_) {
