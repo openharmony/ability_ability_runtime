@@ -241,6 +241,21 @@ int32_t AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const s
     return ERR_OK;
 }
 
+int32_t AppRunningManager::IsAppRunningByBundleNameAndUserId(const std::string &bundleName,
+    int32_t userId, bool &isRunning)
+{
+    auto appRunningMap = GetAppRunningRecordMap();
+    for (const auto &item : appRunningMap) {
+        const auto &appRecord = item.second;
+        if (appRecord && appRecord->GetBundleName() == bundleName && !(appRecord->GetRestartAppFlag()) &&
+            appRecord->GetUid() / BASE_USER_RANGE == userId) {
+            isRunning = true;
+            break;
+        }
+    }
+    return ERR_OK;
+}
+
 int32_t AppRunningManager::GetAllAppRunningRecordCountByBundleName(const std::string &bundleName)
 {
     int32_t count = 0;
