@@ -108,6 +108,7 @@ private:
     int32_t HandleGetAllRunningInstanceKeysBySelf(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllRunningInstanceKeysByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsAppRunning(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsAppRunningByBundleNameAndUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAppRunningStateByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel &reply);

@@ -671,6 +671,17 @@ public:
         bool &isRunning) = 0;
 
     /**
+     * Check whether the process of the application under the specified user exists.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param userId the userId of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return Return ERR_OK if success, others fail.
+     */
+    virtual int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
+        bool &isRunning) = 0;
+
+    /**
      * Start child process, called by ChildProcessManager.
      *
      * @param childPid Created child process pid.

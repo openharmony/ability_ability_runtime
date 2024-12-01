@@ -1400,6 +1400,15 @@ int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCl
     return appMgrServiceInner_->IsAppRunning(bundleName, appCloneIndex, isRunning);
 }
 
+int32_t AppMgrService::IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
+    bool &isRunning)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning);
+}
+
 int32_t AppMgrService::StartChildProcess(pid_t &childPid, const ChildProcessRequest &request)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");

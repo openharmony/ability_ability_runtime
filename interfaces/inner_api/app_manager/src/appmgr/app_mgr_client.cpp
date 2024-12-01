@@ -1412,12 +1412,12 @@ bool AppMgrClient::IsCallerKilling(const std::string& callerKey) const
     return amsService->IsCallerKilling(callerKey);
 }
 
-AppMgrResultCode AppMgrClient::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+AppMgrResultCode AppMgrClient::IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
     bool &isRunning)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        return AppMgrResultCode(service->IsAppRunning(bundleName, appCloneIndex, isRunning));
+        return AppMgrResultCode(service->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning));
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
