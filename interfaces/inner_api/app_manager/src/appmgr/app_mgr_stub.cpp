@@ -301,6 +301,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSixth(uint32_t code, MessageParcel &data
             return HandleGetAllUIExtensionRootHostPid(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_UI_EXTENSION_PROVIDER_PID):
             return HandleGetAllUIExtensionProviderPid(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::IS_APP_RUNNING_BY_BUNDLE_NAME_AND_USER_ID):
+            return HandleIsAppRunningByBundleNameAndUserId(data, reply);
     }
     return INVALID_FD;
 }
@@ -1370,6 +1372,23 @@ int32_t AppMgrStub::HandleIsAppRunning(MessageParcel &data, MessageParcel &reply
     bool isRunning = false;
     int32_t appCloneIndex = data.ReadInt32();
     int32_t result = IsAppRunning(bundleName, appCloneIndex, isRunning);
+    if (!reply.WriteBool(isRunning)) {
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleIsAppRunningByBundleNameAndUserId(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    std::string bundleName = data.ReadString();
+    bool isRunning = false;
+    int32_t userId = data.ReadInt32();
+    int32_t result = IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning);
     if (!reply.WriteBool(isRunning)) {
         return ERR_INVALID_VALUE;
     }
