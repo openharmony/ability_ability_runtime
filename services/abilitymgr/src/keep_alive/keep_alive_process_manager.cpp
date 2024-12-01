@@ -176,7 +176,7 @@ int32_t KeepAliveProcessManager::SetApplicationKeepAlive(const std::string &bund
         CHECK_TRUE_RETURN_RET(!MainElementUtils::CheckStatusBarAbility(bundleInfo),
             ERR_NO_STATUS_BAR_ABILITY, "app has no status bar");
         bool isRunning = false;
-        result = IN_PROCESS_CALL(appMgrClient->IsAppRunning(bundleName, 0, isRunning));
+        result = IN_PROCESS_CALL(appMgrClient->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning));
         CHECK_RET_RETURN_RET(result, "IsAppRunning failed");
         CHECK_TRUE_RETURN_RET((isRunning && !IsRunningAppInStatusBar(abilityMgr, bundleInfo)),
             ERR_NOT_ATTACHED_TO_STATUS_BAR, "app is not attached to status bar");

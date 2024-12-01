@@ -29,7 +29,7 @@ int32_t AppMgrClient::KillApplication(const std::string &bundleName, bool clearP
     return ERR_OK;
 }
 
-int32_t AppMgrClient::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+int32_t AppMgrClient::IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
     bool &isRunning)
 {
     isRunning = isAppRunningReturnValue;

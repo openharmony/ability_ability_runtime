@@ -6413,6 +6413,27 @@ int32_t AppMgrServiceInner::IsAppRunning(const std::string &bundleName, int32_t 
     return appRunningManager_->CheckAppCloneRunningRecordIsExistByBundleName(bundleName, appCloneIndex, isRunning);
 }
 
+int32_t AppMgrServiceInner::IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
+    bool &isRunning)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called, bundleName=%{public}s,userId=%{public}d", bundleName.c_str(), userId);
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not foundation call");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    if (appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_NO_INIT;
+    }
+
+    if (userId < 0) {
+        userId = GetCurrentAccountId();
+    }
+
+    return appRunningManager_->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning);
+}
+
 bool AppMgrServiceInner::CreateAbilityInfo(const AAFwk::Want &want, AbilityInfo &abilityInfo)
 {
     auto&& bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
