@@ -36,6 +36,7 @@ UIExtensionSessionInfo *UIExtensionSessionInfo::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     info->elementName = *element;
+    info->extensionAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(parcel.ReadInt32());
     return info;
 }
 
@@ -58,6 +59,11 @@ bool UIExtensionSessionInfo::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteParcelable(&elementName)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write elementName failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(extensionAbilityType))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write extensionAbilityType failed");
         return false;
     }
 
