@@ -33,6 +33,7 @@
 #include "startup_util.h"
 #include "ui_extension_utils.h"
 #include "ui_service_extension_connection_constants.h"
+#include "uri_utils.h"
 #include "cache_extension_utils.h"
 #include "datetime_ex.h"
 #include "init_reboot.h"
@@ -98,6 +99,8 @@ AbilityConnectManager::~AbilityConnectManager()
 
 int AbilityConnectManager::StartAbility(const AbilityRequest &abilityRequest)
 {
+    // grant uri permission to service extension and ui extension, must call out of serialMutext_.
+    UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
     std::lock_guard guard(serialMutex_);
     return StartAbilityLocked(abilityRequest);
 }
@@ -200,12 +203,10 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         if (IsUIExtensionAbility(targetService)) {
             targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
         }
-        targetService->GrantUriPermissionForServiceExtension();
         LoadAbility(targetService);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE) && !IsUIExtensionAbility(targetService)) {
         // It may have been started through connect
         targetService->SetWant(abilityRequest.want);
-        targetService->GrantUriPermissionForServiceExtension();
         CommandAbility(targetService);
     } else if (IsUIExtensionAbility(targetService)) {
         DoForegroundUIExtension(targetService, abilityRequest);
@@ -571,6 +572,8 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     auto connectObject = connect->AsObject();
+    // grant uri to service extension by connect, must call out of serialMutex_
+    UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
     std::lock_guard guard(serialMutex_);
 
     // 1. get target service ability record, and check whether it has been loaded.
@@ -869,7 +872,6 @@ void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
         }
         std::string element = abilityRecord->GetURI();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability is %{public}s, start to foreground.", element.c_str());
-        abilityRecord->GrantUriPermissionForUIExtension();
         abilityRecord->ForegroundUIExtensionAbility();
     }
 }
@@ -1909,7 +1911,6 @@ void AbilityConnectManager::TerminateDone(const std::shared_ptr<AbilityRecord> &
             "error. expect %{public}s, actual %{public}s", expect.c_str(), actual.c_str());
         return;
     }
-    IN_PROCESS_CALL_WITHOUT_RET(abilityRecord->RevokeUriPermission());
     abilityRecord->RemoveAbilityDeathRecipient();
     if (abilityRecord->IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "scb exit, kill processes");

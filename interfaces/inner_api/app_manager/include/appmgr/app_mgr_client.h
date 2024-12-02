@@ -902,15 +902,23 @@ public:
     bool IsCallerKilling(const std::string& callerKey) const;
 
     /**
-     * Check whether the bundle is running.
+     * Check whether the process of the application under the specified user exists.
      *
      * @param bundleName Indicates the bundle name of the bundle.
-     * @param appCloneIndex the appindex of the bundle.
+     * @param userId the userId of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
      * @return Return ERR_OK if success, others fail.
      */
-    virtual AppMgrResultCode IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+    virtual AppMgrResultCode IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
         bool &isRunning);
+    
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     * @return Returns RESULT_OK on success, others on failure.
+     */
+    virtual AppMgrResultCode SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

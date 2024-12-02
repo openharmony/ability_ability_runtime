@@ -496,11 +496,11 @@ bool DistributedClient::WriteInfosToParcel(MessageParcel& data, const OHOS::AAFw
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         return false;
     }
-    PARCEL_WRITE_HELPER(data, Parcelable, &want);
-    PARCEL_WRITE_HELPER(data, RemoteObject, connect);
-    PARCEL_WRITE_HELPER(data, Int32, callerUid);
-    PARCEL_WRITE_HELPER(data, Int32, callerPid);
-    PARCEL_WRITE_HELPER(data, Uint32, accessToken);
+    PARCEL_WRITE_HELPER_RET(data, Parcelable, &want, false);
+    PARCEL_WRITE_HELPER_RET(data, RemoteObject, connect, false);
+    PARCEL_WRITE_HELPER_RET(data, Int32, callerUid, false);
+    PARCEL_WRITE_HELPER_RET(data, Int32, callerPid, false);
+    PARCEL_WRITE_HELPER_RET(data, Uint32, accessToken, false);
     return true;
 }
 

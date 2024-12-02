@@ -31,6 +31,7 @@
 #include "data_ability_predicates.h"
 #include "data_ability_result.h"
 #include "data_uri_utils.h"
+#include "display_util.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -176,7 +177,7 @@ void Ability::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
     }
     TAG_LOGD(AAFwkTag::ABILITY, "ability:%{public}s", abilityInfo_->name.c_str());
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        int32_t defualtDisplayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+        int32_t defualtDisplayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
         int32_t displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         TAG_LOGD(AAFwkTag::ABILITY, "abilityName:%{public}s, displayId:%{public}d",
             abilityInfo_->name.c_str(), displayId);

@@ -18,8 +18,9 @@
 
 #include <sys/types.h>
 #include <vector>
+#include "uri.h"
 
-#include "media_library_manager.h"
+#include "media_library_extend_manager.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -27,15 +28,18 @@ class MediaPermissionManager {
 public:
     static MediaPermissionManager &GetInstance();
     std::vector<bool> CheckUriPermission(const std::vector<Uri> &uriVec, uint32_t callerTokenId, uint32_t flag);
+    int32_t GrantUriPermission(const std::vector<std::string> &uris, uint32_t flag, uint32_t callerTokenId,
+        uint32_t targetTokenId, int32_t hideSensitiveType);
+    int32_t RevokeUriPermission(uint32_t callerTokenId, uint32_t targetTokenId, const std::string &uri);
     ~MediaPermissionManager() {};
     MediaPermissionManager(const MediaPermissionManager &mediaPermissionManager) = delete;
     const MediaPermissionManager &operator=(const MediaPermissionManager &mediaPermissionManager) = delete;
 
 private:
-    std::mutex mutex_;
     MediaPermissionManager();
-    Media::MediaLibraryManager *GetMediaLibraryManager();
-    Media::MediaLibraryManager *mediaLibraryManager_ = nullptr;
+    Media::MediaLibraryExtendManager *GetMediaLibraryManager();
+    Media::PhotoPermissionType FlagToFileOpenMode(uint32_t flag);
+    Media::HideSensitiveType ConvertHideSensitiveType(int32_t hideSensitiveType);
 };
 
 } // OHOS

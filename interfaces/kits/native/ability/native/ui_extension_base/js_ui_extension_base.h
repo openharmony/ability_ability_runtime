@@ -201,6 +201,9 @@ protected:
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
 
+private:
+    sptr<Rosen::WindowOption> CreateWindowOption(const sptr<AAFwk::SessionInfo> &sessionInfo);
+    
 #ifdef SUPPORT_GRAPHICS
 private:
     class JsUIExtensionBaseDisplayListener : public OHOS::Rosen::IDisplayInfoChangedListener {

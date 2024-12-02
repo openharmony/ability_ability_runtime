@@ -72,8 +72,8 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
     };
     auto ret = StartAbility(info);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "startAbility failed:%{public}d, add to list", ret);
-        AddFailedKeepAliveAbility(info);
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "startAbility failed:%{public}d, unsetting keep-alive", ret);
+        (void)SetApplicationKeepAlive(bundleInfo.name, userId, false, true);
         return;
     }
 
@@ -103,20 +103,13 @@ int32_t KeepAliveProcessManager::StartAbility(const KeepAliveAbilityInfo &info)
 void KeepAliveProcessManager::AfterStartKeepAliveApp(const AppExecFwk::BundleInfo &bundleInfo,
     const std::string &mainElementName, int32_t userId)
 {
-    uint32_t accessTokenId = 0;
-    MainElementUtils::GetMainUIAbilityAccessTokenId(bundleInfo, mainElementName, accessTokenId);
-    if (accessTokenId == 0) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "invalid accessTokenId, unsetting keep-alive");
-        (void)SetApplicationKeepAlive(bundleInfo.name, userId, false, true);
-        return;
-    }
     bool isCreated = false;
     std::shared_ptr<bool> isCanceled = std::make_shared<bool>(false);
     ffrt::condition_variable taskCv;
     ffrt::mutex taskMutex;
-    ffrt::submit([&isCreated, &taskCv, &taskMutex, isCanceled, accessTokenId,
-        abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance()]() {
-        while (!abilityMgr || !abilityMgr->IsInStatusBar(accessTokenId)) {
+    ffrt::submit([&isCreated, &taskCv, &taskMutex, isCanceled,
+        accessTokenId = bundleInfo.applicationInfo.accessTokenId, uid = bundleInfo.uid]() {
+        while (!DelayedSingleton<AbilityManagerService>::GetInstance()->IsInStatusBar(accessTokenId, uid)) {
             if (!isCanceled || *isCanceled) {
                 TAG_LOGE(AAFwkTag::KEEP_ALIVE, "canceled in the middle");
                 return;
@@ -183,7 +176,7 @@ int32_t KeepAliveProcessManager::SetApplicationKeepAlive(const std::string &bund
         CHECK_TRUE_RETURN_RET(!MainElementUtils::CheckStatusBarAbility(bundleInfo),
             ERR_NO_STATUS_BAR_ABILITY, "app has no status bar");
         bool isRunning = false;
-        result = IN_PROCESS_CALL(appMgrClient->IsAppRunning(bundleName, 0, isRunning));
+        result = IN_PROCESS_CALL(appMgrClient->IsAppRunningByBundleNameAndUserId(bundleName, userId, isRunning));
         CHECK_RET_RETURN_RET(result, "IsAppRunning failed");
         CHECK_TRUE_RETURN_RET((isRunning && !IsRunningAppInStatusBar(abilityMgr, bundleInfo)),
             ERR_NOT_ATTACHED_TO_STATUS_BAR, "app is not attached to status bar");
@@ -215,13 +208,7 @@ bool KeepAliveProcessManager::IsRunningAppInStatusBar(std::shared_ptr<AbilityMan
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "bundle has no main uiability");
         return false;
     }
-    uint32_t accessTokenId = 0;
-    MainElementUtils::GetMainUIAbilityAccessTokenId(bundleInfo, mainElementName, accessTokenId);
-    if (accessTokenId == 0) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "cannot get accessTokenId");
-        return false;
-    }
-    return abilityMgr->IsInStatusBar(accessTokenId);
+    return abilityMgr->IsInStatusBar(bundleInfo.applicationInfo.accessTokenId, bundleInfo.uid);
 }
 
 void KeepAliveProcessManager::OnAppStateChanged(const AppInfo &info)
@@ -299,41 +286,6 @@ bool KeepAliveProcessManager::GetKeepAliveBundleInfosForUser(std::vector<AppExec
     }
 
     return !bundleInfos.empty();
-}
-
-void KeepAliveProcessManager::StartFailedKeepAliveAbilities()
-{
-    if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
-        return;
-    }
-    unlockedAfterBoot_ = true;
-    std::list<KeepAliveAbilityInfo> tmpList;
-    {
-        std::lock_guard lock(failedKeepAliveAbilityInfoMutex_);
-        if (failedKeepAliveAbilityInfos_.empty()) {
-            TAG_LOGI(AAFwkTag::KEEP_ALIVE, "no failed abilities");
-            return;
-        }
-        tmpList = std::move(failedKeepAliveAbilityInfos_);
-    }
-    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "start failed keep-alive %{public}zu abilities", tmpList.size());
-    for (const auto &info: tmpList) {
-        (void)StartAbility(info);
-    }
-}
-
-void KeepAliveProcessManager::AddFailedKeepAliveAbility(const KeepAliveAbilityInfo &info)
-{
-    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "failed bundleName: %{public}s, moduleName: %{public}s, mainElement: %{public}s"
-        " appCloneIndex: %{public}d", info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(),
-        info.appCloneIndex);
-    if (unlockedAfterBoot_) {
-        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "already unlocked");
-        return;
-    }
-
-    std::lock_guard lock(failedKeepAliveAbilityInfoMutex_);
-    failedKeepAliveAbilityInfos_.push_back(info);
 }
 
 int32_t KeepAliveProcessManager::QueryKeepAliveApplications(int32_t appType, int32_t userId,

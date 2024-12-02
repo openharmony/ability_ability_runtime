@@ -34,7 +34,6 @@ ohos_unittest("dynamic_loader_ohos_test") {
     "${ability_runtime_path}/cj_environment/frameworks/cj_environment/src/dynamic_loader_ohos.cpp",
     "dynamic_loader_ohos_test.cpp",
   ]
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

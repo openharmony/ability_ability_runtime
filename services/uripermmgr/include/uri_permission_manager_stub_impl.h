@@ -20,8 +20,8 @@
 #include <map>
 #include <vector>
 #include <unordered_set>
-
 #include "app_mgr_interface.h"
+#include "batch_uri.h"
 #include "istorage_manager.h"
 #include "tokenid_permission.h"
 #include "uri.h"
@@ -29,7 +29,6 @@
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 #include "policy_info.h"
-#include "sandbox_manager_kit.h"
 #else
 #include "upms_policy_info.h"
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
@@ -41,37 +40,20 @@ using TokenId = Security::AccessToken::AccessTokenID;
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 using namespace AccessControl::SandboxManager;
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
-
-constexpr int32_t DEFAULT_ABILITY_ID = -1;
 }
 
 struct GrantInfo {
     unsigned int flag;
     const uint32_t fromTokenId;
     const uint32_t targetTokenId;
-    bool autoRemove;
-    std::unordered_set<int32_t> abilityIds;
+};
 
-    void AddAbilityId(int32_t abilityId)
+struct GrantPolicyInfo {
+    const uint32_t callerTokenId;
+    const uint32_t targetTokenId;
+    bool Equal(uint32_t cTokenId, uint32_t tTokenId)
     {
-        if (abilityId != DEFAULT_ABILITY_ID) {
-            abilityIds.insert(abilityId);
-        }
-    }
-
-    bool RemoveAbilityId(int32_t abilityId)
-    {
-        return abilityIds.erase(abilityId) > 0;
-    }
-
-    bool IsEmptyAbilityId()
-    {
-        return abilityIds.empty();
-    }
-
-    void ClearAbilityIds()
-    {
-        abilityIds.clear();
+        return callerTokenId == cTokenId && targetTokenId == tTokenId;
     }
 };
 
@@ -81,71 +63,82 @@ public:
     UriPermissionManagerStubImpl() = default;
     virtual ~UriPermissionManagerStubImpl() = default;
 
+    /*
+    * not support local media file uri.
+    */
+    bool VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
+
+    /*
+    * only support local file uri, not support distribute docs and content uri.
+    */
     int GrantUriPermission(const Uri &uri, unsigned int flag, const std::string targetBundleName,
-        int32_t appIndex = 0, uint32_t initiatorTokenId = 0, int32_t abilityId = -1) override;
+        int32_t appIndex = 0, uint32_t initiatorTokenId = 0) override;
+
+    /*
+    * only support local file uri, not support distribute docs and content uri.
+    */
     int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0,
-        int32_t abilityId = -1) override;
+        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0) override;
+
+    /*
+    * only support local file uri, not support distribute docs and content uri.
+    */
     int32_t GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
         const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId,
-        int32_t abilityId) override;
-    
+        int32_t hideSensitiveType) override;
+
+    /*
+    * only support local file uri, not support distribute docs and content uri.
+    */
     std::vector<bool> CheckUriAuthorization(const std::vector<std::string> &uriVec, uint32_t flag,
         uint32_t tokenId) override;
 
-    // only for foundation calling
-    void RevokeUriPermission(const TokenId tokenId, int32_t abilityId = -1) override;
     int RevokeAllUriPermissions(uint32_t tokenId) override;
+
     int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName,
         int32_t appIndex = 0) override;
-
-    bool VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
 
 private:
     template<typename T>
     void ConnectManager(sptr<T> &mgr, int32_t serviceId);
-    int GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
-        TokenId fromTokenId, TokenId targetTokenId, int32_t abilityId);
-    int AddTempUriPermission(const std::string &uri, unsigned int flag, TokenId fromTokenId,
-        TokenId targetTokenId, int32_t abilityId);
 
-    int GrantBatchUriPermissionImpl(const std::vector<std::string> &uriVec, unsigned int flag,
-        TokenId initiatorTokenId, TokenId targetTokenId, int32_t abilityId);
-    int GrantBatchUriPermission(const std::vector<Uri> &uriVec, unsigned int flag, uint32_t initiatorTokenId,
-        uint32_t targetTokenId, int32_t abilityId);
+    std::vector<bool> VerifyUriPermissionByMap(std::vector<Uri> &uriVec, uint32_t flag, uint32_t tokenId);
+
+    bool VerifySingleUriPermissionByMap(const std::string &uri, uint32_t flag, uint32_t tokenId);
+
+    int32_t AddTempUriPermission(const std::string &uri, uint32_t flag, TokenId fromTokenId, TokenId targetTokenId);
+
+    int32_t GrantUriPermissionInner(const std::vector<Uri> &uriVec, uint32_t flag,
+        uint32_t callerTokenId, uint32_t targetTokenId, const std::string &targetBundleName);
+
+    int32_t GrantUriPermissionPrivilegedInner(const std::vector<Uri> &uriVec, uint32_t flag, uint32_t callerTokenId,
+        uint32_t targetTokenId, const std::string &targetAlterBundleName, int32_t hideSensitiveType);
     
-    int32_t GrantBatchUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
-        uint32_t callerTokenId, uint32_t targetTokenId, int32_t abilityId = -1);
-    
-    int32_t GrantBatchUriPermissionFor2In1Privileged(const std::vector<Uri> &uriVec, uint32_t flag,
-        uint32_t callerTokenId, uint32_t targetTokenId, int32_t abilityId = -1);
+    int32_t GrantBatchMediaUriPermissionImpl(const std::vector<std::string> &mediaUris, uint32_t flag,
+        uint32_t callerTokenId, uint32_t targetTokenId, int32_t hideSensitiveType);
 
-    int GrantSingleUriPermission(const Uri &uri, unsigned int flag, uint32_t callerTokenId, uint32_t targetTokenId,
-        int32_t abilityId);
-
-    int32_t CheckCalledBySandBox();
+    int32_t GrantBatchUriPermissionImpl(const std::vector<std::string> &uriVec,
+        uint32_t flag, TokenId callerTokenId, TokenId targetTokenId);
 
     std::vector<bool> CheckUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<Uri> &uriVec,
         uint32_t flag);
 
-    bool CheckUriTypeIsValid(Uri uri);
-
-    int GrantUriPermissionInner(const std::vector<Uri> &uriVec, unsigned int flag, const std::string targetBundleName,
-        int32_t appIndex, uint32_t initiatorTokenId, int32_t abilityId = -1);
-
-    int GrantUriPermissionFor2In1Inner(const std::vector<Uri> &uriVec, unsigned int flag,
-        const std::string &targetBundleName, int32_t appIndex, bool isSystemAppCall, uint32_t initiatorTokenId = 0,
-        int32_t abilityId = -1);
-
-    void HandleUriPermission(
-        uint64_t tokenId, unsigned int flag, std::vector<PolicyInfo> &docsVec, bool isSystemAppCall);
-
     void CheckProxyUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<Uri> &uriVec, uint32_t flag,
         std::vector<bool> &result);
-    
+
+    void RevokeMapUriPermission(uint32_t tokenId);
+
+    int32_t RevokeAllMapUriPermissions(uint32_t tokenId);
+
+    int32_t RevokeUriPermissionManuallyInner(Uri &uri, uint32_t targetTokenId);
+
+    int32_t RevokeMapUriPermissionManually(uint32_t callerTokenId, uint32_t targetTokenId, Uri &uri);
+
     int32_t DeleteShareFile(uint32_t targetTokenId, const std::vector<std::string> &uriVec);
 
-    void RemoveUriRecord(std::vector<std::string> &uriList, const TokenId tokenId, int32_t abilityId);
+    int32_t RevokeMediaUriPermissionManually(uint32_t callerTokenId, uint32_t targetTokenId, Uri &uri);
+
+    int32_t CheckCalledBySandBox();
 
     bool VerifySubDirUriPermission(const std::string &uriStr, uint32_t newFlag, uint32_t tokenId);
 

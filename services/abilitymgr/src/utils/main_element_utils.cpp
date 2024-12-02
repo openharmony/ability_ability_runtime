@@ -145,11 +145,5 @@ bool MainElementUtils::CheckStatusBarAbility(const AppExecFwk::BundleInfo &bundl
     }
     return false;
 }
-
-void MainElementUtils::GetMainUIAbilityAccessTokenId(const AppExecFwk::BundleInfo &bundleInfo,
-    const std::string &mainElementName, uint32_t &accessTokenId)
-{
-    accessTokenId = bundleInfo.applicationInfo.accessTokenId;
-}
 }  // namespace AAFwk
 }  // namespace OHOS

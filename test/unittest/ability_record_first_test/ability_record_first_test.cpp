@@ -19,11 +19,11 @@
 #define protected public
 #include "ability_record.h"
 #include "app_utils.h"
+#include "uri_utils.h"
 #undef private
 #undef protected
 
 #include "ability_util.h"
-#include "uri_utils.h"
 
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
@@ -189,7 +189,7 @@ HWTEST_F(AbilityRecordFirstTest, AbilityRecord_GrantPermissionToShell_001, TestS
     std::vector<std::string> uriVec;
     UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     std::string targetPkg = "";
-    bool ret = abilityRecord_->GrantPermissionToShell(uriVec, flag, targetPkg);
+    bool ret = UriUtils::GetInstance().GrantShellUriPermission(uriVec, flag, targetPkg, 0);
     EXPECT_FALSE(ret);
 }
 
@@ -209,7 +209,7 @@ HWTEST_F(AbilityRecordFirstTest, AbilityRecord_GrantPermissionToShell_002, TestS
     std::vector<std::string> uriVec;
     UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
     std::string targetPkg = "";
-    bool ret = abilityRecord_->GrantPermissionToShell(uriVec, flag, targetPkg);
+    bool ret = UriUtils::GetInstance().GrantShellUriPermission(uriVec, flag, targetPkg, 0);
     EXPECT_TRUE(ret);
 }
 

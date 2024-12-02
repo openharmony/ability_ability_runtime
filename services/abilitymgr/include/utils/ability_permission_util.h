@@ -85,6 +85,8 @@ public:
      */
     int32_t CheckMultiInstanceKeyForExtension(const AbilityRequest &abilityRequest);
 
+    int32_t CheckStartRecentAbility(const Want &want, AbilityRequest &request);
+
 private:
     /**
      * AbilityPermissionUtil, the private constructor.

@@ -463,6 +463,13 @@ public:
         return false;
     }
 
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    virtual void SendAppSpawnUninstallDebugHapMsg(int32_t userId) = 0;
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -518,6 +525,7 @@ public:
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
         SET_KEEP_ALIVE_DKV,
         KILL_PROCESSES_IN_BATCH,
+        SEND_APP_SPAWN_UNINSTALL_DEBUG_HAP_MSG,
         // Add enumeration values above
         END
     };

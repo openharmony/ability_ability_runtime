@@ -30,8 +30,6 @@ class UriUtils {
 public:
     static UriUtils &GetInstance();
 
-    void FilterUriWithPermissionDms(Want &want, uint32_t tokenId);
-
     int32_t CheckNonImplicitShareFileUri(const Want &want, int32_t userId, uint32_t specifyTokenId);
 
     std::vector<Uri> GetPermissionedUriList(const std::vector<std::string> &uriVec,
@@ -41,24 +39,40 @@ public:
 
     bool IsGrantUriPermissionFlag(const Want &want);
 
-    void CheckUriPermissionForServiceExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType);
+    bool IsServiceExtensionType(AppExecFwk::ExtensionAbilityType extensionAbilityType);
 
-    void CheckUriPermissionForUIExtension(Want &want, AppExecFwk::ExtensionAbilityType extensionAbilityType,
-        uint32_t tokenId = 0);
+    void GrantDmsUriPermission(Want &want, uint32_t callerTokenId, std::string targetBundleName, int32_t appIndex);
 
-    bool IsPermissionPreCheckedType(AppExecFwk::ExtensionAbilityType extensionAbilityType);
+    void GrantUriPermissionForServiceExtension(const AbilityRequest &abilityRequest);
+
+    void GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &abilityRequest);
+
+    void GrantUriPermission(Want &want, std::string targetBundleName, int32_t appIndex,
+        bool isSandboxApp, uint32_t callerTokenId, int32_t collaboratorType);
+
+    void CheckUriPermission(uint32_t callerTokenId, Want &want);
 private:
     UriUtils();
     ~UriUtils();
 
-    std::vector<std::string> GetUriListFromWantDms(const Want &want);
+    bool GrantShellUriPermission(const std::vector<std::string> &strUriVec, uint32_t flag,
+        const std::string &targetPkg, int32_t appIndex);
+    
+    bool GrantUriPermissionInner(std::vector<std::string> uriVec, uint32_t callerTokenId,
+        const std::string &targetBundleName, int32_t appIndex, Want &want);
 
-    void CheckUriPermissionForExtension(Want &want, uint32_t tokenId);
+    bool IsDmsCall(uint32_t fromTokenId);
+
+    bool IsSandboxApp(uint32_t tokenId);
+
+    std::vector<Uri> GetUriListFromWantDms(Want &want);
 
     int32_t CheckNonImplicitShareFileUriInner(uint32_t callerTokenId, const std::string &targetBundleName,
         int32_t userId);
 
     bool IsSystemApplication(const std::string &bundleName, int32_t userId);
+
+    void PublishFileOpenEvent(const Want &want);
 
     DISALLOW_COPY_AND_MOVE(UriUtils);
 };

@@ -520,6 +520,17 @@ public:
     int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning);
 
     /**
+     * Check whether the process of the application under the specified user exists.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param userId the userId of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return Return ERR_OK if success, others fail.
+     */
+    virtual int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
+        bool &isRunning);
+
+    /**
      * start native process for debugger.
      *
      * @param want param to start a process.
@@ -1415,6 +1426,13 @@ public:
     virtual int32_t CheckIsKiaProcess(pid_t pid, bool &isKia);
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
+
+    /**
+     * Send appSpawn uninstall debug hap message.
+     *
+     * @param userId, the user id.
+     */
+    void SendAppSpawnUninstallDebugHapMsg(int32_t userId);
 
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,

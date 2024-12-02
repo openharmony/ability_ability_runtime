@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -256,7 +256,7 @@ public:
         const std::string& appName, const ApplicationFlag flag, const int userId, ApplicationInfo& appInfo) override;
 
     bool QueryAbilityInfo(const Want& want, int32_t flags, int32_t userId, AbilityInfo& abilityInfo,
-        const sptr<IRemoteObject>& callBack)
+        const sptr<IRemoteObject>& callBack) override
     {
         if (userId == 1) {
             return false;
@@ -268,7 +268,7 @@ public:
         const std::string& bundleName, const BundleFlag flag, BundleInfo& bundleInfo, int32_t userId) override;
 
     bool GetBundleInfos(const BundleFlag flag,
-        std::vector<BundleInfo> &bundleInfos, int32_t userId = Constants::UNSPECIFIED_USERID)
+        std::vector<BundleInfo> &bundleInfos, int32_t userId = Constants::UNSPECIFIED_USERID) override
     {
         OHOS::AppExecFwk::BundleInfo bundleInfo;
         bundleInfo.name = "com.ix.residentservcie";
@@ -331,7 +331,7 @@ public:
         return true;
     }
 
-    virtual sptr<IAppControlMgr> GetAppControlProxy()
+    virtual sptr<IAppControlMgr> GetAppControlProxy() override
     {
         if (isAppControlProxyNull_) {
             isAppControlProxyNull_ = false;

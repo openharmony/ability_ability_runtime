@@ -43,7 +43,7 @@ public:
      * @return Returns true if the authorization is successful, otherwise returns false.
      */
     virtual int GrantUriPermission(const Uri &uri, unsigned int flag, const std::string targetBundleName,
-        int32_t appIndex = 0, uint32_t initiatorTokenId = 0, int32_t abilityId = -1) = 0;
+        int32_t appIndex = 0, uint32_t initiatorTokenId = 0) = 0;
 
     /**
      * @brief Authorize the uri permission to targetBundleName.
@@ -54,8 +54,7 @@ public:
      * @return Returns true if the authorization is successful, otherwise returns false.
      */
     virtual int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0,
-        int32_t abilityId = -1) = 0;
+        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0) = 0;
 
     /**
      * @brief Authorize the uri permission to targetBundleName.
@@ -68,16 +67,7 @@ public:
      */
     virtual int32_t GrantUriPermissionPrivileged(const std::vector<Uri> &uriVec, uint32_t flag,
         const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId,
-        int32_t abilityId) = 0;
-
-    /**
-     * @brief Clear user's uri authorization record with autoremove flag.
-     *
-     * @param tokenId A tokenId of an application.
-     * @param abilityId The abilityId of an ability record.
-     * @return Returns true if the remove is successful, otherwise returns false.
-     */
-    virtual void RevokeUriPermission(const uint32_t tokenId, int32_t abilityId = -1) = 0;
+        int32_t hideSensitiveType = 0) = 0;
 
     /**
      * @brief Clear user's all uri authorization record with autoremove flag.
@@ -127,12 +117,10 @@ public:
         // ipc id for GrantUriPermission
         ON_GRANT_URI_PERMISSION = 0,
 
-        // ipc id for RevokeUriPermission
-        ON_REVOKE_URI_PERMISSION,
-
         // ipc id for RevokeAllUriPermission
         ON_REVOKE_ALL_URI_PERMISSION,
 
+        // ipc id for RevokeUriPermisionManually
         ON_REVOKE_URI_PERMISSION_MANUALLY,
 
         // ipc id for VerifyUriPermission
@@ -144,7 +132,7 @@ public:
         //ipc id for GrantUriPermissionPrivileged
         ON_GRANT_URI_PERMISSION_PRIVILEGED,
 
-        //ipc id for GrantUriPermissionPrivileged
+        //ipc id for CheckUriAuthorization
         ON_CHECK_URI_AUTHORIZATION,
 
         //ipc id for ClearPermissionTokenByMap

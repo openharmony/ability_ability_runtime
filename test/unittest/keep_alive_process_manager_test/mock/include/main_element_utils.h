@@ -55,16 +55,6 @@ public:
      */
     static bool CheckStatusBarAbility(const AppExecFwk::BundleInfo &bundleInfo);
 
-    /**
-     * GetMainUIAbilityAccessTokenId, get the access token id of the main uiability.
-     *
-     * @param bundleInfo The bundle info.
-     * @param mainElementName The main element name.
-     * @param accessTokenId The returned access token id.
-     */
-    static void GetMainUIAbilityAccessTokenId(const AppExecFwk::BundleInfo &bundleInfo,
-        const std::string &mainElementName, uint32_t &accessTokenId);
-
 public:
     static bool checkMainUIAbilityResult;
     static bool checkStatusBarAbilityResult;

@@ -29,7 +29,6 @@ int32_t BatchUri::Init(const std::vector<Uri> &uriVec, uint32_t mode, const std:
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec is empty.");
         return 0;
     }
-    targetAppName = targetBundleName;
     totalUriCount = static_cast<int32_t>(uriVec.size());
     validUriCount = 0;
     result = std::vector<bool>(totalUriCount, false);
@@ -118,6 +117,16 @@ void BatchUri::SetOtherUriCheckResult(const std::vector<bool> &otherUriResult)
     }
 }
 
+int32_t BatchUri::GetMediaUriToGrant(std::vector<std::string> &uriVec)
+{
+    for (size_t i = 0; i < mediaIndexs.size(); i++) {
+        if (result[mediaIndexs[i]]) {
+            uriVec.emplace_back(mediaUris[i].ToString());
+        }
+    }
+    return uriVec.size();
+}
+
 void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUrisByPolicy,
     std::vector<Uri> &proxyUrisByMap)
 {
@@ -127,14 +136,6 @@ void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUris
         if (!result[index]) {
             proxyIndexsByPolicy.emplace_back(index);
             proxyUrisByPolicy.emplace_back(otherPolicyInfos[i]);
-        }
-    }
-    // media uri
-    for (size_t i = 0; i < mediaIndexs.size(); i++) {
-        auto index = mediaIndexs[i];
-        if (!result[index]) {
-            proxyIndexsByMap.emplace_back(index);
-            proxyUrisByMap.emplace_back(mediaUris[i]);
         }
     }
 }
@@ -159,10 +160,6 @@ void BatchUri::SetCheckProxyByPolicyResult(std::vector<bool> &proxyResultByPolic
 
 int32_t BatchUri::GetUriToGrantByMap(std::vector<std::string> &uriVec)
 {
-    // content
-    SelectPermissionedUri(contentUris, contentIndexs, uriVec);
-    // media
-    SelectPermissionedUri(mediaUris, mediaIndexs, uriVec);
     return uriVec.size();
 }
 

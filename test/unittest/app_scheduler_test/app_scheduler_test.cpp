@@ -1137,5 +1137,18 @@ HWTEST_F(AppSchedulerTest, AppScheduler_RegisterAbilityDebugResponse_001, TestSi
     int res = DelayedSingleton<AppScheduler>::GetInstance()->RegisterAbilityDebugResponse(response);
     EXPECT_EQ(res, INNER_ERR);
 }
+
+/**
+ * @tc.name: AppScheduler_SendAppSpawnUninstallDebugHapMsg_001
+ * @tc.desc: SendAppSpawnUninstallDebugHapMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_SendAppSpawnUninstallDebugHapMsg_001, TestSize.Level1)
+{
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::make_unique<AppExecFwk::AppMgrClient>();
+    ASSERT_NE(DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_, nullptr);
+    int32_t userId = 0;
+    DelayedSingleton<AppScheduler>::GetInstance()->SendAppSpawnUninstallDebugHapMsg(userId);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
