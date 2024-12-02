@@ -17,6 +17,7 @@
 #include "dataobs_mgr_client.h"
 
 #include "common_utils.h"
+#include "datashare_log.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -77,7 +78,7 @@ ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, sptr<IDataAbilityObse
 {
     auto [errCode, dataObsManger] = GetObsMgr();
     if (errCode != SUCCESS) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "Failed to get ObsMgr, errCode: %{public}d.", errCode);
+        LOG_ERORR("Failed to get ObsMgr, errCode: %{public}d.", errCode);
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     auto status = dataObsManger->RegisterObserver(uri, dataObserver);
@@ -260,7 +261,7 @@ void DataObsMgrClient::ReRegister()
         for (const auto &uri : value) {
             auto ret = RegisterObserver(uri, key);
             if (ret != SUCCESS) {
-                TAG_LOGE(AAFwkTag::DATASHARE, "RegisterObserver failed, uri:%{public}s, ret:%{public}d",
+                LOG_ERORR("RegisterObserver failed, uri:%{public}s, ret:%{public}d",
                     CommonUtils::Anonymous(uri.ToString()).c_str(), ret);
             }
         }
@@ -273,8 +274,9 @@ void DataObsMgrClient::ReRegister()
         for (const auto &param : value) {
             auto ret = RegisterObserverExt(param.uri, key, param.isDescendants);
             if (ret != SUCCESS) {
-                TAG_LOGE(AAFwkTag::DATASHARE, "RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d",
-                    CommonUtils::Anonymous(param.uri.ToString()).c_str(), ret);
+                LOG_ERORR("RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d,
+                    param.isDescendants:%{public}d",
+                    CommonUtils::Anonymous(param.uri.ToString()).c_str(), ret, param.isDescendants);
             }
         }
         return false;
