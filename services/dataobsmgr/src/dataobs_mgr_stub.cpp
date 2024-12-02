@@ -19,6 +19,7 @@
 
 #include "data_ability_observer_proxy.h"
 #include "dataobs_mgr_errors.h"
+#include "datashare_log.h"
 #include "ipc_skeleton.h"
 #include "common_utils.h"
 #include "hilog_tag_wrapper.h"
@@ -146,7 +147,7 @@ int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessagePar
 {
     ChangeInfo changeInfo;
     if (!ChangeInfo::Unmarshalling(changeInfo, data)) {
-        TAG_LOGE(AAFwkTag::DATASHARE, "Failed to unmarshall changeInfo.");
+        LOG_ERORR("Failed to unmarshall changeInfo.");
         return IPC_STUB_INVALID_DATA_ERR;
     }
 
