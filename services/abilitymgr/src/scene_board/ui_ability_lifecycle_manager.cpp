@@ -121,7 +121,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     TAG_LOGD(AAFwkTag::ABILITYMGR, "StartUIAbility");
     uiAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
 
-    if (isCallBySCB && uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
+    if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
         return ERR_OK;
@@ -719,7 +719,10 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         abilityRecord->SetStartToForeground(false);
     }
 
-    if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
+    if (abilityRecord->IsNewWant()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "has new want");
+        abilityRecord->ForegroundAbility();
+    } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
         abilityRecord->SetMinimizeReason(true);
         MoveToBackground(abilityRecord);
     } else if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
@@ -1585,7 +1588,6 @@ void UIAbilityLifecycleManager::CompleteTerminateLocked(const std::shared_ptr<Ab
         // Don't return here
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMS fail to terminate ability");
     }
-    abilityRecord->RevokeUriPermission();
     EraseSpecifiedAbilityRecord(abilityRecord);
     terminateAbilityList_.remove(abilityRecord);
 }
@@ -1721,7 +1723,6 @@ void UIAbilityLifecycleManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordI
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call, msgId:%{public}d, name:%{public}s", msgId,
         abilityRecord->GetAbilityInfo().name.c_str());
-    abilityRecord->RevokeUriPermission();
     PrintTimeOutLog(abilityRecord, msgId, isHalf);
     if (isHalf) {
         return;

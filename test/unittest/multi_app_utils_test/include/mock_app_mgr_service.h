@@ -97,6 +97,8 @@ public:
     MOCK_METHOD2(IsApplicationRunning, int32_t(const std::string &bundleName, bool &isRunning));
     MOCK_METHOD3(IsAppRunning, int32_t(const std::string &bundleName,
         int32_t appCloneIndex, bool &isRunning));
+    MOCK_METHOD3(IsAppRunningByBundleNameAndUserId, int32_t(const std::string &bundleName,
+        int32_t userId, bool &isRunning));
     MOCK_METHOD2(StartChildProcess, int32_t(pid_t &childPid, const ChildProcessRequest &request));
     MOCK_METHOD1(GetChildProcessInfoForSelf, int32_t(ChildProcessInfo &info));
     MOCK_METHOD1(AttachChildProcess, void(const sptr<IRemoteObject> &childScheduler));

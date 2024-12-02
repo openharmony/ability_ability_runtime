@@ -26,9 +26,11 @@ public:
 
     static uint32_t GetCallingTokenID();
     static uint32_t GetCallingPid();
+    static uint32_t GetCallingUid();
 
     static void SetCallingTokenId(uint32_t tokenId);
     static void SetCallingPid(uint32_t pId);
+    static void SetCallingUid(uint32_t uId);
 
     static void ResetTokenId();
     static void ResetPId();
@@ -36,6 +38,7 @@ public:
 
     static uint32_t callerTokenId;
     static uint32_t callerPId;
+    static uint32_t callerUId;
 };
 } // namespace OHOS
 #endif // OHOS_IPC_IPC_SKELETON_H

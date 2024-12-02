@@ -79,27 +79,6 @@ HWTEST_F(UriPermissionTest, Upms_ConnectManager_001, TestSize.Level1)
 
 /*
  * Feature: URIPermissionManagerService
- * Function: RevokeUriPermission
- * SubFunction: NA
- * FunctionPoints: URIPermissionManagerService RevokeUriPermission
- */
-HWTEST_F(UriPermissionTest, Upms_RevokeUriPermission_001, TestSize.Level1)
-{
-    auto upms = std::make_shared<UriPermissionManagerStubImpl>();
-    EXPECT_NE(upms, nullptr);
-    unsigned int tmpFlag = 1;
-    uint32_t fromTokenId = 2;
-    uint32_t targetTokenId = 3;
-    int autoremove = 1;
-    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId, autoremove };
-    std::list<GrantInfo> infoList = { info };
-    auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
-    upms->uriMap_.emplace(uriStr, infoList);
-    upms->RevokeUriPermission(targetTokenId);
-}
-
-/*
- * Feature: URIPermissionManagerService
  * Function: OnRemoteDied
  * SubFunction: NA
  * FunctionPoints: URIPermissionManagerService OnRemoteDied

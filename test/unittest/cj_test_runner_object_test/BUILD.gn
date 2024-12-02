@@ -38,7 +38,6 @@ ohos_unittest("cj_test_runner_object_test") {
     "${ability_runtime_path}/frameworks/native/appkit/ability_delegator/runner_runtime/cj_test_runner_object.cpp",
     "cj_test_runner_object_test.cpp",
   ]
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

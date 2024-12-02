@@ -57,6 +57,7 @@ ohos_unittest("js_ui_service_extension_context_second_test") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",

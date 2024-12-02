@@ -214,7 +214,11 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
     CHECK_POINTER(workContext);
     screenModePtr_ = std::make_shared<int32_t>(screenMode);
     auto workScreenMode = new (std::nothrow) std::weak_ptr<int32_t>(screenModePtr_);
-    CHECK_POINTER(workScreenMode);
+    if (workScreenMode == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "workScreenMode is null");
+        delete workContext;
+        return;
+    }
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, workContext, workScreenMode);
     context->Bind(jsRuntime_, shellContextRef_.get());
@@ -720,6 +724,8 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetRealParentId(sessionInfo->realHostWindowId);
     option->SetParentWindowType(static_cast<Rosen::WindowType>(sessionInfo->parentWindowType));
     option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
+    option->SetDensity(sessionInfo->density);
+    option->SetIsDensityFollowHost(sessionInfo->isDensityFollowHost);
     HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::Create");
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }

@@ -54,6 +54,7 @@ ohos_fuzztest("AttachAbilityThreadFuzzTest") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "napi:ace_napi",
     "relational_store:native_dataability",

@@ -101,19 +101,12 @@ public:
      */
     bool GetKeepAliveBundleInfosForUser(std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
 
-    /**
-     * Start failed keep-alive abilities.
-     *
-     */
-    void StartFailedKeepAliveAbilities();
-
 private:
     KeepAliveProcessManager();
     ~KeepAliveProcessManager();
 
     int32_t CheckPermission();
     int32_t CheckPermissionForEDM();
-    void AddFailedKeepAliveAbility(const KeepAliveAbilityInfo &info);
     void StartKeepAliveProcessWithMainElementPerBundle(const AppExecFwk::BundleInfo &bundleInfo,
         int32_t userId);
     int32_t StartAbility(const KeepAliveAbilityInfo &info);
@@ -122,9 +115,6 @@ private:
     bool IsRunningAppInStatusBar(std::shared_ptr<AbilityManagerService> abilityMgr,
         const AppExecFwk::BundleInfo &bundleInfo);
 
-    std::mutex failedKeepAliveAbilityInfoMutex_;
-    std::list<KeepAliveAbilityInfo> failedKeepAliveAbilityInfos_;
-    std::atomic_bool unlockedAfterBoot_ = false;
     DISALLOW_COPY_AND_MOVE(KeepAliveProcessManager);
 };
 }  // namespace AAFwk
