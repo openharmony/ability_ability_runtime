@@ -783,8 +783,8 @@ int32_t UriPermissionManagerStubImpl::ClearPermissionTokenByMap(const uint32_t t
     }
     RevokeMapUriPermission(tokenId);
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
-    uint64_t timeNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count());
     TAG_LOGD(AAFwkTag::URIPERMMGR, "clear %{private}d permission", tokenId);
     auto ret = SandboxManagerKit::UnSetAllPolicyByToken(tokenId, timeNow);
     TAG_LOGI(AAFwkTag::URIPERMMGR, "clear permission end");
@@ -817,8 +817,8 @@ int32_t UriPermissionManagerStubImpl::Active(const std::vector<PolicyInfo> &poli
         TAG_LOGD(AAFwkTag::URIPERMMGR, "app is terminating");
         return INVALID_PARAMTER;
     }
-    uint64_t timeNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count());
     auto tokenId = IPCSkeleton::GetCallingTokenID();
     TAG_LOGD(AAFwkTag::URIPERMMGR, "active %{private}d permission", tokenId);
     auto ret = SandboxManagerKit::StartAccessingPolicy(policy, result, false, tokenId, timeNow);

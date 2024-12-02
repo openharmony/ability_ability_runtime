@@ -22,6 +22,9 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+const int CYCLE_LIMIT = 1000;
+}
 ServiceRouterMgrProxy::ServiceRouterMgrProxy(const sptr<IRemoteObject> &object)
     : IRemoteProxy<IServiceRouterManager>(object)
 {
@@ -201,6 +204,10 @@ int32_t ServiceRouterMgrProxy::GetParcelableInfos(
     }
 
     int32_t infosSize = reply.ReadInt32();
+    if (infosSize > CYCLE_LIMIT) {
+        TAG_LOGE(AAFwkTag::SER_ROUTER, "Reply size too large");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
     for (int32_t j = 0; j < infosSize; j++) {
         std::unique_ptr<T> info(reply.ReadParcelable<T>());
         if (!info) {
