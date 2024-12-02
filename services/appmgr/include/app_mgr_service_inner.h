@@ -1790,6 +1790,8 @@ private:
 
     void HandlePreloadApplication(const PreloadRequest &request);
 
+    void reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord);
+
     std::string GetSpecifiedProcessFlag(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want);
 
     void LoadAbilityNoAppRecord(const std::shared_ptr<AppRunningRecord> appRecord,
