@@ -276,7 +276,8 @@ void DataObsMgrClient::ReRegister()
             if (ret != SUCCESS) {
                 LOG_ERROR(
                     "RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d, param.isDescendants:%{public}d",
-                    CommonUtils::Anonymous(param.uri.ToString()).c_str(), ret, param.isDescendants);
+                    CommonUtils::Anonymous(param.uri.ToString()).c_str(), ret, param.isDescendants
+                );
             }
         }
         return false;
