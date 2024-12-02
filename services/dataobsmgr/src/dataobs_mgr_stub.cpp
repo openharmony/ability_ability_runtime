@@ -146,7 +146,7 @@ int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessagePar
 {
     ChangeInfo changeInfo;
     if (!ChangeInfo::Unmarshalling(changeInfo, data)) {
-        LOG_ERORR("Failed to unmarshall changeInfo.");
+        LOG_ERROR("Failed to unmarshall changeInfo.");
         return IPC_STUB_INVALID_DATA_ERR;
     }
 
