@@ -52,6 +52,7 @@ ohos_fuzztest("UnregisterApplicationStateObserverFuzzTest") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ffrt:libffrt",
+    "hisysevent:libhisysevent",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",

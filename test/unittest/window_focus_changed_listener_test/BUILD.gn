@@ -95,6 +95,7 @@ ohos_unittest("window_focus_changed_listener_test") {
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",

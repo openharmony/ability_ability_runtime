@@ -82,10 +82,12 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "safwk:api_cache_manager",
   ]
 
   if (os_dlp_part_enabled) {

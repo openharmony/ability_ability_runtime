@@ -63,7 +63,14 @@ ohos_shared_library("demo_ui_extension") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps += [ "window_manager:libwm" ]
+    defines = [ "SUPPORT_SCREEN" ]
+    external_deps += [
+      "ace_engine:ace_uicontent",
+      "window_manager:libdm",
+      "window_manager:libwm",
+    ]
+
+    public_external_deps = [ "window_manager:scene_session_manager" ]
   }
 
   subsystem_name = "ability"
@@ -110,10 +117,23 @@ ohos_shared_library("demo_ui_extension_module") {
     "ability_base:configuration",
     "ability_base:session_info",
     "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "hilog:libhilog",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
+
+  if (ability_runtime_graphics) {
+    defines = [ "SUPPORT_SCREEN" ]
+    external_deps += [
+      "ace_engine:ace_uicontent",
+      "window_manager:libdm",
+      "window_manager:libwm",
+    ]
+
+    public_external_deps = [ "window_manager:scene_session_manager" ]
+  }
 
   relative_install_dir = "extensionability/"
   subsystem_name = "ability"
