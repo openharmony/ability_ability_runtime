@@ -23,6 +23,7 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const int MAX_URI_COUNT = 500;
+const uint32_t CYCLE_LIMIT = 1000;
 }
 UriPermissionManagerProxy::UriPermissionManagerProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<IUriPermissionManager>(impl) {}
@@ -291,6 +292,10 @@ std::vector<bool> UriPermissionManagerProxy::CheckUriAuthorization(const std::ve
         return result;
     }
     auto size = reply.ReadUint32();
+    if (size > CYCLE_LIMIT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Reply size too large");
+        return result;
+    }
     for (auto i = 0; i < static_cast<int32_t>(size); i++) {
         result[i] = reply.ReadBool();
     }
