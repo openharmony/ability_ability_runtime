@@ -109,6 +109,7 @@ ohos_unittest("photo_editor_extension_module_loader_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 }
@@ -152,6 +153,7 @@ ohos_unittest("photo_editor_extension_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 }

@@ -58,6 +58,7 @@ ohos_unittest("want_utils_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "image_framework:image_native",
     "ipc:ipc_core",
   ]
 

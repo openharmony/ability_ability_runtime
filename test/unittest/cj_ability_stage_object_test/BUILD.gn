@@ -43,7 +43,6 @@ ohos_unittest("cj_ability_stage_object_test") {
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "cj_ability_stage_object_test.cpp",
   ]
-  configs = [ "${c_utils_base_path}:utils_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -93,8 +92,6 @@ ohos_unittest("cj_ability_stage_object_test") {
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
   }
-
-  defines = [ "CONFIG_HILOG" ]
 }
 
 group("unittest") {

@@ -67,6 +67,8 @@ ohos_unittest("window_visibility_changed_listener_test") {
     "memory_utils:libmeminfo",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libwmutil",
+    "window_manager:libwmutil_base",
   ]
 
   if (ability_runtime_graphics) {
