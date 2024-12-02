@@ -27,7 +27,6 @@
 namespace OHOS {
 namespace AAFwk {
 std::mutex DataObsMgrClient::mutex_;
-const uint32_t DATASHARE = 1651;
 
 class DataObsMgrClient::SystemAbilityStatusChangeListener
     : public SystemAbilityStatusChangeStub {
