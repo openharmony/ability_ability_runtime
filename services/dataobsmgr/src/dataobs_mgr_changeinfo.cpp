@@ -58,17 +58,17 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
 {
     uint32_t changeType;
     if (!parcel.ReadUint32(changeType)) {
-        LOG_ERORR("Failed to read changeType from parcel.");
+        LOG_ERROR("Failed to read changeType from parcel.");
         return false;
     }
 
     uint32_t len = 0;
     if (!parcel.ReadUint32(len)) {
-        LOG_ERORR("Failed to read uris size from parcel.");
+        LOG_ERROR("Failed to read uris size from parcel.");
         return false;
     }
     if (len > LIST_MAX_COUNT) {
-        LOG_ERORR("Uris size exceeds LIST_MAX_COUNT.");
+        LOG_ERROR("Uris size exceeds LIST_MAX_COUNT.");
         return false;
     }
 
@@ -76,7 +76,7 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
     for (uint32_t i = 0; i < len; i++) {
         Uri uri = Uri(parcel.ReadString());
         if (uri.ToString().empty()) {
-            LOG_ERORR("The count:%{public}d uri is empty.", i);
+            LOG_ERROR("The count:%{public}d uri is empty.", i);
             return false;
         }
         uris.emplace_back(std::move(uri));
@@ -84,18 +84,18 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
 
     uint32_t size = 0;
     if (!parcel.ReadUint32(size)) {
-        LOG_ERORR("Failed to read size from parcel.");
+        LOG_ERROR("Failed to read size from parcel.");
         return false;
     }
 
     const uint8_t *data = size > 0 ? parcel.ReadBuffer(size) : nullptr;
     if (size > 0 && data == nullptr) {
-        LOG_ERORR("Failed to read buffer from parcel.");
+        LOG_ERROR("Failed to read buffer from parcel.");
         return false;
     }
     VBuckets buckets;
     if (!(DataObsUtils::Unmarshal(parcel, buckets))) {
-        LOG_ERORR("Failed to unmarshall valueBuckets from parcel.");
+        LOG_ERROR("Failed to unmarshall valueBuckets from parcel.");
         return false;
     }
     output.changeType_ = static_cast<ChangeType>(changeType);
