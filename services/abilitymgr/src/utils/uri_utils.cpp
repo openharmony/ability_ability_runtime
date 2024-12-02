@@ -425,7 +425,9 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
 {
     auto wangUri = want.GetUri();
     std::string uriStr = wangUri.ToString();
-    if (!uriStr.empty() && wangUri.GetScheme() == "file") {
+    bool isAddToRecent = want.GetBoolParam("isAddToRecent", true);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record, isAddToRecent: %{public}d", isAddToRecent);
+    if (isAddToRecent && !uriStr.empty() && wangUri.GetScheme() == "file") {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record, file uri: %{private}s", uriStr.c_str());
         Want msgWant;
         msgWant.SetAction("file.event.OPEN_TIME");
