@@ -27,7 +27,6 @@
 namespace OHOS {
 namespace AAFwk {
 using Uri = OHOS::Uri;
-const uint32_t DATASHARE = 1651;
 
 const DataObsManagerStub::RequestFuncType DataObsManagerStub::HANDLES[TRANS_BUTT] = {
     &DataObsManagerStub::RegisterObserverInner,
