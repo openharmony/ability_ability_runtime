@@ -31,9 +31,9 @@ public:
     explicit ExtensionConfig() = default;
     virtual ~ExtensionConfig() = default;
     void LoadExtensionConfiguration();
-    int32_t GetExtensionAutoDisconnectTime(std::string extensionTypeName);
-    bool IsExtensionStartThirdPartyAppEnable(std::string extensionTypeName);
-    bool IsExtensionStartServiceEnable(std::string extensionTypeName, std::string targetUri);
+    int32_t GetExtensionAutoDisconnectTime(const std::string &extensionTypeName);
+    bool IsExtensionStartThirdPartyAppEnable(const std::string &extensionTypeName);
+    bool IsExtensionStartServiceEnable(const std::string &extensionTypeName, const std::string &targetUri);
 private:
     void LoadExtensionConfig(const nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);

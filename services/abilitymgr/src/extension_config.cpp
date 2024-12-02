@@ -59,7 +59,7 @@ void ExtensionConfig::LoadExtensionConfiguration()
     LoadExtensionConfig(jsonBuf);
 }
 
-int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(std::string extensionTypeName)
+int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(const std::string &extensionTypeName)
 {
     if (extensionAutoDisconnectTimeMap_.find(extensionTypeName) != extensionAutoDisconnectTimeMap_.end()) {
         return extensionAutoDisconnectTimeMap_[extensionTypeName];
@@ -67,7 +67,7 @@ int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(std::string extensionTyp
     return DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME;
 }
 
-bool ExtensionConfig::IsExtensionStartThirdPartyAppEnable(std::string extensionTypeName)
+bool ExtensionConfig::IsExtensionStartThirdPartyAppEnable(const std::string &extensionTypeName)
 {
     if (thirdPartyAppEnableFlags_.find(extensionTypeName) != thirdPartyAppEnableFlags_.end()) {
         return thirdPartyAppEnableFlags_[extensionTypeName];
@@ -75,7 +75,7 @@ bool ExtensionConfig::IsExtensionStartThirdPartyAppEnable(std::string extensionT
     return true;
 }
 
-bool ExtensionConfig::IsExtensionStartServiceEnable(std::string extensionTypeName, std::string targetUri)
+bool ExtensionConfig::IsExtensionStartServiceEnable(const std::string &extensionTypeName, const std::string &targetUri)
 {
     AppExecFwk::ElementName targetElementName;
     if (serviceEnableFlags_.find(extensionTypeName) != serviceEnableFlags_.end() &&
