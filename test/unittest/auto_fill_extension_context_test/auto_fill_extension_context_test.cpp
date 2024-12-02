@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "ability_manager_errors.h"
 #include "auto_fill_extension_context.h"
 #undef private
 #undef protected
@@ -209,6 +210,24 @@ HWTEST_F(AutoFillExtensionContextTest, ReloadInModal_0100, TestSize.Level1)
     auto ret = context->ReloadInModal(data);
     EXPECT_EQ(ret, 0);
     TAG_LOGI(AAFwkTag::TEST, "ReloadInModal_0100 end");
+}
+
+/**
+ * @tc.number: ConnectUIServiceExtensionAbility_0100
+ * @tc.name: ConnectUIServiceExtensionAbility
+ * @tc.desc: ConnectUIServiceExtensionAbility.
+ */
+HWTEST_F(AutoFillExtensionContextTest, ConnectUIServiceExtensionAbility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ConnectUIServiceExtensionAbility_0100 start");
+
+    std::shared_ptr<AutoFillExtensionContext> context = std::make_shared<AutoFillExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    AAFwk::Want want;
+    sptr<AbilityConnectCallback> connectCallback = nullptr;
+    EXPECT_EQ(context->ConnectUIServiceExtensionAbility(want, connectCallback), AAFwk::ERR_INVALID_CALLER);
+
+    TAG_LOGI(AAFwkTag::TEST, "ConnectUIServiceExtensionAbility_0100 end");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
