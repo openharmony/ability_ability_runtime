@@ -26,6 +26,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+using namespace DataShare;
 using Uri = OHOS::Uri;
 
 const DataObsManagerStub::RequestFuncType DataObsManagerStub::HANDLES[TRANS_BUTT] = {

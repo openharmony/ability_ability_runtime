@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace AAFwk {
 std::mutex DataObsMgrClient::mutex_;
+using namespace DataShare;
 
 class DataObsMgrClient::SystemAbilityStatusChangeListener
     : public SystemAbilityStatusChangeStub {
@@ -273,8 +274,8 @@ void DataObsMgrClient::ReRegister()
         for (const auto &param : value) {
             auto ret = RegisterObserverExt(param.uri, key, param.isDescendants);
             if (ret != SUCCESS) {
-                LOG_ERROR("RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d,
-                    param.isDescendants:%{public}d",
+                LOG_ERROR(
+                    "RegisterObserverExt failed, param.uri:%{public}s, ret:%{public}d, param.isDescendants:%{public}d",
                     CommonUtils::Anonymous(param.uri.ToString()).c_str(), ret, param.isDescendants);
             }
         }

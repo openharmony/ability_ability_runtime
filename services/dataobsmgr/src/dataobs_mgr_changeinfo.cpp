@@ -20,6 +20,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+using namespace DataShare;
 using Value = std::variant<std::monostate, int64_t, double, std::string, bool, std::vector<uint8_t>>;
 using VBucket = std::map<std::string, Value>;
 using VBuckets = std::vector<VBucket>;
