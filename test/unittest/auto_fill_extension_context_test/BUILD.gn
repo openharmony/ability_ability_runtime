@@ -24,6 +24,7 @@ ohos_unittest("auto_fill_extension_context_test") {
     "./",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/auto_fill_extension_ability",
   ]
 
