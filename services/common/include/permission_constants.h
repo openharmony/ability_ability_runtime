@@ -69,6 +69,7 @@ constexpr const char* PERMISSION_SUPERVISE_KIA_SERVICE = "ohos.permission.SUPERV
 constexpr const char* PERMISSION_GET_TELEPHONY_STATE = "ohos.permission.GET_TELEPHONY_STATE";
 constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE = "ohos.permission.MANAGE_APP_KEEP_ALIVE";
 constexpr const char* PERMISSION_MANAGE_APP_KEEP_ALIVE_INTERNAL = "ohos.permission.MANAGE_APP_KEEP_ALIVE_INTERNAL";
+constexpr const char* PERMISSION_SET_LAUNCH_REASON_MESSAGE = "ohos.permission.SET_LAUNCH_REASON_MESSAGE";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS

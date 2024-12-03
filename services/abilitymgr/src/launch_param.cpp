@@ -27,6 +27,7 @@ bool LaunchParam::ReadFromParcel(Parcel &parcel)
         return false;
     }
     launchReason = static_cast<LaunchReason>(reason);
+    launchReasonMessage = Str16ToStr8(parcel.ReadString16());
 
     if (!parcel.ReadInt32(reason)) {
         return false;
@@ -55,6 +56,10 @@ bool LaunchParam::Marshalling(Parcel &parcel) const
 {
     // write launchReason
     if (!parcel.WriteInt32(static_cast<int32_t>(launchReason))) {
+        return false;
+    }
+    if (!parcel.WriteString16(Str8ToStr16(launchReasonMessage))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write launchReasonMessage failed");
         return false;
     }
     // write lastExitReason

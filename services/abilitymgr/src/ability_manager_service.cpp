@@ -1240,6 +1240,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     }
 
+    RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerToken);
     if (abilityInfo.type == AppExecFwk::AbilityType::SERVICE ||
         abilityInfo.type == AppExecFwk::AbilityType::EXTENSION) {
         SendStartAbilityOtherExtensionEvent(abilityInfo, abilityRequest.want, specifyTokenId);
@@ -1550,6 +1551,8 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
         SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_WOULD_BLOCK;
     }
+
+    RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerToken);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
         abilityRequest.userId = oriValidUserId;
@@ -1945,6 +1948,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         abilityRequest.want.SetParam(SPECIFY_TOKEN_ID, static_cast<int32_t>(specifyTokenId));
         abilityRequest.specifyTokenId = specifyTokenId;
     }
+
+    RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerToken);
     abilityRequest.want.RemoveParam(PARAM_SPECIFIED_PROCESS_FLAG);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         abilityRequest.userId = oriValidUserId;
@@ -2284,6 +2289,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
             StartAbilityUtils::skipErms = true;
         }
         Want newWant = abilityRequest.want;
+        RemoveUnauthorizedLaunchReasonMessage(sessionInfo->want, abilityRequest, sessionInfo->callerToken);
         AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(), true,
             sessionInfo->callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), false, appIndex);
         result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
@@ -7266,6 +7272,36 @@ void AbilityManagerService::RemoveScreenUnlockInterceptor()
     interceptorExecuter_->RemoveInterceptor("ScreenUnlock");
 }
 
+void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,
+    const sptr<IRemoteObject> &callerToken)
+{
+    std::string value = want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+    if (value.empty()) {
+        return;
+    }
+
+    if (callerToken == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "callertoken is nullptr, remove launch reason message.");
+        (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+        abilityRequest.want.RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+    } else {
+        auto targetRecord = Token::GetAbilityRecordByToken(callerToken);
+        if (targetRecord == nullptr) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "targetRecord is nullptr.");
+            return;
+        }
+        auto tokenId = targetRecord->GetAbilityInfo().applicationInfo.accessTokenId;
+        if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId,
+            PermissionConstants::PERMISSION_SET_LAUNCH_REASON_MESSAGE) ||
+            (!PermissionVerification::GetInstance()->IsSystemAppCall() &&
+            !PermissionVerification::GetInstance()->IsSACall())) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "verifyPermission failed, remove launch reason message.");
+            (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+            abilityRequest.want.RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
+        }
+    }
+}
+
 void AbilityManagerService::ConnectServices()
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "waiting appMgr service run completed");
@@ -7511,6 +7547,8 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
         TAG_LOGE(AAFwkTag::ABILITYMGR, "afterCheckExecuter_ null or doProcess error");
         return result;
     }
+
+    RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerToken);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         ReportEventToRSS(abilityRequest.abilityInfo, callerToken);
         abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
