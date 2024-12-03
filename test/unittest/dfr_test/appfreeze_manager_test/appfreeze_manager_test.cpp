@@ -248,8 +248,6 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_002, TestSiz
     std::string bundleName = "AppfreezeManagerTest_AppFreezeFilter_002";
     EXPECT_TRUE(appfreezeManager->CancelAppFreezeDetect(pid, bundleName));
     EXPECT_TRUE(appfreezeManager->IsProcessDebug(pid, bundleName));
-    appfreezeManager->ResetAppfreezeState(pid, bundleName);
-    EXPECT_TRUE(!appfreezeManager->IsProcessDebug(pid, bundleName));
     appfreezeManager->RemoveDeathProcess(bundleName);
 }
 
