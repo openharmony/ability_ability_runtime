@@ -12334,6 +12334,10 @@ int32_t AbilityManagerService::CleanUIAbilityBySCB(const sptr<SessionInfo> &sess
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "user request clean session: %{public}d", sessionInfo->persistentId);
     auto abilityRecord = uiAbilityManager->GetUIAbilityRecordBySessionInfo(sessionInfo);
+    if(!abilityRecord){
+        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            DeleteAbilityRecoverInfoBySessionId(sessionInfo->persistentId);
+    }
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     int32_t errCode = uiAbilityManager->CleanUIAbility(abilityRecord);
     ReportCleanSession(sessionInfo, abilityRecord, errCode);
