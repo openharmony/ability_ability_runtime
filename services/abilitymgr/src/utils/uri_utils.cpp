@@ -425,13 +425,15 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
 {
     auto wangUri = want.GetUri();
     std::string uriStr = wangUri.ToString();
-    bool isAddToRecent = want.GetBoolParam("isAddToRecent", true);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record, isAddToRecent: %{public}d", isAddToRecent);
-    if (isAddToRecent && !uriStr.empty() && wangUri.GetScheme() == "file") {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record, file uri: %{private}s", uriStr.c_str());
+    if (!uriStr.empty() && wangUri.GetScheme() == "file") {
+        OHOS::AppExecFwk::ElementName element = want.GetElement();
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ability record, file uri:%{private}s, bundle:%{public}s, ability:%{public}s",
+            uriStr.c_str(), element.GetBundleName().c_str(), element.GetAbilityName().c_str());
         Want msgWant;
         msgWant.SetAction("file.event.OPEN_TIME");
         msgWant.SetParam("uri", uriStr);
+        msgWant.SetParam("bundleName", element.GetBundleName());
+        msgWant.SetParam("abilityName", element.GetAbilityName());
         auto timeNow = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
         std::string currentTime = std::to_string(timeNow);
