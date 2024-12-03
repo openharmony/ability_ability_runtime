@@ -547,6 +547,7 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
     int32_t userId, int requestCode)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start ability with caller");
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     auto checkFileShareRet = UriUtils::GetInstance().CheckNonImplicitShareFileUri(want, GetValidUserId(userId), 0);
@@ -1109,6 +1110,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
         auto checkResult = AbilityUtil::CheckInstanceKey(want);
         if (checkResult != ERR_OK) {
             return checkResult;
@@ -1137,6 +1139,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
                                   want.GetElement().GetBundleName() == callerBundleName);
     bool isStartFreeInstallByWant = AbilityUtil::IsStartFreeInstall(want);
     if (isStartFreeInstallByWant || selfFreeInstallEnable) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "selfFreeInstallEnable: %{public}d, isStartFreeInstallByWant: %{public}d",
+            selfFreeInstallEnable, isStartFreeInstallByWant);
         Want localWant;
         auto freeInstallResult = PreStartFreeInstall(want, callerToken, specifyTokenId, isStartAsCaller, localWant);
         if (freeInstallResult != ERR_OK) {
@@ -1253,7 +1257,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     abilityRequest.want.RemoveParam(SPECIFY_TOKEN_ID);
     if (specifyTokenId > 0) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Set specifyTokenId, the specifyTokenId is %{public}d.", specifyTokenId);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "set specifyTokenId, the specifyTokenId is %{public}d", specifyTokenId);
         abilityRequest.want.SetParam(SPECIFY_TOKEN_ID, static_cast<int32_t>(specifyTokenId));
         abilityRequest.specifyTokenId = specifyTokenId;
     }
@@ -1284,7 +1288,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     ReportAbilityStartInfoToRSS(abilityInfo);
     ReportEventToRSS(abilityInfo, callerToken);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Start ability, name is %{public}s.", abilityInfo.name.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start ability, name is %{public}s", abilityInfo.name.c_str());
     return missionListManager->StartAbility(abilityRequest);
 }
 
@@ -1318,7 +1322,7 @@ int AbilityManagerService::StartAbilityByConnectManager(const Want& want, const 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager null userId=%{public}d", validUserId);
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Start service or extension, name is %{public}s.", abilityInfo.name.c_str());
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start service or extension, name is %{public}s", abilityInfo.name.c_str());
     ReportEventToRSS(abilityInfo, callerToken);
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     return connectManager->StartAbility(abilityRequest);
@@ -1327,6 +1331,7 @@ int AbilityManagerService::StartAbilityByConnectManager(const Want& want, const 
 int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSetting &abilityStartSetting,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start ability with abilityStartSetting");
     OHOS::AAFwk::Want newWant = want;
     WindowOptionsUtils::UpdateWantToSetDisplayID(newWant, callerToken);
     auto checkFileShareRet = UriUtils::GetInstance().CheckNonImplicitShareFileUri(newWant, GetValidUserId(userId), 0);
@@ -1453,6 +1458,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
         auto checkResult = AbilityUtil::CheckInstanceKey(want);
         if (checkResult != ERR_OK) {
             return checkResult;
@@ -1758,6 +1764,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
             UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(localWant, callerToken);
         }
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "is start free install");
         return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode,
             callerToken, true, specifyTokenId);
     }
@@ -1771,6 +1778,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
         auto checkResult = AbilityUtil::CheckInstanceKey(want);
         if (checkResult != ERR_OK) {
             return checkResult;
@@ -1797,6 +1805,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
             UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
         }
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "implicit start ability");
         result = implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId,
             startOptions.GetWindowMode());
         if (result != ERR_OK) {
@@ -2933,6 +2942,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
         abilityRequest.Voluation(want, DEFAULT_INVAL_VALUE, callerToken);
         abilityRequest.callType = AbilityCallType::START_EXTENSION_TYPE;
         abilityRequest.extensionType = extensionType;
@@ -4087,6 +4097,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
     int32_t validUserId = GetValidUserId(userId);
 
     if (AbilityUtil::IsStartFreeInstall(want) && freeInstallManager_ != nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "is start free install");
         std::string localDeviceId;
         if (!GetLocalDeviceId(localDeviceId)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s:get Local deviceId failed", __func__);
@@ -4294,6 +4305,8 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
 
     AbilityRequest abilityRequest;
     ErrCode result = ERR_OK;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start generate ability request, isQueryExtensionOnly: %{public}d, type: %{public}d",
+        isQueryExtensionOnly, static_cast<int32_t>(extensionType));
     if (isQueryExtensionOnly ||
         AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
         result = GenerateExtensionAbilityRequest(want, abilityRequest, callerToken, userId);
@@ -4312,7 +4325,6 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
     }
     result = CheckPermissionForUIService(extensionType, want, abilityRequest);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "checkPermissionForUIService failed");
         return result;
     }
 
@@ -12159,7 +12171,7 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
     std::string callerBundleName = abilityRecord ? abilityRecord->GetAbilityInfo().bundleName : "";
 
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Generate ability request local error");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request local error");
         return result;
     }
 
@@ -12219,6 +12231,8 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
 
     if (abilityInfo.type == AppExecFwk::AbilityType::SERVICE ||
         abilityInfo.type == AppExecFwk::AbilityType::EXTENSION) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "start ability by connectManager, type:%{public}d",
+            static_cast<int32_t>(abilityInfo.type));
         return StartAbilityByConnectManager(want, abilityRequest, abilityInfo, validUserId, callerToken);
     }
 
