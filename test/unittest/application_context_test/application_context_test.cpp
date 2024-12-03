@@ -24,6 +24,7 @@
 #include "want.h"
 #include "configuration_convertor.h"
 #include "ability_manager_errors.h"
+#include "exit_reason.h"
 using namespace testing::ext;
 
 
@@ -1544,6 +1545,84 @@ HWTEST_F(ApplicationContextTest, GetDataDir_0100, TestSize.Level1)
 {
     std::string res = context_->GetDataDir();
     EXPECT_TRUE(context_ != nullptr);
+}
+
+/**
+ * @tc.number:SetFontSizeScale_0100
+ * @tc.name: SetFontSizeScale
+ * @tc.desc: SetFontSizeScale fail with no permission
+ */
+HWTEST_F(ApplicationContextTest, SetFontSizeScale_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetFontSizeScale_0100 start";
+    context_->AttachContextImpl(mock_);
+    double fontSizeScale = 1.5;
+    bool result1 = context_->SetFontSizeScale(fontSizeScale);
+    EXPECT_TRUE(result1);
+    mock_ = nullptr;
+    context_->AttachContextImpl(mock_);
+    bool result = context_->SetFontSizeScale(fontSizeScale);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "SetFontSizeScale_0100 end";
+}
+
+/**
+ * @tc.number:RegisterProcessSecurityExit_0100
+ * @tc.name: RegisterProcessSecurityExit
+ * @tc.desc: RegisterProcessSecurityExit fail with no permission
+ */
+HWTEST_F(ApplicationContextTest, RegisterProcessSecurityExit_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterProcessSecurityExit_0100 start";
+    AppProcessExitCallback appProcessExitCallback = [](const AAFwk::ExitReason &exitReason){};
+    context_->appProcessExitCallback_ = nullptr;
+    context_->RegisterProcessSecurityExit(appProcessExitCallback);
+    EXPECT_TRUE(context_->appProcessExitCallback_ != nullptr);
+    GTEST_LOG_(INFO) << "RegisterProcessSecurityExit_0100 end";
+}
+
+/**
+ * @tc.number:SetCurrentInstanceKey_0100
+ * @tc.name: SetCurrentInstanceKey
+ * @tc.desc: SetCurrentInstanceKey fail with no permission
+ */
+HWTEST_F(ApplicationContextTest, SetCurrentInstanceKey_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetCurrentInstanceKey_0100 start";
+    std::string instanceKey = "InstanceKey";
+    context_->SetCurrentInstanceKey(instanceKey);
+    std::string key = context_->GetCurrentInstanceKey();
+    EXPECT_TRUE(key == instanceKey);
+    GTEST_LOG_(INFO) << "SetCurrentInstanceKey_0100 end";
+}
+
+/**
+ * @tc.number:GetAllRunningInstanceKeys_0100
+ * @tc.name: GetAllRunningInstanceKeys
+ * @tc.desc: GetAllRunningInstanceKeys fail with no permission
+ */
+HWTEST_F(ApplicationContextTest, GetAllRunningInstanceKeys_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetAllRunningInstanceKeys_0100 start";
+    std::vector<std::string> instanceKeys;
+    int32_t keys = context_->GetAllRunningInstanceKeys(instanceKeys);
+    EXPECT_TRUE(keys == -1);
+    GTEST_LOG_(INFO) << "GetAllRunningInstanceKeys_0100 end";
+}
+
+/**
+ * @tc.number:ProcessSecurityExit_0100
+ * @tc.name: ProcessSecurityExit
+ * @tc.desc: ProcessSecurityExit fail with no permission
+ */
+HWTEST_F(ApplicationContextTest, ProcessSecurityExit_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ProcessSecurityExit_0100 start";
+    context_->AttachContextImpl(mock_);
+    AAFwk::ExitReason exitReason = { AAFwk::Reason::REASON_JS_ERROR, "Js Error." };
+    context_->ProcessSecurityExit(exitReason);
+    EXPECT_TRUE(context_->appProcessExitCallback_ == nullptr);
+    GTEST_LOG_(INFO) << "ProcessSecurityExit_0100 end";
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
