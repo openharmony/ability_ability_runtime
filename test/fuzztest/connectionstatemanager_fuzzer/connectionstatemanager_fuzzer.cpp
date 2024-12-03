@@ -154,7 +154,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     connectionRecord->GetAbilityConnectCallback();
     connectionRecord->ClearConnCallBack();
     connectionRecord->DisconnectAbility();
-    connectionRecord->CompleteConnect(intParam);
+    connectionRecord->CompleteConnect();
     connectionRecord->CompleteDisconnect(intParam, boolParam);
     connectionRecord->ScheduleDisconnectAbilityDone();
     connectionRecord->ScheduleConnectAbilityDone();
