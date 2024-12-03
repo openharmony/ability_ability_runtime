@@ -48,7 +48,6 @@ ohos_fuzztest("AbilityChildProcessRecordFuzzTest") {
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/common:perm_verification",
@@ -83,6 +82,11 @@ ohos_fuzztest("AbilityChildProcessRecordFuzzTest") {
 
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libwm" ]
+  }
+  if (ability_runtime_upms) {
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
   }
 }
 

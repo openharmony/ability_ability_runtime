@@ -76,7 +76,9 @@
 #include "ui_extension_utils.h"
 #include "ui_service_extension_connection_constants.h"
 #include "unlock_screen_manager.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 #include "uri_utils.h"
 #include "view_data.h"
 #include "xcollie/watchdog.h"
@@ -11075,11 +11077,13 @@ void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
+#ifdef SUPPORT_UPMS
     if (!IN_PROCESS_CALL(AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(
         uri, flag, accessTokenId))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "premission check failed");
         return -1;
     }
+#endif // SUPPORT_UPMS
     auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
     if (collaborator == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "collaborator getCollaborator null");

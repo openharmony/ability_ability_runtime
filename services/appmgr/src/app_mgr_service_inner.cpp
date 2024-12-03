@@ -79,7 +79,9 @@
 #include "system_ability_definition.h"
 #include "time_util.h"
 #include "ui_extension_utils.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 #include "user_record_manager.h"
 #ifdef APP_MGR_SERVICE_APPMS
 #include "net_conn_client.h"
@@ -1921,10 +1923,12 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
         return ERR_INVALID_OPERATION;
     }
     // 5.revoke uri permission rights
+#ifdef SUPPORT_UPMS
     auto ret = IN_PROCESS_CALL(AAFwk::UriPermissionManagerClient::GetInstance().RevokeAllUriPermissions(tokenId));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "revoke all uri permissions fail");
     }
+#endif // SUPPORT_UPMS
     auto dataMgr = OHOS::DistributedKv::DistributedDataMgr();
     auto dataRet = dataMgr.ClearAppStorage(bundleName, userId, appCloneIndex, tokenId);
     if (dataRet != 0) {

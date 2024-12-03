@@ -25,7 +25,9 @@
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "ui_extension_utils.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 
 namespace OHOS {
 namespace AAFwk {
@@ -106,14 +108,16 @@ void UriUtils::FilterUriWithPermissionDms(Want &want, uint32_t tokenId)
         want.SetParam(PARAMS_URI, uriVec);
         return;
     }
+    std::vector<std::string> validUriVec;
+#ifdef SUPPORT_UPMS
     auto checkResult = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
         uriVec, want.GetFlags(), tokenId));
-    std::vector<std::string> validUriVec;
     for (size_t i = 0; i < checkResult.size(); i++) {
         if (checkResult[i]) {
             validUriVec.emplace_back(uriVec[i]);
         }
     }
+#endif // SUPPORT_UPMS
     TAG_LOGI(AAFwkTag::ABILITYMGR, "authorized uri size :%{public}zu", validUriVec.size());
     want.SetParam(PARAMS_URI, validUriVec);
 }
@@ -306,10 +310,12 @@ void UriUtils::CheckUriPermissionForExtension(Want &want, uint32_t tokenId)
     auto callerTokenId = tokenId > 0 ?
             tokenId : static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
     // check uri permission
+#ifdef SUPPORT_UPMS
     auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
         uriVec, flag, callerTokenId));
     // remove unpermissioned uri from want
     UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, want);
+#endif // SUPPORT_UPMS
     return;
 }
 

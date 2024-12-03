@@ -41,7 +41,9 @@
 #include "startup_util.h"
 #include "system_ability_token_callback.h"
 #include "ui_extension_utils.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 #include "param.h"
 #include "permission_constants.h"
 #include "process_options.h"
@@ -422,6 +424,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     }
 }
 
+#ifdef SUPPORT_UPMS
 bool AbilityRecord::GrantUriPermissionForUIExtension()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "GrantUriPermissionForUIExtension:: called.");
@@ -432,6 +435,7 @@ bool AbilityRecord::GrantUriPermissionForUIExtension()
     }
     return false;
 }
+#endif // SUPPORT_UPMS
 
 void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
 {
@@ -460,10 +464,12 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetElementName().GetURI();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability record: %{public}s", element.c_str());
+#ifdef SUPPORT_UPMS
     {
         std::lock_guard guard(wantLock_);
         GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, tokenId);
     }
+#endif // SUPPORT_UPMS
 
     if (isReady_) {
         PostForegroundTimeoutTask();
@@ -726,10 +732,12 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetElementName().GetURI();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
+#ifdef SUPPORT_UPMS
     {
         std::lock_guard guard(wantLock_);
         GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0);
     }
+#endif // SUPPORT_UPMS
 
     if (isReady_ && !GetRestartAppFlag()) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
@@ -1707,7 +1715,9 @@ void AbilityRecord::ConnectAbilityWithWant(const Want &want)
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "state err");
     }
+#ifdef SUPPORT_UPMS
     GrantUriPermissionForServiceExtension();
+#endif // SUPPORT_UPMS
     lifecycleDeal_->ConnectAbility(want);
     isConnected = true;
 }
@@ -1739,6 +1749,7 @@ void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
     }
 }
 
+#ifdef SUPPORT_UPMS
 bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
     if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
@@ -1753,6 +1764,7 @@ bool AbilityRecord::GrantUriPermissionForServiceExtension()
     }
     return false;
 }
+#endif // SUPPORT_UPMS
 
 void AbilityRecord::CommandAbility()
 {
@@ -1821,9 +1833,11 @@ void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
     CHECK_POINTER(scheduler_);
     auto result = GetResult();
     CHECK_POINTER(result);
+#ifdef SUPPORT_UPMS
     UriUtils::GetInstance().CheckUriPermissionForUIExtension(result->resultWant_,
         abilityInfo_.extensionAbilityType, tokeId);
     GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId);
+#endif // SUPPORT_UPMS
     scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
     // reset result to avoid send result next time
     SetResult(nullptr);
@@ -1862,12 +1876,14 @@ void AbilityRecord::SendSandboxSavefileResult(const Want &want, int resultCode, 
             }
             Uri uri(uriStr);
             uint32_t initiatorTokenId = IPCSkeleton::GetCallingTokenID();
+#ifdef SUPPORT_UPMS
             bool flag = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
             auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermission(uri,
                 flag, abilityInfo_.bundleName, appIndex_, initiatorTokenId, recordId_));
             if (ret != ERR_OK) {
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "GrantUriPermission failed");
             }
+#endif // SUPPORT_UPMS
         }
     } else {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "uri illegal for request: %{public}d", requestCode);
@@ -2568,7 +2584,9 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
         return;
     }
 
+#ifdef SUPPORT_UPMS
     RevokeUriPermission();
+#endif // SUPPORT_UPMS
     if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
         auto schedulerObject = scheduler_->AsObject();
         if (schedulerObject != nullptr) {
@@ -3278,6 +3296,7 @@ void AbilityRecord::PublishFileOpenEvent(const Want &want)
     }
 }
 
+#ifdef SUPPORT_UPMS
 void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId)
 {
     if (specifyTokenId_ > 0) {
@@ -3392,6 +3411,7 @@ bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUr
     }
     return true;
 }
+#endif // SUPPORT_UPMS
 
 bool AbilityRecord::IsDmsCall(Want &want)
 {
@@ -3411,6 +3431,7 @@ bool AbilityRecord::IsDmsCall(Want &want)
     return false;
 }
 
+#ifdef SUPPORT_UPMS
 void AbilityRecord::GrantDmsUriPermission(Want &want, std::string targetBundleName)
 {
     std::vector<std::string> uriStrVec = want.GetStringArrayParam(PARAMS_URI);
@@ -3442,6 +3463,7 @@ void AbilityRecord::RevokeUriPermission()
         isGrantedUriPermission_ = false;
     }
 }
+#endif // SUPPORT_UPMS
 
 #ifdef WITH_DLP
 void AbilityRecord::HandleDlpAttached()
