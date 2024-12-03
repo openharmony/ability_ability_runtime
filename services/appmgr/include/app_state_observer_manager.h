@@ -33,7 +33,9 @@
 #include "permission_verification.h"
 #include "singleton.h"
 #include "task_handler_wrap.h"
+#ifdef SUPPORT_UPMS
 #include "uri_permission_manager_client.h"
+#endif // SUPPORT_UPMS
 
 namespace OHOS {
 namespace AppExecFwk {
