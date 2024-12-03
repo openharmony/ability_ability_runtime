@@ -34,6 +34,7 @@ const std::string KEY_RECOVER_INFO_PREFIX = "recover_info";
 const std::string JSON_KEY_RECOVER_INFO_LIST = "recover_info_list";
 const std::string JSON_KEY_SESSION_ID_LIST = "session_id_list";
 const std::string JSON_KEY_EXTENSION_NAME = "extension_name";
+const std::string JSON_KEY_ACCESSTOKENId = "access_token_id";
 const std::string SEPARATOR = ":";
 } // namespace
 AppExitReasonDataManager::AppExitReasonDataManager() {}
@@ -332,7 +333,11 @@ int32_t AppExitReasonDataManager::AddAbilityRecoverInfo(uint32_t accessTokenId,
 
     DistributedKv::Key key = GetAbilityRecoverInfoKey(accessTokenId);
     DistributedKv::Value value;
-    DistributedKv::Status status = kvStorePtr_->Get(key, value);
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->Get(key, value);
+    }
     if (status != DistributedKv::Status::SUCCESS && status != DistributedKv::Status::KEY_NOT_FOUND) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "AddAbilityRecoverInfo get error: %{public}d", status);
         return ERR_INVALID_VALUE;
@@ -364,6 +369,7 @@ int32_t AppExitReasonDataManager::AddAbilityRecoverInfo(uint32_t accessTokenId,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "error : %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
+    InnerAddSessionId(sessionId, accessTokenId);
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "AddAbilityRecoverInfo finish");
     return ERR_OK;
@@ -379,7 +385,75 @@ int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByTokenId(uint32_t tokenId
             return ERR_NO_INIT;
         }
     }
+
+    DistributedKv::Key key = GetAbilityRecoverInfoKey(tokenId);
+    DistributedKv::Value value;
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->Get(key, value);
+    }
+    if (status != DistributedKv::Status::SUCCESS) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed:%{public}d", status);
+        return ERR_INVALID_VALUE;
+    }
+
+    std::vector<std::string> recoverInfoList;
+    std::vector<int> sessionIdList;
+    ConvertAbilityRecoverInfoFromValue(value, recoverInfoList, sessionIdList);
+    if (!sessionIdList.empty()) {
+        for (auto sessionId : sessionIdList) {
+            InnerDeleteSessionId(sessionId);
+        }
+    }
+
     InnerDeleteAbilityRecoverInfo(tokenId);
+    return ERR_OK;
+}
+
+int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfoBySessionId(const int32_t sessionId)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "sessionId %{public}d", sessionId);
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        if (!CheckKvStore()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStore");
+            return ERR_NO_INIT;
+        }
+    }
+ 
+    uint32_t accessTokenId = GetTokenIdBySessionID(sessionId);
+    DistributedKv::Key key = GetAbilityRecoverInfoKey(accessTokenId);
+    DistributedKv::Value value;
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->Get(key, value);
+    }
+    if (status != DistributedKv::Status::SUCCESS) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed:%{public}d", status);
+        return ERR_INVALID_VALUE;
+    }
+
+    std::vector<std::string> recoverInfoList;
+    std::vector<int> sessionIdList;
+    ConvertAbilityRecoverInfoFromValue(value, recoverInfoList, sessionIdList);
+    auto pos = std::find(sessionIdList.begin(), sessionIdList.end(), sessionId);
+    if (pos != sessionIdList.end()) {
+        sessionIdList.erase(std::remove(sessionIdList.begin(), sessionIdList.end(), sessionId),
+            sessionIdList.end());
+        int index = std::distance(sessionIdList.begin(), pos);
+        recoverInfoList.erase(std::remove(recoverInfoList.begin(), recoverInfoList.end(), recoverInfoList[index]),
+            recoverInfoList.end());
+        InnerDeleteSessionId(sessionId);
+        UpdateAbilityRecoverInfo(accessTokenId, recoverInfoList, sessionIdList);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "DeleteAbilityRecoverInfoBySessionId remove recoverInfo succeed");
+    }
+    if (sessionIdList.empty()) {
+        InnerDeleteAbilityRecoverInfo(accessTokenId);
+    }
+ 
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "DeleteAbilityRecoverInfoBySessionId finished");
     return ERR_OK;
 }
 
@@ -398,7 +472,11 @@ int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfo(
 
     DistributedKv::Key key = GetAbilityRecoverInfoKey(accessTokenId);
     DistributedKv::Value value;
-    DistributedKv::Status status = kvStorePtr_->Get(key, value);
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->Get(key, value);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed:%{public}d", status);
         return ERR_INVALID_VALUE;
@@ -415,6 +493,7 @@ int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfo(
         int index = std::distance(recoverInfoList.begin(), pos);
         sessionIdList.erase(std::remove(sessionIdList.begin(), sessionIdList.end(), sessionIdList[index]),
             sessionIdList.end());
+        InnerDeleteSessionId(sessionIdList[index]);
         UpdateAbilityRecoverInfo(accessTokenId, recoverInfoList, sessionIdList);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "DeleteAbilityRecoverInfo remove recoverInfo succeed");
     }
@@ -442,7 +521,11 @@ int32_t AppExitReasonDataManager::GetAbilityRecoverInfo(
 
     DistributedKv::Key key = GetAbilityRecoverInfoKey(accessTokenId);
     DistributedKv::Value value;
-    DistributedKv::Status status = kvStorePtr_->Get(key, value);
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->Get(key, value);
+    }
     if (status != DistributedKv::Status::SUCCESS) {
         if (status == DistributedKv::Status::KEY_NOT_FOUND) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "KEY_NOT_FOUND");
@@ -462,6 +545,28 @@ int32_t AppExitReasonDataManager::GetAbilityRecoverInfo(
         TAG_LOGI(AAFwkTag::ABILITYMGR, "GetAbilityRecoverInfo hasRecoverInfo found info");
     }
     return ERR_OK;
+}
+
+uint32_t AppExitReasonDataManager::GetTokenIdBySessionID(const int32_t sessionId)
+{
+    if (kvStorePtr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
+        return ERR_NO_INIT;
+    }
+    DistributedKv::Key key = GetAbilityRecoverInfoKey(sessionId);
+    DistributedKv::Value value;
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->Get(key, value);
+    }
+    if (status != DistributedKv::Status::SUCCESS) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed:%{public}d", status);
+        return ERR_INVALID_VALUE;
+    }
+    uint32_t accessTokenId;
+    ConvertAccessTokenIdFromValue(value, accessTokenId);
+    return accessTokenId;
 }
 
 int32_t AppExitReasonDataManager::SetUIExtensionAbilityExitReason(
@@ -603,6 +708,19 @@ void AppExitReasonDataManager::ConvertAbilityRecoverInfoFromValue(const Distribu
     }
 }
 
+void AppExitReasonDataManager::ConvertAccessTokenIdFromValue(const DistributedKv::Value &value,
+    uint32_t &accessTokenId)
+{
+    nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "parse json sting failed");
+        return;
+    }
+    if (jsonObject.contains(JSON_KEY_ACCESSTOKENId)) {
+        accessTokenId=jsonObject[JSON_KEY_ACCESSTOKENId];
+    }
+}
+
 void AppExitReasonDataManager::InnerDeleteAbilityRecoverInfo(uint32_t accessTokenId)
 {
     if (kvStorePtr_ == nullptr) {
@@ -622,11 +740,65 @@ void AppExitReasonDataManager::InnerDeleteAbilityRecoverInfo(uint32_t accessToke
     }
 }
 
+void AppExitReasonDataManager::InnerAddSessionId(const int sessionId, uint32_t accessTokenId)
+{
+    if (kvStorePtr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
+        return;
+    }
+ 
+    DistributedKv::Key key = GetSessionIdKey(sessionId);
+    DistributedKv::Value value = ConvertAccessTokenIdToValue(accessTokenId);
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->Put(key, value);
+    }
+    if (status != DistributedKv::Status::SUCCESS) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AddSessionId error : %{public}d", status);
+        return;
+    }
+}
+ 
+void AppExitReasonDataManager::InnerDeleteSessionId(const int sessionId)
+{
+    if (kvStorePtr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
+        return;
+    }
+ 
+    DistributedKv::Key key = GetSessionIdKey(sessionId);
+    DistributedKv::Status status;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->Delete(key);
+    }
+ 
+    if (status != DistributedKv::Status::SUCCESS) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "DeleteSessionId error: %{public}d", status);
+    }
+}
+ 
 DistributedKv::Key AppExitReasonDataManager::GetAbilityRecoverInfoKey(uint32_t accessTokenId)
 {
     return DistributedKv::Key(KEY_RECOVER_INFO_PREFIX + std::to_string(accessTokenId));
 }
 
+DistributedKv::Key AppExitReasonDataManager::GetSessionIdKey(const int sessionId)
+{
+    return DistributedKv::Key(KEY_RECOVER_INFO_PREFIX + std::to_string(sessionId));
+}
+ 
+DistributedKv::Value AppExitReasonDataManager::ConvertAccessTokenIdToValue(uint32_t accessTokenId)
+{
+    nlohmann::json jsonObject = nlohmann::json {
+            { JSON_KEY_ACCESSTOKENId, accessTokenId },
+        };
+    DistributedKv::Value value(jsonObject.dump());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ConvertAccessTokenIdToValue value: %{public}s", value.ToString().c_str());
+    return value;
+}
+ 
 DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValueOfExtensionName(
     const std::string &extensionListName, const AAFwk::ExitReason &exitReason)
 {
