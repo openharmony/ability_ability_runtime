@@ -51,8 +51,12 @@ public:
 
     int32_t DeleteAllRecoverInfoByTokenId(uint32_t tokenId);
 
+    int32_t DeleteAbilityRecoverInfoBySessionId(const int32_t sessionId);
+
     int32_t GetAbilityRecoverInfo(uint32_t accessTokenId,
         const std::string &moduleName, const std::string &abilityName, bool &hasRecoverInfo);
+
+    uint32_t GetTokenIdBySessionID(const int32_t sessionId);
 
     int32_t SetUIExtensionAbilityExitReason(const std::string &bundleName,
         const std::vector<std::string> &extensionList, const AAFwk::ExitReason &exitReason);
@@ -66,9 +70,12 @@ private:
         const std::vector<std::string> &abilityList, const AAFwk::ExitReason &exitReason);
     void ConvertAppExitReasonInfoFromValue(const DistributedKv::Value &value, AAFwk::ExitReason &exitReason,
         int64_t &time_stamp, std::vector<std::string> &abilityList);
+    void ConvertAccessTokenIdFromValue(const DistributedKv::Value &value, uint32_t &accessTokenId);
     void UpdateAppExitReason(uint32_t accessTokenId, const std::vector<std::string> &abilityList,
         const AAFwk::ExitReason &exitReason);
     void InnerDeleteAppExitReason(const std::string &keyName);
+    void InnerDeleteSessionId(const int32_t sessionId);
+    void InnerAddSessionId(const int32_t sessionId, uint32_t accessTokenId);
 
     void UpdateAbilityRecoverInfo(uint32_t accessTokenId,
         const std::vector<std::string> &recoverInfoList, const std::vector<int> &sessionIdList);
@@ -80,6 +87,9 @@ private:
     DistributedKv::Key GetAbilityRecoverInfoKey(uint32_t accessTokenId);
     DistributedKv::Value ConvertAppExitReasonInfoToValueOfExtensionName(
         const std::string &extensionListName, const AAFwk::ExitReason &exitReason);
+
+    DistributedKv::Key GetSessionIdKey(const int32_t sessionId);
+    DistributedKv::Value ConvertAccessTokenIdToValue(uint32_t accessTokenId);
 
     const DistributedKv::AppId appId_ { "app_exit_reason_storage" };
     const DistributedKv::StoreId storeId_ { "app_exit_reason_infos" };
