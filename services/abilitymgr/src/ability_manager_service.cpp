@@ -9747,9 +9747,10 @@ bool AbilityManagerService::CheckUIExtensionCallerPidByHostWindowId(const Abilit
     // If host window id is scb, it will return with error.
     auto tokenId = abilityRequest.appInfo.accessTokenId;
     auto element = abilityRequest.want.GetElement();
+    auto extType = abilityRequest.abilityInfo.extensionAbilityType;
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "Rosen::SceneSessionManager::CheckUIExtensionCreation");
-        auto ret = sceneSessionManager->CheckUIExtensionCreation(hostWindowId, tokenId, element, hostPid);
+        auto ret = sceneSessionManager->CheckUIExtensionCreation(hostWindowId, tokenId, element, extType, hostPid);
         if (ret == Rosen::WMError::WM_ERROR_INVALID_PERMISSION) {
             // If check permission failed, means target ability can't show on lock screen.
             TAG_LOGE(AAFwkTag::UI_EXT, "Check fail, tokenId: %{public}d, element: %{public}s, ret: %{public}d",
