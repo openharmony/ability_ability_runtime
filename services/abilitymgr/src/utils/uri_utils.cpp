@@ -23,6 +23,7 @@
 #include "app_utils.h"
 #include "common_event_manager.h"
 #include "extension_ability_info.h"
+#include "element_name.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
