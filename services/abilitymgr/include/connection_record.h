@@ -97,7 +97,7 @@ public:
      * complete connect ability and invoke callback.
      *
      */
-    void CompleteConnect(int resultCode);
+    void CompleteConnect();
 
     /**
      * complete disconnect ability and invoke callback.
