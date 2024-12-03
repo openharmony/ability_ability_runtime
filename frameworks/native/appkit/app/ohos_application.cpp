@@ -222,11 +222,8 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
         TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ or abilityRuntimeContext_ is null");
         return;
     }
-    // Whether the color changes with the system
     bool isUpdateAppColor = IsUpdateColorNeeded(config, level);
-    // Whether the font changes with the system
     bool isUpdateAppFontSize = isUpdateFontSize(config, level);
-    // Whether the language changes with the system
     bool isUpdateAppLanguage = IsUpdateLanguageNeeded(config, level);
     if (!isUpdateAppColor && !isUpdateAppFontSize && !isUpdateAppLanguage && config.GetItemSize() == 0) {
         TAG_LOGD(AAFwkTag::APPKIT, "configuration need not updated");
@@ -242,6 +239,10 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
         configuration_->GetName().c_str(), config.GetName().c_str());
     // Update resConfig of resource manager, which belongs to application context.
     UpdateAppContextResMgr(config);
+    #ifdef SUPPORT_GRAPHICS
+        auto diffSyncConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
+        Rosen::Window::UpdateConfigurationSyncForAll(diffSyncConfiguration);
+    #endif
     // Notify all abilities
     for (const auto &abilityToken : abilityRecordMgr_->GetAllTokens()) {
         auto abilityRecord = abilityRecordMgr_->GetAbilityItem(abilityToken);
@@ -249,20 +250,16 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config, AbilityRuntim
             abilityRecord->GetAbilityThread()->ScheduleUpdateConfiguration(config);
         }
     }
-
     for (auto it = abilityStages_.begin(); it != abilityStages_.end(); it++) {
         auto abilityStage = it->second;
         if (abilityStage) {
             abilityStage->OnConfigurationUpdated(config);
         }
     }
-
 #ifdef SUPPORT_GRAPHICS
-    TAG_LOGD(AAFwkTag::APPKIT, "Update configuration for all window.");
     auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
     Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
 #endif
-
     abilityRuntimeContext_->DispatchConfigurationUpdated(*configuration_);
     abilityRuntimeContext_->SetConfiguration(configuration_);
 }
