@@ -336,7 +336,7 @@ void IsUpdatingConfigurationsExecuteCallback(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "fail ability type");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type failed");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -370,7 +370,7 @@ void PrintDrawnCompletedExecuteCallback(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "fail ability type");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type failed");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -399,7 +399,7 @@ void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "wrong type of ability");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -413,7 +413,7 @@ void GetOrCreateDistributedDirExecuteCallback(napi_env, void *data)
         return;
     }
     asyncCallbackInfo->native_data.str_value = abilityContext->GetDistributedFilesDir();
-    TAG_LOGI(AAFwkTag::JSNAPI, "end filesDir=%{public}s",
+    TAG_LOGI(AAFwkTag::JSNAPI, "filesDir=%{public}s",
              asyncCallbackInfo->native_data.str_value.c_str());
 }
 
@@ -441,7 +441,7 @@ void GetCacheDirExecuteCallback(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "error type of ability");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -455,7 +455,7 @@ void GetCacheDirExecuteCallback(napi_env, void *data)
         return;
     }
     asyncCallbackInfo->native_data.str_value = abilityContext->GetCacheDir();
-    TAG_LOGI(AAFwkTag::JSNAPI, "end CacheDir=%{public}s",
+    TAG_LOGI(AAFwkTag::JSNAPI, "cacheDir=%{public}s",
              asyncCallbackInfo->native_data.str_value.c_str());
 }
 
@@ -483,7 +483,7 @@ void GetExternalCacheDirExecuteCallback(napi_env, void *data)
     }
 
     if (!CheckAbilityType(asyncCallbackInfo)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "wrong ability type");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ability type error");
         asyncCallbackInfo->error_code = NAPI_ERR_ABILITY_TYPE_INVALID;
         asyncCallbackInfo->native_data.data_type = NVT_UNDEFINED;
         return;
@@ -491,7 +491,7 @@ void GetExternalCacheDirExecuteCallback(napi_env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_STRING;
     asyncCallbackInfo->native_data.str_value = asyncCallbackInfo->ability->GetExternalCacheDir();
-    TAG_LOGI(AAFwkTag::JSNAPI, "end ExternalCacheDir=%{private}s",
+    TAG_LOGI(AAFwkTag::JSNAPI, "externalCacheDir=%{private}s",
              asyncCallbackInfo->native_data.str_value.c_str());
 }
 
@@ -940,7 +940,7 @@ void UnwrapAbilityStartSettingForNumber(
     bool isReadValue32 = false;
     bool isReadDouble = false;
     if (napi_get_value_int32(env, param, &natValue32) == napi_ok) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "Property value=%{private}d.", natValue32);
+        TAG_LOGI(AAFwkTag::JSNAPI, "property value=%{private}d", natValue32);
         isReadValue32 = true;
     }
 

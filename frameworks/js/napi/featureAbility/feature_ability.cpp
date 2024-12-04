@@ -227,7 +227,7 @@ napi_value JsFeatureAbility::OnHasWindowFocus(napi_env env, const NapiCallbackIn
     NapiAsyncTask::CompleteCallback complete =
         [obj = this](napi_env env, NapiAsyncTask &task, int32_t status) {
             if (obj->ability_ == nullptr) {
-                TAG_LOGE(AAFwkTag::FA, "HasWindowFocus execute error, the ability is nullptr");
+                TAG_LOGE(AAFwkTag::FA, "null ability");
                 task.Reject(env, CreateJsError(env, NAPI_ERR_ACE_ABILITY, "HasWindowFocus failed"));
                 return;
             }
@@ -586,7 +586,7 @@ napi_value SetResultPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
                     asyncCallbackInfo->param.requestCode, asyncCallbackInfo->param.want);
                 asyncCallbackInfo->ability->TerminateAbility();
             } else {
-                TAG_LOGE(AAFwkTag::FA, "ability == nullptr");
+                TAG_LOGE(AAFwkTag::FA, "null ability");
             }
             TAG_LOGI(AAFwkTag::FA, "execute end");
         },
@@ -1081,7 +1081,7 @@ void GetDataAbilityHelperAsyncCompleteCB(napi_env env, napi_status status, void 
     if (IsTypeForNapiValue(env, dataAbilityHelperCB->result, napi_object)) {
         result[PARAM1] = dataAbilityHelperCB->result;
     } else {
-        TAG_LOGI(AAFwkTag::FA, "helper is nullptr");
+        TAG_LOGI(AAFwkTag::FA, "null helper");
         result[PARAM1] = WrapVoidToJS(env);
     }
     result[PARAM0] = GetCallbackErrorValue(env, NO_ERROR);
@@ -1186,7 +1186,7 @@ napi_value ContinueAbilityWrap(napi_env env, napi_callback_info info, AsyncCallb
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
     NAPI_CALL(env, napi_typeof(env, args[0], &valueType));
     if (valueType != napi_object && valueType != napi_function) {
-        TAG_LOGE(AAFwkTag::FA, "wrong argument type. Object or function expected");
+        TAG_LOGE(AAFwkTag::FA, "wrong argument type");
         return nullptr;
     }
     if (argc == 0) {

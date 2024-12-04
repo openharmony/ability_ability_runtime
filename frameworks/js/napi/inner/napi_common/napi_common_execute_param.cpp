@@ -67,7 +67,7 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, napiIntentParam, &valueType);
     if (valueType != napi_object) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type intentParam.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "wrong argument type intentParam");
         return false;
     }
     auto wp = std::make_shared<WantParams>();
