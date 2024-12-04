@@ -32,12 +32,12 @@ CJAbilityStageFuncs g_cjAbilityStageFuncs {};
 void RegisterCJAbilityStageFuncs(void (*registerFunc)(CJAbilityStageFuncs* result))
 {
     if (g_cjAbilityStageFuncs.LoadAbilityStage != nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Repeated registration for cj functions of CJAbilityStage.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null LoadAbilityStage");
         return;
     }
 
     if (registerFunc == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "RegisterCJAbilityStageFuncs failed, registerFunc is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null registerFunc");
         return;
     }
 
@@ -54,8 +54,7 @@ std::shared_ptr<CJAbilityStageObject> CJAbilityStageObject::LoadModule(const std
     TAG_LOGI(AAFwkTag::APPKIT, "CJAbilityStageObject::LoadModule");
     auto handle = g_cjAbilityStageFuncs.LoadAbilityStage(moduleName.c_str());
     if (!handle) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to invoke CJAbilityStageObject::LoadModule. AbilityStage"
-            " is not registered: %{public}s.", moduleName.c_str());
+        TAG_LOGE(AAFwkTag::APPKIT, "not registered: %{public}s.", moduleName.c_str());
         return nullptr;
     }
 
@@ -65,7 +64,7 @@ std::shared_ptr<CJAbilityStageObject> CJAbilityStageObject::LoadModule(const std
 CJAbilityStageObject::~CJAbilityStageObject()
 {
     if (g_cjAbilityStageFuncs.ReleaseAbilityStage == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.Stage are not registered");
+        TAG_LOGE(AAFwkTag::APPKIT, "null ReleaseAbilityStage");
     } else {
         g_cjAbilityStageFuncs.ReleaseAbilityStage(id_);
         id_ = 0;
@@ -75,7 +74,7 @@ CJAbilityStageObject::~CJAbilityStageObject()
 void CJAbilityStageObject::Init(AbilityStageHandle abilityStage) const
 {
     if (g_cjAbilityStageFuncs.AbilityStageInit == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.Init are not registered");
+        TAG_LOGE(AAFwkTag::APPKIT, "null AbilityStageInit");
         return;
     }
     g_cjAbilityStageFuncs.AbilityStageInit(id_, abilityStage);
@@ -84,7 +83,7 @@ void CJAbilityStageObject::Init(AbilityStageHandle abilityStage) const
 void CJAbilityStageObject::OnCreate() const
 {
     if (g_cjAbilityStageFuncs.AbilityStageOnCreate == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.OnCreate are not registered");
+        TAG_LOGE(AAFwkTag::APPKIT, "null AbilityStageOnCreate");
         return;
     }
     g_cjAbilityStageFuncs.AbilityStageOnCreate(id_);
@@ -93,7 +92,7 @@ void CJAbilityStageObject::OnCreate() const
 void CJAbilityStageObject::OnDestroy() const
 {
     if (g_cjAbilityStageFuncs.AbilityStageOnDestroy == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.OnDestroy are not registered");
+        TAG_LOGE(AAFwkTag::APPKIT, "null AbilityStageOnDestroy");
         return;
     }
     g_cjAbilityStageFuncs.AbilityStageOnDestroy(id_);
@@ -102,7 +101,7 @@ void CJAbilityStageObject::OnDestroy() const
 std::string CJAbilityStageObject::OnAcceptWant(const AAFwk::Want& want) const
 {
     if (g_cjAbilityStageFuncs.AbilityStageOnAcceptWant == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.OnAcceptWant are not registered");
+        TAG_LOGE(AAFwkTag::APPKIT, "null AbilityStageOnAcceptWant");
         return "";
     }
 
@@ -118,7 +117,7 @@ std::string CJAbilityStageObject::OnAcceptWant(const AAFwk::Want& want) const
 std::string CJAbilityStageObject::OnNewProcessRequest(const AAFwk::Want& want) const
 {
     if (g_cjAbilityStageFuncs.AbilityStageOnNewProcessRequest == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.OnNewProcessRequest are not registered");
+        TAG_LOGE(AAFwkTag::APPKIT, "null AbilityStageOnNewProcessRequest");
         return "";
     }
 
@@ -134,7 +133,7 @@ std::string CJAbilityStageObject::OnNewProcessRequest(const AAFwk::Want& want) c
 void CJAbilityStageObject::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration) const
 {
     if (g_cjAbilityStageFuncs.AbilityStageOnConfigurationUpdated2 == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.OnConfigurationUpdated2 are not registered");
+        TAG_LOGE(AAFwkTag::APPKIT, "null AbilityStageOnConfigurationUpdated2");
         return;
     }
 
@@ -144,7 +143,7 @@ void CJAbilityStageObject::OnConfigurationUpdated(const std::shared_ptr<AppExecF
 void CJAbilityStageObject::OnMemoryLevel(int32_t level) const
 {
     if (g_cjAbilityStageFuncs.AbilityStageOnMemoryLevel == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "cj functions for CJAbilityStage.OnMemoryLevel are not registered");
+        TAG_LOGE(AAFwkTag::APPKIT, "null AbilityStageOnMemoryLevel");
         return;
     }
     g_cjAbilityStageFuncs.AbilityStageOnMemoryLevel(id_, level);

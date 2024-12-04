@@ -26,7 +26,7 @@ CJ_EXPORT RetHapModuleInfo FFICJGetHapModuleInfo(int64_t id)
 {
     auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
     if (abilityStageContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get abilityStageContext failed. ");
+        TAG_LOGE(AAFwkTag::APPKIT, "get abilityStageContext failed");
         return RetHapModuleInfo();
     }
 
@@ -37,13 +37,13 @@ CJ_EXPORT CurrentHapModuleInfo* FFICJCurrentHapModuleInfo(int64_t id)
 {
     auto abilityStageContext = OHOS::FFI::FFIData::GetData<CJAbilityStageContext>(id);
     if (abilityStageContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get abilityStageContext failed. ");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityStageContext");
         return nullptr;
     }
 
     auto hapInfo = abilityStageContext->GetHapModuleInfo();
     if (hapInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "CurrentHapModuleInfo is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null hapInfo");
         return nullptr;
     }
 
@@ -88,12 +88,12 @@ CJ_EXPORT int64_t FFIAbilityGetAbilityStageContext(AbilityStageHandle abilitySta
     }
     auto context = ability->GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetAbilityStageContext failed, abilityContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return ERR_INVALID_INSTANCE_CODE;
     }
     auto cjStageContext = OHOS::FFI::FFIData::Create<CJAbilityStageContext>(context);
     if (cjStageContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetAbilityStageContext failed, abilityContext is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjStageContext");
         return ERR_INVALID_INSTANCE_CODE;
     }
     return cjStageContext->GetID();
@@ -104,20 +104,20 @@ std::shared_ptr<CJAbilityStage> CJAbilityStage::Create(
     const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
     if (!runtime) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Runtime does not exist.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return nullptr;
     }
     auto& cjRuntime = static_cast<CJRuntime&>(*runtime);
     // Load cj app library.
     if (!cjRuntime.IsAppLibLoaded()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create CJAbilityStage, applib not loaded.");
+        TAG_LOGE(AAFwkTag::APPKIT, "appLib not loaded");
         return nullptr;
     }
 
     auto cjAbilityStageObject = CJAbilityStageObject::LoadModule(hapModuleInfo.moduleName);
     if (cjAbilityStageObject == nullptr) {
         cjRuntime.UnLoadCJAppLibrary();
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create CJAbilityStage.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjAbilityStage");
         return nullptr;
     }
 
@@ -129,7 +129,7 @@ void CJAbilityStage::Init(const std::shared_ptr<Context> &context,
 {
     AbilityStage::Init(context, application);
     if (!cjAbilityStageObject_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create CJAbilityStage.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjAbilityStage");
         return;
     }
     cjAbilityStageObject_->Init(this);
@@ -139,7 +139,7 @@ void CJAbilityStage::OnCreate(const AAFwk::Want& want) const
 {
     AbilityStage::OnCreate(want);
     if (!cjAbilityStageObject_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "CJAbilityStage is not loaded.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjAbilityStage");
         return;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "CJAbilityStage::OnCreate");
@@ -150,7 +150,7 @@ std::string CJAbilityStage::OnAcceptWant(const AAFwk::Want& want)
 {
     AbilityStage::OnAcceptWant(want);
     if (!cjAbilityStageObject_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "CJAbilityStage is not loaded.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjAbilityStage");
         return "";
     }
     return cjAbilityStageObject_->OnAcceptWant(want);
@@ -171,12 +171,12 @@ void CJAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& con
     AbilityStage::OnConfigurationUpdated(configuration);
     auto fullConfig = GetContext()->GetConfiguration();
     if (!fullConfig) {
-        TAG_LOGE(AAFwkTag::APPKIT, "configuration is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null fullConfig");
         return;
     }
 
     if (!cjAbilityStageObject_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "CJAbilityStage is not loaded.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjAbilityStage");
         return;
     }
     cjAbilityStageObject_->OnConfigurationUpdated(fullConfig);
@@ -186,7 +186,7 @@ void CJAbilityStage::OnMemoryLevel(int level)
 {
     AbilityStage::OnMemoryLevel(level);
     if (!cjAbilityStageObject_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "CJAbilityStage is not loaded.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null cjAbilityStage");
         return;
     }
     cjAbilityStageObject_->OnMemoryLevel(level);

@@ -42,7 +42,7 @@ void NativeChildCallback::OnNativeChildStarted(const sptr<IRemoteObject> &native
     sptr<IRemoteObject> ipcRemote = nativeChild;
     OHIPCRemoteProxy *ipcProxy = CreateIPCRemoteProxy(ipcRemote);
     if (ipcProxy == nullptr) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "Convert inner ipc object to OHIPCRemoteProxy point failed");
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null ipcProxy");
         callback_(NCP_ERR_INTERNAL, nullptr);
         return;
     }

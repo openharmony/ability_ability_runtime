@@ -31,19 +31,19 @@ int FormExtensionContext::UpdateForm(const int64_t formId, const AppExecFwk::For
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Update form, formId: %{public}" PRId64 ".", formId);
     if (formId <= 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FormId can't be negative or zero");
+        TAG_LOGE(AAFwkTag::APPKIT, "formId not be negative or zero");
         return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
 
     // check fms recover status
     if (AppExecFwk::FormMgr::GetRecoverStatus() == AppExecFwk::Constants::IN_RECOVERING) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Update failed, form is in recover status, can't do action on it");
+        TAG_LOGE(AAFwkTag::APPKIT, "update failed");
         return ERR_APPEXECFWK_FORM_IN_RECOVER;
     }
 
     // check formProviderData
     if (formProviderData.GetDataString().empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Form data is empty.");
+        TAG_LOGE(AAFwkTag::APPKIT, "form data empty");
         return ERR_APPEXECFWK_FORM_INVALID_PARAM;
     }
 
@@ -58,7 +58,7 @@ ErrCode FormExtensionContext::StartAbility(const AAFwk::Want &want) const
     // route to FMS
     ErrCode err = AppExecFwk::FormMgr::GetInstance().StartAbility(want, token_);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Start ability failed with %{public}d", err);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed %{public}d", err);
     }
     return err;
 }
@@ -67,7 +67,7 @@ AppExecFwk::AbilityType FormExtensionContext::GetAbilityInfoType() const
 {
     std::shared_ptr<AppExecFwk::AbilityInfo> info = GetAbilityInfo();
     if (info == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Ability info is invalid.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null info");
         return AppExecFwk::AbilityType::UNKNOWN;
     }
 
@@ -82,7 +82,7 @@ std::shared_ptr<AppExecFwk::AbilityInfo> FormExtensionContext::GetAbilityInfo() 
 void FormExtensionContext::SetAbilityInfo(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> &abilityInfo)
 {
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Ability info is invalid.");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
         return;
     }
     abilityInfo_ = abilityInfo;
@@ -91,12 +91,11 @@ void FormExtensionContext::SetAbilityInfo(const std::shared_ptr<OHOS::AppExecFwk
 ErrCode FormExtensionContext::ConnectAbility(
     const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "Connect ability begin, ability:%{public}s.",
-        want.GetElement().GetAbilityName().c_str());
+    TAG_LOGI(AAFwkTag::APPKIT, "connect ability: %{public}s", want.GetElement().GetAbilityName().c_str());
     ErrCode ret =
         ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FormExtensionContext::ConnectAbility ErrorCode = %{public}d", ret);
+        TAG_LOGE(AAFwkTag::APPKIT, "errorCode = %{public}d", ret);
     }
     return ret;
 }
@@ -108,7 +107,7 @@ ErrCode FormExtensionContext::DisconnectAbility(
     ErrCode ret =
         ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "DisconnectAbility error, ret=%{public}d", ret);
+        TAG_LOGE(AAFwkTag::APPKIT, "ret=%{public}d", ret);
     }
     return ret;
 }

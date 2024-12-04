@@ -35,7 +35,7 @@ sptr<IRemoteObject> AbilityRecordMgr::GetToken() const
 void AbilityRecordMgr::SetToken(const sptr<IRemoteObject> &token)
 {
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return;
     }
     tokens_ = token;
@@ -52,12 +52,12 @@ void AbilityRecordMgr::AddAbilityRecord(
     const sptr<IRemoteObject> &token, const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
 {
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return;
     }
 
     if (abilityRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "abilityRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
         return;
     }
     abilityRecords_[token] = abilityRecord;
@@ -72,7 +72,7 @@ void AbilityRecordMgr::AddAbilityRecord(
 void AbilityRecordMgr::RemoveAbilityRecord(const sptr<IRemoteObject> &token)
 {
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return;
     }
     abilityRecords_.erase(token);
@@ -98,7 +98,7 @@ int AbilityRecordMgr::GetRecordCount() const
 std::shared_ptr<AbilityLocalRecord> AbilityRecordMgr::GetAbilityItem(const sptr<IRemoteObject> &token) const
 {
     if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "token is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "null token");
         return nullptr;
     }
 
@@ -106,7 +106,7 @@ std::shared_ptr<AbilityLocalRecord> AbilityRecordMgr::GetAbilityItem(const sptr<
     if (iter != abilityRecords_.end()) {
         return iter->second;
     }
-    TAG_LOGW(AAFwkTag::APPKIT, "the ability not found");
+    TAG_LOGW(AAFwkTag::APPKIT, "not found ability");
     return nullptr;
 }
 
